@@ -631,7 +631,7 @@ function renderReviewModeSelect(){
 // Link de voltar da sessão: "Voltar ao Deck" quando a sessão veio de um Deck.
 function syncReviewBackLink(){
   const el = document.getElementById('review-back-to-modes');
-  if (el) el.textContent = t(STATE.reviewSessionClassReview ? 'review.backToStudent' : STATE.reviewSessionDeckId != null ? 'review.backToDeck' : 'review.backToModes');
+  if (el) el.textContent = t(STATE.reviewSessionClassReview ? 'review.exitSession' : STATE.reviewSessionDeckId != null ? 'review.backToDeck' : 'review.backToModes');
 }
 
 function startSpeedReview(){
@@ -748,6 +748,8 @@ function startReviewSession(opts){
   // solto de tipo pra zerar aqui.
   STATE.reviewSessionStartedAt = Date.now();
   STATE.reviewCardState = null;
+  STATE.reviewHistory = [];
+  STATE.reviewPeek = null;
   renderReviewView();
 }
 
@@ -817,12 +819,134 @@ function reviewProgressBarHTML(card){
   `;
 }
 
+
 // XP da Revisão (decisão da autora, 2026-10-15): valor fixo por nota (XP_PER_GRADE em shared/srs.js), SEM redução
 // para cartão maduro, para não desestimular a revisão ao longo do tempo. Errei = 0 (addXP(0) não faz nada).
 // `intervalBefore` continua na assinatura só porque os chamadores (fr e zh) já o passam; não entra mais no cálculo.
 function reviewXP(intervalBefore, grade){
   return XP_PER_GRADE[grade] || 0;
 }
+
+// Voltar (cartões da professora): foto dos campos simples do cartão (FSRS) antes da nota, para poder trocar a nota depois.
+function reviewCardSnapshot(card){
+  const o = {};
+  Object.keys(card).forEach(k => { const v = card[k]; if (v === null || ['string', 'number', 'boolean'].indexOf(typeof v) >= 0) o[k] = v; });
+  return o;
+}
+function subtractReviewXP(n){
+  STATE.xp = Math.max(0, STATE.xp - n);
+  ensurePeriodXp();
+  STATE.periodXp.amount = Math.max(0, STATE.periodXp.amount - n);
+  ensureDailyBucket();
+  STATE.daily.xp = Math.max(0, STATE.daily.xp - n);
+}
+// Já existe uma resposta mais nova do MESMO cartão (voltou como reforço de "Errei"): só a mais recente pode mudar.
+function reviewEntryLocked(idx){
+  const h = STATE.reviewHistory || [];
+  return h.some((x, i) => i > idx && x.card === h[idx].card);
+}
+// Botão "Voltar" fixo ABAIXO do cartão, na esquerda (fora de #review-content, que os cartões refazem a cada toque).
+function syncReviewPrevRow(show){
+  const content = document.getElementById('review-content');
+  if (!content) return;
+  let row = document.getElementById('review-prev-row');
+  if (!row){
+    row = document.createElement('div');
+    row.id = 'review-prev-row';
+    row.className = 'review-prev-row';
+    content.insertAdjacentElement('afterend', row);
+  }
+  const want = !!show && STATE.reviewSessionClassReview && STATE.reviewHistory && STATE.reviewHistory.length > 0;
+  row.hidden = !want;
+  row.innerHTML = want ? `<button type="button" class="review-prev-btn" id="review-prev-btn" aria-label="${escapeHTML(t('review.prev.aria'))}">‹ ${escapeHTML(t('review.prev'))}</button>` : '';
+}
+function reviewGoBack(){
+  const h = STATE.reviewHistory || [];
+  if (!STATE.reviewSessionClassReview || !h.length) return;
+  STATE.reviewPeek = h.length - 1;
+  renderReviewView();
+}
+function regradeReviewEntry(idx, newGrade){
+  const h = STATE.reviewHistory || [];
+  const e = h[idx];
+  if (!e || e.grade === newGrade || reviewEntryLocked(idx)) return;
+  const card = e.card;
+  Object.assign(card, e.snap);
+  applyMemoryGrade(card, newGrade);
+  const newXp = reviewXP(0, newGrade);
+  const delta = newXp - e.xp;
+  if (delta > 0) addXP(delta, { quiet: true });
+  else if (delta < 0) subtractReviewXP(-delta);
+  const q = STATE.reviewQueue;
+  if (e.requeued && newGrade !== 0){
+    const at = q.lastIndexOf(card);
+    if (at >= STATE.reviewIndex) q.splice(at, 1);
+    e.requeued = false;
+  } else if (!e.requeued && newGrade === 0 && q.length - STATE.reviewIndex >= 3){
+    q.push(card);
+    e.requeued = true;
+  }
+  if (typeof logBankHomeStudy === 'function'){
+    const kind = e.local && e.local.kind;
+    logBankHomeStudy(card, newGrade, kind === 'type_answer' || kind === 'cloze', { correction: true });
+  }
+  e.grade = newGrade;
+  e.xp = newXp;
+  saveState();
+  renderTopbarStats();
+  showToast(t('review.peek.changed'));
+  renderReviewView();
+}
+function reviewPeekBodyHTML(e){
+  const card = e.card, view = resolveCardContentView(card), L = e.local || {};
+  const box = (label, text) => `<div class="review-peek-line"><small>${escapeHTML(label)}</small><div>${escapeHTML(text)}</div></div>`;
+  let html = '';
+  if (view.kind === 'cloze'){
+    const sentence = renderClozeText(view.rawSentenceText, view.markId, { reveal: true });
+    html += `<div class="review-peek-line"><div>${escapeHTML(sentence)}</div></div>`;
+  } else if (view.kind === 'type_answer' || view.kind === 'multiple_choice'){
+    html += `<div class="review-peek-line"><div>${escapeHTML(view.prompt ? view.prompt.text : '')}</div></div>`;
+  } else {
+    html += `<div class="review-peek-line"><div>${escapeHTML(view.front ? view.front.text : '')}</div></div>`;
+  }
+  const answer = view.kind === 'normal' ? (view.back ? view.back.text : '') : view.kind === 'multiple_choice' ? view.correctText : view.displayAnswerText;
+  html += `<div class="review-peek-line is-answer"><strong>${escapeHTML(answer || '')}</strong></div>`;
+  if ((view.kind === 'type_answer' || view.kind === 'cloze') && L.typedAnswer) html += box(t('review.peek.typed', { text: L.typedAnswer }), '');
+  if (view.kind === 'multiple_choice' && L.shuffledOptions && L.selectedIndex != null && L.shuffledOptions[L.selectedIndex] != null){
+    const o = L.shuffledOptions[L.selectedIndex];
+    html += box(t('review.peek.chose', { text: typeof o === 'string' ? o : (o && o.text) || '' }), '');
+  }
+  return html + reviewObservationHTML(card);
+}
+function renderReviewPeek(el){
+  const h = STATE.reviewHistory, i = STATE.reviewPeek, e = h[i];
+  const locked = reviewEntryLocked(i);
+  const now = Date.now();
+  const gradeKeys = [[0, 'again'], [1, 'hard'], [2, 'good'], [3, 'easy']];
+  const cur = e.grade;
+  el.innerHTML = `
+    <div class="review-peek" data-peek-index="${i}">
+      <div class="review-peek-head">
+        <button type="button" class="review-prev-btn" id="review-peek-older" ${i > 0 ? '' : 'hidden'}>‹ ${escapeHTML(t('review.prev'))}</button>
+        <span class="review-peek-title">${escapeHTML(t('review.peek.title'))}</span>
+      </div>
+      <div class="review-peek-card">${reviewPeekBodyHTML(e)}</div>
+      <div class="review-peek-note">${escapeHTML(t('review.peek.yourNote', { grade: t('review.grade.' + gradeKeys.find(x => x[0] === cur)[1]) }))} · ${escapeHTML(t('review.peek.change'))}</div>
+      ${locked ? `<div class="review-peek-locked">${escapeHTML(t('review.peek.locked'))}</div>` : ''}
+      <div class="grade-buttons review-peek-grades">${gradeKeys.map(([g, k]) =>
+        `<button type="button" class="grade-btn grade-${k}${g === cur ? ' is-current' : ''}" data-peek-grade="${g}" aria-pressed="${g === cur}" ${locked ? 'disabled' : ''}>${escapeHTML(t('review.grade.' + k))}<small>${escapeHTML(formatReviewInterval(previewNextIntervalDays(Object.assign({}, e.card, e.snap), g, now)))}</small></button>`).join('')}</div>
+      <button type="button" class="btn btn-primary btn-block" id="review-peek-newer">${escapeHTML(t('review.peek.next'))}</button>
+    </div>`;
+}
+// Cliques do "Voltar" e da tela do cartão anterior (o HTML da sessão é refeito a cada resposta, por isso delegado).
+document.addEventListener('click', ev => {
+  const tg = ev.target && ev.target.closest ? ev.target.closest('#review-prev-btn, #review-peek-older, #review-peek-newer, [data-peek-grade]') : null;
+  if (!tg || STATE.reviewPeek == null && tg.id !== 'review-prev-btn') return;
+  if (tg.id === 'review-prev-btn') return reviewGoBack();
+  if (tg.id === 'review-peek-older'){ if (STATE.reviewPeek > 0){ STATE.reviewPeek -= 1; renderReviewView(); } return; }
+  if (tg.id === 'review-peek-newer'){ STATE.reviewPeek = null; renderReviewView(); return; }
+  regradeReviewEntry(STATE.reviewPeek, Number(tg.dataset.peekGrade));
+});
 
 function gradeCurrentCard(grade){
   const card = STATE.reviewQueue[STATE.reviewIndex];
@@ -831,6 +955,8 @@ function gradeCurrentCard(grade){
   // ser lido antes de applyMemoryGrade/scheduleReview mutar card.due pra reavaliação.
   const wasOverdue = card.due > 0 && card.due < new Date().setHours(0, 0, 0, 0);
   const intervalBefore = card.interval;
+  const histSnap = reviewCardSnapshot(card);
+  const histLocal = STATE.reviewCardState ? Object.assign({}, STATE.reviewCardState) : null;
   // K2-G: nenhuma direção é gravada aqui -- A/B são CardInstances independentes
   // e a direção é estrutural; a revisão só aplica o grau (FSRS) ao CardInstance mostrado.
   // Fase 5: Flashcard agora usa o motor FSRS (shared/fsrs.js) -- due deixa
@@ -850,6 +976,7 @@ function gradeCurrentCard(grade){
   registerDailyReviewCard();
   if (wasOverdue) registerDailyOverdueReviewCard();
   addXP(reviewXP(intervalBefore, grade));
+  let histRequeued = false;
 
   if (grade === 0){
     // "Errei" só volta nesta MESMA sessão se sobrar separação real até o
@@ -861,7 +988,11 @@ function gradeCurrentCard(grade){
     // (fsrsIntervalFromStability nunca agenda em horas) -- este requeue é só
     // reforço extra quando ainda cabe hoje com distância de verdade.
     const remaining = STATE.reviewQueue.length - STATE.reviewIndex - 1;
-    if (remaining >= 3) STATE.reviewQueue.push(card);
+    if (remaining >= 3){ STATE.reviewQueue.push(card); histRequeued = true; }
+  }
+  if (STATE.reviewSessionClassReview){
+    if (!STATE.reviewHistory) STATE.reviewHistory = [];
+    STATE.reviewHistory.push({ card, snap: histSnap, grade, xp: reviewXP(intervalBefore, grade), requeued: histRequeued, local: histLocal });
   }
 
   STATE.reviewIndex += 1;

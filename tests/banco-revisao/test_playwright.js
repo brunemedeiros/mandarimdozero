@@ -686,7 +686,7 @@ const BANK_STUB = (who, appKey) => {
       await page.waitForFunction(() => document.getElementById('view-review').classList.contains('active') && document.getElementById('review-session-wrap').style.display === 'block');
       const sess = await ev(() => ({ allTeacher: STATE.reviewQueue.length > 0 && STATE.reviewQueue.every(c => c.origin === 'teacher'), back: document.getElementById('review-back-to-modes').textContent, hash: location.hash }));
       L('sessão do Aluno: só cartões da professora, mesmo motor da Revisão', sess.allTeacher, sess);
-      L('sessão do Aluno: link "Voltar ao Aluno" e rota #/review/class', /Aluno|Student/.test(sess.back) && sess.hash === '#/review/class', sess);
+      L('sessão do Aluno: link "Sair" e rota #/review/class', /Sair|Exit/.test(sess.back) /* 2026-11-04: o link do topo virou "← Sair" */ && sess.hash === '#/review/class', sess);
       await shot('aluno-revisao-sessao');
       // 114: menu ⋯ do cartão da professora (três opções, cada uma um botão com borda e espaço entre eles)
       await ev(() => {

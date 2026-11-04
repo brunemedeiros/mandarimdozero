@@ -17,12 +17,12 @@ const base = (id, extra) => ({ id, type: 'expression', level: 'A1', status: 'pub
   meaning: { fr: 'Pas de chance.', pt: 'Que azar.' }, explanation: 'Familier.', microActivity: { prompt: 'Oh, __________ !', answer: 'pas de bol' } }, extra) });
 const ROWS = [
   // completo: destaque, tradução com dois falantes (quebra de linha), literal e nota
-  base('ch-full', { microActivity: { prompt: 'Oh, __________ !', answer: 'pas de bol', pt: 'Ah, que azar!' }, example: { text: "J'ai raté le bus de deux minutes. — Pas de bol !", audioFile: 'a.mp3', mark: 'Pas de bol', pt: '— Perdi o ônibus por dois minutos.\n— Que azar!' }, secondExample: { text: 'Pas de bol, il pleut.', mark: 'Pas de bol', pt: 'Que azar, está chovendo.' },
+  base('ch-full', { questionMode: 'when', optionsPt: ['Falta de sorte', 'Muito', 'Uma tigela', 'Nada'], microActivity: { prompt: 'Oh, __________ !', answer: 'pas de bol', pt: 'Ah, que azar!' }, example: { text: "J'ai raté le bus de deux minutes. — Pas de bol !", audioFile: 'a.mp3', mark: 'Pas de bol', pt: '— Perdi o ônibus por dois minutos.\n— Que azar!' }, secondExample: { text: 'Pas de bol, il pleut.', mark: 'Pas de bol', pt: 'Que azar, está chovendo.' },
     literal: { pt: 'sem tigela', note: 'Na gíria antiga, "bol" era a bunda.' } }),
   // sem nenhum campo novo (como antes do lote): nada muda
   base('ch-old', { example: { text: 'Oh, pas de bol !' }, secondExample: { text: 'Pas de bol hier.' } }),
   // marca que não está no texto e texto com HTML: sem destaque, sem quebrar, escapado
-  base('ch-odd', { example: { text: 'Quel <b>bol</b> !', mark: 'inexistente', pt: 'Que <i>sorte</i>!' }, secondExample: { text: 'Ça va.', mark: 'Ça va', pt: 'Tudo bem.' }, literal: { pt: 'x <u>y</u>' } }),
+  base('ch-odd', { questionMode: 'who', example: { text: 'Quel <b>bol</b> !', mark: 'inexistente', pt: 'Que <i>sorte</i>!' }, secondExample: { text: 'Ça va.', mark: 'Ça va', pt: 'Tudo bem.' }, literal: { pt: 'x <u>y</u>' } }),
 ];
 const STUB = `(function(){ const ROWS = ${JSON.stringify(ROWS)};
   function builder(table){ const b = new Proxy({}, { get(_, p){ if (p === 'then') return (ok, ko) => Promise.resolve({ data: table === 'challenges' ? ROWS : [], error: null }).then(ok, ko); return () => b; } }); return b; }
@@ -31,7 +31,7 @@ const STUB = `(function(){ const ROWS = ${JSON.stringify(ROWS)};
     storage: { from: () => ({ upload: async () => ({}), getPublicUrl: () => ({ data: { publicUrl: '' } }), remove: async () => ({}) }) }, functions: { invoke: async () => ({ data: null, error: null }) } };
   window.supabase = { createClient: () => client }; })();`;
 const EN = {
-  'ch-full': { meaning: 'Bad luck.', example: "— I missed the bus by two minutes.\n— Bad luck!", secondExample: "Bad luck, it's raining.", literal: 'no bowl', literalNote: 'In old slang, "bol" meant the backside.', microActivity: 'Oh, bad luck!' },
+  'ch-full': { options: ['Bad luck', 'A lot', 'A bowl', 'Nothing'], meaning: 'Bad luck.', example: "— I missed the bus by two minutes.\n— Bad luck!", secondExample: "Bad luck, it's raining.", literal: 'no bowl', literalNote: 'In old slang, "bol" meant the backside.', microActivity: 'Oh, bad luck!' },
   'ch-old': { meaning: 'Bad luck.' },
   'ch-odd': { meaning: 'Bad luck.', example: 'What <i>luck</i>!' },
 };
@@ -66,6 +66,21 @@ const ateExemplos = async page => { await ateResposta(page); await page.click('#
   for (const lang of ['pt-BR', 'en']) for (const theme of ['light', 'dark']) for (const [vw, vh, tag] of [[1200, 800, 'desktop'], [390, 800, 'celular']]){
     const label = `${lang}-${theme}-${tag}`, pt = lang === 'pt-BR';
     const { page, ctx, errors } = await boot(browser, port, { lang, theme, vw, vh });
+    // ---- opções no idioma do site (mesma ordem; a correção segue o francês) ----
+    await open(page, 'ch-full');
+    const qLab = async () => page.evaluate(() => (document.querySelector('#challenge-player-content .exercise-prompt-label') || {}).textContent);
+    check(label + ' tipo da pergunta (questionMode when): "Quando se usa isso?" no idioma do site', (await qLab()) === (pt ? 'Quando se usa isso?' : 'When do you use it?'));
+    await page.click('#expr-see-options-btn'); await page.waitForSelector('.exercise-option');
+    const labs = await page.evaluate(() => [...document.querySelectorAll('.exercise-option')].reduce((o, b) => (o[b.dataset.origIdx] = b.querySelector('.opt-text').textContent, o), {}));
+    check(label + ' opções no idioma do site, cada uma na sua posição de origem', JSON.stringify(labs) === JSON.stringify(pt ? { 0: 'Falta de sorte', 1: 'Muito', 2: 'Uma tigela', 3: 'Nada' } : { 0: 'Bad luck', 1: 'A lot', 2: 'A bowl', 3: 'Nothing' }), labs);
+    await page.click('.exercise-option[data-orig-idx="2"]'); await page.waitForSelector('.wrong-feedback'); await page.waitForTimeout(60);
+    const wrongTxt = await page.evaluate(() => ({ yours: (document.querySelector('.wrong-feedback .feedback-inner-box') || {}).textContent, okOpt: (document.querySelector('.exercise-option.correct .opt-text') || {}).textContent, badOpt: (document.querySelector('.exercise-option.incorrect .opt-text') || {}).textContent }));
+    check(label + ' errou: "Sua resposta" e as marcas verde/vermelha no idioma do site, correção pelo francês', wrongTxt.yours.trim() === (pt ? 'Uma tigela' : 'A bowl') && wrongTxt.okOpt === (pt ? 'Falta de sorte' : 'Bad luck') && wrongTxt.badOpt === (pt ? 'Uma tigela' : 'A bowl'), wrongTxt);
+    if (OUT) await page.screenshot({ path: path.join(OUT, `0-opcoes-${label}.png`) });
+    await open(page, 'ch-old');
+    check(label + ' sem questionMode: continua "O que significa?"', (await qLab()) === (pt ? 'O que significa?' : 'What does it mean?'));
+    await page.click('#expr-see-options-btn'); await page.waitForSelector('.exercise-option');
+    check(label + ' sem tradução das opções no dado: mostra o francês de antes', await page.evaluate(() => [...document.querySelectorAll('.exercise-option .opt-text')].map(e => e.textContent).sort().join('|')) === ['Beaucoup', 'Pas de chance', 'Rien', 'Un bol'].join('|'));
     // ---- completo ----
     await open(page, 'ch-full'); await ateResposta(page);
     const lit = await page.evaluate(() => ({ label: (document.querySelector('.expr-literal-label') || {}).textContent, text: (document.querySelector('.expr-literal em') || {}).textContent, note: (document.querySelector('.expr-literal-note') || {}).textContent }));
@@ -110,7 +125,9 @@ const ateExemplos = async page => { await ateResposta(page); await page.click('#
     await page.click('#expr-continue-btn'); await page.waitForSelector('.expr-order-tr, #expr-order-dontknow-btn');
     check(label + ' Monte a frase sem tradução: não cria a linha de apoio', (await page.evaluate(() => !document.querySelector('.expr-order-tr'))));
     // ---- marca fora do texto + HTML no dado ----
-    await open(page, 'ch-odd'); await ateResposta(page);
+    await open(page, 'ch-odd');
+    check(label + ' questionMode who: "Quem diz isso?"', (await qLab()) === (pt ? 'Quem diz isso?' : 'Who says this?'));
+    await ateResposta(page);
     await page.evaluate(() => { document.getElementById('expr-continue-btn').click(); }); await page.waitForSelector('.expr-example'); await page.waitForTimeout(60);
     const odd = await page.evaluate(() => { const es = [...document.querySelectorAll('.expr-example')]; return { marks: es.map(e => (e.querySelector('.expr-mark') || {}).textContent || null), noHtml: !document.querySelector('.expr-example-text b') && !document.querySelector('.expr-example-tr i'), trBtns: es.map(e => !!e.querySelector('.expr-tr-btn')), t0: es[0].querySelector('.expr-example-text').textContent }; });
     check(label + ' marca fora do texto: sem destaque; marca válida no 2º; HTML do dado escapado', odd.marks[0] === null && odd.marks[1] === 'Ça va' && odd.noHtml && odd.t0 === 'Quel <b>bol</b> !', odd);

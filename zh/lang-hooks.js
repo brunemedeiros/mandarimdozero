@@ -115,7 +115,7 @@ const LANG_HOOKS = (typeof defineLangHooks === 'function' ? defineLangHooks : (h
   },
   clozeSentenceHTML: (ex) => `
         <div class="cloze-hanzi">${ex.phrase.blocks.map((b, i) =>
-    i === ex.blankIdx ? '<span class="cloze-blank" id="cloze-blank">___</span>' : b.c
+    i === ex.blankIdx ? '<span class="cloze-blank" id="cloze-blank">&nbsp;</span>' : b.c
   ).join('')}</div>
         <div class="cloze-pinyin">${ex.phrase.blocks.map((b, i) =>
     i === ex.blankIdx ? '___' : b.p

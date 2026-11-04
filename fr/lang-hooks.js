@@ -68,7 +68,7 @@ const LANG_HOOKS = (typeof defineLangHooks === 'function' ? defineLangHooks : (h
     wireInputExtra: (root, inputEl) => wireFrAccentPicker(root.querySelector('.fr-accent-picker'), inputEl),
   },
   clozeSentenceHTML: (ex) => ex.phrase.blocks.map((b, i) =>
-    i === ex.blankIdx ? '<span class="cloze-blank" id="cloze-blank">___</span>' : b.f
+    i === ex.blankIdx ? '<span class="cloze-blank" id="cloze-blank">&nbsp;</span>' : b.f
   ).join(' '),
   clozeOptionsHTML: (options) => options.map((opt, i) => `<button class="cloze-option" data-idx="${i}">${opt.f}</button>`).join(''),
   clozeSpoken: (ex) => ex.phrase.f,
