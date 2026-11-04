@@ -31,7 +31,11 @@ const ETAPA6 = (v) => etapa7(PROGRESSO_ORDEM(v)).split('Ver o que você aprendeu
   .replace(/<!-- Recomeçar este curso.*?-->(\\n|\n)\s*<article id=\\?"settings-restart-box\\?"[^>]*><\/article>(\\n|\n)\s*/g, '')
   // Lacuna dos cartões de completar sem os três tracinhos (2026-11-03, pedido da dona: a borda já é o sublinhado): a árvore nova
   // traz só um espaço dentro de <span class="cloze-blank">; a antiga trazia ___. Mesmo resto da cena.
-  .replace(/(<span class=\\?"cloze-blank\\?" id=\\?"cloze-blank\\?">)&nbsp;(<\/span>)/g, '$1___$2');
+  .replace(/(<span class=\\?"cloze-blank\\?" id=\\?"cloze-blank\\?">)&nbsp;(<\/span>)/g, '$1___$2')
+  // Botão "‹ Voltar" dos cartões da professora (2026-11-04, PRs #436/#438; docs/historico/15-auditoria-banco-revisao.md):
+  // syncReviewPrevRow cria a linha logo depois de #review-content em toda sessão da Revisão, VAZIA e escondida fora da sessão
+  // da professora. Só a linha vazia e hidden sai; com o botão dentro a cena continua diferente.
+  .replace(/<div id=\\?"review-prev-row\\?" class=\\?"review-prev-row\\?" hidden=\\?"\\?"><\/div>/g, '');
 // Perfil > Progresso (decisão da dona, 2026-10-31): Conquistas saíram de cima dos números e foram para o fim da tela.
 // Na árvore antiga, o bloco (título + grade) é movido para o fim; na nova, sai o comentário que explica a ordem.
 // Assim a comparação continua provando que números, gráficos e conquistas têm o mesmo conteúdo.
