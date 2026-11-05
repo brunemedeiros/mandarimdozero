@@ -3553,6 +3553,14 @@ window.I18N_CATALOG['en'] = {
   'panel.classLog.cal.schedule': 'Schedule a lesson on this day', // ALTA
   'myClassLogs.upcoming': 'Upcoming lessons', // ALTA
   'panel.notion.title': 'Notion', // ALTA
+  'panel.notion.more': 'More Notion options', // ALTA
+  'panel.notion.oneWayShort': 'Read-only, from Notion to the site', // ALTA
+  'panel.notion.ind.recent': 'updated in 7 days', // ALTA
+  'panel.notion.ind.linked': 'linked lessons', // ALTA
+  'panel.notion.ind.approval': 'to approve', // ALTA
+  'panel.notion.ind.review': 'to review', // ALTA
+  'panel.notion.on': 'Connected', // ALTA
+  'panel.notion.toCheck': '{n} to check', // ALTA
   'panel.notion.oneWay': 'One-way sync: Notion → site. The site only reads your Notion; nothing is written there.', // ALTA
   'panel.notion.howItWorks': 'Connect your Notion lesson database: every hour the site reads new or edited rows and fills in the lesson for the same student and day (or creates it). That way the board notice, the bell and the Review Bank cards go out on their own.', // ALTA
   'panel.notion.connect': 'Connect Notion', // ALTA

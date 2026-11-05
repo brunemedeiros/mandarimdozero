@@ -40,8 +40,8 @@ async function notionLoad(){
   }
 }
 
-function notionDay(iso){
-  return iso ? fmtDate(new Date(`${String(iso).slice(0, 10)}T00:00:00`), { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }) : '';
+function notionDay(iso, long){
+  return iso ? fmtDate(new Date(`${String(iso).slice(0, 10)}T00:00:00`), long ? { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' } : { weekday: 'short', day: 'numeric', month: 'short' }) : '';
 }
 
 function notionTargetOptionsHTML(){
@@ -58,39 +58,43 @@ function notionTargetOptionsHTML(){
       `<option value="bank_student|${escapeHTML(b.id)}|${escapeHTML(b.language_app_key)}">${escapeHTML(b.name)} · ${escapeHTML(lang(b.language_app_key))}</option>`).join('')}</optgroup>` : ''}`;
 }
 
-function notionItemHTML(it){
-  const lines = [
-    it.topic ? `<span><b>${t('panel.notion.f.topic')}:</b> ${escapeHTML(it.topic)}</span>` : '',
-    it.homework ? `<span><b>${t('panel.notion.f.homework')}:</b> ${escapeHTML(it.homework)}</span>` : '',
-    it.attendance ? `<span><b>${t('panel.notion.f.attendance')}:</b> ${escapeHTML(it.attendance)}</span>` : '',
-  ].filter(Boolean).join('');
-  const head = `<div class="gcal-review-head"><b>${escapeHTML(it.target || it.name || t('panel.notion.noName'))}</b>
-      <span class="profile-edit-hint">${escapeHTML(notionDay(it.class_date))}${it.start_time ? ' · ' + escapeHTML(String(it.start_time).slice(0, 5)) : ''}${it.target && it.name ? ' · ' + t('panel.notion.inNotion', { name: escapeHTML(it.name) }) : ''}</span></div>
-    ${lines ? `<div class="notion-item-lines">${lines}</div>` : ''}`;
-  if (it.state === 'approval'){
-    return `<li class="gcal-review-item" data-notion-item="${it.id}">${head}
-      <div class="gcal-review-actions">
-        <button type="button" class="btn btn-primary mural-small-btn" data-notion-do="approve">${t('panel.notion.approve')}</button>
-        <button type="button" class="btn tinv-ghost mural-small-btn" data-notion-do="discard">${t('panel.notion.discard')}</button>
-      </div></li>`;
-  }
-  if (it.state === 'review'){
-    return `<li class="gcal-review-item" data-notion-item="${it.id}" data-notion-name="${escapeHTML(it.name || '')}">${head}
-      <p class="profile-edit-hint">${escapeHTML(notionReason(it.reason))}</p>
-      ${it.name ? `<div class="gcal-review-actions">
-        <select class="profile-edit-input" data-notion-target aria-label="${escapeHTML(t('panel.notion.pick'))}">${notionTargetOptionsHTML()}</select>
-        <button type="button" class="btn btn-primary mural-small-btn" data-notion-do="link">${t('panel.notion.link')}</button>
-        <button type="button" class="btn tinv-ghost mural-small-btn" data-notion-do="ignore">${t('panel.notion.ignoreName')}</button>
-      </div>
-      <p class="profile-edit-hint">${t('panel.notion.linkHint', { name: escapeHTML(it.name) })}</p>` : ''}</li>`;
-  }
-  return `<li class="gcal-review-item" data-notion-item="${it.id}">${head}<p class="profile-edit-hint">${t('panel.notion.waitingHint')}</p></li>`;
-}
-
 function notionReason(r){
   const map = { 'nome não reconhecido': 'panel.notion.r.unknown', 'mais de um aluno com esse nome': 'panel.notion.r.many',
     'aluno com mais de um idioma': 'panel.notion.r.lang', 'sem data': 'panel.notion.r.noDate', 'sem aluno': 'panel.notion.r.noName' };
   return map[r] ? t(map[r]) : '';
+}
+
+// Uma linha da lista (peça p-item do Design System do painel): quem e quando no título; tópico, tarefa e presença numa linha só.
+function notionItemHTML(it){
+  const who = escapeHTML(it.target || it.name || t('panel.notion.noName'));
+  const when = escapeHTML(notionDay(it.class_date)) + (it.start_time ? ' · ' + escapeHTML(String(it.start_time).slice(0, 5)) : '');
+  const parts = [
+    it.topic ? escapeHTML(it.topic) : '',
+    it.homework ? `${t('panel.notion.f.homework')}: ${escapeHTML(it.homework)}` : '',
+    it.attendance ? escapeHTML(it.attendance) : '',
+  ].filter(Boolean);
+  const head = `<div class="p-item-conteudo">
+      <span class="p-item-titulo">${who} <span class="notion-quando">${when}</span></span>
+      ${parts.length ? `<span class="p-item-descricao">${parts.join(' · ')}</span>` : ''}
+      ${it.target && it.name ? `<span class="p-item-descricao notion-nome">${t('panel.notion.inNotion', { name: escapeHTML(it.name) })}</span>` : ''}
+    </div>`;
+  if (it.state === 'approval'){
+    return `<li data-notion-item="${it.id}"><div class="p-item">${head}
+      <div class="p-item-acoes">
+        <button type="button" class="p-pequeno" data-notion-do="approve">${t('panel.notion.approve')}</button>
+        <button type="button" class="outline secondary p-pequeno" data-notion-do="discard">${t('panel.notion.discard')}</button>
+      </div></div></li>`;
+  }
+  if (it.state === 'review'){
+    return `<li data-notion-item="${it.id}" data-notion-name="${escapeHTML(it.name || '')}"><div class="p-item notion-item-revisar">${head.replace('</div>', `<span class="p-item-descricao notion-motivo">${escapeHTML(notionReason(it.reason))}</span></div>`)}
+      ${it.name ? `<div class="notion-ligar">
+        <select data-notion-target aria-label="${escapeHTML(t('panel.notion.pick'))}">${notionTargetOptionsHTML()}</select>
+        <button type="button" class="p-pequeno" data-notion-do="link">${t('panel.notion.link')}</button>
+        <button type="button" class="outline secondary p-pequeno" data-notion-do="ignore">${t('panel.notion.ignoreName')}</button>
+        <small class="p-ajuda">${t('panel.notion.linkHint', { name: escapeHTML(it.name) })}</small>
+      </div>` : ''}</div></li>`;
+  }
+  return `<li data-notion-item="${it.id}"><div class="p-item p-item--suave">${head}</div></li>`;
 }
 
 function notionReviewHTML(){
@@ -102,97 +106,119 @@ function notionReviewHTML(){
   const list = lists[tab];
   const shown = list.slice(0, NOTION_STATE.shown);
   const rest = list.length - shown.length;
-  const tabBtn = (key, label) => lists[key].length ? `<button type="button" class="gcal-tab${tab === key ? ' is-active' : ''}" data-notion-tab="${key}" aria-pressed="${tab === key}">${label}</button>` : '';
-  return `<div class="section-label">${t('panel.notion.reviewTitle')}</div>
-    <div class="gcal-review-bar"><div class="gcal-tabs">
-      ${tabBtn('approval', t('panel.notion.tabApproval', { n: lists.approval.length }))}
-      ${tabBtn('review', t('panel.notion.tabReview', { n: lists.review.length }))}
-      ${tabBtn('no_account', t('panel.notion.tabWaiting', { n: lists.no_account.length }))}
-    </div></div>
-    <p class="profile-edit-hint">${t(tab === 'approval' ? 'panel.notion.approvalHint' : tab === 'review' ? 'panel.notion.reviewHint' : 'panel.notion.waitingTabHint')}</p>
-    ${tab === 'approval' ? `<div class="gcal-actions"><button type="button" class="btn btn-secondary mural-small-btn" data-notion-approve-all>${t('panel.notion.approveAll', { n: list.length })}</button></div>` : ''}
-    <ul class="gcal-review">${shown.map(notionItemHTML).join('')}</ul>
-    ${rest > 0 ? `<button type="button" class="btn tinv-ghost mural-small-btn gcal-more" data-notion-more>${t('panel.gcal.showMore', { n: Math.min(rest, NOTION_PAGE), rest })}</button>` : ''}`;
+  const segBtn = (key, label) => lists[key].length ? `<button type="button" data-notion-tab="${key}" aria-pressed="${tab === key}">${label}</button>` : '';
+  return `<section class="notion-revisao" aria-label="${escapeHTML(t('panel.notion.reviewTitle'))}">
+    <div class="notion-revisao-topo">
+      <div class="p-seg" role="toolbar" aria-label="${escapeHTML(t('panel.notion.reviewTitle'))}">
+        ${segBtn('approval', t('panel.notion.tabApproval', { n: lists.approval.length }))}${segBtn('review', t('panel.notion.tabReview', { n: lists.review.length }))}${segBtn('no_account', t('panel.notion.tabWaiting', { n: lists.no_account.length }))}
+      </div>
+      ${tab === 'approval' ? `<button type="button" class="p-pequeno" data-notion-approve-all>${t('panel.notion.approveAll', { n: list.length })}</button>` : ''}
+    </div>
+    <small class="p-ajuda">${t(tab === 'approval' ? 'panel.notion.approvalHint' : tab === 'review' ? 'panel.notion.reviewHint' : 'panel.notion.waitingTabHint')}</small>
+    <ul class="p-itens">${shown.map(notionItemHTML).join('')}</ul>
+    ${rest > 0 ? `<button type="button" class="outline secondary p-pequeno" data-notion-more>${t('panel.gcal.showMore', { n: Math.min(rest, NOTION_PAGE), rest })}</button>` : ''}
+  </section>`;
 }
 
 function notionSetupHTML(){
   const s = NOTION_STATE.setup;
   if (s && s.step === 'databases'){
-    return `<div class="section-label">${t('panel.notion.pickDatabase')}</div>
-      ${s.list.length ? `<ul class="gcal-sources">${s.list.map(d => `<li><span>${escapeHTML(d.title)}</span>
-        <button type="button" class="btn btn-secondary mural-small-btn" data-notion-db="${escapeHTML(d.id)}" data-notion-db-title="${escapeHTML(d.title)}">${t('panel.notion.useThis')}</button></li>`).join('')}</ul>`
-        : `<p class="profile-empty-note">${t('panel.notion.noDatabases')}</p>`}
-      <p class="profile-edit-hint">${t('panel.notion.noDatabasesHint')}</p>
-      <div class="gcal-actions"><button type="button" class="btn tinv-ghost mural-small-btn" data-notion-cancel-setup>${t('panel.notion.cancel')}</button></div>`;
+    return `<fieldset class="p-grupo">
+      <legend>${t('panel.notion.pickDatabase')}</legend>
+      ${s.list.length ? `<ul class="p-itens">${s.list.map(d => `<li><div class="p-item">
+          <span class="p-item-media" aria-hidden="true">📝</span>
+          <div class="p-item-conteudo"><span class="p-item-titulo">${escapeHTML(d.title)}</span></div>
+          <div class="p-item-acoes"><button type="button" class="p-pequeno" data-notion-db="${escapeHTML(d.id)}" data-notion-db-title="${escapeHTML(d.title)}">${t('panel.notion.useThis')}</button></div>
+        </div></li>`).join('')}</ul>`
+        : `<p class="p-descricao">${t('panel.notion.noDatabases')}</p>`}
+      <small class="p-ajuda">${t('panel.notion.noDatabasesHint')}</small>
+      <div class="p-acoes"><button type="button" class="secondary outline" data-notion-cancel-setup>${t('panel.notion.cancel')}</button></div>
+    </fieldset>`;
   }
   if (s && s.step === 'columns'){
     const current = (NOTION_STATE.status.source && NOTION_STATE.status.source.database_id === s.database_id) ? NOTION_STATE.status.source.column_map : s.suggested;
     const from = (NOTION_STATE.status.source && NOTION_STATE.status.source.import_from)
       || new Date(Date.now() - 30 * 864e5 - new Date().getTimezoneOffset() * 6e4).toISOString().slice(0, 10);
-    const row = (f) => {
+    const field = (f) => {
       const ok = (s.field_types && s.field_types[f]) || [];
       const opts = s.properties.filter(p => ok.includes(p.type));
-      return `<label class="notion-map-row"><span>${t('panel.notion.f.' + f)}${NOTION_REQUIRED.includes(f) ? ' *' : ''}</span>
-        <select class="profile-edit-input" data-notion-col="${f}">
+      return `<div class="p-campo"><label for="notion-col-${f}">${t('panel.notion.f.' + f)}${NOTION_REQUIRED.includes(f) ? ' *' : ''}</label>
+        <select id="notion-col-${f}" data-notion-col="${f}">
           <option value="">${t(NOTION_REQUIRED.includes(f) ? 'panel.notion.pickColumn' : 'panel.notion.noColumn')}</option>
           ${opts.map(p => `<option value="${escapeHTML(p.id)}" ${current && current[f] === p.id ? 'selected' : ''}>${escapeHTML(p.name)}</option>`).join('')}
-        </select></label>`;
+        </select></div>`;
     };
-    return `<div class="section-label">${t('panel.notion.columnsTitle', { title: escapeHTML(s.title || '') })}</div>
-      <p class="profile-edit-hint">${t('panel.notion.columnsHint')}</p>
-      <div class="notion-map">${NOTION_FIELDS.map(row).join('')}
-        <label class="notion-map-row"><span>${t('panel.notion.importFrom')}</span>
-          <input type="date" class="profile-edit-input" data-notion-from value="${escapeHTML(from)}"></label>
+    return `<fieldset class="p-grupo">
+      <legend>${t('panel.notion.columnsTitle', { title: escapeHTML(s.title || '') })}</legend>
+      <p class="p-descricao">${t('panel.notion.columnsHint')}</p>
+      <div class="notion-campos">${NOTION_FIELDS.map(field).join('')}</div>
+      <div class="p-campo notion-desde"><label for="notion-from">${t('panel.notion.importFrom')}</label>
+        <input type="date" id="notion-from" data-notion-from value="${escapeHTML(from)}">
+        <small class="p-ajuda">${t('panel.notion.importFromHint')}</small></div>
+      <small class="p-erro" data-notion-setup-error role="alert" hidden></small>
+      <div class="p-acoes">
+        <button type="button" data-notion-save-source="${escapeHTML(s.database_id)}" data-notion-db-title="${escapeHTML(s.title || '')}">${t('panel.notion.saveSource')}</button>
+        <button type="button" class="secondary outline" data-notion-cancel-setup>${t('panel.notion.cancel')}</button>
       </div>
-      <p class="profile-edit-hint">${t('panel.notion.importFromHint')}</p>
-      <p class="gcal-error" data-notion-setup-error role="alert" hidden></p>
-      <div class="gcal-actions">
-        <button type="button" class="btn btn-primary mural-small-btn" data-notion-save-source="${escapeHTML(s.database_id)}" data-notion-db-title="${escapeHTML(s.title || '')}">${t('panel.notion.saveSource')}</button>
-        <button type="button" class="btn tinv-ghost mural-small-btn" data-notion-cancel-setup>${t('panel.notion.cancel')}</button>
-      </div>`;
+    </fieldset>`;
   }
   return '';
 }
 
+function notionMenuHTML(withColumns){
+  return `<details class="p-menu" data-alinhar="fim">
+    <summary role="button" class="outline secondary p-pequeno" aria-label="${escapeHTML(t('panel.notion.more'))}">⋯</summary>
+    <div class="p-menu-lista" role="menu">
+      ${withColumns ? `<button type="button" class="p-menu-item" role="menuitem" data-notion-edit-columns>${t('panel.notion.editColumns')}</button>` : ''}
+      <button type="button" class="p-menu-item" role="menuitem" data-notion-pick>${t('panel.notion.otherDatabase')}</button>
+      <button type="button" class="p-menu-item" role="menuitem" data-notion-connect>${t('panel.notion.reconnect')}</button>
+      <div class="p-menu-sep" role="separator"></div>
+      <button type="button" class="p-menu-item p-menu-item--perigo" role="menuitem" data-notion-disconnect>${t('panel.notion.disconnect')}</button>
+    </div>
+  </details>`;
+}
+
 function notionBoxHTML(){
   const st = NOTION_STATE.status;
-  if (!st) return `<p class="profile-empty-note">${t('panel.notion.loadError')}</p>`;
-  const intro = `<p class="profile-edit-hint gcal-oneway">${t('panel.notion.oneWay')}</p>`;
+  if (!st) return `<div class="p-alerta" role="alert"><span>${t('panel.notion.loadError')}</span></div>`;
   if (!st.connected){
-    return `${intro}<p class="profile-edit-hint">${t('panel.notion.howItWorks')}</p>
-      <button type="button" class="btn btn-primary mural-small-btn" data-notion-connect>${t('panel.notion.connect')}</button>`;
+    return `<div class="p-item p-item--suave notion-convite">
+      <div class="p-item-conteudo"><span class="p-item-titulo">${t('panel.notion.oneWay')}</span>
+        <span class="p-item-descricao">${t('panel.notion.howItWorks')}</span></div>
+      <div class="p-item-acoes"><button type="button" data-notion-connect>${t('panel.notion.connect')}</button></div>
+    </div>`;
   }
-  if (NOTION_STATE.setup) return intro + notionSetupHTML();
+  if (NOTION_STATE.setup) return notionSetupHTML();
   const src = st.source;
   const c = st.counts || {};
   const err = st.last_error === 'reconnect' ? t('panel.notion.errReconnect') : (st.last_error ? t('panel.notion.errGeneric') : '');
+  const alert = err ? `<div class="p-alerta" role="alert" style="--c: var(--p-erro)"><span>${err}</span>${st.last_error === 'reconnect' ? `<button type="button" class="p-pequeno" data-notion-connect>${t('panel.notion.reconnect')}</button>` : ''}</div>` : '';
   if (!src || !src.enabled){
-    return `${intro}<p class="gcal-account">${t('panel.notion.connectedTo', { name: escapeHTML(st.workspace || 'Notion') })}</p>
-      <p class="profile-edit-hint">${t('panel.notion.nextPick')}</p>
-      <div class="gcal-actions">
-        <button type="button" class="btn btn-primary mural-small-btn" data-notion-pick>${t('panel.notion.pickDatabaseBtn')}</button>
-        <a href="#" class="admin-select-link" data-notion-disconnect>${t('panel.notion.disconnect')}</a>
-      </div>`;
+    return `${alert}<div class="p-item p-item--suave">
+      <div class="p-item-conteudo"><span class="p-item-titulo">${t('panel.notion.connectedTo', { name: escapeHTML(st.workspace || 'Notion') })}</span>
+        <span class="p-item-descricao">${t('panel.notion.nextPick')}</span></div>
+      <div class="p-item-acoes"><button type="button" data-notion-pick>${t('panel.notion.pickDatabaseBtn')}</button>${notionMenuHTML(false)}</div>
+    </div>`;
   }
-  return `${intro}
-    <p class="gcal-account">${t('panel.notion.sourceLine', { title: escapeHTML(src.title || '?'), name: escapeHTML(st.workspace || 'Notion') })} · ${t('panel.gcal.lastRead', { when: escapeHTML(gcalAgo(st.last_sync_at)) })}</p>
-    ${err ? `<p class="gcal-error" role="alert">${err}</p>` : ''}
-    ${st.last_error === 'reconnect' ? `<button type="button" class="btn btn-primary mural-small-btn" data-notion-connect>${t('panel.notion.reconnect')}</button>` : ''}
-    ${c.recent ? `<p class="notion-recent">${tp('panel.notion.recent', c.recent, { n: c.recent })}</p>` : ''}
-    <p class="gcal-counts">${t('panel.notion.counts', { linked: c.linked || 0, approval: c.approval || 0, review: c.review || 0, waiting: c.no_account || 0 })}</p>
-    <div class="gcal-actions">
-      <button type="button" class="btn btn-secondary mural-small-btn" data-notion-sync>${t('panel.notion.syncNow')}</button>
-      <button type="button" class="btn tinv-ghost mural-small-btn" data-notion-edit-columns>${t('panel.notion.editColumns')}</button>
-      <button type="button" class="admin-select-link gcal-skip" data-notion-pick>${t('panel.notion.otherDatabase')}</button>
-      <a href="#" class="admin-select-link" data-notion-disconnect>${t('panel.notion.disconnect')}</a>
+  const ind = (n, key) => `<div class="p-indicador"><span class="p-indicador-valor">${n || 0}</span><span class="p-indicador-rotulo">${t(key)}</span></div>`;
+  return `${alert}
+    <div class="notion-topo">
+      <div class="notion-fonte"><span class="p-item-titulo">${t('panel.notion.sourceLine', { title: escapeHTML(src.title || '?'), name: escapeHTML(st.workspace || 'Notion') })}</span>
+        <small class="p-ajuda">${t('panel.notion.oneWayShort')} · ${t('panel.gcal.lastRead', { when: escapeHTML(gcalAgo(st.last_sync_at)) })}</small></div>
+      <div class="p-acoes"><button type="button" class="secondary p-pequeno" data-notion-sync>${t('panel.notion.syncNow')}</button>${notionMenuHTML(true)}</div>
+    </div>
+    <div class="p-resumo notion-resumo">
+      ${ind(c.recent, 'panel.notion.ind.recent')}${ind(c.linked, 'panel.notion.ind.linked')}${ind(c.approval, 'panel.notion.ind.approval')}${ind(c.review, 'panel.notion.ind.review')}
     </div>
     ${notionReviewHTML()}`;
 }
 
 function notionBoxShellHTML(){
-  return `<details class="profile-section gcal-box notion-box" id="admin-notion-box">
-    <summary class="section-label">📝 ${t('panel.notion.title')} <span class="gcal-badge" data-notion-badge hidden></span></summary>
-    <div class="gcal-body" data-notion-body></div>
+  return `<details class="painel notion-box" id="admin-notion-box">
+    <summary class="notion-resumo-linha"><span class="notion-titulo">📝 ${t('panel.notion.title')}</span>
+      <span class="p-selo p-selo--ok" data-notion-on hidden>${t('panel.notion.on')}</span>
+      <span class="p-selo p-selo--aviso" data-notion-badge hidden></span></summary>
+    <div class="notion-corpo" data-notion-body></div>
   </details>`;
 }
 
@@ -211,7 +237,9 @@ async function renderNotionBox(opts){
   body.innerHTML = notionBoxHTML();
   const n = NOTION_STATE.items.filter(i => i.state === 'approval' || i.state === 'review').length;
   const badge = host.querySelector('[data-notion-badge]');
-  if (badge){ badge.textContent = n ? String(n) : ''; badge.hidden = !n; }
+  if (badge){ badge.textContent = n ? t('panel.notion.toCheck', { n }) : ''; badge.hidden = !n; }
+  const on = host.querySelector('[data-notion-on]');
+  if (on) on.hidden = !(NOTION_STATE.status && NOTION_STATE.status.connected && NOTION_STATE.status.source && NOTION_STATE.status.source.enabled);
   host.open = NOTION_STATE.open === null ? !!n : NOTION_STATE.open;
 }
 

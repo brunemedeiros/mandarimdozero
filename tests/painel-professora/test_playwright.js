@@ -429,12 +429,12 @@ const PANEL_STUB = (who) => {
         if (action === 'columns') return { ok: true, title: 'Calendário de Aulas', properties: [{ id: 'Dt', name: 'Data', type: 'date' }, { id: 'Al', name: 'Aluno/a', type: 'select' }, { id: 'title', name: 'Tópico', type: 'title' }, { id: 'Px', name: 'Para a próxima aula', type: 'rich_text' }],
           suggested: { date: 'Dt', student: 'Al', topic: 'title', homework: 'Px' }, field_types: { date: ['date'], student: ['select', 'title'], topic: ['title', 'rich_text'], homework: ['rich_text', 'title'], attendance: ['select'], skills: ['multi_select'], language: ['select'] } };
         return { ok: true, results: [] }; }; });
-      await page.waitForSelector('#admin-notion-box .gcal-review-item');
-      L('notion: caixa no topo de Aulas, aberta porque há o que conferir, com contador 3', await ev(() => { const b = document.getElementById('admin-notion-box'); return b.open && b.querySelector('[data-notion-badge]').textContent === '3' && b.compareDocumentPosition(document.querySelector('.class-log-views')) & Node.DOCUMENT_POSITION_FOLLOWING; }));
+      await page.waitForSelector('#admin-notion-box [data-notion-item]');
+      L('notion: caixa no topo de Aulas, aberta porque há o que conferir, com "3 para conferir" e o selo Conectado', await ev(() => { const b = document.getElementById('admin-notion-box'); return b.open && b.querySelector('[data-notion-badge]').textContent === '3 para conferir' && !b.querySelector('[data-notion-on]').hidden && b.classList.contains('painel') && b.compareDocumentPosition(document.querySelector('.class-log-views')) & Node.DOCUMENT_POSITION_FOLLOWING; }));
       if (SHOTS) { await ev(() => { document.getElementById('admin-notion-box').scrollIntoView({ block: 'start' }); window.scrollBy(0, -110); }); await shot('notion-aprovar'); }
-      L('notion: diz que é em um sentido e mostra o banco lido', await ev(() => /Notion → site/.test(document.querySelector('#admin-notion-box .gcal-oneway').textContent) && document.querySelector('#admin-notion-box .gcal-account').textContent.includes('Calendário de Aulas')));
-      L('notion: faixa das aulas atualizadas nos últimos 7 dias', await ev(() => document.querySelector('#admin-notion-box .notion-recent').textContent.includes('3 aulas atualizadas')));
-      L('notion: abre em Para aprovar com as 2 aulas e o botão Aprovar todas', await ev(() => document.querySelector('[data-notion-tab="approval"]').classList.contains('is-active') && document.querySelectorAll('#admin-notion-box [data-notion-item]').length === 2 && /2/.test(document.querySelector('[data-notion-approve-all]').textContent)));
+      L('notion: diz que é só leitura e mostra o banco lido', await ev(() => /Só leitura/.test(document.querySelector('#admin-notion-box .notion-fonte').textContent) && document.querySelector('#admin-notion-box .notion-fonte').textContent.includes('Calendário de Aulas')));
+      L('notion: resumo com atualizadas em 7 dias, ligadas, para aprovar e para revisar', await ev(() => [...document.querySelectorAll('#admin-notion-box .notion-resumo .p-indicador-valor')].map(x => x.textContent).join() === '3,9,2,1'));
+      L('notion: abre em Para aprovar com as 2 aulas e o botão Aprovar todas', await ev(() => document.querySelector('[data-notion-tab="approval"]').getAttribute('aria-pressed') === 'true' && document.querySelectorAll('#admin-notion-box [data-notion-item]').length === 2 && /2/.test(document.querySelector('[data-notion-approve-all]').textContent)));
       L('notion: item mostra o aluno do site, o nome no Notion, o tópico e a tarefa', await ev(() => { const it = document.querySelector('[data-notion-item="501"]').textContent; return it.includes('Ana Souza') && it.includes('Ana 🇧🇷') && it.includes('Passé composé') && it.includes('Exercícios'); }));
       await ev(() => document.querySelector('[data-notion-tab="review"]').click());
       await page.waitForSelector('[data-notion-item="503"] [data-notion-target]');
@@ -449,7 +449,7 @@ const PANEL_STUB = (who) => {
       await page.waitForFunction(() => !document.querySelector('#admin-notion-box [data-notion-item]'));
       L('notion: caixa some quando não há mais nada para conferir', true);
       // trocar de banco: lista de bancos, colunas sugeridas e salvar
-      await ev(() => document.querySelector('#admin-notion-box [data-notion-pick]').click());
+      await ev(() => { document.querySelector('#admin-notion-box .p-menu').open = true; document.querySelector('#admin-notion-box [data-notion-pick]').click(); });
       await page.waitForSelector('#admin-notion-box [data-notion-db]');
       await ev(() => document.querySelector('#admin-notion-box [data-notion-db]').click());
       await page.waitForSelector('#admin-notion-box [data-notion-col="date"]');
