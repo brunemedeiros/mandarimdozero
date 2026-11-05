@@ -1376,3 +1376,9 @@ Base: `piloto-m1/A1-1/A1-1.md`. **Pedido de mudança ao mapa congelado (decisão
      **D3**: nas frases publicadas da "Gramática: preposições com cidades e países" (*Elle est aux Pays-Bas.*, *Ils vivent aux Pays-Bas.*), trocar *les Pays-Bas* por ***les États-Unis*** (cartão de "Países e cidades", plural com *aux*), e *vivent* por *habitent* (cartão): entra na lista de reescrita, na implementação.
      **D4**: ***long / longue*** e ***court / courte*** são **cartões em par** (masculino e feminino, como *beau / belle*), a pedido da dona; *bel* (antes de vogal: *un bel homme*) fica numa linha da nota "lugar do adjetivo" de "Descrever a aparência".
      **D5**: a nota "Bonjour ou Bonsoir?" ganha a linha "*coucou* é ainda mais próximo que *salut*: com família, amigos e crianças", com o exemplo *coucou* (validador do rascunho: 118 textos, 0 falhas).
+
+# Trigésima oitava rodada (2026-11-05): unidade 2 "Dizer o nome e a nacionalidade"
+
+326. **Unidade 2, primeiras respostas (a dona)**: aceitas as 4 sugestões (cartão ***tu / vous*** em par, mesma chave; lição com até 6 cartões aceita se preciso; o **alfabeto como lição 2**; o **diálogo publicado com a negação nas duas últimas falas**, chaves novas para as falas trocadas).
+     **Princípio reforçado pela dona: toda nota precisa de um GATILHO** (o cartão ou a frase logo antes, que mostra a forma que a nota explica): a nota de tônicos não tinha gatilho; a nota "t'es" vinha depois de *Je suis*, e não de *Tu es*; a nota da negação não tinha cartão. **A negação precisa de cartão**, para o diálogo e a nota não introduzirem *je ne suis pas française* do nada.
+     ***la France* e *le Brésil*** não servem para "dizer a nacionalidade" (são países; só fariam sentido com *Je viens de France / du Brésil*, que ainda não é trabalhado). Falta tratar **outras nacionalidades** além de brasileiro e francês. Redesenho em proposta no chat de 2026-11-05.
