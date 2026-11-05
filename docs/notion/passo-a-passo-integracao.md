@@ -2,9 +2,10 @@
 
 Sem isso a função `notion-sync` responde `not_configured` e o botão "Conectar Notion" dá erro.
 
-1. Abra https://www.notion.so/profile/integrations (logada no Notion) e clique em **Nova integração** (New integration).
-2. Tipo: **Pública** (Public). Pública aqui só quer dizer "outras pessoas podem conectar o Notion delas"; ela não aparece
-   na galeria do Notion e não precisa de revisão deles.
+1. Abra https://www.notion.so/profile/integrations (logada no Notion) e clique em **New connection** (Nova conexão).
+2. Nome: `Idiomas com Prof. Brune`. Em **Authentication method**, escolha **OAuth** (não "API token": o API token só
+   serve para um espaço do Notion e não dá o client ID e o client secret que o site precisa). OAuth é o que o Notion antes
+   chamava de integração "pública": cada professora entra com o próprio Notion.
 3. Preencha:
    - Nome: `Idiomas com Prof. Brune`; logo: o mesmo do site (`icons/` do repositório) ou deixe sem.
    - Site: `https://app.profbrune.com.br`
