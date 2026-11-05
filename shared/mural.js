@@ -690,8 +690,12 @@ function muralApplyAulasScope(sel){
   const scope = sel && sel.startsWith('c:') ? { classroomId: Number(sel.slice(2)) } : sel && sel.startsWith('s:') ? { studentId: sel.slice(2) } : null;
   if (typeof ADMIN_CLASS_LOGS_STATE !== 'undefined'){
     ADMIN_CLASS_LOGS_STATE.scope = scope;
+    // "Todos": a lista mostra as aulas de todo mundo (listAll) e o formulário de Nova aula começa sem ninguém marcado.
+    const wasAll = ADMIN_CLASS_LOGS_STATE.listAll;
+    ADMIN_CLASS_LOGS_STATE.listAll = !scope;
     if (scope?.studentId){ ADMIN_CLASS_LOGS_STATE.studentIds = new Set([scope.studentId]); ADMIN_CLASS_LOGS_STATE.classroomIds = new Set(); }
     else if (scope?.classroomId){ ADMIN_CLASS_LOGS_STATE.classroomIds = new Set([String(scope.classroomId)]); ADMIN_CLASS_LOGS_STATE.studentIds = new Set(); }
+    else if (!wasAll){ ADMIN_CLASS_LOGS_STATE.studentIds = new Set(); ADMIN_CLASS_LOGS_STATE.classroomIds = new Set(); }
   }
   if (typeof MATERIALS_VIEW !== 'undefined') MATERIALS_VIEW.filtros.aluno = scope?.studentId || '';
 }

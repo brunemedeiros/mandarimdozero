@@ -439,9 +439,17 @@ function wireClassLogsListBox(listBox){
   });
 }
 
+// Mural > Aulas e materiais com "Todos" (listAll): a lista mostra as aulas de todos os alunos e turmas, sem
+// marcar ninguém no formulário de Nova aula (para não registrar uma aula para todo mundo sem querer).
+function classLogListTargets(){
+  const st = ADMIN_CLASS_LOGS_STATE;
+  if (st.listAll) return { students: st._studentsCache.slice(), rooms: st._classroomsCache.slice() };
+  return { students: st._studentsCache.filter(s => st.studentIds.has(s.student_id)), rooms: classLogSelectedClassrooms() };
+}
+
 async function refreshClassLogsListBox(listBox){
-  const selectedStudents = ADMIN_CLASS_LOGS_STATE._studentsCache.filter(s => ADMIN_CLASS_LOGS_STATE.studentIds.has(s.student_id));
-  listBox.innerHTML = await buildClassLogsListBoxHTML(selectedStudents);
+  const { students, rooms } = classLogListTargets();
+  listBox.innerHTML = await buildClassLogsListBoxHTML(students, rooms);
   wireClassLogsListBox(listBox);
 }
 
@@ -726,7 +734,7 @@ async function renderAdminClassLogsView(){
     </div>
 
     <div class="profile-section" id="admin-classlogs-list-box">
-      ${await buildClassLogsListBoxHTML(selectedStudents, selectedRooms)}
+      ${await (async () => { const tg = classLogListTargets(); return buildClassLogsListBoxHTML(tg.students, tg.rooms); })()}
     </div>
     </div>
   `;
