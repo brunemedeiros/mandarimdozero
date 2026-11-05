@@ -396,6 +396,7 @@ window.I18N_CATALOG['en'] = {
   'review.cloze.placeholder': 'Type the missing word', // ALTA
   'review.typeAnswer.placeholder': 'Type the answer', // ALTA
   'review.tapToReveal': 'tap to see the answer', // ALTA
+  'review.pressToReveal': 'Space shows the answer', // ALTA
   'review.grade.again': 'Again', // MÉDIA -- botão de nota; PT "Errei" = "I got it wrong"; EN segue o padrão Anki
   'review.grade.hard': 'Hard', // ALTA
   'review.grade.good': 'Good', // ALTA

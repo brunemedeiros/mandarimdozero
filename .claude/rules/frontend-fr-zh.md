@@ -72,6 +72,9 @@ paths:
   Dados opcionais de cada expressão: `example/secondExample.{pt,mark}` (tradução e trecho exato do francês a destacar), `literal.{pt,note}` (tradução literal e nota de origem); no site em outro idioma vêm do overlay (`docs/i18n/challenges-en.json`: `example`, `secondExample`, `literal`, `literalNote`) e nunca entram em `CHALLENGE_SITE_LANG_FIELDS` (sem o campo, a parte some; o desafio não). Teste: `tests/desafios-exemplos-traducao/`. Gravar SQL no navegador troca `\n` por `\r\n`: usar `chr(10)` (`docs/i18n/lote-exemplos-expressoes/gerar.py`) e conferir por hash.
 - **Lembrete de revisão do rodapé** (`maybeShowReviewReminder`, `shared/core/revisao-decks.js`): o dia só é gravado depois de o banner ficar visível uns segundos ou ser clicado/dispensado
   (`markReviewReminderSeen`); em lição (`lesson-focus`) nem aparece nem gasta o dia; reavalia ao voltar para a aba e ao sair da lição. Guarda: `tests/lembrete-revisao/`.
+- **Teclado na Revisão da aluna** (decisão da autora, 2026-11-05; `wireReviewKeyboard`, `shared/core/revisao-cartoes.js`; CSS `shared/revisao-teclado.css`): Espaço/Enter mostram a resposta do cartão Normal;
+  1 a 4 pela POSIÇÃO do botão (4 notas: Errei, Difícil, Bom, Fácil; digitar com acerto em cheio: 1 Bom, 2 Fácil; múltipla escolha: opções); Enter aciona o "Continuar"; Espaço/Enter nunca avaliam; só números (sem setas nem `h`);
+  tecla segurada e os 300 ms de cada cartão novo são ignorados; Preview e tela escondida nunca respondem. Cartão de Revisão novo chama `wireReviewKeyboard` no fim do renderer. Guarda: `tests/teclado-revisao/`.
 - Enter dentro de campo de resposta pertence ao campo (não aciona o atalho global de "Continuar").
 - Ícones: emoji escrito no texto vira desenho do Fluent por `shared/emoji-icons.js`. Emoji novo precisa entrar no MAP de lá
   e ter o SVG em `shared/icons/fluent/` (senão aparece o emoji do aparelho). Ícone de menu = `<img class="tab-icon" ...>`.

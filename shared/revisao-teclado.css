@@ -1,0 +1,23 @@
+/* Teclado na Revisão (shared/core/revisao-cartoes.js, wireReviewKeyboard): comum aos sites.
+   Os números 1-4 nos botões de nota e nas opções (.kbd-hint, escondido em tela de toque pelo index.html de cada site),
+   a dica "Espaço mostra a resposta" e a etiqueta "Enter" do Continuar só aparecem com mouse e teclado de verdade. */
+.grade-btn .kbd-hint{
+  position:static; width:auto; height:auto; min-width:16px; padding:1px 5px; margin-bottom:2px;
+  background:transparent; color:inherit; border:1px solid currentColor; opacity:.9; line-height:1.2;
+}
+.mc-option{ position:relative; }
+.mc-option .kbd-hint{ top:50%; transform:translateY(-50%); }
+.mc-option:has(.kbd-hint){ padding-left:40px; }
+.flashcard-hint .hint-kbd{ display:none; }
+.key-enter-hint{ display:none; }
+@media (hover:hover) and (pointer:fine){
+  .flashcard-hint .hint-touch{ display:none; }
+  .flashcard-hint .hint-kbd{ display:inline; }
+  .key-enter-hint{
+    display:inline-block; margin-left:8px; padding:0 6px; font-size:11px; font-weight:800;
+    border:1px solid currentColor; border-radius:4px; opacity:.9; line-height:1.4;
+  }
+}
+@media not all and (hover:hover) and (pointer:fine){
+  .mc-option:has(.kbd-hint){ padding-left:16px; }
+}

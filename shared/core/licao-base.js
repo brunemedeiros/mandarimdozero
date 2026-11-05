@@ -146,6 +146,8 @@ function renderReviewViewInner(){
   stopExerciseAudio();
   const el = document.getElementById('review-content');
   syncReviewPrevRow(false);
+  // Telas sem cartão (vazia, fim da sessão, "ver cartão anterior") não têm atalhos; cada renderer de cartão religa os seus.
+  REVIEW_KEYS.reveal = null; REVIEW_KEYS.mountEl = null; clearKeyboardOptions();
 
   if (STATE.reviewPeek != null && STATE.reviewSessionClassReview && STATE.reviewHistory && STATE.reviewHistory[STATE.reviewPeek]){
     renderReviewPeek(el);
@@ -565,6 +567,11 @@ function findEnterAdvanceTarget(){
   if (challengeCompleteBtn) return challengeCompleteBtn;
   const stepNextBtn = document.getElementById('step-next-btn');
   if (stepNextBtn && stepNextBtn.offsetParent !== null) return stepNextBtn;
+  // Revisão: "Continuar" depois de múltipla escolha, ou de digitar com erro/quase (a nota é automática).
+  for (const id of ['mc-continue-btn', 'cloze-continue-btn']){
+    const b = document.getElementById(id);
+    if (b && b.getClientRects().length && reviewKeysReady()) return b;
+  }
   return null;
 }
 

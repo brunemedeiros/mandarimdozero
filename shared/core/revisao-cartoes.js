@@ -111,6 +111,46 @@ function renderClozeCard(mountEl, card, localState, callbacks){
     // Errei (e o Difícil do "quase", no fr) são automáticos; acerto em cheio escolhe Bom ou Fácil (typedResultActionsHTML).
     wireTypedResultActions(mountEl, callbacks, localState, LANG_HOOKS.reviewTyped.wrongGrade(localState));
   }
+  wireReviewKeyboard(mountEl, card, { options: answered ? mountEl.querySelectorAll('.typed-grade .grade-btn') : null });
+}
+
+// ---------- Teclado da Revisão ----------
+// Números pela POSIÇÃO do botão na tela (1 = primeiro): 4 botões de nota = 1 Errei, 2 Difícil, 3 Bom, 4 Fácil; digitar com acerto
+// em cheio (só Bom e Fácil) = 1 Bom, 2 Fácil; múltipla escolha = 1 a 4 nas opções. Espaço/Enter mostram a resposta do cartão Normal;
+// Enter aciona o "Continuar" (shared/core/licao-base.js, findEnterAdvanceTarget). Espaço e Enter NÃO avaliam. Um só listener, em
+// wireLessonKeyboardShortcuts (app-comum.js). Tecla segurada e as teclas nos primeiros REVIEW_KEYS_DELAY_MS de cada cartão são ignoradas.
+const REVIEW_KEYS_DELAY_MS = 300;
+function reviewKeysReady(){
+  if (REVIEW_KEYS.repeating) return false;
+  if (Date.now() < REVIEW_KEYS.notBefore) return false;
+  const m = REVIEW_KEYS.mountEl;
+  return !!(m && m.isConnected && m.getClientRects().length);
+}
+// Espaço/Enter no cartão ainda não revelado. Devolve true se a tecla é da Revisão (mesmo ignorada), para o listener não seguir.
+function reviewKeyReveal(){
+  if (!REVIEW_KEYS.reveal) return false;
+  const m = REVIEW_KEYS.mountEl;
+  if (!(m && m.isConnected && m.getClientRects().length)) return false;
+  if (!reviewKeysReady()) return true;
+  const ae = document.activeElement;
+  if (ae && ae !== document.body && m.contains(ae) && typeof ae.blur === 'function') ae.blur(); // Espaço não "clica" no botão focado (ex.: áudio)
+  REVIEW_KEYS.reveal();
+  return true;
+}
+// Chamado no fim de cada renderer de cartão. reveal: função que mostra a resposta; options: botões numerados (até 4).
+// O Preview do editor (card.__isPreviewCard) nunca ganha atalhos.
+function wireReviewKeyboard(mountEl, card, { reveal = null, options = null } = {}){
+  REVIEW_KEYS.reveal = null;
+  REVIEW_KEYS.mountEl = null;
+  clearKeyboardOptions();
+  if (card.__isPreviewCard) return;
+  REVIEW_KEYS.mountEl = mountEl;
+  REVIEW_KEYS.notBefore = Date.now() + REVIEW_KEYS_DELAY_MS;
+  REVIEW_KEYS.reveal = reveal;
+  if (options && options.length){
+    wireKeyboardOptions(options);
+    if (KEYBOARD_OPTION_MAP) KEYBOARD_OPTION_MAP.review = true;
+  }
 }
 
 // Fase 6C.2 (ver CLAUDE.md) -- renderer de "Digite a resposta", extraído
@@ -192,6 +232,7 @@ function renderTypeAnswerCard(mountEl, card, localState, callbacks){
     // Errei (e o Difícil do "quase", no fr) são automáticos; acerto em cheio escolhe Bom ou Fácil (typedResultActionsHTML).
     wireTypedResultActions(mountEl, callbacks, localState, LANG_HOOKS.reviewTyped.wrongGrade(localState));
   }
+  wireReviewKeyboard(mountEl, card, { options: answered ? mountEl.querySelectorAll('.typed-grade .grade-btn') : null });
 }
 
 // Fase 6C.1 (ver CLAUDE.md) -- renderer de "Normal", extraído do bloco
@@ -305,7 +346,7 @@ function renderNormalCard(mountEl, card, localState, callbacks){
         <div class="divider-line"></div>
         ${flashcardImageHTML(resolvedBackImageUrl)}
         ${backHTML}
-      ` : `<div class="flashcard-hint">${t('review.tapToReveal')}</div>`}
+      ` : `<div class="flashcard-hint"><span class="hint-touch">${t('review.tapToReveal')}</span><span class="hint-kbd">${t('review.pressToReveal')}</span></div>`}
     </div>
     ${localState.revealed ? `
       ${reviewObservationHTML(card)}
@@ -349,6 +390,9 @@ function renderNormalCard(mountEl, card, localState, callbacks){
       });
     });
   }
+  wireReviewKeyboard(mountEl, card, localState.revealed
+    ? { options: mountEl.querySelectorAll('.grade-btn') }
+    : { reveal: () => mountEl.querySelector('#flashcard').click() });
 }
 
 // Título (tag) do cartão na Revisão: cartão de professora/aluna traz `unitTitleKey` (catálogo, shared/flashcard-model.js);

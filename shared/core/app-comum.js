@@ -287,6 +287,10 @@ const CONSOLIDATION_CAP = 10;
 // de chamar (digitação, ordenar frase) -- o mapa fica null nesses casos e o
 // listener não faz nada.
 let KEYBOARD_OPTION_MAP = null;
+// Teclado da Revisão (wireReviewKeyboard, shared/core/revisao-cartoes.js): reveal = função que mostra a resposta do cartão
+// Normal (Espaço/Enter); notBefore = instante a partir do qual as teclas valem (evita nota por reflexo ao trocar de cartão);
+// repeating = a tecla está sendo segurada (ignorada).
+let REVIEW_KEYS = { reveal: null, mountEl: null, notBefore: 0, repeating: false };
 // Estimativa de minutos estudados: cada exercício respondido (certo ou errado)
 // conta como ESTIMATED_SECONDS_PER_EXERCISE segundos, acumulado por dia — usado
 // pelo anel de meta diária. Não é cronômetro real (a pessoa pode demorar mais
@@ -490,6 +494,7 @@ function wireLessonKeyboardShortcuts(){
   // Registrado uma única vez, no carregamento do script -- nunca por render.
   document.addEventListener('keydown', (e) => {
     if (anyAppModalOpen()) return;
+    REVIEW_KEYS.repeating = !!e.repeat;
 
     if (e.key === 'Enter' && !e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey){
       // Enter digitado DENTRO de um campo de resposta é do próprio campo (ele
@@ -498,6 +503,7 @@ function wireLessonKeyboardShortcuts(){
       // resultado (relato de 2026-10-07: "haizi" no ditado de pinyin).
       const tgt = e.target;
       if (tgt && (tgt.tagName === 'INPUT' || tgt.tagName === 'TEXTAREA' || tgt.isContentEditable)) return;
+      if (reviewKeyReveal(true)){ e.preventDefault(); return; }
       const target = findEnterAdvanceTarget();
       if (target){
         e.preventDefault();
@@ -508,6 +514,12 @@ function wireLessonKeyboardShortcuts(){
 
     const tag = document.activeElement?.tagName;
     if (tag === 'INPUT' || tag === 'TEXTAREA' || document.activeElement?.isContentEditable) return;
+
+    // Espaço mostra a resposta do cartão Normal na Revisão (depois de revelar, não faz nada).
+    if (e.key === ' ' && !e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey){
+      if (reviewKeyReveal(false)) e.preventDefault();
+      return;
+    }
 
     // "r" repete o último áudio que de fato tocou (clique manual ou autoplay)
     // -- reaproveita o mesmo botão/clique de sempre, não uma lógica própria.
@@ -524,6 +536,8 @@ function wireLessonKeyboardShortcuts(){
     const entry = KEYBOARD_OPTION_MAP.find(x => x.key === e.key);
     if (!entry) return;
     if (!entry.el.isConnected || entry.el.disabled || entry.el.classList.contains('disabled')) return;
+    if (!entry.el.getClientRects().length) return; // tela escondida (ex.: saiu da Revisão): nunca clica no que não se vê
+    if (KEYBOARD_OPTION_MAP.review && !reviewKeysReady()) return;
     e.preventDefault();
     entry.el.click();
   });
