@@ -504,7 +504,7 @@ function wireLessonKeyboardShortcuts(){
       const tgt = e.target;
       if (tgt && (tgt.tagName === 'INPUT' || tgt.tagName === 'TEXTAREA' || tgt.isContentEditable)) return;
       if (reviewKeyReveal(true)){ e.preventDefault(); return; }
-      const target = findEnterAdvanceTarget();
+      const target = findEnterAdvanceTarget() || findReviewContinueTarget();
       if (target){
         e.preventDefault();
         target.click();

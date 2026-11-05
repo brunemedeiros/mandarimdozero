@@ -35,7 +35,16 @@ const ETAPA6 = (v) => etapa7(PROGRESSO_ORDEM(v)).split('Ver o que você aprendeu
   // Botão "‹ Voltar" dos cartões da professora (2026-11-04, PRs #436/#438; docs/historico/15-auditoria-banco-revisao.md):
   // syncReviewPrevRow cria a linha logo depois de #review-content em toda sessão da Revisão, VAZIA e escondida fora da sessão
   // da professora. Só a linha vazia e hidden sai; com o botão dentro a cena continua diferente.
-  .replace(/<div id=\\?"review-prev-row\\?" class=\\?"review-prev-row\\?" hidden=\\?"\\?"><\/div>/g, '');
+  .replace(/<div id=\\?"review-prev-row\\?" class=\\?"review-prev-row\\?" hidden=\\?"\\?"><\/div>/g, '')
+  // Teclado na Revisão (2026-11-05, decisão da autora; docs/historico/33-teclado-na-revisao.md): número (.kbd-hint) nos botões de nota e nas
+  // opções da múltipla escolha, dica "Espaço mostra a resposta" ao lado do "toque para ver a resposta" e etiqueta "Enter" no Continuar.
+  // Só esses acréscimos saem; o resto da cena continua igual. O nome da cena traz o texto do botão (com o número no fim).
+  .replace(/(<button class=\\?"grade-btn [^>]*>(?:(?!<\/button>).)*?)<span class=\\?"kbd-hint\\?">[1-4]<\/span>/g, '$1')
+  .replace(/(<button class=\\?"mc-option[^>]*>(?:(?!<\/button>).)*?)<span class=\\?"kbd-hint\\?">[1-4]<\/span>/g, '$1')
+  .replace(/<span class=\\?"hint-touch\\?">([^<]*)<\/span><span class=\\?"hint-kbd\\?">[^<]*<\/span>/g, '$1')
+  .replace(/<span class=\\?"key-enter-hint\\?" aria-hidden=\\?"true\\?">Enter<\/span>/g, '')
+  .replace(/(\.(?:grade-btn\.grade-\w+|mc-option)\[[^\]]*?)[1-4]\]/g, '$1]')
+  .replace(/(\.btn-primary\[Continu(?:ar|e))Enter\]/g, '$1]');
 // Perfil > Progresso (decisão da dona, 2026-10-31): Conquistas saíram de cima dos números e foram para o fim da tela.
 // Na árvore antiga, o bloco (título + grade) é movido para o fim; na nova, sai o comentário que explica a ordem.
 // Assim a comparação continua provando que números, gráficos e conquistas têm o mesmo conteúdo.

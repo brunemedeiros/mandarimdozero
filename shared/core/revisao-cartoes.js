@@ -126,6 +126,16 @@ function reviewKeysReady(){
   const m = REVIEW_KEYS.mountEl;
   return !!(m && m.isConnected && m.getClientRects().length);
 }
+// "Continuar" da Revisão (múltipla escolha respondida; digitar com erro ou quase, onde a nota é automática), acionado só pelo Enter.
+// Fica fora de findEnterAdvanceTarget (licao-base.js), que é a busca das lições e dos testes de paridade.
+function findReviewContinueTarget(){
+  if (!reviewKeysReady()) return null;
+  for (const id of ['mc-continue-btn', 'cloze-continue-btn']){
+    const b = document.getElementById(id);
+    if (b && b.getClientRects().length) return b;
+  }
+  return null;
+}
 // Espaço/Enter no cartão ainda não revelado. Devolve true se a tecla é da Revisão (mesmo ignorada), para o listener não seguir.
 function reviewKeyReveal(){
   if (!REVIEW_KEYS.reveal) return false;

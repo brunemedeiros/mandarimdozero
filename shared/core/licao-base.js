@@ -567,11 +567,6 @@ function findEnterAdvanceTarget(){
   if (challengeCompleteBtn) return challengeCompleteBtn;
   const stepNextBtn = document.getElementById('step-next-btn');
   if (stepNextBtn && stepNextBtn.offsetParent !== null) return stepNextBtn;
-  // Revisão: "Continuar" depois de múltipla escolha, ou de digitar com erro/quase (a nota é automática).
-  for (const id of ['mc-continue-btn', 'cloze-continue-btn']){
-    const b = document.getElementById(id);
-    if (b && b.getClientRects().length && reviewKeysReady()) return b;
-  }
   return null;
 }
 
