@@ -674,6 +674,7 @@ async function renderAdminClassLogsView(){
       : '';
 
   wrap.innerHTML = `
+    ${typeof notionBoxShellHTML === 'function' ? notionBoxShellHTML() : ''}
     <div class="deck-topbar panel-nav class-log-views" role="tablist" aria-label="${t('panel.classLog.views')}">
       <button type="button" class="deck-topbar-btn" role="tab" data-classlog-view="register">${t('panel.classLog.view.register')}</button>
       <button type="button" class="deck-topbar-btn" role="tab" data-classlog-view="calendar">${t('panel.classLog.view.calendar')}</button>
@@ -741,6 +742,7 @@ async function renderAdminClassLogsView(){
   wrap.querySelectorAll('[data-classlog-view]').forEach(b => b.addEventListener('click', () => switchClassLogsView(b.dataset.classlogView)));
   wireCalendarFeedBox(wrap);
   if (typeof wireGoogleCalendarBox === 'function'){ wireGoogleCalendarBox(wrap); renderGoogleCalendarBox(); }
+  if (typeof wireNotionBox === 'function'){ wireNotionBox(wrap); renderNotionBox(); }
   const repeatCb = document.getElementById('admin-class-log-repeat');
   repeatCb?.addEventListener('change', () => { document.getElementById('admin-class-log-repeat-box').hidden = !repeatCb.checked; });
   switchClassLogsView(ADMIN_CLASS_LOGS_STATE.view);

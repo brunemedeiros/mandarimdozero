@@ -3552,6 +3552,78 @@ window.I18N_CATALOG['en'] = {
   'panel.classLog.cal.empty': 'No lessons on this day.', // ALTA
   'panel.classLog.cal.schedule': 'Schedule a lesson on this day', // ALTA
   'myClassLogs.upcoming': 'Upcoming lessons', // ALTA
+  'panel.notion.title': 'Notion', // ALTA
+  'panel.notion.oneWay': 'One-way sync: Notion → site. The site only reads your Notion; nothing is written there.', // ALTA
+  'panel.notion.howItWorks': 'Connect your Notion lesson database: every hour the site reads new or edited rows and fills in the lesson for the same student and day (or creates it). That way the board notice, the bell and the Review Bank cards go out on their own.', // ALTA
+  'panel.notion.connect': 'Connect Notion', // ALTA
+  'panel.notion.reconnect': 'Connect again', // ALTA
+  'panel.notion.loadError': 'Couldn\'t load Notion right now.', // ALTA
+  'panel.notion.connectedTo': 'Connected to {name}.', // ALTA
+  'panel.notion.nextPick': 'Now choose your lesson database and tell the site which column is which.', // ALTA
+  'panel.notion.pickDatabaseBtn': 'Choose the lesson database', // ALTA
+  'panel.notion.disconnect': 'Disconnect', // ALTA
+  'panel.notion.disconnectConfirm': 'Disconnect Notion? Lessons already on the site stay as they are.', // ALTA
+  'panel.notion.disconnected': 'Notion disconnected.', // ALTA
+  'panel.notion.sourceLine': 'Reading "{title}" ({name})', // ALTA
+  'panel.notion.errReconnect': 'Notion asked you to sign in again. Click "Connect again".', // ALTA
+  'panel.notion.errGeneric': 'Something went wrong with Notion. Try again in a moment.', // ALTA
+  'panel.notion.recent': { one: '{n} lesson updated from Notion in the last 7 days', other: '{n} lessons updated from Notion in the last 7 days' }, // ALTA
+  'panel.notion.counts': '{linked} linked lessons · {approval} to approve · {review} to review · {waiting} waiting for an account', // ALTA
+  'panel.notion.syncNow': 'Read now', // ALTA
+  'panel.notion.reading': 'Reading Notion…', // ALTA
+  'panel.notion.synced': 'Notion read.', // ALTA
+  'panel.notion.editColumns': 'Columns', // ALTA
+  'panel.notion.otherDatabase': 'Change database', // ALTA
+  'panel.notion.pickDatabase': 'Which one is your lesson database?', // ALTA
+  'panel.notion.useThis': 'Use this one', // ALTA
+  'panel.notion.noDatabases': 'No Notion database was shared with the site.', // ALTA
+  'panel.notion.noDatabasesHint': 'Can\'t find yours? Click "Connect again" and, in Notion, tick your lesson database in the list of pages the site can read.', // ALTA
+  'panel.notion.cancel': 'Cancel', // ALTA
+  'panel.notion.columnsTitle': 'Columns of "{title}"', // ALTA
+  'panel.notion.columnsHint': 'Tell the site which Notion column holds each piece of information. Only Date and Student are required; anything left blank isn\'t read.', // ALTA
+  'panel.notion.f.date': 'Date', // ALTA
+  'panel.notion.f.student': 'Student or class', // ALTA
+  'panel.notion.f.topic': 'Lesson topic', // ALTA
+  'panel.notion.f.homework': 'For next lesson', // ALTA
+  'panel.notion.f.attendance': 'Attendance', // ALTA
+  'panel.notion.f.skills': 'Skills', // ALTA
+  'panel.notion.f.language': 'Language', // ALTA
+  'panel.notion.pickColumn': 'Choose the column', // ALTA
+  'panel.notion.noColumn': 'Don\'t read', // ALTA
+  'panel.notion.importFrom': 'Bring lessons from', // ALTA
+  'panel.notion.importFromHint': 'Lessons from before today go to "To approve": students only see them after you approve, and there\'s no board notice.', // ALTA
+  'panel.notion.saveSource': 'Save and read', // ALTA
+  'panel.notion.needDateStudent': 'Choose at least the Date and Student columns.', // ALTA
+  'panel.notion.errSave': 'Couldn\'t save. Check the columns and the date.', // ALTA
+  'panel.notion.reviewTitle': 'From Notion to check', // ALTA
+  'panel.notion.tabApproval': 'To approve ({n})', // ALTA
+  'panel.notion.tabReview': 'To review ({n})', // ALTA
+  'panel.notion.tabWaiting': 'Waiting for an account ({n})', // ALTA
+  'panel.notion.approvalHint': 'Lessons from before you connected Notion. Approving saves them to the lesson with no board notice or bell.', // ALTA
+  'panel.notion.reviewHint': 'The site couldn\'t tell whose lesson this is. Link the name once and the next rows with that name come in on their own.', // ALTA
+  'panel.notion.waitingTabHint': 'Students who don\'t have an account on the site yet (or aren\'t linked to you). Their lessons come in once the account is linked.', // ALTA
+  'panel.notion.approveAll': 'Approve all ({n})', // ALTA
+  'panel.notion.approve': 'Approve', // ALTA
+  'panel.notion.discard': 'Discard', // ALTA
+  'panel.notion.approved': 'Lesson approved.', // ALTA
+  'panel.notion.approvedAll': 'Lessons approved.', // ALTA
+  'panel.notion.discarded': 'Row discarded. The lesson on the site didn\'t change.', // ALTA
+  'panel.notion.pick': 'Whose lesson is this?', // ALTA
+  'panel.notion.pickFirst': 'Choose the student or class.', // ALTA
+  'panel.notion.link': 'Link', // ALTA
+  'panel.notion.ignoreName': 'Ignore this name', // ALTA
+  'panel.notion.linkHint': 'Applies to every row with "{name}".', // ALTA
+  'panel.notion.linked': 'Done.', // ALTA
+  'panel.notion.waitingHint': 'Waiting for the student\'s account on the site.', // ALTA
+  'panel.notion.noName': 'No name', // ALTA
+  'panel.notion.inNotion': 'in Notion: {name}', // ALTA
+  'panel.notion.r.unknown': 'A name the site didn\'t recognize.', // ALTA
+  'panel.notion.r.many': 'More than one student with this name.', // ALTA
+  'panel.notion.r.lang': 'This student studies more than one language with you: pick which.', // ALTA
+  'panel.notion.r.noDate': 'Row without a date.', // ALTA
+  'panel.notion.r.noName': 'Row without a student.', // ALTA
+  'panel.notion.connectedToast': 'Notion connected.', // ALTA
+  'panel.notion.cancelledToast': 'Notion connection cancelled.', // ALTA
   'panel.gcal.title': 'Google Calendar', // ALTA
   'panel.gcal.oneWay': 'One-way sync: Google Calendar → site. The site only reads your calendar; nothing is written to your Google account.', // ALTA
   'panel.gcal.howItWorks': 'Connect your Google account and choose the calendars with your lessons. Every 15 minutes the site reads the events and creates or updates each lesson on the right day and time, recognizing the student by the name in the title or the guest\'s email. If you move a lesson in Google, the site follows.', // ALTA

@@ -1,0 +1,11 @@
+/* Conectar Notion (128, shared/notion-sync.js). A caixa usa as classes da caixa do Google Agenda (gcal-*, nos index.html). */
+.notion-box { margin-bottom: 12px; }
+.notion-map { display: flex; flex-direction: column; gap: 8px; }
+.notion-map-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; }
+.notion-map-row > span { font-weight: 700; }
+.notion-map-row select, .notion-map-row input { flex: 1 1 220px; max-width: 320px; }
+.notion-item-lines { display: flex; flex-direction: column; gap: 2px; font-size: 0.92rem; }
+.notion-recent { margin: 0; font-weight: 700; }
+@media (max-width: 600px) {
+  .notion-map-row select, .notion-map-row input { max-width: none; min-height: 44px; }
+}
