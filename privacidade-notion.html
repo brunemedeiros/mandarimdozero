@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacidade: Notion · Idiomas com Prof. Brune</title>
+<meta name="description" content="Como o site Idiomas com Prof. Brune usa os dados do Notion das professoras que conectam o banco de aulas.">
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32">
+<link rel="stylesheet" href="shared/fonts/nunito.css">
+<!-- Página da integração "Conectar Notion" (migration 128, Edge Function notion-sync), exigida pelo Notion para a
+     integração pública. Texto factual sobre a integração; a política completa do site é outra. Rascunho de 2026-11-05. -->
+<style>
+:root {
+  --ink: #201A2C; --ink-soft: #6B6478; --paper: #FAF7F2; --paper-warm: #F1ECE2; --paper-line: #E3DCCE;
+  --link: #2678AC;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --ink: #EEE9F5; --ink-soft: #ADA5BE; --paper: #17141F; --paper-warm: #201C2B; --paper-line: #362F44; --link: #6CB8E6; }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--paper); color: var(--ink); font-family: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
+  line-height: 1.6; font-size: 17px; }
+main { max-width: 760px; margin: 0 auto; padding: 32px 16px 64px; }
+header { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; }
+.brand { font-weight: 800; color: var(--ink); text-decoration: none; }
+.langs a { color: var(--link); font-weight: 700; margin-left: 12px; }
+h1 { font-size: clamp(26px, 5vw, 34px); line-height: 1.2; margin: 24px 0 4px; }
+h2 { font-size: 20px; margin: 28px 0 6px; }
+.updated { color: var(--ink-soft); margin: 0 0 20px; }
+.box { background: var(--paper-warm); border: 1px solid var(--paper-line); border-radius: 14px; padding: 14px 16px; }
+a { color: var(--link); }
+ul { padding-left: 22px; }
+li { margin: 4px 0; }
+hr { border: none; border-top: 1px solid var(--paper-line); margin: 48px 0; }
+</style>
+</head>
+<body>
+<main>
+<header>
+  <a class="brand" href="https://app.profbrune.com.br/">Idiomas com Prof. Brune</a>
+  <nav class="langs"><a href="sobre.html">Sobre / About</a><a href="#pt">Português</a><a href="#en">English</a></nav>
+</header>
+<section id="pt" lang="pt-BR">
+<h1>Privacidade: conexão com o Notion</h1>
+<p class="updated">Última atualização: 5 de novembro de 2026</p>
+<p class="box">Resumo: o site só <b>lê</b> o banco de aulas que a professora escolher no Notion, para registrar as aulas com o
+tópico, a tarefa e a presença. Ele nunca cria, muda nem apaga nada no Notion, não vende nem repassa os dados e não usa esses
+dados para anúncios.</p>
+<h2>Quem usa e para quê</h2>
+<p>A conexão com o Notion é opcional e serve só para professoras do site <b>Idiomas com Prof. Brune</b> (app.profbrune.com.br).
+Quando uma professora conecta o Notion, ela escolhe quais páginas o site pode ler e, entre elas, o banco de aulas. A cada hora,
+o site lê as linhas novas ou editadas e completa (ou cria) a aula do aluno no mesmo dia. Os alunos não conectam nada.</p>
+<h2>O que o site lê</h2>
+<ul>
+  <li>Só as páginas e bancos que a professora liberar na tela do Notion. O site não vê o resto do Notion dela.</li>
+  <li>Do banco de aulas escolhido, só as colunas que a professora ligar: data, aluno ou turma, tópico, "para a próxima aula",
+      presença, competências e idioma. O texto de dentro de cada página do Notion <b>não</b> é lido.</li>
+  <li>O nome do espaço de trabalho do Notion, para mostrar qual conta está conectada.</li>
+</ul>
+<h2>O que fica guardado</h2>
+<ul>
+  <li>Uma chave de acesso (fornecida pelo Notion) que permite ao site ler o banco de tempos em tempos. Ela fica só no servidor;
+      nem o navegador nem outras pessoas têm acesso a ela.</li>
+  <li>Qual banco foi escolhido e qual coluna é cada informação.</li>
+  <li>Uma cópia das colunas ligadas de cada linha lida, para o site saber o que mudou e para a professora aprovar ou conferir.</li>
+  <li>As escolhas que a professora ensina ao site (por exemplo, "o nome X no Notion é o aluno Y").</li>
+</ul>
+<h2>Quem vê esses dados</h2>
+<ul>
+  <li>A professora vê as próprias aulas e as linhas que o site não reconheceu ou que esperam aprovação.</li>
+  <li>Cada aluno vê só as próprias aulas (data, horário, tema, tarefa e presença), como já acontece no site.</li>
+  <li>Os dados ficam no banco de dados do site (Supabase), protegidos por regras de acesso e transmitidos com criptografia (HTTPS).
+      Não são vendidos, não são repassados a terceiros e não são usados para publicidade nem para treinar inteligência artificial.</li>
+</ul>
+<h2>Como desconectar e apagar</h2>
+<ul>
+  <li>No site: Professora &gt; Mural &gt; Aulas e materiais &gt; Notion &gt; <b>Desconectar</b>. Isso apaga a chave de acesso e
+      esvazia as cópias das linhas. As aulas já registradas continuam no site, porque fazem parte do histórico das aulas.</li>
+  <li>No Notion: em Configurações &gt; Conexões, remova "Idiomas com Prof. Brune". A partir daí o site não consegue mais ler nada.</li>
+  <li>Para qualquer dúvida, escreva para <a href="mailto:contato@profbrune.com.br">contato@profbrune.com.br</a>.</li>
+</ul>
+<h2>Mudanças</h2>
+<p>Se esta página mudar, a data no topo é atualizada. Mudanças no que é lido ou guardado são avisadas no site antes de valer.</p>
+</section>
+<hr>
+<section id="en" lang="en">
+<h1>Privacy: Notion connection</h1>
+<p class="updated">Last updated: November 5, 2026</p>
+<p class="box">In short: the site only <b>reads</b> the lesson database a teacher chooses in Notion, to record lessons with their
+topic, homework and attendance. It never creates, changes or deletes anything in Notion, never sells or shares the data, and
+never uses it for ads.</p>
+<h2>Who uses it and why</h2>
+<p>The Notion connection is optional and is only for teachers on <b>Idiomas com Prof. Brune</b> (app.profbrune.com.br). When a
+teacher connects Notion, she chooses which pages the site may read and, among them, her lesson database. Every hour the site
+reads new or edited rows and fills in (or creates) the student's lesson on the same day. Students don't connect anything.</p>
+<h2>What the site reads</h2>
+<ul>
+  <li>Only the pages and databases the teacher shares on Notion's screen. The site doesn't see the rest of her Notion.</li>
+  <li>From the chosen lesson database, only the columns the teacher links: date, student or class, topic, "for next lesson",
+      attendance, skills and language. The text inside each Notion page is <b>not</b> read.</li>
+  <li>The name of the Notion workspace, to show which account is connected.</li>
+</ul>
+<h2>What is stored</h2>
+<ul>
+  <li>An access key (issued by Notion) that lets the site read the database from time to time. It stays on the server only;
+      neither the browser nor other people can access it.</li>
+  <li>Which database was chosen and which column holds each piece of information.</li>
+  <li>A copy of the linked columns of each row read, so the site knows what changed and the teacher can approve or check it.</li>
+  <li>The choices the teacher teaches the site (for example, "the name X in Notion is student Y").</li>
+</ul>
+<h2>Who sees this data</h2>
+<ul>
+  <li>The teacher sees her own lessons and the rows the site didn't recognize or that are waiting for approval.</li>
+  <li>Each student sees only their own lessons (date, time, topic, homework and attendance), as already happens on the site.</li>
+  <li>The data is stored in the site's database (Supabase), protected by access rules and sent encrypted (HTTPS).
+      It isn't sold, shared with third parties, or used for advertising or to train artificial intelligence.</li>
+</ul>
+<h2>How to disconnect and delete</h2>
+<ul>
+  <li>On the site: Teacher &gt; Board &gt; Lessons and materials &gt; Notion &gt; <b>Disconnect</b>. This deletes the access key and
+      empties the copies of the rows. Lessons already on the site stay, because they are part of the lesson history.</li>
+  <li>In Notion: under Settings &gt; Connections, remove "Idiomas com Prof. Brune". From then on the site can't read anything.</li>
+  <li>For any question, write to <a href="mailto:contato@profbrune.com.br">contato@profbrune.com.br</a>.</li>
+</ul>
+<h2>Changes</h2>
+<p>If this page changes, the date at the top is updated. Changes to what is read or stored are announced on the site before they apply.</p>
+</section>
+</main>
+</body>
+</html>

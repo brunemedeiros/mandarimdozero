@@ -545,7 +545,7 @@ begin
   return jsonb_build_object('ok', true, 'n', v_n);
 end $$;
 
--- Desconectar: apaga o token (fica vazio) e desliga a leitura; as aulas e o que já foi gravado nelas ficam.
+-- Desconectar: apaga o token (fica vazio), desliga a leitura e esvazia as cópias das linhas; as aulas e o que já foi gravado nelas ficam.
 create or replace function public.notion_disconnect()
 returns jsonb language plpgsql security definer set search_path = public as $$
 declare v_me uuid := auth.uid();
@@ -553,6 +553,9 @@ begin
   if v_me is null or not public.is_teacher() then return jsonb_build_object('error', 'not_authorized'); end if;
   update public.notion_sources set enabled = false, cursor = null where user_id = v_me;
   update public.notion_connections set access_token = '', last_error = null where user_id = v_me;
+  -- o que foi copiado do Notion e ainda está só aqui (não nas aulas) é esvaziado
+  update public.notion_pages set name = null, topic = null, homework = null, attendance = null, skills = '{}', language_hint = null
+   where user_id = v_me;
   return jsonb_build_object('ok', true);
 end $$;
 

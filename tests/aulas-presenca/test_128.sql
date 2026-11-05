@@ -117,7 +117,8 @@ insert into v select 'SX', notion_status()::text;
 reset role;
 insert into r select (pg_temp.g('ST')::jsonb ->> 'connected')::boolean and (pg_temp.g('ST')::jsonb -> 'counts' ->> 'linked')::int = 4
   and not (pg_temp.g('ST2')::jsonb ->> 'connected')::boolean and (select access_token from notion_connections where user_id = pg_temp.g('T')::uuid) = ''
-  and exists (select 1 from teacher_class_logs where id = pg_temp.g('L1')::bigint), 'status; desconectar apaga o token e as aulas ficam';
+  and exists (select 1 from teacher_class_logs where id = pg_temp.g('L1')::bigint)
+  and not exists (select 1 from notion_pages where user_id = pg_temp.g('T')::uuid and (topic is not null or name is not null)), 'status; desconectar apaga o token e as cópias das linhas, e as aulas ficam';
 insert into r select pg_temp.g('SX')::jsonb ->> 'error' = 'not_authorized', 'aluno não vê o status do Notion';
 insert into r select not has_function_privilege('authenticated', 'notion_ingest(uuid,jsonb,timestamptz)', 'execute')
   and not has_function_privilege('authenticated', 'notion_token(uuid)', 'execute')
