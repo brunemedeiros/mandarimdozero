@@ -572,3 +572,22 @@ Número 086 já usado por outras conversas (`086_friends_streak_milestones_and_c
 - `shared/supabase_migrations/126_etapa7_aviso_para_hoje.sql`: só UPDATE de `notification_templates.body` (ids 39 e 41 pt, 119 e 120
   en, `review_overdue`), condicionado ao texto antigo; desfazer no comentário. Detalhes: `docs/i18n/etapa7-vocabulario-auditoria.md` seção 11.
 - Staging: aplicada (2026-11-03; lá só existem 39 e 41). Produção: aplicada (2026-11-03, autorizada, versão `20261103224909`); conferido: as 4 linhas com o texto novo.
+
+## 128 -- Conectar Notion (2026-11-05, decisões da autora)
+
+- `shared/supabase_migrations/128_notion_sync.sql`: `notion_connections` (token só para o servidor), `notion_sources` (banco,
+  mapa de colunas, "importar desde", dia da ligação), `notion_pages` (cópia das colunas ligadas de cada linha), `notion_name_links`
+  (nome do Notion -> aluno/turma/aluno do Banco/ignorar), `teacher_class_logs.notion_page_ref`. `_notion_apply` reconhece o aluno
+  (nome ligado, Banco, turma, primeiro nome) e completa a aula do mesmo aluno/turma, dia e idioma (a do Google primeiro) ou cria a
+  aula; linha de antes do dia da ligação fica "para aprovar" e `notion_approve` grava sem aviso no Mural (`app.mural_skip`, troca de
+  `_mural_lesson_trigger` da 121). Regra de edição: o Notion só grava quando a linha muda lá; o site nunca escreve no Notion.
+  Desconectar esvazia o token e as cópias (UPDATE, sem DELETE). Cron `notion-sync` de hora em hora, com a senha do cron do Google.
+- Edge Function `notion-sync` (`supabase/functions/notion-sync/index.ts` + `map.mjs`): login OAuth do Notion, lista de bancos,
+  colunas com sugestão, leitura incremental. Tela: `shared/notion-sync.js` + `shared/notion-sync.css` (caixa no topo de
+  Aulas e materiais). Página `privacidade-notion.html`. Repasse `/notion/callback` no Netlify.
+- Staging: migration aplicada (2026-11-05, versão 20261105144747; 5 tabelas, cron criado, sem execute para anon/app nas funções
+  internas); função `notion-sync` v1 publicada (sem os secrets ainda: responde `not_configured`). Produção: PENDENTE.
+- Testes: SQL local 128 19/19; peças `tests/notion/test_map.mjs` 10/10; painel-professora 793/793 (com a caixa do Notion);
+  i18n 2336/2336, sem português no en 6/6, paridade CSS 5/5.
+- Falta: a autora criar a integração no Notion e os secrets (`docs/notion/passo-a-passo-integracao.md`), teste ponta a ponta no
+  Staging com o Notion dela, prévia, produção (migration + função + merge, que publica o Netlify e a página de privacidade).

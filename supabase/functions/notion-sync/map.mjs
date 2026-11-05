@@ -78,7 +78,7 @@ const OK_TYPES = {
   topic: ['title', 'rich_text'], homework: ['rich_text', 'title'], attendance: ['select', 'status'],
   skills: ['multi_select'], language: ['select', 'status', 'rich_text'],
 };
-const norm = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9/() ]/g, ' ').replace(/\s+/g, ' ').trim();
+const norm = s => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9/() ]/g, ' ').replace(/\s+/g, ' ').trim();
 
 export function suggestColumns(properties) {
   const props = Object.entries(properties || {}).map(([name, p]) => ({ name, id: p.id, type: p.type, key: norm(name) }));

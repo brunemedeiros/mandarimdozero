@@ -58,6 +58,8 @@ Histórico: `docs/historico/02-*`, `03-*`, `11-*`.
 - Google Agenda → site (117, `shared/google-calendar.js`, Edge Function `google-calendar`): só LÊ o Google, nunca escreve.
   Reconhece o aluno pelos "nomes na agenda" do Banco, e-mail do convidado ou regra aprendida; aula do Google tem horário travado
   no site (`google_event_ref`). Ida e volta é decisão futura da autora; não escrever no Google sem ela pedir.
+- Notion -> site (128, `shared/notion-sync.js`, Edge Function `notion-sync`): só LÊ o Notion. Linha casa com a aula do mesmo aluno/turma e
+  dia (ou cria); de antes da ligação fica "para aprovar" (aprovar não gera aviso: `app.mural_skip`). Plano: `docs/notion/plano-conectar-notion.md`.
 - Rotina automática do Banco (`supabase/functions/review-bank-agent`, migrations 089, 090 e 097 a 100): a tarefa da madrugada só INSERE itens/recaps de alunos
   com `agent_managed = true` e gera cartões pelo mesmo motor do site; `engine.generated.mjs` é GERADO (`node scripts/build-review-bank-agent.js`,
   nunca editar à mão). Mudou `shared/review-bank*.js` ou o motor de cartões: regerar, rodar `tests/banco-revisao/test_agent_core.js`, novo deploy.
