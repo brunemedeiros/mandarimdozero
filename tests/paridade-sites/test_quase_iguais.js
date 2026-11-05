@@ -58,15 +58,21 @@ function comparar(rotulo, antes, depois){
   check(`${rotulo}: mesmos erros de página antes e depois`, JSON.stringify(antes.errors) === JSON.stringify(depois.errors), { antes: antes.errors.slice(0, 3), depois: depois.errors.slice(0, 3) });
   check(`${rotulo}: mesmo número de cenas`, antes.cenas.length === depois.cenas.length, [antes.cenas.length, depois.cenas.length]);
   let iguais = 0, mostradas = 0;
+  const escondidas = [];
   const n = Math.min(antes.cenas.length, depois.cenas.length);
   for (let i = 0; i < n; i++){
     const a = antes.cenas[i], b = depois.cenas[i];
     if ((a.n === b.n || ETAPA6(a.n) === ETAPA6(b.n)) && (a.v === b.v || igualEtapa6(a.v, b.v))){ iguais++; continue; } // o nome da cena traz o texto do botão clicado
     if (mostradas++ < 3){
-      let j = 0; while (j < a.v.length && a.v[j] === b.v[j]) j++;
-      check(`${rotulo}: cena ${i} igual (${a.n})`, false, { depoisNome: b.n, antes: a.v.slice(Math.max(0, j - 150), j + 250), depois: b.v.slice(Math.max(0, j - 150), j + 250) });
-    } else failed++;
+      // O trecho mostrado é a diferença que SOBRA depois das neutralizações (ETAPA6 nas duas árvores). Mostrar a primeira
+      // diferença crua engana: ela costuma cair numa mudança já aprovada e neutralizada (caso de 2026-11-04: apontava para o
+      // nome "Speed Review", e a diferença real era outra, mais adiante).
+      const x = ETAPA6(a.v), y = ETAPA6(b.v);
+      let j = 0; while (j < x.length && x[j] === y[j]) j++;
+      check(`${rotulo}: cena ${i} igual (${a.n})`, false, { depoisNome: b.n, posicao: j, antesNeutro: x.slice(Math.max(0, j - 150), j + 250), depoisNeutro: y.slice(Math.max(0, j - 150), j + 250) });
+    } else { failed++; escondidas.push(`${i} (${a.n})`); }
   }
+  if (escondidas.length) console.log(`  ${rotulo}: mais ${escondidas.length} cena(s) diferente(s), sem trecho: ${escondidas.join(', ')}`);
   passed += iguais;
   console.log(`  ${rotulo}: ${iguais}/${antes.cenas.length} cenas iguais`);
   return iguais;
