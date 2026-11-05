@@ -553,6 +553,9 @@ textarea.challenges-admin-edit-input{ resize:vertical; }
 .expr-final-gain{ font-size:12px; font-weight:800; color:var(--ink-soft); }
 @keyframes expr-final-pop{ 0%{ transform:scale(.3) rotate(-12deg); opacity:0; } 100%{ transform:scale(1) rotate(0); opacity:1; } }
 @media (prefers-reduced-motion: reduce){ .expr-final.is-ok .expr-final-ico{ animation:none; } }
+.audio-btn-md{ width:32px; height:32px; font-size:15px; }
+.expr-order-line{ display:flex; align-items:center; justify-content:center; gap:10px; flex-wrap:wrap; }
+.expr-order-icons{ display:inline-flex; gap:6px; }
 .expr-order-full-tr, .expr-turn-tr{ margin-top:8px; font-size:14.5px; font-weight:600; color:var(--ink-soft); line-height:1.4; white-space:pre-line; }
 .expr-final-sum{ list-style:none; padding:0; margin:0 0 18px; text-align:left; background:var(--paper); border:1px solid var(--paper-line); border-radius:var(--radius); }
 .expr-final-sum li{ display:flex; justify-content:space-between; gap:12px; padding:12px 16px; font-size:14.5px; border-bottom:1px solid var(--paper-line); }

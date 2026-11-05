@@ -18,8 +18,12 @@ const SLOW_AUDIO_RATE = 0.65;
 function slowAudioBtnHTML(id){
   return `<button class="dictation-play-btn dictation-play-btn-slow" id="${id}" title="${t('fr.audio.listenSlower')}">🐢 ${chT('ch.slow')}</button>`;
 }
-function slowAudioIconBtnHTML(id){
-  return `<button class="audio-btn audio-btn-slow" id="${id}" aria-label="${t('fr.audio.listenSlowly')}" title="${t('fr.audio.listenSlowly')}">🐢</button>`;
+// Versão só com ícone do "▶ Ouvir" (mesmo ícone do botão com texto; decisão da autora, 2026-11-05): para áudio ao lado da frase.
+function listenIconBtnHTML(id){
+  return `<button class="audio-btn audio-btn-md" id="${id}" aria-label="${t('fr.audio.listen')}" title="${t('fr.audio.listen')}">▶</button>`;
+}
+function slowAudioIconBtnHTML(id, extraClass){
+  return `<button class="audio-btn audio-btn-slow ${extraClass || ''}" id="${id}" aria-label="${t('fr.audio.listenSlowly')}" title="${t('fr.audio.listenSlowly')}">🐢</button>`;
 }
 
 // ---------- Unidade opcional "Desafios do Módulo N" (Premium) ----------
@@ -966,9 +970,9 @@ function exprShowOrder(c){
     }
     blocksEl.style.display = 'none';
     const dk = document.getElementById('expr-order-dontknow-btn'); if (dk) dk.classList.add('disabled');
-    // Frase montada inteira, com a expressão em destaque e a tradução (sem botões de áudio: já estão no cartão de cima; decisão da autora, 2026-11-04).
+    // Frase montada inteira, com a expressão em destaque, ícones pequenos de áudio ao lado (▶ e 🐢, sem texto) e a tradução (decisão da autora, 2026-11-05).
     const ev = exprExampleView(c, 0);
-    const full = `<div class="feedback-inner-box expr-order-full" lang="${lang}">${exprHighlightHTML(c.example.text, ev.mark)}
+    const full = `<div class="feedback-inner-box expr-order-full" lang="${lang}"><div class="expr-order-line"><span>${exprHighlightHTML(c.example.text, ev.mark)}</span>${file ? `<span class="expr-order-icons">${listenIconBtnHTML('expr-order-done-play')}${slowAudioIconBtnHTML('expr-order-done-slow', 'audio-btn-md')}</span>` : ''}</div>
       ${ev.tr ? `<div class="expr-order-full-tr">${escapeHtmlChallenge(ev.tr)}</div>` : ''}</div>`;
     const panel = document.createElement('div');
     panel.className = (ok ? 'correct-feedback' : 'wrong-feedback') + ' expr-panel';
@@ -984,6 +988,8 @@ function exprShowOrder(c){
         <button class="btn btn-primary btn-block wrong-feedback-continue" id="expr-continue-btn">${t('common.continueArrow')}</button>
       </div>`;
     slotsEl.parentElement.appendChild(panel);
+    exprWireAudio('expr-order-done-play', file);
+    exprWireAudio('expr-order-done-slow', file, SLOW_AUDIO_RATE);
     panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     document.getElementById('expr-continue-btn').addEventListener('click', () => exprShowYourTurn(c));
   }
