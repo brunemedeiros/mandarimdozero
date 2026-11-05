@@ -562,3 +562,30 @@ revoke execute on function public.notion_status(), public.notion_save_source(tex
 grant execute on function public.notion_status(), public.notion_save_source(text, text, jsonb, date), public.notion_review_items(),
   public.notion_approve(bigint[], boolean), public.notion_link_name(text, text, uuid, bigint, uuid, text), public.notion_disconnect()
   to authenticated;
+
+-- ---------------- Leitura automática (a cada hora) ----------------
+-- Usa a mesma senha do cron do Google Agenda (Vault gcal_sync_token, conferida por gcal_check_sync_token) e o mesmo
+-- endereço base (gcal_sync_url com notion-sync no lugar de google-calendar): nenhum secret novo no Vault.
+create or replace function public._notion_cron_post()
+returns void language plpgsql security definer set search_path = public as $$
+declare
+  v_url text := replace(coalesce(public._rb_agent_secret('gcal_sync_url'), ''), '/google-calendar', '/notion-sync');
+  v_token text := public._rb_agent_secret('gcal_sync_token');
+begin
+  if v_url = '' or coalesce(v_token, '') = '' then return; end if;
+  if not exists (select 1 from public.notion_sources s join public.notion_connections c on c.user_id = s.user_id
+                  where s.enabled and c.access_token <> '') then return; end if;
+  perform net.http_post(
+    url := v_url,
+    headers := jsonb_build_object('Content-Type', 'application/json', 'x-sync-token', v_token),
+    body := '{"action":"sync"}'::jsonb,
+    timeout_milliseconds := 120000);
+end $$;
+revoke execute on function public._notion_cron_post() from public, anon, authenticated;
+
+do $$
+begin
+  if exists (select 1 from pg_extension where extname = 'pg_cron') then
+    perform cron.schedule('notion-sync', '7 * * * *', 'select public._notion_cron_post()');
+  end if;
+end $$;
