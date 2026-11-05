@@ -337,7 +337,7 @@ revoke execute on function public._mural_lesson_trigger() from public, anon, aut
 -- ---------------- Edge Function (service_role) ----------------
 create or replace function public.notion_new_state(p_user uuid, p_return_url text)
 returns text language plpgsql security definer set search_path = public as $$
-declare v_state text := encode(extensions.gen_random_bytes(32), 'hex');
+declare v_state text := replace(gen_random_uuid()::text, '-', '') || replace(gen_random_uuid()::text, '-', '');
 begin
   insert into public.notion_oauth_states (state, user_id, return_url) values (v_state, p_user, p_return_url);
   return v_state;
