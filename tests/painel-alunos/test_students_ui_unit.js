@@ -117,7 +117,7 @@ const link = (id, user, name, key) => ({ id, student_id: 's' + id, username: use
   check('criados: carregando / falhou / vazio', C(undefined).includes('p-spinner') && C(null).includes('Não foi possível carregar os cartões') && C({ contentsTotal: 0, archivedNotes: 0 }).includes('Nenhum cartão criado para Ana ainda'));
   const m = { contentsTotal: 3, contentsStudied: 2, contentsNotStarted: 1, contentsStrengthNotStarted: 1, contentsStrengthWeak: 0, contentsStrengthMedium: 1, contentsStrengthStrong: 1, cardsTotal: 6, cardsNew: 4, cardsLearning: 1, cardsReview: 1, cardsDue: 2, archivedNotes: 1, archivedCards: 2 };
   const ch = C(m);
-  check('criados: conteúdos x cartões, força sem misturar não iniciados com fracos', ch.includes('2 de 3 (1 não iniciados)') && ch.includes('1 não iniciados · 0 fracos · 1 médios · 1 fortes') && ch.includes('6 (4 novos · 1 aprendendo · 1 para revisar · 2 vencidos)') && ch.includes('1 conteúdo · 2 cartões'));
+  check('criados: conteúdos x cartões, força sem misturar não iniciados com fracos', ch.includes('2 de 3 (1 não iniciados)') && ch.includes('1 não iniciados · 0 fracos · 1 médios · 1 fortes') && ch.includes('6 (4 novos · 1 aprendendo · 1 em revisão · 2 para hoje)') && ch.includes('1 conteúdo · 2 cartões'));
   // aulas
   check('aulas: carregando / vazio / lista com data e tópico', fr.tsuClassesHTML(undefined).includes('p-spinner') && fr.tsuClassesHTML([]).includes('Nenhuma aula registrada para este aluno.')
     && (() => { const h = fr.tsuClassesHTML([{ class_date: '2026-10-09', topic: 'Passé composé' }]); return h.includes('09/10') && h.includes('Passé composé') && h.includes('data-ir-secao="classlogs"'); })());

@@ -55,7 +55,7 @@ async function boot(browser, port, lang, scheme){
       return { cls: row.className, txt: row.textContent, cards: cs.length, before, otherModuleUnits: MODULES[1].unitIds.length };
     });
     L('com unidade concluída a faixa fica pronta (não vazia)', !/locked/.test(r.cls), r.cls);
-    L('texto: recomendado, opcional e o porquê', /Recomendado antes de seguir \(opcional\)/.test(r.txt) && /\d+ itens?: 1 com erros recentes, 1 vencendo hoje/.test(r.txt), r.txt);
+    L('texto: recomendado, opcional e o porquê', /Recomendado antes de seguir \(opcional\)/.test(r.txt) && /\d+ itens?: 1 com erros recentes, 1 para hoje/.test(r.txt), r.txt);
     L('teto de 20 respeitado no texto', (() => { const n = parseInt(r.txt.match(/(\d+) itens?:/)[1], 10); return n <= 20 && n === Math.min(20, r.cards); })(), r.txt);
 
     // clicar abre a Revisão existente com recorte do módulo

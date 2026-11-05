@@ -356,7 +356,7 @@ window.I18N_CATALOG['en'] = {
   'review.strength.notStarted': 'Not started', // ALTA
   'review.strength.medium': 'Medium', // ALTA
   'review.strength.strong': 'Strong', // ALTA
-  'review.strength.hint': 'Not started = no study yet; Weak = not solid yet; Strong = known well for a while; Medium = somewhere in between. This is ALL your vocabulary, not today\'s reviews (above). So you can have medium words here even with no reviews due right now.', // MÉDIA -- texto longo; "firmou" sem equivalente direto
+  'review.strength.hint': 'Not started = no study yet; Weak = not solid yet; Strong = known well for a while; Medium = somewhere in between. This is ALL your vocabulary, not today\'s reviews (above). So you can have medium words here even with no reviews due today.', // MÉDIA -- Etapa 7 (needs_review) -- texto longo; "firmou" sem equivalente direto
   'review.mode.reviewLabel': 'Review', // ALTA
   'review.empty.noneYetTitle': 'No reviews yet', // ALTA
   'review.empty.upToDateTitle': 'You\'re all caught up!', // ALTA
@@ -375,7 +375,7 @@ window.I18N_CATALOG['en'] = {
   'review.match.attempts': { one: '{n} attempt', other: '{n} attempts' }, // ALTA
   'review.match.playAgain': 'Play again', // ALTA
   'review.speed.insufficientBody': 'Quick review needs words you have already studied successfully at least once. Keep studying units in Study.', // ALTA -- Etapa 7 (needs_review)
-  'review.speed.upToDateBody': 'No reviews due right now. Practice is still available whenever you like.', // ALTA
+  'review.speed.upToDateBody': 'No reviews due today. Practice is still available whenever you like.', // ALTA -- Etapa 7 (needs_review)
   'review.practice': 'Practice', // ALTA
   'review.speed.gameOver': 'Game over!', // ALTA
   'review.speed.points': '{n} pts', // ALTA
@@ -385,11 +385,11 @@ window.I18N_CATALOG['en'] = {
   'review.complete.title': 'Review complete!', // ALTA
   'review.complete.reviewed': { one: 'You reviewed {n} card this session.', other: 'You reviewed {n} cards this session.' }, // ALTA
   'review.session.deckEmptyTitle': 'No cards in this Deck yet', // ALTA
-  'review.session.classEmptyTitle': 'No lesson cards to review right now', // ALTA
+  'review.session.classEmptyTitle': 'No lesson cards due today', // ALTA -- Etapa 7 (needs_review)
   'review.session.tagsEmptyTitle': 'No cards with the selected tags', // ALTA
   'review.session.unitEmptyTitle': 'No cards in this unit yet', // ALTA
   'review.session.allDoneTitle': 'All caught up!', // ALTA
-  'review.session.pendingOverall': { one: 'You still have {n} card due overall.', other: 'You still have {n} cards due overall.' }, // ALTA
+  'review.session.pendingOverall': { one: 'You still have {n} card due today in total.', other: 'You still have {n} cards due today in total.' }, // ALTA -- Etapa 7 (needs_review)
   'review.session.comeBackLater': 'Come back later for your next review, or start a new unit on the course path.', // ALTA
   'review.session.reviewAllAvailable': 'Review everything available', // ALTA
   'review.previewLabel': '👁️ Preview', // ALTA
@@ -439,11 +439,11 @@ window.I18N_CATALOG['en'] = {
   'deck.myDecks': 'My Decks', // ALTA
   'deck.teacherRoot': 'Teacher\'s cards', // MÉDIA
   'deck.studyThis': 'Study this Deck', // ALTA
-  'deck.countsFull': { one: '{total} card · New: {new} · Learning: {learning} · To review: {review} · Due: {due}', other: '{total} cards · New: {new} · Learning: {learning} · To review: {review} · Due: {due}' }, // ALTA
+  'deck.countsFull': { one: '{total} card · New: {new} · Learning: {learning} · In review: {review} · Due today: {due}', other: '{total} cards · New: {new} · Learning: {learning} · In review: {review} · Due today: {due}' }, // ALTA -- Etapa 7 (needs_review)
   'deck.publicBadge': '🌐 Public', // ALTA
   'deck.publish': '🔒 Private', // ALTA
   'deck.cardsCount': { one: '{n} card', other: '{n} cards' }, // ALTA
-  'deck.countsDetail': { one: '{n} card · {new} new · {learning} learning · {review} to review', other: '{n} cards · {new} new · {learning} learning · {review} to review' }, // MÉDIA
+  'deck.countsDetail': { one: '{n} card · {new} new · {learning} learning · {review} in review', other: '{n} cards · {new} new · {learning} learning · {review} in review' }, // ALTA -- Etapa 7 (needs_review)
   'myFlashcards.lang.fr': 'French', // ALTA
   'myFlashcards.lang.pt': 'Portuguese', // ALTA
   'myFlashcards.lang.en': 'English', // ALTA
@@ -725,7 +725,7 @@ window.I18N_CATALOG['en'] = {
   'zh.progress.heatLess': 'Less', // ALTA
   'zh.progress.heatMore': 'More', // ALTA
   'zh.hanzi.allCaughtUp': 'All caught up!', // ALTA
-  'zh.hanzi.pendingChars': { one: 'You still have {n} character due.', other: 'You still have {n} characters due.' }, // ALTA
+  'zh.hanzi.pendingChars': { one: 'You still have {n} character due today.', other: 'You still have {n} characters due today.' }, // ALTA -- Etapa 7 (needs_review)
   'zh.hanzi.comeBackLater': 'Come back later for your next review, or move on to a new lesson.', // ALTA
   'zh.hanzi.sessionDone': 'Session complete!', // ALTA
   'zh.hanzi.sessionReviewed': { one: 'You reviewed {n} character in this session.', other: 'You reviewed {n} characters in this session.' }, // ALTA
@@ -1053,6 +1053,17 @@ window.I18N_CATALOG['en'] = {
   'review.today.speedSplitAria': 'New {new}, Learning {learning}, Review {review}', // ALTA -- Revisão nova
   'review.backToDeck': '← Back to Deck', // ALTA -- Revisão nova
   'review.backToStudent': '← Back to Student', // ALTA
+  'review.exitSession': '← Exit', // ALTA
+  'review.prev': 'Back', // ALTA
+  'review.prev.aria': 'Back to the previous card', // ALTA
+  'review.peek.title': 'Previous card', // ALTA
+  'review.peek.yourNote': 'Your grade: {grade}', // ALTA
+  'review.peek.change': 'Want to change the grade?', // ALTA
+  'review.peek.typed': 'You wrote: {text}', // ALTA
+  'review.peek.chose': 'You chose: {text}', // ALTA
+  'review.peek.next': 'Back to the current card', // ALTA
+  'review.peek.changed': 'Grade changed', // ALTA
+  'review.peek.locked': 'This card came back later in the session, so its latest grade is the one that counts.', // ALTA
   'review.backToModes': '← Back to modes', // ALTA -- Revisão nova
   'review.settings.origin': 'Source', // ALTA -- Revisão nova
   'review.settings.freq.balanced': 'Balanced (recommended)', // ALTA -- Revisão nova
@@ -2138,7 +2149,7 @@ window.I18N_CATALOG['en'] = {
   'ui.review.intensity': 'Session intensity', // ALTA
   'ui.review.intensity.light': 'Light (shorter sessions)', // ALTA
   'ui.review.intensity.intense': 'Intense (longer sessions)', // ALTA
-  'ui.review.practiceHint': 'Keep practicing whenever you like, even with no reviews due.', // ALTA
+  'ui.review.practiceHint': 'Keep practicing whenever you like, even with nothing due today.', // ALTA -- Etapa 7 (needs_review)
   'ui.conj.sub': 'Choose the verbs and the verb tenses.', // ALTA
   'ui.conj.topN': 'Number of verbs (most common first)', // ALTA
   'ui.conj.start': 'Start practice', // ALTA
@@ -2879,7 +2890,7 @@ window.I18N_CATALOG['en'] = {
   'students.ind.byLang': '{n} in {lang}', // ALTA
   'students.ind.today': 'Studied today', // ALTA
   'students.ind.todayPct': '{pct}% of the class', // ALTA
-  'students.ind.due': 'Reviews due', // ALTA
+  'students.ind.due': 'Due today', // ALTA -- Etapa 7 (needs_review)
   'students.ind.dueSum': 'total across all students', // ALTA
   'students.ind.attention': 'Need attention', // ALTA
   'students.ind.attentionDetail': '{stopped} stopped, {warn} to watch', // ALTA
@@ -2892,7 +2903,7 @@ window.I18N_CATALOG['en'] = {
   'students.col.course': 'Course', // ALTA
   'students.col.last': 'Last study', // ALTA
   'students.col.streak': 'Streak', // ALTA
-  'students.col.due': 'Reviews due', // ALTA
+  'students.col.due': 'Due today', // ALTA -- Etapa 7 (needs_review)
   'students.col.status': 'Status', // ALTA
   'students.open': 'Open', // ALTA
   'students.situation.ok': 'On track', // ALTA
@@ -2927,7 +2938,7 @@ window.I18N_CATALOG['en'] = {
   'students.ind.noRecord': 'no record', // ALTA
   'students.ind.streak': 'Streak', // ALTA
   'students.ind.activeDays': { one: '{n} active day in the last 30', other: '{n} active days in the last 30' }, // ALTA
-  'students.ind.dueCount': 'Reviews due', // ALTA
+  'students.ind.dueCount': 'Due today', // ALTA -- Etapa 7 (needs_review)
   'students.ind.dueOf': 'of {total} in the queue', // ALTA
   'students.ind.accuracy': 'Accuracy (7 days)', // ALTA
   'students.ind.accuracyOf': { one: 'over {n} reviewed card', other: 'over {n} reviewed cards' }, // ALTA
@@ -2960,7 +2971,7 @@ window.I18N_CATALOG['en'] = {
   'students.created.strength': 'Item strength', // ALTA
   'students.created.strengthValue': '{notStarted} not started · {weak} weak · {medium} medium · {strong} strong', // ALTA
   'students.created.cards': 'Cards generated', // ALTA
-  'students.created.cardsValue': '{total} ({n} new · {learning} learning · {review} to review · {due} due)', // ALTA
+  'students.created.cardsValue': '{total} ({n} new · {learning} learning · {review} in review · {due} due today)', // ALTA -- Etapa 7 (needs_review)
   'students.created.archived': 'Archived (not counted)', // ALTA
   'students.created.failed': 'Could not load this student\'s cards right now.', // ALTA
   'students.block.recent': 'Recent activity', // ALTA
