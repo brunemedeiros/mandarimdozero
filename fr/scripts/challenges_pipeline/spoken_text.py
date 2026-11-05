@@ -29,7 +29,7 @@ from dataclasses import dataclass
 from typing import Callable, Dict, List, Optional, Tuple
 
 # Sobe quando o comportamento de qualquer regra muda (regenerar o que a regra afeta).
-SPOKEN_RULES_VERSION = 5
+SPOKEN_RULES_VERSION = 6
 
 
 @dataclass(frozen=True)
@@ -53,10 +53,31 @@ class SpokenRule:
         return re.sub(self.pattern, self.replacement, text)
 
 
+def strip_pronunciation_hints(text: str) -> str:
+    """Tira a pronúncia anotada entre barras (/bʁe.zi.ljɛ̃/): dica de tela, não é para ser lida (2026-11-05).
+    Só vale a barra que abre depois de espaço, começo ou "(" e fecha antes de espaço, pontuação ou "×";
+    "tu / vous" e "e/ou" ficam como estão. Mesma regra de tts_core.mjs e de shared/core/voz.js."""
+    if "/" not in text:
+        return text
+
+    def _sub(m):
+        pre = m.group(1)
+        nxt = m.string[m.end():m.end() + 1]
+        return "" if (pre.isspace() and nxt and nxt in ",.;:!?)") else pre
+
+    out = re.sub(r"(^|[\s(])/(?=\S)[^/\n]*?\S/(?=$|[\s,.;:!?)\u00D7])", _sub, text)
+    return re.sub(r"[ \t]{2,}", " ", out).strip()
+
+
 # ---------------------------------------------------------------------------
 # Francês
 # ---------------------------------------------------------------------------
 _FR_RULES: List[SpokenRule] = [
+    SpokenRule(
+        id="fr.pronunciation-hints", lang="fr",
+        reason='"brésiliens /bʁe.zi.ljɛ̃/": a pronúncia entre barras é dica de tela e o TTS a lia em voz alta. Sai do texto falado; "tu / vous" e "et/ou" ficam.',
+        pattern="", replacement="", fn=strip_pronunciation_hints,
+    ),
     SpokenRule(
         id="fr.parenthetical-particle",
         lang="fr",
@@ -301,6 +322,11 @@ def _pt_abbreviations(text: str) -> str:
 
 
 _PT_RULES: List[SpokenRule] = [
+    SpokenRule(
+        id="pt.pronunciation-hints", lang="pt",
+        reason='"Moi, c\'est Bia. /Muá, sé Bia/": a pronúncia entre barras é dica de tela e o TTS a lia em voz alta. Sai do texto falado; "bonito / bonita" e "e/ou" ficam.',
+        pattern="", replacement="", fn=strip_pronunciation_hints,
+    ),
     SpokenRule(
         id="pt.title-abbreviations", lang="pt",
         reason='"Sra. Silva", "Dr. Paulo", "Sr.(a)": o TTS pode soletrar ou pausar no ponto. Lê "Senhora", "Doutor", "Senhor ou Senhora".',
