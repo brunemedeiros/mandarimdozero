@@ -1290,7 +1290,7 @@ function checkAccentAnswer(c){
 
   const accentBodyHTML = `
       ${!isCorrect ? `<p class="accent-feedback-answer">${chT('ch.accent.yours', { answer: escapeHtmlChallenge(studentAnswer || '—') })}</p>` : ''}
-      <div class="accent-feedback-correct-word">${escapeHtmlChallenge(c.targetText)} ${audioIconsHTML('accent-replay-btn', 'accent-replay-slow-btn')}</div>
+      <div class="feedback-inner-box accent-feedback-correct-box"><div class="expr-order-line"><span class="accent-feedback-correct-word">${escapeHtmlChallenge(c.targetText)}</span>${audioIconsHTML('accent-replay-btn', 'accent-replay-slow-btn')}</div></div>
       ${(challengeText(c, 'explanation')) ? `<p class="accent-feedback-explanation">${escapeHtmlChallenge(challengeText(c, 'explanation'))}</p>` : ''}
   `;
   document.getElementById('accent-feedback-wrap').innerHTML = challengeFeedbackWrapperHTML('accent', isCorrect, outcome === 'ok' ? chT('ch.accent.right') : outcome === 'partial' ? chT('ch.accent.partial') : chT('ch.accent.wrong'), accentBodyHTML, outcome);
