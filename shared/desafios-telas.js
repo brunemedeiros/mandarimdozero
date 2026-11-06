@@ -20,8 +20,10 @@ function slowAudioBtnHTML(id){
 }
 // Áudio só com ícone (🔊 cinza, o mesmo da Revisão e da Conjugação; decisão da autora, 2026-11-06): para áudio de apoio ao lado da frase.
 function audioIconsHTML(playId, slowId){ return `<span class="expr-order-icons">${listenIconBtnHTML(playId)}${slowAudioIconBtnHTML(slowId, 'audio-btn-md')}</span>`; }
+// Rótulo do ícone de ouvir: chave do idioma estudado vinda de registerChallenges (audioListenKey), com a do fr como reserva.
+function audioListenKeyCh(){ return chCfg().audioListenKey || 'fr.audio.listen'; }
 function listenIconBtnHTML(id){
-  return `<button class="audio-btn audio-btn-md" id="${id}" aria-label="${t('fr.audio.listen')}" title="${t('fr.audio.listen')}">🔊</button>`;
+  return `<button class="audio-btn audio-btn-md" id="${id}" aria-label="${t(audioListenKeyCh())}" title="${t(audioListenKeyCh())}">🔊</button>`;
 }
 function slowAudioIconBtnHTML(id, extraClass){
   return `<button class="audio-btn audio-btn-slow ${extraClass || ''}" id="${id}" aria-label="${t('fr.audio.listenSlowly')}" title="${t('fr.audio.listenSlowly')}">🐢</button>`;
@@ -1288,7 +1290,7 @@ function checkAccentAnswer(c){
 
   const accentBodyHTML = `
       ${!isCorrect ? `<p class="accent-feedback-answer">${chT('ch.accent.yours', { answer: escapeHtmlChallenge(studentAnswer || '—') })}</p>` : ''}
-      <div class="accent-feedback-correct-word">${escapeHtmlChallenge(c.targetText)} ${audioIconsHTML('accent-replay-btn', 'accent-replay-slow-btn')}</div>
+      <div class="feedback-inner-box accent-feedback-correct-box"><div class="expr-order-line"><span class="accent-feedback-correct-word">${escapeHtmlChallenge(c.targetText)}</span>${audioIconsHTML('accent-replay-btn', 'accent-replay-slow-btn')}</div></div>
       ${(challengeText(c, 'explanation')) ? `<p class="accent-feedback-explanation">${escapeHtmlChallenge(challengeText(c, 'explanation'))}</p>` : ''}
   `;
   document.getElementById('accent-feedback-wrap').innerHTML = challengeFeedbackWrapperHTML('accent', isCorrect, outcome === 'ok' ? chT('ch.accent.right') : outcome === 'partial' ? chT('ch.accent.partial') : chT('ch.accent.wrong'), accentBodyHTML, outcome);
