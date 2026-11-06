@@ -104,7 +104,7 @@ const state = page => page.evaluate(() => ({ xp: STATE.xp, done: !!STATE.complet
     if (OUT) { await page.waitForTimeout(450); await page.screenshot({ path: path.join(OUT, `3-acerto-${label}.png`), fullPage: true }); }
     await page.keyboard.press('Enter'); // Enter avança
     await page.waitForSelector('.expr-example');
-    const e = await page.evaluate(() => ({ label: (document.querySelector('.exercise-prompt-label') || {}).textContent, n: document.querySelectorAll('.expr-example').length, audio: [...document.querySelectorAll('.expr-example')].filter(x => x.querySelector('.dictation-play-btn')).length }));
+    const e = await page.evaluate(() => ({ label: (document.querySelector('.exercise-prompt-label') || {}).textContent, n: document.querySelectorAll('.expr-example').length, audio: [...document.querySelectorAll('.expr-example')].filter(x => x.querySelector('.audio-btn')).length }));
     check(label + ' "Veja em frases": 2 exemplos e áudio só onde existe, progresso 40%', e.label.toUpperCase() === X.seeSent && e.n === 2 && e.audio === 1 && (await prog(page)) === '40%', e);
     const w = await page.evaluate(() => { const b = document.querySelector('.expr-when'); return { has: !!b, chip: !!(b && b.querySelector('.expr-reg')), label: b && b.querySelector('.expr-when-label').textContent, hint: b && b.querySelector('p').textContent, firstIsWhen: !!b && b.previousElementSibling.classList.contains('exercise-prompt-label') }; });
     check(label + ' "Quando usar": registro + cuidado no idioma do site, logo abaixo do título', w.has && w.chip && w.firstIsWhen && w.label.toUpperCase() === X.when && w.hint === X.whenHint, w);

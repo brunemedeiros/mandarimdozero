@@ -18,9 +18,10 @@ const SLOW_AUDIO_RATE = 0.65;
 function slowAudioBtnHTML(id){
   return `<button class="dictation-play-btn dictation-play-btn-slow" id="${id}" title="${t('fr.audio.listenSlower')}">🐢 ${chT('ch.slow')}</button>`;
 }
-// Versão só com ícone do "▶ Ouvir" (mesmo ícone do botão com texto; decisão da autora, 2026-11-05): para áudio ao lado da frase.
+// Áudio só com ícone (🔊 cinza, o mesmo da Revisão e da Conjugação; decisão da autora, 2026-11-06): para áudio de apoio ao lado da frase.
+function audioIconsHTML(playId, slowId){ return `<span class="expr-order-icons">${listenIconBtnHTML(playId)}${slowAudioIconBtnHTML(slowId, 'audio-btn-md')}</span>`; }
 function listenIconBtnHTML(id){
-  return `<button class="audio-btn audio-btn-md" id="${id}" aria-label="${t('fr.audio.listen')}" title="${t('fr.audio.listen')}">▶</button>`;
+  return `<button class="audio-btn audio-btn-md" id="${id}" aria-label="${t('fr.audio.listen')}" title="${t('fr.audio.listen')}">🔊</button>`;
 }
 function slowAudioIconBtnHTML(id, extraClass){
   return `<button class="audio-btn audio-btn-slow ${extraClass || ''}" id="${id}" aria-label="${t('fr.audio.listenSlowly')}" title="${t('fr.audio.listenSlowly')}">🐢</button>`;
@@ -890,9 +891,8 @@ function exprShowExamples(c){
       ${exs.map((ex, i) => { const v = exprExampleView(c, exKeys[i]); return `
         <div class="exercise-prompt expr-example">
           <div class="expr-example-label">${chT('ch.expr.example' + (i + 1))}</div>
-          <div class="expr-example-text" lang="${chCfg().lang}">${exprHighlightHTML(ex.text, v.mark)}</div>
+          <div class="expr-example-line"><div class="expr-example-text" lang="${chCfg().lang}">${exprHighlightHTML(ex.text, v.mark)}</div>${ex.audioFile ? audioIconsHTML('expr-ex' + i + '-play', 'expr-ex' + i + '-slow') : ''}</div>
           ${v.tr ? `<button type="button" class="expr-tr-btn" id="expr-ex${i}-trbtn">${chT('ch.expr.seeTranslation')}</button><div class="expr-example-tr" id="expr-ex${i}-tr" hidden>${escapeHtmlChallenge(v.tr)}</div>` : ''}
-          ${ex.audioFile ? `<div class="audio-btn-row"><button class="dictation-play-btn" id="expr-ex${i}-play">${chT('ch.listenFr')}</button>${slowAudioBtnHTML('expr-ex' + i + '-slow')}</div>` : ''}
         </div>`; }).join('')}
       <button class="btn btn-primary btn-block" id="expr-continue-btn">${t('common.continueArrow')}</button>
     </div>`, 2);
@@ -972,7 +972,7 @@ function exprShowOrder(c){
     const dk = document.getElementById('expr-order-dontknow-btn'); if (dk) dk.classList.add('disabled');
     // Frase montada inteira, com a expressão em destaque, ícones pequenos de áudio ao lado (▶ e 🐢, sem texto) e a tradução (decisão da autora, 2026-11-05).
     const ev = exprExampleView(c, 0);
-    const full = `<div class="feedback-inner-box expr-order-full" lang="${lang}"><div class="expr-order-line"><span>${exprHighlightHTML(c.example.text, ev.mark)}</span>${file ? `<span class="expr-order-icons">${listenIconBtnHTML('expr-order-done-play')}${slowAudioIconBtnHTML('expr-order-done-slow', 'audio-btn-md')}</span>` : ''}</div>
+    const full = `<div class="feedback-inner-box expr-order-full" lang="${lang}"><div class="expr-order-line"><span>${exprHighlightHTML(c.example.text, ev.mark)}</span>${file ? audioIconsHTML('expr-order-done-play', 'expr-order-done-slow') : ''}</div>
       ${ev.tr ? `<div class="expr-order-full-tr">${escapeHtmlChallenge(ev.tr)}</div>` : ''}</div>`;
     const panel = document.createElement('div');
     panel.className = (ok ? 'correct-feedback' : 'wrong-feedback') + ' expr-panel';
@@ -1232,12 +1232,8 @@ function checkListenTranslateAnswer(c){
         <p class="listen-translate-feedback-row"><strong>${chT('ch.lt.yours')}</strong>${yoursHTML}</p>
         <p class="listen-translate-feedback-row"><strong>${chT('ch.lt.expected')}</strong>${expectedHTML}</p>
       </div>
-      <p class="listen-translate-feedback-row"><strong>${chT('ch.lt.original')}</strong>${escapeHtmlChallenge(c.sentenceFr)}</p>
+      <p class="listen-translate-feedback-row"><strong>${chT('ch.lt.original')}</strong>${escapeHtmlChallenge(c.sentenceFr)} ${audioIconsHTML('lt-replay-btn', 'lt-replay-slow-btn')}</p>
       ${lt.explanation ? `<p class="listen-translate-feedback-row"><strong>${chT('ch.lt.explanation')}</strong>${escapeHtmlChallenge(lt.explanation)}</p>` : ''}
-      <div class="audio-btn-row">
-        <button class="dictation-play-btn" id="lt-replay-btn">${chT('ch.listenAgain')}</button>
-        ${slowAudioBtnHTML('lt-replay-slow-btn')}
-      </div>
   `;
   document.getElementById('lt-feedback-wrap').innerHTML = challengeFeedbackWrapperHTML('listen-translate', isCorrect, outcome === 'ok' ? chT('ch.lt.right') : outcome === 'partial' ? chT(ptPt ? 'ch.lt.partialPtPt' : 'ch.lt.partial') : chT('ch.notQuite'), ltBodyHTML, outcome);
   document.getElementById('lt-verify-btn').style.display = 'none';
@@ -1292,11 +1288,7 @@ function checkAccentAnswer(c){
 
   const accentBodyHTML = `
       ${!isCorrect ? `<p class="accent-feedback-answer">${chT('ch.accent.yours', { answer: escapeHtmlChallenge(studentAnswer || '—') })}</p>` : ''}
-      <div class="accent-feedback-correct-word">${escapeHtmlChallenge(c.targetText)}</div>
-      <div class="audio-btn-row">
-        <button class="dictation-play-btn" id="accent-replay-btn">${chT('ch.listenFr')}</button>
-        ${slowAudioBtnHTML('accent-replay-slow-btn')}
-      </div>
+      <div class="accent-feedback-correct-word">${escapeHtmlChallenge(c.targetText)} ${audioIconsHTML('accent-replay-btn', 'accent-replay-slow-btn')}</div>
       ${(challengeText(c, 'explanation')) ? `<p class="accent-feedback-explanation">${escapeHtmlChallenge(challengeText(c, 'explanation'))}</p>` : ''}
   `;
   document.getElementById('accent-feedback-wrap').innerHTML = challengeFeedbackWrapperHTML('accent', isCorrect, outcome === 'ok' ? chT('ch.accent.right') : outcome === 'partial' ? chT('ch.accent.partial') : chT('ch.accent.wrong'), accentBodyHTML, outcome);
