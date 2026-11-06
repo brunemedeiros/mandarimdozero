@@ -37,13 +37,32 @@ lingua.com (painel de progresso, cartões com status, Premium no fim de cada gru
   revisão do nível, cartões "em breve", desenhos novos e respostas alternativas. Objetivo: melhorar os jogos existentes,
   o visual, e já preparar jogos novos.
 
-## Em aberto (perguntado à autora em 2026-11-06)
+## Decisões da autora (2026-11-06, 3ª rodada)
 
-- Regra de "Concluído": proposta da autora = todas as frases do jogo respondidas + 70% de acerto. Recomendação:
-  contar entre partidas (a próxima partida puxa primeiro as frases ainda não vistas), 70% sobre a ÚLTIMA resposta de
-  cada frase ("Não sei" = erro). Aguardando confirmação.
-- Formato do "Revisar erros" (na hora, no fim da partida, ou guardado para voltar depois como nos Desafios).
-- Peças do artifact de jogos de português (https://claude.ai/artifact/Qrg6nH8zG1mdaDLFK9adLX) a reaproveitar.
+- Concluído: todas as frases do jogo respondidas, somando as partidas (a próxima partida puxa primeiro as não vistas), e
+  70% pela ÚLTIMA resposta de cada frase ("Não sei" = erro). Já é o que a etapa 1 calcula.
+- "Revisar erros": as duas formas (na hora, no fim da partida, escrevendo a resposta; e guardado para voltar em outro dia,
+  como nos Desafios).
+- Sem desenhos novos de linha do tempo nos Jogos (o `pc-imparfait` mantém os 2 que já tem).
+- Ordem das etapas: a da tabela abaixo.
+
+## Jogos novos propostos (a partir de `docs/i18n/curriculo/04-v1-lacunas-e-propostas-fr.md`, seção 2.2 e J6) -- aguarda a autora
+
+Todos no formato atual (duas formas para a lacuna) + as etapas novas. Só verbos (vocabulário e preposições ficam para Desafios).
+Grátis: 1 por nível. Cada jogo novo: ~20 frases em pt-BR e en, revisor-conteudo, aprovação da autora antes de publicar.
+
+| Nível | id proposto | Jogo | Treina (item do currículo) | Grátis? |
+|---|---|---|---|---|
+| A1 | `present-futur-proche` | Agora ou depois? | présent x futur proche (G28) | Premium |
+| A1 | `participe-passe` | Qual é o particípio? | particípio irregular x forma inventada (*pris* x *prendu*; G30) | Premium |
+| A1 | `revisao-a1` | Revisão A1 | mistura dos jogos A1 (ideia do artifact) | Premium |
+| A2 | `accord-etre` | Allé ou allée? | concordância do particípio com *être* (G31, A2) | Premium |
+| A2 | `futur-conditionnel` | Futur ou conditionnel? | *j'aimerai* x *j'aimerais* (G39, G43) | Premium |
+| A2 | `futur-simple-proche` | Futur simple ou futur proche? | G39 x G28 | Premium |
+| A2 | `revisao-a2` | Revisão A2 | mistura dos jogos A2 | Premium |
+| B1 | `indicatif-subjonctif` | Indicatif ou subjonctif? | *il faut que*, *je pense que* x *je ne pense pas que* | **Grátis** |
+| B1 | `pqp-passe-compose` | Plus-que-parfait ou passé composé? | anterioridade no passado | Premium |
+| B1 | `si-hypothese` | Se eu tivesse... (*si* + imparfait / conditionnel) | frases com *si* | Premium |
 
 ## Etapas (cada uma mostrada à autora antes da seguinte)
 
