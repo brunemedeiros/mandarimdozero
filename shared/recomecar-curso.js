@@ -141,6 +141,7 @@
     if (has('storyProgress')) items.push('restart.zero.stories');
     if (has('completedChallenges')) items.push('restart.zero.challenges');
     if (has('dictations')) items.push('restart.zero.dictations');
+    if (has('conjGames')) items.push('restart.zero.games');
     return items.map(function(k){ return t(k); });
   }
   function keepItems(){

@@ -259,6 +259,9 @@ async function fingerprint(browser, root){
       [/(Ver resultado →|Ver resultado|See result →|See result)/g, 'VER_RESULTADO'],
       // o jogo agora conta o dia de estudo (registerStudyToday) ao terminar: o contador de atividade do dia sobe 1
       [/\\"activityLog\\":\{[^}]*\}/g, '\\"activityLog\\":AL'],
+      // Jogos da Conjugação, etapa 1 (2026-11-06, docs/jogos-reformulacao-plano.md): o progresso de cada jogo passou a ser salvo
+      // (STATE.conjGames, antes de progressSummary); tirado para provar que o resto do estado não mudou.
+      [/\\*"conjGames\\*":\{.*?\},(?=\\*"progressSummary)/g, ''],
       // Etapa 7 (2026-10-31, vocabulário aprovado pela dona): textos das Missões do dia guardados no estado
       // (ver etapa7-neutro.js, aplicado em norm)
     ];

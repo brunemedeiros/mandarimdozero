@@ -159,6 +159,7 @@ window.I18N_CATALOG['pt-BR'] = {
   'restart.zero.stories': 'Histórias',
   'restart.zero.challenges': 'Desafios',
   'restart.zero.dictations': 'Ditados',
+  'restart.zero.games': 'Jogos da Conjugação',
   'restart.keep.streak': 'Sua sequência de dias e o seu recorde',
   'restart.keep.cards': 'Os cartões da sua professora e os seus, com a memória deles',
   'restart.keep.decks': 'Seus Decks, a sua meta e as suas configurações',

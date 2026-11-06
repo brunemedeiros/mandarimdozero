@@ -29,6 +29,14 @@ lingua.com (painel de progresso, cartões com status, Premium no fim de cada gru
 9. Jogos de vocabulário e de preposições não entram na Conjugação; se vierem, serão em Desafios (assunto separado).
 10. Banco de dados: sem tabela nova e sem migration; o progresso vai dentro do `progress.data` que já existe.
 
+## Decisões da autora (2026-11-06, 2ª rodada)
+
+- Filtro: Todos / Pendentes / Concluídos.
+- Do artifact de português entra TUDO nesta reformulação, menos os jogos de português: etapas na partida (Escolha,
+  Escreva, Corrija o erro, Traduza), revisão escrevendo, rodada Completa x Curta, frase de exemplo no cartão, jogo de
+  revisão do nível, cartões "em breve", desenhos novos e respostas alternativas. Objetivo: melhorar os jogos existentes,
+  o visual, e já preparar jogos novos.
+
 ## Em aberto (perguntado à autora em 2026-11-06)
 
 - Regra de "Concluído": proposta da autora = todas as frases do jogo respondidas + 70% de acerto. Recomendação:
@@ -39,7 +47,13 @@ lingua.com (painel de progresso, cartões com status, Premium no fim de cada gru
 
 ## Etapas (cada uma mostrada à autora antes da seguinte)
 
-1. Salvar o progresso de cada jogo na conta (sem mudança visual) + zerar no Recomeçar + testes.
+1. **Feita (2026-11-06, aguarda a autora ver)**: progresso de cada jogo salvo na conta, sem mudança visual.
+   `STATE.conjGames` (fr/app.js) = `{ gameId: { items: { itemId: { ok, at } }, rounds } }`: última resposta de cada frase
+   ("Não sei" = erro), dia, partidas terminadas; vai no `serializeState` e volta por `mergeConjGamesState`
+   (shared/core/estado-salvar.js; vence o dia mais recente, nada é apagado). Funções em shared/conj-games.js:
+   `recordConjGameAnswer`, `finishConjGameRound`, `conjGameStatus` (vistas, acertos, %, concluído com
+   `CONJ_GAME_DONE_PCT = 70`), `conjGamesSummary` (painel do topo). Sair no meio guarda as respostas. Recomeçar o curso
+   já zera (a RPC 123 só copia campos fixos) e agora lista "Jogos da Conjugação". Teste `tests/jogos-progresso/` 42/42.
 2. Lista no visual das Expressões: painel no topo, grupos por nível, selo de concluído, tema.
 3. Filtro Todos / Pendentes / Concluídos.
 4. Grátis x Premium no fim do grupo.

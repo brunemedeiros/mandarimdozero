@@ -34,7 +34,8 @@ const PAGE_LIB = () => {
   window.__vis = (el) => { if (!el || !el.isConnected) return false; const r = el.getBoundingClientRect(); if (r.width === 0 && r.height === 0) return false; const s = getComputedStyle(el); return s.visibility !== 'hidden' && s.display !== 'none'; };
   // estado salvo, sem o que depende do relógio de parede de verdade (nada: o relógio é falso), resumido por hash + campos-chave
   window.__estado = () => {
-    let ser = ''; try { ser = JSON.stringify(serializeState()); } catch (e) { ser = 'ERRO ' + e.message; }
+    // conjGames (Jogos da Conjugação, etapa 1, 2026-11-06): campo novo do save, fora do hash nas duas árvores (mudança de propósito).
+    let ser = ''; try { const o = serializeState(); delete o.conjGames; ser = JSON.stringify(o); } catch (e) { ser = 'ERRO ' + e.message; }
     const d = STATE.daily || {};
     return { h: window.__fullState ? ser : __h(ser), toast: [...document.querySelectorAll('#toast-layer .toast')].map(e => e.textContent).join(' | '), xp: STATE.xp, daily: JSON.stringify(d), missions: JSON.stringify(STATE.dailyMissions || STATE.missions || null), cur: STATE.currentUnitId, step: STEP_STATE.currentStep, exi: STEP_STATE.exerciseIndex, exn: (STEP_STATE.exerciseList || []).length, score: STEP_STATE.exerciseScore };
   };
@@ -255,7 +256,7 @@ async function sequencia(browser, root, site, lang, opts = {}){
     await cena('config_' + s, { h: await html('#view-settings') });
   }
   await cena('conquistas', { m: await page.evaluate(() => { try { return JSON.stringify(collectBadgeMetrics()); } catch (e) { return 'ERRO ' + e.message; } }) });
-  await cena('resumo', { s: await page.evaluate(() => JSON.stringify(computeProgressSummary())), sv: await page.evaluate(() => JSON.stringify(serializeState())) });
+  await cena('resumo', { s: await page.evaluate(() => JSON.stringify(computeProgressSummary())), sv: await page.evaluate(() => { const o = serializeState(); delete o.conjGames; return JSON.stringify(o); }) }); // conjGames: ver o comentário do hash acima
   await ctx.close(); server.close();
   return { cenas, errors };
 }

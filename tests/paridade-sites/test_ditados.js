@@ -118,8 +118,9 @@ async function fingerprint(browser, root){
   const out = {};
   const html = (sel) => page.evaluate((s) => { const e = document.querySelector(s); return e ? e.innerHTML : null; }, sel);
   const click = (sel) => page.evaluate((s) => { const e = document.querySelector(s); if (!e) throw new Error('sem ' + s); e.click(); }, sel);
+  // conjGames (Jogos da Conjugação, etapa 1, 2026-11-06, docs/jogos-reformulacao-plano.md): campo novo do save, tirado da comparação nas duas árvores.
   const state = () => page.evaluate(() => JSON.stringify({ dictations: STATE.dictations, aced: STATE.dictationsAced, xp: STATE.xp,
-    daily: STATE.daily, modes: STATE.modesUsed, saved: serializeState(), badges: typeof collectBadgeMetrics === 'function' ? collectBadgeMetrics(STATE) : null }));
+    daily: STATE.daily, modes: STATE.modesUsed, saved: (() => { const o = serializeState(); delete o.conjGames; return o; })(), badges: typeof collectBadgeMetrics === 'function' ? collectBadgeMetrics(STATE) : null }));
 
   out.estado_inicial = await state();
 

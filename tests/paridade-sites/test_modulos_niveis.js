@@ -62,7 +62,8 @@ async function fingerprint(browser, root){
   const click = (sel) => page.evaluate((s) => { const e = document.querySelector(s); if (!e) throw new Error('sem ' + s); e.click(); }, sel);
   const html = (sel) => page.evaluate((s) => { const e = document.querySelector(s); return e ? e.innerHTML : null; }, sel);
   // estado salvo sem o carimbo de tempo do save (o relógio está congelado, mas não depende de nada disto)
-  const saved = () => page.evaluate(() => JSON.stringify(serializeState()));
+  // conjGames (Jogos da Conjugação, etapa 1, 2026-11-06, docs/jogos-reformulacao-plano.md): campo novo do save, tirado da comparação nas duas árvores.
+  const saved = () => page.evaluate(() => { const o = serializeState(); delete o.conjGames; return JSON.stringify(o); });
 
   // ---- 1. trilha zerada (lista), título e janela do seletor de nível
   await page.evaluate(() => { try { localStorage.setItem('frances_trail_view', 'list'); } catch (e) {} renderUnitsGrid(); });

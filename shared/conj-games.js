@@ -8,6 +8,43 @@
 // por idioma do site (text['pt-BR'], text.en). Sem XP: é prática livre, como a Conjugação (mas conta o dia de estudo).
 // Molde da trilha (2026-10-26): topo com progresso + ⚑ + ⌨️ + X (shared/activity-focus.js, lessonBar), respostas numeradas
 // (wireKeyboardOptions + teclado global), "Não sei" (revela e conta como erro) e "Continuar →".
+// ---------- Progresso de cada jogo, salvo na conta (2026-11-06, docs/jogos-reformulacao-plano.md) ----------
+// STATE.conjGames[gameId] = { items: { itemId: { ok, at } }, rounds }: a ÚLTIMA resposta de cada frase ("Não sei" = erro)
+// e o dia; rounds = partidas terminadas. Sem XP (prática livre). Site sem o campo no STATE (zh) não grava nada.
+// Concluído (proposta da autora, ajustes em confirmação): todas as frases do jogo já respondidas, somando as partidas,
+// e pelo menos CONJ_GAME_DONE_PCT% delas com a última resposta certa.
+const CONJ_GAME_DONE_PCT = 70;
+function conjGameRecord(gameId, create){
+  if (typeof STATE === 'undefined' || !STATE || !STATE.conjGames || typeof STATE.conjGames !== 'object') return null;
+  const r = STATE.conjGames[gameId];
+  if (r && typeof r === 'object'){ if (!r.items || typeof r.items !== 'object') r.items = {}; return r; }
+  return create ? (STATE.conjGames[gameId] = { items: {}, rounds: 0 }) : null;
+}
+function recordConjGameAnswer(gameId, itemId, ok){
+  const r = conjGameRecord(gameId, true);
+  if (!r || itemId == null) return;
+  const day = typeof todayStr === 'function' ? todayStr() : new Date().toISOString().slice(0, 10);
+  r.items[String(itemId)] = { ok: !!ok, at: day };
+}
+function finishConjGameRound(gameId){
+  const r = conjGameRecord(gameId, true);
+  if (r) r.rounds = (Number(r.rounds) || 0) + 1;
+}
+// Status de um jogo (lista nova): seen/total frases respondidas, right = última resposta certa, pct sobre o total.
+function conjGameStatus(game){
+  const total = game && Array.isArray(game.items) ? game.items.length : 0;
+  const r = game ? conjGameRecord(game.id, false) : null;
+  let seen = 0, right = 0;
+  if (r) game.items.forEach(it => { const e = r.items[String(it.id)]; if (e){ seen++; if (e.ok) right++; } });
+  const pct = total ? Math.round(100 * right / total) : 0;
+  return { seen, total, right, pct, rounds: r ? (Number(r.rounds) || 0) : 0, done: total > 0 && seen === total && pct >= CONJ_GAME_DONE_PCT };
+}
+// Painel do topo: jogos concluídos e acertos (frases cuja última resposta está certa, somando os jogos).
+function conjGamesSummary(games){
+  const st = (games || []).map(conjGameStatus);
+  return { done: st.filter(s => s.done).length, total: st.length, right: st.reduce((a, s) => a + s.right, 0) };
+}
+
 function createConjGames({ games, speak, ids, isLocked, onLocked, lang = 'fr' }){
   // lang: idioma estudado (atributo lang="" das frases e formas); padrão 'fr', o site de português passa 'pt'.
   // isLocked(game): paywall (Jogos são Premium; true só com o bloqueio ligado E sem a permissão "Jogos da Conjugação");
@@ -31,7 +68,7 @@ function createConjGames({ games, speak, ids, isLocked, onLocked, lang = 'fr' })
     line: AXIS + '<rect x="18" y="19" width="92" height="14" rx="7" fill="var(--seal-red)" opacity=".85"/><path d="M24 26 h80" stroke="currentColor" stroke-width="2" stroke-dasharray="4 5"/>'
   };
 
-  const S = { game: null, order: [], idx: 0, hits: 0, log: [], answered: false, shownAt: 0 };
+  const S = { game: null, order: [], idx: 0, hits: 0, log: [], answered: false, shownAt: 0, dirty: false };
 
   // Selo (regra 7 da dona, 2026-10-22): recurso Premium com o bloqueio DESLIGADO mostra só "⭐ Premium" e abre para
   // todos; com o bloqueio LIGADO, quem não tem a permissão vê "⭐ Premium" + cadeado e, ao tocar, o aviso Premium.
@@ -137,6 +174,8 @@ function createConjGames({ games, speak, ids, isLocked, onLocked, lang = 'fr' })
     S.answered = true;
     if (ok) S.hits++;
     S.log.push({ it, ok, given: k });
+    recordConjGameAnswer(g.id, it.id, ok);
+    S.dirty = true;
     const dk = $('cg-dontknow');
     if (dk) dk.classList.add('disabled');
     // Som de acerto/erro como na trilha; "Não sei" é silencioso (a resposta é só revelada).
@@ -181,9 +220,11 @@ function createConjGames({ games, speak, ids, isLocked, onLocked, lang = 'fr' })
     if (typeof clearKeyboardOptions === 'function') clearKeyboardOptions();
     const bar = grabBar();
     // Sem XP (prática livre), mas o dia conta para a sequência, como a trilha (decisão da autora, 2026-10-26).
+    finishConjGameRound(g.id);
+    if (typeof registerStudyToday === 'function') registerStudyToday();
+    S.dirty = false;
+    if (typeof saveState === 'function') saveState(); // grava o dia e o progresso do jogo (STATE.conjGames)
     if (typeof registerStudyToday === 'function'){
-      registerStudyToday();
-      if (typeof saveState === 'function') saveState();
       if (typeof renderTopbarStats === 'function') renderTopbarStats();
       if (typeof maybeShowStreakCelebration === 'function') maybeShowStreakCelebration();
     }
@@ -211,6 +252,8 @@ function createConjGames({ games, speak, ids, isLocked, onLocked, lang = 'fr' })
 
   function exit(){
     if (typeof clearKeyboardOptions === 'function') clearKeyboardOptions();
+    // Saiu no meio da partida: as respostas já dadas ficam salvas (a partida não conta como terminada).
+    if (S.dirty){ S.dirty = false; if (typeof saveState === 'function') saveState(); }
     show(false); renderList();
   }
 

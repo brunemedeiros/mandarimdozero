@@ -142,6 +142,7 @@ window.I18N_CATALOG['en'] = {
   'restart.zero.stories': 'Stories', // ALTA
   'restart.zero.challenges': 'Challenges', // ALTA
   'restart.zero.dictations': 'Dictations', // ALTA
+  'restart.zero.games': 'Conjugation games', // ALTA
   'restart.keep.streak': 'Your day streak and your record', // ALTA
   'restart.keep.cards': 'Your teacher\'s cards and your own, with their memory', // ALTA -- Etapa 7 (needs_review)
   'restart.keep.decks': 'Your Decks, your goal and your settings', // ALTA

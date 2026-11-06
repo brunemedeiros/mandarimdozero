@@ -42,6 +42,7 @@ function serializeState(){
     ...se('completedChallenges'),
     ...se('dictations'),
     ...se('challengeReviews'),
+    ...se('conjGames'),
     // Boas-vindas da 1ª lição (shared/core/boas-vindas.js): por curso, só existe depois de aparecer.
     ...(STATE.welcome && Object.keys(STATE.welcome).length ? { welcome: STATE.welcome } : {}),
     // Só leitura pro Perfil (ver computeProgressSummary) -- nunca restaurado
@@ -123,6 +124,8 @@ function applySerializedState(data){
       if (e) STATE.challengeReviews[id] = e;
     });
   }
+  // Jogos da Conjugação: só acrescenta; na mesma frase fica a resposta do dia mais recente (registro malformado é ignorado).
+  if ('conjGames' in STATE && data.conjGames && typeof data.conjGames === 'object') mergeConjGamesState(STATE.conjGames, data.conjGames);
   // Save antigo não tem o campo (nada a fazer); registros malformados são
   // saneados pela mesma função que atualiza (bestScore nunca diminui).
   if ('dictations' in STATE && data.dictations && typeof data.dictations === 'object'){
@@ -199,4 +202,29 @@ function collectBadgeMetrics(s){
     challengesTotal: ('completedChallenges' in STATE) ? challengeIds.size : 0,
     comeback: !!s.hadStreakComeback, levelLabel: LANG_HOOKS.badgeLevel.label
   };
+}
+
+// Jogos da Conjugação (2026-11-06): junta o progresso salvo no que já está no STATE, sem apagar nada.
+// gameId -> { items: { itemId: { ok: bool, at: 'AAAA-MM-DD' } }, rounds: n }. Na mesma frase vence o dia mais recente
+// (empate: fica o salvo); rounds fica com o maior. Chave perigosa (__proto__ etc.) e valor fora do formato são ignorados.
+function mergeConjGamesState(target, saved){
+  if (!target || !saved || typeof saved !== 'object') return target;
+  const bad = k => k === '__proto__' || k === 'constructor' || k === 'prototype';
+  const isDay = v => typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v);
+  Object.keys(saved).forEach(gid => {
+    const g = saved[gid];
+    if (bad(gid) || !g || typeof g !== 'object') return;
+    const cur = (target[gid] && typeof target[gid] === 'object') ? target[gid] : (target[gid] = { items: {}, rounds: 0 });
+    if (!cur.items || typeof cur.items !== 'object') cur.items = {};
+    const rounds = Number(g.rounds);
+    cur.rounds = Math.max(Number(cur.rounds) || 0, Number.isFinite(rounds) && rounds > 0 ? Math.floor(rounds) : 0);
+    if (!g.items || typeof g.items !== 'object') return;
+    Object.keys(g.items).forEach(iid => {
+      const e = g.items[iid];
+      if (bad(iid) || !e || typeof e !== 'object' || typeof e.ok !== 'boolean' || !isDay(e.at)) return;
+      const have = cur.items[iid];
+      if (!have || !isDay(have.at) || e.at >= have.at) cur.items[iid] = { ok: e.ok, at: e.at };
+    });
+  });
+  return target;
 }

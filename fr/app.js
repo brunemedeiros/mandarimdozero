@@ -209,7 +209,10 @@ const STATE = {
   // Fase 6: revisão espaçada dos desafios errados (fail/partial). challengeId ->
   // { id, lastErrorAt, lastSeenAt, box } -- caixas Leitner 1/3/7/14 dias.
   // Atualizado só por updateChallengeReviewEntry() (bloco challenge-review-logic).
-  challengeReviews: {}
+  challengeReviews: {},
+  // Jogos da Conjugação (shared/conj-games.js, 2026-11-06): gameId -> { items: { itemId: { ok, at } }, rounds }.
+  // Última resposta de cada frase e o dia; partidas terminadas. Atualizado só por recordConjGameAnswer/finishConjGameRound.
+  conjGames: {}
 };
 
 // Só a PRIMEIRA unidade de cada nível já nasce destravada (isFirstOfLevel, shared/core/modulos-niveis.js).
