@@ -17,6 +17,13 @@ function stripPronunciationHints(text){
   }).replace(/[ \t]{2,}/g, ' ').trim();
 }
 
+// "brésiliens × brésiliennes": o × separa as formas (masculino × feminino), não é conta; a voz lia "vezes" (2026-11-06, pedido da dona).
+// Entre letras, com espaços dos dois lados, vira pausa curta (vírgula), como a barra "tu / vous". "4×20" e "2 × 3" (números) ficam como estão.
+function crossToPause(text){
+  if (typeof text !== 'string' || text.indexOf('\u00D7') === -1) return text;
+  return text.replace(/(\p{L})\s+\u00D7\s+(?=\p{L})/gu, '$1, ');
+}
+
 const TTS = {
   supported: 'speechSynthesis' in window,
   voice: null,
@@ -86,7 +93,7 @@ function speakStudyAudioOnly(text, btnEl, isAutoplay){
   window.speechSynthesis.resume();
 
   const buildUtterance = () => {
-    const u = new SpeechSynthesisUtterance(LANG_HOOKS.ttsText(stripPronunciationHints(text)));
+    const u = new SpeechSynthesisUtterance(LANG_HOOKS.ttsText(crossToPause(stripPronunciationHints(text))));
     u.lang = LANG_HOOKS.ttsLang;
     u.voice = TTS.voice;
     u.rate = LANG_HOOKS.ttsRate;

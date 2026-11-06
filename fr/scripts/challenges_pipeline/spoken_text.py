@@ -29,7 +29,7 @@ from dataclasses import dataclass
 from typing import Callable, Dict, List, Optional, Tuple
 
 # Sobe quando o comportamento de qualquer regra muda (regenerar o que a regra afeta).
-SPOKEN_RULES_VERSION = 6
+SPOKEN_RULES_VERSION = 7
 
 
 @dataclass(frozen=True)
@@ -69,6 +69,15 @@ def strip_pronunciation_hints(text: str) -> str:
     return re.sub(r"[ \t]{2,}", " ", out).strip()
 
 
+def cross_to_pause(text: str) -> str:
+    """"brésiliens × brésiliennes": o × separa as formas (masculino × feminino), não é conta; a voz lia "vezes" (2026-11-06).
+    Entre letras, com espaços dos dois lados, vira pausa curta (vírgula). "4×20" e "2 × 3" (números) ficam como estão.
+    Mesma regra de tts_core.mjs e de shared/core/voz.js."""
+    if "\u00d7" not in text:
+        return text
+    return re.sub(r"([^\W\d_])\s+\u00d7\s+(?=[^\W\d_])", r"\1, ", text)
+
+
 # ---------------------------------------------------------------------------
 # Francês
 # ---------------------------------------------------------------------------
@@ -77,6 +86,11 @@ _FR_RULES: List[SpokenRule] = [
         id="fr.pronunciation-hints", lang="fr",
         reason='"brésiliens /bʁe.zi.ljɛ̃/": a pronúncia entre barras é dica de tela e o TTS a lia em voz alta. Sai do texto falado; "tu / vous" e "et/ou" ficam.',
         pattern="", replacement="", fn=strip_pronunciation_hints,
+    ),
+    SpokenRule(
+        id="fr.cross-pause", lang="fr",
+        reason='"brésiliens × brésiliennes": o × separa as formas e a voz lia "vezes". Entre letras vira pausa curta (vírgula); "4×20" fica.',
+        pattern="", replacement="", fn=cross_to_pause,
     ),
     SpokenRule(
         id="fr.parenthetical-particle",
@@ -326,6 +340,11 @@ _PT_RULES: List[SpokenRule] = [
         id="pt.pronunciation-hints", lang="pt",
         reason='"Moi, c\'est Bia. /Muá, sé Bia/": a pronúncia entre barras é dica de tela e o TTS a lia em voz alta. Sai do texto falado; "bonito / bonita" e "e/ou" ficam.',
         pattern="", replacement="", fn=strip_pronunciation_hints,
+    ),
+    SpokenRule(
+        id="pt.cross-pause", lang="pt",
+        reason='"brésiliens × brésiliennes": o × separa as formas e a voz lia "vezes". Entre letras vira pausa curta (vírgula); "4×20" fica.',
+        pattern="", replacement="", fn=cross_to_pause,
     ),
     SpokenRule(
         id="pt.title-abbreviations", lang="pt",
