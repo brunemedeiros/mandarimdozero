@@ -622,8 +622,9 @@ function renderProfileBody(wrap, { profile, langs, earnedBadges, specialBadges, 
     </div>
   `;
 
-  document.getElementById('profile-stats-link')?.addEventListener('click', () => switchTab('progress'));
-  document.getElementById('profile-badges-link')?.addEventListener('click', () => switchTab('progress'));
+  // "Ver estatísticas completas" abre o Progresso no topo (números); "Ver todas" abre já nas Conquistas, no fim (2026-10-31).
+  document.getElementById('profile-stats-link')?.addEventListener('click', () => { switchTab('progress'); window.scrollTo({ top: 0 }); });
+  document.getElementById('profile-badges-link')?.addEventListener('click', () => switchTab('profile-badges'));
   document.getElementById('profile-edit-btn')?.addEventListener('click', () => openEditProfileModal(specialBadges));
   wireTrackChips(wrap, earnedBadges.length ? earnedBadges : badgeTrackViews(STATE).map(v => Object.assign({}, v, { name: v.nameNext })));
   wrap.querySelectorAll('.profile-special-badge[data-special-badge-id]').forEach(el => {

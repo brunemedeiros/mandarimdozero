@@ -73,7 +73,19 @@ const SPOKEN_OVERRIDES = {
   pt: {},
 };
 
+// Pronúncia anotada entre barras (/bʁe.zi.ljɛ̃/): dica de tela, não é para ser lida (2026-11-05, pedido da dona; mesma regra da voz do navegador,
+// stripPronunciationHints em shared/core/voz.js). Só vale a barra que abre depois de espaço/começo/"(" e fecha antes de espaço, pontuação ou "×";
+// "tu / vous" e "e/ou" (alternativas) ficam como estão. Roda ANTES da regra de barra com espaços.
+export function stripPronunciationHints(text) {
+  if (typeof text !== 'string' || text.indexOf('/') === -1) return text;
+  return text.replace(/(^|[\s(])\/(?=\S)[^\/\n]*?\S\/(?=$|[\s,.;:!?)\u00D7])/g, (m, pre, off, str) => {
+    const next = str.charAt(off + m.length);
+    return (/\s/.test(pre) && /[,.;:!?)]/.test(next)) ? '' : pre;
+  }).replace(/[ \t]{2,}/g, ' ').trim();
+}
+
 const FR_RULES = [
+  stripPronunciationHints,                                               // fr.pronunciation-hints
   (t) => t.replace(/\s*\(([^()]*)\)/g, ' $1…'),                         // fr.parenthetical-particle
   (t) => t.replace(/\s+\/\s+/g, ', '),                                   // fr.slash-alternatives
   (t) => t.replace(/œuf/g, 'oeuf'),                                      // fr.oe-ligature-elision
@@ -192,6 +204,7 @@ function ptAbbreviations(text) {
 }
 
 const PT_RULES = [
+  stripPronunciationHints,                                                   // pt.pronunciation-hints
   ptTitles,                                                                  // pt.title-abbreviations
   (t) => t.replace(new RegExp(`(?<!${L})([Nn])\\.?º\\s*(?=\\d)`, 'gu'),         // pt.number-abbreviation
     (m, n) => (n === 'N' ? 'Número ' : 'número ')),

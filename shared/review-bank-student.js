@@ -30,11 +30,20 @@ function bankHomeFsrsSnapshot(card){
   return o;
 }
 // Chamada por gradeCurrentCard() DEPOIS de applyMemoryGrade. Só cartões da professora (origin 'teacher') com linha própria.
-function logBankHomeStudy(card, grade, typed){
+// opts.correction (botão Voltar da Revisão): é a nota CORRIGIDA de um cartão já respondido. Se a resposta anterior ainda está na fila (não
+// foi enviada), ela é trocada ali mesmo; se já foi, o envio usa correct_my_bank_review (127), que troca a de hoje em vez de somar outra.
+function logBankHomeStudy(card, grade, typed, opts){
   try {
     if (!card || card.origin !== 'teacher' || card.rowId == null || typeof CURRENT_USER === 'undefined' || !CURRENT_USER) return;
     const list = bankHomeLogRead();
-    list.push({ card: Number(card.rowId), grade, typed: !!typed, fsrs: bankHomeFsrsSnapshot(card), at: Date.now() });
+    const entry = { card: Number(card.rowId), grade, typed: !!typed, fsrs: bankHomeFsrsSnapshot(card), at: Date.now() };
+    if (opts && opts.correction){
+      let at = -1;
+      for (let i = list.length - 1; i >= 0; i--){ if (list[i].card === entry.card){ at = i; break; } }
+      if (at >= 0 && !(at === 0 && _bankHomeFlushing)){ entry.fix = !!list[at].fix; list[at] = entry; bankHomeLogWrite(list); flushBankHomeLog(); return; }
+      entry.fix = true;
+    }
+    list.push(entry);
     bankHomeLogWrite(list);
     flushBankHomeLog();
   } catch (e) { console.error('logBankHomeStudy:', e); }
@@ -46,7 +55,10 @@ async function flushBankHomeLog(){
     let list = bankHomeLogRead();
     while (list.length){
       const e = list[0];
-      const { error } = await supabaseClient.rpc('log_my_bank_review', { p_card_id: e.card, p_grade: e.grade, p_typed: !!e.typed, p_fsrs: e.fsrs || null });
+      const args = { p_card_id: e.card, p_grade: e.grade, p_typed: !!e.typed, p_fsrs: e.fsrs || null };
+      let { error } = await supabaseClient.rpc(e.fix ? 'correct_my_bank_review' : 'log_my_bank_review', args);
+      // Banco ainda sem a 127: a correção entra como resposta comum (não trava a fila).
+      if (error && e.fix && (error.code === 'PGRST202' || error.code === '42883')) ({ error } = await supabaseClient.rpc('log_my_bank_review', args));
       if (error) break; // sem rede ou banco sem a 112: tenta de novo no próximo envio
       list = bankHomeLogRead().slice(1);
       bankHomeLogWrite(list);

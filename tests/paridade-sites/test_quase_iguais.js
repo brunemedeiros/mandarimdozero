@@ -25,13 +25,30 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
 // nas duas árvores para a comparação provar que o resto não mudou: o último cartão de palavra diz "Continuar →"; o XP usa
 // ⭐ (o ⚡ ficou só no Combo); e a janela da sequência (agora depois do Continuar) limpa os avisos "+N XP" da tela, então
 // numa cena a árvore nova pode ter a lista de avisos vazia onde a antiga ainda tinha avisos.
-const ETAPA6 = (v) => etapa7(v).split('Ver o que você aprendeu →').join('Continuar →').split('See what you learned →').join('Continue →')
+const ETAPA6 = (v) => etapa7(PROGRESSO_ORDEM(v)).split('Ver o que você aprendeu →').join('Continuar →').split('See what you learned →').join('Continue →')
   .replace(/26a1\.svg(&quot;\);\\?">)⚡/g, '2b50.svg$1⭐')
   // Recomeçar o curso (2026-10-30, migration 123): caixa nova e vazia (hidden) em Configurações > Geral, montada por shared/recomecar-curso.js.
   .replace(/<!-- Recomeçar este curso.*?-->(\\n|\n)\s*<article id=\\?"settings-restart-box\\?"[^>]*><\/article>(\\n|\n)\s*/g, '')
   // Lacuna dos cartões de completar sem os três tracinhos (2026-11-03, pedido da dona: a borda já é o sublinhado): a árvore nova
   // traz só um espaço dentro de <span class="cloze-blank">; a antiga trazia ___. Mesmo resto da cena.
-  .replace(/(<span class=\\?"cloze-blank\\?" id=\\?"cloze-blank\\?">)&nbsp;(<\/span>)/g, '$1___$2');
+  .replace(/(<span class=\\?"cloze-blank\\?" id=\\?"cloze-blank\\?">)&nbsp;(<\/span>)/g, '$1___$2')
+  // Botão "‹ Voltar" dos cartões da professora (2026-11-04, PRs #436/#438; docs/historico/15-auditoria-banco-revisao.md):
+  // syncReviewPrevRow cria a linha logo depois de #review-content em toda sessão da Revisão, VAZIA e escondida fora da sessão
+  // da professora. Só a linha vazia e hidden sai; com o botão dentro a cena continua diferente.
+  .replace(/<div id=\\?"review-prev-row\\?" class=\\?"review-prev-row\\?" hidden=\\?"\\?"><\/div>/g, '');
+// Perfil > Progresso (decisão da dona, 2026-10-31): Conquistas saíram de cima dos números e foram para o fim da tela.
+// Na árvore antiga, o bloco (título + grade) é movido para o fim; na nova, sai o comentário que explica a ordem.
+// Assim a comparação continua provando que números, gráficos e conquistas têm o mesmo conteúdo.
+const CONQ_INI = '<div data-i18n=\\"profile.sectionBadges\\"', STATS_INI = '<div class=\\"stat-cards\\"', NL4 = '\\n    ', FIM = '\\n  "}';
+const PROGRESSO_ORDEM = (v) => {
+  v = v.replace(/<!-- Conquistas no fim[\s\S]*?-->\\n\s*/, '');
+  const i = v.indexOf(CONQ_INI), j = v.indexOf(STATS_INI), k = v.lastIndexOf(FIM);
+  if (i < 0 || j < 0 || k < 0 || i > j) return v;
+  const bloco = v.slice(i, j); // título + grade + quebra de linha antes dos números
+  if (!bloco.endsWith(NL4)) return v;
+  const resto = v.slice(0, i) + v.slice(j), k2 = resto.lastIndexOf(FIM);
+  return resto.slice(0, k2) + NL4 + bloco.slice(0, -NL4.length) + resto.slice(k2);
+};
 const SEM_TOAST = (v) => v.replace(/\\?"toast\\?":\\?"[^"\\]*\\?"/, 'T');
 const TOAST_VAZIO = /\\?"toast\\?":\\?"\\?"/;
 const igualEtapa6 = (a, b) => { const x = ETAPA6(a), y = ETAPA6(b); return x === y || (TOAST_VAZIO.test(y) && SEM_TOAST(x) === SEM_TOAST(y)); };
@@ -41,15 +58,21 @@ function comparar(rotulo, antes, depois){
   check(`${rotulo}: mesmos erros de página antes e depois`, JSON.stringify(antes.errors) === JSON.stringify(depois.errors), { antes: antes.errors.slice(0, 3), depois: depois.errors.slice(0, 3) });
   check(`${rotulo}: mesmo número de cenas`, antes.cenas.length === depois.cenas.length, [antes.cenas.length, depois.cenas.length]);
   let iguais = 0, mostradas = 0;
+  const escondidas = [];
   const n = Math.min(antes.cenas.length, depois.cenas.length);
   for (let i = 0; i < n; i++){
     const a = antes.cenas[i], b = depois.cenas[i];
     if ((a.n === b.n || ETAPA6(a.n) === ETAPA6(b.n)) && (a.v === b.v || igualEtapa6(a.v, b.v))){ iguais++; continue; } // o nome da cena traz o texto do botão clicado
     if (mostradas++ < 3){
-      let j = 0; while (j < a.v.length && a.v[j] === b.v[j]) j++;
-      check(`${rotulo}: cena ${i} igual (${a.n})`, false, { depoisNome: b.n, antes: a.v.slice(Math.max(0, j - 150), j + 250), depois: b.v.slice(Math.max(0, j - 150), j + 250) });
-    } else failed++;
+      // O trecho mostrado é a diferença que SOBRA depois das neutralizações (ETAPA6 nas duas árvores). Mostrar a primeira
+      // diferença crua engana: ela costuma cair numa mudança já aprovada e neutralizada (caso de 2026-11-04: apontava para o
+      // nome "Speed Review", e a diferença real era outra, mais adiante).
+      const x = ETAPA6(a.v), y = ETAPA6(b.v);
+      let j = 0; while (j < x.length && x[j] === y[j]) j++;
+      check(`${rotulo}: cena ${i} igual (${a.n})`, false, { depoisNome: b.n, posicao: j, antesNeutro: x.slice(Math.max(0, j - 150), j + 250), depoisNeutro: y.slice(Math.max(0, j - 150), j + 250) });
+    } else { failed++; escondidas.push(`${i} (${a.n})`); }
   }
+  if (escondidas.length) console.log(`  ${rotulo}: mais ${escondidas.length} cena(s) diferente(s), sem trecho: ${escondidas.join(', ')}`);
   passed += iguais;
   console.log(`  ${rotulo}: ${iguais}/${antes.cenas.length} cenas iguais`);
   return iguais;

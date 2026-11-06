@@ -307,6 +307,16 @@ const PANEL_STUB = (who) => {
       L('aulas: aula de turma é 1 linha sem aluno e com a turma', await ev(() => { const r = window.__DB.teacher_class_logs[1]; return r.student_id === null && r.classroom_id === 501 && r.attendance_label_id === 62; }), await ev(() => window.__DB.teacher_class_logs[1]));
       await page.waitForSelector('#admin-classlogs-list-box .class-log-classroom');
       L('aulas: lista da turma mostra o nome da turma', await ev(() => document.querySelector('#admin-classlogs-list-box .class-log-classroom').textContent.includes('Dupla')));
+      // "Todos" no Mural > Aulas e materiais: vindo de uma turma, a lista mostra as aulas de todos, sem marcar ninguém no formulário (bug 2026-11-03)
+      await ev(() => { MURAL_STATE.teacher.sel = 'c:501'; muralApplyAulasScope('c:501'); return renderAdminClassLogsView(); });
+      await page.waitForFunction(() => document.querySelectorAll('#admin-classlogs-list-box [data-edit-class-log]').length === 1);
+      L('aulas: com uma turma escolhida, só as aulas dela', true);
+      await ev(() => { MURAL_STATE.teacher.sel = 'all'; muralApplyAulasScope('all'); return renderAdminClassLogsView(); });
+      await page.waitForFunction(() => document.querySelectorAll('#admin-classlogs-list-box [data-edit-class-log]').length === 2);
+      L('aulas: Todos lista as aulas do aluno e da turma juntas', true);
+      L('aulas: Todos não deixa ninguém marcado no formulário', await ev(() => !document.querySelector('[data-classlog-student-checkbox]:checked, [data-classlog-classroom-checkbox]:checked') && document.getElementById('admin-create-class-log-btn').disabled));
+      await page.check('[data-classlog-classroom-checkbox][value="501"]');
+      L('aulas: em Todos, marcar a turma no formulário não esconde as outras aulas', await ev(() => document.querySelectorAll('#admin-classlogs-list-box [data-edit-class-log]').length === 2));
       // rótulos no estilo do Notion: criar digitando, ⋯ para cor/nome/arquivar, sem perder o que já foi digitado
       await page.fill('#admin-class-log-topic', 'Texto que não pode sumir');
       await page.fill('[data-att-new="new"]', 'Remarcada');

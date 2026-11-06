@@ -888,7 +888,7 @@ function regradeReviewEntry(idx, newGrade){
   }
   if (typeof logBankHomeStudy === 'function'){
     const kind = e.local && e.local.kind;
-    logBankHomeStudy(card, newGrade, kind === 'type_answer' || kind === 'cloze');
+    logBankHomeStudy(card, newGrade, kind === 'type_answer' || kind === 'cloze', { correction: true });
   }
   e.grade = newGrade;
   e.xp = newXp;
