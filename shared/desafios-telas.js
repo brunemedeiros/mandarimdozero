@@ -20,8 +20,8 @@ function slowAudioBtnHTML(id){
 }
 // Áudio só com ícone (🔊 cinza, o mesmo da Revisão e da Conjugação; decisão da autora, 2026-11-06): para áudio de apoio ao lado da frase.
 function audioIconsHTML(playId, slowId){ return `<span class="expr-order-icons">${listenIconBtnHTML(playId)}${slowAudioIconBtnHTML(slowId, 'audio-btn-md')}</span>`; }
-// Rótulo do ícone de ouvir: a chave do idioma estudado (LANG_HOOKS.audioListenKey, fr e zh), com a do fr como reserva.
-function audioListenKeyCh(){ return (typeof LANG_HOOKS !== 'undefined' && LANG_HOOKS && LANG_HOOKS.audioListenKey) || 'fr.audio.listen'; }
+// Rótulo do ícone de ouvir: chave do idioma estudado vinda de registerChallenges (audioListenKey), com a do fr como reserva.
+function audioListenKeyCh(){ return chCfg().audioListenKey || 'fr.audio.listen'; }
 function listenIconBtnHTML(id){
   return `<button class="audio-btn audio-btn-md" id="${id}" aria-label="${t(audioListenKeyCh())}" title="${t(audioListenKeyCh())}">🔊</button>`;
 }
