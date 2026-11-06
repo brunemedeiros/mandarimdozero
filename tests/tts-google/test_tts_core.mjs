@@ -142,11 +142,14 @@ ok(core.decideMonthlyQuota({ count: 99999, limit: Infinity, isAdmin: false }).al
 ok(core.isTtsAdminEmail('BruneMed1310@gmail.com ') && !core.isTtsAdminEmail('x@y.com') && !core.isTtsAdminEmail(undefined), 'admin por e-mail');
 
 // --- pronúncia entre barras não é lida (2026-11-05) ---
-ok(core.toSpokenTextForTts('brésiliens /bʁe.zi.ljɛ̃/ × brésiliennes /bʁe.zi.ljɛn/', 'fr-FR') === 'brésiliens × brésiliennes', 'fr: pronúncia entre barras sai');
+ok(core.toSpokenTextForTts('brésiliens /bʁe.zi.ljɛ̃/ × brésiliennes /bʁe.zi.ljɛn/', 'fr-FR') === 'brésiliens, brésiliennes', 'fr: pronúncia entre barras sai (e o × vira pausa, 2026-11-06)');
 ok(core.toSpokenTextForTts('moi /mwa/ / toi /twa/', 'fr-FR') === 'moi, toi', 'fr: pronúncia sai e barra com espaços vira vírgula');
 ok(core.toSpokenTextForTts('bon /bõ/, bonne /bɔn/.', 'fr-FR') === 'bon, bonne.', 'fr: pronúncia antes de pontuação');
 ok(core.toSpokenTextForTts('Moi, c\'est Bia. /Muá, sé Bia/', 'pt-BR') === 'Moi, c\'est Bia.', 'pt: pronúncia entre barras sai');
 ok(core.toSpokenTextForTts('et/ou', 'fr-FR') === 'et/ou' && core.toSpokenTextForTts('un / une', 'fr-FR') === 'un, une', 'fr: e/ou e alternativas ficam');
+ok(core.toSpokenTextForTts('brésiliens × brésiliennes', 'fr-FR') === 'brésiliens, brésiliennes', 'fr: × entre palavras vira pausa');
+ok(core.toSpokenTextForTts('brasileiros × brasileiras', 'pt-BR') === 'brasileiros, brasileiras', 'pt: × entre palavras vira pausa');
+ok(core.toSpokenTextForTts('quatre-vingts (4×20)', 'fr-FR').includes('4×20') && core.toSpokenTextForTts('2 × 3', 'fr-FR') === '2 × 3', '× de conta (números) fica');
 ok(core.toSpokenTextForTts('/ʁɔ̃/ x', 'cmn-CN') === '/ʁɔ̃/ x', 'zh não muda');
 
 // --- cliente e servidor concordam no generationKey ---
@@ -166,13 +169,13 @@ vm.createContext(ctx);
 vm.runInContext(fs.readFileSync(path.join(root, 'languages/registry.js'), 'utf8'), ctx);
 vm.runInContext(model + '\n;globalThis.__k = computeTtsGenerationKey; globalThis.__labels = TTS_GENERATION_ERROR_LABELS;', ctx);
 const clientKey = await ctx.__k('un / une', 'fr-FR', null, 1);
-const parts = ['un / une', 'fr-FR', '', '1', 'google-chirp3-hd', '2:fr5'].map(encodeURIComponent).join('\u001F');
+const parts = ['un / une', 'fr-FR', '', '1', 'google-chirp3-hd', '2:fr6'].map(encodeURIComponent).join('\u001F');
 const serverKey = Buffer.from(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(parts))).toString('hex');
 ok(clientKey === serverKey, 'generationKey inclui google-chirp3-hd e a versão por idioma');
 const ptKey = await ctx.__k('obrigado(a)', 'pt-BR', null, 1);
 const zhKey = await ctx.__k('obrigado(a)', 'zh-CN', null, 1);
-const ptParts = ['obrigado(a)', 'pt-BR', '', '1', 'google-chirp3-hd', '2:pt4'].map(encodeURIComponent).join('\u001F');
-ok(ptKey === Buffer.from(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(ptParts))).toString('hex'), 'pt usa 2:pt4');
+const ptParts = ['obrigado(a)', 'pt-BR', '', '1', 'google-chirp3-hd', '2:pt5'].map(encodeURIComponent).join('\u001F');
+ok(ptKey === Buffer.from(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(ptParts))).toString('hex'), 'pt usa 2:pt5');
 ok(ptKey !== zhKey, 'versão por idioma separa pt de zh');
 for (const code of ['monthly_quota_exceeded', 'provider_error', 'provider_rate_limited', 'provider_not_configured', 'quota_check_failed', 'unsupported_language', 'invalid_voice', 'rate_limited']) {
   ok(typeof ctx.__labels[code] === 'string' && ctx.__labels[code].length > 0, 'rótulo ' + code);

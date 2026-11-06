@@ -26,6 +26,14 @@ T('http://exemplo.com/a/b', 'http://exemplo.com/a/b');
 T('sem barra nenhuma', 'sem barra nenhuma');
 T('', '');
 
+const mc = src.match(/function crossToPause\(text\)\{[\s\S]*?\n\}\n/);
+const cross = new Function(mc[0] + '; return crossToPause;')();
+const C = (e, x) => { const r = cross(e); if (r === x) ok++; else falhas.push('× ' + JSON.stringify(e) + ' -> ' + JSON.stringify(r)); };
+C('brésiliens × brésiliennes', 'brésiliens, brésiliennes');
+C('2 × 3', '2 × 3');
+C('quatre-vingts (4×20)', 'quatre-vingts (4×20)');
+C('sem sinal', 'sem sinal');
+
 console.log(falhas.length ? 'FALHAS:\n' + falhas.join('\n') : 'ok');
 console.log(ok + ' passaram, ' + falhas.length + ' falharam');
 process.exit(falhas.length ? 1 : 0);

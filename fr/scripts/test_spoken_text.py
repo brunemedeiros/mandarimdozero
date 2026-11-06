@@ -28,11 +28,13 @@ def md5(s):
 
 # --- regras aprovadas -------------------------------------------------------
 check("slash -> vírgula", st.to_spoken_text("un / une", "fr") == "un, une")
-check("pronúncia entre barras sai (fr)", st.to_spoken_text("brésiliens /bʁe.zi.ljɛ̃/ × brésiliennes /bʁe.zi.ljɛn/", "fr") == "brésiliens × brésiliennes")
+check("pronúncia entre barras sai (fr)", st.to_spoken_text("brésiliens /bʁe.zi.ljɛ̃/ × brésiliennes /bʁe.zi.ljɛn/", "fr") == "brésiliens, brésiliennes")
 check("pronúncia entre barras sai e a barra com espaços vira vírgula", st.to_spoken_text("moi /mwa/ / toi /twa/", "fr") == "moi, toi")
 check("pronúncia antes de pontuação (fr)", st.to_spoken_text("bon /bõ/, bonne /bɔn/.", "fr") == "bon, bonne.")
 check("pronúncia entre barras sai (pt)", st.to_spoken_text("Moi, c'est Bia. /Muá, sé Bia/", "pt") == "Moi, c'est Bia.")
 check("e/ou e URL ficam", st.to_spoken_text("et/ou", "fr") == "et/ou" and st.to_spoken_text("http://a.com/b/c", "fr") == "http://a.com/b/c")
+check("× entre palavras vira pausa (fr e pt)", st.to_spoken_text("brésiliens × brésiliennes", "fr") == "brésiliens, brésiliennes" and st.to_spoken_text("brasileiros × brasileiras", "pt") == "brasileiros, brasileiras")
+check("× de conta fica", st.to_spoken_text("2 × 3", "fr") == "2 × 3" and "4×20" in st.to_spoken_text("quatre-vingts (4×20)", "fr"))
 check("explain pronúncia", st.explain_spoken_text("accent /ak.sãn/", "fr") == ["fr.pronunciation-hints"])
 check("slash com acentos", st.to_spoken_text("brésilien / brésilienne", "fr") == "brésilien, brésilienne")
 check("parêntese lido, pausa curta (reticências)", st.to_spoken_text("un kilo (de)", "fr") == "un kilo de…")
