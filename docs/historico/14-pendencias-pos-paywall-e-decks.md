@@ -13,9 +13,17 @@ Pedido da autora: guardar aqui o que só faz sentido (ou só é seguro) depois d
 
 **Conjugação (fr)**
 11. Jogos da Conjugação são Premium (decisão da autora, 2026-10-14); a prática normal da Conjugação é grátis. Hoje só o
-    cadeado aparece. Ao ligar o paywall: `CONJ_GAMES_PAYWALL_ENABLED = true` em `fr/app.js` (a trava fica em
+    selo ⭐ aparece (regra 7). Ao ligar o paywall: `CONJ_GAMES_PAYWALL_ENABLED = true` em `shared/conjugacao.js` (a trava fica em
     `createConjGames` > `start`, via `isConjGameLocked`; quem não é Premium vê o aviso Premium). Trava só de tela, como a dos
-    Desafios antes da 008: os dados dos jogos estão no código público.
+    Desafios antes da 008: os dados dos jogos estão no código público. **Atualização 2026-11-06**: 1 jogo grátis por nível
+    (A1 `etre-avoir`, A2 `pc-imparfait`); os Premium ficam no fim de cada grupo (`docs/jogos-reformulacao-plano.md`).
+
+**Botão e texto de "Assinar" (pedido da autora, 2026-11-06)**
+12. Hoje não existe pagamento: todo convite Premium diz "Fale com a Prof. Brune". Quando o paywall e a cobrança existirem,
+    trocar botão e texto por um "Assinar" de verdade em TODAS as áreas: Jogos da Conjugação (convite no fim de cada grupo e
+    janela `premium-games-modal`), Desafios do Módulo (`premium-challenges-modal`), Ditados Premium, avisos de tipos de
+    cartão, Decks públicos, áudio por Field e qualquer outro convite que use `premiumContactButtonHTML()`
+    (procurar por esse nome no código para achar todos). Textos em pt-BR e en no mesmo lote.
 
 **Premium / cobrança (nada disto existe ainda)**
 5. Não há Stripe nem checkout: o modal de aviso Premium só convida a entrar em contato. Decidir o fluxo de pagamento junto do paywall.
