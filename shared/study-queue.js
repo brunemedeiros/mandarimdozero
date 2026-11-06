@@ -70,7 +70,12 @@ function getStudyQueue(pool, options){
     // venceram (reps>0); cartões novos entram exclusivamente pela via
     // limitada por newCardsLimit.
     const dueReviewed = pool.filter(c => cardStudyBucket(c) !== 'new' && c.due <= Date.now());
-    const newLimit = options.newCardsLimit != null ? options.newCardsLimit : 10;
+    let newLimit = options.newCardsLimit != null ? options.newCardsLimit : 10;
+    // "Novas por dia" é por DIA (2026-11-06, caso da Rachel): cartão da professora que já estreou hoje (firstLearnedDate = hoje, preenchido na
+    // 1ª resposta) gasta a cota; sem isso o contador voltava a "10" a cada lote concluído. Só origem 'teacher': cartão da trilha pode ser
+    // estreado dentro da lição, e isso não deve tirar vagas da Revisão.
+    const introducedToday = pool.filter(c => c.origin === 'teacher' && c.firstLearnedDate === todayStr()).length;
+    newLimit = Math.max(0, newLimit - introducedToday);
     const fresh = newCards(pool).slice(0, newLimit);
     selected = dueReviewed.concat(fresh);
   }

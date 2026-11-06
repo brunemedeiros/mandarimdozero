@@ -76,3 +76,15 @@ Arquivo `shared/supabase_migrations/081_review_bank.sql`. Renumerada de 080 para
 - Limite conhecido (v1, sem migration): a correção chega ao Banco como uma segunda resposta (`log_my_bank_review`), então conta 2x em "Desempenho (aula e casa)".
   Resolvido pela migration 127 (`correct_my_bank_review`, troca a resposta de hoje em vez de somar): no Staging em 2026-11-04; produção só com autorização da dona.
   Cliente: `logBankHomeStudy(..., {correction:true})` troca a resposta ainda na fila ou envia pela função nova; sem a 127 no banco cai na função comum. Testes: `tests/banco-revisao-voltar/test_correcao_fila.js` (3/3) e `tests/banco-revisao-compartilhado/run.sh` (33/33).
+
+## Caso da Rachel: "continua 10 cartões, os mesmos" (2026-11-06)
+- Diagnóstico (dados da produção, só leitura): as respostas dela foram salvas (24 cartões de hoje agendados para amanhã ou depois). Duas causas juntas:
+  1) "Novas por dia" (10) não descontava os cartões novos já estreados hoje: com 14 novos sobrando, o contador voltava a 10 a cada lote;
+  2) cartão de verbo com as 6 formas (ALLER, COMPRENDRE, ÊTRE) virava "Completar" e pedia digitar tudo exato; cada "Errei" punha o cartão de volta no fim da
+     sessão, sem teto, enquanto sobrassem 3 à frente (no teste, errando sempre, cada cartão voltava 6 a 7 vezes em 40 respostas).
+- Correção (decisão da dona, 2026-11-06): A) `getStudyQueue` desconta da cota os cartões da professora com `firstLearnedDate` de hoje (só origem teacher; trilha não);
+  B) no máximo UM reforço de "Errei" por cartão na sessão (`STATE.reviewRequeued`, também no Voltar); C) `rbCardMode(item, existingMode)`: verbo com 3 ou mais formas
+  separadas por vírgula vira cartão Normal só em cartão NOVO; cartão já entregue mantém o tipo (mudar o tipo zera o progresso) e a sincronização de item editado passa `existingMode`.
+- Os cartões de verbo que já existem NÃO foram convertidos (precisa de autorização; ver a contagem por aluno antes). `engine.generated.mjs` regerado: a regra C só vale na rotina
+  da madrugada depois de novo deploy da `review-bank-agent` (v12 hoje).
+- Testes: `tests/banco-revisao-limites/` (modelo e fila 14/14, reforço 8/8, sem a correção o teste do reforço falha). `test_quase_iguais.js` ganhou a correção B em `CORRECOES` (a sequência clica "Errei" e a árvore nova tem menos cenas).
