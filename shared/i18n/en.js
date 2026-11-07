@@ -842,6 +842,13 @@ window.I18N_CATALOG['en'] = {
   'games.practiceMistakes': 'Practice only my mistakes', // ALTA
   'games.again': 'Play again', // ALTA
   'games.backToGames': '← Back to games', // ALTA
+  'games.summary.one': '{done} of {total} game completed', // ALTA
+  'games.summary.other': '{done} of {total} games completed', // ALTA
+  'games.hits.one': '{n} right answer', // ALTA
+  'games.hits.other': '{n} right answers', // ALTA
+  'games.doneSeal': '✓ Completed · {pct}%', // ALTA
+  'games.levelName': 'Level {level}', // ALTA
+  'games.ring.aria': '{done} of {total} games completed in this level', // ALTA
   'fr.dictation.levelReviewTitle': 'Level {level} review', // ALTA
   'fr.challenges.title': 'Challenges', // ALTA
   'fr.challenges.sub': 'Practice real French: expressions, listening comprehension and spelling.', // ALTA

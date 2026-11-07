@@ -530,7 +530,8 @@ function startConjSession(verbs, tenses){
 // O selo segue a regra 7 da dona: desligado = "⭐ Premium" sem cadeado; ligado = "⭐ Premium" + cadeado para quem não tem.
 let CONJ_GAMES_PAYWALL_ENABLED = false; // let: os testes ligam a flag
 function conjGamesUnlocked(){ return (typeof planCan === 'function' && planCan('conj_games')) || (typeof isChallengesAdmin === 'function' && isChallengesAdmin()); }
-function isConjGameLocked(){ return CONJ_GAMES_PAYWALL_ENABLED && !conjGamesUnlocked(); }
+// Jogo com free:true (1 grátis por nível, decisão da autora, 2026-11-06) nunca trava.
+function isConjGameLocked(g){ return !(g && g.free) && CONJ_GAMES_PAYWALL_ENABLED && !conjGamesUnlocked(); }
 // Janela Premium própria dos Jogos (não a dos Desafios do Módulo), com o botão "Fale com a Prof. Brune".
 function openPremiumGamesModal(){
   const modal = document.getElementById('premium-games-modal');

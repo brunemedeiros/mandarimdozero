@@ -46,7 +46,7 @@ lingua.com (painel de progresso, cartões com status, Premium no fim de cada gru
 - Sem desenhos novos de linha do tempo nos Jogos (o `pc-imparfait` mantém os 2 que já tem).
 - Ordem das etapas: a da tabela abaixo.
 
-## Jogos novos propostos (a partir de `docs/i18n/curriculo/04-v1-lacunas-e-propostas-fr.md`, seção 2.2 e J6) -- aguarda a autora
+## Jogos novos (a partir de `docs/i18n/curriculo/04-v1-lacunas-e-propostas-fr.md`, seção 2.2 e J6) -- lista APROVADA pela autora em 2026-11-07
 
 Todos no formato atual (duas formas para a lacuna) + as etapas novas. Só verbos (vocabulário e preposições ficam para Desafios).
 Grátis: 1 por nível. Cada jogo novo: ~20 frases em pt-BR e en, revisor-conteudo, aprovação da autora antes de publicar.
@@ -73,7 +73,18 @@ Grátis: 1 por nível. Cada jogo novo: ~20 frases em pt-BR e en, revisor-conteud
    `recordConjGameAnswer`, `finishConjGameRound`, `conjGameStatus` (vistas, acertos, %, concluído com
    `CONJ_GAME_DONE_PCT = 70`), `conjGamesSummary` (painel do topo). Sair no meio guarda as respostas. Recomeçar o curso
    já zera (a RPC 123 só copia campos fixos) e agora lista "Jogos da Conjugação". Teste `tests/jogos-progresso/` 42/42.
-2. Lista no visual das Expressões: painel no topo, grupos por nível, selo de concluído, tema.
-3. Filtro Todos / Pendentes / Concluídos.
-4. Grátis x Premium no fim do grupo.
-5. Resultado com erros e "Revisar erros".
+2. **Feita (2026-11-07, aguarda a autora ver)**: lista no padrão das Expressões, desenhada em `renderList`
+   (shared/conj-games.js) com as peças de shared/desafios.css (`.challenge-progress`, `.challenges-level-*`,
+   `.challenge-card.expr-card`, `.expr-card-seal`, `.expr-reg`); o próprio do cartão de jogo em shared/conjugacao.css. Painel
+   "X de Y jogos concluídos" + barra + acertos; grupos por nível recolhíveis com anel; cartão com título, frase de exemplo
+   (`sample`) com as duas opções, apresentação em 2 linhas, tema (`theme`) e "⭐ Premium" só nos não grátis (`free`);
+   concluído com selo "✓ Concluído · N%". `isConjGameLocked(g)` nunca trava jogo `free`. Site com Jogos precisa carregar
+   shared/desafios.css (o fr carrega). Testes: jogos-progresso 60/60, conjugacao 82/82 (checks de Premium atualizados:
+   pc-imparfait virou grátis), paridade da Conjugação 343/343 (conteúdo da lista fora da comparação nas duas árvores).
+3. Filtros Todos / Pendentes / Concluídos, Premium no fim de cada grupo, cartões "em breve" (aprovados: Agora ou depois? A1,
+   Futur ou conditionnel? A2, Indicatif ou subjonctif? B1).
+4. Resultado com os erros + "Revisar erros" escrevendo (na hora) e guardado para outro dia.
+5. Rodada Completa x Curta; a partida puxa primeiro as frases ainda não vistas.
+6. Etapa "Escreva a resposta" dentro da partida.
+7. Etapas "Corrija o erro" e "Traduza a frase inteira" (conteúdo novo, revisão e aprovação).
+8. Jogos de revisão do nível e respostas alternativas.

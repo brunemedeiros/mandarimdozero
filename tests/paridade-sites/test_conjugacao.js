@@ -62,6 +62,11 @@ async function fingerprint(browser, root){
   const click = (sel) => page.evaluate((s) => { const e = document.querySelector(s); if (!e) throw new Error('sem ' + s); e.click(); }, sel);
   const html = (sel) => page.evaluate((s) => { const e = document.querySelector(s); return e ? e.innerHTML : null; }, sel);
   const view = () => html('#view-conjugaison');
+  // Lista dos Jogos refeita de propósito (etapa 2 da reformulação, 2026-11-06, docs/jogos-reformulacao-plano.md): nas cenas da
+  // lista, o conteúdo de #conj-games-list fica de fora nas duas árvores (o resto da tela continua comparado); a lista nova
+  // tem teste próprio em tests/jogos-progresso e tests/conjugacao.
+  const viewSemLista = () => page.evaluate(() => { const l = document.getElementById('conj-games-list'); const k = l.innerHTML; l.innerHTML = ''; return k; })
+    .then(k => view().then(v => page.evaluate(k => { document.getElementById('conj-games-list').innerHTML = k; }, k).then(() => v)));
   const state = () => page.evaluate(() => JSON.stringify({ conj: CONJ_STATE, checked: CONJ_STATE.checked ? [...CONJ_STATE.checked] : null,
     daily: STATE.daily, xp: STATE.xp, modes: STATE.modesUsed, saved: serializeState(),
     missions: REVISAO_CONJ_CHALLENGES.map(c => [c.id, c.icon, c.label, c.target, c.get(STATE.daily)]) }));
@@ -193,11 +198,12 @@ async function fingerprint(browser, root){
 
   // ---- 6. Jogos: lista, selo (trava desligada e ligada), janela Premium e um jogo inteiro
   await click('#conj-mode-games');
-  out.j_lista = await view();
+  out.j_lista = await viewSemLista();
   await page.evaluate(() => { CONJ_GAMES_PAYWALL_ENABLED = true; isChallengesAdmin = () => false; setConjMode('games'); });
-  out.j_trava = await view();
+  out.j_trava = await viewSemLista();
   out.j_trava_lock = await page.evaluate(() => [isConjGameLocked(), conjGamesUnlocked()]);
-  await click('.cg-play[data-game="pc-imparfait"]');
+  // pc-imparfait virou o jogo grátis do A2 (2026-11-06): a janela Premium é testada com um jogo Premium nas duas árvores.
+  await click('.cg-play[data-game="pc-auxiliaire"]');
   out.j_janela = await page.evaluate(() => { const m = document.getElementById('premium-games-modal'); return m.style.display + '|' + m.innerHTML; });
   await click('#premium-games-modal-close');
   await page.evaluate(() => { CONJ_GAMES_PAYWALL_ENABLED = false; setConjMode('games'); __seed(31); });

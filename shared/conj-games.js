@@ -78,19 +78,76 @@ function createConjGames({ games, speak, ids, isLocked, onLocked, lang = 'fr' })
       ? ` <span class="cg-lock" role="img" aria-label="${esc(tt('games.locked'))}">🔒</span>` : ''}</span>`;
   }
 
+  // ---------- Lista (etapa 2 da reformulação, 2026-11-06, docs/jogos-reformulacao-plano.md) ----------
+  // No padrão da lista de Expressões (peças de shared/desafios.css): painel "X de Y jogos concluídos" + barra + acertos,
+  // grupos por nível recolhíveis com anel, cartão de álbum (pendente tracejado; concluído com selo "✓ Concluído · N%").
+  // Cartão: título, frase de exemplo com a lacuna e as duas opções, apresentação (2 linhas), tema e selo Premium.
+  const collapsedLevels = new Set();
+  const plural = (base, n, p) => tt(base + (n === 1 ? '.one' : '.other'), p);
+  const tidy = h => h.replace(/ ([?!:;])/g, '\u00a0$1'); // tipografia francesa: o sinal não cai sozinho na linha de baixo
+
+  function summaryHTML(){
+    const sum = conjGamesSummary(games);
+    const pct = sum.total ? Math.round(100 * sum.done / sum.total) : 0;
+    return `<div class="cg-summary">
+      <div class="challenge-progress" data-done="${sum.done}" data-total="${sum.total}">
+        <div class="challenge-progress-label">${esc(plural('games.summary', sum.total, { done: sum.done, total: sum.total }))}</div>
+        <div class="challenge-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="${sum.total}" aria-valuenow="${sum.done}"><div class="challenge-progress-fill" style="width:${pct}%"></div></div>
+      </div>
+      <span class="cg-summary-hits">${esc(plural('games.hits', sum.right, { n: sum.right }))}</span>
+    </div>`;
+  }
+
+  function sampleHTML(g){
+    const it = g.items.find(x => x.id === g.sample) || g.items[0];
+    if (!it) return '';
+    return `<span class="cg-card-sample" lang="${lang}">${tidy(`${esc(it.before)}<span class="cg-card-blank" aria-hidden="true"></span>${esc(it.after)}`)}</span>
+      <span class="cg-card-opts" lang="${lang}">${esc(it.a)} / ${esc(it.b)}</span>`;
+  }
+
+  function cardHTML(g){
+    const st = conjGameStatus(g);
+    const theme = L(g.theme);
+    return `<div class="cg-card-wrap">
+      <button type="button" class="challenge-card expr-card cg-game-card cg-play ${st.done ? 'completed' : ''}" data-game="${esc(g.id)}" data-done="${st.done ? 1 : 0}">
+        ${st.done ? `<span class="expr-card-seal">${esc(tt('games.doneSeal', { pct: st.pct }))}</span>` : ''}
+        <span class="challenge-card-expr">${rich(L(g.title))}</span>
+        ${sampleHTML(g)}
+        <span class="cg-card-lede">${rich(L(g.lede))}</span>
+        <span class="expr-card-foot">${theme ? `<span class="expr-reg expr-reg-neutral">${esc(theme)}</span>` : ''}${g.free ? '' : premiumSealHTML(g)}</span>
+      </button>
+    </div>`;
+  }
+
+  function levelSectionHTML(level){
+    const list = games.filter(g => (g.level || '') === level);
+    const done = list.filter(g => conjGameStatus(g).done).length;
+    const pct = list.length ? Math.round(100 * done / list.length) : 0;
+    const collapsed = collapsedLevels.has(level);
+    return `<div class="challenges-level-section" data-level="${esc(level)}">
+      <button type="button" class="challenges-level-heading" data-level="${esc(level)}" aria-expanded="${!collapsed}">
+        <span class="challenges-level-chevron ${collapsed ? 'collapsed' : ''}" aria-hidden="true">▾</span>
+        <span class="challenges-level-ring" style="--p:${pct}" data-complete="${pct === 100 ? 1 : 0}" role="img" aria-label="${esc(tt('games.ring.aria', { done, total: list.length }))}">${done}/${list.length}</span>
+        ${esc(level ? tt('games.levelName', { level }) : tt('games.tabGames'))}
+        <span class="challenges-level-count">${list.length}</span>
+      </button>
+      <div class="challenges-cards cg-cards" ${collapsed ? 'hidden' : ''}>${list.map(cardHTML).join('')}</div>
+    </div>`;
+  }
+
   function renderList(){
     const el = $(ids.list);
     if (!el) return;
-    el.innerHTML = games.map(g => `
-      <article class="cg-card">
-        <h3 class="cg-card-title">${g.level ? `<span class="cg-level">${esc(g.level)}</span>` : ''}${rich(L(g.title))}</h3>
-        <p class="cg-card-lede">${rich(L(g.lede))}</p>
-        <div class="cg-card-foot">
-          <span class="cg-card-meta">${premiumSealHTML(g)}${esc(tt('games.perRound', { n: Math.min(g.perRound, g.items.length) }))}</span>
-          <button type="button" class="btn btn-primary cg-play" data-game="${esc(g.id)}">${esc(tt('games.play'))}</button>
-        </div>
-      </article>`).join('');
+    const levels = [...new Set(games.map(g => g.level || ''))];
+    el.innerHTML = summaryHTML() + `<div class="challenges-level-sections cg-level-sections">${levels.map(levelSectionHTML).join('')}</div>`;
     el.querySelectorAll('.cg-play').forEach(b => b.addEventListener('click', () => start(b.dataset.game)));
+    el.querySelectorAll('.challenges-level-heading').forEach(b => b.addEventListener('click', () => {
+      const lv = b.dataset.level;
+      if (collapsedLevels.has(lv)) collapsedLevels.delete(lv); else collapsedLevels.add(lv);
+      renderList();
+      const again = el.querySelector(`.challenges-level-heading[data-level="${lv}"]`);
+      if (again) again.focus();
+    }));
   }
 
   function show(playing){

@@ -244,13 +244,25 @@
 #view-conjugaison .conj-mode{ min-height:40px; padding:8px 20px; border:none; border-radius:999px; background:transparent; color:var(--ink-soft); font-family:var(--font-body); font-weight:800; font-size:14.5px; cursor:pointer; }
 #view-conjugaison .conj-mode.active{ background:var(--paper); color:var(--ink); box-shadow:var(--shadow-card); }
 #view-conjugaison .conj-mode:focus-visible{ outline:2px solid var(--seal-red); outline-offset:2px; }
-#view-conjugaison .cg-list{ display:grid; gap:12px; max-width:780px; }
-#view-conjugaison .cg-card{ background:var(--paper); border:1px solid var(--paper-line); border-radius:18px; padding:20px; box-shadow:var(--shadow-card); }
-#view-conjugaison .cg-card-title{ margin:0 0 6px; font-size:19px; font-weight:800; color:var(--ink); }
-#view-conjugaison .cg-card-lede{ margin:0 0 16px; color:var(--ink-soft); font-size:14.5px; line-height:1.5; max-width:62ch; }
-#view-conjugaison .cg-card-foot{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
-#view-conjugaison .cg-card-meta{ font-size:13px; font-weight:700; color:var(--ink-soft); }
-#view-conjugaison .cg-card .cg-play{ min-width:140px; }
+/* Lista dos Jogos (etapa 2 da reformulação, 2026-11-06): peças das Expressões (shared/desafios.css: .challenge-progress,
+   .challenges-level-*, .challenge-card.expr-card, .expr-card-seal, .expr-reg); aqui só o que é próprio do cartão de jogo. */
+#view-conjugaison .cg-list{ max-width:780px; }
+#view-conjugaison .cg-summary{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin:0 0 18px; }
+#view-conjugaison .cg-summary .challenge-progress{ margin:0; max-width:320px; flex:1 1 200px; }
+#view-conjugaison .cg-summary-hits{ font-size:13px; font-weight:800; color:var(--ink-soft); font-variant-numeric:tabular-nums; white-space:nowrap; }
+#view-conjugaison .cg-cards{ display:grid; }
+#view-conjugaison .cg-cards[hidden]{ display:none; }
+#view-conjugaison .cg-card-wrap{ position:relative; min-width:0; }
+#view-conjugaison .challenge-card.cg-game-card{ padding:14px 16px; gap:7px; cursor:pointer; font-family:var(--font-body); color:var(--ink); }
+#view-conjugaison .cg-game-card .challenge-card-expr{ font-size:18px; }
+#view-conjugaison .cg-card-sample{ font-size:15px; font-weight:700; line-height:1.45; color:var(--ink); }
+#view-conjugaison .cg-card-blank{ display:inline-block; width:3.2em; height:1em; vertical-align:-0.15em; margin:0 .15em; border-bottom:2px solid var(--seal-red-dark); }
+#view-conjugaison .cg-card-opts{ font-size:13px; font-weight:700; color:var(--seal-red-dark); }
+#view-conjugaison .cg-card-lede{ font-size:13.5px; line-height:1.45; color:var(--ink-soft); display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+/* sem o botão de áudio das Expressões: rodapé em linha, sem a reserva à direita nem altura mínima */
+#view-conjugaison .cg-game-card .expr-card-foot{ flex-direction:row; flex-wrap:wrap; align-items:center; gap:6px; padding-right:0; min-height:0; }
+#view-conjugaison .challenges-cards .challenge-card.cg-game-card{ min-height:0; padding:14px 16px; }
+#view-conjugaison .cg-game-card .cg-premium{ font-size:12px; font-weight:800; color:var(--ink-soft); }
 #conj-game-wrap{ max-width:720px; margin:0 auto; }
 #view-conjugaison .cg-title{ font-size:18px; font-weight:800; margin:0 0 10px; color:var(--ink); }
 #view-conjugaison .cg-progress{ display:flex; align-items:center; gap:12px; margin-bottom:18px; font-size:13px; font-weight:700; color:var(--ink-soft); font-variant-numeric:tabular-nums; }

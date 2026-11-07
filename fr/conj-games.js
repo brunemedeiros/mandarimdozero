@@ -11,6 +11,8 @@
 //   ans: 'a' | 'b'; verb: infinitivo (opcional, aparece entre parênteses); clue: trecho da frase que decide (destacado na explicação)
 //   Francês dentro do texto em português/inglês (title, lede, tl, why) vai entre {chaves}: sai em azul (.cg-fr).
 //   Vale para toda frase nova; o teste da Conjugação barra explicação sem nenhum trecho marcado.
+// Jogo (lista, 2026-11-06): free (true = grátis; sem o campo = Premium), sample (id da frase mostrada no cartão),
+//   theme (etiqueta de tema por idioma do site).
 //   text: tradução (tr) e explicação (why) por idioma do site. O curso em inglês não mostra
 //         português: sem a chave do idioma, cai no pt-BR só como último recurso.
 const CONJ_GAMES = [
@@ -18,6 +20,9 @@ const CONJ_GAMES = [
   {
     id: 'etre-avoir',
     level: 'A1',
+    free: true, // grátis do A1 (decisão da autora, 2026-11-06)
+    sample: 3,
+    theme: { 'pt-BR': 'Être e avoir', en: 'Être and avoir' },
     title: { 'pt-BR': '{Être} ou {avoir}?', en: '{Être} or {avoir}?' },
     lede: {
       'pt-BR': 'Fome, frio, sede, medo: em francês muita coisa se "tem" ({avoir}) em vez de se "estar". Complete com {être} ou {avoir} e veja onde o português engana.',
@@ -111,6 +116,8 @@ const CONJ_GAMES = [
   {
     id: 'pc-auxiliaire',
     level: 'A1',
+    sample: 1,
+    theme: { 'pt-BR': 'Passé composé', en: 'Passé composé' },
     title: { 'pt-BR': '{Passé composé}: {avoir} ou {être}?', en: '{Passé composé}: {avoir} or {être}?' },
     lede: {
       'pt-BR': 'A maioria dos verbos usa {avoir}, mas alguns pedem {être}. Escolha o auxiliar certo e veja os verbos que mais enganam, de um lado e do outro.',
@@ -224,6 +231,8 @@ const CONJ_GAMES = [
   {
     id: 'tu-vous',
     level: 'A1',
+    sample: 3,
+    theme: { 'pt-BR': 'Formal ou informal', en: 'Formal or informal' },
     title: { 'pt-BR': '{Tu} ou {vous}?', en: '{Tu} or {vous}?' },
     lede: {
       'pt-BR': 'Em português a gente diz "você" para quase todo mundo; em francês é preciso escolher. Leia a pista da frase e escolha a forma certa do verbo.',
@@ -309,6 +318,9 @@ const CONJ_GAMES = [
   {
     id: 'pc-imparfait',
     level: 'A2',
+    free: true, // grátis do A2 (decisão da autora, 2026-11-06)
+    sample: 2,
+    theme: { 'pt-BR': 'Tempos do passado', en: 'Past tenses' },
     title: { 'pt-BR': '{Passé composé} ou {Imparfait}?', en: '{Passé composé} or {Imparfait}?' },
     lede: {
       'pt-BR': 'Complete cada frase com o {passé composé} ou o {imparfait}. Depois de responder, veja por que a frase pede aquele tempo.',

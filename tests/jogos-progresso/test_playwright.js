@@ -2,7 +2,7 @@
 // STATE.conjGames[gameId] = { items: { itemId: { ok, at } }, rounds }: última resposta de cada frase, partidas terminadas;
 // vai no serializeState (progress.data), volta pelo applySerializedState sem apagar nada (vence o dia mais recente);
 // status do jogo (vistas/total, % pela última resposta, concluído = todas vistas e >= 70%); sair no meio guarda as respostas;
-// o Recomeçar lista "Jogos da Conjugação". Sem XP. A tela dos jogos não muda nesta etapa.
+// o Recomeçar lista "Jogos da Conjugação". Sem XP. Etapa 2: lista no padrão das Expressões (painel, níveis, selo, exemplo, tema).
 // Rodar: node tests/jogos-progresso/test_playwright.js
 const { chromium } = require(require.resolve('playwright', { paths: [process.env.NODE_PATH || '/opt/node22/lib/node_modules'] }));
 const http = require('http'), fs = require('fs'), path = require('path');
@@ -119,6 +119,31 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
     await page.click('#conj-game-wrap .activity-exit-btn');
     const mid = await page.evaluate(() => STATE.conjGames['tu-vous']);
     check(L + ' sair no meio guarda a resposta e não conta rodada', mid && Object.keys(mid.items).length === 1 && mid.rounds === 0, mid);
+
+    // Etapa 2 (lista no padrão das Expressões): painel, grupos por nível, selo só no concluído, frase de exemplo, tema, Premium.
+    await page.evaluate(() => { const g = CONJ_GAMES.find(x => x.id === 'etre-avoir'); g.items.forEach(it => recordConjGameAnswer(g.id, it.id, true)); CONJ_GAMES_UI.renderList(); });
+    const ls = await page.evaluate(() => {
+      const q = s => document.querySelector(s), qa = s => [...document.querySelectorAll(s)];
+      const card = id => q('.cg-game-card[data-game="' + id + '"]');
+      return { label: q('.cg-summary .challenge-progress-label').textContent, hits: q('.cg-summary-hits').textContent, bar: q('.cg-summary .challenge-progress-fill').style.width,
+        levels: qa('.cg-level-sections .challenges-level-section').map(x => x.dataset.level), ring: q('.challenges-level-section[data-level="A1"] .challenges-level-ring').textContent,
+        doneSeal: (card('etre-avoir').querySelector('.expr-card-seal') || {}).textContent || '', doneCls: card('etre-avoir').classList.contains('completed'),
+        pendSeal: !!card('tu-vous').querySelector('.expr-card-seal'), sample: card('etre-avoir').querySelector('.cg-card-sample').textContent, opts: card('etre-avoir').querySelector('.cg-card-opts').textContent,
+        theme: card('tu-vous').querySelector('.expr-reg').textContent, prem: ['etre-avoir', 'pc-auxiliaire', 'tu-vous', 'pc-imparfait'].map(id => !!card(id).querySelector('.cg-premium')),
+        hscroll: document.documentElement.scrollWidth > window.innerWidth + 1, noPt: lang => true };
+    });
+    const pt = lang === 'pt-BR';
+    check(L + ' painel: "1 de 4" no idioma do site', pt ? ls.label === '1 de 4 jogos concluídos' : ls.label === '1 of 4 games completed', ls.label);
+    check(L + ' painel: acertos e barra em 25%', /\d/.test(ls.hits) && (pt ? /acerto/.test(ls.hits) : /right answer/.test(ls.hits)) && ls.bar === '25%', ls);
+    check(L + ' grupos por nível A1, A2 com anel 1/3', ls.levels.join() === 'A1,A2' && ls.ring === '1/3', ls);
+    check(L + ' concluído com selo e %, pendente sem selo', ls.doneCls && /100%/.test(ls.doneSeal) && !ls.pendSeal, ls);
+    check(L + ' frase de exemplo com as duas opções', /faim/.test(ls.sample) && ls.opts === "J'ai / Je suis", ls);
+    check(L + ' tema no idioma do site', pt ? ls.theme === 'Formal ou informal' : ls.theme === 'Formal or informal', ls.theme);
+    check(L + ' selo Premium só nos jogos não grátis', ls.prem.join() === 'false,true,true,false', ls.prem);
+    check(L + ' celular sem rolagem horizontal', !ls.hscroll);
+    await page.click('.challenges-level-heading[data-level="A1"]');
+    check(L + ' recolher o nível esconde os cartões', await page.evaluate(() => document.querySelector('.challenges-level-section[data-level="A1"] .cg-cards').hidden && document.querySelector('.challenges-level-heading[data-level="A1"]').getAttribute('aria-expanded') === 'false'));
+    await page.click('.challenges-level-heading[data-level="A1"]');
 
     // Recomeçar o curso lista os Jogos no que volta para o zero.
     const restartKey = await page.evaluate(() => t('restart.zero.games'));
