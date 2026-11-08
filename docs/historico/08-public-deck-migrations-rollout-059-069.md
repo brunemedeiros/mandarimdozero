@@ -586,8 +586,12 @@ Número 086 já usado por outras conversas (`086_friends_streak_milestones_and_c
   colunas com sugestão, leitura incremental. Tela: `shared/notion-sync.js` + `shared/notion-sync.css` (caixa no topo de
   Aulas e materiais). Página `privacidade-notion.html`. Repasse `/notion/callback` no Netlify.
 - Staging: migration aplicada (2026-11-05, versão 20261105144747; 5 tabelas, cron criado, sem execute para anon/app nas funções
-  internas); função `notion-sync` v1 publicada (sem os secrets ainda: responde `not_configured`). Produção: PENDENTE.
+  internas); função `notion-sync` v1 publicada (secrets colocados pela autora em 2026-11-08: sem login = 401).
+- Produção (2026-11-08, autorizada): migration aplicada (versão 20261108171207; 5 tabelas, cron `7 * * * *`, sem execute para anon,
+  955 aulas antes e depois); função `notion-sync` v1 (sem login = 401, callback sem estado = 400 "Link expirado").
+  ATENÇÃO: a `main` tem outra `128_review_bank_agent_state_pending` (outra sessão); número repetido, como 072/073.
+- Ajuste na mesclagem: a caixa virou `<div class="painel"><details class="notion-box">` porque `PainelUI.confirmar()` prende a
+  janela no 1º `.painel` visível e, num `<details>` fechado, a janela não aparecia (quebrava "Apagar material", 210/210 de novo).
 - Testes: SQL local 128 19/19; peças `tests/notion/test_map.mjs` 10/10; painel-professora 793/793 (com a caixa do Notion);
   i18n 2336/2336, sem português no en 6/6, paridade CSS 5/5.
-- Falta: a autora criar a integração no Notion e os secrets (`docs/notion/passo-a-passo-integracao.md`), teste ponta a ponta no
-  Staging com o Notion dela, prévia, produção (migration + função + merge, que publica o Netlify e a página de privacidade).
+- Falta: a autora conectar o Notion dela na produção (Mural > Aulas e materiais > Notion) e conferir a 1ª leitura.

@@ -1,9 +1,9 @@
 /* Conectar Notion (128, shared/notion-sync.js). Peças do Design System do painel (.painel, p-*); aqui só o arranjo da caixa. */
-.painel.notion-box { margin: 0 0 1rem; border: 1px solid var(--p-linha); border-radius: var(--p-raio); background: var(--p-bg); padding: 0; }
-.painel.notion-box > summary { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; padding: .85rem 1.1rem; cursor: pointer; list-style: none; margin: 0; }
-.painel.notion-box > summary::-webkit-details-marker { display: none; }
-.painel.notion-box > summary::after { content: '▾'; margin-left: auto; color: var(--p-tinta-suave); transition: transform .15s; }
-.painel.notion-box:not([open]) > summary::after { transform: rotate(-90deg); }
+.painel .notion-box { margin: 0 0 1rem; border: 1px solid var(--p-linha); border-radius: var(--p-raio); background: var(--p-bg); padding: 0; }
+.painel .notion-box > summary { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; padding: .85rem 1.1rem; cursor: pointer; list-style: none; margin: 0; }
+.painel .notion-box > summary::-webkit-details-marker { display: none; }
+.painel .notion-box > summary::after { content: '▾'; margin-left: auto; color: var(--p-tinta-suave); transition: transform .15s; background-image: none; width: auto; height: auto; float: none; transform: none; }
+.painel .notion-box:not([open]) > summary::after { transform: rotate(-90deg); }
 .painel .notion-titulo { font-weight: 800; font-size: 1.05rem; color: var(--p-tinta); }
 .painel .notion-corpo { display: flex; flex-direction: column; gap: 1rem; padding: 0 1.1rem 1.1rem; }
 .painel .notion-corpo > * { margin: 0; }
@@ -26,7 +26,7 @@
 .painel .notion-desde { max-width: 320px; }
 @media (max-width: 600px) {
   .painel .notion-corpo { padding: 0 .8rem .9rem; }
-  .painel.notion-box > summary { padding: .8rem; min-height: 44px; }
+  .painel .notion-box > summary { padding: .8rem; min-height: 44px; }
   .painel .notion-box button, .painel .notion-ligar select, .painel .notion-box .p-menu > summary { min-height: 44px; }
   .painel .notion-revisao .p-item { flex-wrap: wrap; }
   .painel .notion-revisao .p-item-acoes { flex-basis: 100%; justify-content: flex-start; }

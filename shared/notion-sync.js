@@ -214,12 +214,14 @@ function notionBoxHTML(){
 }
 
 function notionBoxShellHTML(){
-  return `<details class="painel notion-box" id="admin-notion-box">
+  // O .painel fica num <div> por fora: o PainelUI.confirmar() prende a janela no 1º .painel visível, e dentro de um
+  // <details> fechado ela não apareceria (quebrava o "Apagar material").
+  return `<div class="painel notion-painel"><details class="notion-box" id="admin-notion-box">
     <summary class="notion-resumo-linha"><span class="notion-titulo">📝 ${t('panel.notion.title')}</span>
       <span class="p-selo p-selo--ok" data-notion-on hidden>${t('panel.notion.on')}</span>
       <span class="p-selo p-selo--aviso" data-notion-badge hidden></span></summary>
     <div class="notion-corpo" data-notion-body></div>
-  </details>`;
+  </details></div>`;
 }
 
 function notionRepaint(){
