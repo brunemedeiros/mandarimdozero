@@ -45,3 +45,7 @@ psql -h /tmp/pg -p 54329 -U pguser aulas94 -q -At -f "$HERE/test_122.sql" 2>&1 |
 $P aulas94 -f "$MIG/124_classroom_ranking.sql" >/dev/null
 $P aulas94 -f "$MIG/124_classroom_ranking.sql" >/dev/null
 psql -h /tmp/pg -p 54329 -U pguser aulas94 -q -At -f "$HERE/test_124.sql" 2>&1 | grep -v '^\s*$'
+# 128: Conectar Notion.
+$P aulas94 -f "$MIG/128_notion_sync.sql" >/dev/null
+$P aulas94 -f "$MIG/128_notion_sync.sql" >/dev/null
+psql -h /tmp/pg -p 54329 -U pguser aulas94 -q -At -f "$HERE/test_128.sql" 2>&1 | grep -v '^\s*$'
