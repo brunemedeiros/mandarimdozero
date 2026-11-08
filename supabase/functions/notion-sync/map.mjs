@@ -86,7 +86,12 @@ export function suggestColumns(properties) {
   const used = new Set();
   for (const field of ['date', 'student', 'homework', 'attendance', 'skills', 'language', 'topic']) {
     const cands = props.filter(p => OK_TYPES[field].includes(p.type) && !used.has(p.id));
-    let hit = cands.find(p => NAME_HINTS[field].includes(p.key))
+    // Aluno: uma coluna de relação com nome de aluno (ex.: "Ficha do Aluno") ganha da lista de opções, porque aponta
+    // para a página do aluno e não muda quando a professora renomeia uma opção.
+    let hit = field === 'student'
+      ? cands.find(p => p.type === 'relation' && NAME_HINTS.student.some(h => p.key.includes(h)))
+      : null;
+    hit = hit || cands.find(p => NAME_HINTS[field].includes(p.key))
       || cands.find(p => NAME_HINTS[field].some(h => p.key.startsWith(h) || p.key.includes(h)));
     if (!hit && field === 'date') hit = cands[0];
     if (!hit && field === 'topic') hit = cands.find(p => p.type === 'title');

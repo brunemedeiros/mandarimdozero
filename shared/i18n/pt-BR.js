@@ -3608,6 +3608,7 @@ window.I18N_CATALOG['pt-BR'] = {
   'panel.notion.cancel': 'Cancelar',
   'panel.notion.columnsTitle': 'Colunas de "{title}"',
   'panel.notion.columnsHint': 'Diga qual coluna do seu Notion é cada informação. Só Data e Aluno são obrigatórias; o que ficar em branco não é lido.',
+  'panel.notion.relationHint': 'Coluna ligada a outro banco (relação, como uma Ficha do Aluno) só aparece aqui se esse outro banco também estiver compartilhado com o site no Notion (⋯ > Conexões). O site lê só o nome de cada página.',
   'panel.notion.f.date': 'Data',
   'panel.notion.f.student': 'Aluno ou turma',
   'panel.notion.f.topic': 'Tópico da aula',
