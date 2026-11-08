@@ -183,7 +183,7 @@ function createConjGames({ games, soon = [], speak, ids, isLocked, onLocked, lan
     </button>` : '';
     el.innerHTML = summaryHTML() + dueHTML + filtersHTML()
       + `<div class="challenges-level-sections cg-level-sections">${sections || `<div class="challenges-empty"><p>${esc(tt('games.filter.none'))}</p></div>`}</div>`;
-    el.querySelectorAll('.cg-play').forEach(b => b.addEventListener('click', () => start(b.dataset.game)));
+    el.querySelectorAll('.cg-play').forEach(b => b.addEventListener('click', () => openIntro(b.dataset.game)));
     const dueBtn = el.querySelector('#cg-due');
     if (dueBtn) dueBtn.addEventListener('click', () => startReview(dueEntries()));
     el.querySelectorAll('[data-cg-invite]').forEach(b => b.addEventListener('click', () => { if (onLocked) onLocked(null); }));
@@ -215,7 +215,7 @@ function createConjGames({ games, soon = [], speak, ids, isLocked, onLocked, lan
     if (isLocked && isLocked(g)){ if (onLocked) onLocked(g); return; }
     const pool = onlyIds ? g.items.filter(it => onlyIds.includes(it.id)) : g.items;
     const order = onlyIds ? shuffle(pool) : (roundSize() === 'full' ? shuffle(pool) : pickRound(g));
-    Object.assign(S, { game: g, order, gameAt: [], mode: 'choice', idx: 0, hits: 0, log: [], answered: false, fresh: !onlyIds });
+    Object.assign(S, { game: g, order, gameAt: [], mode: 'choice', idx: 0, hits: 0, log: [], answered: false });
     if (typeof trackEvent === 'function') trackEvent('lesson_start', 'conj_game', { game: g.id });
     show(true);
     renderQuestion();
@@ -251,7 +251,7 @@ function createConjGames({ games, soon = [], speak, ids, isLocked, onLocked, lan
   }
 
   // ---------- Partida Curta x Completa e frases ainda não vistas (etapa 5, 2026-11-08) ----------
-  // Curta = perRound frases (10, como sempre); Completa = todas as frases do jogo. Escolha da aluna, lembrada NESTE aparelho
+  // Curta = perRound frases (10, como sempre); Completa = todas as frases do jogo. Escolha da aluna na tela do jogo, lembrada NESTE aparelho
   // (localStorage, conveniência; o progresso de verdade fica na conta). Padrão: Curta.
   // A partida Curta puxa primeiro as frases que a aluna ainda não respondeu, depois as que ela errou por último e só então
   // as que já acertou: em 2 ou 3 partidas ela passa por todas (regra do "Concluído").
@@ -263,14 +263,43 @@ function createConjGames({ games, soon = [], speak, ids, isLocked, onLocked, lan
     const unseen = g.items.filter(it => !seen(it)), wrong = g.items.filter(it => seen(it) && !seen(it).ok), right = g.items.filter(it => seen(it) && seen(it).ok);
     return [].concat(shuffle(unseen), shuffle(wrong), shuffle(right)).slice(0, g.perRound);
   }
-  function roundToggleHTML(g){
-    if (!S.fresh || S.idx !== 0 || S.log.length || g.items.length <= g.perRound) return '';
-    const cur = roundSize();
-    return `<div class="cg-round" role="group" aria-label="${esc(tt('games.round.label'))}">
-      <span>${esc(tt('games.round.label'))}</span>
-      <button type="button" class="challenges-filter-chip ${cur === 'short' ? 'active' : ''}" data-cg-round="short" aria-pressed="${cur === 'short'}">${esc(tt('games.round.short', { n: g.perRound }))}</button>
-      <button type="button" class="challenges-filter-chip ${cur === 'full' ? 'active' : ''}" data-cg-round="full" aria-pressed="${cur === 'full'}">${esc(tt('games.round.full', { n: g.items.length }))}</button>
-    </div>`;
+  // Tela do jogo (pedido da autora, 2026-11-08): antes da partida, título, apresentação, quanto a aluna já fez e a
+  // escolha Curta x Completa (no lugar do botão que ficava em cima da 1ª frase). Jogo com perRound >= frases: um botão só.
+  function openIntro(gameId){
+    const g = games.find(x => x.id === gameId);
+    if (!g) return;
+    if (isLocked && isLocked(g)){ if (onLocked) onLocked(g); return; }
+    Object.assign(S, { game: g, order: [], gameAt: [], mode: 'intro', idx: 0, hits: 0, log: [], answered: false });
+    show(true);
+    const bar = grabBar();
+    const st = conjGameStatus(g), cur = roundSize(), both = g.items.length > g.perRound;
+    const status = st.done ? `<span class="expr-card-seal cg-intro-seal">${esc(tt('games.doneSeal', { pct: st.pct }))}</span>`
+      : (st.seen ? `<p class="cg-intro-status">${esc(tt('games.intro.status', { seen: st.seen, total: st.total, pct: st.pct }))}</p>` : '');
+    const opt = (size, n, sub) => `<button type="button" class="cg-intro-opt ${cur === size || !both ? 'is-current' : ''}" data-cg-start="${size}">
+        <span class="cg-intro-opt-title">${esc(tt(both ? 'games.round.' + size : 'games.intro.start', { n }))}</span>
+        ${sub ? `<span class="cg-intro-opt-sub">${esc(tt(sub))}</span>` : ''}
+      </button>`;
+    $(ids.content).innerHTML = `
+      <div class="cg-head">
+        <span class="cg-eyebrow">${esc(tt('games.tabGames'))}${g.level ? ` · ${esc(g.level)}` : ''}</span>
+        <h2 class="cg-title">${rich(L(g.title))}</h2>
+      </div>
+      <div class="cg-intro">
+        ${status}
+        <p class="cg-intro-lede">${rich(L(g.lede))}</p>
+        <h3 class="cg-intro-choose">${esc(tt('games.intro.choose'))}</h3>
+        <div class="cg-intro-opts">
+          ${both ? opt('short', g.perRound, 'games.intro.shortSub') + opt('full', g.items.length, 'games.intro.fullSub') : opt('full', g.items.length, '')}
+        </div>
+      </div>`;
+    const btns = $(ids.content).querySelectorAll('[data-cg-start]');
+    btns.forEach(b => b.addEventListener('click', () => { if (both) setRoundSize(b.dataset.cgStart); start(g.id); }));
+    if (typeof wireKeyboardOptions === 'function' && btns.length > 1) wireKeyboardOptions(btns, { mode: 'sequential' });
+    mountBar(bar, '.cg-head');
+    setProgress(0);
+    window.scrollTo(0, 0);
+    const def = $(ids.content).querySelector('.cg-intro-opt.is-current') || btns[0];
+    setTimeout(() => { if (def && S.mode === 'intro') def.focus(); }, 0);
   }
 
   const item = () => S.order[S.idx];
@@ -311,7 +340,7 @@ function createConjGames({ games, soon = [], speak, ids, isLocked, onLocked, lan
         <span class="cg-eyebrow">${esc(tt('games.tabGames'))}${g.level ? ` · ${esc(g.level)}` : ''}</span>
         <h2 class="cg-title">${rich(L(g.title))}</h2>
       </div>
-      ${progressHTML()}${roundToggleHTML(g)}
+      ${progressHTML()}
       <div class="cg-stage">
         <div class="cg-panel">
           ${it.verb ? `<span class="cg-verb" lang="${lang}">(${esc(it.verb)})</span>` : ''}
@@ -328,13 +357,6 @@ function createConjGames({ games, soon = [], speak, ids, isLocked, onLocked, lan
     const choices = $(ids.content).querySelectorAll('.cg-choice');
     choices.forEach(b => b.addEventListener('click', () => answer(b.dataset.k)));
     $('cg-dontknow').addEventListener('click', () => answer(null));
-    $(ids.content).querySelectorAll('[data-cg-round]').forEach(b => b.addEventListener('click', () => {
-      if (b.dataset.cgRound === roundSize()) return;
-      setRoundSize(b.dataset.cgRound);
-      start(g.id); // monta a partida de novo no tamanho escolhido (ainda não houve resposta)
-      const again = $(ids.content).querySelector(`[data-cg-round="${b.dataset.cgRound}"]`);
-      if (again) again.focus();
-    }));
     // Número 1/2 em cada resposta; as teclas valem pelo teclado global do app (respeita janela aberta).
     if (typeof wireKeyboardOptions === 'function') wireKeyboardOptions(choices, { mode: 'sequential' });
     mountBar(bar, '.cg-head');
@@ -417,8 +439,6 @@ function createConjGames({ games, soon = [], speak, ids, isLocked, onLocked, lan
     S.dirty = true;
     const dk = $('cg-dontknow');
     if (dk) dk.classList.add('disabled');
-    const rt = $(ids.content).querySelector('.cg-round'); // depois de responder não dá mais para trocar Curta x Completa
-    if (rt) rt.remove();
     // Som de acerto/erro como na trilha; "Não sei" é silencioso (a resposta é só revelada).
     if (!revealed && typeof playFeedbackSound === 'function') playFeedbackSound(ok);
     if (typedInfo){
@@ -524,5 +544,5 @@ function createConjGames({ games, soon = [], speak, ids, isLocked, onLocked, lan
   if (back) back.addEventListener('click', exit);
   window.addEventListener('i18n:change', () => { if ($(ids.wrap) && $(ids.wrap).style.display === 'none') renderList(); });
 
-  return { renderList, start, startReview, dueEntries, exit, state: S };
+  return { renderList, openIntro, start, startReview, dueEntries, exit, state: S };
 }

@@ -57,7 +57,7 @@ const T = { 'pt-BR': { cont: 'Continuar →', see: 'Ver resultado →', revealed
     await page.waitForFunction(() => typeof STATE !== 'undefined' && STATE.cards && STATE.cards.length > 0 && CURRENT_USER === false, null, { timeout: 15000 });
     await page.evaluate(() => { window.__events = []; window.__sounds = []; const ps = playFeedbackSound; playFeedbackSound = (v) => { window.__sounds.push(v); return ps(v); }; const o = trackEvent; trackEvent = (a, b, c) => { window.__events.push([a, b, c]); return o(a, b, c); }; switchTab('conjugaison'); });
     await page.click('#conj-mode-games');
-    await page.click('.cg-play[data-game="etre-avoir"]');
+    await page.click('.cg-play[data-game="etre-avoir"]'); await page.evaluate(() => { const b = document.querySelector('[data-cg-start="short"]') || document.querySelector('[data-cg-start]'); if (b) b.click(); });
     await page.waitForSelector('.cg-choice');
     await page.waitForTimeout(250);
     if (OUT) await page.screenshot({ path: path.join(OUT, `jogo-${label}.png`) });

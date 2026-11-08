@@ -326,11 +326,11 @@ async function fill(page, wrongIdx){
       const lk = await page.evaluate(() => ({ badge: (document.querySelector('.cg-game-card[data-game="pc-auxiliaire"] .cg-premium') || {}).textContent, tab: (document.querySelector('#conj-mode-games [data-conj-games-seal]') || {}).textContent }));
       check('bloqueio ligado, conta grátis: ⭐ Premium + cadeado no cartão e na aba', /⭐/.test(lk.badge || '') && /🔒/.test(lk.badge || '') && lk.tab === '⭐🔒', lk);
       // jogo grátis abre mesmo com o bloqueio ligado
-      await page.click('.cg-play[data-game="pc-imparfait"]');
+      await page.click('.cg-play[data-game="pc-imparfait"]'); await page.evaluate(() => { const b = document.querySelector('[data-cg-start="short"]') || document.querySelector('[data-cg-start]'); if (b) b.click(); });
       const fr0 = await page.evaluate(() => ({ modal: getComputedStyle(document.getElementById('premium-games-modal')).display, playing: document.getElementById('conj-game-wrap').style.display }));
       check('bloqueio ligado: jogo grátis abre (sem janela Premium)', fr0.modal === 'none' && fr0.playing === 'block', fr0);
       await page.click('#conj-game-wrap .activity-exit-btn');
-      await page.click('.cg-play[data-game="pc-auxiliaire"]');
+      await page.click('.cg-play[data-game="pc-auxiliaire"]'); await page.evaluate(() => { const b = document.querySelector('[data-cg-start="short"]') || document.querySelector('[data-cg-start]'); if (b) b.click(); });
       const pw = await page.evaluate(() => ({ modal: getComputedStyle(document.getElementById('premium-games-modal')).display, ch: getComputedStyle(document.getElementById('premium-challenges-modal')).display,
         text: document.getElementById('premium-games-modal').innerText, mail: (document.querySelector('#premium-games-modal a[data-premium-contact]') || {}).href || '', playing: document.getElementById('conj-game-wrap').style.display }));
       check('bloqueio ligado: abre a janela Premium dos Jogos (não a dos Desafios) em vez do jogo', pw.modal === 'flex' && pw.ch === 'none' && pw.playing !== 'block' && /Jogos da Conjugação/.test(pw.text) && !/Desafios do Módulo/.test(pw.text), pw);
@@ -340,7 +340,7 @@ async function fill(page, wrongIdx){
       const st = await page.evaluate(() => ({ badge: (document.querySelector('.cg-game-card[data-game="pc-auxiliaire"] .cg-premium') || {}).textContent, tab: (document.querySelector('#conj-mode-games [data-conj-games-seal]') || {}).textContent }));
       check('bloqueio ligado, aluno: ⭐ Premium sem cadeado (a tabela libera)', !/🔒/.test(st.badge || '') && st.tab === '⭐', st);
       await page.evaluate(() => { CONJ_GAMES_PAYWALL_ENABLED = false; MY_PERMISSIONS = null; setConjMode('games'); });
-      await page.click('.cg-play[data-game="pc-imparfait"]');
+      await page.click('.cg-play[data-game="pc-imparfait"]'); await page.evaluate(() => { const b = document.querySelector('[data-cg-start="short"]') || document.querySelector('[data-cg-start]'); if (b) b.click(); });
       await page.waitForSelector('.cg-choice');
       const q = await page.evaluate(() => ({ n: CONJ_GAMES_UI.state.order.length, focus: document.body.dataset.activityFocus, blank: !!document.querySelector('.cg-blank'),
         choices: document.querySelectorAll('.cg-choice').length,
@@ -373,7 +373,7 @@ async function fill(page, wrongIdx){
       check('sair pelo X sai do foco e volta à lista de jogos', await page.evaluate(() => !document.body.dataset.activityFocus && document.getElementById('conj-select-wrap').style.display === 'block'));
       // Site em inglês: nada em português no jogo.
       await page.evaluate(() => { window.getUiLang = () => 'en'; });
-      await page.click('.cg-play[data-game="pc-imparfait"]');
+      await page.click('.cg-play[data-game="pc-imparfait"]'); await page.evaluate(() => { const b = document.querySelector('[data-cg-start="short"]') || document.querySelector('[data-cg-start]'); if (b) b.click(); });
       await page.keyboard.press('1');
       const en = await page.evaluate(() => { const it = CONJ_GAMES_UI.state.order[0];
         return { tr: document.querySelector('.cg-panel .cg-tr').textContent === it.text.en.tr, why: document.querySelector('.cg-why p').textContent === it.text.en.why.replace(/[{}]/g, ''),
@@ -408,7 +408,7 @@ async function fill(page, wrongIdx){
     check('lista: 3 jogos A1 primeiro (grupo Nível A1), depois o A2', cards.map(c => c.level).join() === 'A1,A1,A1,A2' && cards[3].game === 'pc-imparfait', cards);
     if (process.env.SHOTS) await page.screenshot({ path: process.env.SHOTS + '/jogos-lista.png', fullPage: true });
     for (const id of ['etre-avoir', 'pc-auxiliaire', 'tu-vous']){
-      await page.click(`.cg-play[data-game="${id}"]`);
+      await page.click(`.cg-play[data-game="${id}"]`); await page.evaluate(() => { const b = document.querySelector('[data-cg-start="short"]') || document.querySelector('[data-cg-start]'); if (b) b.click(); });
       await page.waitForSelector('.cg-choice');
       const it = await page.evaluate(() => CONJ_GAMES_UI.state.order[0]);
       const verb = await page.evaluate(() => (document.querySelector('.cg-verb') || {}).textContent || '');
@@ -427,7 +427,7 @@ async function fill(page, wrongIdx){
       await page.click('#conj-game-wrap .activity-exit-btn');
     }
     await page.evaluate(() => { window.getUiLang = () => 'en'; });
-    await page.click('.cg-play[data-game="tu-vous"]');
+    await page.click('.cg-play[data-game="tu-vous"]'); await page.evaluate(() => { const b = document.querySelector('[data-cg-start="short"]') || document.querySelector('[data-cg-start]'); if (b) b.click(); });
     await page.keyboard.press('1');
     const en = await page.evaluate(() => { const it = CONJ_GAMES_UI.state.order[0];
       return { title: document.querySelector('.cg-title').textContent, why: document.querySelector('.cg-why p').textContent === it.text.en.why.replace(/[{}]/g, ''),

@@ -98,12 +98,15 @@ Grátis: 1 por nível. Cada jogo novo: ~20 frases em pt-BR e en, revisor-conteud
    trancado): cartão "🔁 Revisar erros (N)" no topo da lista (`dueEntries`), revisão misturando jogos; acertou sai, errou
    volta no dia seguinte. Chave `games.practiceMistakes` apagada (sem uso). Testes: jogos-progresso 96/96; paridade da
    Conjugação 343/343 (fim da partida neutralizado de propósito).
-5. **Feita (2026-11-08, aguarda a autora ver)**: na 1ª frase de cada partida, antes de responder, "Partida: Curta (10
-   frases) | Completa (N frases)" (some ao responder; não aparece em "Revisar erros" nem em jogo com perRound >= frases).
-   Escolha lembrada NO APARELHO (`localStorage['conj-games-round']`, conveniência), padrão Curta. A partida Curta puxa
-   primeiro as frases nunca respondidas, depois as erradas por último e só então as certas (`pickRound`): em 2 partidas
-   a aluna passa por todas as 19-24 frases. Chave `games.perRound` apagada (sem uso desde a etapa 3). Testes:
-   jogos-progresso 108/108; paridade da Conjugação 343/343 (escolha da partida neutralizada de propósito).
+5. **Feita (2026-11-08, aguarda a autora ver)**: TELA DO JOGO antes da partida (pedido da autora, 2026-11-08, no lugar
+   do botão que ficava em cima da 1ª frase): tocar no cartão abre `openIntro` (shared/conj-games.js) com título,
+   apresentação (a que saiu do cartão), "N de M frases respondidas · X% de acerto" ou o selo de concluído, e "Escolha a
+   partida": Curta (10 frases, "Começa pelas frases que você ainda não viu") x Completa (todas), com atalhos 1/2 e a
+   última escolha marcada. Escolha lembrada NO APARELHO (`localStorage['conj-games-round']`, conveniência), padrão
+   Curta; "Jogar de novo" vai direto no mesmo tamanho; jogo trancado abre a janela Premium antes da tela. A partida Curta
+   puxa primeiro as frases nunca respondidas, depois as erradas por último e só então as certas (`pickRound`). Chaves
+   `games.perRound` e `games.round.label` apagadas (sem uso). Testes: jogos-progresso 114/114; os testes que tocam no
+   cartão passam pela tela do jogo (Curta).
 6. Etapa "Escreva a resposta" dentro da partida.
 7. Etapas "Corrija o erro" e "Traduza a frase inteira" (conteúdo novo, revisão e aprovação).
 8. Jogos de revisão do nível e respostas alternativas.

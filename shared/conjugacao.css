@@ -283,10 +283,23 @@
 @media (min-width:760px){ #view-conjugaison .cg-check{ align-self:flex-start; min-width:160px; } }
 #view-conjugaison .cg-review-given{ display:block; font-size:13px; font-weight:700; color:var(--ink-soft); }
 #view-conjugaison .cg-review-given s{ color:var(--error-red-text, var(--error-red)); }
-/* Partida Curta x Completa (etapa 5): só na 1ª frase, antes de responder; mesmos botões dos filtros */
-#view-conjugaison .cg-round{ display:flex; align-items:center; flex-wrap:wrap; gap:8px; margin:-6px 0 16px; font-size:13px; font-weight:800; color:var(--ink-soft); }
-#view-conjugaison .cg-round .challenges-filter-chip{ min-height:40px; }
-@media (max-width:759px){ #view-conjugaison .cg-round .challenges-filter-chip{ min-height:44px; } }
+/* Tela do jogo antes da partida (2026-11-08): apresentação, quanto já fez e Curta x Completa em dois cartões grandes */
+#view-conjugaison .cg-intro{ position:relative; display:flex; flex-direction:column; gap:14px; background:var(--paper); border:1px solid var(--paper-line); border-radius:20px; padding:24px 22px; box-shadow:var(--shadow-card); }
+#view-conjugaison .cg-intro-lede{ margin:0; font-size:15.5px; line-height:1.55; color:var(--ink); max-width:62ch; }
+#view-conjugaison .cg-intro-status{ margin:0; font-size:13.5px; font-weight:800; color:var(--ink-soft); }
+#view-conjugaison .cg-intro-seal{ position:static; align-self:flex-start; transform:none; }
+#view-conjugaison .cg-intro-choose{ margin:6px 0 0; font-size:15px; font-weight:900; color:var(--ink); }
+#view-conjugaison .cg-intro-opts{ display:grid; grid-template-columns:1fr; gap:10px; }
+@media (min-width:760px){ #view-conjugaison .cg-intro-opts{ grid-template-columns:1fr 1fr; } }
+#view-conjugaison .cg-intro-opt{ position:relative; display:flex; flex-direction:column; align-items:flex-start; gap:4px; min-height:72px; padding:14px 16px; text-align:left; cursor:pointer;
+  border-radius:16px; border:2px solid var(--paper-line); background:var(--paper-warm); color:var(--ink); font-family:var(--font-body); }
+#view-conjugaison .cg-intro-opt.is-current{ border-color:var(--seal-red); background:color-mix(in srgb, var(--seal-red) 8%, var(--paper)); }
+@media (hover:hover){ #view-conjugaison .cg-intro-opt:hover{ border-color:var(--seal-red); } }
+#view-conjugaison .cg-intro-opt:focus-visible{ outline:2px solid var(--seal-red); outline-offset:2px; }
+#view-conjugaison .cg-intro-opt .kbd-hint{ position:absolute; left:14px; top:16px; }
+@media (hover:hover) and (pointer:fine){ #view-conjugaison .cg-intro-opt{ padding-left:44px; } }
+#view-conjugaison .cg-intro-opt-title{ font-size:17px; font-weight:900; }
+#view-conjugaison .cg-intro-opt-sub{ font-size:13.5px; font-weight:700; color:var(--ink-soft); }
 #view-conjugaison .cg-premium-invite{ align-self:flex-start; min-height:44px; padding:8px 14px; border-radius:999px; border:1.5px dashed var(--paper-line); background:var(--paper); color:var(--ink); font-family:var(--font-body); font-size:14px; font-weight:800; cursor:pointer; text-align:left; }
 #view-conjugaison .cg-premium-invite:hover{ border-color:var(--seal-red); }
 #view-conjugaison .cg-premium-invite:focus-visible{ outline:2px solid var(--seal-red); outline-offset:2px; }

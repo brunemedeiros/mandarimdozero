@@ -865,9 +865,13 @@ window.I18N_CATALOG['en'] = {
   'games.youAnswered': 'You answered:', // ALTA
   'games.dueTitle': 'Review mistakes ({n})', // ALTA
   'games.dueSub': 'Sentences you got wrong on other days. This time, you type the answer.', // ALTA
-  'games.round.label': 'Round:', // ALTA
   'games.round.short': 'Short ({n} sentences)', // ALTA
   'games.round.full': 'Full ({n} sentences)', // ALTA
+  'games.intro.choose': 'Choose your round', // ALTA
+  'games.intro.shortSub': 'Starts with the sentences you haven\'t seen yet', // ALTA
+  'games.intro.fullSub': 'All the sentences in this game', // ALTA
+  'games.intro.start': 'Start ({n} sentences)', // ALTA
+  'games.intro.status': '{seen} of {total} sentences answered · {pct}% right', // ALTA
   'fr.dictation.levelReviewTitle': 'Level {level} review', // ALTA
   'fr.challenges.title': 'Challenges', // ALTA
   'fr.challenges.sub': 'Practice real French: expressions, listening comprehension and spelling.', // ALTA

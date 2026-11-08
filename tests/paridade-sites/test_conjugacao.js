@@ -207,7 +207,7 @@ async function fingerprint(browser, root){
   out.j_janela = await page.evaluate(() => { const m = document.getElementById('premium-games-modal'); return m.style.display + '|' + m.innerHTML; });
   await click('#premium-games-modal-close');
   await page.evaluate(() => { CONJ_GAMES_PAYWALL_ENABLED = false; setConjMode('games'); __seed(31); });
-  await click('.cg-play[data-game="tu-vous"]');
+  await click('.cg-play[data-game="tu-vous"]'); await page.evaluate(() => { const b = document.querySelector('[data-cg-start="short"]') || document.querySelector('[data-cg-start]'); if (b) b.click(); }); // tela do jogo (2026-11-08): só existe na árvore nova
   for (let i = 0; i < 12; i++){
     const done = await page.evaluate(() => !document.querySelector('.cg-choice'));
     if (done) break;
@@ -272,8 +272,6 @@ async function fingerprint(browser, root){
       // ("Você respondeu: ...") e o botão "Praticar só os que errei" virou "Revisar erros" (revisão escrevendo).
       [/<span class=\\"cg-review-given\\">.*?<\/span>(?=<span class=\\"cg-review-tr)/g, ''],
       [/(Praticar só os que errei|Practice only my mistakes|Revisar erros|Review mistakes)/g, 'REVISAR_ERROS'],
-      // Jogos, etapa 5 (2026-11-08): na 1ª frase, antes de responder, a escolha "Partida: Curta x Completa".
-      [/<div class=\\"cg-round\\"[\s\S]*?<\/div>/g, ''],
       // Etapa 7 (2026-10-31, vocabulário aprovado pela dona): textos das Missões do dia guardados no estado
       // (ver etapa7-neutro.js, aplicado em norm)
     ];

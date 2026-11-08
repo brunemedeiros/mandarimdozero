@@ -90,7 +90,7 @@ const STUB = `(function(){
     await click('#conj-mode-games');
     await shot('jogos');
     await page.evaluate(() => __seed(7));
-    await click('.cg-play[data-game="pc-imparfait"]');
+    await click('.cg-play[data-game="pc-imparfait"]'); await page.evaluate(() => { const b = document.querySelector('[data-cg-start="short"]') || document.querySelector('[data-cg-start]'); if (b) b.click(); }); // tela do jogo (2026-11-08): só existe na árvore nova
     await shot('jogo-pergunta'); // (o shot avança o relógio 4 s: o 1º clique vale)
     await page.evaluate(() => { const it = CONJ_GAMES_UI.state.order[0]; document.querySelector('.cg-choice[data-k="' + (it.ans === 'a' ? 'b' : 'a') + '"]').click(); });
     await shot('jogo-resposta');
