@@ -1,0 +1,1426 @@
+{
+ "_doc": "Rascunho da unidade A1-2 'Dizer o nome e a nacionalidade' (módulo 'Apresentar-se', A1-m1), desenhada pelas decisões 326 a 328 do docs/i18n/curriculo/12-decisoes-apos-maquete-m1.md, no modelo do piloto A1-1. Só pt-BR: os campos 'en' ficam null até a aprovação da dona (decisão 81). Nada daqui está em fr/content.js nem na camada courses/fr-pt-BR/layer.js. Chave estável: a publicada em fr/published_ids.json; item novo = 'nova' (a chave definitiva sai de node fr/scripts/congelar_chaves.js). Ordem dos cartões, lições, notas (com exemplos) e diálogo: dados/mapa.json (fonte única; o validar.js confere). Leitura para a dona: A1-2.md. Validação: node docs/i18n/curriculo/piloto-m1/A1-2/validar.js.",
+ "status": "needs_review",
+ "versao": "2026-11-08",
+ "unidade": {
+  "id": "A1-2",
+  "id_funcao": "dizer-o-nome-e-a-nacionalidade",
+  "modulo": "A1-m1",
+  "posicao": "M1.2",
+  "tipo": "vocabulario",
+  "funcao": "dizer e perguntar o nome, soletrar o nome e dizer a nacionalidade (e a que não é)",
+  "titulo": {
+   "publicado": "Se apresentar",
+   "pt-BR": "Dizer o nome e a nacionalidade",
+   "en": null,
+   "muda": true
+  },
+  "objetivo": {
+   "publicado": "Dizer o nome, a nacionalidade e perguntar o mesmo para o outro.",
+   "pt-BR": "Dizer e perguntar o nome, soletrar o nome e dizer a nacionalidade, com tu e com vous.",
+   "en": null,
+   "muda": true,
+   "motivo": "as lições novas: dizer o nome, soletrar (alfabeto), dizer a nacionalidade e a que não é (decisões 326 e 327)"
+  },
+  "tamanho": "14 cartões (4 + 4 + 6), 3 lições (a 2ª de pronúncia) + Revisão da unidade, 7 notas, 1 diálogo no fim da lição 3; lição 3 com 6 cartões aceita pela dona (decisões 326 e 327)",
+  "gramatica_do_mapa": "être (fórmula je suis, tu es); tônicos 1 (moi, toi, vous); negação ne… pas (1ª aparição)",
+  "versao_gratis": "menção breve de \"Gramática: être e avoir\", \"Gramática: masculino e feminino\" e \"Gramática: adjetivos\" (versao_gratis_em das gramáticas, decisão 260)",
+  "gratis_premium": "Tudo da unidade é grátis (lições, cartões, notas, V/F, diálogo, lição de pronúncia, Revisão da unidade). Desafios do módulo são Premium (paywall hoje desligado); o ditado do módulo segue aberto."
+ },
+ "cartoes": [
+  {
+   "ordem": 0,
+   "chave": "A1-2-v0",
+   "fr": "je",
+   "traducao": {
+    "pt-BR": "eu",
+    "en": null
+   },
+   "licao": "pronomes-e-nome",
+   "origem": "publicado",
+   "muda": "igual",
+   "frase_do_cartao": "nova-je"
+  },
+  {
+   "ordem": 1,
+   "chave": "A1-2-v1",
+   "fr": "tu / vous",
+   "traducao": {
+    "pt-BR": "você / o senhor, a senhora",
+    "en": null
+   },
+   "licao": "pronomes-e-nome",
+   "origem": "publicado",
+   "muda": "vira par (decisão 326, mesma chave): era só \"tu\" \"você (informal)\"; vous também é \"vocês\" (na nota)",
+   "frase_do_cartao": "nova-vous"
+  },
+  {
+   "ordem": 2,
+   "chave": "A1-2-v2",
+   "fr": "s'appeler",
+   "traducao": {
+    "pt-BR": "chamar-se",
+    "en": null
+   },
+   "licao": "pronomes-e-nome",
+   "origem": "publicado",
+   "muda": "igual",
+   "frase_do_cartao": "A1-2-p0"
+  },
+  {
+   "ordem": 3,
+   "chave": "nova",
+   "fr": "moi, c'est…",
+   "traducao": {
+    "pt-BR": "eu sou… (para dizer o nome)",
+    "en": null
+   },
+   "licao": "pronomes-e-nome",
+   "origem": "novo",
+   "muda": "novo (decisão 327): gatilho da nota de tônicos",
+   "frase_do_cartao": "nova-moi-cest"
+  },
+  {
+   "ordem": 4,
+   "chave": "nova",
+   "fr": "le prénom",
+   "traducao": {
+    "pt-BR": "o nome (o primeiro nome)",
+    "en": null
+   },
+   "licao": "nome-e-ser",
+   "origem": "novo",
+   "muda": "novo (vem da A1-23, que saiu; decisões 110 e 139)",
+   "frase_do_cartao": "nova-prenom"
+  },
+  {
+   "ordem": 5,
+   "chave": "A1-2-v3",
+   "fr": "le nom",
+   "traducao": {
+    "pt-BR": "o sobrenome / o nome",
+    "en": null
+   },
+   "licao": "nome-e-ser",
+   "origem": "publicado",
+   "muda": "muda da lição 2 antiga para a lição 2 nova; tradução \"o nome\" vira \"o sobrenome / o nome\" (a confirmar: com le prénom ao lado, le nom é o sobrenome)",
+   "frase_do_cartao": "nova-nom"
+  },
+  {
+   "ordem": 6,
+   "chave": "nova",
+   "fr": "épeler",
+   "traducao": {
+    "pt-BR": "soletrar",
+    "en": null
+   },
+   "licao": "nome-e-ser",
+   "origem": "novo",
+   "muda": "novo (lição de pronúncia, decisão 108); gatilho da nota do alfabeto",
+   "frase_do_cartao": "nova-epeler"
+  },
+  {
+   "ordem": 7,
+   "chave": "nova",
+   "fr": "Ça s'écrit comment ?",
+   "traducao": {
+    "pt-BR": "Como se escreve?",
+    "en": null
+   },
+   "licao": "nome-e-ser",
+   "origem": "novo",
+   "muda": "novo (lição de pronúncia, decisão 108)",
+   "frase_do_cartao": "nova-ecrit"
+  },
+  {
+   "ordem": 8,
+   "chave": "A1-2-v4",
+   "fr": "être",
+   "traducao": {
+    "pt-BR": "ser / estar",
+    "en": null
+   },
+   "licao": "nacionalidades",
+   "origem": "publicado",
+   "muda": "muda da lição 2 para a 3 (gatilho de t'es com Tu es français ?, decisão 326)",
+   "frase_do_cartao": "nova-etre"
+  },
+  {
+   "ordem": 9,
+   "chave": "A1-2-v9",
+   "fr": "le pays",
+   "traducao": {
+    "pt-BR": "o país",
+    "en": null
+   },
+   "licao": "nacionalidades",
+   "origem": "publicado",
+   "muda": "igual",
+   "frase_do_cartao": "A1-2-p2"
+  },
+  {
+   "ordem": 10,
+   "chave": "A1-2-v7",
+   "fr": "français / française",
+   "traducao": {
+    "pt-BR": "francês / francesa",
+    "en": null
+   },
+   "licao": "nacionalidades",
+   "origem": "publicado",
+   "muda": "igual (já fundido com A1-9-v0)",
+   "frase_do_cartao": "A1-2-p3"
+  },
+  {
+   "ordem": 11,
+   "chave": "A1-2-v8",
+   "fr": "brésilien / brésilienne",
+   "traducao": {
+    "pt-BR": "brasileiro / brasileira",
+    "en": null
+   },
+   "licao": "nacionalidades",
+   "origem": "publicado",
+   "muda": "igual (já fundido com A1-9-v1)",
+   "frase_do_cartao": "nova-bresilienne"
+  },
+  {
+   "ordem": 12,
+   "chave": "A1-9-v2",
+   "fr": "américain / américaine",
+   "traducao": {
+    "pt-BR": "americano / americana",
+    "en": null
+   },
+   "licao": "nacionalidades",
+   "origem": "publicado",
+   "muda": "vem de \"Dizer de onde é e onde mora\" com a chave (decisões 327 e 328)",
+   "frase_do_cartao": "nova-americaine"
+  },
+  {
+   "ordem": 13,
+   "chave": "nova",
+   "fr": "ne… pas",
+   "traducao": {
+    "pt-BR": "não (ne antes do verbo, pas depois)",
+    "en": null
+   },
+   "licao": "nacionalidades",
+   "origem": "novo",
+   "muda": "novo (decisão 326 e 327): gatilho da nota e do diálogo da negação",
+   "frase_do_cartao": "nova-ne-pas"
+  }
+ ],
+ "licoes": [
+  {
+   "id": "pronomes-e-nome",
+   "ordem": 1,
+   "id_novo": false,
+   "titulo": {
+    "publicado": "Eu, você e dizer seu nome",
+    "pt-BR": "Dizer o nome",
+    "en": null,
+    "a_confirmar": true
+   },
+   "cartoes": [
+    "A1-2-v0",
+    "A1-2-v1",
+    "A1-2-v2",
+    "nova: moi, c'est…"
+   ],
+   "inclui_dialogo": false,
+   "sequencia": [
+    "ponte (unidade anterior)",
+    "cartão je",
+    "cartão tu / vous",
+    "nota \"Tu\" ou \"vous\"? + V/F",
+    "cartão s'appeler",
+    "nota Tu t'appelles comment ? + V/F",
+    "cartão moi, c'est…",
+    "nota Moi, toi, vous: para dar destaque + V/F",
+    "checagem rápida",
+    "praticando"
+   ]
+  },
+  {
+   "id": "nome-e-ser",
+   "ordem": 2,
+   "id_novo": false,
+   "pronuncia": true,
+   "titulo": {
+    "publicado": "O nome e o verbo être",
+    "pt-BR": "O alfabeto e soletrar o nome",
+    "en": null,
+    "a_confirmar": false,
+    "decisao": 326
+   },
+   "cartoes": [
+    "nova: le prénom",
+    "A1-2-v3",
+    "nova: épeler",
+    "nova: Ça s'écrit comment ?"
+   ],
+   "inclui_dialogo": false,
+   "sequencia": [
+    "ponte (lição 1)",
+    "cartão le prénom",
+    "cartão le nom",
+    "cartão épeler",
+    "nota O alfabeto em francês (grade com 🔊 por letra)",
+    "cartão Ça s'écrit comment ?",
+    "prática de pronúncia: ouvir a letra e escolher (G/J, E/I, U); ouvir um nome soletrado e digitar (Ana, Léo, Dubois)",
+    "checagem rápida",
+    "praticando"
+   ]
+  },
+  {
+   "id": "nacionalidades",
+   "ordem": 3,
+   "id_novo": false,
+   "titulo": {
+    "publicado": "Falar da nacionalidade e do país",
+    "pt-BR": "Dizer a nacionalidade",
+    "en": null,
+    "a_confirmar": true
+   },
+   "cartoes": [
+    "A1-2-v4",
+    "A1-2-v9",
+    "A1-2-v7",
+    "A1-2-v8",
+    "A1-9-v2",
+    "nova: ne… pas"
+   ],
+   "inclui_dialogo": true,
+   "cartoes_obs": "6 cartões, aceito pela dona (decisões 326 e 327)",
+   "sequencia": [
+    "ponte (lição 2)",
+    "cartão être",
+    "nota t'es + V/F",
+    "cartão le pays",
+    "cartão français / française",
+    "nota Français, française: o feminino que se ouve + V/F",
+    "cartão brésilien / brésilienne",
+    "cartão américain / américaine",
+    "cartão ne… pas",
+    "nota Ne… pas: o não em volta do verbo + V/F",
+    "checagem rápida",
+    "praticando",
+    "diálogo \"Primeiro encontro\" + Você entendeu?"
+   ]
+  },
+  {
+   "id": "checkpoint",
+   "ordem": 4,
+   "titulo": {
+    "publicado": "Ponto de verificação",
+    "pt-BR": "Revisão da unidade",
+    "en": "Unit review",
+    "decisao": 47
+   },
+   "conteudo": "ver revisao_da_unidade"
+  }
+ ],
+ "dialogos": [
+  {
+   "titulo": {
+    "pt-BR": "Primeiro encontro",
+    "en": null
+   },
+   "registro": "informal",
+   "cena": {
+    "pt-BR": "Numa festa de boas-vindas, dois desconhecidos se apresentam.",
+    "en": null
+   },
+   "licao": "nacionalidades",
+   "muda": "publicado; as três primeiras falas ficam com a chave; as duas últimas trocam para a negação, com chave nova (decisão 326); as chaves A1-2-d3 e A1-2-d4 vão para o arquivo de aposentados na implementação",
+   "falantes": {
+    "A": {
+     "nome": "Ana",
+     "emoji": "👩"
+    },
+    "B": {
+     "nome": "Léo",
+     "emoji": "👨"
+    }
+   },
+   "falas": [
+    {
+     "chave": "A1-2-d0",
+     "falante": "A",
+     "fr": "Bonjour, comment tu t'appelles ?",
+     "pt-BR": "Oi, como você se chama?",
+     "en": null,
+     "muda": "tradução: era \"Olá, qual é o seu nome?\" (a confirmar)"
+    },
+    {
+     "chave": "A1-2-d1",
+     "falante": "B",
+     "fr": "Je m'appelle Léo. Et toi ?",
+     "pt-BR": "Eu me chamo Léo. E você?",
+     "en": null
+    },
+    {
+     "chave": "A1-2-d2",
+     "falante": "A",
+     "fr": "Moi, c'est Ana. Tu es français ?",
+     "pt-BR": "Eu sou a Ana. Você é francês?",
+     "en": null
+    },
+    {
+     "chave": "nova",
+     "falante": "B",
+     "fr": "Oui, je suis français. Et toi, tu es française ?",
+     "pt-BR": "Sim, eu sou francês. E você, é francesa?",
+     "en": null,
+     "muda": "substitui A1-2-d3 (... tu es brésilienne ?)"
+    },
+    {
+     "chave": "nova",
+     "falante": "A",
+     "fr": "Non, je ne suis pas française. Je suis brésilienne !",
+     "pt-BR": "Não, eu não sou francesa. Sou brasileira!",
+     "en": null,
+     "muda": "substitui A1-2-d4 (Oui, je suis brésilienne !)"
+    }
+   ],
+   "check": [
+    {
+     "tipo": "fill",
+     "fala": 4,
+     "opcoes_erradas": [
+      "Oui, je suis française.",
+      "Non, je suis française."
+     ],
+     "muda": "era a fala 1"
+    },
+    {
+     "tipo": "listen",
+     "fala": 2,
+     "opcoes_erradas": [
+      "Je m'appelle Ana.",
+      "Bonjour, comment tu t'appelles ?"
+     ]
+    },
+    {
+     "tipo": "understand",
+     "pergunta": {
+      "pt-BR": "A Ana é francesa?",
+      "en": null
+     },
+     "opcoes": [
+      {
+       "pt-BR": "Não, ela é brasileira",
+       "en": null,
+       "certa": true
+      },
+      {
+       "pt-BR": "Sim, ela é francesa",
+       "en": null
+      },
+      {
+       "pt-BR": "Não, ela é americana",
+       "en": null
+      }
+     ],
+     "muda": "era \"De que país é a Ana?\"; agora cobra a negação"
+    }
+   ],
+   "falas_publicadas_que_saem": [
+    "A1-2-d3",
+    "A1-2-d4"
+   ]
+  }
+ ],
+ "frases_na_frase": [
+  {
+   "chave": "nova",
+   "id_rascunho": "nova-je",
+   "fr": "Je m'appelle Léo.",
+   "pt-BR": "Eu me chamo Léo.",
+   "en": null,
+   "ilustra": "A1-2-v0",
+   "papel": "essencial",
+   "motivo": "frase do cartão; m'appelle é o cartão seguinte (s'appeler), com a tradução à vista"
+  },
+  {
+   "chave": "nova",
+   "id_rascunho": "nova-vous",
+   "fr": "Vous êtes madame Dubois ?",
+   "pt-BR": "A senhora é a Sra. Dubois?",
+   "en": null,
+   "ilustra": "A1-2-v1",
+   "papel": "so_exemplo",
+   "motivo": "frase do cartão; êtes (être) só vem na lição 3"
+  },
+  {
+   "chave": "A1-2-p0",
+   "id_rascunho": null,
+   "fr": "Comment tu t'appelles ?",
+   "pt-BR": "Qual é o seu nome?",
+   "en": null,
+   "ilustra": "A1-2-v2",
+   "papel": "essencial",
+   "motivo": "frase do cartão (publicada)",
+   "muda": "vira a frase do cartão; papel novo"
+  },
+  {
+   "chave": "nova",
+   "id_rascunho": "nova-moi-cest",
+   "fr": "Moi, c'est Ana.",
+   "pt-BR": "Eu sou a Ana.",
+   "en": null,
+   "ilustra": "nova: moi, c'est…",
+   "papel": "essencial",
+   "motivo": "frase do cartão; gatilho da nota de tônicos"
+  },
+  {
+   "chave": "nova",
+   "id_rascunho": "nova-prenom",
+   "fr": "Mon prénom, c'est Ana.",
+   "pt-BR": "Meu nome é Ana.",
+   "en": null,
+   "ilustra": "nova: le prénom",
+   "papel": "so_exemplo",
+   "motivo": "frase do cartão; mon ainda não é visto (possessivos só em \"Apresentar a família\")"
+  },
+  {
+   "chave": "nova",
+   "id_rascunho": "nova-nom",
+   "fr": "Mon nom, c'est Dubois.",
+   "pt-BR": "Meu sobrenome é Dubois.",
+   "en": null,
+   "ilustra": "A1-2-v3",
+   "papel": "so_exemplo",
+   "motivo": "frase do cartão; mon ainda não é visto"
+  },
+  {
+   "chave": "nova",
+   "id_rascunho": "nova-epeler",
+   "fr": "Vous pouvez épeler, s'il vous plaît ?",
+   "pt-BR": "O senhor pode soletrar, por favor?",
+   "en": null,
+   "ilustra": "nova: épeler",
+   "papel": "so_exemplo",
+   "motivo": "frase do cartão; pouvez só é cartão em \"Verbos muito usados\" (como Pardon ? Vous pouvez répéter ?)"
+  },
+  {
+   "chave": "nova",
+   "id_rascunho": "nova-ecrit",
+   "fr": "Dubois ? Ça s'écrit comment ?",
+   "pt-BR": "Dubois? Como se escreve?",
+   "en": null,
+   "ilustra": "nova: Ça s'écrit comment ?",
+   "papel": "essencial",
+   "motivo": "frase do cartão"
+  },
+  {
+   "chave": "nova",
+   "id_rascunho": "nova-etre",
+   "fr": "Tu es français ?",
+   "pt-BR": "Você é francês?",
+   "en": null,
+   "ilustra": "A1-2-v4",
+   "papel": "essencial",
+   "motivo": "frase do cartão; gatilho da nota t'es (decisão 326)"
+  },
+  {
+   "chave": "A1-2-p2",
+   "id_rascunho": null,
+   "fr": "Tu es de quel pays ?",
+   "pt-BR": "De que país você é?",
+   "en": null,
+   "ilustra": "A1-2-v9",
+   "papel": "essencial",
+   "motivo": "frase do cartão (publicada)",
+   "muda": "vira a frase do cartão; papel novo"
+  },
+  {
+   "chave": "A1-2-p3",
+   "id_rascunho": null,
+   "fr": "Moi aussi, je suis française !",
+   "pt-BR": "Eu também, eu sou francesa!",
+   "en": null,
+   "ilustra": "A1-2-v7",
+   "papel": "so_exemplo",
+   "motivo": "frase do cartão (publicada); aussi não é cartão",
+   "muda": "vira a frase do cartão; papel novo"
+  },
+  {
+   "chave": "nova",
+   "id_rascunho": "nova-bresilienne",
+   "fr": "Je suis brésilienne.",
+   "pt-BR": "Eu sou brasileira.",
+   "en": null,
+   "ilustra": "A1-2-v8",
+   "papel": "essencial",
+   "motivo": "frase do cartão"
+  },
+  {
+   "chave": "nova",
+   "id_rascunho": "nova-americaine",
+   "fr": "Je suis américaine.",
+   "pt-BR": "Eu sou americana.",
+   "en": null,
+   "ilustra": "A1-9-v2",
+   "papel": "essencial",
+   "motivo": "frase do cartão"
+  },
+  {
+   "chave": "nova",
+   "id_rascunho": "nova-ne-pas",
+   "fr": "Je ne suis pas française.",
+   "pt-BR": "Eu não sou francesa.",
+   "en": null,
+   "ilustra": "nova: ne… pas",
+   "papel": "essencial",
+   "motivo": "frase do cartão; gatilho da nota da negação e do diálogo"
+  },
+  {
+   "chave": "A1-2-p1",
+   "id_rascunho": null,
+   "fr": "Je suis {nacionalidade}.",
+   "pt-BR": "Eu sou {nacionalidade_t}.",
+   "en": null,
+   "ilustra": "A1-2-v8",
+   "papel": "essencial",
+   "motivo": "outra frase da unidade (publicada, com placeholder de perfil): o aluno diz a própria nacionalidade",
+   "muda": "fica; papel novo"
+  },
+  {
+   "chave": "A1-2-p7",
+   "id_rascunho": null,
+   "fr": "Le pays est magnifique.",
+   "pt-BR": "O país é magnífico.",
+   "en": null,
+   "ilustra": "A1-2-v9",
+   "papel": "so_exemplo",
+   "motivo": "outra frase da unidade (publicada); magnifique é cognato, com a tradução à vista",
+   "muda": "fica; papel novo"
+  }
+ ],
+ "frases_que_saem": [
+  {
+   "chave": "A1-2-p4",
+   "fr": "Quel est le nom de la ville ?",
+   "vai_para": "A1-9",
+   "motivo": "acompanha la ville (decisão 207), com a chave"
+  },
+  {
+   "chave": "A1-2-p5",
+   "fr": "J'aime la France.",
+   "vai_para": "A1-9",
+   "papel": "so_exemplo",
+   "motivo": "acompanha o cartão la France (decisão 328), com a chave"
+  },
+  {
+   "chave": "A1-2-p6",
+   "fr": "Le Brésil est très grand.",
+   "vai_para": "A1-9",
+   "papel": "so_exemplo",
+   "motivo": "acompanha o cartão le Brésil (decisão 328), com a chave"
+  }
+ ],
+ "regra_frases_essenciais_em_exercicio": "a mesma da A1-1 (decisão 321, A3), a implementar em fr/scripts/curriculo_papel.js",
+ "notas": [
+  {
+   "id": "tu-vs-vous",
+   "id_mapa": "N05",
+   "nova": false,
+   "titulo": {
+    "pt-BR": "\"Tu\" ou \"vous\"?",
+    "en": null
+   },
+   "tipo": "Exp",
+   "tipo_visivel": "explicação",
+   "kind": null,
+   "category": null,
+   "confianca": "alta",
+   "fonte": "uso padrão (tutoiement x vouvoiement); texto publicado reescrito sem travessão",
+   "momento": {
+    "licao": "pronomes-e-nome",
+    "depois_do_cartao": "tu / vous",
+    "afterKey": "A1-2-v1"
+   },
+   "texto": {
+    "pt-BR": "Você já viu <strong>tu</strong> e <strong>vous</strong> na unidade anterior, em <i>et toi ? / et vous ?</i>. A regra: <strong>tu</strong> é para amigos, família, crianças e colegas da mesma idade. <strong>Vous</strong> é para quem você não conhece, pessoas mais velhas e situações de trabalho. <strong>Vous</strong> também é \"vocês\": para falar com duas pessoas ou mais, use sempre <strong>vous</strong>. Na dúvida, comece com <strong>vous</strong>: é melhor do que parecer íntimo demais.",
+    "en": null
+   },
+   "exemplos": [
+    {
+     "fr": "tu",
+     "pt-BR": "você (informal)",
+     "en": null
+    },
+    {
+     "fr": "vous",
+     "pt-BR": "o senhor, a senhora (formal) / vocês",
+     "en": null
+    }
+   ],
+   "exemplos_fonte": "dados/mapa.json (um lugar só; o validar.js confere que são iguais)",
+   "audios_previstos": [
+    "tu",
+    "vous"
+   ],
+   "vf": [
+    {
+     "afirmacao": {
+      "pt-BR": "Para falar com dois amigos ao mesmo tempo, usamos <i>vous</i>.",
+      "en": null
+     },
+     "resposta": true,
+     "porque": {
+      "pt-BR": "<b>Vous</b> também é o plural, \"vocês\": com um amigo, <b>tu</b>; com dois ou mais, <b>vous</b>.",
+      "en": null
+     }
+    }
+   ],
+   "muda": "publicada (N05); sistematiza o que os pares da unidade 1 mostraram (decisão 321, A4); texto sem travessão; vous = vocês ganha destaque (decisão 326)"
+  },
+  {
+   "id": "tu-tappelles-comment",
+   "id_mapa": "N06",
+   "nova": false,
+   "titulo": {
+    "pt-BR": "Tu t'appelles comment ?",
+    "en": null
+   },
+   "tipo": "Real",
+   "tipo_visivel": "realidade",
+   "kind": "reality",
+   "category": "gramatica-coloquial",
+   "confianca": "alta",
+   "fonte": "uso corrente (pergunta com a palavra interrogativa no fim, fala cotidiana); texto publicado reescrito",
+   "momento": {
+    "licao": "pronomes-e-nome",
+    "depois_do_cartao": "s'appeler",
+    "afterKey": "A1-2-v2"
+   },
+   "texto": {
+    "pt-BR": "Na fala do dia a dia, a palavra da pergunta costuma ir para o fim: <strong>Tu t'appelles comment ?</strong> quer dizer o mesmo que <i>Comment tu t'appelles ?</i>. Com quem você trata por <strong>vous</strong>, a pergunta mais cuidada é <strong>Comment vous appelez-vous ?</strong>. Nos exercícios, escreva <i>Comment tu t'appelles ?</i>.",
+    "en": null
+   },
+   "exemplos": [
+    {
+     "fr": "Tu t'appelles comment ?",
+     "pt-BR": "Como você se chama? (fala do dia a dia)",
+     "en": null
+    },
+    {
+     "fr": "Comment vous appelez-vous ?",
+     "pt-BR": "Como o senhor se chama? (formal)",
+     "en": null
+    }
+   ],
+   "exemplos_fonte": "dados/mapa.json (um lugar só; o validar.js confere que são iguais)",
+   "audios_previstos": [
+    "Tu t'appelles comment ?",
+    "Comment vous appelez-vous ?"
+   ],
+   "vf": [
+    {
+     "afirmacao": {
+      "pt-BR": "<i>Tu t'appelles comment ?</i> é um erro de quem está aprendendo francês.",
+      "en": null
+     },
+     "resposta": false,
+     "porque": {
+      "pt-BR": "É a forma mais comum na fala do dia a dia. Nos exercícios, use <b>Comment tu t'appelles ?</b>.",
+      "en": null
+     }
+    }
+   ],
+   "muda": "publicada (N06), breve; título curto; ganha a forma formal Comment vous appelez-vous ? (decisão 326); sem travessão e sem \"pra\"",
+   "breve": true
+  },
+  {
+   "id": "moi-toi-vous",
+   "id_mapa": null,
+   "nova": true,
+   "titulo": {
+    "pt-BR": "Moi, toi, vous: para dar destaque",
+    "en": null
+   },
+   "tipo": "Exp",
+   "tipo_visivel": "explicação",
+   "kind": null,
+   "category": null,
+   "confianca": "alta",
+   "fonte": "gramática padrão (pronomes tônicos)",
+   "momento": {
+    "licao": "pronomes-e-nome",
+    "depois_do_cartao": "moi, c'est…",
+    "afterKey": "nova"
+   },
+   "texto": {
+    "pt-BR": "Você já usa <strong>et toi ?</strong> e <strong>et vous ?</strong>. Esse <strong>toi</strong> é o \"você\" com destaque: a forma que aparece sozinha ou depois de <i>et</i>. O \"eu\" com destaque é <strong>moi</strong>: <i>Moi, c'est Ana.</i> Ele também pode vir junto de <i>je</i>, para reforçar: <i>Moi, je m'appelle Léo.</i> Depois de <i>et</i>, use sempre <strong>moi</strong>: <i>Et moi ?</i>",
+    "en": null
+   },
+   "exemplos": [
+    {
+     "fr": "Et toi ?",
+     "pt-BR": "E você?",
+     "en": null
+    },
+    {
+     "fr": "Moi, c'est Ana.",
+     "pt-BR": "Eu sou a Ana.",
+     "en": null
+    },
+    {
+     "fr": "Moi, je m'appelle Léo.",
+     "pt-BR": "Eu me chamo Léo.",
+     "en": null
+    }
+   ],
+   "exemplos_fonte": "dados/mapa.json (um lugar só; o validar.js confere que são iguais)",
+   "audios_previstos": [
+    "Et toi ?",
+    "Moi, c'est Ana.",
+    "Moi, je m'appelle Léo."
+   ],
+   "vf": [
+    {
+     "afirmacao": {
+      "pt-BR": "Para perguntar \"E eu?\", dizemos <i>Et je ?</i>.",
+      "en": null
+     },
+     "resposta": false,
+     "porque": {
+      "pt-BR": "Depois de <i>et</i>, o \"eu\" vira <b>moi</b>: <b>Et moi ?</b>",
+      "en": null
+     }
+    }
+   ],
+   "muda": "nova (decisões 321, A4, e 327): parte de et toi ? / et vous ? e acrescenta moi; lui e elle ficam para \"Perguntar a idade dos outros\" (regra 9)"
+  },
+  {
+   "id": "alfabeto",
+   "id_mapa": null,
+   "nova": true,
+   "titulo": {
+    "pt-BR": "O alfabeto em francês",
+    "en": null
+   },
+   "tipo": "Pron",
+   "tipo_visivel": "pronúncia",
+   "kind": null,
+   "category": null,
+   "confianca": "alta",
+   "fonte": "nomes das letras: CNRTL (TLFi) e Larousse; sem IPA (regra 7)",
+   "momento": {
+    "licao": "nome-e-ser",
+    "depois_do_cartao": "épeler",
+    "afterKey": "nova"
+   },
+   "texto": {
+    "pt-BR": "Para soletrar (<i>épeler</i>), você precisa do nome das letras em francês. Toque no 🔊 ao lado de cada letra para ouvir. Atenção às que mais confundem: <strong>G</strong> soa como o nosso \"gê\" e <strong>J</strong> soa \"ji\"; <strong>E</strong> não é \"é\" nem \"ê\": é um som curto, com os lábios um pouco arredondados; <strong>U</strong> é o \"i\" com biquinho; <strong>H</strong> é \"ache\"; <strong>W</strong> é \"double vé\" (vê duplo) e <strong>Y</strong> é \"i grec\" (i grego).",
+    "en": null
+   },
+   "exemplos": [],
+   "exemplos_fonte": "dados/mapa.json (um lugar só; o validar.js confere que são iguais)",
+   "audios_previstos": [],
+   "vf": [],
+   "muda": "nova (decisão 327): formato em grade, 26 letras com o nome em francês e 🔊 ao lado de cada uma, sem IPA; exige código (formato de nota novo)",
+   "formato": "grade",
+   "grade": [
+    {
+     "letra": "A",
+     "nome_fr": "a",
+     "audio": "a"
+    },
+    {
+     "letra": "B",
+     "nome_fr": "bé",
+     "audio": "bé"
+    },
+    {
+     "letra": "C",
+     "nome_fr": "cé",
+     "audio": "cé"
+    },
+    {
+     "letra": "D",
+     "nome_fr": "dé",
+     "audio": "dé"
+    },
+    {
+     "letra": "E",
+     "nome_fr": "e",
+     "audio": "e"
+    },
+    {
+     "letra": "F",
+     "nome_fr": "effe",
+     "audio": "effe"
+    },
+    {
+     "letra": "G",
+     "nome_fr": "gé",
+     "audio": "gé"
+    },
+    {
+     "letra": "H",
+     "nome_fr": "ache",
+     "audio": "ache"
+    },
+    {
+     "letra": "I",
+     "nome_fr": "i",
+     "audio": "i"
+    },
+    {
+     "letra": "J",
+     "nome_fr": "ji",
+     "audio": "ji"
+    },
+    {
+     "letra": "K",
+     "nome_fr": "ka",
+     "audio": "ka"
+    },
+    {
+     "letra": "L",
+     "nome_fr": "elle",
+     "audio": "elle"
+    },
+    {
+     "letra": "M",
+     "nome_fr": "emme",
+     "audio": "emme"
+    },
+    {
+     "letra": "N",
+     "nome_fr": "enne",
+     "audio": "enne"
+    },
+    {
+     "letra": "O",
+     "nome_fr": "o",
+     "audio": "o"
+    },
+    {
+     "letra": "P",
+     "nome_fr": "pé",
+     "audio": "pé"
+    },
+    {
+     "letra": "Q",
+     "nome_fr": "qu",
+     "audio": "qu"
+    },
+    {
+     "letra": "R",
+     "nome_fr": "erre",
+     "audio": "erre"
+    },
+    {
+     "letra": "S",
+     "nome_fr": "esse",
+     "audio": "esse"
+    },
+    {
+     "letra": "T",
+     "nome_fr": "té",
+     "audio": "té"
+    },
+    {
+     "letra": "U",
+     "nome_fr": "u",
+     "audio": "u"
+    },
+    {
+     "letra": "V",
+     "nome_fr": "vé",
+     "audio": "vé"
+    },
+    {
+     "letra": "W",
+     "nome_fr": "double vé",
+     "audio": "double vé"
+    },
+    {
+     "letra": "X",
+     "nome_fr": "ixe",
+     "audio": "ixe"
+    },
+    {
+     "letra": "Y",
+     "nome_fr": "i grec",
+     "audio": "i grec"
+    },
+    {
+     "letra": "Z",
+     "nome_fr": "zède",
+     "audio": "zède"
+    }
+   ],
+   "grade_obs": "a coluna nome_fr é o nome da letra escrito em francês (o que o 🔊 fala); na tela aparecem a letra e o 🔊, o nome escrito é a confirmar com a dona (L, \"elle\", pode ser confundido com o pronome)"
+  },
+  {
+   "id": "tes",
+   "id_mapa": "N07",
+   "nova": false,
+   "titulo": {
+    "pt-BR": "t'es",
+    "en": null
+   },
+   "tipo": "Real",
+   "tipo_visivel": "realidade",
+   "kind": "reality",
+   "category": "gramatica-coloquial",
+   "confianca": "alta",
+   "fonte": "uso corrente (elisão de tu diante de vogal na fala); texto publicado reescrito",
+   "momento": {
+    "licao": "nacionalidades",
+    "depois_do_cartao": "être",
+    "afterKey": "A1-2-v4"
+   },
+   "texto": {
+    "pt-BR": "Na fala corrida, <strong>tu es</strong> quase sempre vira <strong>t'es</strong>: <i>T'es français ?</i>. Aparece até em mensagens escritas entre amigos. Nos exercícios, escreva a forma padrão, <strong>tu es</strong>; o <i>t'es</i> é para você reconhecer quando ouvir.",
+    "en": null
+   },
+   "exemplos": [
+    {
+     "fr": "Tu es français ?",
+     "pt-BR": "Você é francês?",
+     "en": null
+    },
+    {
+     "fr": "T'es français ?",
+     "pt-BR": "Você é francês? (fala do dia a dia)",
+     "en": null
+    }
+   ],
+   "exemplos_fonte": "dados/mapa.json (um lugar só; o validar.js confere que são iguais)",
+   "audios_previstos": [
+    "Tu es français ?",
+    "T'es français ?"
+   ],
+   "vf": [
+    {
+     "afirmacao": {
+      "pt-BR": "<i>T'es français ?</i> é a forma certa para um texto formal.",
+      "en": null
+     },
+     "resposta": false,
+     "porque": {
+      "pt-BR": "<b>T'es</b> é da fala e das mensagens entre amigos. Por escrito, num texto formal, <b>tu es</b>.",
+      "en": null
+     }
+    }
+   ],
+   "muda": "publicada (N07, \"Tu es\" vira \"t'es\" na fala); gatilho passa a ser o cartão être com Tu es français ? (decisão 326); sai do fim do diálogo; sem travessão e sem \"pra\""
+  },
+  {
+   "id": "feminino-que-se-ouve",
+   "id_mapa": null,
+   "nova": true,
+   "titulo": {
+    "pt-BR": "Français, française: o feminino que se ouve",
+    "en": null
+   },
+   "tipo": "Exp",
+   "tipo_visivel": "explicação",
+   "kind": null,
+   "category": null,
+   "confianca": "alta",
+   "fonte": "pronúncia padrão (consoante final muda no masculino, pronunciada no feminino)",
+   "momento": {
+    "licao": "nacionalidades",
+    "depois_do_cartao": "français / française",
+    "afterKey": "A1-2-v7"
+   },
+   "texto": {
+    "pt-BR": "Em <strong>français</strong>, o <i>s</i> do fim não se pronuncia. No feminino, o <i>e</i> final faz o <i>s</i> soar, como um \"z\": <strong>française</strong>. Por isso, só de ouvir, você sabe se é um homem ou uma mulher. Muitas nacionalidades funcionam assim: a letra final, muda no masculino, aparece na voz no feminino.",
+    "en": null
+   },
+   "exemplos": [
+    {
+     "fr": "français",
+     "pt-BR": "francês",
+     "en": null
+    },
+    {
+     "fr": "française",
+     "pt-BR": "francesa",
+     "en": null
+    }
+   ],
+   "exemplos_fonte": "dados/mapa.json (um lugar só; o validar.js confere que são iguais)",
+   "audios_previstos": [
+    "français",
+    "française"
+   ],
+   "vf": [
+    {
+     "afirmacao": {
+      "pt-BR": "<i>Français</i> e <i>française</i> soam iguais.",
+      "en": null
+     },
+     "resposta": false,
+     "porque": {
+      "pt-BR": "No masculino, o <b>s</b> final é mudo; no feminino, o <b>e</b> faz o <b>s</b> soar como \"z\".",
+      "en": null
+     }
+    }
+   ],
+   "muda": "nova; versão grátis (menção breve) de \"Gramática: masculino e feminino\" e \"Gramática: adjetivos\" (decisão 285)"
+  },
+  {
+   "id": "ne-pas",
+   "id_mapa": null,
+   "nova": true,
+   "titulo": {
+    "pt-BR": "Ne… pas: o não em volta do verbo",
+    "en": null
+   },
+   "tipo": "Exp",
+   "tipo_visivel": "explicação",
+   "kind": null,
+   "category": null,
+   "confianca": "alta",
+   "fonte": "gramática padrão (negação ne... pas; elisão ne > n' diante de vogal)",
+   "momento": {
+    "licao": "nacionalidades",
+    "depois_do_cartao": "ne… pas",
+    "afterKey": "nova"
+   },
+   "texto": {
+    "pt-BR": "Para dizer \"não\" numa frase, o francês usa duas palavras, uma de cada lado do verbo: <strong>ne</strong> antes e <strong>pas</strong> depois. <i>Je suis française</i> vira <i>Je <strong>ne</strong> suis <strong>pas</strong> française.</i> Antes de vogal, <strong>ne</strong> vira <strong>n'</strong>: <i>Tu <strong>n'</strong>es <strong>pas</strong> français ?</i>",
+    "en": null
+   },
+   "exemplos": [
+    {
+     "fr": "Je ne suis pas française.",
+     "pt-BR": "Eu não sou francesa.",
+     "en": null
+    },
+    {
+     "fr": "Tu n'es pas français ?",
+     "pt-BR": "Você não é francês?",
+     "en": null
+    }
+   ],
+   "exemplos_fonte": "dados/mapa.json (um lugar só; o validar.js confere que são iguais)",
+   "audios_previstos": [
+    "Je ne suis pas française.",
+    "Tu n'es pas français ?"
+   ],
+   "vf": [
+    {
+     "afirmacao": {
+      "pt-BR": "Em <i>Je ne suis pas française</i>, o <i>pas</i> vem antes do verbo.",
+      "en": null
+     },
+     "resposta": false,
+     "porque": {
+      "pt-BR": "O <b>ne</b> vem antes do verbo e o <b>pas</b> depois: <b>je ne suis pas</b>.",
+      "en": null
+     }
+    }
+   ],
+   "muda": "nova, breve (`16`: a única nota de 1ª aparição da negação); gatilho é o cartão ne… pas (decisão 326); depois dela, o diálogo com a negação",
+   "breve": true
+  }
+ ],
+ "verdadeiro_falso_da_unidade": [
+  {
+   "subject": "Comment tu t'appelles ?",
+   "emoji": "🙋",
+   "afirmacao": {
+    "pt-BR": "Essa pergunta serve para saber a idade de alguém.",
+    "en": null
+   },
+   "resposta": false,
+   "porque": {
+    "pt-BR": "Errado: <strong>Comment tu t'appelles ?</strong> pergunta o nome (<i>s'appeler</i> = chamar-se), não a idade.",
+    "en": null
+   },
+   "chave": "publicado",
+   "muda": "texto sem travessão e sem \"pra\"; sai a menção a quel âge as-tu ? (ainda não visto)"
+  },
+  {
+   "subject": "Je ne suis pas brésilienne.",
+   "emoji": "🇧🇷",
+   "afirmacao": {
+    "pt-BR": "Quem diz isso é brasileira.",
+    "en": null
+   },
+   "resposta": false,
+   "porque": {
+    "pt-BR": "Errado: <strong>ne… pas</strong> é \"não\". A frase quer dizer \"Eu não sou brasileira\".",
+    "en": null
+   },
+   "chave": "nova"
+  }
+ ],
+ "revisao_da_unidade": {
+  "licao": "checkpoint",
+  "titulo": {
+   "pt-BR": "Revisão da unidade",
+   "en": "Unit review"
+  },
+  "regra": "contexto ponto_verificacao_unidade: fechado para frases so_exemplo e notas não contam como vistas (decisão 265); a 💡 mostra as 7 notas da unidade",
+  "fica_de_fora": "frases so_exemplo (nova-vous, nova-prenom, nova-nom, nova-epeler, A1-2-p2, A1-2-p3, A1-2-p7): ficha, Revisão (cartões) e exercícios da lição que não pedem digitar",
+  "itens": [
+   {
+    "tipo": "rodada_por_palavra",
+    "conteudo": "1 rodada por cartão (14), gerada pelo app"
+   },
+   {
+    "tipo": "verdadeiro_falso",
+    "conteudo": "os 2 itens de verdadeiro_falso_da_unidade"
+   },
+   {
+    "tipo": "ordenar_blocos",
+    "frase": "nova-moi-cest",
+    "blocos": [
+     "Moi,",
+     "c'est",
+     "Ana."
+    ],
+    "iscas": [
+     "je"
+    ]
+   },
+   {
+    "tipo": "ordenar_blocos",
+    "frase": "A1-2-p0",
+    "blocos": [
+     "Comment",
+     "tu",
+     "t'appelles ?"
+    ],
+    "iscas": [
+     "es"
+    ]
+   },
+   {
+    "tipo": "ordenar_blocos",
+    "frase": "nova-ne-pas",
+    "blocos": [
+     "Je ne",
+     "suis pas",
+     "française."
+    ],
+    "iscas": [
+     "moi"
+    ]
+   },
+   {
+    "tipo": "ordenar_blocos",
+    "frase": "nova-ecrit",
+    "blocos": [
+     "Dubois ?",
+     "Ça s'écrit",
+     "comment ?"
+    ],
+    "iscas": [
+     "tu"
+    ]
+   },
+   {
+    "tipo": "lacuna_tocando",
+    "frase": "nova-ne-pas",
+    "texto": "Je ___ suis pas française.",
+    "certa": "ne",
+    "opcoes": [
+     "ne",
+     "pas",
+     "moi"
+    ]
+   },
+   {
+    "tipo": "lacuna_tocando",
+    "frase": "nova-americaine",
+    "texto": "Je suis ___.",
+    "certa": "américaine",
+    "opcoes": [
+     "américaine",
+     "américain",
+     "français"
+    ],
+    "enunciado": {
+     "pt-BR": "A Ana é americana. Complete o que ela diz.",
+     "en": null
+    }
+   },
+   {
+    "tipo": "cenario",
+    "id": "cen-nome",
+    "frase": "A1-2-p0",
+    "enunciado": {
+     "pt-BR": "Numa festa, você conhece alguém e quer saber o nome da pessoa. O que você pergunta?",
+     "en": null
+    },
+    "opcoes": [
+     {
+      "fr": "Comment tu t'appelles ?",
+      "certa": true
+     },
+     {
+      "fr": "Tu es français ?"
+     },
+     {
+      "fr": "Ça s'écrit comment ?"
+     }
+    ]
+   },
+   {
+    "tipo": "cenario",
+    "id": "cen-soletrar",
+    "frase": "nova-ecrit",
+    "enunciado": {
+     "pt-BR": "Você ouve o sobrenome de uma pessoa e não sabe como ele se escreve. O que você pergunta?",
+     "en": null
+    },
+    "opcoes": [
+     {
+      "fr": "Ça s'écrit comment ?",
+      "certa": true
+     },
+     {
+      "fr": "Comment tu t'appelles ?"
+     },
+     {
+      "fr": "Moi, c'est Ana."
+     }
+    ]
+   },
+   {
+    "tipo": "cenario",
+    "id": "cen-nao",
+    "frase": "nova-ne-pas",
+    "enunciado": {
+     "pt-BR": "Alguém pergunta: \"Tu es française ?\". Você é brasileira, não francesa. O que você responde?",
+     "en": null
+    },
+    "opcoes": [
+     {
+      "fr": "Non, je ne suis pas française. Je suis brésilienne !",
+      "certa": true
+     },
+     {
+      "fr": "Oui, je suis française."
+     },
+     {
+      "fr": "Moi, c'est Ana."
+     }
+    ],
+    "nota": "a certa é a última fala do diálogo"
+   },
+   {
+    "tipo": "cenario",
+    "id": "cen-moi",
+    "frase": "nova-moi-cest",
+    "enunciado": {
+     "pt-BR": "O Léo diz o nome dele e pergunta \"Et toi ?\". Como você diz o seu nome?",
+     "en": null
+    },
+    "opcoes": [
+     {
+      "fr": "Moi, c'est Ana.",
+      "certa": true
+     },
+     {
+      "fr": "Et toi ?"
+     },
+     {
+      "fr": "Je suis américaine."
+     }
+    ]
+   }
+  ]
+ },
+ "ditados": {
+  "decisao": "trail, no MÓDULO (shared/challenge-policy.js); nenhum ditado é da unidade A1-2",
+  "candidato_para_o_modulo": {
+   "fr": "Moi, c'est Ana. Je ne suis pas française, je suis brésilienne.",
+   "tarefa": {
+    "pt-BR": "A Ana se apresenta",
+    "en": null
+   },
+   "status": "sugestão: só cartões de \"Cumprimentar e se despedir\" e desta unidade (palavra de nota não conta em ditado)"
+  }
+ },
+ "desafios": {
+  "_doc": "Não reescritos agora: a revisão dos Desafios é por módulo (decisão 281). Lista gerada pelo validar.js (grupo 'Desafios publicados'), a partir de fr/scripts/challenges_import/modulo-a1-m1-content.json. Estado no banco não conferido.",
+  "gratis_premium": "Desafios são Premium (paywall hoje desligado); o ditado do módulo continua aberto a todos."
+ },
+ "progresso_dos_alunos": {
+  "leitura": "não conferido em produção (só a leitura da A1-1, decisão 284)",
+  "regra_do_app": "o save guarda lessonId; se a lição salva muda de posição, lessonIdx segue o id; se o id some, volta para a 1ª lição com palavra ainda não liberada (reconcileUnitLessonIdx em shared/study-trail-model.js)",
+  "ids": [
+   {
+    "id": "pronomes-e-nome",
+    "antes": "lição 1 (je, tu, s'appeler)",
+    "depois": "lição 1 \"Dizer o nome\" (+ moi, c'est…)",
+    "efeito": "fica na lição 1"
+   },
+   {
+    "id": "nome-e-ser",
+    "antes": "lição 2 (le nom, être, la France)",
+    "depois": "lição 2 \"O alfabeto e soletrar o nome\"",
+    "efeito": "fica na lição 2, agora a do alfabeto; être passa para a lição 3"
+   },
+   {
+    "id": "nacionalidades",
+    "antes": "lição 3 (le Brésil, français, brésilien, le pays + diálogo)",
+    "depois": "lição 3 \"Dizer a nacionalidade\"",
+    "efeito": "fica na lição 3; o diálogo muda as duas últimas falas"
+   },
+   {
+    "id": "checkpoint",
+    "antes": "lição 4 (Ponto de verificação)",
+    "depois": "lição 4 (Revisão da unidade)",
+    "efeito": "igual"
+   }
+  ],
+  "cartoes_novos_em_unidade_concluida": "quem já concluiu a unidade recebe os cartões novos (moi, c'est…, le prénom, épeler, Ça s'écrit comment ?, ne… pas) e américain / américaine direto na Revisão (decisão 325, D1); la France e le Brésil seguem com a chave e o progresso, agora na unidade \"Dizer de onde é e onde mora\", que abre atrás de quem já passou (decisão 328)"
+ },
+ "audios_novos_previstos": [
+  "tu / vous",
+  "moi, c'est…",
+  "le prénom",
+  "épeler",
+  "Ça s'écrit comment ?",
+  "américain / américaine",
+  "ne… pas",
+  "Je m'appelle Léo.",
+  "Vous êtes madame Dubois ?",
+  "Moi, c'est Ana.",
+  "Mon prénom, c'est Ana.",
+  "Mon nom, c'est Dubois.",
+  "Vous pouvez épeler, s'il vous plaît ?",
+  "Dubois ? Ça s'écrit comment ?",
+  "Tu es français ?",
+  "Je suis brésilienne.",
+  "Je suis américaine.",
+  "Je ne suis pas française.",
+  "Oui, je suis français. Et toi, tu es française ?",
+  "Non, je ne suis pas française. Je suis brésilienne !",
+  "tu",
+  "vous",
+  "Tu t'appelles comment ?",
+  "Comment vous appelez-vous ?",
+  "Et toi ?",
+  "Moi, je m'appelle Léo.",
+  "T'es français ?",
+  "français",
+  "française",
+  "Tu n'es pas français ?",
+  "as 26 letras (nome em francês: a, bé, cé ... zède)"
+ ],
+ "camadas_a_mexer_quando_aprovado": [
+  "fr/content.js (ordem dos cartões nas lições; tu vira par; 5 cartões novos e américain vindo da A1-9; la France e le Brésil saem para a A1-9 com as frases p4, p5, p6; 2 falas novas no diálogo; concepts com trigger pelo cartão; A1-9 no módulo A1-m1, logo depois da A1-2)",
+  "courses/fr-pt-BR/layer.js (títulos, objetivo, notas, traduções; DELIBERATE_PT_CHANGES em tests/i18n)",
+  "camada en (depois da aprovação, decisão 81)",
+  "docs/i18n/curriculo/dados/frases_na_frase.json (papel das frases -p: p0, p1, p2, p3, p7 aqui; p4, p5, p6 na A1-9)",
+  "código: nota em grade (alfabeto com 🔊 por letra), lição de pronúncia com exercícios de letras, exampleK (frase do cartão), cenários das frases só exemplo dentro da lição",
+  "fr/scripts/challenges_import/modulo-a1-m1-content.json (na revisão dos Desafios do módulo, decisão 281)",
+  "áudio (skill audio-tts): cartões, frases, exemplos das notas, as 26 letras e as 2 falas novas (duas vozes)",
+  "node scripts/gerar_mapa_cron.js + novo deploy do notification-cron (a ordem das palavras e das unidades muda)"
+ ]
+}

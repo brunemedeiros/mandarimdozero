@@ -249,4 +249,21 @@ Objetivo: melhorar o currículo pedagógico do francês (A1 revisado e A2 novo) 
 - **Totais novos**: A1 com **382 cartões** (**757** A/B), **~153 lições** (+1 em "Pedir no restaurante" e +1 em "Tipos de moradia e cômodos", pela regra do script),
   **128 notas**, ~31h00 (tempo digitado, sem regra nova, decisão 300). A2 com **433 cartões** (423 novos + 10 publicados; **862** A/B), ~178 lições, 76 notas, ~33h10.
 
+## Atualização 2026-11-08 (decisões 326 a 328, pedido de mudança: unidade 2 e "Dizer de onde é e onde mora")
+
+- **"Dizer o nome e a nacionalidade"** (módulo "Apresentar-se") desenhada lição por lição, aplicada em `dados/mapa.json`, `08 v2` e no rascunho
+  `piloto-m1/A1-2/` (`A1-2.md` para a dona ler, `A1-2.json`, `validar.js`): **14 cartões em 3 lições** (4 + 4 + 6; a lição 3 com 6, aceito pela dona):
+  "Dizer o nome" (*je, tu / vous* em par com a mesma chave, *s'appeler*, ***moi, c'est…***), "O alfabeto e soletrar o nome" (lição de pronúncia, com cartões:
+  *le prénom, le nom, épeler, Ça s'écrit comment ?*) e "Dizer a nacionalidade" (*être, le pays, français / française, brésilien / brésilienne,
+  américain / américaine*, ***ne… pas***). **7 notas, cada uma depois do seu gatilho** (decisão 326; regra 4 do `15`), com a nova "O alfabeto em francês"
+  (nota em grade com 🔊 por letra, sem IPA: exige código). Diálogo publicado com a negação nas duas últimas falas, no fim da lição 3.
+- **"Dizer de onde é e onde mora"** (`A1-9`) vai do módulo "Família e pessoas próximas" para **"Apresentar-se"**, logo depois da unidade 2 (A1 M1.3; decisão 328):
+  ganha *la France* e *le Brésil* (com as chaves e as frases `A1-2-p4` a `p6`), perde *américain / américaine*: 12 cartões. Renumeração: A1 M1.3 a M1.7 passam a
+  M1.4 a M1.8; A1 M2.6 e M2.7 passam a M2.5 e M2.6 (nota no topo do `08 v2`). "Consigo..." dos dois módulos ajustado.
+- **Script e dados**: `conferirCartoesPorLicao` aceita a lição marcada com `cartoes_aceitos` (exceção da dona, com teste); `formas_extras.json` ganha as formas
+  elididas de *s'appeler* (*m'appelle, t'appelles*...) e o nome *Dubois*.
+- **Totais novos**: A1 com **384 cartões** (**761** A/B; 194 novos + 190 publicados), **~152 lições**, **129 notas**, ~31h00 (tempo digitado, não recalculado:
+  regra 16 suspensa, decisão 325); "Apresentar-se" com 8 unidades e 79 cartões; "Família e pessoas próximas" com 6 unidades e 27 cartões. A2 sem mudança.
+- **Para a dona**: as decisões pequenas do `piloto-m1/A1-2/A1-2.md` (seção 9).
+
 > **Como falar com a dona** (2026-10-23): em toda mensagem a ela, citar o NOME do módulo e da unidade (não só M6.1 ou `A1-15`), explicar termos internos e dar o contexto completo de cada decisão. Vale para o chat e para qualquer agente.
