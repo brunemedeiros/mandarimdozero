@@ -1,4 +1,4 @@
--- 128: a rotina da madrugada passa a mostrar, na mensagem da manhã, quantos itens PENDENTES (para a professora conferir) cada aluno tem.
+-- 129: a rotina da madrugada passa a mostrar, na mensagem da manhã, quantos itens PENDENTES (para a professora conferir) cada aluno tem.
 -- `review_bank_agent_state()` ganha, em cada aluno gerenciado, só três números: `pending_total`, `pending_recent` (últimos 7 dias) e `pending_sensitive`.
 -- Nada de texto de item nem dado pessoal. Mesma assinatura e mesmo retorno de antes (campos novos no objeto de cada aluno); aditiva (create or replace); nenhum DROP.
 -- Desfazer (manual): reaplicar a 100.
