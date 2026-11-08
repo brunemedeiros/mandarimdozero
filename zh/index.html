@@ -2668,6 +2668,10 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
 
 .conquests-grid{ margin-bottom:26px; }
 .conquests-grid .badge .icon{ font-size:30px; }
+/* Conquista do aviso "Nova conquista!" em destaque por uns segundos (focusProgressBadges, 2026-10-31). */
+#badge-grid .is-spotlight{ outline:3px solid var(--brand-fill); outline-offset:3px; animation:badge-spotlight 1.2s ease-in-out 2; }
+@keyframes badge-spotlight{ 50%{ outline-offset:7px; } }
+@media (prefers-reduced-motion: reduce){ #badge-grid .is-spotlight{ animation:none; } }
 
 /* ---------- Preferências (aba Progresso) ---------- */
 .pref-row{
@@ -4692,6 +4696,7 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
 <!-- Boas-vindas da 1ª lição do curso (Etapa 6) -->
 <link rel="stylesheet" href="../shared/boas-vindas.css">
 <link rel="stylesheet" href="../shared/mural-classroom.css">
+<link rel="stylesheet" href="../shared/notion-sync.css">
 <!-- Janelas do topo (🔥 sequência e ⭐ XP da semana), shared/janelas-topo.js e shared/xp-semana.js -->
 <link rel="stylesheet" href="../shared/janelas-topo.css">
 <!-- Recomeçar o curso e retomada guiada (shared/recomecar-curso.js) -->
@@ -5032,14 +5037,16 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
       <h2 data-i18n="ui.stats.title">Seu progresso</h2>
       <p data-i18n="ui.stats.sub">Acompanhe sua consistência e conquistas.</p>
     </div>
-    <div data-i18n="profile.sectionBadges" class="section-label conquests-label">Conquistas <span class="conquests-count" id="badge-grid-count"></span></div>
-    <div class="badge-grid conquests-grid" id="badge-grid"></div>
     <div class="stat-cards" id="stat-cards"></div>
     <div id="vocab-strength-widget"></div>
     <div data-i18n="ui.stats.dailyActivity" class="section-label">Atividade diária</div>
     <div class="heatmap-wrap" id="heatmap-wrap"></div>
     <div data-i18n="ui.stats.wordsOverTime" class="section-label">Palavras aprendidas ao longo do tempo</div>
     <div class="progress-line-wrap" id="progress-line-chart-wrap"></div>
+    <!-- Conquistas no fim (decisão da dona, 2026-10-31): "Ver estatísticas completas" cai nos números; "Ver todas" e o aviso de
+         "Nova conquista!" abrem aqui pela aba de mentira 'profile-badges' (shared/tabs.js). -->
+    <div data-i18n="profile.sectionBadges" class="section-label conquests-label">Conquistas <span class="conquests-count" id="badge-grid-count"></span></div>
+    <div class="badge-grid conquests-grid" id="badge-grid"></div>
   </div>
 
   <!-- ===== METAS ===== -->
@@ -5831,6 +5838,7 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
 <script src="../shared/teacher-class-logs.js"></script>
 <script src="../shared/admin-class-logs.js"></script>
 <script src="../shared/google-calendar.js"></script>
+<script src="../shared/notion-sync.js"></script>
 <script src="../shared/teacher-support-materials.js"></script>
 <script src="../shared/teacher-materials-ui.js"></script>
 <script src="../shared/admin-support-materials.js"></script>

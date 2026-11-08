@@ -52,6 +52,17 @@ const PANEL_STUB = (who) => {
       return { data: all.filter(e => !(window.__gcalResolved && window.__gcalResolved.p_event_id === e.id && window.__gcalResolved.p_action === 'student')), error: null };
     }
     if (name === 'google_calendar_resolve'){ window.__gcalResolved = args; return { data: 'linked', error: null }; }
+    // 128: Conectar Notion conectado, banco escolhido; 2 aulas para aprovar e 1 nome para revisar.
+    if (name === 'notion_status') return { data: window.__notionStatus || { connected: true, workspace: 'Brune', last_sync_at: new Date().toISOString(), last_error: null,
+      source: { database_id: '1ed6b6a3e89f80b5a448000bc2dc1582', title: 'Calendário de Aulas', column_map: { date: 'Dt', student: 'Al' }, import_from: '2026-10-16', linked_on: '2026-11-05', enabled: true },
+      counts: { linked: 9, approval: 2, review: 1, no_account: 0, recent: 3 } }, error: null };
+    if (name === 'notion_review_items') return { data: { data: (window.__notionItems || [
+      { id: 501, state: 'approval', name: 'Ana 🇧🇷', target: 'Ana Souza', class_date: '2026-10-21', topic: 'Passé composé', homework: 'Exercícios', attendance: 'Aula dada✅' },
+      { id: 502, state: 'approval', name: 'Ana 🇧🇷', target: 'Ana Souza', class_date: '2026-10-20', topic: 'Imparfait' },
+      { id: 503, state: 'review', reason: 'nome não reconhecido', name: 'Fred 🇧🇷', class_date: '2026-10-22', topic: 'Futur' }]) }, error: null };
+    if (name === 'notion_approve'){ window.__notionApprove = args; window.__notionItems = []; return { data: { ok: true, n: 1 }, error: null }; }
+    if (name === 'notion_link_name'){ window.__notionLink = args; return { data: { ok: true, n: 1 }, error: null }; }
+    if (name === 'notion_save_source'){ window.__notionSave = args; return { data: { ok: true }, error: null }; }
     if (name === 'my_calendar_feed_token') return { data: (args && args.p_regenerate ? 'b' : 'a').repeat(16), error: null };
     // 101: com horário; inclui 1 aula futura (próximas aulas) marcada em São Paulo.
     if (name === 'get_my_class_schedule') return { data: who === 'S' ? [
@@ -307,6 +318,16 @@ const PANEL_STUB = (who) => {
       L('aulas: aula de turma é 1 linha sem aluno e com a turma', await ev(() => { const r = window.__DB.teacher_class_logs[1]; return r.student_id === null && r.classroom_id === 501 && r.attendance_label_id === 62; }), await ev(() => window.__DB.teacher_class_logs[1]));
       await page.waitForSelector('#admin-classlogs-list-box .class-log-classroom');
       L('aulas: lista da turma mostra o nome da turma', await ev(() => document.querySelector('#admin-classlogs-list-box .class-log-classroom').textContent.includes('Dupla')));
+      // "Todos" no Mural > Aulas e materiais: vindo de uma turma, a lista mostra as aulas de todos, sem marcar ninguém no formulário (bug 2026-11-03)
+      await ev(() => { MURAL_STATE.teacher.sel = 'c:501'; muralApplyAulasScope('c:501'); return renderAdminClassLogsView(); });
+      await page.waitForFunction(() => document.querySelectorAll('#admin-classlogs-list-box [data-edit-class-log]').length === 1);
+      L('aulas: com uma turma escolhida, só as aulas dela', true);
+      await ev(() => { MURAL_STATE.teacher.sel = 'all'; muralApplyAulasScope('all'); return renderAdminClassLogsView(); });
+      await page.waitForFunction(() => document.querySelectorAll('#admin-classlogs-list-box [data-edit-class-log]').length === 2);
+      L('aulas: Todos lista as aulas do aluno e da turma juntas', true);
+      L('aulas: Todos não deixa ninguém marcado no formulário', await ev(() => !document.querySelector('[data-classlog-student-checkbox]:checked, [data-classlog-classroom-checkbox]:checked') && document.getElementById('admin-create-class-log-btn').disabled));
+      await page.check('[data-classlog-classroom-checkbox][value="501"]');
+      L('aulas: em Todos, marcar a turma no formulário não esconde as outras aulas', await ev(() => document.querySelectorAll('#admin-classlogs-list-box [data-edit-class-log]').length === 2));
       // rótulos no estilo do Notion: criar digitando, ⋯ para cor/nome/arquivar, sem perder o que já foi digitado
       await page.fill('#admin-class-log-topic', 'Texto que não pode sumir');
       await page.fill('[data-att-new="new"]', 'Remarcada');
@@ -402,6 +423,51 @@ const PANEL_STUB = (who) => {
       await page.waitForFunction(() => !!window.__gcalResolved);
       L('google (119): fora do site manda p_action outside com lembrar', await ev(() => window.__gcalResolved.p_action === 'outside' && window.__gcalResolved.p_remember === true));
       L('google: aula comum continua editável', await ev(() => !/ disabled/.test(classLogWhenFieldsHTML('t2', 'd2', { start_time: '10:00:00' }))));
+      // 128: caixa do Notion acima de Registrar | Calendário
+      await ev(() => { window.notionCall = async (action, extra) => { (window.__notionCalls = window.__notionCalls || []).push([action, extra]);
+        if (action === 'databases') return { ok: true, databases: [{ id: '1ed6b6a3e89f80b5a448000bc2dc1582', title: 'Calendário de Aulas' }] };
+        if (action === 'columns') return { ok: true, title: 'Calendário de Aulas', properties: [{ id: 'Dt', name: 'Data', type: 'date' }, { id: 'Al', name: 'Aluno/a', type: 'select' }, { id: 'title', name: 'Tópico', type: 'title' }, { id: 'Px', name: 'Para a próxima aula', type: 'rich_text' }],
+          suggested: { date: 'Dt', student: 'Al', topic: 'title', homework: 'Px' }, field_types: { date: ['date'], student: ['select', 'title'], topic: ['title', 'rich_text'], homework: ['rich_text', 'title'], attendance: ['select'], skills: ['multi_select'], language: ['select'] } };
+        return { ok: true, results: [] }; }; });
+      await page.waitForSelector('#admin-notion-box [data-notion-item]');
+      L('notion: caixa no topo de Aulas, aberta porque há o que conferir, com "3 para conferir" e o selo Conectado', await ev(() => { const b = document.getElementById('admin-notion-box'); return b.open && b.querySelector('[data-notion-badge]').textContent === '3 para conferir' && !b.querySelector('[data-notion-on]').hidden && b.parentElement.classList.contains('painel') && !b.classList.contains('painel') && b.compareDocumentPosition(document.querySelector('.class-log-views')) & Node.DOCUMENT_POSITION_FOLLOWING; }));
+      if (SHOTS) { await ev(() => { document.getElementById('admin-notion-box').scrollIntoView({ block: 'start' }); window.scrollBy(0, -110); }); await shot('notion-aprovar'); }
+      L('notion: diz que é só leitura e mostra o banco lido', await ev(() => /Só leitura/.test(document.querySelector('#admin-notion-box .notion-fonte').textContent) && document.querySelector('#admin-notion-box .notion-fonte').textContent.includes('Calendário de Aulas')));
+      L('notion: resumo com atualizadas em 7 dias, ligadas, para aprovar e para revisar', await ev(() => [...document.querySelectorAll('#admin-notion-box .notion-resumo .p-indicador-valor')].map(x => x.textContent).join() === '3,9,2,1'));
+      L('notion: abre em Para aprovar com as 2 aulas e o botão Aprovar todas', await ev(() => document.querySelector('[data-notion-tab="approval"]').getAttribute('aria-pressed') === 'true' && document.querySelectorAll('#admin-notion-box [data-notion-item]').length === 2 && /2/.test(document.querySelector('[data-notion-approve-all]').textContent)));
+      L('notion: item mostra o aluno do site, o nome no Notion, o tópico e a tarefa', await ev(() => { const it = document.querySelector('[data-notion-item="501"]').textContent; return it.includes('Ana Souza') && it.includes('Ana 🇧🇷') && it.includes('Passé composé') && it.includes('Exercícios'); }));
+      await ev(() => document.querySelector('[data-notion-tab="review"]').click());
+      await page.waitForSelector('[data-notion-item="503"] [data-notion-target]');
+      await ev(() => { const sel = document.querySelector('[data-notion-item="503"] [data-notion-target]'); sel.value = [...sel.options].find(o => o.value.startsWith('student|')).value; });
+      await ev(() => document.querySelector('[data-notion-item="503"] [data-notion-do="link"]').click());
+      await page.waitForFunction(() => !!window.__notionLink);
+      L('notion: ligar o nome manda o nome do Notion, o aluno e o idioma', await ev(() => window.__notionLink.p_name === 'Fred 🇧🇷' && window.__notionLink.p_action === 'student' && !!window.__notionLink.p_student && !!window.__notionLink.p_lang));
+      await ev(() => document.querySelector('[data-notion-tab="approval"]').click());
+      await ev(() => document.querySelector('[data-notion-approve-all]').click());
+      await page.waitForFunction(() => !!window.__notionApprove);
+      L('notion: Aprovar todas aprova sem lista (todas)', await ev(() => window.__notionApprove.p_ids === null && window.__notionApprove.p_approve === true));
+      await page.waitForFunction(() => !document.querySelector('#admin-notion-box [data-notion-item]'));
+      L('notion: caixa some quando não há mais nada para conferir', true);
+      // trocar de banco: lista de bancos, colunas sugeridas e salvar
+      await ev(() => { document.querySelector('#admin-notion-box .p-menu').open = true; document.querySelector('#admin-notion-box [data-notion-pick]').click(); });
+      await page.waitForSelector('#admin-notion-box [data-notion-db]');
+      await ev(() => document.querySelector('#admin-notion-box [data-notion-db]').click());
+      await page.waitForSelector('#admin-notion-box [data-notion-col="date"]');
+      if (SHOTS) await shot('notion-colunas');
+      L('notion: mesmo banco abre com as colunas já salvas (o que ela deixou sem ler continua sem ler) e só com os tipos que servem', await ev(() => document.querySelector('[data-notion-col="date"]').value === 'Dt' && document.querySelector('[data-notion-col="student"]').value === 'Al'
+        && document.querySelector('[data-notion-col="homework"]').value === '' && document.querySelectorAll('[data-notion-col="date"] option').length === 2));
+      await ev(() => { document.querySelector('[data-notion-col="student"]').value = ''; document.querySelector('[data-notion-save-source]').click(); });
+      L('notion: sem a coluna Aluno não salva e avisa', await ev(() => !window.__notionSave && !document.querySelector('[data-notion-setup-error]').hidden));
+      await ev(() => { document.querySelector('[data-notion-col="student"]').value = 'Al'; document.querySelector('[data-notion-col="homework"]').value = 'Px'; document.querySelector('[data-notion-from]').value = '2026-10-16'; document.querySelector('[data-notion-save-source]').click(); });
+      await page.waitForFunction(() => !!window.__notionSave);
+      L('notion: salvar manda o banco, o mapa de colunas e a data, e já lê', await ev(() => window.__notionSave.p_database_id === '1ed6b6a3e89f80b5a448000bc2dc1582' && window.__notionSave.p_import_from === '2026-10-16'
+        && JSON.stringify(window.__notionSave.p_column_map) === JSON.stringify({ date: 'Dt', student: 'Al', homework: 'Px' })));
+      await page.waitForFunction(() => (window.__notionCalls || []).some(c => c[0] === 'sync'));
+      L('notion: depois de salvar pede a leitura', true);
+      // sem conexão: só o botão Conectar
+      await ev(() => { window.__notionStatus = { connected: false }; return renderNotionBox(); });
+      L('notion: sem conexão mostra Conectar Notion', await ev(() => !!document.querySelector('#admin-notion-box [data-notion-connect]') && !document.querySelector('#admin-notion-box [data-notion-sync]')));
+      await ev(() => { window.__notionStatus = null; });
       await ev(() => { delete window.__gcalResolved; });
       if (SHOTS) { await page.waitForTimeout(3500); await ev(() => { document.querySelector('#admin-classlogs-calendar-wrap [data-calendar-feed]').scrollIntoView({ block: 'start' }); window.scrollBy(0, -110); }); }
       await shot('aulas-link-agenda');

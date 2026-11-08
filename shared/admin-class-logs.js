@@ -439,9 +439,17 @@ function wireClassLogsListBox(listBox){
   });
 }
 
+// Mural > Aulas e materiais com "Todos" (listAll): a lista mostra as aulas de todos os alunos e turmas, sem
+// marcar ninguém no formulário de Nova aula (para não registrar uma aula para todo mundo sem querer).
+function classLogListTargets(){
+  const st = ADMIN_CLASS_LOGS_STATE;
+  if (st.listAll) return { students: st._studentsCache.slice(), rooms: st._classroomsCache.slice() };
+  return { students: st._studentsCache.filter(s => st.studentIds.has(s.student_id)), rooms: classLogSelectedClassrooms() };
+}
+
 async function refreshClassLogsListBox(listBox){
-  const selectedStudents = ADMIN_CLASS_LOGS_STATE._studentsCache.filter(s => ADMIN_CLASS_LOGS_STATE.studentIds.has(s.student_id));
-  listBox.innerHTML = await buildClassLogsListBoxHTML(selectedStudents);
+  const { students, rooms } = classLogListTargets();
+  listBox.innerHTML = await buildClassLogsListBoxHTML(students, rooms);
   wireClassLogsListBox(listBox);
 }
 
@@ -666,6 +674,7 @@ async function renderAdminClassLogsView(){
       : '';
 
   wrap.innerHTML = `
+    ${typeof notionBoxShellHTML === 'function' ? notionBoxShellHTML() : ''}
     <div class="deck-topbar panel-nav class-log-views" role="tablist" aria-label="${t('panel.classLog.views')}">
       <button type="button" class="deck-topbar-btn" role="tab" data-classlog-view="register">${t('panel.classLog.view.register')}</button>
       <button type="button" class="deck-topbar-btn" role="tab" data-classlog-view="calendar">${t('panel.classLog.view.calendar')}</button>
@@ -726,13 +735,14 @@ async function renderAdminClassLogsView(){
     </div>
 
     <div class="profile-section" id="admin-classlogs-list-box">
-      ${await buildClassLogsListBoxHTML(selectedStudents, selectedRooms)}
+      ${await (async () => { const tg = classLogListTargets(); return buildClassLogsListBoxHTML(tg.students, tg.rooms); })()}
     </div>
     </div>
   `;
   wrap.querySelectorAll('[data-classlog-view]').forEach(b => b.addEventListener('click', () => switchClassLogsView(b.dataset.classlogView)));
   wireCalendarFeedBox(wrap);
   if (typeof wireGoogleCalendarBox === 'function'){ wireGoogleCalendarBox(wrap); renderGoogleCalendarBox(); }
+  if (typeof wireNotionBox === 'function'){ wireNotionBox(wrap); renderNotionBox(); }
   const repeatCb = document.getElementById('admin-class-log-repeat');
   repeatCb?.addEventListener('change', () => { document.getElementById('admin-class-log-repeat-box').hidden = !repeatCb.checked; });
   switchClassLogsView(ADMIN_CLASS_LOGS_STATE.view);

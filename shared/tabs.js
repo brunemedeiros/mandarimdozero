@@ -13,6 +13,9 @@ function createTabSwitcher({ onBeforeSwitch, tabHandlers }){
     // Abas antigas/avisos do sino que hoje são seções de um painel (087): abre o painel já na seção certa.
     // 'teacher-mural' = Painel da professora > Mural; 'my-mural'/'my-class-logs'/'support-materials' = Aluno.
     const studentSection = { 'my-mural': 'mural', 'my-class-logs': 'classlogs', 'support-materials': 'materials' }[tab];
+    // 'profile-badges' = Perfil > Progresso já nas Conquistas (fim da tela; "Ver todas" e aviso "Nova conquista!", 2026-10-31).
+    const toBadges = tab === 'profile-badges';
+    if (toBadges) tab = 'progress';
     if (tab === 'teacher-mural'){
       if (typeof TEACHER_PANEL_STATE !== 'undefined') TEACHER_PANEL_STATE.section = 'mural';
       tab = 'teacher-panel';
@@ -68,6 +71,7 @@ function createTabSwitcher({ onBeforeSwitch, tabHandlers }){
     }
 
     if (tabHandlers && tabHandlers[tab]) tabHandlers[tab]();
+    if (toBadges && typeof focusProgressBadges === 'function') focusProgressBadges();
 
     // Marca esta troca de aba como uma tela de navegação real (ver
     // shared/router.js) -- ponto único: todo clique de aba (sidebar, barra

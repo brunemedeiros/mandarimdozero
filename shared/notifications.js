@@ -328,7 +328,7 @@ async function renderNotificationDropdown(){
     const twin = n.category === 'amigos' ? `data-twin-at="${escapeHTML(n.created_at)}" data-twin-body="${escapeHTML(n.body || '')}"` : '';
     return `${head}
     <li class="notification-row">
-      <a href="#" class="p-item notification-item ${unread ? 'p-item--suave unread' : ''}" data-notification-id="${n.id}" data-action-tab="${escapeHTML(n.action_tab || '')}" ${twin}>
+      <a href="#" class="p-item notification-item ${unread ? 'p-item--suave unread' : ''}" data-notification-id="${n.id}" data-action-tab="${escapeHTML(n.action_tab || '')}" data-event-type="${escapeHTML(n.event_type || '')}" ${twin}>
         <span class="p-item-media notification-item-icon" aria-hidden="true">${n.icon || NOTIFICATION_CATEGORY_ICON[n.category] || '🔔'}</span>
         <span class="p-item-conteudo notification-item-body">
           ${n.title ? `<span class="p-item-titulo notification-item-title">${escapeHTML(n.title)}</span>` : ''}
@@ -356,7 +356,15 @@ async function renderNotificationDropdown(){
       await markNotificationRead(el.dataset.notificationId, el.dataset.twinAt ? { createdAt: el.dataset.twinAt, body: el.dataset.twinBody } : null);
       el.classList.remove('unread', 'p-item--suave');
       el.parentElement.querySelector('.notification-unread-dot')?.remove();
-      const tab = el.dataset.actionTab;
+      let tab = el.dataset.actionTab;
+      // "Nova conquista!" abre Perfil > Progresso já nas Conquistas, com a conquista do aviso em destaque (decisão da dona,
+      // 2026-10-31). O banco continua gravando action_tab 'profile' (avisos antigos e apps em cache seguem funcionando);
+      // quem decide é o tipo do evento. O nome vem entre aspas no texto do aviso (modelos pt-BR e en).
+      if (el.dataset.eventType === 'achievement_unlocked' && (!tab || tab === 'profile')){
+        const m = (el.querySelector('.notification-item-text')?.textContent || '').match(/["“]([^"”]+)["”]/);
+        if (typeof PROGRESS_BADGE_SPOTLIGHT !== 'undefined') PROGRESS_BADGE_SPOTLIGHT = m ? m[1] : null;
+        tab = 'profile-badges';
+      }
       document.getElementById('notifications-dropdown')?.classList.remove('open');
       if (tab === 'profile-edit'){
         // Lembrete de "badge em destaque" (ver checkFeaturedBadgeReminder no
