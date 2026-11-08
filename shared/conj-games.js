@@ -45,7 +45,8 @@ function conjGamesSummary(games){
   return { done: st.filter(s => s.done).length, total: st.length, right: st.reduce((a, s) => a + s.right, 0) };
 }
 
-function createConjGames({ games, speak, ids, isLocked, onLocked, lang = 'fr' }){
+function createConjGames({ games, soon = [], speak, ids, isLocked, onLocked, lang = 'fr' }){
+  // soon: jogos "em breve" ({ id, level, title, free? }), só cartão sem abrir no fim do grupo do nível.
   // lang: idioma estudado (atributo lang="" das frases e formas); padrão 'fr', o site de português passa 'pt'.
   // isLocked(game): paywall (Jogos são Premium; true só com o bloqueio ligado E sem a permissão "Jogos da Conjugação");
   // onLocked(game): o que fazer ao tocar num jogo trancado (a janela Premium própria dos Jogos).
@@ -78,13 +79,19 @@ function createConjGames({ games, speak, ids, isLocked, onLocked, lang = 'fr' })
       ? ` <span class="cg-lock" role="img" aria-label="${esc(tt('games.locked'))}">🔒</span>` : ''}</span>`;
   }
 
-  // ---------- Lista (etapa 2 da reformulação, 2026-11-06, docs/jogos-reformulacao-plano.md) ----------
+  // ---------- Lista (etapas 2 e 3 da reformulação, 2026-11-06/08, docs/jogos-reformulacao-plano.md) ----------
   // No padrão da lista de Expressões (peças de shared/desafios.css): painel "X de Y jogos concluídos" + barra + acertos,
-  // grupos por nível recolhíveis com anel, cartão de álbum (pendente tracejado; concluído com selo "✓ Concluído · N%").
-  // Cartão: título, frase de exemplo com a lacuna e as duas opções, apresentação (2 linhas), tema e selo Premium.
+  // filtros Todos / Pendentes / Concluídos, grupos por nível recolhíveis com anel, cartão de álbum (pendente tracejado;
+  // concluído com selo "✓ Concluído · N%"). Cartão (pedido da autora, 2026-11-08, como o artifact de jogos): título e UMA
+  // frase do jogo com a lacuna e, entre parênteses, as duas opções (ou o verbo, com sampleHint:'verb'); embaixo tema e
+  // "⭐ Premium". Em cada nível: grátis primeiro, Premium no fim, "em breve" por último. Convite "Premium: mais N jogos ·
+  // Fale com a Prof. Brune" só quando o jogo trava de verdade (bloqueio ligado e sem a permissão; regra 7 da dona).
   const collapsedLevels = new Set();
+  let listFilter = 'all';
   const plural = (base, n, p) => tt(base + (n === 1 ? '.one' : '.other'), p);
   const tidy = h => h.replace(/ ([?!:;])/g, '\u00a0$1'); // tipografia francesa: o sinal não cai sozinho na linha de baixo
+  const LEVEL_ORDER = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
+  const levelRank = lv => { const i = LEVEL_ORDER.indexOf(lv); return i < 0 ? 99 : i; };
 
   function summaryHTML(){
     const sum = conjGamesSummary(games);
@@ -98,51 +105,88 @@ function createConjGames({ games, speak, ids, isLocked, onLocked, lang = 'fr' })
     </div>`;
   }
 
+  function filtersHTML(){
+    return `<div class="challenges-filter-chips cg-filters" role="group" aria-label="${esc(tt('games.filter.label'))}">
+      ${['all', 'pending', 'done'].map(f => `<button type="button" class="challenges-filter-chip ${listFilter === f ? 'active' : ''}" data-cg-filter="${f}" aria-pressed="${listFilter === f}">${esc(tt('games.filter.' + f))}</button>`).join('')}
+    </div>`;
+  }
+
   function sampleHTML(g){
     const it = g.items.find(x => x.id === g.sample) || g.items[0];
     if (!it) return '';
-    return `<span class="cg-card-sample" lang="${lang}">${tidy(`${esc(it.before)}<span class="cg-card-blank" aria-hidden="true"></span>${esc(it.after)}`)}</span>
-      <span class="cg-card-opts" lang="${lang}">${esc(it.a)} / ${esc(it.b)}</span>`;
+    const hint = g.sampleHint === 'verb' && it.verb ? it.verb : `${g.opts.a.label.toLowerCase()} ou ${g.opts.b.label.toLowerCase()}`;
+    return `<span class="cg-card-sample" lang="${lang}">${tidy(`${esc(it.before)}<span class="cg-card-blank" aria-hidden="true"></span> <span class="cg-card-hint">(${esc(hint)})</span>${esc(it.after)}`)}</span>`;
   }
 
   function cardHTML(g){
     const st = conjGameStatus(g);
     const theme = L(g.theme);
+    const locked = !!(isLocked && isLocked(g));
     return `<div class="cg-card-wrap">
-      <button type="button" class="challenge-card expr-card cg-game-card cg-play ${st.done ? 'completed' : ''}" data-game="${esc(g.id)}" data-done="${st.done ? 1 : 0}">
+      <button type="button" class="challenge-card expr-card cg-game-card cg-play ${st.done ? 'completed' : ''} ${locked ? 'locked' : ''}" data-game="${esc(g.id)}" data-done="${st.done ? 1 : 0}">
         ${st.done ? `<span class="expr-card-seal">${esc(tt('games.doneSeal', { pct: st.pct }))}</span>` : ''}
         <span class="challenge-card-expr">${rich(L(g.title))}</span>
         ${sampleHTML(g)}
-        <span class="cg-card-lede">${rich(L(g.lede))}</span>
         <span class="expr-card-foot">${theme ? `<span class="expr-reg expr-reg-neutral">${esc(theme)}</span>` : ''}${g.free ? '' : premiumSealHTML(g)}</span>
       </button>
     </div>`;
   }
 
+  function soonCardHTML(g){
+    return `<div class="cg-card-wrap">
+      <div class="challenge-card expr-card cg-game-card cg-soon" data-soon="${esc(g.id)}" aria-disabled="true">
+        <span class="challenge-card-expr">${rich(L(g.title))}</span>
+        <span class="expr-card-foot"><span class="cg-soon-chip">${esc(tt('games.soon'))}</span></span>
+      </div>
+    </div>`;
+  }
+
+  const passes = g => listFilter === 'all' || (listFilter === 'done') === conjGameStatus(g).done;
+
   function levelSectionHTML(level){
-    const list = games.filter(g => (g.level || '') === level);
-    const done = list.filter(g => conjGameStatus(g).done).length;
-    const pct = list.length ? Math.round(100 * done / list.length) : 0;
-    const collapsed = collapsedLevels.has(level);
+    const all = games.filter(g => (g.level || '') === level);
+    // grátis primeiro, Premium no fim (ordem do arquivo dentro de cada parte)
+    const ordered = all.filter(g => g.free).concat(all.filter(g => !g.free));
+    const shown = ordered.filter(passes);
+    const soonHere = listFilter === 'all' ? soon.filter(g => (g.level || '') === level) : [];
+    if (!shown.length && !soonHere.length) return '';
+    const done = all.filter(g => conjGameStatus(g).done).length;
+    const pct = all.length ? Math.round(100 * done / all.length) : 0;
+    const collapsed = collapsedLevels.has(level) && listFilter === 'all';
+    const lockedN = all.filter(g => !g.free && isLocked && isLocked(g)).length;
+    const invite = lockedN && listFilter !== 'done' ? `<button type="button" class="cg-premium-invite" data-cg-invite="1">⭐ ${esc(plural('games.premiumMore', lockedN, { n: lockedN }))} · ${esc(tt('premiumContact.button'))}</button>` : '';
     return `<div class="challenges-level-section" data-level="${esc(level)}">
       <button type="button" class="challenges-level-heading" data-level="${esc(level)}" aria-expanded="${!collapsed}">
         <span class="challenges-level-chevron ${collapsed ? 'collapsed' : ''}" aria-hidden="true">▾</span>
-        <span class="challenges-level-ring" style="--p:${pct}" data-complete="${pct === 100 ? 1 : 0}" role="img" aria-label="${esc(tt('games.ring.aria', { done, total: list.length }))}">${done}/${list.length}</span>
+        ${all.length ? `<span class="challenges-level-ring" style="--p:${pct}" data-complete="${pct === 100 ? 1 : 0}" role="img" aria-label="${esc(tt('games.ring.aria', { done, total: all.length }))}">${done}/${all.length}</span>` : ''}
         ${esc(level ? tt('games.levelName', { level }) : tt('games.tabGames'))}
-        <span class="challenges-level-count">${list.length}</span>
+        ${all.length ? `<span class="challenges-level-count">${listFilter === 'all' ? all.length : `${shown.length}/${all.length}`}</span>` : ''}
       </button>
-      <div class="challenges-cards cg-cards" ${collapsed ? 'hidden' : ''}>${list.map(cardHTML).join('')}</div>
+      <div class="cg-level-body" ${collapsed ? 'hidden' : ''}>
+        <div class="challenges-cards cg-cards">${shown.map(cardHTML).join('')}${soonHere.map(soonCardHTML).join('')}</div>
+        ${invite}
+      </div>
     </div>`;
   }
 
   function renderList(){
     const el = $(ids.list);
     if (!el) return;
-    const levels = [...new Set(games.map(g => g.level || ''))];
-    el.innerHTML = summaryHTML() + `<div class="challenges-level-sections cg-level-sections">${levels.map(levelSectionHTML).join('')}</div>`;
+    const levels = [...new Set(games.concat(soon).map(g => g.level || ''))].sort((a, b) => levelRank(a) - levelRank(b));
+    const sections = levels.map(levelSectionHTML).join('');
+    el.innerHTML = summaryHTML() + filtersHTML()
+      + `<div class="challenges-level-sections cg-level-sections">${sections || `<div class="challenges-empty"><p>${esc(tt('games.filter.none'))}</p></div>`}</div>`;
     el.querySelectorAll('.cg-play').forEach(b => b.addEventListener('click', () => start(b.dataset.game)));
+    el.querySelectorAll('[data-cg-invite]').forEach(b => b.addEventListener('click', () => { if (onLocked) onLocked(null); }));
+    el.querySelectorAll('[data-cg-filter]').forEach(b => b.addEventListener('click', () => {
+      listFilter = b.dataset.cgFilter;
+      renderList();
+      const again = el.querySelector(`[data-cg-filter="${listFilter}"]`);
+      if (again) again.focus();
+    }));
     el.querySelectorAll('.challenges-level-heading').forEach(b => b.addEventListener('click', () => {
       const lv = b.dataset.level;
+      if (listFilter !== 'all') return; // com filtro, tudo aberto (como nas Expressões)
       if (collapsedLevels.has(lv)) collapsedLevels.delete(lv); else collapsedLevels.add(lv);
       renderList();
       const again = el.querySelector(`.challenges-level-heading[data-level="${lv}"]`);

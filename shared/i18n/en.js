@@ -849,6 +849,14 @@ window.I18N_CATALOG['en'] = {
   'games.doneSeal': '✓ Completed · {pct}%', // ALTA
   'games.levelName': 'Level {level}', // ALTA
   'games.ring.aria': '{done} of {total} games completed in this level', // ALTA
+  'games.filter.label': 'Filter games', // ALTA
+  'games.filter.all': 'All', // ALTA
+  'games.filter.pending': 'Pending', // ALTA -- como "Pendentes" das Expressões
+  'games.filter.done': 'Completed', // ALTA
+  'games.filter.none': 'No games here yet.', // ALTA
+  'games.soon': 'Coming soon', // ALTA
+  'games.premiumMore.one': 'Premium: {n} more game', // ALTA
+  'games.premiumMore.other': 'Premium: {n} more games', // ALTA
   'fr.dictation.levelReviewTitle': 'Level {level} review', // ALTA
   'fr.challenges.title': 'Challenges', // ALTA
   'fr.challenges.sub': 'Practice real French: expressions, listening comprehension and spelling.', // ALTA

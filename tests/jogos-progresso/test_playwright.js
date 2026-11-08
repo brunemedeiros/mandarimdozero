@@ -128,22 +128,45 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
       return { label: q('.cg-summary .challenge-progress-label').textContent, hits: q('.cg-summary-hits').textContent, bar: q('.cg-summary .challenge-progress-fill').style.width,
         levels: qa('.cg-level-sections .challenges-level-section').map(x => x.dataset.level), ring: q('.challenges-level-section[data-level="A1"] .challenges-level-ring').textContent,
         doneSeal: (card('etre-avoir').querySelector('.expr-card-seal') || {}).textContent || '', doneCls: card('etre-avoir').classList.contains('completed'),
-        pendSeal: !!card('tu-vous').querySelector('.expr-card-seal'), sample: card('etre-avoir').querySelector('.cg-card-sample').textContent, opts: card('etre-avoir').querySelector('.cg-card-opts').textContent,
+        pendSeal: !!card('tu-vous').querySelector('.expr-card-seal'), sample: card('etre-avoir').querySelector('.cg-card-sample').textContent, opts: card('etre-avoir').querySelector('.cg-card-hint').textContent,
+        verbHint: card('pc-imparfait').querySelector('.cg-card-hint').textContent, lede: !!document.querySelector('.cg-card-lede'),
+        order: qa('.challenges-level-section[data-level="A1"] .cg-game-card').map(c => c.dataset.game || c.dataset.soon),
+        soon: qa('.cg-soon').map(c => c.closest('.challenges-level-section').dataset.level + ':' + c.dataset.soon), b1Count: !!document.querySelector('.challenges-level-section[data-level="B1"] .challenges-level-count'),
         theme: card('tu-vous').querySelector('.expr-reg').textContent, prem: ['etre-avoir', 'pc-auxiliaire', 'tu-vous', 'pc-imparfait'].map(id => !!card(id).querySelector('.cg-premium')),
         hscroll: document.documentElement.scrollWidth > window.innerWidth + 1, noPt: lang => true };
     });
     const pt = lang === 'pt-BR';
     check(L + ' painel: "1 de 4" no idioma do site', pt ? ls.label === '1 de 4 jogos concluídos' : ls.label === '1 of 4 games completed', ls.label);
     check(L + ' painel: acertos e barra em 25%', /\d/.test(ls.hits) && (pt ? /acerto/.test(ls.hits) : /right answer/.test(ls.hits)) && ls.bar === '25%', ls);
-    check(L + ' grupos por nível A1, A2 com anel 1/3', ls.levels.join() === 'A1,A2' && ls.ring === '1/3', ls);
+    check(L + ' grupos por nível A1, A2, B1 (só "em breve") com anel 1/3', ls.levels.join() === 'A1,A2,B1' && ls.ring === '1/3', ls);
     check(L + ' concluído com selo e %, pendente sem selo', ls.doneCls && /100%/.test(ls.doneSeal) && !ls.pendSeal, ls);
-    check(L + ' frase de exemplo com as duas opções', /faim/.test(ls.sample) && ls.opts === "J'ai / Je suis", ls);
+    check(L + ' cartão: frase do jogo com as duas opções entre parênteses, sem apresentação', /faim/.test(ls.sample) && ls.opts === '(avoir ou être)' && !ls.lede, ls);
+    check(L + ' cartão do PC ou imparfait mostra o verbo', ls.verbHint === '(jouer)', ls.verbHint);
+    check(L + ' nível: grátis primeiro, Premium depois, "em breve" no fim', ls.order.join() === 'etre-avoir,pc-auxiliaire,tu-vous,present-futur-proche', ls.order);
+    check(L + ' "em breve" aprovados no nível certo; B1 sem contador', ls.soon.join() === 'A1:present-futur-proche,A2:futur-conditionnel,B1:indicatif-subjonctif' && !ls.b1Count, ls);
     check(L + ' tema no idioma do site', pt ? ls.theme === 'Formal ou informal' : ls.theme === 'Formal or informal', ls.theme);
     check(L + ' selo Premium só nos jogos não grátis', ls.prem.join() === 'false,true,true,false', ls.prem);
     check(L + ' celular sem rolagem horizontal', !ls.hscroll);
     await page.click('.challenges-level-heading[data-level="A1"]');
-    check(L + ' recolher o nível esconde os cartões', await page.evaluate(() => document.querySelector('.challenges-level-section[data-level="A1"] .cg-cards').hidden && document.querySelector('.challenges-level-heading[data-level="A1"]').getAttribute('aria-expanded') === 'false'));
+    check(L + ' recolher o nível esconde os cartões', await page.evaluate(() => document.querySelector('.challenges-level-section[data-level="A1"] .cg-level-body').hidden && document.querySelector('.challenges-level-heading[data-level="A1"]').getAttribute('aria-expanded') === 'false'));
     await page.click('.challenges-level-heading[data-level="A1"]');
+
+    // Filtros (Todos / Pendentes / Concluídos): só filtram a exibição; "em breve" só em Todos.
+    await page.click('[data-cg-filter="done"]');
+    const fd = await page.evaluate(() => ({ cards: [...document.querySelectorAll('.cg-game-card')].map(c => c.dataset.game || c.dataset.soon), pressed: document.querySelector('[data-cg-filter="done"]').getAttribute('aria-pressed') }));
+    check(L + ' filtro Concluídos: só o jogo concluído', fd.cards.join() === 'etre-avoir' && fd.pressed === 'true', fd);
+    await page.click('[data-cg-filter="pending"]');
+    const fp = await page.evaluate(() => [...document.querySelectorAll('.cg-game-card')].map(c => c.dataset.game || c.dataset.soon));
+    check(L + ' filtro Pendentes: os 3 não concluídos, sem "em breve"', fp.join() === 'pc-auxiliaire,tu-vous,pc-imparfait', fp);
+    await page.click('[data-cg-filter="all"]');
+    check(L + ' "em breve" não abre jogo', await page.evaluate(() => { document.querySelector('.cg-soon').click(); return document.getElementById('conj-game-wrap').style.display !== 'block'; }));
+    // Convite Premium no fim do grupo só com o bloqueio ligado (regra 7); grátis continua abrindo.
+    check(L + ' bloqueio desligado: sem convite Premium', await page.evaluate(() => !document.querySelector('.cg-premium-invite')));
+    const inv = await page.evaluate(() => { CONJ_GAMES_PAYWALL_ENABLED = true; const a = isChallengesAdmin; isChallengesAdmin = () => false; MY_PERMISSIONS = { conj_games: false }; CONJ_GAMES_UI.renderList();
+      const r = [...document.querySelectorAll('.cg-premium-invite')].map(b => b.closest('.challenges-level-section').dataset.level + ':' + b.textContent.trim());
+      document.querySelector('.cg-premium-invite').click(); const modal = getComputedStyle(document.getElementById('premium-games-modal')).display;
+      document.getElementById('premium-games-modal').style.display = 'none'; CONJ_GAMES_PAYWALL_ENABLED = false; isChallengesAdmin = a; MY_PERMISSIONS = null; CONJ_GAMES_UI.renderList(); return { r, modal }; });
+    check(L + ' bloqueio ligado: convite no fim do A1 (2 jogos) que abre a janela Premium', inv.r.length === 1 && /^A1:/.test(inv.r[0]) && /2/.test(inv.r[0]) && inv.modal === 'flex', inv);
 
     // Recomeçar o curso lista os Jogos no que volta para o zero.
     const restartKey = await page.evaluate(() => t('restart.zero.games'));

@@ -89,5 +89,6 @@
     accentGroups: () => LANG_HOOKS.familiaLatina.gruposDeAcentos,
     speak: (text, btn) => speakFrench(text, btn),
     games: typeof CONJ_GAMES !== 'undefined' ? CONJ_GAMES : null,
+    gamesSoon: typeof CONJ_GAMES_SOON !== 'undefined' ? CONJ_GAMES_SOON : null,
   });
 })();

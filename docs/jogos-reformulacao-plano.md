@@ -81,8 +81,14 @@ Grátis: 1 por nível. Cada jogo novo: ~20 frases em pt-BR e en, revisor-conteud
    concluído com selo "✓ Concluído · N%". `isConjGameLocked(g)` nunca trava jogo `free`. Site com Jogos precisa carregar
    shared/desafios.css (o fr carrega). Testes: jogos-progresso 60/60, conjugacao 82/82 (checks de Premium atualizados:
    pc-imparfait virou grátis), paridade da Conjugação 343/343 (conteúdo da lista fora da comparação nas duas árvores).
-3. Filtros Todos / Pendentes / Concluídos, Premium no fim de cada grupo, cartões "em breve" (aprovados: Agora ou depois? A1,
-   Futur ou conditionnel? A2, Indicatif ou subjonctif? B1).
+3. **Feita (2026-11-08, aguarda a autora ver)**: filtros Todos / Pendentes / Concluídos (`.challenges-filter-chip`);
+   em cada nível, grátis primeiro, Premium depois e "em breve" no fim (`CONJ_GAMES_SOON` em fr/conj-games.js, via
+   `gamesSoon` de fr/conj-config.js; cartão sem abrir; nível só com "em breve" fica sem anel e sem contador); convite
+   "⭐ Premium: mais N jogos · Fale com a Prof. Brune" no fim do grupo SÓ quando o jogo trava de verdade (bloqueio ligado
+   e sem a permissão, regra 7), abre `premium-games-modal`. Cartão refeito a pedido da autora (2026-11-08, como o
+   artifact): título + uma frase do jogo com a lacuna e as duas opções entre parênteses ("avoir ou être"; no
+   pc-imparfait o verbo, `sampleHint: 'verb'`), sem apresentação; embaixo tema e "⭐ Premium". Testes: jogos-progresso
+   76/76, conjugacao 82/82 (conta só os cartões que abrem).
 4. Resultado com os erros + "Revisar erros" escrevendo (na hora) e guardado para outro dia.
 5. Rodada Completa x Curta; a partida puxa primeiro as frases ainda não vistas.
 6. Etapa "Escreva a resposta" dentro da partida.

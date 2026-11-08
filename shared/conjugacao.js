@@ -938,7 +938,7 @@ function wireConjugationScreen(){
   });
   const games = conjCfg().games;
   CONJ_GAMES_UI = (typeof createConjGames === 'function' && games)
-    ? createConjGames({ games, lang: conjLang(), speak: (text, btn) => conjCfg().speak(text, btn),
+    ? createConjGames({ games, soon: conjCfg().gamesSoon || [], lang: conjLang(), speak: (text, btn) => conjCfg().speak(text, btn),
         isLocked: g => isConjGameLocked(g), onLocked: () => openPremiumGamesModal(),
         ids: { select: 'conj-select-wrap', wrap: 'conj-game-wrap', content: 'conj-game-content', list: 'conj-games-list', back: 'conj-game-back' } })
     : null;

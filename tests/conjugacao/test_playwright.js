@@ -311,7 +311,7 @@ async function fill(page, wrongIdx){
           || !(i.before + i[i.ans] + i.after).includes(i.clue)).map(i => i.id) }; });
       check('jogo: 22 frases aprovadas (11 de cada), 10 por partida, pt e en completos, pista dentro da frase', d.n === 22 && d.a === 11 && d.per === 10 && d.bad.length === 0, d);
       await page.click('#conj-mode-games');
-      const l = await page.evaluate(() => ({ practiceHidden: document.getElementById('conj-practice-pane').hidden, cards: document.querySelectorAll('#conj-games-list .cg-game-card').length,
+      const l = await page.evaluate(() => ({ practiceHidden: document.getElementById('conj-practice-pane').hidden, cards: document.querySelectorAll('#conj-games-list .cg-game-card.cg-play').length, // só os que abrem (os "em breve" ficam de fora)
         sel: document.getElementById('conj-mode-games').getAttribute('aria-selected'), sub: document.querySelector('#conj-select-wrap .path-header p').hidden }));
       check('aba Jogos: lista de jogos no lugar da escolha', l.practiceHidden && l.cards === 4 && l.sel === 'true' && l.sub, l);
       // Etapa 5, regra 7 da dona: bloqueio DESLIGADO = só o selo "⭐ Premium" (sem cadeado) e o jogo abre para todos.
@@ -404,7 +404,7 @@ async function fill(page, wrongIdx){
       g.level === 'A1' && g.per === 10 && g.n >= 16 && g.a >= 6 && g.n - g.a >= 6 && g.noSketch && !g.dupIds && !g.bad.length && !g.unmarked.length && !g.enPt.length && !g.ptBad.length && !g.agree.length, g);
     await page.click('#conj-mode-games');
     // 2026-11-06 (etapa 2): o nível virou o grupo ("Nível A1"), não mais etiqueta dentro do cartão.
-    const cards = await page.evaluate(() => [...document.querySelectorAll('#conj-games-list .cg-game-card')].map(c => ({ level: c.closest('.challenges-level-section').dataset.level, game: c.dataset.game })));
+    const cards = await page.evaluate(() => [...document.querySelectorAll('#conj-games-list .cg-game-card.cg-play')].map(c => ({ level: c.closest('.challenges-level-section').dataset.level, game: c.dataset.game })));
     check('lista: 3 jogos A1 primeiro (grupo Nível A1), depois o A2', cards.map(c => c.level).join() === 'A1,A1,A1,A2' && cards[3].game === 'pc-imparfait', cards);
     if (process.env.SHOTS) await page.screenshot({ path: process.env.SHOTS + '/jogos-lista.png', fullPage: true });
     for (const id of ['etre-avoir', 'pc-auxiliaire', 'tu-vous']){

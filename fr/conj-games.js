@@ -12,7 +12,8 @@
 //   Francês dentro do texto em português/inglês (title, lede, tl, why) vai entre {chaves}: sai em azul (.cg-fr).
 //   Vale para toda frase nova; o teste da Conjugação barra explicação sem nenhum trecho marcado.
 // Jogo (lista, 2026-11-06): free (true = grátis; sem o campo = Premium), sample (id da frase mostrada no cartão),
-//   theme (etiqueta de tema por idioma do site).
+//   theme (etiqueta de tema por idioma do site); sampleHint: 'verb' = no cartão, o infinitivo entre parênteses em vez
+//   das duas opções.
 //   text: tradução (tr) e explicação (why) por idioma do site. O curso em inglês não mostra
 //         português: sem a chave do idioma, cai no pt-BR só como último recurso.
 const CONJ_GAMES = [
@@ -320,6 +321,7 @@ const CONJ_GAMES = [
     level: 'A2',
     free: true, // grátis do A2 (decisão da autora, 2026-11-06)
     sample: 2,
+    sampleHint: 'verb', // no cartão, o verbo entre parênteses (as opções são tempos verbais)
     theme: { 'pt-BR': 'Tempos do passado', en: 'Past tenses' },
     title: { 'pt-BR': '{Passé composé} ou {Imparfait}?', en: '{Passé composé} or {Imparfait}?' },
     lede: {
@@ -422,4 +424,12 @@ const CONJ_GAMES = [
           en: { tr: 'When I lived in Lyon, I took the metro every day.', why: '"{Quand j\'habitais}" opens a period of life, and the habit in that period ({je prenais}) calls for a background in the {imparfait} too.' } } }
     ]
   }
+];
+
+// Jogos "em breve" (aprovados pela autora em 2026-11-07, docs/jogos-reformulacao-plano.md): cartão sem abrir, no fim do
+// grupo do nível. Ao publicar um deles, ele sai daqui e entra em CONJ_GAMES com as frases revisadas.
+const CONJ_GAMES_SOON = [
+  { id: 'present-futur-proche', level: 'A1', title: { 'pt-BR': 'Agora ou depois?', en: 'Now or later?' } },
+  { id: 'futur-conditionnel', level: 'A2', title: { 'pt-BR': '{Futur} ou {conditionnel}?', en: '{Futur} or {conditionnel}?' } },
+  { id: 'indicatif-subjonctif', level: 'B1', free: true, title: { 'pt-BR': '{Indicatif} ou {subjonctif}?', en: '{Indicatif} or {subjonctif}?' } }
 ];
