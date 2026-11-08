@@ -272,6 +272,8 @@ async function fingerprint(browser, root){
       // ("Você respondeu: ...") e o botão "Praticar só os que errei" virou "Revisar erros" (revisão escrevendo).
       [/<span class=\\"cg-review-given\\">.*?<\/span>(?=<span class=\\"cg-review-tr)/g, ''],
       [/(Praticar só os que errei|Practice only my mistakes|Revisar erros|Review mistakes)/g, 'REVISAR_ERROS'],
+      // Jogos, etapa 5 (2026-11-08): na 1ª frase, antes de responder, a escolha "Partida: Curta x Completa".
+      [/<div class=\\"cg-round\\"[\s\S]*?<\/div>/g, ''],
       // Etapa 7 (2026-10-31, vocabulário aprovado pela dona): textos das Missões do dia guardados no estado
       // (ver etapa7-neutro.js, aplicado em norm)
     ];

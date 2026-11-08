@@ -283,6 +283,10 @@
 @media (min-width:760px){ #view-conjugaison .cg-check{ align-self:flex-start; min-width:160px; } }
 #view-conjugaison .cg-review-given{ display:block; font-size:13px; font-weight:700; color:var(--ink-soft); }
 #view-conjugaison .cg-review-given s{ color:var(--error-red-text, var(--error-red)); }
+/* Partida Curta x Completa (etapa 5): só na 1ª frase, antes de responder; mesmos botões dos filtros */
+#view-conjugaison .cg-round{ display:flex; align-items:center; flex-wrap:wrap; gap:8px; margin:-6px 0 16px; font-size:13px; font-weight:800; color:var(--ink-soft); }
+#view-conjugaison .cg-round .challenges-filter-chip{ min-height:40px; }
+@media (max-width:759px){ #view-conjugaison .cg-round .challenges-filter-chip{ min-height:44px; } }
 #view-conjugaison .cg-premium-invite{ align-self:flex-start; min-height:44px; padding:8px 14px; border-radius:999px; border:1.5px dashed var(--paper-line); background:var(--paper); color:var(--ink); font-family:var(--font-body); font-size:14px; font-weight:800; cursor:pointer; text-align:left; }
 #view-conjugaison .cg-premium-invite:hover{ border-color:var(--seal-red); }
 #view-conjugaison .cg-premium-invite:focus-visible{ outline:2px solid var(--seal-red); outline-offset:2px; }

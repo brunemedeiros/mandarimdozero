@@ -98,7 +98,12 @@ Grátis: 1 por nível. Cada jogo novo: ~20 frases em pt-BR e en, revisor-conteud
    trancado): cartão "🔁 Revisar erros (N)" no topo da lista (`dueEntries`), revisão misturando jogos; acertou sai, errou
    volta no dia seguinte. Chave `games.practiceMistakes` apagada (sem uso). Testes: jogos-progresso 96/96; paridade da
    Conjugação 343/343 (fim da partida neutralizado de propósito).
-5. Rodada Completa x Curta; a partida puxa primeiro as frases ainda não vistas.
+5. **Feita (2026-11-08, aguarda a autora ver)**: na 1ª frase de cada partida, antes de responder, "Partida: Curta (10
+   frases) | Completa (N frases)" (some ao responder; não aparece em "Revisar erros" nem em jogo com perRound >= frases).
+   Escolha lembrada NO APARELHO (`localStorage['conj-games-round']`, conveniência), padrão Curta. A partida Curta puxa
+   primeiro as frases nunca respondidas, depois as erradas por último e só então as certas (`pickRound`): em 2 partidas
+   a aluna passa por todas as 19-24 frases. Chave `games.perRound` apagada (sem uso desde a etapa 3). Testes:
+   jogos-progresso 108/108; paridade da Conjugação 343/343 (escolha da partida neutralizada de propósito).
 6. Etapa "Escreva a resposta" dentro da partida.
 7. Etapas "Corrija o erro" e "Traduza a frase inteira" (conteúdo novo, revisão e aprovação).
 8. Jogos de revisão do nível e respostas alternativas.

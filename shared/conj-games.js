@@ -214,7 +214,8 @@ function createConjGames({ games, soon = [], speak, ids, isLocked, onLocked, lan
     // PAYWALL: ponto único que trava os Jogos. Hoje isLocked devolve false (flag desligada no app.js).
     if (isLocked && isLocked(g)){ if (onLocked) onLocked(g); return; }
     const pool = onlyIds ? g.items.filter(it => onlyIds.includes(it.id)) : g.items;
-    Object.assign(S, { game: g, order: onlyIds ? shuffle(pool) : shuffle(pool).slice(0, g.perRound), gameAt: [], mode: 'choice', idx: 0, hits: 0, log: [], answered: false });
+    const order = onlyIds ? shuffle(pool) : (roundSize() === 'full' ? shuffle(pool) : pickRound(g));
+    Object.assign(S, { game: g, order, gameAt: [], mode: 'choice', idx: 0, hits: 0, log: [], answered: false, fresh: !onlyIds });
     if (typeof trackEvent === 'function') trackEvent('lesson_start', 'conj_game', { game: g.id });
     show(true);
     renderQuestion();
@@ -247,6 +248,29 @@ function createConjGames({ games, soon = [], speak, ids, isLocked, onLocked, lan
       g.items.forEach(it => { const e = r.items[String(it.id)]; if (e && e.ok === false && e.at < today) out.push({ g, it }); });
     });
     return out;
+  }
+
+  // ---------- Partida Curta x Completa e frases ainda não vistas (etapa 5, 2026-11-08) ----------
+  // Curta = perRound frases (10, como sempre); Completa = todas as frases do jogo. Escolha da aluna, lembrada NESTE aparelho
+  // (localStorage, conveniência; o progresso de verdade fica na conta). Padrão: Curta.
+  // A partida Curta puxa primeiro as frases que a aluna ainda não respondeu, depois as que ela errou por último e só então
+  // as que já acertou: em 2 ou 3 partidas ela passa por todas (regra do "Concluído").
+  const ROUND_KEY = 'conj-games-round';
+  function roundSize(){ try { return localStorage.getItem(ROUND_KEY) === 'full' ? 'full' : 'short'; } catch (e) { return 'short'; } }
+  function setRoundSize(v){ try { localStorage.setItem(ROUND_KEY, v); } catch (e) {} }
+  function pickRound(g){
+    const r = conjGameRecord(g.id, false), seen = it => r && r.items[String(it.id)];
+    const unseen = g.items.filter(it => !seen(it)), wrong = g.items.filter(it => seen(it) && !seen(it).ok), right = g.items.filter(it => seen(it) && seen(it).ok);
+    return [].concat(shuffle(unseen), shuffle(wrong), shuffle(right)).slice(0, g.perRound);
+  }
+  function roundToggleHTML(g){
+    if (!S.fresh || S.idx !== 0 || S.log.length || g.items.length <= g.perRound) return '';
+    const cur = roundSize();
+    return `<div class="cg-round" role="group" aria-label="${esc(tt('games.round.label'))}">
+      <span>${esc(tt('games.round.label'))}</span>
+      <button type="button" class="challenges-filter-chip ${cur === 'short' ? 'active' : ''}" data-cg-round="short" aria-pressed="${cur === 'short'}">${esc(tt('games.round.short', { n: g.perRound }))}</button>
+      <button type="button" class="challenges-filter-chip ${cur === 'full' ? 'active' : ''}" data-cg-round="full" aria-pressed="${cur === 'full'}">${esc(tt('games.round.full', { n: g.items.length }))}</button>
+    </div>`;
   }
 
   const item = () => S.order[S.idx];
@@ -287,7 +311,7 @@ function createConjGames({ games, soon = [], speak, ids, isLocked, onLocked, lan
         <span class="cg-eyebrow">${esc(tt('games.tabGames'))}${g.level ? ` · ${esc(g.level)}` : ''}</span>
         <h2 class="cg-title">${rich(L(g.title))}</h2>
       </div>
-      ${progressHTML()}
+      ${progressHTML()}${roundToggleHTML(g)}
       <div class="cg-stage">
         <div class="cg-panel">
           ${it.verb ? `<span class="cg-verb" lang="${lang}">(${esc(it.verb)})</span>` : ''}
@@ -304,6 +328,13 @@ function createConjGames({ games, soon = [], speak, ids, isLocked, onLocked, lan
     const choices = $(ids.content).querySelectorAll('.cg-choice');
     choices.forEach(b => b.addEventListener('click', () => answer(b.dataset.k)));
     $('cg-dontknow').addEventListener('click', () => answer(null));
+    $(ids.content).querySelectorAll('[data-cg-round]').forEach(b => b.addEventListener('click', () => {
+      if (b.dataset.cgRound === roundSize()) return;
+      setRoundSize(b.dataset.cgRound);
+      start(g.id); // monta a partida de novo no tamanho escolhido (ainda não houve resposta)
+      const again = $(ids.content).querySelector(`[data-cg-round="${b.dataset.cgRound}"]`);
+      if (again) again.focus();
+    }));
     // Número 1/2 em cada resposta; as teclas valem pelo teclado global do app (respeita janela aberta).
     if (typeof wireKeyboardOptions === 'function') wireKeyboardOptions(choices, { mode: 'sequential' });
     mountBar(bar, '.cg-head');
@@ -386,6 +417,8 @@ function createConjGames({ games, soon = [], speak, ids, isLocked, onLocked, lan
     S.dirty = true;
     const dk = $('cg-dontknow');
     if (dk) dk.classList.add('disabled');
+    const rt = $(ids.content).querySelector('.cg-round'); // depois de responder não dá mais para trocar Curta x Completa
+    if (rt) rt.remove();
     // Som de acerto/erro como na trilha; "Não sei" é silencioso (a resposta é só revelada).
     if (!revealed && typeof playFeedbackSound === 'function') playFeedbackSound(ok);
     if (typedInfo){

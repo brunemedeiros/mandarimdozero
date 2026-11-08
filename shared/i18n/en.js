@@ -825,7 +825,6 @@ window.I18N_CATALOG['en'] = {
   'games.premiumModal.title': '🔒 Premium feature', // ALTA -- Etapa 5
   'games.premiumModal.bodyHtml': 'The <strong>Conjugation Games</strong> train the choices that confuse people the most, like passé composé or imparfait and être or avoir, with an explanation and audio for every sentence. Conjugation practice stays free.', // MÉDIA -- Etapa 5
   'games.premiumModal.howTo': 'They\'re part of the Premium plan. To ask for Premium, contact Prof. Brune using the button below.', // ALTA -- Etapa 5
-  'games.perRound': '{n} sentences per round', // ALTA
   'games.play': 'Play', // ALTA
   'games.counter': 'Sentence {i} of {n}', // ALTA
   'games.right': 'Right!', // ALTA
@@ -866,6 +865,9 @@ window.I18N_CATALOG['en'] = {
   'games.youAnswered': 'You answered:', // ALTA
   'games.dueTitle': 'Review mistakes ({n})', // ALTA
   'games.dueSub': 'Sentences you got wrong on other days. This time, you type the answer.', // ALTA
+  'games.round.label': 'Round:', // ALTA
+  'games.round.short': 'Short ({n} sentences)', // ALTA
+  'games.round.full': 'Full ({n} sentences)', // ALTA
   'fr.dictation.levelReviewTitle': 'Level {level} review', // ALTA
   'fr.challenges.title': 'Challenges', // ALTA
   'fr.challenges.sub': 'Practice real French: expressions, listening comprehension and spelling.', // ALTA

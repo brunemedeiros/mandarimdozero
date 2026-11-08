@@ -231,6 +231,37 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
     await page.click('#cg-to-list');
     check(L + ' acertou na revisão: sai da lista de outros dias', await page.evaluate(() => CONJ_GAMES_UI.dueEntries().length === 0 && !document.getElementById('cg-due')));
 
+    // Etapa 5: partida Curta x Completa (lembrada no aparelho) e frases ainda não vistas primeiro.
+    await page.evaluate(() => { try { localStorage.removeItem('conj-games-round'); } catch (e) {} STATE.conjGames = {}; CONJ_GAMES_UI.renderList(); });
+    await hideStreak();
+    await page.click('.cg-play[data-game="etre-avoir"]');
+    await page.waitForSelector('.cg-choice');
+    const t0 = await page.evaluate(() => ({ n: CONJ_GAMES_UI.state.order.length, total: CONJ_GAMES.find(g => g.id === 'etre-avoir').items.length,
+      chips: [...document.querySelectorAll('[data-cg-round]')].map(b => b.dataset.cgRound + ':' + b.getAttribute('aria-pressed') + ':' + b.textContent.trim()) }));
+    check(L + ' 1ª frase: escolha Curta (padrão, ativa) x Completa com o número de frases', t0.n === 10 && t0.chips.length === 2 && /^short:true:/.test(t0.chips[0]) && /^full:false:/.test(t0.chips[1]) && t0.chips[1].includes(String(t0.total)), t0);
+    // joga a partida curta inteira (tudo certo) e começa outra: as não vistas vêm primeiro
+    const first = await page.evaluate(() => CONJ_GAMES_UI.state.order.map(i => i.id));
+    for (let i = 0; i < t0.n; i++){
+      await page.evaluate(() => { const it = CONJ_GAMES_UI.state.order[CONJ_GAMES_UI.state.idx]; document.querySelector('.cg-choice[data-k="' + it.ans + '"]').click(); });
+      if (i === 0) check(L + ' a escolha some depois da 1ª resposta', await page.evaluate(() => !document.querySelector('[data-cg-round]')));
+      await page.waitForTimeout(380); await hideStreak(); await page.click('#cg-next');
+    }
+    await page.waitForSelector('.cg-result'); await hideStreak();
+    await page.click('#cg-again'); await page.waitForSelector('.cg-choice');
+    const second = await page.evaluate(() => CONJ_GAMES_UI.state.order.map(i => i.id));
+    const unseen = t0.total - first.length;
+    check(L + ' 2ª partida curta traz todas as ' + unseen + ' frases ainda não vistas', second.filter(id => !first.includes(id)).length === unseen && second.length === 10, { first, second });
+    // Completa: todas as frases; fica lembrada para a próxima partida
+    await page.click('[data-cg-round="full"]');
+    const f = await page.evaluate(() => ({ n: CONJ_GAMES_UI.state.order.length, ids: new Set(CONJ_GAMES_UI.state.order.map(i => i.id)).size, saved: localStorage.getItem('conj-games-round'), pressed: document.querySelector('[data-cg-round="full"]').getAttribute('aria-pressed') }));
+    check(L + ' Completa: todas as frases do jogo, sem repetir, e lembrada', f.n === t0.total && f.ids === t0.total && f.saved === 'full' && f.pressed === 'true', f);
+    await hideStreak(); await page.click('#conj-game-wrap .activity-exit-btn');
+    await page.click('.cg-play[data-game="pc-imparfait"]'); await page.waitForSelector('.cg-choice');
+    check(L + ' próxima partida já começa Completa', await page.evaluate(() => CONJ_GAMES_UI.state.order.length === CONJ_GAMES.find(g => g.id === 'pc-imparfait').items.length));
+    await page.click('[data-cg-round="short"]');
+    check(L + ' volta para Curta (10)', await page.evaluate(() => CONJ_GAMES_UI.state.order.length === 10 && localStorage.getItem('conj-games-round') === 'short'));
+    await hideStreak(); await page.click('#conj-game-wrap .activity-exit-btn');
+
     // Recomeçar o curso lista os Jogos no que volta para o zero.
     const restartKey = await page.evaluate(() => t('restart.zero.games'));
     check(L + ' texto do Recomeçar existe no idioma do site', restartKey && restartKey !== 'restart.zero.games' && (lang === 'en' ? !/Jogos/.test(restartKey) : /Jogos/.test(restartKey)), restartKey);
