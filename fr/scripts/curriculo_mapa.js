@@ -123,6 +123,8 @@ function contas(mapa){ return mapa.niveis.map(contasDoNivel); }
 
 // Regra 13 (decisão 319): de 3 a 5 cartões novos por lição; o objetivo comunicativo decide o tamanho da unidade.
 // Só confere as unidades cujos cartões já têm `licao` (unidades desenhadas lição por lição).
+// Exceção aceita pela dona fica na própria lição declarada: `cartoes_aceitos` (com a `decisao`) libera exatamente aquele número
+// (ex.: lição 3 de "Dizer o nome e a nacionalidade" com 6 cartões, decisões 326 e 327); qualquer outro número continua acusado.
 function conferirCartoesPorLicao(mapa){
   const problemas = [];
   for (const it of unidadesEmOrdem(mapa)){
@@ -132,6 +134,8 @@ function conferirCartoesPorLicao(mapa){
     const porLicao = {};
     cartoes.forEach(c => { porLicao[c.licao] = (porLicao[c.licao] || 0) + 1; });
     for (const [licao, n] of Object.entries(porLicao)){
+      const declarada = (u.licoes || []).find(l => l.licao === Number(licao));
+      if (declarada && declarada.cartoes_aceitos === n) continue;
       if (n < REGRAS.cartoesPorLicao.min || n > REGRAS.cartoesPorLicao.max) problemas.push({ unidade: u.id, nome: u.nome, licao: Number(licao), cartoes: n });
     }
   }

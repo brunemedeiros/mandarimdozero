@@ -17,16 +17,16 @@ console.log('== totais do 08 v2 (seção 1 e 3)');
 check('A1: 9 módulos', A1.modulos === 9, A1.modulos);
 check('A1: 57 unidades', A1.unidades === 57, A1.unidades);
 check('A1: 34 vocabulário + 23 gramática', A1.vocabulario === 34 && A1.gramatica === 23, [A1.vocabulario, A1.gramatica]);
-check('A1: 382 cartões (decisão 323: 16 voltam da revisão dos cortes; era 366)', A1.cartoes === 382, A1.cartoes);
-check('A1: 757 cartões A/B (382 × 2 − 7 de reconhecimento)', A1.ab === 757, A1.ab);
-check('A1: 192 novos + 190 publicados', A1.novos === 192 && A1.publicados === 190, [A1.novos, A1.publicados]);
-check('A1: cartões por módulo 66/38/51/52/36/29/39/41/30',
-  JSON.stringify(A1.porModulo.map(m => m.cartoes)) === JSON.stringify([66, 38, 51, 52, 36, 29, 39, 41, 30]), A1.porModulo.map(m => m.cartoes));
-check('A1: ~153 lições (M1 24, M2 15, M3 19, M4 22, M5 14, M6 12, M7 18, M8 17, M9 12; decisão 323: "Pedir no restaurante" e "Tipos de moradia e cômodos" passam de 10 palavras)',
-  JSON.stringify(A1.porModulo.map(m => m.licoes)) === JSON.stringify([24, 15, 19, 22, 14, 12, 18, 17, 12]), A1.porModulo.map(m => m.licoes));
+check('A1: 384 cartões (decisões 327 e 328: + moi, c\'est… e ne… pas em "Dizer o nome e a nacionalidade"; era 382)', A1.cartoes === 384, A1.cartoes);
+check('A1: 761 cartões A/B (384 × 2 − 7 de reconhecimento)', A1.ab === 761, A1.ab);
+check('A1: 194 novos + 190 publicados', A1.novos === 194 && A1.publicados === 190, [A1.novos, A1.publicados]);
+check('A1: cartões por módulo 79/27/51/52/36/29/39/41/30 (decisão 328: "Dizer de onde é e onde mora" vai para "Apresentar-se")',
+  JSON.stringify(A1.porModulo.map(m => m.cartoes)) === JSON.stringify([79, 27, 51, 52, 36, 29, 39, 41, 30]), A1.porModulo.map(m => m.cartoes));
+check('A1: ~152 lições (M1 28, M2 10, M3 19, M4 22, M5 14, M6 12, M7 18, M8 17, M9 12; decisões 326 a 328: "Dizer o nome e a nacionalidade" com 3 lições + Revisão, e "Dizer de onde é e onde mora" no M1)',
+  JSON.stringify(A1.porModulo.map(m => m.licoes)) === JSON.stringify([28, 10, 19, 22, 14, 12, 18, 17, 12]), A1.porModulo.map(m => m.licoes));
 check('A1: ~31h00 de trilha', A1.tempo === 31 * 60, C.formatarTempo(A1.tempo));
 check('A1: "Apresentar-se" fica com o tempo digitado ~3h55 (decisão 270; 16 cartões na A1-1 não mudam a regra, decisões 300 e 308)', A1.porModulo[0].tempo === 3 * 60 + 55, C.formatarTempo(A1.porModulo[0].tempo));
-check('A1: 128 notas (decisão 323: saem 5 notas de vocabulário que ficaram vazias; era 133)', A1.notas === 128, A1.notas);
+check('A1: 129 notas (decisão 327: + "O alfabeto em francês"; era 128)', A1.notas === 129, A1.notas);
 check('A2: 10 módulos', A2.modulos === 10, A2.modulos);
 check('A2: 58 unidades (36 vocabulário + 22 gramática)', A2.unidades === 58 && A2.vocabulario === 36 && A2.gramatica === 22, [A2.unidades, A2.vocabulario, A2.gramatica]);
 check('A2: 433 cartões (decisão 323: +7 que voltam, −2 que passam ao A1; era 428)', A2.cartoes === 433, A2.cartoes);
@@ -62,6 +62,31 @@ console.log('== "Cumprimentar e se despedir" (A1-1), unidade polida pela dona (d
   check('saem bise, letras mudas e Bienvenue (decisões 291 e 311)', !titulos.some(t => /bise|mudas|Bienvenue/i.test(t)));
   check('toda nota tem momento e exemplos com tradução', C.notasDaUnidade(u).every(n => n.momento && C.palavrasDaNota(n).length > 0));
   check('conferência das lições declaradas: sem problema', C.conferirLicoesDaUnidade(mapa).length === 0, C.conferirLicoesDaUnidade(mapa));
+}
+
+console.log('== "Dizer o nome e a nacionalidade" (A1-2) e "Dizer de onde é e onde mora" (A1-9), decisões 326 a 328');
+{
+  const idx = C.indicePorId(mapa);
+  const u = idx['A1-2'].unidade;
+  const ordem = u.cartoes.map(c => `${c.licao}:${c.palavra}`);
+  check('A1-2: 14 cartões na ordem da dona, em 3 lições (4 + 4 + 6)', JSON.stringify(ordem) === JSON.stringify([
+    '1:je', '1:tu / vous', "1:s'appeler", "1:moi, c'est…",
+    '2:le prénom', '2:le nom', '2:épeler', "2:Ça s'écrit comment ?",
+    '3:être', '3:le pays', '3:français / française', '3:brésilien / brésilienne', '3:américain / américaine', '3:ne… pas']), ordem);
+  check('A1-2: tu / vous mantém a chave A1-2-v1; américain / américaine mantém A1-9-v2', u.cartoes[1].chave === 'A1-2-v1' && u.cartoes[12].chave === 'A1-9-v2');
+  check('A1-2: lições reaproveitam os ids publicados (decisão 284)', JSON.stringify(u.licoes.map(l => l.id)) === JSON.stringify(['pronomes-e-nome', 'nome-e-ser', 'nacionalidades']), u.licoes.map(l => l.id));
+  check('A1-2: 3 lições + Revisão da unidade', C.licoesDaUnidade(u) === 4, C.licoesDaUnidade(u));
+  const titulos = C.notasDaUnidade(u).map(n => n.titulo);
+  check('A1-2: 7 notas, cada uma com momento (gatilho, decisão 326)', titulos.length === 7 && C.notasDaUnidade(u).every(n => n.momento), titulos);
+  check('A1-2: sem nota de "outras nacionalidades"', !titulos.some(t => /outras nacionalidades/i.test(t)));
+  const u9 = idx['A1-9'];
+  check('A1-9 no módulo "Apresentar-se", logo depois de A1-2', u9.modulo === 'A1-m1' && u9.ordemGlobal === idx['A1-2'].ordemGlobal + 1, [u9.modulo, u9.posicao]);
+  check('ordem do módulo "Apresentar-se" (decisão 328)', JSON.stringify(mapa.niveis[0].modulos[0].unidades.map(x => x.id)) ===
+    JSON.stringify(['A1-1', 'A1-2', 'A1-9', 'A1-3', 'A1-21', 'A1-g1', 'A1-22', 'A1-g11']));
+  check('"Família e pessoas próximas" começa em "Apresentar a família"', mapa.niveis[0].modulos[1].unidades[0].id === 'A1-4');
+  const p9 = u9.unidade.cartoes.map(c => c.palavra);
+  check('A1-9: 12 cartões, com la France (A1-2-v5) e le Brésil (A1-2-v6), sem américain', p9.length === 12 && !p9.some(p => /américain/.test(p)) &&
+    u9.unidade.cartoes.some(c => c.palavra === 'la France' && c.chave === 'A1-2-v5') && u9.unidade.cartoes.some(c => c.palavra === 'le Brésil' && c.chave === 'A1-2-v6'), p9);
 }
 
 console.log('== revisão dos cortes (decisões 323 e 324)');
@@ -108,6 +133,13 @@ check('regra 13 (decisão 319): de 3 a 5 cartões por lição nas unidades desen
     { palavra: 'f', licao: 2 }, { palavra: 'g', licao: 2 }, { palavra: 'h', licao: 2 } ] }] }] }] };
   const p = C.conferirCartoesPorLicao(fake);
   check('regra 13: lição com 2 cartões e lição com 6 são acusadas', p.length === 2 && p.some(x => x.licao === 1 && x.cartoes === 2) && p.some(x => x.licao === 2 && x.cartoes === 6), p);
+}
+{
+  const fake = { niveis: [{ id: 'X', modulos: [{ id: 'm', unidades: [{ id: 'U', nome: 'U', tipo: 'vocabulario',
+    licoes: [{ licao: 1, id: 'a', cartoes_aceitos: 6 }, { licao: 2, id: 'b', cartoes_aceitos: 6 }],
+    cartoes: Array.from({ length: 13 }, (_, i) => ({ palavra: 'p' + i, licao: i < 6 ? 1 : 2 })) }] }] }] };
+  const p = C.conferirCartoesPorLicao(fake);
+  check('regra 13: cartoes_aceitos libera só o número aceito (6 passa, 7 continua acusado)', p.length === 1 && p[0].licao === 2 && p[0].cartoes === 7, p);
 }
 check('regra 13: unidade grande é só aviso (função existe e devolve lista)', Array.isArray(C.sinaisUnidadeGrande(mapa)));
 check('regra 12: toda gramática tem versão grátis numa unidade ANTERIOR de vocabulário', C.conferirVersaoGratis(mapa).length === 0, C.conferirVersaoGratis(mapa));

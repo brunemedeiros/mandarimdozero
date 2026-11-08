@@ -1,7 +1,7 @@
 {
-  "_doc": "Mapa A1 e A2 do francês em dados (decisões 228, 238 e 259). Fonte: docs/i18n/curriculo/08-mapa-final-a1-a2-v2.md, aprovado e congelado em 2026-10-26. Mudança só por pedido de mudança, com o auditor-curricular rodando (decisão 235); pedidos de mudança aplicados: decisões 267 a 279 (campo opcional \"licao\" por cartão, decisão 274) e 311 a 324 (321 a 324: 23 cartões voltam da revisão dos cortes, docs/i18n/curriculo/dados/revisao-dos-cortes.md; le portable e le mail passam ao A1; A1-1 polida pela dona: 16 cartões, 4 lições com id e título em \"licoes\", 9 notas com \"momento\" e \"exemplos\", 2 diálogos com \"licao\": o informal no fim da lição 2 e o formal no fim da lição 4). As palavras de uma nota saem dos exemplos com tradução (palavrasDaNota em fr/scripts/curriculo_mapa.js, decisão 274); \"palavras\" digitado só nas notas antigas de vocabulário. Contas e tempos saem de fr/scripts/curriculo_mapa.js; ninguém digita total. Posição (M1.1) é rótulo gerado da ordem (decisão 229); o id estável é o \"id\". Divergências com o 08: docs/i18n/curriculo/dados/ACHADOS.md.",
+  "_doc": "Mapa A1 e A2 do francês em dados (decisões 228, 238 e 259). Fonte: docs/i18n/curriculo/08-mapa-final-a1-a2-v2.md, aprovado e congelado em 2026-10-26. Mudança só por pedido de mudança, com o auditor-curricular rodando (decisão 235); pedidos de mudança aplicados: decisões 267 a 279 (campo opcional \"licao\" por cartão, decisão 274) e 311 a 324 (321 a 324: 23 cartões voltam da revisão dos cortes, docs/i18n/curriculo/dados/revisao-dos-cortes.md; le portable e le mail passam ao A1; A1-1 polida pela dona: 16 cartões, 4 lições com id e título em \"licoes\", 9 notas com \"momento\" e \"exemplos\", 2 diálogos com \"licao\": o informal no fim da lição 2 e o formal no fim da lição 4) e 326 a 328 (\"Dizer o nome e a nacionalidade\" desenhada lição por lição: 14 cartões em 3 lições, a 2ª de pronúncia; \"Dizer de onde é e onde mora\" vai para o módulo \"Apresentar-se\", logo depois dela, com la France e le Brésil e sem américain / américaine; lição com mais de 5 cartões aceita pela dona fica marcada com \"cartoes_aceitos\"). As palavras de uma nota saem dos exemplos com tradução (palavrasDaNota em fr/scripts/curriculo_mapa.js, decisão 274); \"palavras\" digitado só nas notas antigas de vocabulário. Contas e tempos saem de fr/scripts/curriculo_mapa.js; ninguém digita total. Posição (M1.1) é rótulo gerado da ordem (decisão 229); o id estável é o \"id\". Divergências com o 08: docs/i18n/curriculo/dados/ACHADOS.md.",
   "idioma": "fr",
-  "versao": "2026-11-01",
+  "versao": "2026-11-08",
   "fonte": "docs/i18n/curriculo/08-mapa-final-a1-a2-v2.md",
   "niveis": [
     {
@@ -12,7 +12,7 @@
           "id": "A1-m1",
           "nome": "Apresentar-se",
           "ordem": 1,
-          "consigo": "cumprimentar e despedir-se escolhendo tu ou vous; dizer nome, sobrenome e nacionalidade no masculino e no feminino; soletrar o meu nome; dizer a idade (1 a 69) e perguntar a do outro; dizer a profissão sem artigo; reagir (Et toi ? Et vous ?) e pedir para repetir",
+          "consigo": "cumprimentar e despedir-se escolhendo tu ou vous; dizer nome, sobrenome e nacionalidade no masculino e no feminino; soletrar o meu nome; dizer de onde venho, onde moro e que línguas falo; dizer a idade (1 a 69) e perguntar a do outro; dizer a profissão sem artigo; reagir (Et toi ? Et vous ?) e pedir para repetir",
           "tempo_08_min": 235,
           "unidades": [
             {
@@ -417,42 +417,64 @@
                 {
                   "palavra": "je",
                   "chave": "A1-2-v0",
-                  "origem": "publicado"
+                  "origem": "publicado",
+                  "licao": 1
                 },
                 {
-                  "palavra": "tu",
+                  "palavra": "tu / vous",
                   "chave": "A1-2-v1",
-                  "origem": "publicado"
+                  "origem": "publicado",
+                  "licao": 1,
+                  "decisao": 326
                 },
                 {
                   "palavra": "s'appeler",
                   "chave": "A1-2-v2",
-                  "origem": "publicado"
+                  "origem": "publicado",
+                  "licao": 1
+                },
+                {
+                  "palavra": "moi, c'est…",
+                  "chave": "nova",
+                  "origem": "novo",
+                  "licao": 1,
+                  "decisao": 327
                 },
                 {
                   "palavra": "le prénom",
                   "chave": "nova",
-                  "origem": "novo"
+                  "origem": "novo",
+                  "licao": 2
                 },
                 {
                   "palavra": "le nom",
                   "chave": "A1-2-v3",
-                  "origem": "publicado"
+                  "origem": "publicado",
+                  "licao": 2
+                },
+                {
+                  "palavra": "épeler",
+                  "chave": "nova",
+                  "origem": "novo",
+                  "licao": 2
+                },
+                {
+                  "palavra": "Ça s'écrit comment ?",
+                  "chave": "nova",
+                  "origem": "novo",
+                  "licao": 2
                 },
                 {
                   "palavra": "être",
                   "chave": "A1-2-v4",
-                  "origem": "publicado"
+                  "origem": "publicado",
+                  "licao": 3
                 },
                 {
-                  "palavra": "la France",
-                  "chave": "A1-2-v5",
-                  "origem": "publicado"
-                },
-                {
-                  "palavra": "le Brésil",
-                  "chave": "A1-2-v6",
-                  "origem": "publicado"
+                  "palavra": "le pays",
+                  "chave": "A1-2-v9",
+                  "origem": "publicado",
+                  "licao": 3
                 },
                 {
                   "palavra": "français / française",
@@ -460,7 +482,8 @@
                   "chaves_fundidas": [
                     "A1-9-v0"
                   ],
-                  "origem": "publicado"
+                  "origem": "publicado",
+                  "licao": 3
                 },
                 {
                   "palavra": "brésilien / brésilienne",
@@ -468,51 +491,123 @@
                   "chaves_fundidas": [
                     "A1-9-v1"
                   ],
-                  "origem": "publicado"
+                  "origem": "publicado",
+                  "licao": 3
                 },
                 {
-                  "palavra": "le pays",
-                  "chave": "A1-2-v9",
-                  "origem": "publicado"
+                  "palavra": "américain / américaine",
+                  "chave": "A1-9-v2",
+                  "origem": "publicado",
+                  "licao": 3,
+                  "decisao": 327
                 },
                 {
-                  "palavra": "épeler",
+                  "palavra": "ne… pas",
                   "chave": "nova",
                   "origem": "novo",
-                  "licao": "pronuncia"
-                },
-                {
-                  "palavra": "Ça s'écrit comment ?",
-                  "chave": "nova",
-                  "origem": "novo",
-                  "licao": "pronuncia"
+                  "licao": 3,
+                  "decisao": 327
                 }
               ],
               "notas": [
                 {
                   "titulo": "\"Tu\" ou \"vous\"?",
                   "tipo": "Exp",
-                  "confianca": "n/r",
-                  "id": "N05"
+                  "confianca": "alta",
+                  "id": "N05",
+                  "momento": {
+                    "licao": 1,
+                    "depois_de": "tu / vous"
+                  },
+                  "exemplos": [
+                    {
+                      "fr": "tu",
+                      "pt-BR": "você (informal)"
+                    },
+                    {
+                      "fr": "vous",
+                      "pt-BR": "o senhor, a senhora (formal) / vocês"
+                    }
+                  ]
                 },
                 {
                   "titulo": "Tu t'appelles comment ?",
                   "tipo": "Real",
                   "confianca": "alta",
                   "id": "N06",
-                  "breve": true
+                  "breve": true,
+                  "momento": {
+                    "licao": 1,
+                    "depois_de": "s'appeler"
+                  },
+                  "exemplos": [
+                    {
+                      "fr": "Tu t'appelles comment ?",
+                      "pt-BR": "Como você se chama? (fala do dia a dia)"
+                    },
+                    {
+                      "fr": "Comment vous appelez-vous ?",
+                      "pt-BR": "Como o senhor se chama? (formal)"
+                    }
+                  ]
+                },
+                {
+                  "titulo": "Moi, toi, vous: para dar destaque",
+                  "tipo": "Exp",
+                  "confianca": "alta",
+                  "nova": true,
+                  "decisao": 327,
+                  "momento": {
+                    "licao": 1,
+                    "depois_de": "moi, c'est…"
+                  },
+                  "exemplos": [
+                    {
+                      "fr": "Et toi ?",
+                      "pt-BR": "E você?"
+                    },
+                    {
+                      "fr": "Moi, c'est Ana.",
+                      "pt-BR": "Eu sou a Ana."
+                    },
+                    {
+                      "fr": "Moi, je m'appelle Léo.",
+                      "pt-BR": "Eu me chamo Léo."
+                    }
+                  ]
+                },
+                {
+                  "titulo": "O alfabeto em francês",
+                  "tipo": "Pron",
+                  "confianca": "alta",
+                  "nova": true,
+                  "decisao": 327,
+                  "formato": "grade",
+                  "momento": {
+                    "licao": 2,
+                    "depois_de": "épeler"
+                  },
+                  "exemplos": []
                 },
                 {
                   "titulo": "t'es",
                   "tipo": "Real",
                   "confianca": "alta",
-                  "id": "N07"
-                },
-                {
-                  "titulo": "Moi, je m'appelle Ana. Et toi ? Et vous ?: moi, toi, vous são tônicos",
-                  "tipo": "Exp",
-                  "confianca": "alta",
-                  "nova": true
+                  "id": "N07",
+                  "momento": {
+                    "licao": 3,
+                    "depois_de": "être"
+                  },
+                  "exemplos": [
+                    {
+                      "fr": "Tu es français ?",
+                      "pt-BR": "Você é francês?"
+                    },
+                    {
+                      "fr": "T'es français ?",
+                      "pt-BR": "Você é francês? (fala do dia a dia)"
+                    }
+                  ]
                 },
                 {
                   "titulo": "Français, française: o feminino que se ouve",
@@ -522,24 +617,203 @@
                   "versao_gratis_de": [
                     "A1-g11",
                     "A1-g15"
+                  ],
+                  "momento": {
+                    "licao": 3,
+                    "depois_de": "français / française"
+                  },
+                  "exemplos": [
+                    {
+                      "fr": "français",
+                      "pt-BR": "francês"
+                    },
+                    {
+                      "fr": "française",
+                      "pt-BR": "francesa"
+                    }
                   ]
                 },
                 {
-                  "titulo": "Tu es française ? Non, je ne suis pas française.: o ne... pas abraça o verbo",
+                  "titulo": "Ne… pas: o não em volta do verbo",
+                  "tipo": "Exp",
+                  "confianca": "alta",
+                  "nova": true,
+                  "breve": true,
+                  "decisao": 327,
+                  "momento": {
+                    "licao": 3,
+                    "depois_de": "ne… pas"
+                  },
+                  "exemplos": [
+                    {
+                      "fr": "Je ne suis pas française.",
+                      "pt-BR": "Eu não sou francesa."
+                    },
+                    {
+                      "fr": "Tu n'es pas français ?",
+                      "pt-BR": "Você não é francês?"
+                    }
+                  ]
+                }
+              ],
+              "licoes_08": 4,
+              "licoes_motivo": "3 lições (a 2ª é a lição de pronúncia do alfabeto, com cartões) + Revisão da unidade (decisões 326 e 327)",
+              "decisoes": [
+                326,
+                327,
+                328
+              ],
+              "licoes": [
+                {
+                  "licao": 1,
+                  "id": "pronomes-e-nome",
+                  "titulo": "Dizer o nome"
+                },
+                {
+                  "licao": 2,
+                  "id": "nome-e-ser",
+                  "titulo": "O alfabeto e soletrar o nome",
+                  "pronuncia": true
+                },
+                {
+                  "licao": 3,
+                  "id": "nacionalidades",
+                  "titulo": "Dizer a nacionalidade",
+                  "cartoes_aceitos": 6,
+                  "decisao": 327
+                }
+              ],
+              "dialogos": [
+                {
+                  "titulo": "Primeiro encontro",
+                  "registro": "informal",
+                  "origem": "publicado (falas A1-2-d0 a d2 ficam; d3 e d4 trocadas por duas falas novas com a negação, decisão 326)",
+                  "licao": 3,
+                  "decisao": 326
+                }
+              ]
+            },
+            {
+              "id": "A1-9",
+              "nome": "Dizer de onde é e onde mora",
+              "ordem": 3,
+              "tipo": "vocabulario",
+              "id_funcao": "dizer-de-onde-e-e-onde-mora",
+              "funcao": "origem, moradia, línguas",
+              "origem": "publicada",
+              "cartoes": [
+                {
+                  "palavra": "habiter",
+                  "chave": "nova",
+                  "origem": "novo"
+                },
+                {
+                  "palavra": "anglais / anglaise",
+                  "chave": "A1-9-v3",
+                  "origem": "publicado"
+                },
+                {
+                  "palavra": "espagnol / espagnole",
+                  "chave": "A1-9-v4",
+                  "origem": "publicado"
+                },
+                {
+                  "palavra": "italien / italienne",
+                  "chave": "A1-9-v5",
+                  "origem": "publicado"
+                },
+                {
+                  "palavra": "allemand / allemande",
+                  "chave": "A1-9-v6",
+                  "origem": "publicado"
+                },
+                {
+                  "palavra": "portugais / portugaise",
+                  "chave": "A1-9-v7",
+                  "origem": "publicado"
+                },
+                {
+                  "palavra": "la nationalité",
+                  "chave": "A1-9-v8",
+                  "origem": "publicado"
+                },
+                {
+                  "palavra": "venir de",
+                  "chave": "A1-9-v9",
+                  "origem": "publicado"
+                },
+                {
+                  "palavra": "la ville",
+                  "chave": "nova",
+                  "origem": "novo"
+                },
+                {
+                  "palavra": "parler",
+                  "chave": "nova",
+                  "origem": "novo"
+                },
+                {
+                  "palavra": "la France",
+                  "chave": "A1-2-v5",
+                  "origem": "publicado",
+                  "decisao": 328
+                },
+                {
+                  "palavra": "le Brésil",
+                  "chave": "A1-2-v6",
+                  "origem": "publicado",
+                  "decisao": 328
+                }
+              ],
+              "notas": [
+                {
+                  "titulo": "Je suis brésilienne ou je viens du Brésil",
+                  "tipo": "Exp",
+                  "confianca": "n/r",
+                  "id": "N17"
+                },
+                {
+                  "titulo": "où vai para o fim",
+                  "tipo": "Real",
+                  "confianca": "alta",
+                  "id": "N18",
+                  "breve": true
+                },
+                {
+                  "titulo": "feminino das outras 5 nacionalidades",
+                  "tipo": "Exp",
+                  "confianca": "n/r",
+                  "nova": true
+                },
+                {
+                  "titulo": "Je viens de France / du Brésil. J'habite à Paris.",
+                  "tipo": "Exp",
+                  "confianca": "alta",
+                  "nova": true,
+                  "breve": true,
+                  "versao_gratis_de": [
+                    "A1-g4"
+                  ]
+                },
+                {
+                  "titulo": "Est-ce que tu parles anglais ?: a mesma pergunta, com est-ce que na frente",
                   "tipo": "Exp",
                   "confianca": "n/r",
                   "nova": true,
-                  "breve": true
+                  "gancho": "Tu parles anglais ?",
+                  "versao_gratis_de": [
+                    "A1-g12"
+                  ]
                 }
               ],
-              "licao_pronuncia": "O alfabeto e soletrar o nome",
-              "licoes_08": 5,
-              "licoes_motivo": "3 lições + lição de pronúncia do alfabeto + Revisão da unidade (08, seção 1 e linha da M1.2)"
+              "decisoes": [
+                328
+              ]
             },
             {
               "id": "A1-3",
               "nome": "Dizer a idade: de 1 a 29",
-              "ordem": 3,
+              "ordem": 4,
               "tipo": "vocabulario",
               "id_funcao": "dizer-a-idade-de-1-a-29",
               "funcao": "dizer a própria idade",
@@ -647,7 +921,7 @@
             {
               "id": "A1-21",
               "nome": "Perguntar a idade dos outros: até 69",
-              "ordem": 4,
+              "ordem": 5,
               "tipo": "vocabulario",
               "id_funcao": "perguntar-a-idade-dos-outros-ate-69",
               "funcao": "perguntar e dizer a idade de terceiros",
@@ -737,7 +1011,7 @@
             {
               "id": "A1-g1",
               "nome": "Gramática: être e avoir",
-              "ordem": 5,
+              "ordem": 6,
               "tipo": "gramatica",
               "id_funcao": "gramatica-etre-e-avoir",
               "funcao": "conjugar os dois verbos da apresentação",
@@ -747,14 +1021,14 @@
                 "A1-3",
                 "A1-21"
               ],
-              "versao_gratis_texto": "parcial e suficiente: M1.2 je suis (fórmula); M1.3 N08 J'ai vingt ans; M1.4 il a / elle a; a tabela completa está na Conjugação (grátis)",
+              "versao_gratis_texto": "parcial e suficiente: M1.2 je suis (fórmula); M1.4 N08 J'ai vingt ans; M1.5 il a / elle a; a tabela completa está na Conjugação (grátis)",
               "telas": 4,
               "exercicios": 6
             },
             {
               "id": "A1-22",
               "nome": "Dizer a profissão",
-              "ordem": 6,
+              "ordem": 7,
               "tipo": "vocabulario",
               "id_funcao": "dizer-a-profissao",
               "funcao": "dizer e perguntar a profissão",
@@ -841,7 +1115,7 @@
             {
               "id": "A1-g11",
               "nome": "Gramática: masculino e feminino",
-              "ordem": 7,
+              "ordem": 8,
               "tipo": "gramatica",
               "id_funcao": "gramatica-masculino-e-feminino",
               "funcao": "concordar nacionalidade e profissão com a pessoa",
@@ -850,18 +1124,18 @@
                 "A1-2",
                 "A1-22"
               ],
-              "versao_gratis_texto": "M1.2 nota \"o feminino que se ouve\"; pares da M1.6 + 1 linha na nota Elle est infirmière (M1.6, gancho la vendeuse)",
+              "versao_gratis_texto": "M1.2 nota \"o feminino que se ouve\"; pares da M1.7 + 1 linha na nota Elle est infirmière (M1.7, gancho la vendeuse)",
               "telas": 5,
               "exercicios": 8
             }
           ],
-          "tempo_08_nota": "Tempo digitado (decisão 270) mantido: \"Cumprimentar e se despedir\" agora tem 16 cartões (decisões 313 e 314), mas nenhum limite novo de tempo é proposto enquanto as lições são revistas (decisões 300 e 308); medição real em dados/medicao-tempo-licao-2026-10-29.md."
+          "tempo_08_nota": "Tempo digitado (decisão 270) mantido: \"Cumprimentar e se despedir\" agora tem 16 cartões (decisões 313 e 314), mas nenhum limite novo de tempo é proposto enquanto as lições são revistas (decisões 300 e 308); medição real em dados/medicao-tempo-licao-2026-10-29.md. Decisão 328: \"Dizer de onde é e onde mora\" entrou no módulo; o tempo digitado de \"Apresentar-se\" e de \"Família e pessoas próximas\" não foi recalculado (regra 16 suspensa, decisão 325; a dona decide na nova medição)."
         },
         {
           "id": "A1-m7",
           "nome": "Família e pessoas próximas",
           "ordem": 2,
-          "consigo": "apresentar a família (nome, idade, profissão); apresentar alguém (C'est ma sœur. Elle est médecin.); descrever a aparência de uma pessoa; dizer de onde alguém é, onde mora e que línguas fala; perguntar sobre pessoas e fazer perguntas de sim ou não",
+          "consigo": "apresentar a família (nome, idade, profissão); apresentar alguém (C'est ma sœur. Elle est médecin.); descrever a aparência de uma pessoa; perguntar sobre pessoas e fazer perguntas de sim ou não",
           "tempo_08_min": 225,
           "unidades": [
             {
@@ -1141,116 +1415,9 @@
               "exercicios": 6
             },
             {
-              "id": "A1-9",
-              "nome": "Dizer de onde é e onde mora",
-              "ordem": 5,
-              "tipo": "vocabulario",
-              "id_funcao": "dizer-de-onde-e-e-onde-mora",
-              "funcao": "origem, moradia, línguas",
-              "origem": "publicada",
-              "cartoes": [
-                {
-                  "palavra": "habiter",
-                  "chave": "nova",
-                  "origem": "novo"
-                },
-                {
-                  "palavra": "américain / américaine",
-                  "chave": "A1-9-v2",
-                  "origem": "publicado"
-                },
-                {
-                  "palavra": "anglais / anglaise",
-                  "chave": "A1-9-v3",
-                  "origem": "publicado"
-                },
-                {
-                  "palavra": "espagnol / espagnole",
-                  "chave": "A1-9-v4",
-                  "origem": "publicado"
-                },
-                {
-                  "palavra": "italien / italienne",
-                  "chave": "A1-9-v5",
-                  "origem": "publicado"
-                },
-                {
-                  "palavra": "allemand / allemande",
-                  "chave": "A1-9-v6",
-                  "origem": "publicado"
-                },
-                {
-                  "palavra": "portugais / portugaise",
-                  "chave": "A1-9-v7",
-                  "origem": "publicado"
-                },
-                {
-                  "palavra": "la nationalité",
-                  "chave": "A1-9-v8",
-                  "origem": "publicado"
-                },
-                {
-                  "palavra": "venir de",
-                  "chave": "A1-9-v9",
-                  "origem": "publicado"
-                },
-                {
-                  "palavra": "la ville",
-                  "chave": "nova",
-                  "origem": "novo"
-                },
-                {
-                  "palavra": "parler",
-                  "chave": "nova",
-                  "origem": "novo"
-                }
-              ],
-              "notas": [
-                {
-                  "titulo": "Je suis brésilienne ou je viens du Brésil",
-                  "tipo": "Exp",
-                  "confianca": "n/r",
-                  "id": "N17"
-                },
-                {
-                  "titulo": "où vai para o fim",
-                  "tipo": "Real",
-                  "confianca": "alta",
-                  "id": "N18",
-                  "breve": true
-                },
-                {
-                  "titulo": "feminino das outras 6 nacionalidades",
-                  "tipo": "Exp",
-                  "confianca": "n/r",
-                  "nova": true
-                },
-                {
-                  "titulo": "Je viens de France / du Brésil. J'habite à Paris.",
-                  "tipo": "Exp",
-                  "confianca": "alta",
-                  "nova": true,
-                  "breve": true,
-                  "versao_gratis_de": [
-                    "A1-g4"
-                  ]
-                },
-                {
-                  "titulo": "Est-ce que tu parles anglais ?: a mesma pergunta, com est-ce que na frente",
-                  "tipo": "Exp",
-                  "confianca": "n/r",
-                  "nova": true,
-                  "gancho": "Tu parles anglais ?",
-                  "versao_gratis_de": [
-                    "A1-g12"
-                  ]
-                }
-              ]
-            },
-            {
               "id": "A1-g22",
               "nome": "Gramática: palavras interrogativas (pessoas)",
-              "ordem": 6,
+              "ordem": 5,
               "tipo": "gramatica",
               "id_funcao": "gramatica-palavras-interrogativas-pessoas",
               "funcao": "perguntar sobre pessoas",
@@ -1267,7 +1434,7 @@
             {
               "id": "A1-g12",
               "nome": "Gramática: perguntar sim ou não",
-              "ordem": 7,
+              "ordem": 6,
               "tipo": "gramatica",
               "id_funcao": "gramatica-perguntar-sim-ou-nao",
               "funcao": "fazer perguntas de sim ou não",
@@ -1276,11 +1443,12 @@
                 "A1-1",
                 "A1-9"
               ],
-              "versao_gratis_texto": "nota Ça va ? sobe (M1.1) + M2.5, gancho Tu parles anglais ?: \"Est-ce que tu parles anglais ?\"",
+              "versao_gratis_texto": "nota Ça va ? sobe (M1.1) + M1.3, gancho Tu parles anglais ?: \"Est-ce que tu parles anglais ?\"",
               "telas": 4,
               "exercicios": 8
             }
-          ]
+          ],
+          "tempo_08_nota": "Tempo digitado mantido: \"Dizer de onde é e onde mora\" saiu para \"Apresentar-se\" (decisão 328), mas o tempo não foi recalculado (regra 16 suspensa, decisão 325)."
         },
         {
           "id": "A1-m2",
@@ -2236,7 +2404,7 @@
                 "A1-11",
                 "A1-22"
               ],
-              "versao_gratis_texto": "M4.1 \"Verbos muito usados\": cartões faire e prendre + fórmulas je vais prendre (M4.2), je fais les courses (M4.3), Qu'est-ce que vous faites ? (M1.6); tabela na Conjugação (grátis)",
+              "versao_gratis_texto": "M4.1 \"Verbos muito usados\": cartões faire e prendre + fórmulas je vais prendre (M4.2), je fais les courses (M4.3), Qu'est-ce que vous faites ? (M1.7); tabela na Conjugação (grátis)",
               "telas": 4,
               "exercicios": 6
             }
@@ -3458,7 +3626,7 @@
                 "A1-9",
                 "A1-31"
               ],
-              "versao_gratis_texto": "M2.5 nota (France / Brésil) + M8.1: nota reescrita como versão grátis completa de en, au, aux, à + país, com +1 linha de procedência",
+              "versao_gratis_texto": "M1.3 nota (France / Brésil) + M8.1: nota reescrita como versão grátis completa de en, au, aux, à + país, com +1 linha de procedência",
               "telas": 5,
               "exercicios": 8
             },
