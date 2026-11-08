@@ -104,3 +104,10 @@ Correção: migration `100_review_bank_agent_other_students` (o estado devolve `
 - 2026-10-15: função v8 na produção (autorizada pela autora), motor regerado no PR #337 (Banco ligado a Turma: `rbReadyToDeliver`
   aceita turma; `teacherId` no cartão). Atalhos fixados no commit c57286f; `index.ts` igual ao da v7. A rotina segue só para
   alunos ligados a uma conta (`core.mjs` exige `linked_student_id`).
+
+## Caderno alterado e avisos de leitura (2026-11-08)
+- Pedido da dona (sugestões 1 e 2): a tarefa `trig_01Ta2vz9PGZktySgX5qMxQj9` agora (1) consulta só os metadados do caderno de cada aluno gerenciado (Drive `get_file_metadata`, sem abrir o conteúdo) e lê o caderno
+  também quando `modifiedTime` é dos últimos 3 dias e posterior a `last_entry_read`, mesmo sem aula na agenda (releitura é segura: o servidor ignora itens repetidos); (2) a mensagem da manhã traz avisos de caderno:
+  "alterado em DD/MM, sem entrada nova depois de DD/MM", "aula de DD/MM, caderno ainda sem alteração" (só aula de ontem ou de hoje) e "caderno que não exportou (texto simples)".
+- Texto igual em `docs/rotina-banco/tarefa-nova-producao.txt` (colar de novo na tarefa se mudar). Só o prompt mudou: nenhuma função ou migration.
+- Motivo: Rachel teve aulas em 23/10, 30/10 e 06/11, mas o caderno só foi alterado em 06/11, depois da última leitura (16/10); e a rotina só lia quando havia aula na agenda dentro de 7 dias.
