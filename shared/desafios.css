@@ -581,3 +581,8 @@ textarea.challenges-admin-edit-input{ resize:vertical; }
 .expr-literal-label{ font-weight:800; color:var(--ink-soft); }
 .expr-literal-note{ display:block; margin-top:4px; font-size:13px; color:var(--ink-soft); }
 @media (max-width:600px){ .expr-tr-btn{ min-height:44px; } }
+
+/* Etapa D (2026-11-04): números 1-N nas opções do Complete a frase (kbd-hint da trilha; só aparece com teclado e mouse). */
+.cloze-grammar .challenge-choice-btn{ position:relative; }
+@media (hover:hover) and (pointer:fine){ .cloze-grammar .challenge-choice-btn:has(.kbd-hint){ padding-left:34px; } }
+.cloze-grammar .challenge-choice-btn .kbd-hint{ top:50%; transform:translateY(-50%); }
