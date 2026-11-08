@@ -218,7 +218,7 @@ insert into r select '097: state devolve so aluno gerenciado, com e-mail da cont
   and not ((review_bank_agent_state() -> 'students' -> 0) ? 'items')
   and (review_bank_agent_items('aaaaaaaa-0000-0000-0000-000000000002') -> 0 ? 'has_card')
   and (review_bank_agent_state() ->> 'today') ~ '^\d{4}-\d{2}-\d{2}$', '';
-insert into r select '128: state traz os numeros de pendentes de cada aluno gerenciado (total, ultima semana, sensiveis)',
+insert into r select '129: state traz os numeros de pendentes de cada aluno gerenciado (total, ultima semana, sensiveis)',
   (select (a ->> 'pending_total')::int = (select count(*) from review_bank_items i where i.bank_student_id = (a ->> 'id')::uuid and i.status = 'pendente')
      and (a ->> 'pending_recent')::int <= (a ->> 'pending_total')::int
      and (a ->> 'pending_sensitive')::int = (select count(*) from review_bank_items i where i.bank_student_id = (a ->> 'id')::uuid and i.status = 'pendente' and i.sensitive)
