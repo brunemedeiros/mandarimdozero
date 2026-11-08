@@ -839,7 +839,6 @@ window.I18N_CATALOG['en'] = {
   'games.resultTitle': 'End of round', // ALTA
   'games.reviewTitle': 'Sentences to review ({n})', // ALTA
   'games.perfect': 'You got them all right!', // ALTA
-  'games.practiceMistakes': 'Practice only my mistakes', // ALTA
   'games.again': 'Play again', // ALTA
   'games.backToGames': '← Back to games', // ALTA
   'games.summary.one': '{done} of {total} game completed', // ALTA
@@ -857,6 +856,16 @@ window.I18N_CATALOG['en'] = {
   'games.soon': 'Coming soon', // ALTA
   'games.premiumMore.one': 'Premium: {n} more game', // ALTA
   'games.premiumMore.other': 'Premium: {n} more games', // ALTA
+  'games.review.btn': 'Review mistakes', // ALTA
+  'games.review.eyebrow': 'Review mistakes', // ALTA
+  'games.review.doneTitle': 'End of review', // ALTA
+  'games.type.label': 'Type the form that completes the sentence', // ALTA
+  'games.type.placeholder': 'Your answer', // ALTA
+  'games.type.check': 'Check', // ALTA
+  'games.almost': 'Almost!', // ALTA
+  'games.youAnswered': 'You answered:', // ALTA
+  'games.dueTitle': 'Review mistakes ({n})', // ALTA
+  'games.dueSub': 'Sentences you got wrong on other days. This time, you type the answer.', // ALTA
   'fr.dictation.levelReviewTitle': 'Level {level} review', // ALTA
   'fr.challenges.title': 'Challenges', // ALTA
   'fr.challenges.sub': 'Practice real French: expressions, listening comprehension and spelling.', // ALTA

@@ -89,7 +89,15 @@ Grátis: 1 por nível. Cada jogo novo: ~20 frases em pt-BR e en, revisor-conteud
    artifact): título + uma frase do jogo com a lacuna e as duas opções entre parênteses ("avoir ou être"; no
    pc-imparfait o verbo, `sampleHint: 'verb'`), sem apresentação; embaixo tema e "⭐ Premium". Testes: jogos-progresso
    76/76, conjugacao 82/82 (conta só os cartões que abrem).
-4. Resultado com os erros + "Revisar erros" escrevendo (na hora) e guardado para outro dia.
+4. **Feita (2026-11-08, aguarda a autora ver)**: fim da partida com os erros (frase certa com a pista, "Você respondeu:"
+   riscado, "Não sei" sem risco, tradução) e o botão "Revisar erros" (substitui "Praticar só os que errei"). A revisão é
+   ESCRITA (`mode: 'type'` em shared/conj-games.js, `startReview`): dica "(verbo · opção a ou opção b)", campo, teclado de
+   acentos (`frAccentPickerHTML`), Corrigir/Enter, "Não sei"; correção = `typedAnswerVerdictForExpected` (a da Revisão de
+   cartões); "quase" (acento ou uma letra) conta como acerto e mostra o desenho letra a letra (`typedAttemptHTML`, só no
+   quase). Revisão não conta partida (`rounds`). Erros de OUTROS dias (última resposta errada antes de hoje, jogo não
+   trancado): cartão "🔁 Revisar erros (N)" no topo da lista (`dueEntries`), revisão misturando jogos; acertou sai, errou
+   volta no dia seguinte. Chave `games.practiceMistakes` apagada (sem uso). Testes: jogos-progresso 96/96; paridade da
+   Conjugação 343/343 (fim da partida neutralizado de propósito).
 5. Rodada Completa x Curta; a partida puxa primeiro as frases ainda não vistas.
 6. Etapa "Escreva a resposta" dentro da partida.
 7. Etapas "Corrija o erro" e "Traduza a frase inteira" (conteúdo novo, revisão e aprovação).

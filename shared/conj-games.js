@@ -69,7 +69,9 @@ function createConjGames({ games, soon = [], speak, ids, isLocked, onLocked, lan
     line: AXIS + '<rect x="18" y="19" width="92" height="14" rx="7" fill="var(--seal-red)" opacity=".85"/><path d="M24 26 h80" stroke="currentColor" stroke-width="2" stroke-dasharray="4 5"/>'
   };
 
-  const S = { game: null, order: [], idx: 0, hits: 0, log: [], answered: false, shownAt: 0, dirty: false };
+  // mode: 'choice' (partida normal, duas opções) ou 'type' ("Revisar erros": escrever a forma). gameAt[i]: jogo da frase i
+  // quando a revisão mistura jogos (senão vale S.game).
+  const S = { game: null, order: [], gameAt: [], mode: 'choice', idx: 0, hits: 0, log: [], answered: false, shownAt: 0, dirty: false };
 
   // Selo (regra 7 da dona, 2026-10-22): recurso Premium com o bloqueio DESLIGADO mostra só "⭐ Premium" e abre para
   // todos; com o bloqueio LIGADO, quem não tem a permissão vê "⭐ Premium" + cadeado e, ao tocar, o aviso Premium.
@@ -114,7 +116,7 @@ function createConjGames({ games, soon = [], speak, ids, isLocked, onLocked, lan
   function sampleHTML(g){
     const it = g.items.find(x => x.id === g.sample) || g.items[0];
     if (!it) return '';
-    const hint = g.sampleHint === 'verb' && it.verb ? it.verb : `${g.opts.a.label.toLowerCase()} ou ${g.opts.b.label.toLowerCase()}`;
+    const hint = g.sampleHint === 'verb' && it.verb ? it.verb : optsHint(g);
     return `<span class="cg-card-sample" lang="${lang}">${tidy(`${esc(it.before)}<span class="cg-card-blank" aria-hidden="true"></span> <span class="cg-card-hint">(${esc(hint)})</span>${esc(it.after)}`)}</span>`;
   }
 
@@ -174,9 +176,16 @@ function createConjGames({ games, soon = [], speak, ids, isLocked, onLocked, lan
     if (!el) return;
     const levels = [...new Set(games.concat(soon).map(g => g.level || ''))].sort((a, b) => levelRank(a) - levelRank(b));
     const sections = levels.map(levelSectionHTML).join('');
-    el.innerHTML = summaryHTML() + filtersHTML()
+    const due = dueEntries();
+    const dueHTML = due.length ? `<button type="button" class="cg-due" id="cg-due">
+      <span class="cg-due-ico" aria-hidden="true">🔁</span>
+      <span class="cg-due-text"><b>${esc(tt('games.dueTitle', { n: due.length }))}</b><span>${esc(tt('games.dueSub'))}</span></span>
+    </button>` : '';
+    el.innerHTML = summaryHTML() + dueHTML + filtersHTML()
       + `<div class="challenges-level-sections cg-level-sections">${sections || `<div class="challenges-empty"><p>${esc(tt('games.filter.none'))}</p></div>`}</div>`;
     el.querySelectorAll('.cg-play').forEach(b => b.addEventListener('click', () => start(b.dataset.game)));
+    const dueBtn = el.querySelector('#cg-due');
+    if (dueBtn) dueBtn.addEventListener('click', () => startReview(dueEntries()));
     el.querySelectorAll('[data-cg-invite]').forEach(b => b.addEventListener('click', () => { if (onLocked) onLocked(null); }));
     el.querySelectorAll('[data-cg-filter]').forEach(b => b.addEventListener('click', () => {
       listFilter = b.dataset.cgFilter;
@@ -205,14 +214,45 @@ function createConjGames({ games, soon = [], speak, ids, isLocked, onLocked, lan
     // PAYWALL: ponto único que trava os Jogos. Hoje isLocked devolve false (flag desligada no app.js).
     if (isLocked && isLocked(g)){ if (onLocked) onLocked(g); return; }
     const pool = onlyIds ? g.items.filter(it => onlyIds.includes(it.id)) : g.items;
-    Object.assign(S, { game: g, order: onlyIds ? shuffle(pool) : shuffle(pool).slice(0, g.perRound), idx: 0, hits: 0, log: [], answered: false });
+    Object.assign(S, { game: g, order: onlyIds ? shuffle(pool) : shuffle(pool).slice(0, g.perRound), gameAt: [], mode: 'choice', idx: 0, hits: 0, log: [], answered: false });
     if (typeof trackEvent === 'function') trackEvent('lesson_start', 'conj_game', { game: g.id });
     show(true);
     renderQuestion();
     window.scrollTo(0, 0);
   }
 
+  // "Revisar erros" (etapa 4, 2026-11-08): só as frases erradas, agora ESCREVENDO a forma (ideia do artifact de jogos).
+  // entries = [{ g, it }], podem ser de jogos diferentes (a revisão de outros dias mistura). Jogo trancado fica de fora.
+  function startReview(entries){
+    const ok = (entries || []).filter(e => e && e.g && e.it && !(isLocked && isLocked(e.g)));
+    if (!ok.length) return;
+    const mixed = shuffle(ok);
+    const one = mixed.every(e => e.g === mixed[0].g) ? mixed[0].g : null;
+    Object.assign(S, { game: one, order: mixed.map(e => e.it), gameAt: mixed.map(e => e.g), mode: 'type', idx: 0, hits: 0, log: [], answered: false });
+    if (typeof trackEvent === 'function') trackEvent('lesson_start', 'conj_game_review', { games: [...new Set(mixed.map(e => e.g.id))].join(','), n: mixed.length });
+    show(true);
+    renderQuestion();
+    window.scrollTo(0, 0);
+  }
+
+  // Erros de OUTROS dias: frase cuja última resposta foi errada antes de hoje (a de hoje aparece no fim da partida).
+  // Acertou na revisão: sai da lista; errou de novo: volta amanhã.
+  function dueEntries(){
+    const today = typeof todayStr === 'function' ? todayStr() : new Date().toISOString().slice(0, 10);
+    const out = [];
+    games.forEach(g => {
+      if (isLocked && isLocked(g)) return;
+      const r = conjGameRecord(g.id, false);
+      if (!r) return;
+      g.items.forEach(it => { const e = r.items[String(it.id)]; if (e && e.ok === false && e.at < today) out.push({ g, it }); });
+    });
+    return out;
+  }
+
   const item = () => S.order[S.idx];
+  const gOf = () => S.gameAt[S.idx] || S.game;
+  // Dica entre parênteses (cartão da lista e revisão escrita): as duas opções do jogo, ou o verbo (sampleHint: 'verb').
+  const optsHint = g => `${g.opts.a.label.toLowerCase()} ou ${g.opts.b.label.toLowerCase()}`;
 
   // Frase com a lacuna; depois de responder, a forma certa entra na lacuna e a pista fica marcada.
   function sentenceHTML(it, filled){
@@ -236,7 +276,8 @@ function createConjGames({ games, soon = [], speak, ids, isLocked, onLocked, lan
   const setProgress = pct => { if (window.activityBarProgress) window.activityBarProgress(ids.wrap, pct); };
 
   function renderQuestion(){
-    const it = item(), g = S.game;
+    if (S.mode === 'type') return renderTypeQuestion();
+    const it = item(), g = gOf();
     S.answered = false;
     const bar = grabBar();
     // Mesmo visual da lição (2026-10-20, pedido da autora): cabeçalho discreto, frase centralizada num painel
@@ -269,18 +310,91 @@ function createConjGames({ games, soon = [], speak, ids, isLocked, onLocked, lan
     setProgress(Math.round(100 * S.idx / S.order.length));
   }
 
-  function answer(k){
+  // Revisão escrita: mesma frase e mesmo painel; no lugar das opções, campo + teclado de acentos + Corrigir.
+  // Dica: o verbo (se a frase tem) e as duas opções do jogo, para saber o que escrever (ex.: "(aller · tu ou vous)").
+  function renderTypeQuestion(){
+    const it = item(), g = gOf();
+    S.answered = false;
+    if (typeof clearKeyboardOptions === 'function') clearKeyboardOptions(); // números viram letras no campo, não atalhos
+    const bar = grabBar();
+    const expected = it[it.ans];
+    const keys = typeof frAccentPickerHTML === 'function' ? frAccentPickerHTML(expected) : '';
+    $(ids.content).innerHTML = `
+      <div class="cg-head">
+        <span class="cg-eyebrow">${esc(tt('games.review.eyebrow'))}${g.level ? ` · ${esc(g.level)}` : ''}</span>
+        <h2 class="cg-title">${rich(L(g.title))}</h2>
+      </div>
+      ${progressHTML()}
+      <div class="cg-stage">
+        <div class="cg-panel">
+          <span class="cg-verb" lang="${lang}">(${it.verb ? esc(it.verb) + ' · ' : ''}${esc(optsHint(g))})</span>
+          <div class="cg-sentence-row">${sentenceHTML(it, false)}</div>
+          <p class="cg-tr" hidden></p>
+        </div>
+        <div class="cg-type">
+          <label class="cg-type-label" for="cg-input">${esc(tt('games.type.label'))}</label>
+          <input id="cg-input" class="cg-input" type="text" lang="${lang}" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="${esc(tt('games.type.placeholder'))}">
+          ${keys ? `<div class="conj-accents cg-accents">${keys}</div>` : ''}
+          <button type="button" class="btn btn-primary cg-check" id="cg-check" disabled>${esc(tt('games.type.check'))}</button>
+        </div>
+        <button type="button" class="exercise-dontknow cg-dontknow" id="cg-dontknow">${esc(tt('common.dontKnow'))}</button>
+        <div class="cg-feedback" id="cg-feedback" aria-live="polite"></div>
+      </div>`;
+    const inp = $('cg-input'), btn = $('cg-check');
+    inp.addEventListener('input', () => { btn.disabled = !inp.value.trim(); });
+    // Enter dentro do campo pertence ao campo: corrige (não aciona o "Continuar" global).
+    inp.addEventListener('keydown', e => {
+      if (e.key !== 'Enter') return;
+      e.preventDefault(); e.stopPropagation();
+      if (!S.answered && inp.value.trim()) answerTyped(false);
+    });
+    btn.addEventListener('click', () => answerTyped(false));
+    $('cg-dontknow').addEventListener('click', () => answerTyped(true));
+    $(ids.content).querySelectorAll('.cg-accents .fr-accent-key').forEach(k => {
+      k.addEventListener('mousedown', e => e.preventDefault());
+      k.addEventListener('click', () => {
+        if (S.answered) return;
+        if (typeof insertAccentAtCursor === 'function') insertAccentAtCursor(inp, k.textContent);
+        else { inp.value += k.textContent; inp.focus(); }
+        btn.disabled = !inp.value.trim();
+      });
+    });
+    mountBar(bar, '.cg-head');
+    setProgress(Math.round(100 * S.idx / S.order.length));
+    setTimeout(() => { if (!S.answered) inp.focus(); }, 0);
+  }
+
+  // Correção da revisão escrita: a mesma da Revisão de cartões (certo / "quase" = só acento ou uma letra / errou).
+  // "Quase" conta como acerto (a forma está lá), com a resposta certa e o desenho letra a letra do erro.
+  function answerTyped(revealed){
     if (S.answered) return;
-    const it = item(), g = S.game, ok = k === it.ans, revealed = k == null;
+    const it = item(), inp = $('cg-input'), typed = revealed ? '' : (inp ? inp.value : '');
+    const expected = it[it.ans];
+    const norm = v => String(v || '').normalize('NFC').replace(/[’]/g, "'").trim().replace(/\s+/g, ' ').toLowerCase();
+    const verdict = revealed ? 'errou' : (typeof typedAnswerVerdictForExpected === 'function'
+      ? typedAnswerVerdictForExpected(typed, expected) : (norm(typed) === norm(expected) ? 'ok' : 'errou'));
+    answer(verdict === 'errou' ? (revealed ? null : '__typed') : it.ans, { typed, verdict, revealed });
+  }
+
+  function answer(k, typedInfo){
+    if (S.answered) return;
+    const it = item(), g = gOf(), ok = k === it.ans, revealed = k == null;
     S.answered = true;
     if (ok) S.hits++;
-    S.log.push({ it, ok, given: k });
+    S.log.push({ it, ok, given: typedInfo ? (typedInfo.revealed ? null : typedInfo.typed) : k, g, typed: !!typedInfo });
     recordConjGameAnswer(g.id, it.id, ok);
     S.dirty = true;
     const dk = $('cg-dontknow');
     if (dk) dk.classList.add('disabled');
     // Som de acerto/erro como na trilha; "Não sei" é silencioso (a resposta é só revelada).
     if (!revealed && typeof playFeedbackSound === 'function') playFeedbackSound(ok);
+    if (typedInfo){
+      const inp = $('cg-input'), chk = $('cg-check');
+      if (inp){ inp.disabled = true; inp.classList.add(ok ? 'is-right' : 'is-wrong'); }
+      // style.display: o display do .btn e do teclado venceria o atributo hidden
+      if (chk) chk.style.display = 'none';
+      $(ids.content).querySelectorAll('.cg-accents').forEach(a => { a.style.display = 'none'; });
+    }
     $(ids.content).querySelectorAll('.cg-choice').forEach(b => {
       b.disabled = true;
       b.classList.add(b.dataset.k === it.ans ? 'is-right' : (b.dataset.k === k ? 'is-wrong' : 'is-dim'));
@@ -296,13 +410,18 @@ function createConjGames({ games, soon = [], speak, ids, isLocked, onLocked, lan
     tr.hidden = !txt.tr;
     const last = S.idx + 1 >= S.order.length;
     const fb = $('cg-feedback');
-    fb.innerHTML = `
-      <p class="cg-verdict ${ok ? 'ok' : 'no'}">${esc(tt(ok ? 'games.right' : (revealed ? 'feedback.header.revealed' : 'games.wrong')))}${ok ? '' : ` <span>${esc(tt('games.answerWas', { form: it[it.ans] }))}</span>`}</p>
+    const almost = !!(typedInfo && typedInfo.verdict === 'quase');
+    // desenho letra a letra só no "quase" (acento ou uma letra); palavra trocada não ganha nada com ele
+    const attempt = almost && typeof typedAttemptHTML === 'function' ? typedAttemptHTML(typedInfo.typed, it[it.ans]) : '';
+    fb.innerHTML = almost ? `
+      <p class="cg-verdict ok">${esc(tt('games.almost'))} <span>${esc(tt('games.answerWas', { form: it[it.ans] }))}</span></p>${attempt}` : `
+      <p class="cg-verdict ${ok ? 'ok' : 'no'}">${esc(tt(ok ? 'games.right' : (revealed ? 'feedback.header.revealed' : 'games.wrong')))}${ok ? '' : ` <span>${esc(tt('games.answerWas', { form: it[it.ans] }))}</span>`}</p>${attempt}`;
+    fb.insertAdjacentHTML('beforeend', `
       <div class="cg-why">
         <figure class="cg-timeline${SKETCH[opt.sketch] ? '' : ' cg-rule'}">${SKETCH[opt.sketch] ? `<svg viewBox="0 0 134 44" role="img" aria-label="${esc(plain(L(opt.tl)))}">${SKETCH[opt.sketch]}</svg>` : ''}<figcaption>${rich(L(opt.tl))}</figcaption></figure>
         <div><h3>${rich(tt('games.whyTense', { tense: '{' + opt.label + '}' }))}</h3><p>${rich(txt.why || '')}</p></div>
       </div>
-      <button type="button" class="btn btn-primary cg-next" id="cg-next">${esc(tt(last ? 'common.seeResultArrow' : 'common.continueArrow'))}</button>`;
+      <button type="button" class="btn btn-primary cg-next" id="cg-next">${esc(tt(last ? 'common.seeResultArrow' : 'common.continueArrow'))}</button>`);
     S.shownAt = performance.now();
     $('cg-next').addEventListener('click', next);
     setTimeout(() => { const n = $('cg-next'); if (n) n.focus(); }, 0);
@@ -317,11 +436,12 @@ function createConjGames({ games, soon = [], speak, ids, isLocked, onLocked, lan
   }
 
   function renderResult(){
-    const g = S.game, n = S.order.length, miss = S.log.filter(x => !x.ok);
+    const review = S.mode === 'type', g = S.game, n = S.order.length, miss = S.log.filter(x => !x.ok);
     if (typeof clearKeyboardOptions === 'function') clearKeyboardOptions();
     const bar = grabBar();
     // Sem XP (prática livre), mas o dia conta para a sequência, como a trilha (decisão da autora, 2026-10-26).
-    finishConjGameRound(g.id);
+    // A revisão de erros não conta como partida (rounds), só grava as respostas.
+    if (!review) finishConjGameRound(g.id);
     if (typeof registerStudyToday === 'function') registerStudyToday();
     S.dirty = false;
     if (typeof saveState === 'function') saveState(); // grava o dia e o progresso do jogo (STATE.conjGames)
@@ -329,25 +449,33 @@ function createConjGames({ games, soon = [], speak, ids, isLocked, onLocked, lan
       if (typeof renderTopbarStats === 'function') renderTopbarStats();
       if (typeof maybeShowStreakCelebration === 'function') maybeShowStreakCelebration();
     }
-    if (typeof trackEvent === 'function') trackEvent('lesson_complete', 'conj_game', { game: g.id, hits: S.hits, total: n, scorePct: n ? Math.round(100 * S.hits / n) : 0 });
+    if (typeof trackEvent === 'function') trackEvent('lesson_complete', review ? 'conj_game_review' : 'conj_game', { game: g ? g.id : 'mix', hits: S.hits, total: n, scorePct: n ? Math.round(100 * S.hits / n) : 0 });
+    // Erros com o que a aluna respondeu (riscado) e a frase certa com a pista, como a lista da Revisão.
+    const givenHTML = x => {
+      if (x.given == null) return `<span class="cg-review-given">${esc(tt('games.youAnswered'))} ${esc(tt('common.dontKnow'))}</span>`;
+      const v = x.typed ? x.given : x.it[x.given];
+      return `<span class="cg-review-given">${esc(tt('games.youAnswered'))} <s lang="${lang}">${esc(v || '')}</s></span>`;
+    };
     $(ids.content).innerHTML = `
       <div class="cg-result">
-        <h2 class="cg-title">${esc(tt('games.resultTitle'))}</h2>
+        <h2 class="cg-title">${esc(tt(review ? 'games.review.doneTitle' : 'games.resultTitle'))}</h2>
         <p class="cg-score"><b>${S.hits}</b> / ${n}</p>
         ${miss.length ? `<div class="cg-review"><h3>${esc(tt('games.reviewTitle', { n: miss.length }))}</h3><ul>
-          ${miss.map(x => `<li>${sentenceHTML(x.it, true)}<span class="cg-review-tr">${esc((L(x.it.text) || {}).tr || '')}</span></li>`).join('')}
+          ${miss.map(x => `<li>${sentenceHTML(x.it, true)}${givenHTML(x)}<span class="cg-review-tr">${esc((L(x.it.text) || {}).tr || '')}</span></li>`).join('')}
         </ul></div>` : `<p class="cg-perfect">${esc(tt('games.perfect'))}</p>`}
         <div class="cg-result-actions">
-          ${miss.length ? `<button type="button" class="btn btn-primary" id="cg-mistakes">${esc(tt('games.practiceMistakes'))}</button>` : ''}
-          <button type="button" class="btn ${miss.length ? 'btn-secondary' : 'btn-primary'}" id="cg-again">${esc(tt('games.again'))}</button>
-          <button type="button" class="btn btn-secondary" id="cg-to-list">${esc(tt('games.backToGames'))}</button>
+          ${miss.length ? `<button type="button" class="btn btn-primary" id="cg-mistakes">${esc(tt('games.review.btn'))}</button>` : ''}
+          ${review ? '' : `<button type="button" class="btn ${miss.length ? 'btn-secondary' : 'btn-primary'}" id="cg-again">${esc(tt('games.again'))}</button>`}
+          <button type="button" class="btn ${review && !miss.length ? 'btn-primary' : 'btn-secondary'}" id="cg-to-list">${esc(tt('games.backToGames'))}</button>
         </div>
       </div>`;
     mountBar(bar, null);
     setProgress(100);
-    const ids0 = miss.map(x => x.it.id);
-    if (miss.length) $('cg-mistakes').addEventListener('click', () => start(g.id, ids0));
-    $('cg-again').addEventListener('click', () => start(g.id));
+    if (miss.length){
+      const entries = miss.map(x => ({ g: x.g, it: x.it }));
+      $('cg-mistakes').addEventListener('click', () => startReview(entries));
+    }
+    if (!review) $('cg-again').addEventListener('click', () => start(g.id));
     $('cg-to-list').addEventListener('click', exit);
   }
 
@@ -363,5 +491,5 @@ function createConjGames({ games, soon = [], speak, ids, isLocked, onLocked, lan
   if (back) back.addEventListener('click', exit);
   window.addEventListener('i18n:change', () => { if ($(ids.wrap) && $(ids.wrap).style.display === 'none') renderList(); });
 
-  return { renderList, start, exit, state: S };
+  return { renderList, start, startReview, dueEntries, exit, state: S };
 }

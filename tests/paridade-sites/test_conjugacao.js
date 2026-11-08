@@ -268,6 +268,10 @@ async function fingerprint(browser, root){
       // Jogos da Conjugação, etapa 1 (2026-11-06, docs/jogos-reformulacao-plano.md): o progresso de cada jogo passou a ser salvo
       // (STATE.conjGames, antes de progressSummary); tirado para provar que o resto do estado não mudou.
       [/\\*"conjGames\\*":\{.*?\},(?=\\*"progressSummary)/g, ''],
+      // Jogos, etapa 4 (2026-11-08, docs/jogos-reformulacao-plano.md): o fim da partida mostra o que a aluna respondeu
+      // ("Você respondeu: ...") e o botão "Praticar só os que errei" virou "Revisar erros" (revisão escrevendo).
+      [/<span class=\\"cg-review-given\\">.*?<\/span>(?=<span class=\\"cg-review-tr)/g, ''],
+      [/(Praticar só os que errei|Practice only my mistakes|Revisar erros|Review mistakes)/g, 'REVISAR_ERROS'],
       // Etapa 7 (2026-10-31, vocabulário aprovado pela dona): textos das Missões do dia guardados no estado
       // (ver etapa7-neutro.js, aplicado em norm)
     ];

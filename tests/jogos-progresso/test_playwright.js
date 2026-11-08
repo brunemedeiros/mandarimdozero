@@ -168,6 +168,69 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
       document.getElementById('premium-games-modal').style.display = 'none'; CONJ_GAMES_PAYWALL_ENABLED = false; isChallengesAdmin = a; MY_PERMISSIONS = null; CONJ_GAMES_UI.renderList(); return { r, modal }; });
     check(L + ' bloqueio ligado: convite no fim do A1 (2 jogos) que abre a janela Premium', inv.r.length === 1 && /^A1:/.test(inv.r[0]) && /2/.test(inv.r[0]) && inv.modal === 'flex', inv);
 
+    // Etapa 4: resultado com os erros e "Revisar erros" escrevendo; erros de outros dias voltam num cartão no topo.
+    // a comemoração da sequência tem teste próprio (jogos-padrao-trilha); aqui ela só atrapalharia os cliques
+    const hideStreak = () => page.evaluate(() => { const m = document.getElementById('streak-modal-overlay'); if (m) m.style.display = 'none'; });
+    await page.evaluate(() => { maybeShowStreakCelebration = () => {}; const m = document.getElementById('streak-modal-overlay'); if (m) m.style.display = 'none'; STATE.conjGames = {}; CONJ_GAMES_UI.renderList(); });
+    await page.click('.cg-play[data-game="etre-avoir"]');
+    await page.waitForSelector('.cg-choice');
+    const n2 = await page.evaluate(() => CONJ_GAMES_UI.state.order.length);
+    for (let i = 0; i < n2; i++){
+      await page.evaluate(i => { const it = CONJ_GAMES_UI.state.order[CONJ_GAMES_UI.state.idx];
+        if (i === 1) document.getElementById('cg-dontknow').click();
+        else document.querySelector('.cg-choice[data-k="' + (i === 0 ? (it.ans === 'a' ? 'b' : 'a') : it.ans) + '"]').click(); }, i);
+      await page.waitForTimeout(380);
+      await hideStreak();
+      await page.click('#cg-next');
+    }
+    await page.waitForSelector('.cg-result');
+    const rs = await page.evaluate(() => ({ items: document.querySelectorAll('.cg-review li').length, given: [...document.querySelectorAll('.cg-review-given')].map(x => x.textContent.trim()),
+      strike: document.querySelectorAll('.cg-review-given s').length, btn: (document.getElementById('cg-mistakes') || {}).textContent, again: !!document.getElementById('cg-again') }));
+    check(L + ' resultado: 2 erros, com o que a aluna respondeu (Não sei sem risco)', rs.items === 2 && rs.given.length === 2 && rs.strike === 1 && rs.again, rs);
+    check(L + ' resultado: botão "Revisar erros" no idioma do site', rs.btn === (pt ? 'Revisar erros' : 'Review mistakes'), rs.btn);
+    await hideStreak();
+    await page.click('#cg-mistakes');
+    await page.waitForSelector('#cg-input');
+    const r0 = await page.evaluate(() => ({ mode: CONJ_GAMES_UI.state.mode, n: CONJ_GAMES_UI.state.order.length, choices: document.querySelectorAll('.cg-choice').length,
+      keys: document.querySelectorAll('.cg-accents .fr-accent-key').length, disabled: document.getElementById('cg-check').disabled, hint: document.querySelector('.cg-verb').textContent, rounds: STATE.conjGames['etre-avoir'].rounds }));
+    check(L + ' revisão: escrever (sem opções), 2 frases, teclado de acentos, Corrigir desligado com o campo vazio', r0.mode === 'type' && r0.n === 2 && r0.choices === 0 && r0.keys > 5 && r0.disabled, r0);
+    check(L + ' revisão: dica com as duas opções', /avoir ou être/.test(r0.hint), r0.hint);
+    await page.fill('#cg-input', 'xyz');
+    await page.press('#cg-input', 'Enter'); // Enter no campo corrige
+    const w = await page.evaluate(() => ({ ok: CONJ_GAMES_UI.state.log[0].ok, cls: document.querySelector('.cg-verdict').className, chk: getComputedStyle(document.getElementById('cg-check')).display, keys: getComputedStyle(document.querySelector('.cg-accents')).display, next: !!document.getElementById('cg-next'), attempt: !!document.querySelector('.cg-feedback .typed-attempt') }));
+    check(L + ' revisão: errou -> vermelho, some o Corrigir e o teclado, sem desenho letra a letra', !w.ok && /no/.test(w.cls) && w.chk === 'none' && w.keys === 'none' && w.next && !w.attempt, w);
+    await page.waitForTimeout(380); await hideStreak(); await page.click('#cg-next'); await page.waitForSelector('#cg-input');
+    const exp = await page.evaluate(() => { const it = CONJ_GAMES_UI.state.order[1]; return it[it.ans]; });
+    await page.fill('#cg-input', exp.toUpperCase()); await page.click('#cg-check');
+    const c = await page.evaluate(() => ({ ok: CONJ_GAMES_UI.state.log[1].ok, cls: document.querySelector('.cg-verdict').className }));
+    check(L + ' revisão: certo (maiúscula não importa)', c.ok && /ok/.test(c.cls), c);
+    await page.waitForTimeout(380); await hideStreak(); await page.click('#cg-next');
+    await page.waitForSelector('.cg-result');
+    const rr = await page.evaluate(() => ({ title: document.querySelector('.cg-result .cg-title').textContent, again: !!document.getElementById('cg-again'), rounds: STATE.conjGames['etre-avoir'].rounds }));
+    check(L + ' fim da revisão: título próprio, sem "Jogar de novo", não conta partida', rr.title === (pt ? 'Fim da revisão' : 'End of review') && !rr.again && rr.rounds === r0.rounds, rr);
+    // "quase" (só acento) conta como acerto e mostra o desenho letra a letra
+    const q = await page.evaluate(() => { const g = CONJ_GAMES.find(x => x.id === 'tu-vous'); const it = g.items.find(i => /ê/.test(i[i.ans])); CONJ_GAMES_UI.startReview([{ g, it }]); return it[it.ans]; });
+    await page.waitForSelector('#cg-input');
+    await page.fill('#cg-input', q.normalize('NFD').replace(/[\u0300-\u036f]/g, '')); await page.click('#cg-check');
+    const qa = await page.evaluate(() => ({ ok: CONJ_GAMES_UI.state.log[0].ok, txt: document.querySelector('.cg-verdict').textContent, attempt: !!document.querySelector('.cg-feedback .typed-attempt') }));
+    check(L + ' revisão: "quase" (sem acento) conta como acerto, com o desenho do erro', qa.ok && /Quase|Almost/.test(qa.txt) && qa.attempt, qa);
+    await hideStreak(); await page.click('#conj-game-wrap .activity-exit-btn');
+    // erros de outros dias: cartão no topo; erro de hoje não entra; jogo trancado não entra
+    const due = await page.evaluate(() => { STATE.conjGames = { 'tu-vous': { items: { '1': { ok: false, at: '2026-01-01' }, '2': { ok: false, at: todayStr() }, '3': { ok: true, at: '2026-01-01' } }, rounds: 1 } }; CONJ_GAMES_UI.renderList();
+      const a = { n: CONJ_GAMES_UI.dueEntries().length, card: (document.getElementById('cg-due') || {}).textContent || '' };
+      CONJ_GAMES_PAYWALL_ENABLED = true; const adm = isChallengesAdmin; isChallengesAdmin = () => false; MY_PERMISSIONS = { conj_games: false };
+      a.locked = CONJ_GAMES_UI.dueEntries().length; CONJ_GAMES_PAYWALL_ENABLED = false; isChallengesAdmin = adm; MY_PERMISSIONS = null; CONJ_GAMES_UI.renderList(); return a; });
+    check(L + ' cartão "Revisar erros (1)": só o erro de outro dia; jogo trancado fica de fora', due.n === 1 && /\(1\)/.test(due.card) && due.locked === 0, due);
+    await hideStreak();
+    await page.click('#cg-due');
+    await page.waitForSelector('#cg-input');
+    const exp3 = await page.evaluate(() => { const it = CONJ_GAMES_UI.state.order[0]; return it[it.ans]; });
+    await page.fill('#cg-input', exp3); await page.click('#cg-check');
+    await page.waitForTimeout(380); await hideStreak(); await page.click('#cg-next');
+    await page.waitForSelector('.cg-result');
+    await page.click('#cg-to-list');
+    check(L + ' acertou na revisão: sai da lista de outros dias', await page.evaluate(() => CONJ_GAMES_UI.dueEntries().length === 0 && !document.getElementById('cg-due')));
+
     // Recomeçar o curso lista os Jogos no que volta para o zero.
     const restartKey = await page.evaluate(() => t('restart.zero.games'));
     check(L + ' texto do Recomeçar existe no idioma do site', restartKey && restartKey !== 'restart.zero.games' && (lang === 'en' ? !/Jogos/.test(restartKey) : /Jogos/.test(restartKey)), restartKey);
