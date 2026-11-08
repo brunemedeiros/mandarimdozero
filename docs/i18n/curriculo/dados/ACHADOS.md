@@ -28,7 +28,7 @@ decisão estão marcados **(para a dona)**.
    (a do A2 daria, por exemplo, 4h10 para "Apresentar-se", que hoje tem 3h35).
 3. **Notas do A1: 132 no json x "~131" no 08** (seção 1, linha "A1: notas"). Contadas todas as notas da coluna "Notas", sem as cortadas (N30 e N36);
    por módulo: 23, 15, 16, 15, 17, 11, 12, 9, 14. Não achei qual nota o 08 deixa de fora (o número do 08 é aproximado).
-4. **Lições de "Dizer o nome e a nacionalidade" (A1-2).** Com 11 palavras, a regra 13 daria 4 lições + Revisão, mais a lição do alfabeto = 6; o 08
+4. **[RESOLVIDO pelas decisões 326 a 329 do `12`: 14 cartões em 3 lições + Revisão da unidade, aprovado pela dona em 2026-11-08] Lições de "Dizer o nome e a nacionalidade" (A1-2).** Com 11 palavras, a regra 13 daria 4 lições + Revisão, mais a lição do alfabeto = 6; o 08
    (seção 1, linha das lições) diz 3 lições + Pronúncia + Revisão = 5, e é com 5 que o M1 dá 23. O json guarda `licoes_08: 5` só nessa unidade.
 5. **Lições de "Corpo e dores" (A1-15, agora A2).** 11 palavras (regra: 4 lições + Revisão = 5), mas o 08 diz "3 lições + a lição final" = 4
    (unidade publicada, decisão 130). O json guarda `licoes_08: 4`.

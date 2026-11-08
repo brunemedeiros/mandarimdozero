@@ -1,6 +1,6 @@
 {
  "_doc": "Rascunho da unidade A1-2 'Dizer o nome e a nacionalidade' (módulo 'Apresentar-se', A1-m1), desenhada pelas decisões 326 a 328 do docs/i18n/curriculo/12-decisoes-apos-maquete-m1.md, no modelo do piloto A1-1. Só pt-BR: os campos 'en' ficam null até a aprovação da dona (decisão 81). Nada daqui está em fr/content.js nem na camada courses/fr-pt-BR/layer.js. Chave estável: a publicada em fr/published_ids.json; item novo = 'nova' (a chave definitiva sai de node fr/scripts/congelar_chaves.js). Ordem dos cartões, lições, notas (com exemplos) e diálogo: dados/mapa.json (fonte única; o validar.js confere). Leitura para a dona: A1-2.md. Validação: node docs/i18n/curriculo/piloto-m1/A1-2/validar.js.",
- "status": "needs_review",
+ "status": "aprovado",
  "versao": "2026-11-08",
  "unidade": {
   "id": "A1-2",
@@ -103,7 +103,7 @@
    },
    "licao": "nome-e-ser",
    "origem": "publicado",
-   "muda": "muda da lição 2 antiga para a lição 2 nova; tradução \"o nome\" vira \"o sobrenome / o nome\" (a confirmar: com le prénom ao lado, le nom é o sobrenome)",
+   "muda": "muda da lição 2 antiga para a lição 2 nova; tradução \"o nome\" vira \"o sobrenome / o nome\" (aprovado, decisão 329: com le prénom ao lado, le nom é o sobrenome)",
    "frase_do_cartao": "nova-nom"
   },
   {
@@ -220,7 +220,7 @@
     "publicado": "Eu, você e dizer seu nome",
     "pt-BR": "Dizer o nome",
     "en": null,
-    "a_confirmar": true
+    "a_confirmar": false
    },
    "cartoes": [
     "A1-2-v0",
@@ -281,7 +281,7 @@
     "publicado": "Falar da nacionalidade e do país",
     "pt-BR": "Dizer a nacionalidade",
     "en": null,
-    "a_confirmar": true
+    "a_confirmar": false
    },
    "cartoes": [
     "A1-2-v4",
@@ -351,7 +351,7 @@
      "fr": "Bonjour, comment tu t'appelles ?",
      "pt-BR": "Oi, como você se chama?",
      "en": null,
-     "muda": "tradução: era \"Olá, qual é o seu nome?\" (a confirmar)"
+     "muda": "tradução: era \"Olá, qual é o seu nome?\" (aprovado, decisão 329)"
     },
     {
      "chave": "A1-2-d1",
@@ -754,7 +754,7 @@
     "afterKey": "nova"
    },
    "texto": {
-    "pt-BR": "Você já usa <strong>et toi ?</strong> e <strong>et vous ?</strong>. Esse <strong>toi</strong> é o \"você\" com destaque: a forma que aparece sozinha ou depois de <i>et</i>. O \"eu\" com destaque é <strong>moi</strong>: <i>Moi, c'est Ana.</i> Ele também pode vir junto de <i>je</i>, para reforçar: <i>Moi, je m'appelle Léo.</i> Depois de <i>et</i>, use sempre <strong>moi</strong>: <i>Et moi ?</i>",
+    "pt-BR": "Você já usa <strong>et toi ?</strong> e <strong>et vous ?</strong>. Esse <strong>toi</strong> é o \"você\" com destaque: a forma que aparece sozinha ou depois de <i>et</i>. O \"eu\" com destaque é <strong>moi</strong>: <i>Moi, c'est Ana.</i> Ele também pode vir junto de <i>je</i>, para reforçar: <i>Moi, je m'appelle Léo.</i> Depois de <i>et</i>, use sempre <strong>moi</strong>: <i>Et moi ?</i> Já o <strong>vous</strong> é igual como sujeito e com destaque: <i>Vous êtes madame Dubois ?</i>, <i>Et vous ?</i>",
     "en": null
    },
    "exemplos": [
@@ -956,7 +956,7 @@
      "audio": "zède"
     }
    ],
-   "grade_obs": "a coluna nome_fr é o nome da letra escrito em francês (o que o 🔊 fala); na tela aparecem a letra e o 🔊, o nome escrito é a confirmar com a dona (L, \"elle\", pode ser confundido com o pronome)"
+   "grade_obs": "a coluna nome_fr é o nome da letra escrito em francês (o que o 🔊 fala); na tela aparecem a letra e o 🔊, o nome escrito aparece na grade (decisão 329; L, \"elle\", pode ser confundido com o pronome)"
   },
   {
    "id": "tes",
@@ -1163,7 +1163,7 @@
    "en": "Unit review"
   },
   "regra": "contexto ponto_verificacao_unidade: fechado para frases so_exemplo e notas não contam como vistas (decisão 265); a 💡 mostra as 7 notas da unidade",
-  "fica_de_fora": "frases so_exemplo (nova-vous, nova-prenom, nova-nom, nova-epeler, A1-2-p2, A1-2-p3, A1-2-p7): ficha, Revisão (cartões) e exercícios da lição que não pedem digitar",
+  "fica_de_fora": "frases so_exemplo (nova-vous, nova-prenom, nova-nom, nova-epeler, A1-2-p3, A1-2-p7): ficha, Revisão (cartões) e exercícios da lição que não pedem digitar",
   "itens": [
    {
     "tipo": "rodada_por_palavra",
@@ -1243,7 +1243,7 @@
      "français"
     ],
     "enunciado": {
-     "pt-BR": "A Ana é americana. Complete o que ela diz.",
+     "pt-BR": "A Emma é americana. Complete o que ela diz.",
      "en": null
     }
    },

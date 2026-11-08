@@ -264,6 +264,6 @@ Objetivo: melhorar o currículo pedagógico do francês (A1 revisado e A2 novo) 
   elididas de *s'appeler* (*m'appelle, t'appelles*...) e o nome *Dubois*.
 - **Totais novos**: A1 com **384 cartões** (**761** A/B; 194 novos + 190 publicados), **~152 lições**, **129 notas**, ~31h00 (tempo digitado, não recalculado:
   regra 16 suspensa, decisão 325); "Apresentar-se" com 8 unidades e 79 cartões; "Família e pessoas próximas" com 6 unidades e 27 cartões. A2 sem mudança.
-- **Para a dona**: as decisões pequenas do `piloto-m1/A1-2/A1-2.md` (seção 9).
+- **Aprovada pela dona em 2026-11-08 (decisão 329)**: as 7 notas e as decisões D1 a D10 do `piloto-m1/A1-2/A1-2.md` (status aprovado; *Tu es de quel pays ?* essencial). Falta só a dona decidir os nomes dos acentos na prática do alfabeto (D7, item 15 da auditoria de 2026-11-08).
 
 > **Como falar com a dona** (2026-10-23): em toda mensagem a ela, citar o NOME do módulo e da unidade (não só M6.1 ou `A1-15`), explicar termos internos e dar o contexto completo de cada decisão. Vale para o chat e para qualquer agente.
