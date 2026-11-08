@@ -64,6 +64,11 @@ function etapa7(v){
     .split('as in the app.').join('as on the site.')
     .split('even when the app is closed').join('even when the site is closed')
     .split('We updated the app.').join('We updated the site.')
-    .split('helping improve the app!').join('helping improve the site!');
+    .split('helping improve the app!').join('helping improve the site!')
+    // lote "para hoje" (2026-11-03, aprovado pela dona; doc da Etapa 7, seção 11): review.strength.hint e review.speed.upToDateBody
+    .split('sem nenhuma revisão pendente agora').join('sem nenhuma revisão para hoje')
+    .split('Nenhuma revisão pendente agora').join('Nenhuma revisão para hoje')
+    .split('no reviews due right now').join('no reviews due today')
+    .split('No reviews due right now').join('No reviews due today');
 }
 module.exports = { etapa7 };
