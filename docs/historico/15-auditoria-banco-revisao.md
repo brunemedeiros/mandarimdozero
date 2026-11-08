@@ -90,3 +90,12 @@ Arquivo `shared/supabase_migrations/081_review_bank.sql`. Renumerada de 080 para
 - Testes: `tests/banco-revisao-limites/` (modelo e fila 14/14, reforço 8/8, sem a correção o teste do reforço falha). `test_quase_iguais.js` ganhou a correção B em `CORRECOES` (a sequência clica "Errei" e a árvore nova tem menos cenas).
 - Deploy (2026-11-06, autorizado pela dona): `review-bank-agent` **v13** na produção, com o motor fixado no commit `7a26b545` (branch `claude/rachel-10-cartoes`, regra C do verbo com várias formas); `core.mjs` continua no `c57286f` e `index.ts` igual ao da v12. Conferido: sem token responde 401 `unauthorized` (a função sobe). Se a branch for mesclada, o commit continua acessível pelo SHA.
 - Conferência da rotina (2026-11-06): 17 de 17 execuções "feito" desde 22/10. Aluno vinculado com item aprovado e sem cartão: nenhum (só os 6 sensíveis da Raíssa). Quem parecia sem cartões novos: Marconi (caderno sem alteração desde 29/10, aulas de 05 e 06/11 ainda não anotadas), Rachel (caderno alterado só hoje, depois da última leitura), Carmen e Luana (cadernos em dia). Pendentes para conferir seguram cartões novos: Sandra e Eduardo 50, Justin 31, Francielly 26, Taryn 12.
+
+### Decisão A refeita (2026-11-08, pedido da dona)
+- A cota "descontar os estreados hoje" travava a aluna em 10 novos por dia, e uma aula costuma deixar mais de 10 cartões (Catharina 28 em uma semana, Francielly 22). Nova regra:
+  **cartões da professora não têm limite diário de novos** (`getStudyQueue`: pool só de origem `teacher` ignora `newCardsLimit`). O contador mostra o que falta de verdade e diminui conforme ela estuda;
+  o tamanho da sessão segue a "Intensidade da sessão" (Leve 15, Normal 30, Intensa 60). O limite de novos por dia continua só nos cartões da trilha. B e C seguem como estão.
+- Migration `128_review_bank_agent_state_pending`: `review_bank_agent_state()` devolve, por aluno gerenciado, `pending_total`, `pending_recent` (7 dias) e `pending_sensitive` (só números), para o
+  "Resumo dos pendentes" na mensagem da manhã da rotina. Teste local `tests/banco-revisao/run_local.sh` 84/84 (aplicada duas vezes). Staging: aplicada em 2026-11-08. Produção: só com autorização.
+- Rotina: texto com leitura estruturada (Google Docs `read_doc`) como 2º recurso quando o HTML falha, só se a ferramenta existir na tarefa (hoje o conector Google Docs NÃO está na tarefa; precisa ser adicionado
+  nas configurações da tarefa no app) e o resumo dos pendentes (pula sozinho enquanto o estado não trouxer os campos novos).

@@ -24,16 +24,17 @@ check('rbBuildCard de ALLER novo: cartão Normal com 2 campos (pergunta e respos
 const b2 = JSON.parse(JSON.stringify(R('rbBuildCard(__i, __s, { existingMode: "cloze" })', { i: aller, s: frAluna })));
 check('rbBuildCard de ALLER já entregue como Completar: continua Completar', b2.ok && b2.mode === 'cloze', JSON.stringify(b2).slice(0, 160));
 
-// ---- A: cota de novos por dia
+// ---- A: cartões da professora não têm limite diário de novos
 const hoje = R('todayStr()'), ontem = '2000-01-01';
 const mk = (id, over) => Object.assign({ id, origin: 'teacher', state: 'new', reps: 0, due: 0 }, over || {});
-const novos = Array.from({ length: 14 }, (_, i) => mk('n' + i));
+const novosT = Array.from({ length: 28 }, (_, i) => mk('n' + i));
+const novosTrilha = Array.from({ length: 28 }, (_, i) => mk('s' + i, { origin: 'study' }));
 const estreados = (n, data, origin) => Array.from({ length: n }, (_, i) => mk('e' + i, { origin: origin || 'teacher', state: 'review', reps: 1, due: Date.now() + 86400000, firstLearnedDate: data }));
 const fila = (pool, lim) => R('getStudyQueue(__p, { scope: "due", newCardsLimit: __l })', { p: pool, l: lim }).length;
-check('A: 14 novos, nenhum estreado hoje, limite 10: entrega 10', fila(novos.concat(estreados(5, ontem)), 10) === 10);
-check('A: 4 estreados hoje, limite 10: entrega 6', fila(novos.concat(estreados(4, hoje)), 10) === 6);
-check('A: 24 estreados hoje (caso da Rachel): entrega 0 novos', fila(novos.concat(estreados(24, hoje)), 10) === 0);
-check('A: nunca fica negativo', fila(novos.concat(estreados(30, hoje)), 10) === 0);
-check('A: cartão da trilha estreado hoje NÃO gasta a cota da Revisão', fila(novos.concat(estreados(5, hoje, 'study')), 10) === 10);
-check('A: cartões vencidos continuam entrando, fora da cota', fila(novos.concat(estreados(24, hoje)).concat([mk('v1', { state: 'review', reps: 2, due: 1 })]), 10) === 1);
+check('A: 28 cartões novos de uma aula (professora), limite 10: entrega os 28', fila(novosT, 10) === 28);
+check('A: contador diminui conforme a aluna estuda (24 já estreados hoje, 14 novos sobrando: mostra os 14)', fila(novosT.slice(0, 14).concat(estreados(24, hoje)), 10) === 14);
+check('A: cartões vencidos continuam entrando junto com os novos', fila(novosT.slice(0, 12).concat([mk('v1', { state: 'review', reps: 2, due: 1 })]), 10) === 13);
+check('A: cartão da TRILHA continua com o limite de novos por dia (10)', fila(novosTrilha, 10) === 10);
+check('A: pool misto (trilha e professora) continua com o limite', fila(novosTrilha.concat(novosT), 10) === 10);
+check('A: pool vazio não quebra', fila([], 10) === 0);
 summary('Banco: limites (Rachel) -- modelo e fila');
