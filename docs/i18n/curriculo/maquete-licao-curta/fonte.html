@@ -11,7 +11,7 @@
   --pink:#E36BCA; --pink-tint:#FBE6F6;
   --ok:#2E6B4F; --ok-tint:#E2F2E8; --on-ok:#FFFFFF;
   --err:#B81F13; --err-tint:#FBE4E1; --on-err:#FFFFFF;
-  --note:#8C5F0E; --note-tint:#FBF0D9;
+  --note-tint:#FBF0D9;
   --shadow:0 1px 2px rgba(32,19,53,.06),0 8px 24px rgba(32,19,53,.08);
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
@@ -21,7 +21,7 @@
   --pink:#F08FE0; --pink-tint:#3A2140;
   --ok:#52B487; --ok-tint:#173126; --on-ok:#201335;
   --err:#FF8A7E; --err-tint:#3A1C1C; --on-err:#201335;
-  --note:#F5C25B; --note-tint:#33290F;
+  --note-tint:#33290F;
   --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.35);
   color-scheme:dark;
 }}
@@ -32,7 +32,7 @@
   --pink:#F08FE0; --pink-tint:#3A2140;
   --ok:#52B487; --ok-tint:#173126; --on-ok:#201335;
   --err:#FF8A7E; --err-tint:#3A1C1C; --on-err:#201335;
-  --note:#F5C25B; --note-tint:#33290F;
+  --note-tint:#33290F;
   --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.35);
   color-scheme:dark;
 }
@@ -40,40 +40,39 @@
 body{background:var(--paper);color:var(--ink);font-family:Nunito,"Segoe UI",system-ui,sans-serif;font-size:16px;line-height:1.5}
 .wrap{max-width:980px;margin:0 auto;padding-block:20px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;grid-template-columns:minmax(0,400px) minmax(0,1fr);gap:28px;align-items:start}
 @media (max-width:820px){.wrap{grid-template-columns:minmax(0,1fr)}}
-header.top{grid-column:1/-1}
-header.top h1{font-size:1.45rem;margin:0 0 4px;text-wrap:balance;font-weight:800}
+header.top{grid-column:1/-1;display:grid;gap:10px}
+header.top h1{font-size:1.45rem;margin:0;text-wrap:balance;font-weight:800}
 header.top p{margin:0;color:var(--ink-soft);max-width:65ch}
 .eyebrow{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;font-weight:800;color:var(--brand-dark)}
+.lesson-tabs{display:flex;flex-wrap:wrap;gap:8px}
+.lesson-tabs button{border:2px solid var(--line);background:var(--card);color:var(--ink);border-radius:99px;padding:6px 14px;font:inherit;font-weight:800;cursor:pointer}
+.lesson-tabs button[aria-pressed="true"]{background:var(--brand);border-color:var(--brand);color:var(--on-brand)}
 
 /* telefone */
-.phone{background:var(--card);border:1px solid var(--line);border-radius:28px;box-shadow:var(--shadow);min-height:660px;display:flex;flex-direction:column;position:relative;overflow:hidden;width:100%;max-width:400px;justify-self:center}
+.phone{background:var(--card);border:1px solid var(--line);border-radius:28px;box-shadow:var(--shadow);min-height:640px;display:flex;flex-direction:column;position:relative;overflow:hidden;width:100%;max-width:400px;justify-self:center}
 .bar{display:flex;align-items:center;gap:12px;padding:16px 18px 6px}
 .x{border:0;background:none;color:var(--ink-soft);font-size:1.3rem;cursor:pointer;line-height:1;padding:4px}
 .prog{flex:1;height:10px;border-radius:99px;background:var(--paper-warm);overflow:hidden}
 .prog i{display:block;height:100%;background:var(--brand);border-radius:99px;transition:width .3s}
 .screen{flex:1;display:flex;flex-direction:column;padding:12px 22px 22px;gap:14px}
-.screen .grow{flex:1;display:flex;flex-direction:column;gap:14px;justify-content:center}
+.grow{flex:1;display:flex;flex-direction:column;gap:14px;justify-content:center}
+.grow.ex{justify-content:flex-start;padding-top:18px}
 .tag{align-self:flex-start;font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:4px 10px;border-radius:99px;background:var(--brand-tint);color:var(--brand-dark)}
 .tag.pink{background:var(--pink-tint);color:var(--ink)}
 .tag.note{background:var(--note-tint);color:var(--ink)}
-.scene{display:flex;justify-content:center;align-items:flex-end;gap:6px;background:var(--paper-warm);border-radius:20px;padding:22px 12px;min-height:150px}
-.scene img{width:84px;height:84px}
-.scene img.sm{width:56px;height:56px}
-.grow.ex .scene{min-height:0;padding:14px 12px}
-.grow.ex .scene img{width:60px;height:60px}
-.grow.ex .scene img.sm{width:48px;height:48px}
-.grow.ex{justify-content:flex-start}
-.scene .cap{align-self:center;font-weight:700;color:var(--ink-soft);font-size:.9rem;margin-left:6px}
+.tags{display:flex;gap:6px;flex-wrap:wrap}
+.ctx{background:var(--paper-warm);border-radius:14px;padding:10px 14px;font-weight:700;color:var(--ink-soft)}
 .fr-big{font-size:2rem;font-weight:800;text-align:center;line-height:1.2;text-wrap:balance}
 .fr-mid{font-size:1.35rem;font-weight:800;text-align:center;text-wrap:balance}
 .tr{text-align:center;color:var(--ink-soft);font-size:1.05rem}
 .audios{display:flex;justify-content:center;flex-wrap:wrap;gap:10px}
-.aud{display:inline-flex;align-items:center;gap:8px;border:2px solid var(--line);background:var(--card);color:var(--ink);border-radius:99px;padding:8px 16px 8px 10px;font:inherit;font-weight:700;cursor:pointer}
+.aud{display:inline-flex;align-items:center;gap:8px;border:2px solid var(--line);background:var(--card);color:var(--brand-dark);border-radius:99px;padding:8px 16px 8px 10px;font:inherit;font-weight:700;cursor:pointer}
+.aud span{color:var(--ink)}
 .aud:hover{border-color:var(--brand)}
-.aud img{width:24px;height:24px}
+.aud svg{width:22px;height:22px;flex:none}
 .aud.round{padding:8px}
-.q{font-weight:800;font-size:1.1rem;text-wrap:balance}
-.blank{display:inline-block;min-width:4.2em;border-bottom:3px solid var(--brand);text-align:center;color:var(--brand-dark)}
+.q{font-weight:800;font-size:1.1rem;text-wrap:balance;margin:0}
+.blank{display:inline-block;min-width:3.6em;border-bottom:3px solid var(--brand);text-align:center;color:var(--brand-dark)}
 .opts{display:grid;gap:10px}
 .opts.two{grid-template-columns:1fr 1fr}
 .opt{border:2px solid var(--line);border-bottom-width:4px;background:var(--card);color:var(--ink);border-radius:16px;padding:14px;font:inherit;font-weight:800;font-size:1.1rem;cursor:pointer;text-align:center}
@@ -96,6 +95,7 @@ header.top p{margin:0;color:var(--ink-soft);max-width:65ch}
 .ex-row .t{flex:1;min-width:0}
 .ex-row b{display:block}
 .ex-row span{color:var(--ink-soft);font-size:.92rem}
+.ex-row .lbl{display:inline-block;font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--brand-dark);margin-left:6px}
 /* painel de resposta */
 .panel{position:absolute;left:0;right:0;bottom:0;padding:18px 22px 22px;border-radius:24px 24px 0 0;transform:translateY(105%);transition:transform .25s ease;display:flex;flex-direction:column;gap:10px}
 .panel.show{transform:none}
@@ -104,38 +104,37 @@ header.top p{margin:0;color:var(--ink-soft);max-width:65ch}
 .panel h4{margin:0;font-size:1.2rem;display:flex;align-items:center;gap:8px}
 .panel.ok h4{color:var(--ok)}
 .panel.err h4{color:var(--err)}
-.panel h4 img{width:28px;height:28px}
+.mark{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-size:1rem;font-weight:800}
+.panel.ok .mark{background:var(--ok);color:var(--on-ok)}
+.panel.err .mark{background:var(--err);color:var(--on-err)}
 .panel .ans{display:flex;align-items:center;gap:10px;font-weight:800}
 .panel .ans .t{flex:1;min-width:0}
 .panel .ans span{display:block;font-weight:600;color:var(--ink-soft)}
 .panel .why{margin:0;color:var(--ink)}
 .panel.ok .btn{background:var(--ok);color:var(--on-ok)}
 .panel.err .btn{background:var(--err);color:var(--on-err)}
-.done-hero{text-align:center}
-.done-hero img{width:88px;height:88px}
-.done-hero h2{margin:6px 0 2px;font-size:1.5rem}
+.done-hero{text-align:center;padding-top:12px}
+.done-hero h2{margin:0 0 2px;font-size:1.5rem}
 .lessons{display:grid;gap:10px}
-.lesson{display:flex;gap:12px;align-items:flex-start;border:2px solid var(--line);border-radius:16px;padding:12px;background:var(--card);text-align:left;font:inherit;color:var(--ink);width:100%}
+.lesson{display:flex;gap:12px;align-items:center;border:2px solid var(--line);border-radius:16px;padding:12px;background:var(--card);text-align:left;font:inherit;color:var(--ink);width:100%}
 button.lesson{cursor:pointer}
 button.lesson:hover{border-color:var(--brand)}
 .lesson .n{flex:none;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-weight:800;background:var(--paper-warm);color:var(--ink-soft)}
 .lesson.done .n{background:var(--ok);color:var(--on-ok)}
-.lesson.newl{border-color:var(--pink)}
-.lesson .t{flex:1;min-width:0}
-.lesson b{display:block}
-.lesson small{color:var(--ink-soft);display:block;line-height:1.35}
-.qa{display:inline-block;font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:1px 6px;border-radius:6px;background:var(--brand-tint);color:var(--brand-dark);margin-right:4px}
-.qa.r{background:var(--pink-tint);color:var(--ink)}
+.lesson.cur{border-color:var(--brand)}
+.lesson.cur .n{background:var(--brand);color:var(--on-brand)}
+.lesson .t{flex:1;min-width:0;font-weight:800}
 .bubbles{display:grid;gap:10px}
 .bub{display:flex;gap:8px;align-items:flex-end}
 .bub.b{flex-direction:row-reverse}
-.bub img{width:40px;height:40px;flex:none}
+.who{width:36px;height:36px;flex:none;border-radius:50%;display:grid;place-items:center;font-weight:800;background:var(--pink-tint);color:var(--ink)}
+.bub.b .who{background:var(--brand-tint);color:var(--brand-dark)}
 .bub .txt{background:var(--paper-warm);border-radius:16px;padding:8px 12px;min-width:0}
 .bub.b .txt{background:var(--brand-tint)}
 .bub .txt b{display:block}
 .bub .txt span{font-size:.9rem;color:var(--ink-soft)}
-.bub .aud{padding:4px;border-width:1px}
-.bub .aud img{width:20px;height:20px}
+.bub .aud{padding:5px;border-width:1px}
+.bub .aud svg{width:18px;height:18px}
 
 /* coluna de comentários */
 aside{display:grid;gap:16px;min-width:0}
@@ -149,13 +148,16 @@ aside{display:grid;gap:16px;min-width:0}
 .jump button{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:99px;padding:5px 11px;font:inherit;font-size:.82rem;font-weight:700;cursor:pointer}
 .jump button[aria-current="true"]{background:var(--brand);color:var(--on-brand);border-color:var(--brand)}
 .small{font-size:.85rem;color:var(--ink-soft)}
+.qa{display:inline-block;font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:1px 6px;border-radius:6px;background:var(--brand-tint);color:var(--brand-dark);margin-right:4px}
+.qa.r{background:var(--pink-tint);color:var(--ink)}
 </style>
 
 <div class="wrap">
   <header class="top">
     <div class="eyebrow">Maquete · Unidade 1 "Cumprimentar e se despedir" · módulo "Apresentar-se"</div>
-    <h1>Lição 1 "Cumprimentar alguém" no formato de lição curta</h1>
+    <h1>Lições curtas da unidade 1: lições 1 e 2</h1>
     <p>Clique como se fosse a aluna. Ao lado, o porquê de cada tela. Nada disso está no app ainda.</p>
+    <div class="lesson-tabs" id="tabs"></div>
   </header>
 
   <main class="phone" id="phone" aria-live="polite">
@@ -180,10 +182,11 @@ aside{display:grid;gap:16px;min-width:0}
     <div class="why-box">
       <div class="eyebrow">Sobre a maquete</div>
       <ul>
-        <li><b>Imagens</b>: Fluent Emoji da Microsoft, os mesmos ícones que o site já usa (licença MIT, grátis, uso comercial livre). Cenas montadas juntando dois ou três ícones.</li>
-        <li><b>Áudio</b>: <i>salut</i>, <i>bonjour</i>, <i>bonsoir</i> e <i>Salut ! Ça va bien ?</i> são os áudios reais do site. O resto usa a voz do navegador só na maquete; no app, tudo terá áudio gerado.</li>
-        <li><b>Grátis x Premium</b>: a lição inteira é grátis, como a trilha hoje.</li>
-        <li>Erro não trava: no app, a tela errada volta no fim da lição (como no Busuu). Aqui ela só segue.</li>
+        <li><b>Imagens</b>: nenhuma por enquanto (decisão 341). O espaço volta quando houver imagem de verdade.</li>
+        <li><b>Distratores</b>: em cada "Complete", ou um erro de grafia, ou outra palavra já vista que não serve ali (decisão 342).</li>
+        <li><b>Áudio</b>: <i>salut</i>, <i>bonjour</i>, <i>bonsoir</i>, <i>ça va</i> e <i>Salut ! Ça va bien ?</i> são áudios reais do site. O resto usa a voz do navegador, só na maquete.</li>
+        <li><b>Erro</b>: no app, a tela errada volta no fim da lição. Aqui ela só segue.</li>
+        <li><b>Grátis x Premium</b>: as lições inteiras são grátis.</li>
       </ul>
     </div>
   </aside>
@@ -196,7 +199,7 @@ aside{display:grid;gap:16px;min-width:0}
 let current=null;
 function speak(text){
   try{ if(current){current.pause();current=null} }catch(e){}
-  const src=AUD[text];
+  const src=AUD[text]||AUD[text.toLowerCase()];
   if(src){ current=new Audio(src); current.play().catch(()=>{}); return; }
   try{
     if(!('speechSynthesis' in window)) return;
@@ -208,164 +211,234 @@ function speak(text){
   }catch(e){}
 }
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const img=(k,cls)=>`<img src="${IMG[k]}" alt="" class="${cls||''}">`;
-const audBtn=(text,label)=>`<button class="aud${label?'':' round'}" data-say="${esc(text)}" aria-label="Ouvir ${esc(text)}">${img('1f50a')}${label?esc(label):''}</button>`;
+const SPK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M16.5 8.5a5 5 0 0 1 0 7"/><path d="M19 6a8.5 8.5 0 0 1 0 12"/></svg>';
+const audBtn=(text,label)=>`<button class="aud${label?'':' round'}" data-say="${esc(text)}" aria-label="Ouvir ${esc(text)}">${SPK}${label?`<span>${esc(label)}</span>`:''}</button>`;
 
 /* ---------- telas ---------- */
 const S=[
- {id:'intro',chip:'Início',type:'intro',
-  why:['Abertura com o objetivo','<p>Título pela função, como no Busuu, e o tamanho da lição: 4 cartões e 1 frase, uns 2 minutos (a mediana medida hoje é 1 min 48 s por lição de vocabulário).</p>']},
- {id:'salut',chip:'salut / coucou',type:'item',kind:'Palavra nova',fr:'salut / coucou',tr:'oi / olá',scene:['1f44b'],
+ /* ===== Lição 1 ===== */
+ {id:'l1-intro',lesson:1,chip:'Início',type:'intro',n:1,title:'Cumprimentar alguém',
+  goal:'Você vai aprender a cumprimentar de dia e à noite, entre amigos e com quem você não conhece.',size:'4 cartões · 1 frase · cerca de 2 minutos',
+  why:['Abertura com o objetivo','<p>Título pela função, como no Busuu, e o tamanho da lição. A mediana medida hoje é 1 min 48 s por lição de vocabulário.</p><p>Sem imagem (decisão 341).</p>']},
+ {id:'l1-salut',lesson:1,chip:'salut / coucou',type:'item',kind:'Palavra nova',fr:'salut / coucou',tr:'oi / olá',
   audios:[['salut','salut'],['coucou','coucou']],
-  why:['Cartão novo, sozinho na tela','<p>Decisão 338, ponto 3: o cartão aparece sozinho, com imagem e áudio, sem frase nem explicação. Só depois vem o exercício.</p><p>Par na mesma tela, um áudio para cada palavra.</p>']},
- {id:'ex-salut',chip:'Complete',type:'complete',
-  scene:['1f9d1','1f44b','1f469'],
+  why:['Cartão novo, sozinho na tela','<p>Decisão 338, ponto 3: o cartão aparece sozinho, só com o áudio. O exercício vem logo depois.</p>']},
+ {id:'l1-ex-salut',lesson:1,chip:'Complete (grafia)',type:'complete',
   before:'',after:' ! Ça va bien ?',tr:'Oi! Tudo bem?',
   opts:['Salut','Salu'],answer:'Salut',full:'Salut ! Ça va bien ?',
   why_ok:'<b>Salut</b> funciona a qualquer hora, mas só com amigos e pessoas próximas. <b>Coucou</b> é ainda mais próximo: família, amigos e crianças.',
-  why:['"Complete" com 2 opções','<p>Ponto 3: a certa e um erro de grafia (<i>Salu</i>), que obriga a olhar a palavra escrita.</p><p>O painel traz a <b>explicação curta</b>. Ela vem da nota "Bonjour ou Bonsoir?", que nesta proposta <b>se divide em três painéis</b>, um por cartão (decisão 339).</p>']},
- {id:'bonjour',chip:'bonjour',type:'item',kind:'Palavra nova',fr:'bonjour',tr:'olá / bom dia',scene:['2600'],
+  why_err:{'Salu':'Atenção à grafia: <b>salut</b> termina em <b>t</b>, que não se pronuncia. '},
+  why:['"Complete" com erro de grafia','<p>Distrator de grafia (<i>Salu</i>): obriga a olhar a palavra escrita. Na lição 2, o "Complete" usa outra palavra como distrator, para equilibrar (decisão 342).</p><p>O painel traz a explicação curta, que vem da nota "Bonjour ou Bonsoir?", dividida em três painéis (decisão 339).</p>']},
+ {id:'l1-bonjour',lesson:1,chip:'bonjour',type:'item',kind:'Palavra nova',fr:'bonjour',tr:'olá / bom dia',
   audios:[['bonjour','bonjour']],
-  why:['Cartão novo','<p>O sol diz "de dia" sem precisar de texto. Imagem simples, de graça e já no repositório.</p>']},
- {id:'ex-bonjour',chip:'V ou F',type:'vf',scene:['2600','1f35e'],cap:'9h, na padaria',
+  why:['Cartão novo','<p>Mesma tela, sem imagem.</p>']},
+ {id:'l1-ex-bonjour',lesson:1,chip:'V ou F',type:'vf',ctx:'9h, na padaria',
   stmt:'Às 9h, para cumprimentar o padeiro, dizemos <i>Bonjour !</i>',answer:true,full:'Bonjour !',fullTr:'Bom dia!',
   why_ok:'<b>Bonjour</b> é o cumprimento padrão do dia: de manhã até o fim da tarde, com qualquer pessoa.',
-  why:['Verdadeiro ou falso','<p>Ponto 3: V/F com uma cena. A explicação do painel é a segunda parte da nota "Bonjour ou Bonsoir?".</p>']},
- {id:'bonsoir',chip:'bonsoir',type:'item',kind:'Palavra nova',fr:'bonsoir',tr:'boa noite (ao chegar)',scene:['1f319'],
+  why:['Verdadeiro ou falso','<p>A situação vai em texto curto, no lugar da imagem. A explicação do painel é a segunda parte da nota "Bonjour ou Bonsoir?".</p>']},
+ {id:'l1-bonsoir',lesson:1,chip:'bonsoir',type:'item',kind:'Palavra nova',fr:'bonsoir',tr:'boa noite (ao chegar)',
   audios:[['bonsoir','bonsoir']],
-  why:['Cartão novo','<p>Lua para a noite. A tradução continua dizendo "ao chegar", como no cartão publicado.</p>']},
- {id:'ex-bonsoir',chip:'Pergunta de função',type:'funcao',scene:['1f319','1f37d'],cap:'20h, no restaurante',
+  why:['Cartão novo','<p>A tradução continua dizendo "ao chegar", como no cartão publicado.</p>']},
+ {id:'l1-ex-bonsoir',lesson:1,chip:'O que você diz?',type:'funcao',ctx:'20h, no restaurante',
   q:'Você chega num restaurante às 20h. O que você diz ao garçom?',
   opts:['Bonsoir !','Salut !','Bonjour !'],answer:'Bonsoir !',fullTr:'Boa noite!',
   why_ok:'À noite, ao chegar num lugar, trocamos <b>bonjour</b> por <b>bonsoir</b>. <b>Salut</b> fica para os amigos.',
-  why:['Pergunta de função','<p>Ponto 1: a situação está na tela e a aluna escolhe <b>o que dizer</b>. Treina a função (cumprimentar à noite, com um desconhecido), não só a tradução.</p><p>As três opções já foram vistas; o erro em <i>Salut</i> ensina o registro.</p>']},
- {id:'monsieur',chip:'monsieur / madame',type:'item',kind:'Palavra nova',fr:'monsieur / madame',tr:'senhor / senhora',scene:['1f468','1f469'],
+  why_err:{'Salut !':'O garçom você não conhece. ','Bonjour !':'<b>Bonjour</b> vale até o fim da tarde. '},
+  why:['Pergunta de função','<p>Ponto 1: a situação está na tela e a aluna escolhe <b>o que dizer</b>. Treina a função, não só a tradução.</p><p>O painel muda conforme o erro.</p>']},
+ {id:'l1-monsieur',lesson:1,chip:'monsieur / madame',type:'item',kind:'Palavra nova',fr:'monsieur / madame',tr:'senhor / senhora',
   audios:[['monsieur','monsieur'],['madame','madame']],
-  why:['Cartão novo em par','<p>Um ícone para cada palavra do par. É o gatilho da nota que vem a seguir.</p>']},
- {id:'nota',chip:'Nota',type:'nota',kind:'Nota · realidade',title:'Madame, monsieur e mademoiselle',
+  why:['Cartão novo em par','<p>Um áudio para cada palavra. É o gatilho da nota seguinte.</p>']},
+ {id:'l1-nota',lesson:1,chip:'Nota',type:'nota',kind:'Nota · realidade',title:'Madame, monsieur e mademoiselle',
   text:'Para falar com um homem que você não conhece, diga <strong>monsieur</strong>; com uma mulher, <strong>madame</strong>. Hoje, <strong>madame</strong> serve para qualquer mulher adulta, casada ou não. <strong>Mademoiselle</strong> (senhorita) ainda aparece, mas é evitado: muita gente acha antiquado ou indelicado, e em 2012 a França tirou essa opção dos formulários oficiais.',
   ex:[['Bonjour, monsieur !','Bom dia, senhor!'],['Bonjour, madame !','Bom dia, senhora!'],['mademoiselle','senhorita (hoje evitado)']],
-  why:['Nota que continua nota','<p>Decisão 339: esta não cabe em uma frase de painel (tem a regra, a exceção e a história de 2012), então fica numa <b>tela própria</b>, logo depois do gatilho (o cartão <i>monsieur / madame</i>).</p><p>O mesmo vale para conjugações e sistematizações.</p>']},
- {id:'ex-nota',chip:'V ou F da nota',type:'vf',scene:['1f469'],cap:'uma moça que você não conhece',
+  why:['Nota que continua nota','<p>Decisão 339: não cabe numa frase de painel (regra, exceção e a história de 2012), então fica numa <b>tela própria</b>, logo depois do gatilho.</p>']},
+ {id:'l1-ex-nota',lesson:1,chip:'V ou F da nota',type:'vf',ctx:'uma moça que você não conhece',
   stmt:'Para falar com uma moça que você não conhece, o mais seguro é dizer <i>mademoiselle</i>.',answer:false,full:'Bonjour, madame !',fullTr:'Bom dia, senhora!',
   why_ok:'<b>Mademoiselle</b> hoje é evitado. Use <b>madame</b> para qualquer mulher adulta.',
-  why:['V/F logo depois da nota','<p>O V/F da nota já existe no rascunho aprovado da unidade 1. Aqui ele só ganha o painel com a resposta em francês e o áudio.</p>']},
- {id:'frase',chip:'Frase nova',type:'item',kind:'Frase nova',fr:'Bonjour, madame !',tr:'Bom dia, senhora!',scene:['2600','1f469'],
+  why:['V/F logo depois da nota','<p>O V/F da nota já está no rascunho aprovado da unidade 1.</p>']},
+ {id:'l1-frase',lesson:1,chip:'Frase nova',type:'item',kind:'Frase nova',fr:'Bonjour, madame !',tr:'Bom dia, senhora!',
   audios:[['Bonjour, madame !','']],
-  why:['A frase-modelo como cartão','<p>Ponto 2: a frase do cartão <i>bonjour</i> (que antes ficava no "Na frase", na mesma tela) agora é um <b>cartão próprio</b>, com tela, áudio e revisão.</p><p>Ela vem depois de <i>madame</i>, para que todas as palavras já tenham sido vistas.</p>']},
- {id:'montar',chip:'Monte a frase',type:'montar',scene:['1f319','1f468'],
+  why:['A frase-modelo como cartão','<p>Ponto 2: a frase do cartão <i>bonjour</i> vira um <b>cartão próprio</b>. Vem depois de <i>madame</i>, para que todas as palavras já tenham sido vistas.</p>']},
+ {id:'l1-montar',lesson:1,chip:'Monte a frase',type:'montar',
   tr:'Boa noite, senhor!',tiles:['madame','Bonsoir,','!','monsieur','Bonjour,'],answer:['Bonsoir,','monsieur','!'],full:'Bonsoir, monsieur !',
   why_ok:'À noite, <b>bonsoir</b>; para um homem, <b>monsieur</b>.',
-  why:['A frase montada na tela seguinte','<p>Critério 5 da dona (Memrise): a frase é construída <b>em telas seguintes</b>, não na mesma tela do cartão. Esta é a frase do cartão <i>bonsoir</i>.</p><p>Duas peças sobram de propósito (<i>madame</i>, <i>Bonjour,</i>).</p>']},
- {id:'fim',chip:'Fim da lição',type:'fim',
+  why:['A frase montada na tela seguinte','<p>Critério 5 (Memrise): a frase é construída <b>em telas seguintes</b>, não na mesma tela do cartão. Sobram duas peças de propósito.</p>']},
+ {id:'l1-fim',lesson:1,chip:'Fim da lição',type:'fim',
   list:[['salut / coucou','oi / olá'],['bonjour','olá / bom dia'],['bonsoir','boa noite (ao chegar)'],['monsieur / madame','senhor / senhora'],['Bonjour, madame !','Bom dia, senhora!'],['Bonsoir, monsieur !','Boa noite, senhor!']],
-  why:['Tela final com a lista','<p>Ponto 4: a lição termina com <b>tudo o que foi visto, com áudio</b>, para ouvir de novo antes de seguir. Foi a tela do Busuu de que você mais gostou.</p>']},
- {id:'unidade',chip:'A unidade',type:'unidade',
-  why:['Como a unidade fica','<p>Ponto 4: os dois diálogos saem do fim das lições 2 e 4 e viram a <b>lição 5, só de diálogos</b>, antes da Revisão da unidade.</p><p>Ponto 1: na lição 2, a <b>pergunta e a resposta são cartões</b> (marcadas aqui como P e R). Os itens das lições 2 a 4 ainda serão redesenhados com você.</p><p>Clique na lição 5 para ver o começo dela.</p>']},
- {id:'dialogo',chip:'Lição de diálogo',type:'dialogo',
-  why:['A lição de diálogo','<p>"Encontro na rua", que hoje fecha a lição 2. Cada fala com áudio e tradução; depois, as checagens que o rascunho já tem (completar, ouvir, entender).</p>']}
+  why:['Tela final com a lista','<p>Ponto 4: tudo o que foi visto, com áudio. Frase aprovada: "Esses cartões já entram na sua Revisão."</p>']},
+
+ /* ===== A unidade ===== */
+ {id:'unidade',lesson:'u',chip:'A unidade',type:'unidade',
+  why:['Como a trilha mostra a unidade','<p>Na trilha, como hoje, cada lição aparece <b>só com o título</b>. As palavras de cada lição ficam aqui, só para você:</p><ul><li><b>1</b>: salut / coucou · bonjour · bonsoir · monsieur / madame</li><li><b>2</b>: <span class="qa">P</span>ça va · tu vas bien ? / vous allez bien ? <span class="qa r">R</span>ça va · je vais bien · et toi ? / et vous ?</li><li><b>3</b>: merci · de rien · s\'il te plaît / s\'il vous plaît · pardon · excuse-moi / excusez-moi</li><li><b>4</b>: au revoir · à bientôt · bonne journée / bonne soirée</li><li><b>5</b>: diálogos "Encontro na rua" (informal) e "Na portaria" (formal)</li></ul><p>Clique na lição 2 ou na 5.</p>']},
+
+ /* ===== Lição 2 ===== */
+ {id:'l2-intro',lesson:2,chip:'Início',type:'intro',n:2,title:'Perguntar como a pessoa está e responder',
+  goal:'Você vai aprender a perguntar "tudo bem?" e a responder, com amigos e com quem você trata por senhor ou senhora.',size:'4 cartões · 1 frase · cerca de 2 minutos',
+  why:['Abertura da lição 2','<p>Ponto 1: a função tem dois lados, <b>perguntar</b> e <b>responder</b>, e os dois viram cartões. As etiquetas "Pergunta" e "Resposta" aparecem em cada cartão.</p>']},
+ {id:'l2-cava',lesson:2,chip:'ça va',type:'item',kind:'Palavra nova',role:'Pergunta e resposta',fr:'ça va',tr:'tudo bem',
+  audios:[['Ça va ?','Ça va ?'],['ça va','Ça va.']],
+  why:['Cartão que é pergunta e resposta','<p><i>Ça va</i> é as duas coisas, então o cartão mostra os dois áudios: a pergunta e a resposta.</p><p>A nota "Ça va pode ser pergunta ou resposta" é curta: vira a explicação do painel no exercício seguinte (decisão 339).</p>']},
+ {id:'l2-ex-cava',lesson:2,chip:'Complete (outra palavra)',type:'complete',
+  before:'Salut, ',after:' ? Oui, ça va.',tr:'Oi, tudo bem? Sim, tudo bem.',
+  opts:['bonsoir','ça va'],answer:'ça va',full:'Salut, ça va ? Oui, ça va.',
+  why_ok:'<b>Ça va</b> serve para perguntar e para responder: na pergunta, "tudo bem?"; na resposta, "tudo bem".',
+  why_err:{'bonsoir':'<b>Bonsoir</b> é um cumprimento, não uma pergunta. '},
+  why:['"Complete" com outra palavra','<p>Decisão 342: aqui o distrator é <b>outra palavra já vista</b> (<i>bonsoir</i>, da lição 1), que não serve na frase. Também faz a ponte com a lição 1.</p><p>A frase é a do cartão <i>ça va</i> (pergunta e resposta).</p>']},
+ {id:'l2-tuvas',lesson:2,chip:'tu vas bien ? / vous allez bien ?',type:'item',kind:'Palavra nova',role:'Pergunta',fr:'tu vas bien ? / vous allez bien ?',tr:'você está bem? / o senhor (a senhora) está bem?',
+  audios:[['Tu vas bien ?','tu vas bien ?'],['Vous allez bien ?','vous allez bien ?']],
+  why:['Cartão de pergunta','<p>Par informal e formal, um áudio para cada forma. É o gatilho da nota seguinte.</p>']},
+ {id:'l2-nota-perguntar',lesson:2,chip:'Nota (sistematização)',type:'nota',kind:'Nota · explicação',title:'Como perguntar "tudo bem?"',
+  text:'Há vários jeitos de perguntar como a pessoa está. <strong>Informal</strong> (família, amigos, jovens da mesma idade, mesmo que não se conheçam): <strong>Ça va ?</strong>, o mais comum, <strong>Tu vas bien ?</strong> e <strong>Comment vas-tu ?</strong>, que na fala do dia a dia soa um pouco mais cuidado que <strong>Ça va ?</strong> e <strong>Tu vas bien ?</strong>. <strong>Formal</strong> (desconhecidos, chefes e superiores, pessoas idosas, quem presta um serviço): <strong>Vous allez bien ?</strong> e <strong>Comment allez-vous ?</strong>.',
+  ex:[['Ça va ?','Tudo bem?','informal'],['Tu vas bien ?','Você está bem?','informal'],['Comment vas-tu ?','Como vai você?','informal'],['Vous allez bien ?','O senhor (a senhora) está bem?','formal'],['Comment allez-vous ?','Como vai o senhor (a senhora)?','formal']],
+  why:['Nota que continua nota (sistematização)','<p>Decisão 339: é uma <b>sistematização</b> (5 formas, informal x formal, quando usar cada uma), grande demais para o painel. Fica numa tela própria, logo depois do gatilho.</p><p>As etiquetas informal e formal ao lado de cada exemplo são novas: ajudam a ler o quadro.</p>']},
+ {id:'l2-ex-tuvas',lesson:2,chip:'O que você diz?',type:'funcao',ctx:'no corredor do prédio',
+  q:'Você encontra a vizinha, uma senhora idosa que você chama de madame. Como pergunta se ela está bem?',
+  opts:['Vous allez bien ?','Tu vas bien ?','Ça va ?'],answer:'Vous allez bien ?',fullTr:'A senhora está bem?',
+  why_ok:'Com pessoas idosas e desconhecidos, use a forma formal: <b>vous allez bien ?</b> ou <b>comment allez-vous ?</b>',
+  why_err:{'Tu vas bien ?':'<b>Tu vas bien ?</b> é informal: família, amigos, gente da mesma idade. ','Ça va ?':'<b>Ça va ?</b> é o mais comum, mas é informal. '},
+  why:['Pergunta de função','<p>O V/F da nota (senhor idoso, <i>Comment allez-vous ?</i>) vira esta pergunta de função: em vez de julgar uma frase, a aluna <b>escolhe o que dizer</b>.</p><p>As três opções foram vistas; o painel explica cada erro.</p>']},
+ {id:'l2-ettoi',lesson:2,chip:'et toi ? / et vous ?',type:'item',kind:'Palavra nova',role:'Resposta',fr:'et toi ? / et vous ?',tr:'e você? / e o senhor? e a senhora?',
+  audios:[['Et toi ?','et toi ?'],['Et vous ?','et vous ?']],
+  why:['Cartão de resposta: devolver a pergunta','<p>Responder inclui devolver a pergunta. Por isso <i>et toi ? / et vous ?</i> está com a etiqueta "Resposta".</p>']},
+ {id:'l2-jevais',lesson:2,chip:'je vais bien',type:'item',kind:'Palavra nova',role:'Resposta',fr:'je vais bien',tr:'estou bem',
+  audios:[['je vais bien','je vais bien']],
+  why:['Cartão de resposta','<p>Dois cartões seguidos sem exercício entre eles: <i>et toi ?</i> só é treinado junto de <i>je vais bien</i>, na frase-modelo. É a única exceção à ordem cartão, exercício nesta lição.</p>']},
+ {id:'l2-nota-responder',lesson:2,chip:'Nota (outras respostas)',type:'nota',kind:'Nota · realidade',title:'Como responder',
+  text:'Além de <strong>je vais bien</strong>, você vai ouvir outras respostas: <strong>très bien</strong> (muito bem); <strong>pas mal</strong> (ao pé da letra, "nada mal": quer dizer que a pessoa está bem); e, entre amigos, <strong>bof</strong>, um "mais ou menos" sem muito ânimo, bem informal.',
+  ex:[['Très bien, merci !','Muito bem, obrigada!'],['Pas mal, et toi ?','Nada mal, e você?'],['Bof...','Mais ou menos... (informal)']],
+  why:['Nota que continua nota','<p>Traz três respostas que <b>não são cartões</b> (<i>très bien</i>, <i>pas mal</i>, <i>bof</i>), cada uma com o seu sentido: não cabe no painel de um cartão.</p>']},
+ {id:'l2-ex-nota',lesson:2,chip:'V ou F da nota',type:'vf',ctx:'um amigo responde: Pas mal !',
+  stmt:'<i>Pas mal</i> quer dizer que a pessoa está mal.',answer:false,full:'Pas mal, et toi ?',fullTr:'Nada mal, e você?',
+  why_ok:'<b>Pas mal</b> é "nada mal": a pessoa está bem.',
+  why:['V/F da nota','<p>O V/F que a nota já tem no rascunho aprovado.</p>']},
+ {id:'l2-frase',lesson:2,chip:'Frase nova',type:'item',kind:'Frase nova',role:'Resposta',fr:'Je vais bien, et toi ?',tr:'Estou bem, e você?',
+  audios:[['Je vais bien, et toi ?','']],
+  why:['A frase-modelo como cartão','<p>Junta os dois cartões de resposta: responder e devolver a pergunta. É a frase do cartão <i>je vais bien</i>.</p>']},
+ {id:'l2-ex-frase',lesson:2,chip:'Complete (grafia)',type:'complete',
+  before:'Je vais bien, et ',after:' ?',tr:'Estou bem, e você?',
+  opts:['toa','toi'],answer:'toi',full:'Je vais bien, et toi ?',
+  why_ok:'Para devolver a pergunta: <b>et toi ?</b> com amigos e família; <b>et vous ?</b> com quem você trata por senhor ou senhora.',
+  why_err:{'toa':'Atenção à grafia: o som "uá" se escreve <b>oi</b> em francês: <b>toi</b>. '},
+  why:['"Complete" com erro de grafia','<p>Distrator de grafia que um brasileiro escreveria de ouvido (<i>toa</i>). O painel traz a explicação do par <i>et toi ? / et vous ?</i>, que não tinha nota.</p>']},
+ {id:'l2-montar',lesson:2,chip:'Monte a frase',type:'montar',
+  tr:'Boa noite, senhora. A senhora está bem?',tiles:['Vous','bien ?','Tu','Bonsoir,','vas','allez','madame.'],answer:['Bonsoir,','madame.','Vous','allez','bien ?'],full:'Bonsoir, madame. Vous allez bien ?',
+  why_ok:'Com <b>madame</b>, a pergunta é formal: <b>vous allez bien ?</b>',
+  why:['A frase montada na tela seguinte','<p>A frase do cartão <i>vous allez bien ?</i>, que junta as lições 1 e 2. Sobram <i>Tu</i> e <i>vas</i>, a forma informal, de propósito.</p>']},
+ {id:'l2-fim',lesson:2,chip:'Fim da lição',type:'fim',
+  list:[['ça va','tudo bem','pergunta e resposta'],['tu vas bien ? / vous allez bien ?','você está bem? / o senhor (a senhora) está bem?','pergunta'],['et toi ? / et vous ?','e você? / e o senhor? e a senhora?','resposta'],['je vais bien','estou bem','resposta'],['Je vais bien, et toi ?','Estou bem, e você?','frase'],['Bonsoir, madame. Vous allez bien ?','Boa noite, senhora. A senhora está bem?','frase']],
+  why:['Tela final','<p>A lista mostra também se cada item é pergunta ou resposta.</p>']},
+
+ /* ===== Lição 5 ===== */
+ {id:'dialogo',lesson:5,chip:'Lição de diálogo',type:'dialogo',
+  why:['A lição de diálogo','<p>"Encontro na rua", que hoje fecha a lição 2, passa para a lição 5. No lugar do ícone, a inicial de quem fala.</p>']}
 ];
 
 /* ---------- estado ---------- */
 let i=0, interacted=false, picked=[];
 const $=id=>document.getElementById(id);
 const screen=$('screen'), panel=$('panel');
+const idx=id=>S.findIndex(s=>s.id===id);
+const LESSONS=[[1,'Lição 1','l1-intro'],[2,'Lição 2','l2-intro'],['u','A unidade','unidade'],[5,'Lição 5','dialogo']];
 
 function setProgress(){
-  const total=S.findIndex(s=>s.id==='fim');
-  $('progbar').style.width=Math.min(100,Math.round(Math.min(i,total)/total*100))+'%';
+  const s=S[i]; const same=S.filter(x=>x.lesson===s.lesson); const k=same.indexOf(s);
+  const end=same.findIndex(x=>x.type==='fim');
+  const pct = end>0 ? Math.min(100,Math.round(k/end*100)) : 100;
+  $('progbar').style.width=pct+'%';
 }
 function setWhy(){
   const s=S[i]; $('why-title').textContent=s.why[0]; $('why-text').innerHTML=s.why[1];
-  [...$('jump').children].forEach((b,k)=>b.setAttribute('aria-current',k===i?'true':'false'));
-}
-function sceneHTML(s){
-  if(!s.scene) return '';
-  const many=s.scene.length>2;
-  return `<div class="scene">${s.scene.map(k=>img(k,many?'sm':'')).join('')}${s.cap?`<span class="cap">${esc(s.cap)}</span>`:''}</div>`;
+  const same=S.filter(x=>x.lesson===s.lesson);
+  $('jump').innerHTML=same.map(x=>`<button data-j="${x.id}" aria-current="${x===s}">${esc(x.chip)}</button>`).join('');
+  [...$('tabs').children].forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.l)===String(s.lesson)));
 }
 function go(n){
-  i=Math.max(0,Math.min(S.length-1,n)); picked=[];
+  i=Math.max(0,Math.min(S.length-1,typeof n==='string'?idx(n):n)); picked=[];
   panel.className='panel'; panel.innerHTML=''; screen.style.paddingBottom='';
   render(); setProgress(); setWhy();
 }
-function next(){ go(i+1); }
+function next(){
+  const s=S[i];
+  if(s.type==='fim') return go('unidade');
+  go(i+1);
+}
 
 function showPanel(ok, s, extra){
   const fr=s.full||s.answer, tr=s.fullTr||s.tr||'';
   panel.className='panel show '+(ok?'ok':'err');
-  panel.innerHTML=`<h4>${img(ok?'2705':'274c')}${ok?'Muito bem!':'Quase!'}</h4>
-    <div class="ans"><div class="t">${esc(typeof fr==='string'?fr:'')}<span>${esc(tr)}</span></div>${audBtn(typeof fr==='string'?fr:'','')}</div>
+  panel.innerHTML=`<h4><span class="mark">${ok?'✓':'✕'}</span>${ok?'Muito bem!':'Quase!'}</h4>
+    <div class="ans"><div class="t">${esc(fr)}<span>${esc(tr)}</span></div>${audBtn(fr,'')}</div>
     <p class="why">${extra||s.why_ok}</p>
     <button class="btn" id="cont">Continuar</button>`;
   $('cont').onclick=next; $('cont').focus({preventScroll:true});
   screen.style.paddingBottom=(panel.offsetHeight+12)+'px';
-  if(typeof fr==='string') speak(fr);
+  speak(fr);
 }
+const ctxHTML=s=>s.ctx?`<div class="ctx">${esc(s.ctx)}</div>`:'';
 
 function render(){
   const s=S[i]; let h='';
   if(s.type==='intro'){
     h=`<div class="grow">
-      <span class="tag">Lição 1 de 5</span>
-      <div class="scene">${img('1f44b')}${img('2600','sm')}${img('1f319','sm')}</div>
-      <div class="fr-mid" style="text-align:left">Cumprimentar alguém</div>
-      <p style="margin:0">Você vai aprender a cumprimentar de dia e à noite, entre amigos e com quem você não conhece.</p>
-      <p class="small" style="margin:0">4 palavras · 2 frases · cerca de 2 minutos</p>
+      <span class="tag">Lição ${s.n} de 5</span>
+      <div class="fr-mid" style="text-align:left">${esc(s.title)}</div>
+      <p style="margin:0">${esc(s.goal)}</p>
+      <p class="small" style="margin:0">${esc(s.size)}</p>
     </div><button class="btn" id="go">Começar</button>`;
   }
   if(s.type==='item'){
-    h=`<span class="tag ${s.kind==='Frase nova'?'pink':''}">${s.kind}</span>
-    <div class="grow">${sceneHTML(s)}
+    h=`<div class="tags"><span class="tag ${s.kind==='Frase nova'?'pink':''}">${s.kind}</span>${s.role?`<span class="tag pink">${esc(s.role)}</span>`:''}</div>
+    <div class="grow">
       <div class="${s.fr.length>14?'fr-mid':'fr-big'}">${esc(s.fr)}</div>
       <div class="tr">${esc(s.tr)}</div>
       <div class="audios">${s.audios.map(([t,l])=>audBtn(t,l)).join('')}</div>
     </div><button class="btn" id="go">Continuar</button>`;
   }
   if(s.type==='complete'){
-    h=`<span class="tag">Complete</span><div class="grow ex">${sceneHTML(s)}
+    h=`<span class="tag">Complete</span><div class="grow ex">
       <div class="fr-mid">${esc(s.before)}<span class="blank" id="blank">&nbsp;</span>${esc(s.after)}</div>
       <div class="tr">${esc(s.tr)}</div>
       <div class="opts two">${s.opts.map(o=>`<button class="opt" data-o="${esc(o)}">${esc(o)}</button>`).join('')}</div></div>`;
   }
   if(s.type==='vf'){
-    h=`<span class="tag">Verdadeiro ou falso?</span><div class="grow ex">${sceneHTML(s)}
-      <p class="q" style="margin:0">${s.stmt}</p>
+    h=`<span class="tag">Verdadeiro ou falso?</span><div class="grow ex">${ctxHTML(s)}
+      <p class="q">${s.stmt}</p>
       <div class="opts two"><button class="opt" data-o="true">Verdadeiro</button><button class="opt" data-o="false">Falso</button></div></div>`;
   }
   if(s.type==='funcao'){
-    h=`<span class="tag">O que você diz?</span><div class="grow ex">${sceneHTML(s)}
-      <p class="q" style="margin:0">${esc(s.q)}</p>
+    h=`<span class="tag">O que você diz?</span><div class="grow ex">${ctxHTML(s)}
+      <p class="q">${esc(s.q)}</p>
       <div class="opts">${s.opts.map(o=>`<button class="opt" data-o="${esc(o)}">${esc(o)}</button>`).join('')}</div></div>`;
   }
   if(s.type==='nota'){
     h=`<span class="tag note">${s.kind}</span><div class="grow" style="justify-content:flex-start">
       <div class="notebox"><h3>${esc(s.title)}</h3><p>${s.text}</p></div>
-      <div class="ex-list">${s.ex.map(([f,t])=>`<div class="ex-row">${audBtn(f,'')}<div class="t"><b>${esc(f)}</b><span>${esc(t)}</span></div></div>`).join('')}</div>
+      <div class="ex-list">${s.ex.map(([f,t,l])=>`<div class="ex-row">${audBtn(f,'')}<div class="t"><b>${esc(f)}${l?`<span class="lbl">${esc(l)}</span>`:''}</b><span>${esc(t)}</span></div></div>`).join('')}</div>
     </div><button class="btn" id="go">Entendi</button>`;
   }
   if(s.type==='montar'){
-    h=`<span class="tag">Monte a frase</span><div class="grow ex">${sceneHTML(s)}
+    h=`<span class="tag">Monte a frase</span><div class="grow ex">
       <div class="tr" style="font-weight:700;color:var(--ink)">${esc(s.tr)}</div>
       <div class="answer-line" id="line"></div>
       <div class="tiles">${s.tiles.map((t,k)=>`<button class="tile" data-k="${k}">${esc(t)}</button>`).join('')}</div>
     </div><button class="btn" id="check" disabled>Verificar</button>`;
   }
   if(s.type==='fim'){
-    h=`<div class="done-hero">${img('1f389')}<h2>Lição concluída!</h2><p class="small" style="margin:0">Você viu nesta lição:</p></div>
-      <div class="ex-list">${s.list.map(([f,t])=>`<div class="ex-row">${audBtn(f,'')}<div class="t"><b>${esc(f)}</b><span>${esc(t)}</span></div></div>`).join('')}</div>
+    h=`<div class="done-hero"><h2>Lição concluída!</h2><p class="small" style="margin:0">Você viu nesta lição:</p></div>
+      <div class="ex-list">${s.list.map(([f,t,l])=>`<div class="ex-row">${audBtn(f,'')}<div class="t"><b>${esc(f)}${l?`<span class="lbl">${esc(l)}</span>`:''}</b><span>${esc(t)}</span></div></div>`).join('')}</div>
       <p class="small" style="margin:0;text-align:center">Esses cartões já entram na sua Revisão.</p>
       <button class="btn" id="go">Continuar</button>`;
   }
   if(s.type==='unidade'){
+    const row=(n,t,cls,id)=>id?`<button class="lesson ${cls}" data-to="${id}"><span class="n">${n}</span><span class="t">${t}</span></button>`:`<div class="lesson ${cls}"><span class="n">${n}</span><span class="t">${t}</span></div>`;
     h=`<span class="tag">Unidade 1 · Cumprimentar e se despedir</span>
     <div class="lessons">
-      <div class="lesson done"><span class="n">✓</span><div class="t"><b>Cumprimentar alguém</b><small>salut / coucou · bonjour · bonsoir · monsieur / madame · 2 frases</small></div></div>
-      <div class="lesson"><span class="n">2</span><div class="t"><b>Perguntar como a pessoa está e responder</b><small><span class="qa">P</span>ça va ? · tu vas bien ? / vous allez bien ?<br><span class="qa r">R</span>ça va · je vais bien · et toi ? / et vous ?</small></div></div>
-      <div class="lesson"><span class="n">3</span><div class="t"><b>Fórmulas de cortesia</b><small>merci · de rien · pardon · s'il te plaît / s'il vous plaît · excuse-moi / excusez-moi</small></div></div>
-      <div class="lesson"><span class="n">4</span><div class="t"><b>Despedir-se</b><small>au revoir · à bientôt · bonne journée / bonne soirée</small></div></div>
-      <button class="lesson newl" id="dlg"><span class="n">5</span><div class="t"><b>Diálogos da unidade</b><small>Encontro na rua (informal) · Na portaria (formal)</small></div></button>
-      <div class="lesson"><span class="n">★</span><div class="t"><b>Revisão da unidade</b><small>como hoje</small></div></div>
+      ${row('✓','Cumprimentar alguém','done','l1-intro')}
+      ${row('2','Perguntar como a pessoa está e responder','cur','l2-intro')}
+      ${row('3','Fórmulas de cortesia','')}
+      ${row('4','Despedir-se','')}
+      ${row('5','Diálogos da unidade','','dialogo')}
+      ${row('★','Revisão da unidade','')}
     </div>`;
   }
   if(s.type==='dialogo'){
@@ -373,31 +446,26 @@ function render(){
     h=`<span class="tag pink">Lição 5 · Diálogos</span>
       <div class="fr-mid" style="text-align:left;font-size:1.15rem">Encontro na rua</div>
       <p class="small" style="margin:0">De manhã, na rua do bairro: Léa encontra o vizinho Hugo.</p>
-      <div class="bubbles">${L.map(([w,f,t])=>`<div class="bub ${w==='B'?'b':''}">${img(w==='A'?'1f469':'1f468')}<div class="txt"><b>${esc(f)}</b><span>${esc(t)}</span></div>${audBtn(f,'')}</div>`).join('')}</div>
-      <p class="q" style="margin:0">Como o Hugo está?</p>
-      <div class="opts">${['Bem','Mal','Cansado'].map(o=>`<button class="opt" data-o="${o}">${o}</button>`).join('')}</div>
-      <button class="btn ghost" id="again">Ver a lição 1 de novo</button>`;
+      <div class="bubbles">${L.map(([w,f,t])=>`<div class="bub ${w==='B'?'b':''}"><span class="who">${w==='A'?'L':'H'}</span><div class="txt"><b>${esc(f)}</b><span>${esc(t)}</span></div>${audBtn(f,'')}</div>`).join('')}</div>
+      <p class="q">Como o Hugo está?</p>
+      <div class="opts">${['Bem','Mal','Cansado'].map(o=>`<button class="opt" data-o="${o}">${o}</button>`).join('')}</div>`;
   }
   screen.innerHTML=h;
   bind(s);
-  if(s.type==='item' && interacted) speak(s.audios.length===1?s.audios[0][0]:s.fr);
+  if(s.type==='item' && interacted) speak(s.audios[0][0]);
 }
 
 function bind(s){
   const g=$('go'); if(g) g.onclick=next;
   if(s.type==='complete'||s.type==='funcao'||s.type==='vf'){
     screen.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{
-      const v=b.dataset.o; const ok = s.type==='vf' ? (String(s.answer)===v) : v===s.answer;
+      const v=b.dataset.o; const ans=String(s.answer); const ok=v===ans;
       screen.querySelectorAll('.opt').forEach(x=>{
         x.disabled=true;
-        const isAns = s.type==='vf' ? x.dataset.o===String(s.answer) : x.dataset.o===s.answer;
-        if(isAns) x.classList.add('right'); else if(x===b) x.classList.add('wrong');
+        if(x.dataset.o===ans) x.classList.add('right'); else if(x===b) x.classList.add('wrong');
       });
-      if(s.type==='complete'){ $('blank').textContent=s.answer; }
-      let extra=null;
-      if(!ok && s.id==='ex-bonsoir' && v==='Salut !') extra='<b>Salut</b> é só para amigos e pessoas próximas, e o garçom você não conhece. À noite, ao chegar num lugar, dizemos <b>bonsoir</b>.';
-      if(!ok && s.id==='ex-bonsoir' && v==='Bonjour !') extra='<b>Bonjour</b> vale até o fim da tarde. Às 20h, ao chegar num lugar, dizemos <b>bonsoir</b>.';
-      if(!ok && s.id==='ex-salut') extra='Atenção à grafia: <b>salut</b> termina em <b>t</b>, que não se pronuncia. '+s.why_ok;
+      if(s.type==='complete') $('blank').textContent=s.answer;
+      const extra = ok ? null : ((s.why_err&&s.why_err[v])||'')+s.why_ok;
       showPanel(ok,s,extra);
     });
   }
@@ -411,20 +479,18 @@ function bind(s){
     };
     screen.querySelectorAll('.tiles .tile').forEach(t=>t.onclick=()=>{picked.push(+t.dataset.k);draw();});
     chk.onclick=()=>{
-      const got=picked.map(k=>s.tiles[k]); const ok=got.join(' ')===s.answer.join(' ');
-      chk.disabled=true; showPanel(ok,{...s,full:s.full,fullTr:s.tr},ok?null:'A frase certa é <b>Bonsoir, monsieur !</b> '+s.why_ok);
+      const ok=picked.map(k=>s.tiles[k]).join(' ')===s.answer.join(' ');
+      chk.disabled=true; showPanel(ok,{...s,fullTr:s.tr},ok?null:`A frase certa é <b>${esc(s.full)}</b> `+s.why_ok);
     };
   }
-  if(s.type==='unidade'){ $('dlg').onclick=next; }
+  if(s.type==='unidade') screen.querySelectorAll('[data-to]').forEach(b=>b.onclick=()=>go(b.dataset.to));
   if(s.type==='dialogo'){
     screen.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{
       const ok=b.dataset.o==='Bem';
       screen.querySelectorAll('.opt').forEach(x=>{x.disabled=true; if(x.dataset.o==='Bem') x.classList.add('right'); else if(x===b) x.classList.add('wrong');});
-      panel.className='panel show '+(ok?'ok':'err');
-      panel.innerHTML=`<h4>${img(ok?'2705':'274c')}${ok?'Muito bem!':'Quase!'}</h4><div class="ans"><div class="t">Je vais bien, et toi ?<span>Estou bem, e você?</span></div>${audBtn('Je vais bien, et toi ?','')}</div><p class="why">O Hugo responde <b>Je vais bien</b>: ele está bem.</p><button class="btn" id="cont">Voltar ao início</button>`;
-      $('cont').onclick=()=>go(0); screen.style.paddingBottom=(panel.offsetHeight+12)+'px';
+      showPanel(ok,{full:'Je vais bien, et toi ?',fullTr:'Estou bem, e você?',why_ok:'O Hugo responde <b>Je vais bien</b>: ele está bem.'});
+      $('cont').textContent='Voltar à unidade'; $('cont').onclick=()=>go('unidade');
     });
-    $('again').onclick=()=>go(1);
   }
 }
 
@@ -432,9 +498,10 @@ document.addEventListener('click',e=>{
   interacted=true;
   const a=e.target.closest('[data-say]'); if(a){ e.preventDefault(); speak(a.dataset.say); }
 });
-$('restart').onclick=()=>go(0);
-$('jump').innerHTML=S.map((s,k)=>`<button data-j="${k}">${esc(s.chip)}</button>`).join('');
-$('jump').onclick=e=>{const b=e.target.closest('[data-j]'); if(b) go(+b.dataset.j);};
+$('restart').onclick=()=>{ const s=S[i]; const first=S.find(x=>x.lesson===s.lesson); go(first.id); };
+$('tabs').innerHTML=LESSONS.map(([l,t])=>`<button data-l="${l}" aria-pressed="false">${t}</button>`).join('');
+$('tabs').onclick=e=>{const b=e.target.closest('[data-l]'); if(b){ const L=LESSONS.find(x=>String(x[0])===b.dataset.l); go(L[2]); }};
+$('jump').onclick=e=>{const b=e.target.closest('[data-j]'); if(b) go(b.dataset.j);};
 try{ speechSynthesis.getVoices(); }catch(e){}
 go(0);
 </script>
