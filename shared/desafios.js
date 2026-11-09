@@ -286,6 +286,10 @@ const CHALLENGE_I18N = {
     'ch.cat.cloze_grammar.subtitle': 'Gramática na prática',
     'ch.label.cloze': '🧠 Complete a frase',
     'ch.cloze.instruction': 'Escolha a forma certa para cada lacuna:',
+    // Etapa D (2026-11-04): comando curto acima do exercício, no idioma do site (molde da trilha).
+    'ch.cmd.listen': 'Ouça e escreva a tradução',
+    'ch.cmd.accent': 'Ouça e escreva com os acentos',
+    'ch.cmd.cloze': 'Escolha a forma certa',
     'ch.cloze.blank': 'Lacuna {n}',
     'ch.cloze.chooseAll': 'Escolha uma opção para cada lacuna antes de verificar.',
     'ch.cloze.right': '✅ Resposta certa.',
@@ -444,6 +448,9 @@ const CHALLENGE_I18N = {
     'ch.cat.cloze_grammar.subtitle': "Grammar in practice",
     'ch.label.cloze': "🧠 Complete the sentence",
     'ch.cloze.instruction': "Choose the right form for each blank:",
+    'ch.cmd.listen': "Listen and write the translation", // ALTA -- etapa D (needs_review)
+    'ch.cmd.accent': "Listen and write it with the accents", // ALTA -- etapa D (needs_review)
+    'ch.cmd.cloze': "Choose the right form", // ALTA -- etapa D (needs_review)
     'ch.cloze.blank': "Blank {n}",
     'ch.cloze.chooseAll': "Choose an option for each blank before checking.",
     'ch.cloze.right': "✅ Correct answer.",
