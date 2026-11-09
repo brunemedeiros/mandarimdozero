@@ -1536,6 +1536,9 @@ window.I18N_CATALOG['en'] = {
   'admin.classLogs.notesOpt': 'Your private notes, the student doesn\'t see them (optional)', // ALTA
   'admin.classLogs.noFields': '(no fields filled in)', // ALTA
   'admin.classLogs.listTitle': 'Recorded classes ({n})', // ALTA
+  'admin.classLogs.futureHidden': 'Showing up to today. {n} upcoming classes (created from your calendar) are in the Calendar.', // ALTA
+  'admin.classLogs.showFuture': 'Show upcoming ({n})', // ALTA
+  'admin.classLogs.hideFuture': 'Hide upcoming', // ALTA
   'admin.classLogs.emptyFor': 'No class recorded yet', // ALTA
   'admin.classLogs.deleteConfirm': 'Delete this class record? This action cannot be undone.', // ALTA
   'admin.classLogs.deleted': '✓ Record deleted.', // ALTA
@@ -3590,6 +3593,7 @@ window.I18N_CATALOG['en'] = {
   'panel.notion.cancel': 'Cancel', // ALTA
   'panel.notion.columnsTitle': 'Columns of "{title}"', // ALTA
   'panel.notion.columnsHint': 'Tell the site which Notion column holds each piece of information. Only Date and Student are required; anything left blank isn\'t read.', // ALTA
+  'panel.notion.relationHint': 'A column linked to another database (a relation, like a student record) only shows up here if that other database is also shared with the site in Notion (⋯ > Connections). The site only reads each page\'s name.', // ALTA
   'panel.notion.f.date': 'Date', // ALTA
   'panel.notion.f.student': 'Student or class', // ALTA
   'panel.notion.f.topic': 'Lesson topic', // ALTA

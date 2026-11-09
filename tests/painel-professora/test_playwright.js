@@ -423,6 +423,25 @@ const PANEL_STUB = (who) => {
       await page.waitForFunction(() => !!window.__gcalResolved);
       L('google (119): fora do site manda p_action outside com lembrar', await ev(() => window.__gcalResolved.p_action === 'outside' && window.__gcalResolved.p_remember === true));
       L('google: aula comum continua editável', await ev(() => !/ disabled/.test(classLogWhenFieldsHTML('t2', 'd2', { start_time: '10:00:00' }))));
+      // 2026-11-09: a lista "Aulas registradas" mostra até hoje; as próximas (criadas pela agenda) ficam atrás de um botão
+      L('aulas registradas: futuras escondidas com botão, e aparecem ao clicar', await ev(async () => {
+        const orig = window.fetchClassLogs, origShow = ADMIN_CLASS_LOGS_STATE.showFuture;
+        const d = (n) => new Date(Date.now() + n * 864e5 - new Date().getTimezoneOffset() * 6e4).toISOString().slice(0, 10);
+        window.fetchClassLogs = async () => [{ id: 9001, class_date: d(30), created_at: new Date().toISOString() }, { id: 9002, class_date: d(60), created_at: new Date().toISOString() },
+          { id: 9003, class_date: d(0), created_at: new Date().toISOString() }, { id: 9004, class_date: d(-7), created_at: new Date().toISOString() }];
+        try {
+          const box = document.createElement('div'); document.body.appendChild(box);
+          ADMIN_CLASS_LOGS_STATE.showFuture = false;
+          box.innerHTML = await buildClassLogsListBoxHTML([{ student_id: 's', language_app_key: 'frances', username: 'ana' }], []); wireClassLogsListBox(box);
+          const hidden = box.querySelectorAll('[data-delete-class-log]').length === 2 && /\(2\)/.test(box.querySelector('.section-label').textContent)
+            && /2 próximas/.test(box.querySelector('.class-log-future-bar').textContent) && !box.querySelector('[data-delete-class-log="9001"]');
+          ADMIN_CLASS_LOGS_STATE.showFuture = true;
+          box.innerHTML = await buildClassLogsListBoxHTML([{ student_id: 's', language_app_key: 'frances', username: 'ana' }], []);
+          const shown = box.querySelectorAll('[data-delete-class-log]').length === 4 && /Esconder/.test(box.querySelector('[data-class-log-future]').textContent);
+          box.remove();
+          return hidden && shown;
+        } finally { window.fetchClassLogs = orig; ADMIN_CLASS_LOGS_STATE.showFuture = origShow; }
+      }));
       // 128: caixa do Notion acima de Registrar | Calendário
       await ev(() => { window.notionCall = async (action, extra) => { (window.__notionCalls = window.__notionCalls || []).push([action, extra]);
         if (action === 'databases') return { ok: true, databases: [{ id: '1ed6b6a3e89f80b5a448000bc2dc1582', title: 'Calendário de Aulas' }] };

@@ -12,10 +12,14 @@ const props = {
   '👨🏽‍🎓 Ficha do Aluno': { id: 'Rel', type: 'relation' },
 };
 const sug = suggestColumns(props);
-check('sugestão: Data, Aluno/a, Tópico, Para a próxima aula, Presença, Competências e Idioma',
-  sug.date === 'Dt' && sug.student === 'UnpncQ' && sug.topic === 'title' && sug.homework === 'PxA' && sug.attendance === 'eVx6Yw'
+check('sugestão: Data, Ficha do Aluno (relação ganha da lista Aluno/a), Tópico, Para a próxima aula, Presença, Competências e Idioma',
+  sug.date === 'Dt' && sug.student === 'Rel' && sug.topic === 'title' && sug.homework === 'PxA' && sug.attendance === 'eVx6Yw'
   && sug.skills === 'RFl7cw' && sug.language === 'XklESw', sug);
 check('sugestão não usa Pontualidade nem Uso da L1', !Object.values(sug).includes('S0FWPQ') && !Object.values(sug).includes('dEhURA'));
+
+const semFicha = Object.fromEntries(Object.entries(props).filter(([k]) => !k.includes('Ficha')));
+check('sem a relação (banco ligado não compartilhado): Aluno/a', suggestColumns(semFicha).student === 'UnpncQ');
+check('relação sem nome de aluno (ex.: Pagamentos) não vira aluno', suggestColumns({ ...semFicha, 'Pagamentos': { id: 'Pg', type: 'relation' } }).student === 'UnpncQ');
 
 const other = suggestColumns({ 'Assunto': { id: 'a', type: 'title' }, 'Quando': { id: 'q', type: 'date' }, 'Estudante': { id: 'e', type: 'rich_text' }, 'Tarefa': { id: 't', type: 'rich_text' } });
 check('outro Notion: Assunto e Quando reconhecidos; Estudante fica para a professora escolher', other.topic === 'a' && other.date === 'q' && other.homework === 't' && !other.student, other);
@@ -32,7 +36,7 @@ const page = {
     'Idioma': { id: 'XklESw', type: 'select', select: { name: 'Francês' } },
   },
 };
-const row = mapRow(page, sug, new Map());
+const row = mapRow(page, { ...sug, student: 'UnpncQ' }, new Map());
 check('linha: texto simples de cada coluna ligada', row.topic === 'Passé composé' && row.name === 'Carol 🇧🇷' && row.homework === 'Exercícios 3 e 4'
   && row.attendance === 'Aula dada✅' && row.skills.join() === 'Gramática,Escuta' && row.language === 'Francês', row);
 check('linha: data e hora como escritas no Notion', row.date === '2026-11-05' && row.start_time === '16:00' && row.last_edited === '2026-11-05T12:01:00.000Z', row);
@@ -42,6 +46,8 @@ const noMap = mapRow(page, { date: 'Dt', student: 'UnpncQ' }, new Map());
 check('coluna não ligada não é lida', noMap.topic === null && noMap.homework === null && noMap.skills.length === 0);
 check('aluno numa coluna de relação usa o título da página relacionada',
   propText({ type: 'relation', relation: [{ id: 'r1' }] }, new Map([['r1', 'Carol Lima']])) === 'Carol Lima');
+const comFicha = mapRow({ ...page, properties: { ...page.properties, '👨🏽‍🎓 Ficha do Aluno': { id: 'Rel', type: 'relation', relation: [{ id: 'f1' }] } } }, sug, new Map([['f1', 'Carol Lima']]));
+check('com a Ficha do Aluno ligada, o nome vem da ficha', comFicha.name === 'Carol Lima', comFicha);
 check('linha arquivada', mapRow({ ...page, archived: true }, sug, new Map()).archived === true);
 console.log(`notion (peças): ${ok}/${ok + fail} ok`);
 process.exit(fail ? 1 : 0);

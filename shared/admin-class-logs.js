@@ -386,14 +386,30 @@ async function buildClassLogsListBoxHTML(selectedStudents, selectedClassrooms){
   logs.sort((a, b) => (b.class_date.localeCompare(a.class_date)) || (new Date(b.created_at) - new Date(a.created_at)));
   const showUsername = selectedStudents.length + selectedClassrooms.length > 1;
   selectedStudents = selectedStudents.concat(selectedClassrooms);
+  // Aulas futuras (o Google Agenda cria as dos eventos repetidos com meses de antecedência) ficam escondidas por padrão:
+  // a lista mostra até hoje; o botão mostra as próximas. Elas continuam no Calendário.
+  const today = new Date(Date.now() - new Date().getTimezoneOffset() * 6e4).toISOString().slice(0, 10);
+  const future = logs.filter(l => l.class_date > today);
+  const past = logs.filter(l => l.class_date <= today);
+  const showFuture = !!ADMIN_CLASS_LOGS_STATE.showFuture;
+  const shown = showFuture ? logs : past;
+  const futureBar = future.length ? `<p class="admin-badge-desc class-log-future-bar">${t('admin.classLogs.futureHidden', { n: future.length })}
+      <button type="button" class="secondary outline" data-class-log-future>${t(showFuture ? 'admin.classLogs.hideFuture' : 'admin.classLogs.showFuture', { n: future.length })}</button></p>` : '';
 
   return `
-    <div class="section-label">${t('admin.classLogs.listTitle', { n: logs.length })}</div>
-    ${logs.length ? logs.map(log => classLogRowHTML(log, showUsername)).join('') : `<p class="profile-empty-note">${t('admin.classLogs.emptyFor')}${adminEmptyForSuffix(selectedStudents.length)}.</p>`}
+    <div class="section-label">${t('admin.classLogs.listTitle', { n: shown.length })}</div>
+    ${futureBar}
+    ${shown.length ? shown.map(log => classLogRowHTML(log, showUsername)).join('') : `<p class="profile-empty-note">${t('admin.classLogs.emptyFor')}${adminEmptyForSuffix(selectedStudents.length)}.</p>`}
   `;
 }
 
 function wireClassLogsListBox(listBox){
+  listBox.querySelectorAll('[data-class-log-future]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      ADMIN_CLASS_LOGS_STATE.showFuture = !ADMIN_CLASS_LOGS_STATE.showFuture;
+      await refreshClassLogsListBox(listBox);
+    });
+  });
   listBox.querySelectorAll('[data-edit-class-log]').forEach(btn => {
     btn.addEventListener('click', async () => {
       ADMIN_CLASS_LOGS_STATE.editingId = Number(btn.dataset.editClassLog);

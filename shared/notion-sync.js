@@ -146,7 +146,7 @@ function notionSetupHTML(){
         <select id="notion-col-${f}" data-notion-col="${f}">
           <option value="">${t(NOTION_REQUIRED.includes(f) ? 'panel.notion.pickColumn' : 'panel.notion.noColumn')}</option>
           ${opts.map(p => `<option value="${escapeHTML(p.id)}" ${current && current[f] === p.id ? 'selected' : ''}>${escapeHTML(p.name)}</option>`).join('')}
-        </select></div>`;
+        </select>${f === 'student' ? `<small class="p-ajuda">${t('panel.notion.relationHint')}</small>` : ''}</div>`;
     };
     return `<fieldset class="p-grupo">
       <legend>${t('panel.notion.columnsTitle', { title: escapeHTML(s.title || '') })}</legend>
