@@ -1420,3 +1420,4 @@ Base: `piloto-m1/A1-1/A1-1.md`. **Pedido de mudança ao mapa congelado (decisão
      Na maquete da lição "Cumprimentar alguém": "Bonjour ou Bonsoir?" se divide em três explicações de painel (uma por cartão); "Madame, monsieur e mademoiselle" fica como nota (tem a história de 2012).
 340. **Imagens sem banco pago (a dona, 2026-11-09)**: começar com os **Fluent Emoji da Microsoft** que o projeto já usa (`shared/icons/fluent/`, licença MIT, uso comercial livre, sem custo), combinados em pequenas cenas (sol + padaria, lua + restaurante). Fotos só com licença livre conferida uma a uma (Wikimedia Commons, Openverse, Unsplash/Pexels) ou feitas pela dona;
      imagem gerada por IA fica para depois (custo e termos a conferir). Vídeo fica para depois.
+     Maquete clicável da lição 1 "Cumprimentar alguém" no formato novo: `maquete-licao-curta/` (`fonte.html` + `gerar.js`, que embute ícones e áudios em `index.html`); publicada como artifact privado em 2026-11-09.

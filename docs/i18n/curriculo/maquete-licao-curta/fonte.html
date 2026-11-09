@@ -1,0 +1,440 @@
+<title>Lição curta: Cumprimentar alguém</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap">
+<style>
+:root{
+  --paper:#FAF5EA; --paper-warm:#F0E8D8; --line:#E1D6C0; --card:#FFFFFF;
+  --ink:#201335; --ink-soft:#5C4E73;
+  --brand:#3498D6; --brand-dark:#1D5A82; --on-brand:#FFFFFF; --brand-tint:#E3F1FA;
+  --pink:#E36BCA; --pink-tint:#FBE6F6;
+  --ok:#2E6B4F; --ok-tint:#E2F2E8; --on-ok:#FFFFFF;
+  --err:#B81F13; --err-tint:#FBE4E1; --on-err:#FFFFFF;
+  --note:#8C5F0E; --note-tint:#FBF0D9;
+  --shadow:0 1px 2px rgba(32,19,53,.06),0 8px 24px rgba(32,19,53,.08);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#17121F; --paper-warm:#201A2C; --line:#362C42; --card:#211B2D;
+  --ink:#EDE6F5; --ink-soft:#C5B8D9;
+  --brand:#4DA9E8; --brand-dark:#7FC4F5; --on-brand:#201335; --brand-tint:#1B2E40;
+  --pink:#F08FE0; --pink-tint:#3A2140;
+  --ok:#52B487; --ok-tint:#173126; --on-ok:#201335;
+  --err:#FF8A7E; --err-tint:#3A1C1C; --on-err:#201335;
+  --note:#F5C25B; --note-tint:#33290F;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.35);
+  color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --paper:#17121F; --paper-warm:#201A2C; --line:#362C42; --card:#211B2D;
+  --ink:#EDE6F5; --ink-soft:#C5B8D9;
+  --brand:#4DA9E8; --brand-dark:#7FC4F5; --on-brand:#201335; --brand-tint:#1B2E40;
+  --pink:#F08FE0; --pink-tint:#3A2140;
+  --ok:#52B487; --ok-tint:#173126; --on-ok:#201335;
+  --err:#FF8A7E; --err-tint:#3A1C1C; --on-err:#201335;
+  --note:#F5C25B; --note-tint:#33290F;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.35);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:Nunito,"Segoe UI",system-ui,sans-serif;font-size:16px;line-height:1.5}
+.wrap{max-width:980px;margin:0 auto;padding-block:20px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;grid-template-columns:minmax(0,400px) minmax(0,1fr);gap:28px;align-items:start}
+@media (max-width:820px){.wrap{grid-template-columns:minmax(0,1fr)}}
+header.top{grid-column:1/-1}
+header.top h1{font-size:1.45rem;margin:0 0 4px;text-wrap:balance;font-weight:800}
+header.top p{margin:0;color:var(--ink-soft);max-width:65ch}
+.eyebrow{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;font-weight:800;color:var(--brand-dark)}
+
+/* telefone */
+.phone{background:var(--card);border:1px solid var(--line);border-radius:28px;box-shadow:var(--shadow);min-height:660px;display:flex;flex-direction:column;position:relative;overflow:hidden;width:100%;max-width:400px;justify-self:center}
+.bar{display:flex;align-items:center;gap:12px;padding:16px 18px 6px}
+.x{border:0;background:none;color:var(--ink-soft);font-size:1.3rem;cursor:pointer;line-height:1;padding:4px}
+.prog{flex:1;height:10px;border-radius:99px;background:var(--paper-warm);overflow:hidden}
+.prog i{display:block;height:100%;background:var(--brand);border-radius:99px;transition:width .3s}
+.screen{flex:1;display:flex;flex-direction:column;padding:12px 22px 22px;gap:14px}
+.screen .grow{flex:1;display:flex;flex-direction:column;gap:14px;justify-content:center}
+.tag{align-self:flex-start;font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:4px 10px;border-radius:99px;background:var(--brand-tint);color:var(--brand-dark)}
+.tag.pink{background:var(--pink-tint);color:var(--ink)}
+.tag.note{background:var(--note-tint);color:var(--ink)}
+.scene{display:flex;justify-content:center;align-items:flex-end;gap:6px;background:var(--paper-warm);border-radius:20px;padding:22px 12px;min-height:150px}
+.scene img{width:84px;height:84px}
+.scene img.sm{width:56px;height:56px}
+.grow.ex .scene{min-height:0;padding:14px 12px}
+.grow.ex .scene img{width:60px;height:60px}
+.grow.ex .scene img.sm{width:48px;height:48px}
+.grow.ex{justify-content:flex-start}
+.scene .cap{align-self:center;font-weight:700;color:var(--ink-soft);font-size:.9rem;margin-left:6px}
+.fr-big{font-size:2rem;font-weight:800;text-align:center;line-height:1.2;text-wrap:balance}
+.fr-mid{font-size:1.35rem;font-weight:800;text-align:center;text-wrap:balance}
+.tr{text-align:center;color:var(--ink-soft);font-size:1.05rem}
+.audios{display:flex;justify-content:center;flex-wrap:wrap;gap:10px}
+.aud{display:inline-flex;align-items:center;gap:8px;border:2px solid var(--line);background:var(--card);color:var(--ink);border-radius:99px;padding:8px 16px 8px 10px;font:inherit;font-weight:700;cursor:pointer}
+.aud:hover{border-color:var(--brand)}
+.aud img{width:24px;height:24px}
+.aud.round{padding:8px}
+.q{font-weight:800;font-size:1.1rem;text-wrap:balance}
+.blank{display:inline-block;min-width:4.2em;border-bottom:3px solid var(--brand);text-align:center;color:var(--brand-dark)}
+.opts{display:grid;gap:10px}
+.opts.two{grid-template-columns:1fr 1fr}
+.opt{border:2px solid var(--line);border-bottom-width:4px;background:var(--card);color:var(--ink);border-radius:16px;padding:14px;font:inherit;font-weight:800;font-size:1.1rem;cursor:pointer;text-align:center}
+.opt:hover:not(:disabled){border-color:var(--brand)}
+.opt.right{border-color:var(--ok);background:var(--ok-tint)}
+.opt.wrong{border-color:var(--err);background:var(--err-tint)}
+.opt:disabled{cursor:default}
+.btn{border:0;border-radius:16px;padding:15px;font:inherit;font-weight:800;font-size:1.05rem;cursor:pointer;background:var(--brand);color:var(--on-brand);width:100%}
+.btn:disabled{background:var(--paper-warm);color:var(--ink-soft);cursor:default}
+.btn.ghost{background:transparent;color:var(--brand-dark);border:2px solid var(--line)}
+.tiles{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.tile{border:2px solid var(--line);border-bottom-width:4px;background:var(--card);color:var(--ink);border-radius:12px;padding:8px 14px;font:inherit;font-weight:800;cursor:pointer}
+.tile:disabled{visibility:hidden}
+.answer-line{min-height:58px;border-bottom:2px solid var(--line);display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:6px 0}
+.notebox{background:var(--note-tint);border-radius:18px;padding:16px 18px}
+.notebox h3{margin:0 0 6px;font-size:1.15rem;text-wrap:balance}
+.notebox p{margin:0}
+.ex-list{display:grid;gap:8px}
+.ex-row{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:8px 10px}
+.ex-row .t{flex:1;min-width:0}
+.ex-row b{display:block}
+.ex-row span{color:var(--ink-soft);font-size:.92rem}
+/* painel de resposta */
+.panel{position:absolute;left:0;right:0;bottom:0;padding:18px 22px 22px;border-radius:24px 24px 0 0;transform:translateY(105%);transition:transform .25s ease;display:flex;flex-direction:column;gap:10px}
+.panel.show{transform:none}
+.panel.ok{background:var(--ok-tint)}
+.panel.err{background:var(--err-tint)}
+.panel h4{margin:0;font-size:1.2rem;display:flex;align-items:center;gap:8px}
+.panel.ok h4{color:var(--ok)}
+.panel.err h4{color:var(--err)}
+.panel h4 img{width:28px;height:28px}
+.panel .ans{display:flex;align-items:center;gap:10px;font-weight:800}
+.panel .ans .t{flex:1;min-width:0}
+.panel .ans span{display:block;font-weight:600;color:var(--ink-soft)}
+.panel .why{margin:0;color:var(--ink)}
+.panel.ok .btn{background:var(--ok);color:var(--on-ok)}
+.panel.err .btn{background:var(--err);color:var(--on-err)}
+.done-hero{text-align:center}
+.done-hero img{width:88px;height:88px}
+.done-hero h2{margin:6px 0 2px;font-size:1.5rem}
+.lessons{display:grid;gap:10px}
+.lesson{display:flex;gap:12px;align-items:flex-start;border:2px solid var(--line);border-radius:16px;padding:12px;background:var(--card);text-align:left;font:inherit;color:var(--ink);width:100%}
+button.lesson{cursor:pointer}
+button.lesson:hover{border-color:var(--brand)}
+.lesson .n{flex:none;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-weight:800;background:var(--paper-warm);color:var(--ink-soft)}
+.lesson.done .n{background:var(--ok);color:var(--on-ok)}
+.lesson.newl{border-color:var(--pink)}
+.lesson .t{flex:1;min-width:0}
+.lesson b{display:block}
+.lesson small{color:var(--ink-soft);display:block;line-height:1.35}
+.qa{display:inline-block;font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:1px 6px;border-radius:6px;background:var(--brand-tint);color:var(--brand-dark);margin-right:4px}
+.qa.r{background:var(--pink-tint);color:var(--ink)}
+.bubbles{display:grid;gap:10px}
+.bub{display:flex;gap:8px;align-items:flex-end}
+.bub.b{flex-direction:row-reverse}
+.bub img{width:40px;height:40px;flex:none}
+.bub .txt{background:var(--paper-warm);border-radius:16px;padding:8px 12px;min-width:0}
+.bub.b .txt{background:var(--brand-tint)}
+.bub .txt b{display:block}
+.bub .txt span{font-size:.9rem;color:var(--ink-soft)}
+.bub .aud{padding:4px;border-width:1px}
+.bub .aud img{width:20px;height:20px}
+
+/* coluna de comentários */
+aside{display:grid;gap:16px;min-width:0}
+.why-box{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px 18px}
+.why-box h2{margin:2px 0 6px;font-size:1.05rem}
+.why-box p{margin:0 0 6px;max-width:65ch}
+.why-box p:last-child{margin-bottom:0}
+.why-box ul{margin:4px 0 0;padding-left:18px}
+.why-box li{margin:3px 0}
+.jump{display:flex;flex-wrap:wrap;gap:6px}
+.jump button{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:99px;padding:5px 11px;font:inherit;font-size:.82rem;font-weight:700;cursor:pointer}
+.jump button[aria-current="true"]{background:var(--brand);color:var(--on-brand);border-color:var(--brand)}
+.small{font-size:.85rem;color:var(--ink-soft)}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="eyebrow">Maquete · Unidade 1 "Cumprimentar e se despedir" · módulo "Apresentar-se"</div>
+    <h1>Lição 1 "Cumprimentar alguém" no formato de lição curta</h1>
+    <p>Clique como se fosse a aluna. Ao lado, o porquê de cada tela. Nada disso está no app ainda.</p>
+  </header>
+
+  <main class="phone" id="phone" aria-live="polite">
+    <div class="bar">
+      <button class="x" id="restart" title="Recomeçar a lição" aria-label="Recomeçar a lição">✕</button>
+      <div class="prog"><i id="progbar" style="width:0%"></i></div>
+    </div>
+    <div class="screen" id="screen"></div>
+    <div class="panel" id="panel" role="status"></div>
+  </main>
+
+  <aside>
+    <div class="why-box">
+      <div class="eyebrow">Esta tela</div>
+      <h2 id="why-title"></h2>
+      <div id="why-text"></div>
+    </div>
+    <div class="why-box">
+      <div class="eyebrow">Ir para</div>
+      <div class="jump" id="jump"></div>
+    </div>
+    <div class="why-box">
+      <div class="eyebrow">Sobre a maquete</div>
+      <ul>
+        <li><b>Imagens</b>: Fluent Emoji da Microsoft, os mesmos ícones que o site já usa (licença MIT, grátis, uso comercial livre). Cenas montadas juntando dois ou três ícones.</li>
+        <li><b>Áudio</b>: <i>salut</i>, <i>bonjour</i>, <i>bonsoir</i> e <i>Salut ! Ça va bien ?</i> são os áudios reais do site. O resto usa a voz do navegador só na maquete; no app, tudo terá áudio gerado.</li>
+        <li><b>Grátis x Premium</b>: a lição inteira é grátis, como a trilha hoje.</li>
+        <li>Erro não trava: no app, a tela errada volta no fim da lição (como no Busuu). Aqui ela só segue.</li>
+      </ul>
+    </div>
+  </aside>
+</div>
+
+<script>
+/*__ASSETS__*/
+
+/* ---------- áudio ---------- */
+let current=null;
+function speak(text){
+  try{ if(current){current.pause();current=null} }catch(e){}
+  const src=AUD[text];
+  if(src){ current=new Audio(src); current.play().catch(()=>{}); return; }
+  try{
+    if(!('speechSynthesis' in window)) return;
+    speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(text.replace(/\s*\/\s*/g,', '));
+    u.lang='fr-FR'; u.rate=.9;
+    const v=speechSynthesis.getVoices().find(v=>/^fr/i.test(v.lang)); if(v) u.voice=v;
+    speechSynthesis.speak(u);
+  }catch(e){}
+}
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const img=(k,cls)=>`<img src="${IMG[k]}" alt="" class="${cls||''}">`;
+const audBtn=(text,label)=>`<button class="aud${label?'':' round'}" data-say="${esc(text)}" aria-label="Ouvir ${esc(text)}">${img('1f50a')}${label?esc(label):''}</button>`;
+
+/* ---------- telas ---------- */
+const S=[
+ {id:'intro',chip:'Início',type:'intro',
+  why:['Abertura com o objetivo','<p>Título pela função, como no Busuu, e o tamanho da lição: 4 cartões e 1 frase, uns 2 minutos (a mediana medida hoje é 1 min 48 s por lição de vocabulário).</p>']},
+ {id:'salut',chip:'salut / coucou',type:'item',kind:'Palavra nova',fr:'salut / coucou',tr:'oi / olá',scene:['1f44b'],
+  audios:[['salut','salut'],['coucou','coucou']],
+  why:['Cartão novo, sozinho na tela','<p>Decisão 338, ponto 3: o cartão aparece sozinho, com imagem e áudio, sem frase nem explicação. Só depois vem o exercício.</p><p>Par na mesma tela, um áudio para cada palavra.</p>']},
+ {id:'ex-salut',chip:'Complete',type:'complete',
+  scene:['1f9d1','1f44b','1f469'],
+  before:'',after:' ! Ça va bien ?',tr:'Oi! Tudo bem?',
+  opts:['Salut','Salu'],answer:'Salut',full:'Salut ! Ça va bien ?',
+  why_ok:'<b>Salut</b> funciona a qualquer hora, mas só com amigos e pessoas próximas. <b>Coucou</b> é ainda mais próximo: família, amigos e crianças.',
+  why:['"Complete" com 2 opções','<p>Ponto 3: a certa e um erro de grafia (<i>Salu</i>), que obriga a olhar a palavra escrita.</p><p>O painel traz a <b>explicação curta</b>. Ela vem da nota "Bonjour ou Bonsoir?", que nesta proposta <b>se divide em três painéis</b>, um por cartão (decisão 339).</p>']},
+ {id:'bonjour',chip:'bonjour',type:'item',kind:'Palavra nova',fr:'bonjour',tr:'olá / bom dia',scene:['2600'],
+  audios:[['bonjour','bonjour']],
+  why:['Cartão novo','<p>O sol diz "de dia" sem precisar de texto. Imagem simples, de graça e já no repositório.</p>']},
+ {id:'ex-bonjour',chip:'V ou F',type:'vf',scene:['2600','1f35e'],cap:'9h, na padaria',
+  stmt:'Às 9h, para cumprimentar o padeiro, dizemos <i>Bonjour !</i>',answer:true,full:'Bonjour !',fullTr:'Bom dia!',
+  why_ok:'<b>Bonjour</b> é o cumprimento padrão do dia: de manhã até o fim da tarde, com qualquer pessoa.',
+  why:['Verdadeiro ou falso','<p>Ponto 3: V/F com uma cena. A explicação do painel é a segunda parte da nota "Bonjour ou Bonsoir?".</p>']},
+ {id:'bonsoir',chip:'bonsoir',type:'item',kind:'Palavra nova',fr:'bonsoir',tr:'boa noite (ao chegar)',scene:['1f319'],
+  audios:[['bonsoir','bonsoir']],
+  why:['Cartão novo','<p>Lua para a noite. A tradução continua dizendo "ao chegar", como no cartão publicado.</p>']},
+ {id:'ex-bonsoir',chip:'Pergunta de função',type:'funcao',scene:['1f319','1f37d'],cap:'20h, no restaurante',
+  q:'Você chega num restaurante às 20h. O que você diz ao garçom?',
+  opts:['Bonsoir !','Salut !','Bonjour !'],answer:'Bonsoir !',fullTr:'Boa noite!',
+  why_ok:'À noite, ao chegar num lugar, trocamos <b>bonjour</b> por <b>bonsoir</b>. <b>Salut</b> fica para os amigos.',
+  why:['Pergunta de função','<p>Ponto 1: a situação está na tela e a aluna escolhe <b>o que dizer</b>. Treina a função (cumprimentar à noite, com um desconhecido), não só a tradução.</p><p>As três opções já foram vistas; o erro em <i>Salut</i> ensina o registro.</p>']},
+ {id:'monsieur',chip:'monsieur / madame',type:'item',kind:'Palavra nova',fr:'monsieur / madame',tr:'senhor / senhora',scene:['1f468','1f469'],
+  audios:[['monsieur','monsieur'],['madame','madame']],
+  why:['Cartão novo em par','<p>Um ícone para cada palavra do par. É o gatilho da nota que vem a seguir.</p>']},
+ {id:'nota',chip:'Nota',type:'nota',kind:'Nota · realidade',title:'Madame, monsieur e mademoiselle',
+  text:'Para falar com um homem que você não conhece, diga <strong>monsieur</strong>; com uma mulher, <strong>madame</strong>. Hoje, <strong>madame</strong> serve para qualquer mulher adulta, casada ou não. <strong>Mademoiselle</strong> (senhorita) ainda aparece, mas é evitado: muita gente acha antiquado ou indelicado, e em 2012 a França tirou essa opção dos formulários oficiais.',
+  ex:[['Bonjour, monsieur !','Bom dia, senhor!'],['Bonjour, madame !','Bom dia, senhora!'],['mademoiselle','senhorita (hoje evitado)']],
+  why:['Nota que continua nota','<p>Decisão 339: esta não cabe em uma frase de painel (tem a regra, a exceção e a história de 2012), então fica numa <b>tela própria</b>, logo depois do gatilho (o cartão <i>monsieur / madame</i>).</p><p>O mesmo vale para conjugações e sistematizações.</p>']},
+ {id:'ex-nota',chip:'V ou F da nota',type:'vf',scene:['1f469'],cap:'uma moça que você não conhece',
+  stmt:'Para falar com uma moça que você não conhece, o mais seguro é dizer <i>mademoiselle</i>.',answer:false,full:'Bonjour, madame !',fullTr:'Bom dia, senhora!',
+  why_ok:'<b>Mademoiselle</b> hoje é evitado. Use <b>madame</b> para qualquer mulher adulta.',
+  why:['V/F logo depois da nota','<p>O V/F da nota já existe no rascunho aprovado da unidade 1. Aqui ele só ganha o painel com a resposta em francês e o áudio.</p>']},
+ {id:'frase',chip:'Frase nova',type:'item',kind:'Frase nova',fr:'Bonjour, madame !',tr:'Bom dia, senhora!',scene:['2600','1f469'],
+  audios:[['Bonjour, madame !','']],
+  why:['A frase-modelo como cartão','<p>Ponto 2: a frase do cartão <i>bonjour</i> (que antes ficava no "Na frase", na mesma tela) agora é um <b>cartão próprio</b>, com tela, áudio e revisão.</p><p>Ela vem depois de <i>madame</i>, para que todas as palavras já tenham sido vistas.</p>']},
+ {id:'montar',chip:'Monte a frase',type:'montar',scene:['1f319','1f468'],
+  tr:'Boa noite, senhor!',tiles:['madame','Bonsoir,','!','monsieur','Bonjour,'],answer:['Bonsoir,','monsieur','!'],full:'Bonsoir, monsieur !',
+  why_ok:'À noite, <b>bonsoir</b>; para um homem, <b>monsieur</b>.',
+  why:['A frase montada na tela seguinte','<p>Critério 5 da dona (Memrise): a frase é construída <b>em telas seguintes</b>, não na mesma tela do cartão. Esta é a frase do cartão <i>bonsoir</i>.</p><p>Duas peças sobram de propósito (<i>madame</i>, <i>Bonjour,</i>).</p>']},
+ {id:'fim',chip:'Fim da lição',type:'fim',
+  list:[['salut / coucou','oi / olá'],['bonjour','olá / bom dia'],['bonsoir','boa noite (ao chegar)'],['monsieur / madame','senhor / senhora'],['Bonjour, madame !','Bom dia, senhora!'],['Bonsoir, monsieur !','Boa noite, senhor!']],
+  why:['Tela final com a lista','<p>Ponto 4: a lição termina com <b>tudo o que foi visto, com áudio</b>, para ouvir de novo antes de seguir. Foi a tela do Busuu de que você mais gostou.</p>']},
+ {id:'unidade',chip:'A unidade',type:'unidade',
+  why:['Como a unidade fica','<p>Ponto 4: os dois diálogos saem do fim das lições 2 e 4 e viram a <b>lição 5, só de diálogos</b>, antes da Revisão da unidade.</p><p>Ponto 1: na lição 2, a <b>pergunta e a resposta são cartões</b> (marcadas aqui como P e R). Os itens das lições 2 a 4 ainda serão redesenhados com você.</p><p>Clique na lição 5 para ver o começo dela.</p>']},
+ {id:'dialogo',chip:'Lição de diálogo',type:'dialogo',
+  why:['A lição de diálogo','<p>"Encontro na rua", que hoje fecha a lição 2. Cada fala com áudio e tradução; depois, as checagens que o rascunho já tem (completar, ouvir, entender).</p>']}
+];
+
+/* ---------- estado ---------- */
+let i=0, interacted=false, picked=[];
+const $=id=>document.getElementById(id);
+const screen=$('screen'), panel=$('panel');
+
+function setProgress(){
+  const total=S.findIndex(s=>s.id==='fim');
+  $('progbar').style.width=Math.min(100,Math.round(Math.min(i,total)/total*100))+'%';
+}
+function setWhy(){
+  const s=S[i]; $('why-title').textContent=s.why[0]; $('why-text').innerHTML=s.why[1];
+  [...$('jump').children].forEach((b,k)=>b.setAttribute('aria-current',k===i?'true':'false'));
+}
+function sceneHTML(s){
+  if(!s.scene) return '';
+  const many=s.scene.length>2;
+  return `<div class="scene">${s.scene.map(k=>img(k,many?'sm':'')).join('')}${s.cap?`<span class="cap">${esc(s.cap)}</span>`:''}</div>`;
+}
+function go(n){
+  i=Math.max(0,Math.min(S.length-1,n)); picked=[];
+  panel.className='panel'; panel.innerHTML=''; screen.style.paddingBottom='';
+  render(); setProgress(); setWhy();
+}
+function next(){ go(i+1); }
+
+function showPanel(ok, s, extra){
+  const fr=s.full||s.answer, tr=s.fullTr||s.tr||'';
+  panel.className='panel show '+(ok?'ok':'err');
+  panel.innerHTML=`<h4>${img(ok?'2705':'274c')}${ok?'Muito bem!':'Quase!'}</h4>
+    <div class="ans"><div class="t">${esc(typeof fr==='string'?fr:'')}<span>${esc(tr)}</span></div>${audBtn(typeof fr==='string'?fr:'','')}</div>
+    <p class="why">${extra||s.why_ok}</p>
+    <button class="btn" id="cont">Continuar</button>`;
+  $('cont').onclick=next; $('cont').focus({preventScroll:true});
+  screen.style.paddingBottom=(panel.offsetHeight+12)+'px';
+  if(typeof fr==='string') speak(fr);
+}
+
+function render(){
+  const s=S[i]; let h='';
+  if(s.type==='intro'){
+    h=`<div class="grow">
+      <span class="tag">Lição 1 de 5</span>
+      <div class="scene">${img('1f44b')}${img('2600','sm')}${img('1f319','sm')}</div>
+      <div class="fr-mid" style="text-align:left">Cumprimentar alguém</div>
+      <p style="margin:0">Você vai aprender a cumprimentar de dia e à noite, entre amigos e com quem você não conhece.</p>
+      <p class="small" style="margin:0">4 palavras · 2 frases · cerca de 2 minutos</p>
+    </div><button class="btn" id="go">Começar</button>`;
+  }
+  if(s.type==='item'){
+    h=`<span class="tag ${s.kind==='Frase nova'?'pink':''}">${s.kind}</span>
+    <div class="grow">${sceneHTML(s)}
+      <div class="${s.fr.length>14?'fr-mid':'fr-big'}">${esc(s.fr)}</div>
+      <div class="tr">${esc(s.tr)}</div>
+      <div class="audios">${s.audios.map(([t,l])=>audBtn(t,l)).join('')}</div>
+    </div><button class="btn" id="go">Continuar</button>`;
+  }
+  if(s.type==='complete'){
+    h=`<span class="tag">Complete</span><div class="grow ex">${sceneHTML(s)}
+      <div class="fr-mid">${esc(s.before)}<span class="blank" id="blank">&nbsp;</span>${esc(s.after)}</div>
+      <div class="tr">${esc(s.tr)}</div>
+      <div class="opts two">${s.opts.map(o=>`<button class="opt" data-o="${esc(o)}">${esc(o)}</button>`).join('')}</div></div>`;
+  }
+  if(s.type==='vf'){
+    h=`<span class="tag">Verdadeiro ou falso?</span><div class="grow ex">${sceneHTML(s)}
+      <p class="q" style="margin:0">${s.stmt}</p>
+      <div class="opts two"><button class="opt" data-o="true">Verdadeiro</button><button class="opt" data-o="false">Falso</button></div></div>`;
+  }
+  if(s.type==='funcao'){
+    h=`<span class="tag">O que você diz?</span><div class="grow ex">${sceneHTML(s)}
+      <p class="q" style="margin:0">${esc(s.q)}</p>
+      <div class="opts">${s.opts.map(o=>`<button class="opt" data-o="${esc(o)}">${esc(o)}</button>`).join('')}</div></div>`;
+  }
+  if(s.type==='nota'){
+    h=`<span class="tag note">${s.kind}</span><div class="grow" style="justify-content:flex-start">
+      <div class="notebox"><h3>${esc(s.title)}</h3><p>${s.text}</p></div>
+      <div class="ex-list">${s.ex.map(([f,t])=>`<div class="ex-row">${audBtn(f,'')}<div class="t"><b>${esc(f)}</b><span>${esc(t)}</span></div></div>`).join('')}</div>
+    </div><button class="btn" id="go">Entendi</button>`;
+  }
+  if(s.type==='montar'){
+    h=`<span class="tag">Monte a frase</span><div class="grow ex">${sceneHTML(s)}
+      <div class="tr" style="font-weight:700;color:var(--ink)">${esc(s.tr)}</div>
+      <div class="answer-line" id="line"></div>
+      <div class="tiles">${s.tiles.map((t,k)=>`<button class="tile" data-k="${k}">${esc(t)}</button>`).join('')}</div>
+    </div><button class="btn" id="check" disabled>Verificar</button>`;
+  }
+  if(s.type==='fim'){
+    h=`<div class="done-hero">${img('1f389')}<h2>Lição concluída!</h2><p class="small" style="margin:0">Você viu nesta lição:</p></div>
+      <div class="ex-list">${s.list.map(([f,t])=>`<div class="ex-row">${audBtn(f,'')}<div class="t"><b>${esc(f)}</b><span>${esc(t)}</span></div></div>`).join('')}</div>
+      <p class="small" style="margin:0;text-align:center">Esses cartões já entram na sua Revisão.</p>
+      <button class="btn" id="go">Continuar</button>`;
+  }
+  if(s.type==='unidade'){
+    h=`<span class="tag">Unidade 1 · Cumprimentar e se despedir</span>
+    <div class="lessons">
+      <div class="lesson done"><span class="n">✓</span><div class="t"><b>Cumprimentar alguém</b><small>salut / coucou · bonjour · bonsoir · monsieur / madame · 2 frases</small></div></div>
+      <div class="lesson"><span class="n">2</span><div class="t"><b>Perguntar como a pessoa está e responder</b><small><span class="qa">P</span>ça va ? · tu vas bien ? / vous allez bien ?<br><span class="qa r">R</span>ça va · je vais bien · et toi ? / et vous ?</small></div></div>
+      <div class="lesson"><span class="n">3</span><div class="t"><b>Fórmulas de cortesia</b><small>merci · de rien · pardon · s'il te plaît / s'il vous plaît · excuse-moi / excusez-moi</small></div></div>
+      <div class="lesson"><span class="n">4</span><div class="t"><b>Despedir-se</b><small>au revoir · à bientôt · bonne journée / bonne soirée</small></div></div>
+      <button class="lesson newl" id="dlg"><span class="n">5</span><div class="t"><b>Diálogos da unidade</b><small>Encontro na rua (informal) · Na portaria (formal)</small></div></button>
+      <div class="lesson"><span class="n">★</span><div class="t"><b>Revisão da unidade</b><small>como hoje</small></div></div>
+    </div>`;
+  }
+  if(s.type==='dialogo'){
+    const L=[['A','Salut ! Tu vas bien ?','Oi! Você está bem?'],['B','Je vais bien, et toi ?','Estou bem, e você?'],['A','Ça va !','Tudo bem!']];
+    h=`<span class="tag pink">Lição 5 · Diálogos</span>
+      <div class="fr-mid" style="text-align:left;font-size:1.15rem">Encontro na rua</div>
+      <p class="small" style="margin:0">De manhã, na rua do bairro: Léa encontra o vizinho Hugo.</p>
+      <div class="bubbles">${L.map(([w,f,t])=>`<div class="bub ${w==='B'?'b':''}">${img(w==='A'?'1f469':'1f468')}<div class="txt"><b>${esc(f)}</b><span>${esc(t)}</span></div>${audBtn(f,'')}</div>`).join('')}</div>
+      <p class="q" style="margin:0">Como o Hugo está?</p>
+      <div class="opts">${['Bem','Mal','Cansado'].map(o=>`<button class="opt" data-o="${o}">${o}</button>`).join('')}</div>
+      <button class="btn ghost" id="again">Ver a lição 1 de novo</button>`;
+  }
+  screen.innerHTML=h;
+  bind(s);
+  if(s.type==='item' && interacted) speak(s.audios.length===1?s.audios[0][0]:s.fr);
+}
+
+function bind(s){
+  const g=$('go'); if(g) g.onclick=next;
+  if(s.type==='complete'||s.type==='funcao'||s.type==='vf'){
+    screen.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{
+      const v=b.dataset.o; const ok = s.type==='vf' ? (String(s.answer)===v) : v===s.answer;
+      screen.querySelectorAll('.opt').forEach(x=>{
+        x.disabled=true;
+        const isAns = s.type==='vf' ? x.dataset.o===String(s.answer) : x.dataset.o===s.answer;
+        if(isAns) x.classList.add('right'); else if(x===b) x.classList.add('wrong');
+      });
+      if(s.type==='complete'){ $('blank').textContent=s.answer; }
+      let extra=null;
+      if(!ok && s.id==='ex-bonsoir' && v==='Salut !') extra='<b>Salut</b> é só para amigos e pessoas próximas, e o garçom você não conhece. À noite, ao chegar num lugar, dizemos <b>bonsoir</b>.';
+      if(!ok && s.id==='ex-bonsoir' && v==='Bonjour !') extra='<b>Bonjour</b> vale até o fim da tarde. Às 20h, ao chegar num lugar, dizemos <b>bonsoir</b>.';
+      if(!ok && s.id==='ex-salut') extra='Atenção à grafia: <b>salut</b> termina em <b>t</b>, que não se pronuncia. '+s.why_ok;
+      showPanel(ok,s,extra);
+    });
+  }
+  if(s.type==='montar'){
+    const line=$('line'), chk=$('check');
+    const draw=()=>{
+      line.innerHTML=picked.map((k,p)=>`<button class="tile" data-p="${p}">${esc(s.tiles[k])}</button>`).join('');
+      screen.querySelectorAll('.tiles .tile').forEach(t=>t.disabled=picked.includes(+t.dataset.k));
+      line.querySelectorAll('.tile').forEach(t=>t.onclick=()=>{picked.splice(+t.dataset.p,1);draw();});
+      chk.disabled=!picked.length;
+    };
+    screen.querySelectorAll('.tiles .tile').forEach(t=>t.onclick=()=>{picked.push(+t.dataset.k);draw();});
+    chk.onclick=()=>{
+      const got=picked.map(k=>s.tiles[k]); const ok=got.join(' ')===s.answer.join(' ');
+      chk.disabled=true; showPanel(ok,{...s,full:s.full,fullTr:s.tr},ok?null:'A frase certa é <b>Bonsoir, monsieur !</b> '+s.why_ok);
+    };
+  }
+  if(s.type==='unidade'){ $('dlg').onclick=next; }
+  if(s.type==='dialogo'){
+    screen.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{
+      const ok=b.dataset.o==='Bem';
+      screen.querySelectorAll('.opt').forEach(x=>{x.disabled=true; if(x.dataset.o==='Bem') x.classList.add('right'); else if(x===b) x.classList.add('wrong');});
+      panel.className='panel show '+(ok?'ok':'err');
+      panel.innerHTML=`<h4>${img(ok?'2705':'274c')}${ok?'Muito bem!':'Quase!'}</h4><div class="ans"><div class="t">Je vais bien, et toi ?<span>Estou bem, e você?</span></div>${audBtn('Je vais bien, et toi ?','')}</div><p class="why">O Hugo responde <b>Je vais bien</b>: ele está bem.</p><button class="btn" id="cont">Voltar ao início</button>`;
+      $('cont').onclick=()=>go(0); screen.style.paddingBottom=(panel.offsetHeight+12)+'px';
+    });
+    $('again').onclick=()=>go(1);
+  }
+}
+
+document.addEventListener('click',e=>{
+  interacted=true;
+  const a=e.target.closest('[data-say]'); if(a){ e.preventDefault(); speak(a.dataset.say); }
+});
+$('restart').onclick=()=>go(0);
+$('jump').innerHTML=S.map((s,k)=>`<button data-j="${k}">${esc(s.chip)}</button>`).join('');
+$('jump').onclick=e=>{const b=e.target.closest('[data-j]'); if(b) go(+b.dataset.j);};
+try{ speechSynthesis.getVoices(); }catch(e){}
+go(0);
+</script>
