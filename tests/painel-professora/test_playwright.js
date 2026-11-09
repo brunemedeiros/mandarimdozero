@@ -328,6 +328,7 @@ const PANEL_STUB = (who) => {
       L('aulas: Todos não deixa ninguém marcado no formulário', await ev(() => !document.querySelector('[data-classlog-student-checkbox]:checked, [data-classlog-classroom-checkbox]:checked') && document.getElementById('admin-create-class-log-btn').disabled));
       await page.check('[data-classlog-classroom-checkbox][value="501"]');
       L('aulas: em Todos, marcar a turma no formulário não esconde as outras aulas', await ev(() => document.querySelectorAll('#admin-classlogs-list-box [data-edit-class-log]').length === 2));
+      if (SHOTS) await page.addStyleTag({ content: '.toast, #toast-container, .toast-stack, header, .topbar, .app-header{ visibility:hidden !important; }' });
       if (SHOTS) await page.locator('#admin-classlogs-register').screenshot({ path: `${SHOTS}/${lang}-${theme}-${width}-aulas-caixas.png` });
       L('aulas: Alunos, Turmas, Nova aula e Aulas registradas em caixas do painel', await ev(() => document.getElementById('admin-classlogs-register').classList.contains('painel')
         && document.querySelectorAll('#admin-classlogs-register > details.aulas-box').length === 4 && /\(2\)/.test(document.querySelector('[data-classlog-count]').textContent)));
