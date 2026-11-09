@@ -589,7 +589,7 @@ Número 086 já usado por outras conversas (`086_friends_streak_milestones_and_c
   internas); função `notion-sync` v1 publicada (secrets colocados pela autora em 2026-11-08: sem login = 401).
 - Produção (2026-11-08, autorizada): migration aplicada (versão 20261108171207; 5 tabelas, cron `7 * * * *`, sem execute para anon,
   955 aulas antes e depois); função `notion-sync` v1 (sem login = 401, callback sem estado = 400 "Link expirado").
-  ATENÇÃO: a `main` tem outra `128_review_bank_agent_state_pending` (outra sessão); número repetido, como 072/073.
+  A outra 128 da `main` virou `129_review_bank_agent_state_pending` (outra sessão).
 - Ajuste na mesclagem: a caixa virou `<div class="painel"><details class="notion-box">` porque `PainelUI.confirmar()` prende a
   janela no 1º `.painel` visível e, num `<details>` fechado, a janela não aparecia (quebrava "Apagar material", 210/210 de novo).
 - Testes: SQL local 128 19/19; peças `tests/notion/test_map.mjs` 10/10; painel-professora 793/793 (com a caixa do Notion);
