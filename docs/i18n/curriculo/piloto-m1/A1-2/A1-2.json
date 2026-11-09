@@ -1,7 +1,7 @@
 {
- "_doc": "Rascunho da unidade A1-2 'Dizer o nome e a nacionalidade' (módulo 'Apresentar-se', A1-m1), desenhada pelas decisões 326 a 328 do docs/i18n/curriculo/12-decisoes-apos-maquete-m1.md, no modelo do piloto A1-1. Só pt-BR: os campos 'en' ficam null até a aprovação da dona (decisão 81). Nada daqui está em fr/content.js nem na camada courses/fr-pt-BR/layer.js. Chave estável: a publicada em fr/published_ids.json; item novo = 'nova' (a chave definitiva sai de node fr/scripts/congelar_chaves.js). Ordem dos cartões, lições, notas (com exemplos) e diálogo: dados/mapa.json (fonte única; o validar.js confere). Leitura para a dona: A1-2.md. Validação: node docs/i18n/curriculo/piloto-m1/A1-2/validar.js.",
- "status": "aprovado",
- "versao": "2026-11-08",
+ "_doc": "Rascunho da unidade A1-2 'Dizer o nome e a nacionalidade' (módulo 'Apresentar-se', A1-m1), desenhada pelas decisões 326 a 328 e ajustada pela 330 do docs/i18n/curriculo/12-decisoes-apos-maquete-m1.md, no modelo do piloto A1-1. Só pt-BR: os campos 'en' ficam null até a aprovação da dona (decisão 81). Nada daqui está em fr/content.js nem na camada courses/fr-pt-BR/layer.js. Chave estável: a publicada em fr/published_ids.json; item novo = 'nova' (a chave definitiva sai de node fr/scripts/congelar_chaves.js). Ordem dos cartões, lições, notas (com exemplos) e diálogo: dados/mapa.json (fonte única; o validar.js confere). Leitura para a dona: A1-2.md. Validação: node docs/i18n/curriculo/piloto-m1/A1-2/validar.js.",
+ "status": "aprovado; pedido de mudança das decisões 330 a 332 aplicado (2026-11-09)",
+ "versao": "2026-11-09",
  "unidade": {
   "id": "A1-2",
   "id_funcao": "dizer-o-nome-e-a-nacionalidade",
@@ -22,7 +22,7 @@
    "muda": true,
    "motivo": "as lições novas: dizer o nome, soletrar (alfabeto), dizer a nacionalidade e a que não é (decisões 326 e 327)"
   },
-  "tamanho": "14 cartões (4 + 4 + 6), 3 lições (a 2ª de pronúncia) + Revisão da unidade, 7 notas, 1 diálogo no fim da lição 3; lição 3 com 6 cartões aceita pela dona (decisões 326 e 327)",
+  "tamanho": "15 cartões (5 + 4 + 6), 3 lições (a 2ª de pronúncia) + Revisão da unidade, 8 notas, 1 diálogo no fim da lição 3; lição 3 com 6 cartões aceita pela dona (decisões 326 e 327); decisão 330: + enchanté / enchantée (lição 1), + nota \"Os acentos ao soletrar\" (lição 2), ne… pas só de reconhecimento",
   "gramatica_do_mapa": "être (fórmula je suis, tu es); tônicos 1 (moi, toi, vous); negação ne… pas (1ª aparição)",
   "versao_gratis": "menção breve de \"Gramática: être e avoir\", \"Gramática: masculino e feminino\" e \"Gramática: adjetivos\" (versao_gratis_em das gramáticas, decisão 260)",
   "gratis_premium": "Tudo da unidade é grátis (lições, cartões, notas, V/F, diálogo, lição de pronúncia, Revisão da unidade). Desafios do módulo são Premium (paywall hoje desligado); o ditado do módulo segue aberto."
@@ -83,6 +83,19 @@
   {
    "ordem": 4,
    "chave": "nova",
+   "fr": "enchanté / enchantée",
+   "traducao": {
+    "pt-BR": "prazer",
+    "en": null
+   },
+   "licao": "pronomes-e-nome",
+   "origem": "novo",
+   "muda": "novo (decisão 330, item 7): par masculino / feminino, no fim da lição 1, que fica com 5 cartões",
+   "frase_do_cartao": "nova-enchante"
+  },
+  {
+   "ordem": 5,
+   "chave": "nova",
    "fr": "le prénom",
    "traducao": {
     "pt-BR": "o nome (o primeiro nome)",
@@ -94,7 +107,7 @@
    "frase_do_cartao": "nova-prenom"
   },
   {
-   "ordem": 5,
+   "ordem": 6,
    "chave": "A1-2-v3",
    "fr": "le nom",
    "traducao": {
@@ -107,7 +120,7 @@
    "frase_do_cartao": "nova-nom"
   },
   {
-   "ordem": 6,
+   "ordem": 7,
    "chave": "nova",
    "fr": "épeler",
    "traducao": {
@@ -120,7 +133,7 @@
    "frase_do_cartao": "nova-epeler"
   },
   {
-   "ordem": 7,
+   "ordem": 8,
    "chave": "nova",
    "fr": "Ça s'écrit comment ?",
    "traducao": {
@@ -133,7 +146,7 @@
    "frase_do_cartao": "nova-ecrit"
   },
   {
-   "ordem": 8,
+   "ordem": 9,
    "chave": "A1-2-v4",
    "fr": "être",
    "traducao": {
@@ -146,7 +159,7 @@
    "frase_do_cartao": "nova-etre"
   },
   {
-   "ordem": 9,
+   "ordem": 10,
    "chave": "A1-2-v9",
    "fr": "le pays",
    "traducao": {
@@ -159,7 +172,7 @@
    "frase_do_cartao": "A1-2-p2"
   },
   {
-   "ordem": 10,
+   "ordem": 11,
    "chave": "A1-2-v7",
    "fr": "français / française",
    "traducao": {
@@ -172,7 +185,7 @@
    "frase_do_cartao": "A1-2-p3"
   },
   {
-   "ordem": 11,
+   "ordem": 12,
    "chave": "A1-2-v8",
    "fr": "brésilien / brésilienne",
    "traducao": {
@@ -185,7 +198,7 @@
    "frase_do_cartao": "nova-bresilienne"
   },
   {
-   "ordem": 12,
+   "ordem": 13,
    "chave": "A1-9-v2",
    "fr": "américain / américaine",
    "traducao": {
@@ -194,11 +207,11 @@
    },
    "licao": "nacionalidades",
    "origem": "publicado",
-   "muda": "vem de \"Dizer de onde é e onde mora\" com a chave (decisões 327 e 328)",
+   "muda": "vem de \"Dizer de onde é, onde mora e que línguas fala\" com a chave (decisões 327 e 328)",
    "frase_do_cartao": "nova-americaine"
   },
   {
-   "ordem": 13,
+   "ordem": 14,
    "chave": "nova",
    "fr": "ne… pas",
    "traducao": {
@@ -207,8 +220,9 @@
    },
    "licao": "nacionalidades",
    "origem": "novo",
-   "muda": "novo (decisão 326 e 327): gatilho da nota e do diálogo da negação",
-   "frase_do_cartao": "nova-ne-pas"
+   "muda": "novo (decisões 326 e 327): gatilho da nota e do diálogo da negação; só de reconhecimento (decisão 330, item 3): um cartão só, do francês para o português, sem verso",
+   "frase_do_cartao": "nova-ne-pas",
+   "reconhecimento_so": true
   }
  ],
  "licoes": [
@@ -226,7 +240,8 @@
     "A1-2-v0",
     "A1-2-v1",
     "A1-2-v2",
-    "nova: moi, c'est…"
+    "nova: moi, c'est…",
+    "nova: enchanté / enchantée"
    ],
    "inclui_dialogo": false,
    "sequencia": [
@@ -238,6 +253,7 @@
     "nota Tu t'appelles comment ? + V/F",
     "cartão moi, c'est…",
     "nota Moi, toi, vous: para dar destaque + V/F",
+    "cartão enchanté / enchantée",
     "checagem rápida",
     "praticando"
    ]
@@ -268,7 +284,8 @@
     "cartão épeler",
     "nota O alfabeto em francês (grade com 🔊 por letra)",
     "cartão Ça s'écrit comment ?",
-    "prática de pronúncia: ouvir a letra e escolher (G/J, E/I, U); ouvir um nome soletrado e digitar (Ana, Léo, Dubois)",
+    "nota Os acentos ao soletrar + V/F",
+    "prática de pronúncia: ouvir a letra e escolher (G/J, E/I, U); ouvir um nome soletrado e digitar (Ana, Léo, Dubois); acentos só de reconhecimento: ouvir um nome soletrado com acento e escolher a grafia certa (Léo, François), sem pedir para dizer ou escrever o nome do acento (decisão 330)",
     "checagem rápida",
     "praticando"
    ]
@@ -473,6 +490,15 @@
    "ilustra": "nova: moi, c'est…",
    "papel": "essencial",
    "motivo": "frase do cartão; gatilho da nota de tônicos"
+  },
+  {
+   "chave": "nova",
+   "id_rascunho": "nova-enchante",
+   "fr": "Enchantée, moi, c'est Ana.",
+   "pt-BR": "Prazer, eu sou a Ana.",
+   "ilustra": "nova: enchanté / enchantée",
+   "papel": "essencial",
+   "motivo": "frase do cartão (proposta, decisão 330): só palavras da lição 1 (moi, c'est… vem logo antes); feminino porque quem fala é a Ana"
   },
   {
    "chave": "nova",
@@ -698,7 +724,7 @@
     "afterKey": "A1-2-v2"
    },
    "texto": {
-    "pt-BR": "Na fala do dia a dia, a palavra da pergunta costuma ir para o fim: <strong>Tu t'appelles comment ?</strong> quer dizer o mesmo que <i>Comment tu t'appelles ?</i>. Com quem você trata por <strong>vous</strong>, a pergunta mais cuidada é <strong>Comment vous appelez-vous ?</strong>. Nos exercícios, escreva <i>Comment tu t'appelles ?</i>.",
+    "pt-BR": "Na fala do dia a dia, a palavra da pergunta costuma ir para o fim: <strong>Tu t'appelles comment ?</strong> quer dizer o mesmo que <i>Comment tu t'appelles ?</i>. Com quem você trata por <strong>vous</strong>, a pergunta mais cuidada é <strong>Comment vous appelez-vous ?</strong>.",
     "en": null
    },
    "exemplos": [
@@ -726,13 +752,14 @@
      },
      "resposta": false,
      "porque": {
-      "pt-BR": "É a forma mais comum na fala do dia a dia. Nos exercícios, use <b>Comment tu t'appelles ?</b>.",
+      "pt-BR": "É a forma mais comum na fala do dia a dia, e quer dizer o mesmo que <b>Comment tu t'appelles ?</b>.",
       "en": null
      }
     }
    ],
-   "muda": "publicada (N06), breve; título curto; ganha a forma formal Comment vous appelez-vous ? (decisão 326); sem travessão e sem \"pra\"",
-   "breve": true
+   "muda": "publicada (N06), breve; título curto; ganha a forma formal Comment vous appelez-vous ? (decisão 326); sem travessão e sem \"pra\"; decisão 330: sai a frase \"Nos exercícios, escreva Comment tu t'appelles ?\" e os exercícios aceitam as duas ordens",
+   "breve": true,
+   "correcao": "os exercícios aceitam as duas ordens, Comment tu t'appelles ? e Tu t'appelles comment ? (decisão 330, item 2): regra de correção, o código entra na implementação"
   },
   {
    "id": "moi-toi-vous",
@@ -959,6 +986,80 @@
    "grade_obs": "a coluna nome_fr é o nome da letra escrito em francês (o que o 🔊 fala); na tela aparecem a letra e o 🔊, o nome escrito aparece na grade (decisão 329; L, \"elle\", pode ser confundido com o pronome)"
   },
   {
+   "id": "acentos",
+   "id_mapa": null,
+   "nova": true,
+   "titulo": {
+    "pt-BR": "Os acentos ao soletrar",
+    "en": null
+   },
+   "tipo": "Exp",
+   "tipo_visivel": "explicação",
+   "kind": null,
+   "category": null,
+   "confianca": "alta",
+   "fonte": "nomes padrão dos sinais gráficos do francês (accent aigu, grave, circonflexe, cédille, tréma; Larousse); ao soletrar, o nome do acento vem depois da letra",
+   "momento": {
+    "licao": "nome-e-ser",
+    "depois_do_cartao": "Ça s'écrit comment ?",
+    "afterKey": "nova"
+   },
+   "texto": {
+    "pt-BR": "Quando alguém pergunta <i>Ça s'écrit comment ?</i>, a resposta soletrada diz também os acentos, logo depois da letra: <i>Léo</i> = L, E <strong>accent aigu</strong>, O. Os nomes: <strong>é</strong> <i>accent aigu</i> (agudo), <strong>è</strong> <i>accent grave</i> (grave), <strong>ê</strong> <i>accent circonflexe</i> (circunflexo), <strong>ç</strong> <i>cédille</i> (cedilha) e <strong>ë</strong> <i>tréma</i> (trema). Por enquanto, basta reconhecer quando ouvir.",
+    "en": null
+   },
+   "exemplos": [
+    {
+     "fr": "é: accent aigu",
+     "pt-BR": "é: acento agudo",
+     "en": null
+    },
+    {
+     "fr": "è: accent grave",
+     "pt-BR": "è: acento grave",
+     "en": null
+    },
+    {
+     "fr": "ê: accent circonflexe",
+     "pt-BR": "ê: acento circunflexo",
+     "en": null
+    },
+    {
+     "fr": "ç: cédille",
+     "pt-BR": "ç: cedilha",
+     "en": null
+    },
+    {
+     "fr": "ë: tréma",
+     "pt-BR": "ë: trema",
+     "en": null
+    }
+   ],
+   "exemplos_fonte": "dados/mapa.json (um lugar só; o validar.js confere que são iguais)",
+   "audios_previstos": [
+    "accent aigu",
+    "accent grave",
+    "accent circonflexe",
+    "cédille",
+    "tréma"
+   ],
+   "vf": [
+    {
+     "afirmacao": {
+      "pt-BR": "Para soletrar <i>Léo</i>, dizemos \"L, E <i>accent grave</i>, O\".",
+      "en": null
+     },
+     "resposta": false,
+     "porque": {
+      "pt-BR": "O <b>é</b> de <i>Léo</i> tem <b>accent aigu</b>. O <i>accent grave</i> é o de <b>è</b>.",
+      "en": null
+     }
+    }
+   ],
+   "muda": "nova (decisão 330, item 1; resolve o D7): breve, gatilho no cartão Ça s'écrit comment ?; na prática da lição 2 os acentos são só de reconhecimento",
+   "breve": true
+  },
+  {
    "id": "tes",
    "id_mapa": "N07",
    "nova": false,
@@ -1162,12 +1263,12 @@
    "pt-BR": "Revisão da unidade",
    "en": "Unit review"
   },
-  "regra": "contexto ponto_verificacao_unidade: fechado para frases so_exemplo e notas não contam como vistas (decisão 265); a 💡 mostra as 7 notas da unidade",
+  "regra": "contexto ponto_verificacao_unidade: fechado para frases so_exemplo e notas não contam como vistas (decisão 265); a 💡 mostra as 8 notas da unidade",
   "fica_de_fora": "frases so_exemplo (nova-vous, nova-prenom, nova-nom, nova-epeler, A1-2-p3, A1-2-p7): ficha, Revisão (cartões) e exercícios da lição que não pedem digitar",
   "itens": [
    {
     "tipo": "rodada_por_palavra",
-    "conteudo": "1 rodada por cartão (14), gerada pelo app"
+    "conteudo": "1 rodada por cartão (15), gerada pelo app; ne… pas é só de reconhecimento (do francês para o português, decisão 330)"
    },
    {
     "tipo": "verdadeiro_falso",
@@ -1378,11 +1479,13 @@
     "efeito": "igual"
    }
   ],
-  "cartoes_novos_em_unidade_concluida": "quem já concluiu a unidade recebe os cartões novos (moi, c'est…, le prénom, épeler, Ça s'écrit comment ?, ne… pas) e américain / américaine direto na Revisão (decisão 325, D1); la France e le Brésil seguem com a chave e o progresso, agora na unidade \"Dizer de onde é e onde mora\", que abre atrás de quem já passou (decisão 328)"
+  "cartoes_novos_em_unidade_concluida": "quem já concluiu a unidade recebe os cartões novos (moi, c'est…, enchanté / enchantée, le prénom, épeler, Ça s'écrit comment ?, ne… pas) e américain / américaine direto na Revisão (decisão 325, D1); la France e le Brésil seguem com a chave e o progresso, agora na unidade \"Dizer de onde é, onde mora e que línguas fala\", que abre atrás de quem já passou (decisão 328)",
+  "modulo_concluido": "quem já concluiu o módulo \"Apresentar-se\" continua com ele concluído e com o Ponto de verificação do módulo aprovado; \"Dizer de onde é, onde mora e que línguas fala\" aparece aberta (decisão 330, item 4; decisão 328)"
  },
  "audios_novos_previstos": [
   "tu / vous",
   "moi, c'est…",
+  "enchanté / enchantée",
   "le prénom",
   "épeler",
   "Ça s'écrit comment ?",
@@ -1391,6 +1494,7 @@
   "Je m'appelle Léo.",
   "Vous êtes madame Dubois ?",
   "Moi, c'est Ana.",
+  "Enchantée, moi, c'est Ana.",
   "Mon prénom, c'est Ana.",
   "Mon nom, c'est Dubois.",
   "Vous pouvez épeler, s'il vous plaît ?",
@@ -1411,14 +1515,20 @@
   "français",
   "française",
   "Tu n'es pas français ?",
+  "accent aigu",
+  "accent grave",
+  "accent circonflexe",
+  "cédille",
+  "tréma",
   "as 26 letras (nome em francês: a, bé, cé ... zède)"
  ],
  "camadas_a_mexer_quando_aprovado": [
-  "fr/content.js (ordem dos cartões nas lições; tu vira par; 5 cartões novos e américain vindo da A1-9; la France e le Brésil saem para a A1-9 com as frases p4, p5, p6; 2 falas novas no diálogo; concepts com trigger pelo cartão; A1-9 no módulo A1-m1, logo depois da A1-2)",
+  "fr/content.js (ordem dos cartões nas lições; tu vira par; 6 cartões novos (com enchanté / enchantée, decisão 330) e américain vindo da A1-9; la France e le Brésil saem para a A1-9 com as frases p4, p5, p6; 2 falas novas no diálogo; concepts com trigger pelo cartão; ne… pas com reconhecimento_so; A1-9 no módulo A1-m1, com o título novo, logo depois da A1-2)",
   "courses/fr-pt-BR/layer.js (títulos, objetivo, notas, traduções; DELIBERATE_PT_CHANGES em tests/i18n)",
   "camada en (depois da aprovação, decisão 81)",
   "docs/i18n/curriculo/dados/frases_na_frase.json (papel das frases -p: p0, p1, p2, p3, p7 aqui; p4, p5, p6 na A1-9)",
   "código: nota em grade (alfabeto com 🔊 por letra), lição de pronúncia com exercícios de letras, exampleK (frase do cartão), cenários das frases só exemplo dentro da lição",
+  "código: correção aceita as duas ordens de Comment tu t'appelles ? / Tu t'appelles comment ? (decisão 330, item 2), em função pura testável; cartão ne… pas só de reconhecimento (campo reconhecimento_so)",
   "fr/scripts/challenges_import/modulo-a1-m1-content.json (na revisão dos Desafios do módulo, decisão 281)",
   "áudio (skill audio-tts): cartões, frases, exemplos das notas, as 26 letras e as 2 falas novas (duas vozes)",
   "node scripts/gerar_mapa_cron.js + novo deploy do notification-cron (a ordem das palavras e das unidades muda)"

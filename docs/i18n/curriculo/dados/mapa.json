@@ -1,7 +1,7 @@
 {
-  "_doc": "Mapa A1 e A2 do francês em dados (decisões 228, 238 e 259). Fonte: docs/i18n/curriculo/08-mapa-final-a1-a2-v2.md, aprovado e congelado em 2026-10-26. Mudança só por pedido de mudança, com o auditor-curricular rodando (decisão 235); pedidos de mudança aplicados: decisões 267 a 279 (campo opcional \"licao\" por cartão, decisão 274) e 311 a 324 (321 a 324: 23 cartões voltam da revisão dos cortes, docs/i18n/curriculo/dados/revisao-dos-cortes.md; le portable e le mail passam ao A1; A1-1 polida pela dona: 16 cartões, 4 lições com id e título em \"licoes\", 9 notas com \"momento\" e \"exemplos\", 2 diálogos com \"licao\": o informal no fim da lição 2 e o formal no fim da lição 4) e 326 a 328 (\"Dizer o nome e a nacionalidade\" desenhada lição por lição: 14 cartões em 3 lições, a 2ª de pronúncia; \"Dizer de onde é e onde mora\" vai para o módulo \"Apresentar-se\", logo depois dela, com la France e le Brésil e sem américain / américaine; lição com mais de 5 cartões aceita pela dona fica marcada com \"cartoes_aceitos\"). As palavras de uma nota saem dos exemplos com tradução (palavrasDaNota em fr/scripts/curriculo_mapa.js, decisão 274); \"palavras\" digitado só nas notas antigas de vocabulário. Contas e tempos saem de fr/scripts/curriculo_mapa.js; ninguém digita total. Posição (M1.1) é rótulo gerado da ordem (decisão 229); o id estável é o \"id\". Divergências com o 08: docs/i18n/curriculo/dados/ACHADOS.md.",
+  "_doc": "Mapa A1 e A2 do francês em dados (decisões 228, 238 e 259). Fonte: docs/i18n/curriculo/08-mapa-final-a1-a2-v2.md, aprovado e congelado em 2026-10-26. Mudança só por pedido de mudança, com o auditor-curricular rodando (decisão 235); pedidos de mudança aplicados: decisões 267 a 279 (campo opcional \"licao\" por cartão, decisão 274) e 311 a 324 (321 a 324: 23 cartões voltam da revisão dos cortes, docs/i18n/curriculo/dados/revisao-dos-cortes.md; le portable e le mail passam ao A1; A1-1 polida pela dona: 16 cartões, 4 lições com id e título em \"licoes\", 9 notas com \"momento\" e \"exemplos\", 2 diálogos com \"licao\": o informal no fim da lição 2 e o formal no fim da lição 4) e 326 a 328 (\"Dizer o nome e a nacionalidade\" desenhada lição por lição: 14 cartões em 3 lições, a 2ª de pronúncia; \"Dizer de onde é e onde mora\" vai para o módulo \"Apresentar-se\", logo depois dela, com la France e le Brésil e sem américain / américaine; lição com mais de 5 cartões aceita pela dona fica marcada com \"cartoes_aceitos\") e 330 a 332 (\"Dizer o nome e a nacionalidade\" ganha enchanté / enchantée e a nota dos acentos, ne… pas vira cartão só de reconhecimento; \"Dizer de onde é, onde mora e que línguas fala\" troca venir de, que vai para \"Países e cidades\", por les États-Unis). As palavras de uma nota saem dos exemplos com tradução (palavrasDaNota em fr/scripts/curriculo_mapa.js, decisão 274); \"palavras\" digitado só nas notas antigas de vocabulário. Contas e tempos saem de fr/scripts/curriculo_mapa.js; ninguém digita total. Posição (M1.1) é rótulo gerado da ordem (decisão 229); o id estável é o \"id\". Divergências com o 08: docs/i18n/curriculo/dados/ACHADOS.md.",
   "idioma": "fr",
-  "versao": "2026-11-08",
+  "versao": "2026-11-09",
   "fonte": "docs/i18n/curriculo/08-mapa-final-a1-a2-v2.md",
   "niveis": [
     {
@@ -12,7 +12,7 @@
           "id": "A1-m1",
           "nome": "Apresentar-se",
           "ordem": 1,
-          "consigo": "cumprimentar e despedir-se escolhendo tu ou vous; dizer nome, sobrenome e nacionalidade no masculino e no feminino; soletrar o meu nome; dizer de onde venho, onde moro e que línguas falo; dizer a idade (1 a 69) e perguntar a do outro; dizer a profissão sem artigo; reagir (Et toi ? Et vous ?) e pedir para repetir",
+          "consigo": "cumprimentar e despedir-se escolhendo tu ou vous; dizer nome, sobrenome e nacionalidade no masculino e no feminino; soletrar o meu nome; dizer de onde sou (nacionalidade e cidade), onde moro e que línguas falo; dizer a idade (1 a 69) e perguntar a do outro; dizer a profissão sem artigo; reagir (Et toi ? Et vous ?) e pedir para repetir",
           "tempo_08_min": 235,
           "unidades": [
             {
@@ -441,6 +441,13 @@
                   "decisao": 327
                 },
                 {
+                  "palavra": "enchanté / enchantée",
+                  "chave": "nova",
+                  "origem": "novo",
+                  "licao": 1,
+                  "decisao": 330
+                },
+                {
                   "palavra": "le prénom",
                   "chave": "nova",
                   "origem": "novo",
@@ -506,7 +513,8 @@
                   "chave": "nova",
                   "origem": "novo",
                   "licao": 3,
-                  "decisao": 327
+                  "decisao": 330,
+                  "reconhecimento_so": true
                 }
               ],
               "notas": [
@@ -549,7 +557,8 @@
                       "fr": "Comment vous appelez-vous ?",
                       "pt-BR": "Como o senhor se chama? (formal)"
                     }
-                  ]
+                  ],
+                  "correcao": "os exercícios aceitam as duas ordens (Comment tu t'appelles ? e Tu t'appelles comment ?); a nota não manda escrever uma só (decisão 330)"
                 },
                 {
                   "titulo": "Moi, toi, vous: para dar destaque",
@@ -588,6 +597,40 @@
                     "depois_de": "épeler"
                   },
                   "exemplos": []
+                },
+                {
+                  "titulo": "Os acentos ao soletrar",
+                  "tipo": "Exp",
+                  "confianca": "alta",
+                  "nova": true,
+                  "breve": true,
+                  "decisao": 330,
+                  "momento": {
+                    "licao": 2,
+                    "depois_de": "Ça s'écrit comment ?"
+                  },
+                  "exemplos": [
+                    {
+                      "fr": "é: accent aigu",
+                      "pt-BR": "é: acento agudo"
+                    },
+                    {
+                      "fr": "è: accent grave",
+                      "pt-BR": "è: acento grave"
+                    },
+                    {
+                      "fr": "ê: accent circonflexe",
+                      "pt-BR": "ê: acento circunflexo"
+                    },
+                    {
+                      "fr": "ç: cédille",
+                      "pt-BR": "ç: cedilha"
+                    },
+                    {
+                      "fr": "ë: tréma",
+                      "pt-BR": "ë: trema"
+                    }
+                  ]
                 },
                 {
                   "titulo": "t'es",
@@ -661,7 +704,8 @@
               "decisoes": [
                 326,
                 327,
-                328
+                328,
+                330
               ],
               "licoes": [
                 {
@@ -691,15 +735,16 @@
                   "licao": 3,
                   "decisao": 326
                 }
-              ]
+              ],
+              "progresso_modulo_concluido": "quem já concluiu o módulo \"Apresentar-se\" continua com ele concluído e com o Ponto de verificação aprovado; a unidade nova aparece aberta (decisão 330, item 4)"
             },
             {
               "id": "A1-9",
-              "nome": "Dizer de onde é e onde mora",
+              "nome": "Dizer de onde é, onde mora e que línguas fala",
               "ordem": 3,
               "tipo": "vocabulario",
-              "id_funcao": "dizer-de-onde-e-e-onde-mora",
-              "funcao": "origem, moradia, línguas",
+              "id_funcao": "dizer-de-onde-e-onde-mora-e-que-linguas-fala",
+              "funcao": "dizer de onde é (nacionalidade e cidade, com Je suis de), onde mora (en / au / aux + país, à + cidade) e que línguas fala",
               "origem": "publicada",
               "cartoes": [
                 {
@@ -738,11 +783,6 @@
                   "origem": "publicado"
                 },
                 {
-                  "palavra": "venir de",
-                  "chave": "A1-9-v9",
-                  "origem": "publicado"
-                },
-                {
                   "palavra": "la ville",
                   "chave": "nova",
                   "origem": "novo"
@@ -750,7 +790,8 @@
                 {
                   "palavra": "parler",
                   "chave": "nova",
-                  "origem": "novo"
+                  "origem": "novo",
+                  "observacao": "o nome da língua é a palavra da nacionalidade no masculino (Je parle anglais, français), sem cartão novo (decisão 332)"
                 },
                 {
                   "palavra": "la France",
@@ -763,14 +804,32 @@
                   "chave": "A1-2-v6",
                   "origem": "publicado",
                   "decisao": 328
+                },
+                {
+                  "palavra": "les États-Unis",
+                  "chave": "nova",
+                  "origem": "novo",
+                  "decisao": 331
                 }
               ],
               "notas": [
                 {
-                  "titulo": "Je suis brésilienne ou je viens du Brésil",
+                  "titulo": "Je suis brésilienne, je suis de Rio: a nacionalidade e a cidade",
                   "tipo": "Exp",
-                  "confianca": "n/r",
-                  "id": "N17"
+                  "confianca": "alta",
+                  "id": "N17",
+                  "decisao": 331,
+                  "observacao": "reescrita (decisão 331): sem venir de, que vai para \"Países e cidades\"; a origem no 1º módulo se diz com a nacionalidade e com Je suis de + cidade",
+                  "exemplos": [
+                    {
+                      "fr": "Je suis brésilienne.",
+                      "pt-BR": "Eu sou brasileira."
+                    },
+                    {
+                      "fr": "Je suis de Rio.",
+                      "pt-BR": "Eu sou do Rio."
+                    }
+                  ]
                 },
                 {
                   "titulo": "où vai para o fim",
@@ -786,13 +845,34 @@
                   "nova": true
                 },
                 {
-                  "titulo": "Je viens de France / du Brésil. J'habite à Paris.",
+                  "titulo": "J'habite en France, au Brésil, aux États-Unis, à Paris",
                   "tipo": "Exp",
                   "confianca": "alta",
                   "nova": true,
                   "breve": true,
+                  "decisao": 331,
+                  "gancho": "J'habite en France / au Brésil / aux États-Unis",
+                  "observacao": "fórmulas, uma por país, e à + cidade; sem a regra do gênero dos países, que fica na \"Gramática: preposições com cidades e países\" (Premium)",
                   "versao_gratis_de": [
                     "A1-g4"
+                  ],
+                  "exemplos": [
+                    {
+                      "fr": "J'habite en France.",
+                      "pt-BR": "Eu moro na França."
+                    },
+                    {
+                      "fr": "J'habite au Brésil.",
+                      "pt-BR": "Eu moro no Brasil."
+                    },
+                    {
+                      "fr": "J'habite aux États-Unis.",
+                      "pt-BR": "Eu moro nos Estados Unidos."
+                    },
+                    {
+                      "fr": "J'habite à Paris.",
+                      "pt-BR": "Eu moro em Paris."
+                    }
                   ]
                 },
                 {
@@ -807,7 +887,9 @@
                 }
               ],
               "decisoes": [
-                328
+                328,
+                331,
+                332
               ]
             },
             {
@@ -3523,7 +3605,7 @@
           "id": "A1-m9",
           "nome": "Viagem e férias",
           "ordem": 8,
-          "consigo": "dizer de que país alguém é e para onde vou viajar (en, au, aux, à); reservar um quarto e fazer o check-in dando os meus dados; falar das férias e de planos com o futuro próximo; falar do tempo e das estações; escrever um cartão-postal; pedir ajuda na viagem, no presente, e ligar para a polícia (17 ou 112)",
+          "consigo": "dizer para onde vou viajar (en, au, aux, à) e de onde venho (venir de); reservar um quarto e fazer o check-in dando os meus dados; falar das férias e de planos com o futuro próximo; falar do tempo e das estações; escrever um cartão-postal; pedir ajuda na viagem, no presente, e ligar para a polícia (17 ou 112)",
           "tempo_08_min": 195,
           "unidades": [
             {
@@ -3532,14 +3614,9 @@
               "ordem": 1,
               "tipo": "vocabulario",
               "id_funcao": "paises-e-cidades",
-              "funcao": "dizer de onde alguém é e para onde vai viajar",
+              "funcao": "dizer para onde vai viajar e de onde vem",
               "origem": "nova",
               "cartoes": [
-                {
-                  "palavra": "les États-Unis",
-                  "chave": "nova",
-                  "origem": "novo"
-                },
                 {
                   "palavra": "l'Angleterre",
                   "chave": "nova",
@@ -3584,18 +3661,26 @@
                   "palavra": "partir",
                   "chave": "nova",
                   "origem": "novo"
+                },
+                {
+                  "palavra": "venir de",
+                  "chave": "A1-9-v9",
+                  "origem": "publicado",
+                  "decisao": 331
                 }
               ],
               "notas": [
                 {
-                  "titulo": "partir / aller en, au, aux, à (+1 linha de procedência: Je viens des États-Unis, d'Italie)",
+                  "titulo": "partir / aller en, au, aux, à; venir de, d', du, des",
                   "tipo": "Exp",
                   "confianca": "alta",
                   "nova": true,
-                  "gancho": "Je vais aux États-Unis, je pars en Italie",
+                  "gancho": "Je vais aux États-Unis, je pars en Italie; je viens d'Italie, des États-Unis",
                   "versao_gratis_de": [
                     "A1-g4"
-                  ]
+                  ],
+                  "decisao": 331,
+                  "observacao": "a procedência vem logo depois do cartão venir de (decisão 331), com os exemplos Je viens d'Italie e Je viens des États-Unis (sugestão 5 da decisão 330)"
                 },
                 {
                   "titulo": "Outras palavras de países",
@@ -3612,6 +3697,9 @@
                   "observacao": "lista fechada para servir à \"Gramática: preposições com cidades e países\": le Mexique termina em -e e é masculino (exceção); les Pays-Bas é plural, com aux",
                   "decisao": 324
                 }
+              ],
+              "decisoes": [
+                331
               ]
             },
             {
@@ -3626,7 +3714,7 @@
                 "A1-9",
                 "A1-31"
               ],
-              "versao_gratis_texto": "M1.3 nota (France / Brésil) + M8.1: nota reescrita como versão grátis completa de en, au, aux, à + país, com +1 linha de procedência",
+              "versao_gratis_texto": "M1.3 nota J'habite en France / au Brésil / aux États-Unis, à + cidade (fórmulas, decisão 331) + M8.1: nota partir / aller en, au, aux, à + venir de, d', du, des (cartão venir de, decisão 331), versão grátis completa de en, au, aux, à + país e da procedência",
               "telas": 5,
               "exercicios": 8
             },

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Validação do rascunho A1-2.json ("Dizer o nome e a nacionalidade", decisões 326 a 328; mesmo modelo do piloto A1-1, decisões 233, 253 e 265).
+// Validação do rascunho A1-2.json ("Dizer o nome e a nacionalidade", decisões 326 a 328 e 330; mesmo modelo do piloto A1-1, decisões 233, 253 e 265).
 // 1) Coerência com o mapa (fonte única de ordem, lições, notas e exemplos: docs/i18n/curriculo/dados/mapa.json).
 // 2) "Só palavras vistas" com as funções puras de fr/scripts/curriculo_palavras_vistas.js (validarTexto) sobre o mapa.json real.
 // Grupos "obrigatório" precisam sair sem palavra não vista (senão o texto é reescrito); grupos "informativo" só listam (frases só exemplo
@@ -38,6 +38,13 @@ R.notas.forEach((n, i) => {
 });
 confere(R.cartoes.every(c => R.frases_na_frase.some(f => (f.chave === 'nova' ? f.id_rascunho : f.chave) === c.frase_do_cartao)), 'cartão sem frase "Na frase" no rascunho');
 confere(new Set(R.cartoes.map(c => c.frase_do_cartao)).size === R.cartoes.length, 'duas cartas com a mesma frase do cartão');
+// Decisão 330: cartão só de reconhecimento (ne… pas) igual no rascunho e no mapa; a nota "Tu t'appelles comment ?" não manda escrever uma ordem só
+// (os exercícios aceitam as duas, regra de correção registrada em "correcao").
+confere(JSON.stringify(R.cartoes.map(c => !!c.reconhecimento_so)) === JSON.stringify(u.cartoes.map(c => !!c.reconhecimento_so)), 'reconhecimento_so diverge do mapa');
+{
+  const n06 = R.notas.find(n => n.id_mapa === 'N06') || {};
+  confere(!/Nos exercícios/i.test(JSON.stringify(n06.texto || {}) + JSON.stringify(n06.vf || [])) && /duas ordens/.test(n06.correcao || ''), 'nota Tu t\'appelles comment ? ainda manda escrever uma ordem só, ou sem a regra de correção');
+}
 const marcadas = P.carregarFrases();
 // Frases publicadas ainda sem marca no frases_na_frase.json: o papel daqui é proposta (a marca entra na aprovação, como na A1-1).
 const semMarca = [];
@@ -45,7 +52,7 @@ for (const f of R.frases_na_frase.filter(f => f.chave !== 'nova')){
   const marcado = P.papelDaFrase(marcadas, f.chave);
   if (marcado) confere(marcado === f.papel, `papel de ${f.chave} diverge do frases_na_frase.json`); else semMarca.push(`${f.chave} (${f.papel})`);
 }
-// Decisão 328: la France e le Brésil (com as frases p4, p5, p6) vão para "Dizer de onde é e onde mora", logo depois desta unidade.
+// Decisão 328: la France e le Brésil (com as frases p4, p5, p6) vão para "Dizer de onde é, onde mora e que línguas fala" (título da decisão 332), logo depois desta unidade.
 {
   const idx = M.indicePorId(mapa), a9 = idx['A1-9'];
   confere(a9.modulo === idx[UID].modulo && a9.ordemGlobal === idx[UID].ordemGlobal + 1, 'A1-9 não está logo depois da A1-2');

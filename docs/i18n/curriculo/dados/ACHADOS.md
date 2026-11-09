@@ -7,8 +7,10 @@ decisão estão marcados **(para a dona)**.
 
 ## 1. O que bate com o 08
 
-- A1: 9 módulos, 57 unidades (34 + 23), 382 cartões, 757 A/B, cartões por módulo 66/38/51/52/36/29/39/41/30, ~153 lições
-  (24/15/19/22/14/12/18/17/12), 128 notas, ~31h00 (depois do pedido de mudança das decisões 321 a 324, 2026-11-01: 16 cartões voltam da revisão dos cortes;
+- A1: 9 módulos, 57 unidades (34 + 23), 385 cartões (195 novos + 190 publicados), 762 A/B, cartões por módulo 80/27/51/52/36/29/39/41/30, ~152 lições
+  (28/10/19/22/14/12/18/17/12), 130 notas (31/9/15/14/16/11/11/9/14), ~31h00 (depois do pedido de mudança das decisões 330 a 332, 2026-11-09; antes 384, 761,
+  79 no M1 e 129 notas, decisões 326 a 328; antes 382, 757, 66/38/51/52/36/29/39/41/30, ~153 lições (24/15/19/22/14/12/18/17/12) e 128 notas, depois do pedido de
+  mudança das decisões 321 a 324, 2026-11-01: 16 cartões voltam da revisão dos cortes;
   antes 366, 725, 66/33/50/49/33/29/35/41/30, ~151 e 133, depois das decisões 311 a 314, 2026-10-29: "Cumprimentar e se despedir" com 16 cartões; antes 362, 717,
   62 no M1; antes do pedido de mudança das decisões 267 a 279, 360, 713, ~150, 132 e ~30h40).
 - A2: 10 módulos, 58 unidades (36 + 22), 433 cartões (423 novos + 10 publicados), 862 A/B, cartões por módulo 49/36/35/48/36/38/48/48/47/48
@@ -125,3 +127,16 @@ decisão estão marcados **(para a dona)**.
       (decisão 260) e a nota *je me réveille, tu te réveilles* continua na unidade. A nota *courriel* / *arobase* passou a ter gancho no cartão *le mail*.
     - **Conteúdo publicado** (não mexido, fica para a implementação): o ditado `d6-p2` (*J'adore*) deixa de precisar de troca, porque *adorer* agora é cartão antes
       do módulo do ditado; a fala publicada com *le balcon* ("Tipos de moradia e cômodos") passa a ter cartão.
+27. **Pedido de mudança 330 a 332 (2026-11-09): unidades 2 e 3 do módulo "Apresentar-se".** Aplicado no `mapa.json` com dois campos novos e opcionais:
+    `correcao` na nota *Tu t'appelles comment ?* (os exercícios aceitam as duas ordens; o código da correção entra na implementação) e
+    `progresso_modulo_concluido` na unidade "Dizer o nome e a nacionalidade" (quem já concluiu "Apresentar-se" continua com ele concluído e com o Ponto de
+    verificação aprovado). *ne… pas* ganha `reconhecimento_so` (A1 com 8 cartões só de reconhecimento). Pontos para registro:
+    - **`id_funcao` da A1-9** mudou com o título da decisão 332 (`dizer-de-onde-e-onde-mora-e-que-linguas-fala`); não é chave de progresso (o id estável é `A1-9`) e
+      nada fora do `mapa.json` o usa.
+    - ***les États-Unis*** muda de unidade com a chave `nova` (ainda não congelada); ***venir de*** leva a chave publicada `A1-9-v9` para "Países e cidades".
+    - **Publicado que usa *venir* e fica sem cartão na A1-9 (para a dona, no desenho das lições)**: frases `A1-9-p2` *D'où viens-tu ?* e `A1-9-p3` *Je viens du Portugal.*,
+      o V/F da unidade com *D'où viens-tu ?* e a nota publicada `etre-nationalite-vs-venir-de` (exemplo *venir de*). Proposta: `p3` vai com a chave para "Países e cidades";
+      `p2` e o V/F trocam para *Tu es d'où ?* (1ª fala do diálogo). Nada mexido no `fr/content.js`.
+    - **Nota de "Países e cidades"**: continua uma nota só (*partir / aller en, au, aux, à; venir de, d', du, des*), agora com o gatilho da procedência no cartão
+      *venir de*. Se a dona preferir uma ideia por nota (regra 4), vira duas notas breves (+1 na conta).
+    - **Exemplos da nota dos acentos** (*é: accent aigu* etc.) aparecem como "não vistas" no grupo informativo do `validar.js` da A1-2: é o que a nota ensina, com tradução.

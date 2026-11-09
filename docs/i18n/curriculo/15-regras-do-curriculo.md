@@ -10,7 +10,7 @@ Regras de conteúdo e de sequência decididas pela dona. Cada regra vale para fr
    sistematizado depois (espiral); o aluno nunca volta a lição anterior (`10`). Exemplo de "conceitos muito ligados": a M7.3 (g) *il y a* e *c'est* + adjetivo, com uma tela
    de contraste (*Il y a un salon. C'est un grand salon.*) (decisão 145).
 4. **Notas**: uma ideia por nota, curtas, sem teto de tamanho nem de quantidade; na primeira aparição só uma nota breve da frase que acabou de aparecer; **toda nota tem um gatilho**: o cartão ou a frase logo antes, que mostra a forma que a nota explica (dona, decisão 326); a nota não carrega conteúdo que o aluno precisa usar, que vira cartão (decisão 287); a unidade de gramática (Premium) sistematiza e treina, mas nunca é a única porta de
-   entrada: todo conceito tem antes a versão grátis (regra 12, decisão 240); mesmo conceito com outro conteúdo ou estrutura mais difícil = nota nova mais breve; V/F depois da nota (sem pular, sem XP); o Ponto de verificação não usa notas (`14`).
+   entrada: todo conceito tem antes a versão grátis (regra 12, decisão 240); mesmo conceito com outro conteúdo ou estrutura mais difícil = nota nova mais breve; V/F depois da nota (sem pular, sem XP); o Ponto de verificação não usa notas (`14`). Quando a nota mostra duas formas certas (ex.: *Comment tu t'appelles ?* e *Tu t'appelles comment ?*), ela não manda o aluno escrever uma só: os exercícios **aceitam as duas** (regra de correção, decisão 330).
 5. **Feedback dos exercícios**: padrão único com frase correta + tradução + áudio; erro de digitação marca letras (`13`).
 6. **Pronúncia**: a prática vem logo depois da lição que introduz o fenômeno, nunca como atalho que tire o aluno da lição; sempre que o texto disser que dois sons são iguais ou
    diferentes, mostrar os dois lados com áudio (`12`).
@@ -37,7 +37,7 @@ Regras de conteúdo e de sequência decididas pela dona. Cada regra vale para fr
     - **Coluna "Versão grátis"** no mapa (decisões 126 e 134): cada gramática do A1 e do A2 mostra onde está a sua versão gratuita (posição + gancho). Nota grátis nunca diz que
       "a gramática já mostrou" (o gratuito não viu; confirmada pela dona, decisão 143). O texto das notas novas só se escreve módulo a módulo, aprovado pela dona.
     - **Unidade de vocabulário grátis sobre verbos não tira o privilégio do Premium** (pergunta da dona, resposta registrada na decisão 216): a A1 M4.1 "Verbos muito usados"
-      e os cartões *savoir, connaître, dire, donner* do A2 são só de **reconhecimento** (significado do infinitivo, 1 ou 2 exemplos "Na frase" e revisão espaçada), sem tabela de
+      e os cartões *savoir, connaître, dire, donner* do A2 são só de **reconhecimento** (também o cartão *ne… pas* de "Dizer o nome e a nacionalidade": um cartão só, sem verso, decisão 330) (significado do infinitivo, 1 ou 2 exemplos "Na frase" e revisão espaçada), sem tabela de
       conjugação e sem exercícios de produção. **O grátis reconhece; o Premium sistematiza e produz**: paradigma completo, regras de uso e exercícios de conjugar e completar
       ficam nas gramáticas (A1 M4.7, M6.4, M9.2; A2 M4.4, M6.4, M7.3). A tabela de conjugação continua grátis fora da trilha, na aba Conjugação.
     - Hoje não há bloqueio de gramática no código (auditoria de 2026-10-19): tratar isto como regra de produto até a implementação.

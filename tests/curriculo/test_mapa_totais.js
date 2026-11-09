@@ -17,16 +17,17 @@ console.log('== totais do 08 v2 (seção 1 e 3)');
 check('A1: 9 módulos', A1.modulos === 9, A1.modulos);
 check('A1: 57 unidades', A1.unidades === 57, A1.unidades);
 check('A1: 34 vocabulário + 23 gramática', A1.vocabulario === 34 && A1.gramatica === 23, [A1.vocabulario, A1.gramatica]);
-check('A1: 384 cartões (decisões 327 e 328: + moi, c\'est… e ne… pas em "Dizer o nome e a nacionalidade"; era 382)', A1.cartoes === 384, A1.cartoes);
-check('A1: 761 cartões A/B (384 × 2 − 7 de reconhecimento)', A1.ab === 761, A1.ab);
-check('A1: 194 novos + 190 publicados', A1.novos === 194 && A1.publicados === 190, [A1.novos, A1.publicados]);
-check('A1: cartões por módulo 79/27/51/52/36/29/39/41/30 (decisão 328: "Dizer de onde é e onde mora" vai para "Apresentar-se")',
-  JSON.stringify(A1.porModulo.map(m => m.cartoes)) === JSON.stringify([79, 27, 51, 52, 36, 29, 39, 41, 30]), A1.porModulo.map(m => m.cartoes));
-check('A1: ~152 lições (M1 28, M2 10, M3 19, M4 22, M5 14, M6 12, M7 18, M8 17, M9 12; decisões 326 a 328: "Dizer o nome e a nacionalidade" com 3 lições + Revisão, e "Dizer de onde é e onde mora" no M1)',
+check('A1: 385 cartões (decisão 330: + enchanté / enchantée em "Dizer o nome e a nacionalidade"; decisão 331: venir de e les États-Unis trocam de unidade, sem mudar a conta; era 384)', A1.cartoes === 385, A1.cartoes);
+check('A1: 762 cartões A/B (385 × 2 − 8 de reconhecimento; decisão 330: ne… pas só de reconhecimento)', A1.ab === 762, A1.ab);
+check('A1: 195 novos + 190 publicados', A1.novos === 195 && A1.publicados === 190, [A1.novos, A1.publicados]);
+check('A1: cartões por módulo 80/27/51/52/36/29/39/41/30 (decisão 328: "Dizer de onde é, onde mora e que línguas fala" vai para "Apresentar-se"; decisão 330: + enchanté / enchantée)',
+  JSON.stringify(A1.porModulo.map(m => m.cartoes)) === JSON.stringify([80, 27, 51, 52, 36, 29, 39, 41, 30]), A1.porModulo.map(m => m.cartoes));
+check('A1: ~152 lições (M1 28, M2 10, M3 19, M4 22, M5 14, M6 12, M7 18, M8 17, M9 12; decisões 326 a 328: "Dizer o nome e a nacionalidade" com 3 lições + Revisão, e "Dizer de onde é, onde mora e que línguas fala" no M1; decisão 330: lição 1 com 5 cartões, sem mudar a conta)',
   JSON.stringify(A1.porModulo.map(m => m.licoes)) === JSON.stringify([28, 10, 19, 22, 14, 12, 18, 17, 12]), A1.porModulo.map(m => m.licoes));
 check('A1: ~31h00 de trilha', A1.tempo === 31 * 60, C.formatarTempo(A1.tempo));
 check('A1: "Apresentar-se" fica com o tempo digitado ~3h55 (decisão 270; 16 cartões na A1-1 não mudam a regra, decisões 300 e 308)', A1.porModulo[0].tempo === 3 * 60 + 55, C.formatarTempo(A1.porModulo[0].tempo));
-check('A1: 129 notas (decisão 327: + "O alfabeto em francês"; era 128)', A1.notas === 129, A1.notas);
+check('A1: 130 notas (decisão 330: + "Os acentos ao soletrar"; era 129)', A1.notas === 130, A1.notas);
+check('A1: notas por módulo 31/9/15/14/16/11/11/9/14', JSON.stringify(A1.porModulo.map(m => m.notas)) === JSON.stringify([31, 9, 15, 14, 16, 11, 11, 9, 14]), A1.porModulo.map(m => m.notas));
 check('A2: 10 módulos', A2.modulos === 10, A2.modulos);
 check('A2: 58 unidades (36 vocabulário + 22 gramática)', A2.unidades === 58 && A2.vocabulario === 36 && A2.gramatica === 22, [A2.unidades, A2.vocabulario, A2.gramatica]);
 check('A2: 433 cartões (decisão 323: +7 que voltam, −2 que passam ao A1; era 428)', A2.cartoes === 433, A2.cartoes);
@@ -64,29 +65,49 @@ console.log('== "Cumprimentar e se despedir" (A1-1), unidade polida pela dona (d
   check('conferência das lições declaradas: sem problema', C.conferirLicoesDaUnidade(mapa).length === 0, C.conferirLicoesDaUnidade(mapa));
 }
 
-console.log('== "Dizer o nome e a nacionalidade" (A1-2) e "Dizer de onde é e onde mora" (A1-9), decisões 326 a 328');
+console.log('== "Dizer o nome e a nacionalidade" (A1-2) e "Dizer de onde é, onde mora e que línguas fala" (A1-9), decisões 326 a 332');
 {
   const idx = C.indicePorId(mapa);
   const u = idx['A1-2'].unidade;
   const ordem = u.cartoes.map(c => `${c.licao}:${c.palavra}`);
-  check('A1-2: 14 cartões na ordem da dona, em 3 lições (4 + 4 + 6)', JSON.stringify(ordem) === JSON.stringify([
-    '1:je', '1:tu / vous', "1:s'appeler", "1:moi, c'est…",
+  check('A1-2: 15 cartões na ordem da dona, em 3 lições (5 + 4 + 6; decisão 330: enchanté / enchantée no fim da lição 1)', JSON.stringify(ordem) === JSON.stringify([
+    '1:je', '1:tu / vous', "1:s'appeler", "1:moi, c'est…", '1:enchanté / enchantée',
     '2:le prénom', '2:le nom', '2:épeler', "2:Ça s'écrit comment ?",
     '3:être', '3:le pays', '3:français / française', '3:brésilien / brésilienne', '3:américain / américaine', '3:ne… pas']), ordem);
-  check('A1-2: tu / vous mantém a chave A1-2-v1; américain / américaine mantém A1-9-v2', u.cartoes[1].chave === 'A1-2-v1' && u.cartoes[12].chave === 'A1-9-v2');
+  check('A1-2: tu / vous mantém a chave A1-2-v1; américain / américaine mantém A1-9-v2', u.cartoes[1].chave === 'A1-2-v1' && u.cartoes[13].chave === 'A1-9-v2');
+  check('A1-2: enchanté / enchantée é cartão novo em par (chave "nova", decisão 330)', u.cartoes[4].chave === 'nova' && u.cartoes[4].origem === 'novo');
+  check('A1-2: ne… pas só de reconhecimento (decisão 330); a unidade tem 29 cartões A/B', u.cartoes[14].reconhecimento_so === true && C.cartoesAB(u) === 29, C.cartoesAB(u));
   check('A1-2: lições reaproveitam os ids publicados (decisão 284)', JSON.stringify(u.licoes.map(l => l.id)) === JSON.stringify(['pronomes-e-nome', 'nome-e-ser', 'nacionalidades']), u.licoes.map(l => l.id));
   check('A1-2: 3 lições + Revisão da unidade', C.licoesDaUnidade(u) === 4, C.licoesDaUnidade(u));
   const titulos = C.notasDaUnidade(u).map(n => n.titulo);
-  check('A1-2: 7 notas, cada uma com momento (gatilho, decisão 326)', titulos.length === 7 && C.notasDaUnidade(u).every(n => n.momento), titulos);
+  check('A1-2: 8 notas, cada uma com momento (gatilho, decisão 326)', titulos.length === 8 && C.notasDaUnidade(u).every(n => n.momento), titulos);
+  const acentos = C.notasDaUnidade(u).find(n => n.titulo === 'Os acentos ao soletrar');
+  check('A1-2: nota dos acentos logo depois do alfabeto, com gatilho em Ça s\'écrit comment ? (decisão 330)', acentos && acentos.tipo === 'Exp' && acentos.confianca === 'alta' &&
+    acentos.momento.depois_de === "Ça s'écrit comment ?" && titulos.indexOf('Os acentos ao soletrar') === titulos.indexOf('O alfabeto em francês') + 1 &&
+    JSON.stringify(acentos.exemplos.map(e => e.fr.split(':')[0])) === JSON.stringify(['é', 'è', 'ê', 'ç', 'ë']));
+  check('A1-2: a nota Tu t\'appelles comment ? registra que os exercícios aceitam as duas ordens', /duas ordens/.test(C.notasDaUnidade(u).find(n => n.id === 'N06').correcao || ''));
   check('A1-2: sem nota de "outras nacionalidades"', !titulos.some(t => /outras nacionalidades/i.test(t)));
   const u9 = idx['A1-9'];
+  check('A1-9 com o título da decisão 332', u9.unidade.nome === 'Dizer de onde é, onde mora e que línguas fala', u9.unidade.nome);
   check('A1-9 no módulo "Apresentar-se", logo depois de A1-2', u9.modulo === 'A1-m1' && u9.ordemGlobal === idx['A1-2'].ordemGlobal + 1, [u9.modulo, u9.posicao]);
   check('ordem do módulo "Apresentar-se" (decisão 328)', JSON.stringify(mapa.niveis[0].modulos[0].unidades.map(x => x.id)) ===
     JSON.stringify(['A1-1', 'A1-2', 'A1-9', 'A1-3', 'A1-21', 'A1-g1', 'A1-22', 'A1-g11']));
   check('"Família e pessoas próximas" começa em "Apresentar a família"', mapa.niveis[0].modulos[1].unidades[0].id === 'A1-4');
   const p9 = u9.unidade.cartoes.map(c => c.palavra);
-  check('A1-9: 12 cartões, com la France (A1-2-v5) e le Brésil (A1-2-v6), sem américain', p9.length === 12 && !p9.some(p => /américain/.test(p)) &&
+  check('A1-9: 12 cartões, com la France (A1-2-v5), le Brésil (A1-2-v6) e les États-Unis, sem américain e sem venir de (decisão 331)', p9.length === 12 &&
+    !p9.some(p => /américain/.test(p)) && !p9.includes('venir de') && p9.includes('les États-Unis') &&
     u9.unidade.cartoes.some(c => c.palavra === 'la France' && c.chave === 'A1-2-v5') && u9.unidade.cartoes.some(c => c.palavra === 'le Brésil' && c.chave === 'A1-2-v6'), p9);
+  const n9 = C.notasDaUnidade(u9.unidade);
+  const habiter = n9.find(n => /^J'habite en France/.test(n.titulo));
+  check('A1-9: nota de en / au / aux + país e à + cidade como fórmulas, versão grátis da gramática de países (decisão 331)', habiter && habiter.versao_gratis_de.includes('A1-g4') &&
+    JSON.stringify(habiter.exemplos.map(e => e.fr)) === JSON.stringify(["J'habite en France.", "J'habite au Brésil.", "J'habite aux États-Unis.", "J'habite à Paris."]));
+  check('A1-9: nenhuma nota cita venir de; a origem vem com Je suis de + cidade', !n9.some(n => /venir|viens/i.test(n.titulo + JSON.stringify(n.exemplos || []))) &&
+    n9.some(n => (n.exemplos || []).some(e => e.fr === 'Je suis de Rio.')));
+  const u31 = idx['A1-31'].unidade, p31 = u31.cartoes.map(c => c.palavra);
+  check('"Países e cidades": venir de (chave A1-9-v9) logo depois de partir, sem les États-Unis (decisão 331)', p31.length === 10 && !p31.includes('les États-Unis') &&
+    p31.indexOf('venir de') === p31.indexOf('partir') + 1 && u31.cartoes.find(c => c.palavra === 'venir de').chave === 'A1-9-v9', p31);
+  check('"Gramática: preposições com cidades e países": versão grátis fala da nota nova da A1-9 e do cartão venir de', /J'habite en France/.test(idx['A1-g4'].unidade.versao_gratis_texto) &&
+    /cartão venir de/.test(idx['A1-g4'].unidade.versao_gratis_texto) && !/France \/ Brésil\)/.test(idx['A1-g4'].unidade.versao_gratis_texto));
 }
 
 console.log('== revisão dos cortes (decisões 323 e 324)');
@@ -117,8 +138,8 @@ console.log('== revisão dos cortes (decisões 323 e 324)');
 console.log('== reconhecimento só (decisões 218 e 255; regra 12)');
 {
   const rec = C.unidadesEmOrdem(mapa).flatMap(it => (it.unidade.cartoes || []).filter(c => c.reconhecimento_so).map(c => `${it.unidade.id}:${c.palavra}`));
-  check('7 verbos de "Verbos muito usados" (A1-36) + savoir, connaître, dire, donner',
-    JSON.stringify(rec) === JSON.stringify(['A1-36:aller', 'A1-36:faire', 'A1-36:vouloir', 'A1-36:pouvoir', 'A1-36:devoir', 'A1-36:voir', 'A1-36:prendre',
+  check('ne… pas (A1-2, decisão 330) + 7 verbos de "Verbos muito usados" (A1-36) + savoir, connaître, dire, donner',
+    JSON.stringify(rec) === JSON.stringify(['A1-2:ne… pas', 'A1-36:aller', 'A1-36:faire', 'A1-36:vouloir', 'A1-36:pouvoir', 'A1-36:devoir', 'A1-36:voir', 'A1-36:prendre',
       'A2-10:donner', 'A2-17:savoir', 'A2-17:connaître', 'A2-20:dire']), rec);
   const prendre = mapa.niveis[0].modulos[3].unidades[0].cartoes.find(c => c.palavra === 'prendre');
   check('prendre mantém a chave publicada A1-14-v6 (decisão 255)', prendre && prendre.chave === 'A1-14-v6' && prendre.origem === 'publicado');

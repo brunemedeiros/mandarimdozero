@@ -264,6 +264,23 @@ Objetivo: melhorar o currículo pedagógico do francês (A1 revisado e A2 novo) 
   elididas de *s'appeler* (*m'appelle, t'appelles*...) e o nome *Dubois*.
 - **Totais novos**: A1 com **384 cartões** (**761** A/B; 194 novos + 190 publicados), **~152 lições**, **129 notas**, ~31h00 (tempo digitado, não recalculado:
   regra 16 suspensa, decisão 325); "Apresentar-se" com 8 unidades e 79 cartões; "Família e pessoas próximas" com 6 unidades e 27 cartões. A2 sem mudança.
-- **Aprovada pela dona em 2026-11-08 (decisão 329)**: as 7 notas e as decisões D1 a D10 do `piloto-m1/A1-2/A1-2.md` (status aprovado; *Tu es de quel pays ?* essencial). Falta só a dona decidir os nomes dos acentos na prática do alfabeto (D7, item 15 da auditoria de 2026-11-08).
+- **Aprovada pela dona em 2026-11-08 (decisão 329)**: as 7 notas e as decisões D1 a D10 do `piloto-m1/A1-2/A1-2.md` (status aprovado; *Tu es de quel pays ?* essencial). Os nomes dos acentos (D7) foram decididos pela dona na decisão 330 (atualização abaixo).
+
+## Atualização 2026-11-09 (decisões 330 a 332, pedido de mudança: unidades 2 e 3 do módulo "Apresentar-se")
+
+- **"Dizer o nome e a nacionalidade"** (decisão 330, itens 1, 2, 3, 4 e 7; o item 6, equilíbrio entre "Apresentar-se" e "Família e pessoas próximas", segue em aberto):
+  cartão em par ***enchanté / enchantée*** ("prazer") no fim da lição 1, que fica com 5 cartões (frase proposta *Enchantée, moi, c'est Ana.*, essencial); nota nova
+  **"Os acentos ao soletrar"** (Exp, alta, breve) logo depois de *Ça s'écrit comment ?* (*accent aigu* é, *grave* è, *circonflexe* ê, *cédille* ç, *tréma* ë), com os acentos
+  só de reconhecimento na prática da lição 2; a nota *Tu t'appelles comment ?* perde "Nos exercícios, escreva *Comment tu t'appelles ?*" e os exercícios aceitam as duas ordens
+  (regra de correção, código na implementação; regra 4 do `15`); ***ne… pas*** vira cartão só de reconhecimento (`reconhecimento_so`); quem já concluiu o módulo
+  "Apresentar-se" continua com ele concluído e com o Ponto de verificação aprovado. 15 cartões, 8 notas. Rascunho `piloto-m1/A1-2/` atualizado (seção 10 do `A1-2.md`).
+- **"Dizer de onde é, onde mora e que línguas fala"** (`A1-9`, título da decisão 332; antes "Dizer de onde é e onde mora"): sai ***venir de***, que vai com a chave
+  `A1-9-v9` para "Países e cidades" (módulo "Viagem e férias"), logo depois de *partir*, com *de / d' / du / des* e os exemplos *d'Italie* e *des États-Unis*; entra
+  ***les États-Unis*** (sai de "Países e cidades", chave nova); *la France* e *le Brésil* ficam. Nota nova *J'habite en France, au Brésil, aux États-Unis, à Paris*
+  (fórmulas, sem a regra do gênero, versão grátis da "Gramática: preposições com cidades e países") no lugar de *Je viens de France / du Brésil. J'habite à Paris.*;
+  N17 reescrita com *Je suis brésilienne* e *Je suis de* + cidade. *parler*: o nome da língua é a nacionalidade no masculino, sem cartão novo. As lições desta unidade
+  ainda não foram desenhadas (fica para fazer com a dona), nem a revisão do publicado que usa *venir* (`A1-9-p2`, `p3`, V/F; `08 v2`, linha da M1.3).
+- **Totais novos**: A1 com **385 cartões** (**762** A/B: 385 × 2 − 8; 195 novos + 190 publicados), **~152 lições**, **130 notas** (por módulo 31, 9, 15, 14, 16, 11, 11, 9, 14),
+  ~31h00 (tempo digitado, não recalculado); "Apresentar-se" com 80 cartões; "Viagem e férias" continua com 41. A2 sem mudança.
 
 > **Como falar com a dona** (2026-10-23): em toda mensagem a ela, citar o NOME do módulo e da unidade (não só M6.1 ou `A1-15`), explicar termos internos e dar o contexto completo de cada decisão. Vale para o chat e para qualquer agente.
