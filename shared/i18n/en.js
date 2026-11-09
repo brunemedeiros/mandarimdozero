@@ -1536,6 +1536,9 @@ window.I18N_CATALOG['en'] = {
   'admin.classLogs.notesOpt': 'Your private notes, the student doesn\'t see them (optional)', // ALTA
   'admin.classLogs.noFields': '(no fields filled in)', // ALTA
   'admin.classLogs.listTitle': 'Recorded classes ({n})', // ALTA
+  'admin.classLogs.futureHidden': 'Showing up to today. {n} upcoming classes (created from your calendar) are in the Calendar.', // ALTA
+  'admin.classLogs.showFuture': 'Show upcoming ({n})', // ALTA
+  'admin.classLogs.hideFuture': 'Hide upcoming', // ALTA
   'admin.classLogs.emptyFor': 'No class recorded yet', // ALTA
   'admin.classLogs.deleteConfirm': 'Delete this class record? This action cannot be undone.', // ALTA
   'admin.classLogs.deleted': '✓ Record deleted.', // ALTA
