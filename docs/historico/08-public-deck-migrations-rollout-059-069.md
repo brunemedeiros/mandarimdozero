@@ -607,3 +607,13 @@ Número 086 já usado por outras conversas (`086_friends_streak_milestones_and_c
   v2 na produção (sugestão da relação). Teste local `tests/aulas-presenca/test_130.sql` 6/6; peças do Notion 13/13.
 - Mesmo PR: "Aulas registradas" mostra só até hoje; as próximas (229 criadas pelo Google Agenda, eventos repetidos até fev/2027)
   ficam atrás do botão "Mostrar as próximas (N)" e continuam no Calendário. Painel da professora 799/799.
+
+## 131 -- Notion: "Descartar" vale para sempre (2026-11-09)
+
+- Achado na releitura completa pedida pela autora: a única linha descartada voltou para "Para aprovar" (descartar só marcava o
+  estado; qualquer releitura ou edição no Notion recalculava). `131_notion_discard_sticks.sql`: coluna `notion_pages.discarded_at`
+  (ADD COLUMN), `notion_approve(.., false)` grava, `_notion_apply` respeita. A linha que já tinha voltado não dá para identificar:
+  a autora descarta de novo.
+- Staging e produção (2026-11-09, produção versão 20261109230551, "pode publicar"). Teste local `tests/aulas-presenca/test_131.sql` 5/5.
+- Mesmo PR: Aulas (Alunos, Turmas, Nova aula, Aulas registradas) em caixas do Design System iguais à do Notion
+  (`shared/aulas-painel.css`, HTML em `shared/admin-class-logs.js`); prévia aprovada pela autora. Painel da professora 805/805.
