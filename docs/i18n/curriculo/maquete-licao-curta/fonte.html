@@ -61,7 +61,7 @@ header.top p{margin:0;color:var(--ink-soft);max-width:65ch}
 .tag.pink{background:var(--pink-tint);color:var(--ink)}
 .tag.note{background:var(--note-tint);color:var(--ink)}
 .tags{display:flex;gap:6px;flex-wrap:wrap}
-.ctx{background:var(--paper-warm);border-radius:14px;padding:10px 14px;font-weight:700;color:var(--ink-soft)}
+.frbox{display:flex;align-items:center;justify-content:center;gap:12px;background:var(--brand-tint);border-radius:16px;padding:16px;font-size:1.35rem}
 .fr-big{font-size:2rem;font-weight:800;text-align:center;line-height:1.2;text-wrap:balance}
 .fr-mid{font-size:1.35rem;font-weight:800;text-align:center;text-wrap:balance}
 .tr{text-align:center;color:var(--ink-soft);font-size:1.05rem}
@@ -155,7 +155,7 @@ aside{display:grid;gap:16px;min-width:0}
 <div class="wrap">
   <header class="top">
     <div class="eyebrow">Maquete · Unidade 1 "Cumprimentar e se despedir" · módulo "Apresentar-se"</div>
-    <h1>Lições curtas da unidade 1: lições 1 e 2</h1>
+    <h1>Lições curtas da unidade 1: lições 1 a 3</h1>
     <p>Clique como se fosse a aluna. Ao lado, o porquê de cada tela. Nada disso está no app ainda.</p>
     <div class="lesson-tabs" id="tabs"></div>
   </header>
@@ -184,7 +184,7 @@ aside{display:grid;gap:16px;min-width:0}
       <ul>
         <li><b>Imagens</b>: nenhuma por enquanto (decisão 341). O espaço volta quando houver imagem de verdade.</li>
         <li><b>Distratores</b>: em cada "Complete", ou um erro de grafia, ou outra palavra já vista que não serve ali (decisão 342).</li>
-        <li><b>Áudio</b>: <i>salut</i>, <i>bonjour</i>, <i>bonsoir</i>, <i>ça va</i> e <i>Salut ! Ça va bien ?</i> são áudios reais do site. O resto usa a voz do navegador, só na maquete.</li>
+        <li><b>Áudio</b>: <i>salut</i>, <i>bonjour</i>, <i>bonsoir</i>, <i>ça va</i>, <i>merci</i>, <i>de rien</i>, <i>s'il te plaît</i>, <i>s'il vous plaît</i>, <i>pardon</i> e <i>Salut ! Ça va bien ?</i> são áudios reais do site. O resto usa a voz do navegador, só na maquete.</li>
         <li><b>Erro</b>: no app, a tela errada volta no fim da lição. Aqui ela só segue.</li>
         <li><b>Grátis x Premium</b>: as lições inteiras são grátis.</li>
       </ul>
@@ -232,14 +232,14 @@ const S=[
  {id:'l1-bonjour',lesson:1,chip:'bonjour',type:'item',kind:'Palavra nova',fr:'bonjour',tr:'olá / bom dia',
   audios:[['bonjour','bonjour']],
   why:['Cartão novo','<p>Mesma tela, sem imagem.</p>']},
- {id:'l1-ex-bonjour',lesson:1,chip:'V ou F',type:'vf',ctx:'9h, na padaria',
-  stmt:'Às 9h, para cumprimentar o padeiro, dizemos <i>Bonjour !</i>',answer:true,full:'Bonjour !',fullTr:'Bom dia!',
+ {id:'l1-ex-bonjour',lesson:1,chip:'V ou F',type:'vf',fr:'Bonjour !',
+  stmt:'Dizemos isso às 9h, para cumprimentar o padeiro.',answer:true,full:'Bonjour !',fullTr:'Bom dia!',
   why_ok:'<b>Bonjour</b> é o cumprimento padrão do dia: de manhã até o fim da tarde, com qualquer pessoa.',
-  why:['Verdadeiro ou falso','<p>A situação vai em texto curto, no lugar da imagem. A explicação do painel é a segunda parte da nota "Bonjour ou Bonsoir?".</p>']},
+  why:['Verdadeiro ou falso','<p>No modelo do Busuu: em cima, a frase em francês com áudio; embaixo, uma afirmação. Cada informação aparece <b>uma vez só</b> (decisão 345).</p><p>A explicação do painel é a segunda parte da nota "Bonjour ou Bonsoir?".</p>']},
  {id:'l1-bonsoir',lesson:1,chip:'bonsoir',type:'item',kind:'Palavra nova',fr:'bonsoir',tr:'boa noite (ao chegar)',
   audios:[['bonsoir','bonsoir']],
   why:['Cartão novo','<p>A tradução continua dizendo "ao chegar", como no cartão publicado.</p>']},
- {id:'l1-ex-bonsoir',lesson:1,chip:'O que você diz?',type:'funcao',ctx:'20h, no restaurante',
+ {id:'l1-ex-bonsoir',lesson:1,chip:'O que você diz?',type:'funcao',
   q:'Você chega num restaurante às 20h. O que você diz ao garçom?',
   opts:['Bonsoir !','Salut !','Bonjour !'],answer:'Bonsoir !',fullTr:'Boa noite!',
   why_ok:'À noite, ao chegar num lugar, trocamos <b>bonjour</b> por <b>bonsoir</b>. <b>Salut</b> fica para os amigos.',
@@ -252,8 +252,8 @@ const S=[
   text:'Para falar com um homem que você não conhece, diga <strong>monsieur</strong>; com uma mulher, <strong>madame</strong>. Hoje, <strong>madame</strong> serve para qualquer mulher adulta, casada ou não. <strong>Mademoiselle</strong> (senhorita) ainda aparece, mas é evitado: muita gente acha antiquado ou indelicado, e em 2012 a França tirou essa opção dos formulários oficiais.',
   ex:[['Bonjour, monsieur !','Bom dia, senhor!'],['Bonjour, madame !','Bom dia, senhora!'],['mademoiselle','senhorita (hoje evitado)']],
   why:['Nota que continua nota','<p>Decisão 339: não cabe numa frase de painel (regra, exceção e a história de 2012), então fica numa <b>tela própria</b>, logo depois do gatilho.</p>']},
- {id:'l1-ex-nota',lesson:1,chip:'V ou F da nota',type:'vf',ctx:'uma moça que você não conhece',
-  stmt:'Para falar com uma moça que você não conhece, o mais seguro é dizer <i>mademoiselle</i>.',answer:false,full:'Bonjour, madame !',fullTr:'Bom dia, senhora!',
+ {id:'l1-ex-nota',lesson:1,chip:'V ou F da nota',type:'vf',fr:'mademoiselle',
+  stmt:'É o jeito mais seguro de falar com uma moça que você não conhece.',answer:false,full:'Bonjour, madame !',fullTr:'Bom dia, senhora!',
   why_ok:'<b>Mademoiselle</b> hoje é evitado. Use <b>madame</b> para qualquer mulher adulta.',
   why:['V/F logo depois da nota','<p>O V/F da nota já está no rascunho aprovado da unidade 1.</p>']},
  {id:'l1-frase',lesson:1,chip:'Frase nova',type:'item',kind:'Frase nova',fr:'Bonjour, madame !',tr:'Bom dia, senhora!',
@@ -269,7 +269,7 @@ const S=[
 
  /* ===== A unidade ===== */
  {id:'unidade',lesson:'u',chip:'A unidade',type:'unidade',
-  why:['Como a trilha mostra a unidade','<p>Na trilha, como hoje, cada lição aparece <b>só com o título</b>. As palavras de cada lição ficam aqui, só para você:</p><ul><li><b>1</b>: salut / coucou · bonjour · bonsoir · monsieur / madame</li><li><b>2</b>: <span class="qa">P</span>ça va · tu vas bien ? / vous allez bien ? <span class="qa r">R</span>ça va · je vais bien · et toi ? / et vous ?</li><li><b>3</b>: merci · de rien · s\'il te plaît / s\'il vous plaît · pardon · excuse-moi / excusez-moi</li><li><b>4</b>: au revoir · à bientôt · bonne journée / bonne soirée</li><li><b>5</b>: diálogos "Encontro na rua" (informal) e "Na portaria" (formal)</li></ul><p>Clique na lição 2 ou na 5.</p>']},
+  why:['Como a trilha mostra a unidade','<p>Na trilha, como hoje, cada lição aparece <b>só com o título</b>. As palavras de cada lição ficam aqui, só para você:</p><ul><li><b>1</b>: salut / coucou · bonjour · bonsoir · monsieur / madame</li><li><b>2</b>: <span class="qa">P</span>ça va · tu vas bien ? / vous allez bien ? <span class="qa r">R</span>ça va · je vais bien · et toi ? / et vous ?</li><li><b>3</b>: <span class="qa">F</span>merci <span class="qa r">R</span>de rien · s\'il te plaît / s\'il vous plaît · pardon · excuse-moi / excusez-moi</li><li><b>4</b>: au revoir · à bientôt · bonne journée / bonne soirée</li><li><b>5</b>: diálogos "Encontro na rua" (informal) e "Na portaria" (formal)</li></ul><p>Clique nas lições 1, 2, 3 ou 5.</p>']},
 
  /* ===== Lição 2 ===== */
  {id:'l2-intro',lesson:2,chip:'Início',type:'intro',n:2,title:'Perguntar como a pessoa está e responder',
@@ -291,7 +291,7 @@ const S=[
   text:'Há vários jeitos de perguntar como a pessoa está. <strong>Informal</strong> (família, amigos, jovens da mesma idade, mesmo que não se conheçam): <strong>Ça va ?</strong>, o mais comum, <strong>Tu vas bien ?</strong> e <strong>Comment vas-tu ?</strong>, que na fala do dia a dia soa um pouco mais cuidado que <strong>Ça va ?</strong> e <strong>Tu vas bien ?</strong>. <strong>Formal</strong> (desconhecidos, chefes e superiores, pessoas idosas, quem presta um serviço): <strong>Vous allez bien ?</strong> e <strong>Comment allez-vous ?</strong>.',
   ex:[['Ça va ?','Tudo bem?','informal'],['Tu vas bien ?','Você está bem?','informal'],['Comment vas-tu ?','Como vai você?','informal'],['Vous allez bien ?','O senhor (a senhora) está bem?','formal'],['Comment allez-vous ?','Como vai o senhor (a senhora)?','formal']],
   why:['Nota que continua nota (sistematização)','<p>Decisão 339: é uma <b>sistematização</b> (5 formas, informal x formal, quando usar cada uma), grande demais para o painel. Fica numa tela própria, logo depois do gatilho.</p><p>As etiquetas informal e formal ao lado de cada exemplo são novas: ajudam a ler o quadro.</p>']},
- {id:'l2-ex-tuvas',lesson:2,chip:'O que você diz?',type:'funcao',ctx:'no corredor do prédio',
+ {id:'l2-ex-tuvas',lesson:2,chip:'O que você diz?',type:'funcao',
   q:'Você encontra a vizinha, uma senhora idosa que você chama de madame. Como pergunta se ela está bem?',
   opts:['Vous allez bien ?','Tu vas bien ?','Ça va ?'],answer:'Vous allez bien ?',fullTr:'A senhora está bem?',
   why_ok:'Com pessoas idosas e desconhecidos, use a forma formal: <b>vous allez bien ?</b> ou <b>comment allez-vous ?</b>',
@@ -307,8 +307,8 @@ const S=[
   text:'Além de <strong>je vais bien</strong>, você vai ouvir outras respostas: <strong>très bien</strong> (muito bem); <strong>pas mal</strong> (ao pé da letra, "nada mal": quer dizer que a pessoa está bem); e, entre amigos, <strong>bof</strong>, um "mais ou menos" sem muito ânimo, bem informal.',
   ex:[['Très bien, merci !','Muito bem, obrigada!'],['Pas mal, et toi ?','Nada mal, e você?'],['Bof...','Mais ou menos... (informal)']],
   why:['Nota que continua nota','<p>Traz três respostas que <b>não são cartões</b> (<i>très bien</i>, <i>pas mal</i>, <i>bof</i>), cada uma com o seu sentido: não cabe no painel de um cartão.</p>']},
- {id:'l2-ex-nota',lesson:2,chip:'V ou F da nota',type:'vf',ctx:'um amigo responde: Pas mal !',
-  stmt:'<i>Pas mal</i> quer dizer que a pessoa está mal.',answer:false,full:'Pas mal, et toi ?',fullTr:'Nada mal, e você?',
+ {id:'l2-ex-nota',lesson:2,chip:'V ou F da nota',type:'vf',fr:'Pas mal !',
+  stmt:'Quer dizer que a pessoa está mal.',answer:false,full:'Pas mal, et toi ?',fullTr:'Nada mal, e você?',
   why_ok:'<b>Pas mal</b> é "nada mal": a pessoa está bem.',
   why:['V/F da nota','<p>O V/F que a nota já tem no rascunho aprovado.</p>']},
  {id:'l2-frase',lesson:2,chip:'Frase nova',type:'item',kind:'Frase nova',role:'Resposta',fr:'Je vais bien, et toi ?',tr:'Estou bem, e você?',
@@ -318,7 +318,7 @@ const S=[
   before:'Je vais bien, et ',after:' ?',tr:'Estou bem, e você?',
   opts:['toa','toi'],answer:'toi',full:'Je vais bien, et toi ?',
   why_ok:'Para devolver a pergunta: <b>et toi ?</b> com amigos e família; <b>et vous ?</b> com quem você trata por senhor ou senhora.',
-  why_err:{'toa':'Atenção à grafia: o som "uá" se escreve <b>oi</b> em francês: <b>toi</b>. '},
+  why_err:{'toa':'Atenção à grafia: em francês, <b>oi</b> se pronuncia /uá/: <b>toi</b>. '},
   why:['"Complete" com erro de grafia','<p>Distrator de grafia que um brasileiro escreveria de ouvido (<i>toa</i>). O painel traz a explicação do par <i>et toi ? / et vous ?</i>, que não tinha nota.</p>']},
  {id:'l2-montar',lesson:2,chip:'Monte a frase',type:'montar',
   tr:'Boa noite, senhora. A senhora está bem?',tiles:['Vous','bien ?','Tu','Bonsoir,','vas','allez','madame.'],answer:['Bonsoir,','madame.','Vous','allez','bien ?'],full:'Bonsoir, madame. Vous allez bien ?',
@@ -327,6 +327,70 @@ const S=[
  {id:'l2-fim',lesson:2,chip:'Fim da lição',type:'fim',
   list:[['ça va','tudo bem','pergunta e resposta'],['tu vas bien ? / vous allez bien ?','você está bem? / o senhor (a senhora) está bem?','pergunta'],['et toi ? / et vous ?','e você? / e o senhor? e a senhora?','resposta'],['je vais bien','estou bem','resposta'],['Je vais bien, et toi ?','Estou bem, e você?','frase'],['Bonsoir, madame. Vous allez bien ?','Boa noite, senhora. A senhora está bem?','frase']],
   why:['Tela final','<p>A lista mostra também se cada item é pergunta ou resposta.</p>']},
+
+ /* ===== Lição 3 ===== */
+ {id:'l3-intro',lesson:3,chip:'Início',type:'intro',n:3,title:'Fórmulas de cortesia',
+  goal:'Você vai aprender a agradecer, a responder a um obrigado, a pedir por favor e a pedir desculpa ou licença.',size:'5 cartões · 1 frase · cerca de 3 minutos',
+  why:['Abertura da lição 3','<p>É a lição mais longa da unidade: 5 cartões (o máximo da regra 13) e duas notas que continuam notas. Uns 3 minutos.</p>']},
+ {id:'l3-merci',lesson:3,chip:'merci',type:'item',kind:'Palavra nova',role:'Fala',fr:'merci',tr:'obrigado / obrigada',
+  audios:[['merci','merci']],
+  why:['Cartão de fala','<p>Ponto 1 nesta lição: <b>fala e resposta</b>. <i>Merci</i> é a fala; <i>de rien</i>, a resposta.</p>']},
+ {id:'l3-ex-merci',lesson:3,chip:'Complete (outra palavra)',type:'complete',
+  before:'Je vais bien, ',after:'.',tr:'Estou bem, obrigada.',
+  opts:['bonjour','merci'],answer:'merci',full:'Je vais bien, merci.',
+  why_ok:'<b>Merci</b> não muda: é "obrigado" ou "obrigada", conforme quem fala.',
+  why_err:{'bonjour':'<b>Bonjour</b> é um cumprimento: não fecha a resposta. '},
+  why:['"Complete" com outra palavra','<p>A frase do cartão <i>merci</i> faz a ponte com a lição 2 (<i>je vais bien</i>). O distrator é outra palavra já vista (decisão 342).</p>']},
+ {id:'l3-derien',lesson:3,chip:'de rien',type:'item',kind:'Palavra nova',role:'Resposta',fr:'de rien',tr:'de nada',
+  audios:[['de rien','de rien']],
+  why:['Cartão de resposta','<p>A resposta a <i>merci</i>.</p>']},
+ {id:'l3-ex-derien',lesson:3,chip:'V ou F',type:'vf',fr:'De rien !',
+  stmt:'Respondemos isso quando alguém diz <i>merci</i>.',answer:true,full:'Merci ! De rien !',fullTr:'Obrigada! De nada!',
+  why_ok:'<b>De rien</b> quer dizer "de nada": é a resposta a <b>merci</b>.',
+  why:['V/F no modelo do Busuu','<p>É o V/F de <i>De rien !</i> que já está no rascunho aprovado (Revisão da unidade), agora com a frase em francês e o áudio em cima.</p><p>O painel mostra a frase do cartão: <i>Merci ! De rien !</i></p>']},
+ {id:'l3-svp',lesson:3,chip:"s'il te plaît / s'il vous plaît",type:'item',kind:'Palavra nova',role:'Pedido',fr:"s'il te plaît / s'il vous plaît",tr:'por favor (informal / formal)',
+  audios:[["s'il te plaît","s'il te plaît"],["s'il vous plaît","s'il vous plaît"]],
+  why:['Cartão de pedido','<p>Par informal e formal, informal primeiro (decisão 292). É o gatilho da nota seguinte.</p>']},
+ {id:'l3-nota-svp',lesson:3,chip:'Nota (STP e SVP)',type:'nota',kind:'Nota · realidade',title:'"S\'il vous plaît" no dia a dia',
+  text:"Na fala, use a forma inteira: <strong>s'il te plaît</strong> com amigos e família, <strong>s'il vous plaît</strong> com desconhecidos (é sempre a escolha mais segura). Por escrito, as duas costumam encolher: em mensagem para amigos, <strong>STP</strong>; em avisos, placas e mensagens mais formais, <strong>SVP</strong>.",
+  ex:[['STP',"s'il te plaît (por escrito, entre amigos)"],['SVP',"s'il vous plaît (por escrito)"]],
+  why:['Nota que continua nota','<p>Traz <b>STP</b> e <b>SVP</b>, que não são cartões: pelo critério da lição 2, nota que traz formas fora dos cartões continua nota.</p>']},
+ {id:'l3-ex-svp',lesson:3,chip:'V ou F da nota',type:'vf',fr:'STP',
+  stmt:"Numa mensagem para um amigo, quer dizer <i>s'il te plaît</i>.",answer:true,full:"s'il te plaît",fullTr:'por favor (informal)',
+  why_ok:"<b>STP</b> é a forma curta de <b>s'il te plaît</b>, comum em mensagem para amigos.",
+  why:['V/F da nota','<p>O V/F que a nota já tem, no modelo novo: a forma escrita em cima, a afirmação embaixo, sem repetir <i>STP</i> na frase.</p>']},
+ {id:'l3-pardon',lesson:3,chip:'pardon',type:'item',kind:'Palavra nova',fr:'pardon',tr:'desculpe / com licença',
+  audios:[['pardon','pardon']],
+  why:['Cartão novo','<p>A tradução não muda (decisão 321).</p>']},
+ {id:'l3-ex-pardon',lesson:3,chip:'O que você diz?',type:'funcao',
+  q:'Você esbarra sem querer numa senhora na rua. O que você diz?',
+  opts:['Pardon, madame !','Merci, madame !','De rien, madame !'],answer:'Pardon, madame !',fullTr:'Desculpe, senhora!',
+  why_ok:'<b>Pardon</b> serve para pedir licença e para pedir desculpa por algo pequeno, como um esbarrão.',
+  why_err:{'Merci, madame !':'<b>Merci</b> é para agradecer. ','De rien, madame !':'<b>De rien</b> é a resposta a <b>merci</b>. '},
+  why:['Pergunta de função','<p>A situação fica só na pergunta, sem caixa de contexto repetindo (decisão 345). <i>Pardon, madame !</i> é uma frase essencial da unidade.</p><p>O painel usa a primeira parte da nota "Pardon, excuse-moi ou excusez-moi?".</p>']},
+ {id:'l3-excuse',lesson:3,chip:'excuse-moi / excusez-moi',type:'item',kind:'Palavra nova',fr:'excuse-moi / excusez-moi',tr:'desculpa, com licença (informal / formal)',
+  audios:[['excuse-moi','excuse-moi'],['excusez-moi','excusez-moi']],
+  why:['Cartão novo em par','<p>Informal e formal, como <i>s\'il te plaît / s\'il vous plaît</i>. É o gatilho da nota seguinte.</p>']},
+ {id:'l3-nota-pardon',lesson:3,chip:'Nota (sistematização)',type:'nota',kind:'Nota · realidade',title:'Pardon, excuse-moi ou excusez-moi?',
+  text:'<strong>Pardon</strong> serve para pedir licença, pedir desculpa por algo pequeno (um esbarrão) e, como pergunta, para pedir que a pessoa repita: <strong>Pardon ?</strong> Para chamar a atenção de alguém ou pedir desculpa com mais cuidado, use <strong>excusez-moi</strong> com desconhecidos e <strong>excuse-moi</strong> com amigos e família. Para dizer "sinto muito", use <strong>désolé</strong> (ou <strong>désolée</strong>, se quem fala é mulher).',
+  ex:[['Pardon ?','Como? / Pode repetir?'],['Excusez-moi !','Com licença! / Desculpe!','formal'],['Excuse-moi !','Desculpa!','informal'],['Désolé ! Désolée !','Sinto muito!']],
+  why:['Nota que continua nota (sistematização)','<p>Compara três formas e traz <i>désolé / désolée</i>, que não é cartão. Fica numa tela própria, depois do gatilho <i>excuse-moi / excusez-moi</i>.</p><p>O primeiro uso de <i>pardon</i> já apareceu no painel do exercício anterior; a nota repete de propósito, porque aqui ele está ao lado das outras formas.</p>']},
+ {id:'l3-ex-nota',lesson:3,chip:'V ou F da nota',type:'vf',fr:'Excuse-moi !',
+  stmt:'Dizemos isso para chamar a atenção de um desconhecido.',answer:false,full:'Excusez-moi, monsieur !',fullTr:'Com licença, senhor!',
+  why_ok:'Com desconhecidos, <b>excusez-moi</b>; <b>excuse-moi</b> é para amigos e família.',
+  why:['V/F da nota','<p>O V/F que a nota já tem, no modelo novo.</p>']},
+ {id:'l3-frase',lesson:3,chip:'Frase nova',type:'item',kind:'Frase nova',fr:'Excusez-moi, monsieur !',tr:'Com licença, senhor!',
+  audios:[['Excusez-moi, monsieur !','']],
+  why:['A frase-modelo como cartão','<p>A frase do cartão <i>excuse-moi / excusez-moi</i>, na forma formal, a mais segura.</p>']},
+ {id:'l3-ex-frase',lesson:3,chip:'Complete (grafia)',type:'complete',
+  before:'',after:', monsieur !',tr:'Com licença, senhor!',
+  opts:['Excusez-moi','Excusé-moi'],answer:'Excusez-moi',full:'Excusez-moi, monsieur !',
+  why_ok:'Com <b>vous</b>, a forma termina em <b>-ez</b>: <b>excusez-moi</b>.',
+  why_err:{'Excusé-moi':'Atenção à grafia: em francês, <b>-ez</b> no fim da palavra se pronuncia /ê/, o mesmo som de <b>é</b>. '},
+  why:['"Complete" com erro de grafia','<p><i>Excusé-moi</i> é o erro de quem escreve de ouvido. Equilibra com o "Complete" de outra palavra do começo da lição.</p>']},
+ {id:'l3-fim',lesson:3,chip:'Fim da lição',type:'fim',
+  list:[['merci','obrigado / obrigada','fala'],['de rien','de nada','resposta'],["s'il te plaît / s'il vous plaît",'por favor (informal / formal)'],['pardon','desculpe / com licença'],['excuse-moi / excusez-moi','desculpa, com licença (informal / formal)'],['Excusez-moi, monsieur !','Com licença, senhor!','frase']],
+  why:['Tela final','<p>Mesma tela das lições 1 e 2.</p>']},
 
  /* ===== Lição 5 ===== */
  {id:'dialogo',lesson:5,chip:'Lição de diálogo',type:'dialogo',
@@ -338,7 +402,7 @@ let i=0, interacted=false, picked=[];
 const $=id=>document.getElementById(id);
 const screen=$('screen'), panel=$('panel');
 const idx=id=>S.findIndex(s=>s.id===id);
-const LESSONS=[[1,'Lição 1','l1-intro'],[2,'Lição 2','l2-intro'],['u','A unidade','unidade'],[5,'Lição 5','dialogo']];
+const LESSONS=[[1,'Lição 1','l1-intro'],[2,'Lição 2','l2-intro'],[3,'Lição 3','l3-intro'],['u','A unidade','unidade'],[5,'Lição 5','dialogo']];
 
 function setProgress(){
   const s=S[i]; const same=S.filter(x=>x.lesson===s.lesson); const k=same.indexOf(s);
@@ -374,7 +438,7 @@ function showPanel(ok, s, extra){
   screen.style.paddingBottom=(panel.offsetHeight+12)+'px';
   speak(fr);
 }
-const ctxHTML=s=>s.ctx?`<div class="ctx">${esc(s.ctx)}</div>`:'';
+const frBox=s=>s.fr?`<div class="frbox">${audBtn(s.fr,'')}<b>${esc(s.fr)}</b></div>`:'';
 
 function render(){
   const s=S[i]; let h='';
@@ -401,12 +465,12 @@ function render(){
       <div class="opts two">${s.opts.map(o=>`<button class="opt" data-o="${esc(o)}">${esc(o)}</button>`).join('')}</div></div>`;
   }
   if(s.type==='vf'){
-    h=`<span class="tag">Verdadeiro ou falso?</span><div class="grow ex">${ctxHTML(s)}
+    h=`<span class="tag">Verdadeiro ou falso?</span><div class="grow ex">${frBox(s)}
       <p class="q">${s.stmt}</p>
       <div class="opts two"><button class="opt" data-o="true">Verdadeiro</button><button class="opt" data-o="false">Falso</button></div></div>`;
   }
   if(s.type==='funcao'){
-    h=`<span class="tag">O que você diz?</span><div class="grow ex">${ctxHTML(s)}
+    h=`<span class="tag">O que você diz?</span><div class="grow ex">
       <p class="q">${esc(s.q)}</p>
       <div class="opts">${s.opts.map(o=>`<button class="opt" data-o="${esc(o)}">${esc(o)}</button>`).join('')}</div></div>`;
   }
@@ -434,8 +498,8 @@ function render(){
     h=`<span class="tag">Unidade 1 · Cumprimentar e se despedir</span>
     <div class="lessons">
       ${row('✓','Cumprimentar alguém','done','l1-intro')}
-      ${row('2','Perguntar como a pessoa está e responder','cur','l2-intro')}
-      ${row('3','Fórmulas de cortesia','')}
+      ${row('✓','Perguntar como a pessoa está e responder','done','l2-intro')}
+      ${row('3','Fórmulas de cortesia','cur','l3-intro')}
       ${row('4','Despedir-se','')}
       ${row('5','Diálogos da unidade','','dialogo')}
       ${row('★','Revisão da unidade','')}
