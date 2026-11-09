@@ -1,0 +1,41 @@
+/* Aulas (Mural > Aulas e materiais): Alunos, Turmas, Nova aula e Aulas registradas em caixas iguais à do Notion
+   (shared/notion-sync.css). Peças do Design System do painel (.painel, p-*); aqui só o arranjo. HTML em shared/admin-class-logs.js. */
+.painel.aulas-painel { display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem; }
+.painel .aulas-box { margin: 0; border: 1px solid var(--p-linha); border-radius: var(--p-raio); background: var(--p-bg); padding: 0; }
+.painel .aulas-box > summary { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; padding: .85rem 1.1rem; cursor: pointer; list-style: none; margin: 0; }
+.painel .aulas-box > summary::-webkit-details-marker { display: none; }
+.painel .aulas-box > summary::after { content: '▾'; margin-left: auto; color: var(--p-tinta-suave); transition: transform .15s; background-image: none; width: auto; height: auto; float: none; transform: none; }
+.painel .aulas-box:not([open]) > summary::after { transform: rotate(-90deg); }
+.painel .aulas-titulo { font-weight: 800; font-size: 1.05rem; color: var(--p-tinta); }
+.painel .aulas-sub { font-weight: 600; color: var(--p-tinta-suave); font-size: .9em; }
+.painel .aulas-corpo { display: flex; flex-direction: column; gap: .75rem; padding: 0 1.1rem 1.1rem; }
+.painel .aulas-corpo > * { margin: 0; }
+.painel .aulas-atalhos { display: flex; gap: 1rem; font-size: .9rem; font-weight: 700; }
+.painel .aulas-lista { display: flex; flex-direction: column; max-height: 15rem; overflow-y: auto; border: 1px solid var(--p-linha); border-radius: 12px; padding: .25rem .75rem; }
+.painel .aulas-opcao { display: flex; align-items: center; gap: .6rem; margin: 0; padding: .45rem 0; cursor: pointer; border-bottom: 1px solid var(--p-linha); }
+.painel .aulas-opcao:last-child { border-bottom: 0; }
+.painel .aulas-opcao input[type=checkbox] { margin: 0; flex: 0 0 auto; }
+.painel .aulas-opcao small { font-size: .85em; }
+.painel #admin-create-class-log-form { display: flex; flex-direction: column; gap: .35rem; margin: 0; }
+.painel #admin-create-class-log-form :is(input:not([type=checkbox]):not([type=radio]), select, textarea) { margin-bottom: .5rem; }
+.painel #admin-create-class-log-btn { align-self: flex-start; width: auto; margin-top: .5rem; }
+.painel .aulas-itens .p-item { align-items: flex-start; }
+.painel .aulas-itens .p-item-titulo { font-weight: 800; }
+.painel .aulas-quem { color: var(--p-tinta-suave); font-weight: 600; }
+.painel .aulas-item.is-editando .p-item-conteudo { width: 100%; }
+@media (max-width: 600px) {
+  .painel .aulas-itens .p-item { flex-wrap: wrap; }
+  .painel .aulas-itens .p-item-acoes { width: 100%; justify-content: flex-end; }
+  .painel .aulas-itens .p-item-acoes button { min-height: 44px; min-width: 44px; }
+}
+/* Campos do formulário com a largura toda; Presença e Competências mantêm as pílulas do site (iguais à tela da aluna),
+   só com a caixinha de marcar alinhada (o Pico muda o tamanho e a margem dela). */
+.painel #admin-create-class-log-form :is(input:not([type=checkbox]):not([type=radio]), select, textarea) { width: 100%; max-width: none; }
+.painel #admin-create-class-log-form .att-new { max-width: 360px; }
+.painel #admin-create-class-log-form label:not(.att-choice):not(.skill-toggle) { font-weight: 700; font-size: .9rem; color: var(--p-tinta); margin: .25rem 0 0; }
+.painel :is(.skill-toggle, label.att-choice) input { width: 1rem; height: 1rem; margin: 0; flex: 0 0 auto; position: static; top: auto; vertical-align: middle; }
+.painel :is(.skill-toggle, label.att-choice) { display: inline-flex; align-items: center; gap: 6px; margin: 0; line-height: 1.2; }
+.painel .class-log-extras { margin: .25rem 0 0; }
+.painel .class-log-extras legend { margin-top: .5rem; font-weight: 700; font-size: .9rem; color: var(--p-tinta); }
+.painel .class-log-repeat { margin: 0; }
+.painel #admin-create-class-log-error:empty { display: none; }

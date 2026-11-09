@@ -328,6 +328,10 @@ const PANEL_STUB = (who) => {
       L('aulas: Todos não deixa ninguém marcado no formulário', await ev(() => !document.querySelector('[data-classlog-student-checkbox]:checked, [data-classlog-classroom-checkbox]:checked') && document.getElementById('admin-create-class-log-btn').disabled));
       await page.check('[data-classlog-classroom-checkbox][value="501"]');
       L('aulas: em Todos, marcar a turma no formulário não esconde as outras aulas', await ev(() => document.querySelectorAll('#admin-classlogs-list-box [data-edit-class-log]').length === 2));
+      if (SHOTS) await page.addStyleTag({ content: '.toast, #toast-container, .toast-stack, header, .topbar, .app-header{ visibility:hidden !important; }' });
+      if (SHOTS) await page.locator('#admin-classlogs-register').screenshot({ path: `${SHOTS}/${lang}-${theme}-${width}-aulas-caixas.png` });
+      L('aulas: Alunos, Turmas, Nova aula e Aulas registradas em caixas do painel', await ev(() => document.getElementById('admin-classlogs-register').classList.contains('painel')
+        && document.querySelectorAll('#admin-classlogs-register > details.aulas-box').length === 4 && /\(2\)/.test(document.querySelector('[data-classlog-count]').textContent)));
       // rótulos no estilo do Notion: criar digitando, ⋯ para cor/nome/arquivar, sem perder o que já foi digitado
       await page.fill('#admin-class-log-topic', 'Texto que não pode sumir');
       await page.fill('[data-att-new="new"]', 'Remarcada');
@@ -433,7 +437,7 @@ const PANEL_STUB = (who) => {
           const box = document.createElement('div'); document.body.appendChild(box);
           ADMIN_CLASS_LOGS_STATE.showFuture = false;
           box.innerHTML = await buildClassLogsListBoxHTML([{ student_id: 's', language_app_key: 'frances', username: 'ana' }], []); wireClassLogsListBox(box);
-          const hidden = box.querySelectorAll('[data-delete-class-log]').length === 2 && /\(2\)/.test(box.querySelector('.section-label').textContent)
+          const hidden = box.querySelectorAll('[data-delete-class-log]').length === 2 && box.querySelector('[data-classlog-n]').dataset.classlogN === '2'
             && /2 próximas/.test(box.querySelector('.class-log-future-bar').textContent) && !box.querySelector('[data-delete-class-log="9001"]');
           ADMIN_CLASS_LOGS_STATE.showFuture = true;
           box.innerHTML = await buildClassLogsListBoxHTML([{ student_id: 's', language_app_key: 'frances', username: 'ana' }], []);
