@@ -283,4 +283,20 @@ Objetivo: melhorar o currículo pedagógico do francês (A1 revisado e A2 novo) 
 - **Totais novos**: A1 com **385 cartões** (**762** A/B: 385 × 2 − 8; 195 novos + 190 publicados), **~152 lições**, **130 notas** (por módulo 31, 9, 15, 14, 16, 11, 11, 9, 14),
   ~31h00 (tempo digitado, não recalculado); "Apresentar-se" com 80 cartões; "Viagem e férias" continua com 41. A2 sem mudança.
 
+## Atualização 2026-11-09 (decisões 333 a 335, pedido de mudança: ordem dos módulos "Apresentar-se" e "Família e pessoas próximas")
+
+- **"Países e cidades"** (módulo "Viagem e férias"; decisão 333): a nota que juntava ida e procedência vira **duas notas breves**, cada uma com o seu gatilho:
+  logo depois do cartão *partir*, *aller en / au / aux / à* (para onde vou); logo depois do cartão *venir de*, *de / d' / du / des* (de onde venho, com *d'Italie* e
+  *des États-Unis*). As duas são a versão grátis da "Gramática: preposições com cidades e países".
+- **Ordem nova dos módulos 1 e 2** (decisões 334 e 335; critério "eu" e "os outros"; mesmos ids e chaves):
+  "Apresentar-se" = Cumprimentar e se despedir · Dizer o nome e a nacionalidade · Dizer de onde é, onde mora e que línguas fala · **Gramática: perguntar sim ou não**
+  (vem do módulo 2; gatilho *Tu habites à Paris ?*, *Tu parles anglais ?*) · Dizer a idade: de 1 a 29 · Gramática: *être* e *avoir* · Dizer a profissão ·
+  Gramática: masculino e feminino. "Família e pessoas próximas" = Apresentar a família · Gramática: artigos e plural · **Perguntar a idade dos outros: até 69**
+  (vem do módulo 1) · Gramática: possessivos · Descrever a aparência · Gramática: palavras interrogativas (pessoas). "Consigo..." dos dois módulos reescritos;
+  a versão grátis da "Gramática: *être* e *avoir*" perde *il a / elle a* (que agora vem depois) e fica com *je suis, tu es* e *J'ai vingt ans* (a tabela da
+  Conjugação, grátis, completa). Quem já concluiu um dos dois módulos **continua com ele concluído** (regra da decisão 330, item 4, estendida). O diálogo publicado
+  "No parque" (*Quel âge a ta fille ?*) pode ir para "Perguntar a idade dos outros" (a decidir no desenho dessa unidade). Renumeração no topo do `08 v2`.
+- **Totais novos**: A1 com 385 cartões (sem mudança), **~152 lições** (M1 23, M2 15), **131 notas** (por módulo 29, 11, 15, 14, 16, 11, 11, 10, 14), ~31h00;
+  "Apresentar-se" com 67 cartões e "Família e pessoas próximas" com 40. Auditoria: `auditoria/2026-11-09-ordem-modulos-1-e-2.md`.
+
 > **Como falar com a dona** (2026-10-23): em toda mensagem a ela, citar o NOME do módulo e da unidade (não só M6.1 ou `A1-15`), explicar termos internos e dar o contexto completo de cada decisão. Vale para o chat e para qualquer agente.

@@ -137,6 +137,20 @@ decisão estão marcados **(para a dona)**.
     - **Publicado que usa *venir* e fica sem cartão na A1-9 (para a dona, no desenho das lições)**: frases `A1-9-p2` *D'où viens-tu ?* e `A1-9-p3` *Je viens du Portugal.*,
       o V/F da unidade com *D'où viens-tu ?* e a nota publicada `etre-nationalite-vs-venir-de` (exemplo *venir de*). Proposta: `p3` vai com a chave para "Países e cidades";
       `p2` e o V/F trocam para *Tu es d'où ?* (1ª fala do diálogo). Nada mexido no `fr/content.js`.
-    - **Nota de "Países e cidades"**: continua uma nota só (*partir / aller en, au, aux, à; venir de, d', du, des*), agora com o gatilho da procedência no cartão
-      *venir de*. Se a dona preferir uma ideia por nota (regra 4), vira duas notas breves (+1 na conta).
+    - **[RESOLVIDO pela decisão 333: duas notas breves, uma depois de *partir* e outra depois de *venir de*; item 28] Nota de "Países e cidades"**: continuava uma nota só
+      (*partir / aller en, au, aux, à; venir de, d', du, des*), com o gatilho da procedência no cartão *venir de*.
     - **Exemplos da nota dos acentos** (*é: accent aigu* etc.) aparecem como "não vistas" no grupo informativo do `validar.js` da A1-2: é o que a nota ensina, com tradução.
+28. **Pedido de mudança 333 a 335 (2026-11-09): duas notas em "Países e cidades" e ordem nova dos módulos 1 e 2.** Aplicado no `mapa.json`:
+    - **Notas de "Países e cidades"** (decisão 333): duas notas breves com `momento.depois_de` (*partir* e *venir de*) e `exemplos` com tradução. A unidade não tem
+      `licoes` ainda, então o `momento` vai sem `licao` e a `conferirLicoesDaUnidade` não o confere (só confere unidades com `licoes`); o teste do mapa confere que os dois
+      gatilhos são cartões da unidade. A1 passa a 131 notas.
+    - **Ordem dos módulos** (decisões 334 e 335): só a lista `unidades` e o campo `ordem` mudam; ids, `id_funcao` e chaves ficam. As contas por módulo saem do script:
+      "Apresentar-se" 67 cartões, 23 lições, 29 notas; "Família e pessoas próximas" 40 cartões, 15 lições, 11 notas (A1 total sem mudança: 385, ~152).
+    - **Versão grátis da "Gramática: *être* e *avoir*"**: a `versao_gratis_em` citava "Perguntar a idade dos outros" (*il a / elle a*), que agora vem depois; a
+      `conferirVersaoGratis` acusaria. Ficou `["A1-2", "A1-3"]` (*je suis, tu es*; *J'ai vingt ans*), com a Conjugação (grátis) para o resto. **Para a dona confirmar**
+      que a versão grátis continua "parcial e suficiente" sem *il a / elle a* (auditoria de 2026-11-09).
+    - **Campos novos e opcionais**: `progresso_modulo_concluido` também na "Gramática: perguntar sim ou não" e em "Perguntar a idade dos outros" (regra da decisão 330,
+      item 4, estendida); `gatilho` na "Gramática: perguntar sim ou não"; `dialogo_a_decidir` em "Perguntar a idade dos outros" (diálogo "No parque").
+    - **Tempo digitado** (`tempo_08_min`) de "Apresentar-se" (3h55) e de "Família e pessoas próximas" (3h45) **não foi recalculado** (regra 16 suspensa, decisão 325):
+      com 13 cartões a menos, "Apresentar-se" continua com o mesmo número; a dona decide na nova medição.
+

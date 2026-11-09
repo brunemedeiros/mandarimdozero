@@ -8,7 +8,7 @@ as linhas dela saem do A1 e ficam marcadas abaixo.
 numa gramática ganha a sua **versão grátis** numa unidade de vocabulário antes dela (seção "Versão grátis" abaixo; coluna "Versão grátis" do `08 v2`). A gramática de frequência
 passou a M3.7 (a M3.6 é a unidade nova de vocabulário "Frequência", `A1-35`).
 **Correções da auditoria de 2026-10-21** (decisão 136; `auditoria/2026-10-21-a1-a2-rodada-equidade.md`): diálogos negativos posicionados na M3.1, M6.1 e M8.3; fala com *combien de* na
-M2.1; N43 sem *savoir* nem *pas encore*. O `08 v2` registrava as mesmas posições até a decisão 328 (2026-11-08), que renumerou as unidades: neste documento, as posições atuais são as da lista a seguir. Renumeração: "Perguntar a idade dos outros" M1.4 -> M1.5; "Dizer de onde é e onde mora" M2.5 -> M1.3; gramáticas de perguntas M2.6/M2.7 -> M2.5/M2.6 (nota da M1.2 incluída).
+M2.1; N43 sem *savoir* nem *pas encore*. O `08 v2` registrava as mesmas posições até a decisão 328 (2026-11-08), que renumerou as unidades: neste documento, as posições atuais são as da lista a seguir. Renumeração: "Perguntar a idade dos outros" M1.4 -> M1.5; "Dizer de onde é e onde mora" M2.5 -> M1.3; gramáticas de perguntas M2.6/M2.7 -> M2.5/M2.6 (nota da M1.2 incluída). **Decisão 335 (2026-11-09)**, nova ordem dos módulos 1 e 2: "Gramática: perguntar sim ou não" M2.6 -> **M1.4** (logo depois do gatilho *Tu parles anglais ?* da M1.3); "Dizer a idade: de 1 a 29" M1.4 -> **M1.5**; "Perguntar a idade dos outros" M1.5 -> **M2.3**; "Descrever a aparência" M2.3 -> **M2.5**; "Gramática: palavras interrogativas (pessoas)" M2.5 -> **M2.6**. As tabelas abaixo já usam essa numeração; os trechos históricos ("Respostas da dona", "Posições finais", "Proposta") ficam como foram escritos.
 **Auditoria final** (decisões 197 e 202 do `12`, 2026-10-23; `auditoria/2026-10-22-a1-a2-auditoria-final.md`): *aimer* (M4.2) e *parler* (hoje M1.3, era M2.5) viram cartão, então os diálogos negativos da M4.2 e da M1.3 usam só cartões; *pourquoi / parce que* sai da lista da M6.6 e fica na M9.3, como no `08 v2`. **Confirmado pela dona** (decisão 210, 2026-10-23): *pourquoi / parce que* fica na A1 M9.3 (convites).
 **Decisão 216 (2026-10-23)**: unidade nova A1 M4.1 "Verbos muito usados" (`A1-36`, só reconhecimento: *aller, faire, vouloir, pouvoir, devoir, voir*); as antigas A1 M4.1 a M4.6 passaram a **M4.2 a M4.7** e este documento já usa a numeração nova. Os verbos dos diálogos negativos e da nota dos modais (*Je ne peux pas, je dois travailler.*, M9.1) já são cartão quando essas unidades chegam.
 
@@ -31,11 +31,11 @@ M2.1; N43 sem *savoir* nem *pas encore*. O `08 v2` registrava as mesmas posiçõ
 |---|---|---|
 | M1.1 | *Je ne comprends pas.* (fórmula) | não |
 | M1.2 | diálogo novo: *Tu es française ? Non, je ne suis pas française. Je suis brésilienne.* | **sim, a única de primeira aparição**: nota breve (*ne... pas* abraça o verbo; gatilho: o cartão *ne… pas*, com a frase *Je ne suis pas française.*, decisão 326) |
-| M1.5 (era M1.4) | *Il a trente ans ? Non, il n'a pas trente ans. Il a quarante ans.* | não (o aluno vê o *n'* na frase; "Na frase" mostra) |
+| M1.3 | *Tu parles anglais ? Non, je ne parle pas anglais.* (*parler* é cartão da M1.3, decisão 197) | não |
 | M2.1 | diálogo novo: *Tu as des frères ? Non, je n'ai pas de frère.* | **sim, breve**: *un, une, des* viram *de* depois de *pas* (regra que não se deduz; versão grátis da tela da M2.2, decisão 126) |
 | M2.2 (g) | *J'ai une voiture* → *Je n'ai pas de voiture* | **tela** na gramática de artigos (regra que não se deduz; sistematiza a nota da M2.1) |
-| M2.3 | *Il est grand ? Non, il n'est pas très grand.* | não |
-| M1.3 (era M2.5) | *Tu parles anglais ? Non, je ne parle pas anglais.* (*parler* é cartão da M1.3, decisão 197) | não |
+| M2.3 (era M1.5; decisão 335) | *Il a trente ans ? Non, il n'a pas trente ans. Il a quarante ans.* | não (o aluno vê o *n'* na frase; "Na frase" mostra) |
+| M2.5 (era M2.3; decisão 335) | *Il est grand ? Non, il n'est pas très grand.* | não |
 | M3.1 | diálogo novo: *Tu te lèves tôt ? Non, je ne me lève pas tôt. Je me lève tard.* (decisão 136) | não (versão grátis por diálogo do *ne* antes do pronome da M3.4) |
 | M3.3 | *Tu travailles le samedi ? Non, je ne travaille pas le samedi.* | não |
 | M3.6 | *jamais* vira cartão (unidade "Frequência", decisão 127): *Tu travailles le dimanche ? Non, je ne travaille jamais le dimanche.* (proposta de exemplo, a escrever com a unidade) | **sim, breve**: *ne... jamais*, o *jamais* fica no lugar do *pas* (versão grátis da M3.7) |
@@ -75,8 +75,8 @@ O aluno gratuito não vê as gramáticas (regra 12; com o paywall ligado, conclu
 | futuro próximo negativo (tela da M8.4) | **M8.3**, diálogo *Tu vas réserver l'hôtel ? Non, je ne vais pas réserver l'hôtel.* (decisão 136) | diálogo |
 | modais no negativo (tela da M9.2) | **M9.1**, nota *Tu veux sortir ? Je ne peux pas, je dois travailler.* | nota |
 | PC negativo (tela da M9.5) | **M9.4**, diálogo *Tu as mangé ? Non, je n'ai pas mangé.* | nota breve (regra que não se deduz) |
-| *est-ce que* e entonação (M2.6, era M2.7) | nota *Ça va ?* sobe (M1.1) + **M1.3** (era M2.5), *Est-ce que tu parles anglais ?* | notas |
-| palavras interrogativas (M2.5, era M2.6, e M6.6) | diálogos de M1 a M6 com a pergunta e a resposta; notas M3.1, M5.1; *combien de* (M2.6): **M2.1**, fala nova *Tu as combien de frères ? J'ai deux frères.* (decisão 136: *combien* saiu da M1.3 e nenhum diálogo de M1 ou M2 tinha *combien de*) | diálogos e notas (já existem, menos a fala nova da M2.1) |
+| *est-ce que* e entonação (**M1.4**, decisão 335; era M2.6) | *Vous allez bien ?* só pela entonação (M1.1) + **M1.3**, logo antes, *Est-ce que tu parles anglais ?* (gatilhos *Tu habites à Paris ?*, *Tu parles anglais ?*) | notas |
+| palavras interrogativas (**M2.6**, decisão 335, e M6.6) | diálogos de M1 a M6 com a pergunta e a resposta; notas M3.1, M5.1; *combien de* (M2.6): **M2.1**, fala nova *Tu as combien de frères ? J'ai deux frères.* (decisão 136: *combien* saiu da M1.3 e nenhum diálogo de M1 ou M2 tinha *combien de*) | diálogos e notas (já existem, menos a fala nova da M2.1) |
 
 O texto das notas novas só se escreve depois, módulo a módulo, aprovado pela dona (decisão 126).
 
@@ -87,13 +87,13 @@ O texto das notas novas só se escreve depois, módulo a módulo, aprovado pela 
 | Palavra | Onde aparece hoje | Posição no mapa novo | Resposta ensinada na mesma unidade |
 |---|---|---|---|
 | *comment* (+ *tu t'appelles / allez-vous*) | A1-1, A1-2 | M1.1, M1.2 | *Je m'appelle...*, *Ça va bien* |
-| *quel / quelle* + nome | *de quel pays* (A1-2), *quel âge* (A1-3, A1-4), *quelle heure*, *quel jour*, *quelle date* (A1-6, A1-7), *quelle taille* (A1-10), *quel temps* (A1-13), *quel film* (A1-19) | M1.2, M1.4/M1.5, M3.1, M3.3, M3.5, M5.3, M8.5, M9.1 | nacionalidade, idade, hora, dia, data, tamanho, tempo, filme |
+| *quel / quelle* + nome | *de quel pays* (A1-2), *quel âge* (A1-3, A1-4), *quelle heure*, *quel jour*, *quelle date* (A1-6, A1-7), *quelle taille* (A1-10), *quel temps* (A1-13), *quel film* (A1-19) | M1.2, M1.5, M2.1, M2.3, M3.1, M3.3, M3.5, M5.3, M8.5, M9.1 | nacionalidade, idade, hora, dia, data, tamanho, tempo, filme |
 | *d'où* | A1-9 (*D'où viens-tu ?*) | M1.3 (era M2.5) | *Je viens de... / Je suis de...* |
 | *combien (de)* | A1-3 (*Combien ça coûte ?*), A1-10, A1-12 (*combien de pommes*), A1-14 (*combien coûte le billet*), A1-17 (*combien de chambres*) | M5.1, M4.4, M6.5, M7.1 (e, antes, a fala nova da M2.1 *Tu as combien de frères ?*, decisão 136) | números e preços |
 | *à quelle heure*, *quand* | A1-6 | M3.1 | *à sept heures*, dias |
 | *qu'est-ce que / que* | A1-11 (*Qu'est-ce qu'on achète ?*), A1-19, A1-20 | M4.3, M9.1, M9.4 | o que se compra, o que se faz |
 | *où* (+ *est*) | A1-8, A1-14, A1-15, A1-18 | M6.1, M6.5, M7.5 (e A2 M4.1, a `A1-15`) | lugares e posições (*à gauche, sur la table*) |
-| *comment est...* | A1-16 | M2.3 | adjetivos (*il est grand*) |
+| *comment est...* | A1-16 | M2.5 | adjetivos (*il est grand*) |
 | *qu'est-ce qui ne va pas*, *depuis quand* | A1-15 | **saiu do A1**: A2 M4.1 (decisão 116) | *J'ai mal à...*, *depuis hier* |
 | ***qui*** | **não aparece hoje** | M2.1 | *Qui est-ce ? C'est ma sœur.* (a introduzir) |
 | ***pourquoi / parce que*** | **não aparece hoje** (*parce que* não é cartão: é fórmula e nota em "Convidar, aceitar, recusar e se desculpar", M9.3) | M9.3 | *Pourquoi tu viens ? Parce que...* (a introduzir) |

@@ -20,14 +20,15 @@ check('A1: 34 vocabulário + 23 gramática', A1.vocabulario === 34 && A1.gramati
 check('A1: 385 cartões (decisão 330: + enchanté / enchantée em "Dizer o nome e a nacionalidade"; decisão 331: venir de e les États-Unis trocam de unidade, sem mudar a conta; era 384)', A1.cartoes === 385, A1.cartoes);
 check('A1: 762 cartões A/B (385 × 2 − 8 de reconhecimento; decisão 330: ne… pas só de reconhecimento)', A1.ab === 762, A1.ab);
 check('A1: 195 novos + 190 publicados', A1.novos === 195 && A1.publicados === 190, [A1.novos, A1.publicados]);
-check('A1: cartões por módulo 80/27/51/52/36/29/39/41/30 (decisão 328: "Dizer de onde é, onde mora e que línguas fala" vai para "Apresentar-se"; decisão 330: + enchanté / enchantée)',
-  JSON.stringify(A1.porModulo.map(m => m.cartoes)) === JSON.stringify([80, 27, 51, 52, 36, 29, 39, 41, 30]), A1.porModulo.map(m => m.cartoes));
-check('A1: ~152 lições (M1 28, M2 10, M3 19, M4 22, M5 14, M6 12, M7 18, M8 17, M9 12; decisões 326 a 328: "Dizer o nome e a nacionalidade" com 3 lições + Revisão, e "Dizer de onde é, onde mora e que línguas fala" no M1; decisão 330: lição 1 com 5 cartões, sem mudar a conta)',
-  JSON.stringify(A1.porModulo.map(m => m.licoes)) === JSON.stringify([28, 10, 19, 22, 14, 12, 18, 17, 12]), A1.porModulo.map(m => m.licoes));
+check('A1: cartões por módulo 67/40/51/52/36/29/39/41/30 (decisões 334 e 335: "Perguntar a idade dos outros: até 69", 13, desce para "Família e pessoas próximas"; era 80/27)',
+  JSON.stringify(A1.porModulo.map(m => m.cartoes)) === JSON.stringify([67, 40, 51, 52, 36, 29, 39, 41, 30]), A1.porModulo.map(m => m.cartoes));
+check('A1: ~152 lições (M1 23, M2 15, M3 19, M4 22, M5 14, M6 12, M7 18, M8 17, M9 12; decisão 335: as 5 lições de "Perguntar a idade dos outros: até 69" passam do M1 ao M2; era M1 28, M2 10)',
+  JSON.stringify(A1.porModulo.map(m => m.licoes)) === JSON.stringify([23, 15, 19, 22, 14, 12, 18, 17, 12]), A1.porModulo.map(m => m.licoes));
 check('A1: ~31h00 de trilha', A1.tempo === 31 * 60, C.formatarTempo(A1.tempo));
 check('A1: "Apresentar-se" fica com o tempo digitado ~3h55 (decisão 270; 16 cartões na A1-1 não mudam a regra, decisões 300 e 308)', A1.porModulo[0].tempo === 3 * 60 + 55, C.formatarTempo(A1.porModulo[0].tempo));
-check('A1: 130 notas (decisão 330: + "Os acentos ao soletrar"; era 129)', A1.notas === 130, A1.notas);
-check('A1: notas por módulo 31/9/15/14/16/11/11/9/14', JSON.stringify(A1.porModulo.map(m => m.notas)) === JSON.stringify([31, 9, 15, 14, 16, 11, 11, 9, 14]), A1.porModulo.map(m => m.notas));
+check('A1: 131 notas (decisão 333: a nota de ida e procedência de "Países e cidades" vira duas; era 130)', A1.notas === 131, A1.notas);
+check('A1: notas por módulo 29/11/15/14/16/11/11/10/14 (decisão 335: as 2 notas de "Perguntar a idade dos outros" passam ao M2; decisão 333: +1 no M8)',
+  JSON.stringify(A1.porModulo.map(m => m.notas)) === JSON.stringify([29, 11, 15, 14, 16, 11, 11, 10, 14]), A1.porModulo.map(m => m.notas));
 check('A2: 10 módulos', A2.modulos === 10, A2.modulos);
 check('A2: 58 unidades (36 vocabulário + 22 gramática)', A2.unidades === 58 && A2.vocabulario === 36 && A2.gramatica === 22, [A2.unidades, A2.vocabulario, A2.gramatica]);
 check('A2: 433 cartões (decisão 323: +7 que voltam, −2 que passam ao A1; era 428)', A2.cartoes === 433, A2.cartoes);
@@ -90,8 +91,6 @@ console.log('== "Dizer o nome e a nacionalidade" (A1-2) e "Dizer de onde é, ond
   const u9 = idx['A1-9'];
   check('A1-9 com o título da decisão 332', u9.unidade.nome === 'Dizer de onde é, onde mora e que línguas fala', u9.unidade.nome);
   check('A1-9 no módulo "Apresentar-se", logo depois de A1-2', u9.modulo === 'A1-m1' && u9.ordemGlobal === idx['A1-2'].ordemGlobal + 1, [u9.modulo, u9.posicao]);
-  check('ordem do módulo "Apresentar-se" (decisão 328)', JSON.stringify(mapa.niveis[0].modulos[0].unidades.map(x => x.id)) ===
-    JSON.stringify(['A1-1', 'A1-2', 'A1-9', 'A1-3', 'A1-21', 'A1-g1', 'A1-22', 'A1-g11']));
   check('"Família e pessoas próximas" começa em "Apresentar a família"', mapa.niveis[0].modulos[1].unidades[0].id === 'A1-4');
   const p9 = u9.unidade.cartoes.map(c => c.palavra);
   check('A1-9: 12 cartões, com la France (A1-2-v5), le Brésil (A1-2-v6) e les États-Unis, sem américain e sem venir de (decisão 331)', p9.length === 12 &&
@@ -104,10 +103,41 @@ console.log('== "Dizer o nome e a nacionalidade" (A1-2) e "Dizer de onde é, ond
   check('A1-9: nenhuma nota cita venir de; a origem vem com Je suis de + cidade', !n9.some(n => /venir|viens/i.test(n.titulo + JSON.stringify(n.exemplos || []))) &&
     n9.some(n => (n.exemplos || []).some(e => e.fr === 'Je suis de Rio.')));
   const u31 = idx['A1-31'].unidade, p31 = u31.cartoes.map(c => c.palavra);
+  const n31 = C.notasDaUnidade(u31), ida = n31[0], vinda = n31[1];
+  check('"Países e cidades": duas notas breves, cada uma com o seu gatilho (decisão 333): ida depois de partir, procedência depois de venir de',
+    ida && vinda && ida.breve && vinda.breve && ida.momento.depois_de === 'partir' && vinda.momento.depois_de === 'venir de' &&
+    p31.includes(ida.momento.depois_de) && p31.includes(vinda.momento.depois_de) && ida.versao_gratis_de.includes('A1-g4') && vinda.versao_gratis_de.includes('A1-g4'), n31.map(n => n.titulo));
+  check('"Países e cidades": a nota da ida não fala de venir; a da procedência traz d\'Italie e des États-Unis',
+    !C.palavrasDaNota(ida).some(f => /vien/.test(f)) && C.palavrasDaNota(ida).some(f => /aux États-Unis/.test(f)) &&
+    ["Je viens d'Italie.", 'Je viens des États-Unis.'].every(f => C.palavrasDaNota(vinda).includes(f)) && !C.palavrasDaNota(vinda).some(f => /^Je (vais|pars)/.test(f)));
+  check('"Países e cidades": sem a nota antiga que juntava ida e procedência', !n31.some(n => /aller.*venir/.test(n.titulo)));
   check('"Países e cidades": venir de (chave A1-9-v9) logo depois de partir, sem les États-Unis (decisão 331)', p31.length === 10 && !p31.includes('les États-Unis') &&
     p31.indexOf('venir de') === p31.indexOf('partir') + 1 && u31.cartoes.find(c => c.palavra === 'venir de').chave === 'A1-9-v9', p31);
   check('"Gramática: preposições com cidades e países": versão grátis fala da nota nova da A1-9 e do cartão venir de', /J'habite en France/.test(idx['A1-g4'].unidade.versao_gratis_texto) &&
     /cartão venir de/.test(idx['A1-g4'].unidade.versao_gratis_texto) && !/France \/ Brésil\)/.test(idx['A1-g4'].unidade.versao_gratis_texto));
+}
+
+console.log('== ordem dos módulos "Apresentar-se" e "Família e pessoas próximas" (decisões 334 e 335)');
+{
+  const idx = C.indicePorId(mapa);
+  const [m1, m2] = mapa.niveis[0].modulos;
+  check('ordem do módulo "Apresentar-se" (decisão 335)', JSON.stringify(m1.unidades.map(x => x.id)) ===
+    JSON.stringify(['A1-1', 'A1-2', 'A1-9', 'A1-g12', 'A1-3', 'A1-g1', 'A1-22', 'A1-g11']), m1.unidades.map(x => x.id));
+  check('ordem do módulo "Família e pessoas próximas" (decisão 335)', JSON.stringify(m2.unidades.map(x => x.id)) ===
+    JSON.stringify(['A1-4', 'A1-g17', 'A1-21', 'A1-g2', 'A1-16', 'A1-g22']), m2.unidades.map(x => x.id));
+  check('"ordem" de cada unidade = posição na lista (1..n), sem buraco', [m1, m2].every(m => m.unidades.every((u, i) => u.ordem === i + 1)));
+  check('"Gramática: perguntar sim ou não" logo depois de "Dizer de onde é, onde mora e que línguas fala" (gatilho Tu parles anglais ?)',
+    idx['A1-g12'].ordemGlobal === idx['A1-9'].ordemGlobal + 1 && idx['A1-g12'].posicao === 'M1.4', idx['A1-g12'].posicao);
+  check('"Perguntar a idade dos outros: até 69" logo depois da "Gramática: artigos e plural" (M2.3)',
+    idx['A1-21'].modulo === 'A1-m7' && idx['A1-21'].ordemGlobal === idx['A1-g17'].ordemGlobal + 1 && idx['A1-21'].posicao === 'M2.3', idx['A1-21'].posicao);
+  check('mesmos nomes, ids e funções (só a posição muda)', idx['A1-g12'].unidade.id_funcao === 'gramatica-perguntar-sim-ou-nao' && idx['A1-21'].unidade.id_funcao === 'perguntar-a-idade-dos-outros-ate-69');
+  check('"Gramática: être e avoir": versão grátis só em unidades anteriores (sai A1-21, que agora vem depois)',
+    JSON.stringify(idx['A1-g1'].unidade.versao_gratis_em) === JSON.stringify(['A1-2', 'A1-3']) && !/M1\.5 il a/.test(idx['A1-g1'].unidade.versao_gratis_texto));
+  check('quem concluiu o módulo continua concluído: regra registrada nas duas unidades que mudam de módulo (decisão 330, item 4, estendida)',
+    ['A1-g12', 'A1-21'].every(id => /continua com ele concluído/.test(idx[id].unidade.progresso_modulo_concluido || '')));
+  check('"Consigo..." dos dois módulos segue a ordem nova', /perguntas de sim ou não/.test(m1.consigo) && !/1 a 69|perguntar a do outro/.test(m1.consigo) &&
+    /idade dos outros/.test(m2.consigo) && !/sim ou não/.test(m2.consigo), [m1.consigo, m2.consigo]);
+  check('diálogo "No parque" anotado como possível em "Perguntar a idade dos outros" (a decidir)', /No parque/.test(idx['A1-21'].unidade.dialogo_a_decidir || ''));
 }
 
 console.log('== revisão dos cortes (decisões 323 e 324)');

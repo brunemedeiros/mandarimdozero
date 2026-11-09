@@ -1,5 +1,5 @@
 {
-  "_doc": "Mapa A1 e A2 do francês em dados (decisões 228, 238 e 259). Fonte: docs/i18n/curriculo/08-mapa-final-a1-a2-v2.md, aprovado e congelado em 2026-10-26. Mudança só por pedido de mudança, com o auditor-curricular rodando (decisão 235); pedidos de mudança aplicados: decisões 267 a 279 (campo opcional \"licao\" por cartão, decisão 274) e 311 a 324 (321 a 324: 23 cartões voltam da revisão dos cortes, docs/i18n/curriculo/dados/revisao-dos-cortes.md; le portable e le mail passam ao A1; A1-1 polida pela dona: 16 cartões, 4 lições com id e título em \"licoes\", 9 notas com \"momento\" e \"exemplos\", 2 diálogos com \"licao\": o informal no fim da lição 2 e o formal no fim da lição 4) e 326 a 328 (\"Dizer o nome e a nacionalidade\" desenhada lição por lição: 14 cartões em 3 lições, a 2ª de pronúncia; \"Dizer de onde é e onde mora\" vai para o módulo \"Apresentar-se\", logo depois dela, com la France e le Brésil e sem américain / américaine; lição com mais de 5 cartões aceita pela dona fica marcada com \"cartoes_aceitos\") e 330 a 332 (\"Dizer o nome e a nacionalidade\" ganha enchanté / enchantée e a nota dos acentos, ne… pas vira cartão só de reconhecimento; \"Dizer de onde é, onde mora e que línguas fala\" troca venir de, que vai para \"Países e cidades\", por les États-Unis). As palavras de uma nota saem dos exemplos com tradução (palavrasDaNota em fr/scripts/curriculo_mapa.js, decisão 274); \"palavras\" digitado só nas notas antigas de vocabulário. Contas e tempos saem de fr/scripts/curriculo_mapa.js; ninguém digita total. Posição (M1.1) é rótulo gerado da ordem (decisão 229); o id estável é o \"id\". Divergências com o 08: docs/i18n/curriculo/dados/ACHADOS.md.",
+  "_doc": "Mapa A1 e A2 do francês em dados (decisões 228, 238 e 259). Fonte: docs/i18n/curriculo/08-mapa-final-a1-a2-v2.md, aprovado e congelado em 2026-10-26. Mudança só por pedido de mudança, com o auditor-curricular rodando (decisão 235); pedidos de mudança aplicados: decisões 267 a 279 (campo opcional \"licao\" por cartão, decisão 274) e 311 a 324 (321 a 324: 23 cartões voltam da revisão dos cortes, docs/i18n/curriculo/dados/revisao-dos-cortes.md; le portable e le mail passam ao A1; A1-1 polida pela dona: 16 cartões, 4 lições com id e título em \"licoes\", 9 notas com \"momento\" e \"exemplos\", 2 diálogos com \"licao\": o informal no fim da lição 2 e o formal no fim da lição 4) e 326 a 328 (\"Dizer o nome e a nacionalidade\" desenhada lição por lição: 14 cartões em 3 lições, a 2ª de pronúncia; \"Dizer de onde é e onde mora\" vai para o módulo \"Apresentar-se\", logo depois dela, com la France e le Brésil e sem américain / américaine; lição com mais de 5 cartões aceita pela dona fica marcada com \"cartoes_aceitos\") e 330 a 332 (\"Dizer o nome e a nacionalidade\" ganha enchanté / enchantée e a nota dos acentos, ne… pas vira cartão só de reconhecimento; \"Dizer de onde é, onde mora e que línguas fala\" troca venir de, que vai para \"Países e cidades\", por les États-Unis) e 333 a 335 (a nota de \"Países e cidades\" vira duas notas breves, uma depois de partir e outra depois de venir de; ordem nova dos módulos \"Apresentar-se\" e \"Família e pessoas próximas\": a \"Gramática: perguntar sim ou não\" sobe para o módulo 1 e \"Perguntar a idade dos outros: até 69\" desce para o módulo 2, mesmos ids e chaves; quem concluiu o módulo continua concluído). As palavras de uma nota saem dos exemplos com tradução (palavrasDaNota em fr/scripts/curriculo_mapa.js, decisão 274); \"palavras\" digitado só nas notas antigas de vocabulário. Contas e tempos saem de fr/scripts/curriculo_mapa.js; ninguém digita total. Posição (M1.1) é rótulo gerado da ordem (decisão 229); o id estável é o \"id\". Divergências com o 08: docs/i18n/curriculo/dados/ACHADOS.md.",
   "idioma": "fr",
   "versao": "2026-11-09",
   "fonte": "docs/i18n/curriculo/08-mapa-final-a1-a2-v2.md",
@@ -12,7 +12,7 @@
           "id": "A1-m1",
           "nome": "Apresentar-se",
           "ordem": 1,
-          "consigo": "cumprimentar e despedir-se escolhendo tu ou vous; dizer nome, sobrenome e nacionalidade no masculino e no feminino; soletrar o meu nome; dizer de onde sou (nacionalidade e cidade), onde moro e que línguas falo; dizer a idade (1 a 69) e perguntar a do outro; dizer a profissão sem artigo; reagir (Et toi ? Et vous ?) e pedir para repetir",
+          "consigo": "cumprimentar e despedir-se escolhendo tu ou vous; dizer nome, sobrenome e nacionalidade no masculino e no feminino; soletrar o meu nome; dizer de onde sou (nacionalidade e cidade), onde moro e que línguas falo; fazer perguntas de sim ou não (Tu parles anglais ? Est-ce que tu parles anglais ?); dizer a minha idade (1 a 29); dizer a profissão sem artigo; reagir (Et toi ? Et vous ?) e pedir para repetir",
           "tempo_08_min": 235,
           "unidades": [
             {
@@ -893,9 +893,31 @@
               ]
             },
             {
+              "id": "A1-g12",
+              "nome": "Gramática: perguntar sim ou não",
+              "ordem": 4,
+              "tipo": "gramatica",
+              "id_funcao": "gramatica-perguntar-sim-ou-nao",
+              "funcao": "fazer perguntas de sim ou não",
+              "origem": "nova",
+              "versao_gratis_em": [
+                "A1-1",
+                "A1-9"
+              ],
+              "versao_gratis_texto": "nota Ça va ? sobe (M1.1) + M1.3, logo antes desta gramática (decisão 335), gancho Tu parles anglais ?: \"Est-ce que tu parles anglais ?\"",
+              "telas": 4,
+              "exercicios": 8,
+              "decisoes": [
+                334,
+                335
+              ],
+              "progresso_modulo_concluido": "quem já concluiu o módulo \"Apresentar-se\" continua com ele concluído e com o Ponto de verificação aprovado; a unidade que entra aparece aberta (regra da decisão 330, item 4, estendida às mudanças de módulo das decisões 334 e 335)",
+              "gatilho": "Tu habites à Paris ?, Tu parles anglais ? (fim de \"Dizer de onde é, onde mora e que línguas fala\")"
+            },
+            {
               "id": "A1-3",
               "nome": "Dizer a idade: de 1 a 29",
-              "ordem": 4,
+              "ordem": 5,
               "tipo": "vocabulario",
               "id_funcao": "dizer-a-idade-de-1-a-29",
               "funcao": "dizer a própria idade",
@@ -1001,96 +1023,6 @@
               ]
             },
             {
-              "id": "A1-21",
-              "nome": "Perguntar a idade dos outros: até 69",
-              "ordem": 5,
-              "tipo": "vocabulario",
-              "id_funcao": "perguntar-a-idade-dos-outros-ate-69",
-              "funcao": "perguntar e dizer a idade de terceiros",
-              "origem": "nova",
-              "cartoes": [
-                {
-                  "palavra": "onze",
-                  "chave": "nova",
-                  "origem": "novo"
-                },
-                {
-                  "palavra": "douze",
-                  "chave": "nova",
-                  "origem": "novo"
-                },
-                {
-                  "palavra": "treize",
-                  "chave": "nova",
-                  "origem": "novo"
-                },
-                {
-                  "palavra": "quatorze",
-                  "chave": "nova",
-                  "origem": "novo"
-                },
-                {
-                  "palavra": "quinze",
-                  "chave": "nova",
-                  "origem": "novo"
-                },
-                {
-                  "palavra": "seize",
-                  "chave": "nova",
-                  "origem": "novo"
-                },
-                {
-                  "palavra": "dix-sept",
-                  "chave": "nova",
-                  "origem": "novo"
-                },
-                {
-                  "palavra": "dix-huit",
-                  "chave": "nova",
-                  "origem": "novo"
-                },
-                {
-                  "palavra": "dix-neuf",
-                  "chave": "nova",
-                  "origem": "novo"
-                },
-                {
-                  "palavra": "trente",
-                  "chave": "A1-10-v6",
-                  "origem": "publicado"
-                },
-                {
-                  "palavra": "quarante",
-                  "chave": "A1-10-v7",
-                  "origem": "publicado"
-                },
-                {
-                  "palavra": "cinquante",
-                  "chave": "A1-10-v8",
-                  "origem": "publicado"
-                },
-                {
-                  "palavra": "soixante",
-                  "chave": "A1-10-v9",
-                  "origem": "publicado"
-                }
-              ],
-              "notas": [
-                {
-                  "titulo": "17, 18, 19 e as dezenas",
-                  "tipo": "Exp",
-                  "confianca": "alta",
-                  "nova": true
-                },
-                {
-                  "titulo": "Et lui ? Et elle ?: tônicos",
-                  "tipo": "Exp",
-                  "confianca": "alta",
-                  "nova": true
-                }
-              ]
-            },
-            {
               "id": "A1-g1",
               "nome": "Gramática: être e avoir",
               "ordem": 6,
@@ -1100,12 +1032,14 @@
               "origem": "publicada",
               "versao_gratis_em": [
                 "A1-2",
-                "A1-3",
-                "A1-21"
+                "A1-3"
               ],
-              "versao_gratis_texto": "parcial e suficiente: M1.2 je suis (fórmula); M1.4 N08 J'ai vingt ans; M1.5 il a / elle a; a tabela completa está na Conjugação (grátis)",
+              "versao_gratis_texto": "parcial e suficiente: M1.2 je suis, tu es (fórmula); M1.5 N08 J'ai vingt ans; a tabela completa está na Conjugação (grátis). Decisão 335: il a / elle a sai da versão grátis, porque \"Perguntar a idade dos outros: até 69\" passa a vir depois desta gramática (M2.3), onde retoma a forma",
               "telas": 4,
-              "exercicios": 6
+              "exercicios": 6,
+              "decisoes": [
+                335
+              ]
             },
             {
               "id": "A1-22",
@@ -1211,13 +1145,13 @@
               "exercicios": 8
             }
           ],
-          "tempo_08_nota": "Tempo digitado (decisão 270) mantido: \"Cumprimentar e se despedir\" agora tem 16 cartões (decisões 313 e 314), mas nenhum limite novo de tempo é proposto enquanto as lições são revistas (decisões 300 e 308); medição real em dados/medicao-tempo-licao-2026-10-29.md. Decisão 328: \"Dizer de onde é e onde mora\" entrou no módulo; o tempo digitado de \"Apresentar-se\" e de \"Família e pessoas próximas\" não foi recalculado (regra 16 suspensa, decisão 325; a dona decide na nova medição)."
+          "tempo_08_nota": "Tempo digitado (decisão 270) mantido: \"Cumprimentar e se despedir\" agora tem 16 cartões (decisões 313 e 314), mas nenhum limite novo de tempo é proposto enquanto as lições são revistas (decisões 300 e 308); medição real em dados/medicao-tempo-licao-2026-10-29.md. Decisão 328: \"Dizer de onde é e onde mora\" entrou no módulo; o tempo digitado de \"Apresentar-se\" e de \"Família e pessoas próximas\" não foi recalculado (regra 16 suspensa, decisão 325; a dona decide na nova medição). Decisões 334 e 335: sai \"Perguntar a idade dos outros: até 69\" (para \"Família e pessoas próximas\") e entra a \"Gramática: perguntar sim ou não\"; o tempo digitado continua sem recálculo (regra 16 suspensa)."
         },
         {
           "id": "A1-m7",
           "nome": "Família e pessoas próximas",
           "ordem": 2,
-          "consigo": "apresentar a família (nome, idade, profissão); apresentar alguém (C'est ma sœur. Elle est médecin.); descrever a aparência de uma pessoa; perguntar sobre pessoas e fazer perguntas de sim ou não",
+          "consigo": "apresentar a família (nome, idade, profissão); apresentar alguém (C'est ma sœur. Elle est médecin.); perguntar e dizer a idade dos outros (até 69); descrever a aparência de uma pessoa; fazer perguntas sobre pessoas (qui, comment, quel, combien de)",
           "tempo_08_min": 225,
           "unidades": [
             {
@@ -1372,9 +1306,120 @@
               "versao_gratis_texto": "M2.1, gancho les parents: nota \"le, la, l', les: o plural se ouve no artigo\"; diálogo Tu as des frères ? Non, je n'ai pas de frère. com nota breve"
             },
             {
+              "id": "A1-21",
+              "nome": "Perguntar a idade dos outros: até 69",
+              "ordem": 3,
+              "tipo": "vocabulario",
+              "id_funcao": "perguntar-a-idade-dos-outros-ate-69",
+              "funcao": "perguntar e dizer a idade de terceiros",
+              "origem": "nova",
+              "cartoes": [
+                {
+                  "palavra": "onze",
+                  "chave": "nova",
+                  "origem": "novo"
+                },
+                {
+                  "palavra": "douze",
+                  "chave": "nova",
+                  "origem": "novo"
+                },
+                {
+                  "palavra": "treize",
+                  "chave": "nova",
+                  "origem": "novo"
+                },
+                {
+                  "palavra": "quatorze",
+                  "chave": "nova",
+                  "origem": "novo"
+                },
+                {
+                  "palavra": "quinze",
+                  "chave": "nova",
+                  "origem": "novo"
+                },
+                {
+                  "palavra": "seize",
+                  "chave": "nova",
+                  "origem": "novo"
+                },
+                {
+                  "palavra": "dix-sept",
+                  "chave": "nova",
+                  "origem": "novo"
+                },
+                {
+                  "palavra": "dix-huit",
+                  "chave": "nova",
+                  "origem": "novo"
+                },
+                {
+                  "palavra": "dix-neuf",
+                  "chave": "nova",
+                  "origem": "novo"
+                },
+                {
+                  "palavra": "trente",
+                  "chave": "A1-10-v6",
+                  "origem": "publicado"
+                },
+                {
+                  "palavra": "quarante",
+                  "chave": "A1-10-v7",
+                  "origem": "publicado"
+                },
+                {
+                  "palavra": "cinquante",
+                  "chave": "A1-10-v8",
+                  "origem": "publicado"
+                },
+                {
+                  "palavra": "soixante",
+                  "chave": "A1-10-v9",
+                  "origem": "publicado"
+                }
+              ],
+              "notas": [
+                {
+                  "titulo": "17, 18, 19 e as dezenas",
+                  "tipo": "Exp",
+                  "confianca": "alta",
+                  "nova": true
+                },
+                {
+                  "titulo": "Et lui ? Et elle ?: tônicos",
+                  "tipo": "Exp",
+                  "confianca": "alta",
+                  "nova": true
+                }
+              ],
+              "decisoes": [
+                334,
+                335
+              ],
+              "progresso_modulo_concluido": "quem já concluiu o módulo \"Família e pessoas próximas\" continua com ele concluído e com o Ponto de verificação aprovado; a unidade que entra aparece aberta (regra da decisão 330, item 4, estendida às mudanças de módulo das decisões 334 e 335); quem tinha concluído \"Apresentar-se\" com esta unidade não perde nada (a unidade é nova, ainda sem chave publicada)",
+              "dialogo_a_decidir": "o diálogo publicado \"No parque\" (Quel âge a ta fille ? ...), hoje em \"Dizer a idade: de 1 a 29\", pode vir para esta unidade (decisão 335; a decidir no desenho dela)"
+            },
+            {
+              "id": "A1-g2",
+              "nome": "Gramática: possessivos",
+              "ordem": 4,
+              "tipo": "gramatica",
+              "id_funcao": "gramatica-possessivos",
+              "funcao": "dizer de quem é",
+              "origem": "publicada",
+              "versao_gratis_em": [
+                "A1-4"
+              ],
+              "versao_gratis_texto": "N12 mon / ma (M2.1) + M2.1, gancho sa sœur: \"son / sa: concorda com a coisa, não com o dono\"",
+              "telas": 4,
+              "exercicios": 6
+            },
+            {
               "id": "A1-16",
               "nome": "Descrever a aparência",
-              "ordem": 3,
+              "ordem": 5,
               "tipo": "vocabulario",
               "id_funcao": "descrever-a-aparencia",
               "funcao": "descrever a aparência física de alguém",
@@ -1482,24 +1527,9 @@
               ]
             },
             {
-              "id": "A1-g2",
-              "nome": "Gramática: possessivos",
-              "ordem": 4,
-              "tipo": "gramatica",
-              "id_funcao": "gramatica-possessivos",
-              "funcao": "dizer de quem é",
-              "origem": "publicada",
-              "versao_gratis_em": [
-                "A1-4"
-              ],
-              "versao_gratis_texto": "N12 mon / ma (M2.1) + M2.1, gancho sa sœur: \"son / sa: concorda com a coisa, não com o dono\"",
-              "telas": 4,
-              "exercicios": 6
-            },
-            {
               "id": "A1-g22",
               "nome": "Gramática: palavras interrogativas (pessoas)",
-              "ordem": 5,
+              "ordem": 6,
               "tipo": "gramatica",
               "id_funcao": "gramatica-palavras-interrogativas-pessoas",
               "funcao": "perguntar sobre pessoas",
@@ -1509,28 +1539,12 @@
                 "A1-9",
                 "A1-4"
               ],
-              "versao_gratis_texto": "já existe: diálogos de M1 e M2 com pergunta e resposta; N06, N18; combien de: M2.1, fala nova Tu as combien de frères ? J'ai deux frères.",
+              "versao_gratis_texto": "já existe: diálogos de M1 e M2 (até \"Descrever a aparência\", M2.5) com pergunta e resposta; N06, N18; combien de: M2.1, fala nova Tu as combien de frères ? J'ai deux frères.",
               "telas": 4,
               "exercicios": "6 a 8"
-            },
-            {
-              "id": "A1-g12",
-              "nome": "Gramática: perguntar sim ou não",
-              "ordem": 6,
-              "tipo": "gramatica",
-              "id_funcao": "gramatica-perguntar-sim-ou-nao",
-              "funcao": "fazer perguntas de sim ou não",
-              "origem": "nova",
-              "versao_gratis_em": [
-                "A1-1",
-                "A1-9"
-              ],
-              "versao_gratis_texto": "nota Ça va ? sobe (M1.1) + M1.3, gancho Tu parles anglais ?: \"Est-ce que tu parles anglais ?\"",
-              "telas": 4,
-              "exercicios": 8
             }
           ],
-          "tempo_08_nota": "Tempo digitado mantido: \"Dizer de onde é e onde mora\" saiu para \"Apresentar-se\" (decisão 328), mas o tempo não foi recalculado (regra 16 suspensa, decisão 325)."
+          "tempo_08_nota": "Tempo digitado mantido: \"Dizer de onde é e onde mora\" saiu para \"Apresentar-se\" (decisão 328), mas o tempo não foi recalculado (regra 16 suspensa, decisão 325). Decisões 334 e 335: entra \"Perguntar a idade dos outros: até 69\" e sai a \"Gramática: perguntar sim ou não\" (para \"Apresentar-se\"); tempo digitado sem recálculo (regra 16 suspensa)."
         },
         {
           "id": "A1-m2",
@@ -3671,16 +3685,72 @@
               ],
               "notas": [
                 {
-                  "titulo": "partir / aller en, au, aux, à; venir de, d', du, des",
+                  "titulo": "partir, aller en, au, aux, à: para onde vou",
                   "tipo": "Exp",
                   "confianca": "alta",
                   "nova": true,
-                  "gancho": "Je vais aux États-Unis, je pars en Italie; je viens d'Italie, des États-Unis",
+                  "breve": true,
+                  "momento": {
+                    "depois_de": "partir"
+                  },
+                  "gancho": "Je pars en Italie, je vais aux États-Unis",
                   "versao_gratis_de": [
                     "A1-g4"
                   ],
-                  "decisao": 331,
-                  "observacao": "a procedência vem logo depois do cartão venir de (decisão 331), com os exemplos Je viens d'Italie e Je viens des États-Unis (sugestão 5 da decisão 330)"
+                  "decisao": 333,
+                  "observacao": "decisão 333: a nota que juntava ida e procedência vira duas notas breves; esta vem logo depois do cartão partir e fala só da ida (en / au / aux + país, à + cidade)",
+                  "exemplos": [
+                    {
+                      "fr": "Je pars en Italie.",
+                      "pt-BR": "Eu vou para a Itália."
+                    },
+                    {
+                      "fr": "Je vais au Portugal.",
+                      "pt-BR": "Eu vou para Portugal."
+                    },
+                    {
+                      "fr": "Je vais aux États-Unis.",
+                      "pt-BR": "Eu vou para os Estados Unidos."
+                    },
+                    {
+                      "fr": "Je vais à Paris.",
+                      "pt-BR": "Eu vou para Paris."
+                    }
+                  ]
+                },
+                {
+                  "titulo": "venir de, d', du, des: de onde venho",
+                  "tipo": "Exp",
+                  "confianca": "alta",
+                  "nova": true,
+                  "breve": true,
+                  "momento": {
+                    "depois_de": "venir de"
+                  },
+                  "gancho": "Je viens d'Italie, je viens des États-Unis",
+                  "versao_gratis_de": [
+                    "A1-g4"
+                  ],
+                  "decisao": 333,
+                  "observacao": "decisão 333: segunda nota breve, logo depois do cartão venir de, só da procedência; exemplos d'Italie e des États-Unis (sugestão 5 da decisão 330, decisão 331)",
+                  "exemplos": [
+                    {
+                      "fr": "Je viens de Paris.",
+                      "pt-BR": "Eu venho de Paris."
+                    },
+                    {
+                      "fr": "Je viens d'Italie.",
+                      "pt-BR": "Eu venho da Itália."
+                    },
+                    {
+                      "fr": "Je viens du Portugal.",
+                      "pt-BR": "Eu venho de Portugal."
+                    },
+                    {
+                      "fr": "Je viens des États-Unis.",
+                      "pt-BR": "Eu venho dos Estados Unidos."
+                    }
+                  ]
                 },
                 {
                   "titulo": "Outras palavras de países",
@@ -3699,7 +3769,8 @@
                 }
               ],
               "decisoes": [
-                331
+                331,
+                333
               ]
             },
             {
@@ -3714,7 +3785,7 @@
                 "A1-9",
                 "A1-31"
               ],
-              "versao_gratis_texto": "M1.3 nota J'habite en France / au Brésil / aux États-Unis, à + cidade (fórmulas, decisão 331) + M8.1: nota partir / aller en, au, aux, à + venir de, d', du, des (cartão venir de, decisão 331), versão grátis completa de en, au, aux, à + país e da procedência",
+              "versao_gratis_texto": "M1.3 nota J'habite en France / au Brésil / aux États-Unis, à + cidade (fórmulas, decisão 331) + M8.1: duas notas breves (decisão 333), uma logo depois do cartão partir (aller en, au, aux, à) e outra logo depois do cartão venir de (de, d', du, des, com d'Italie e des États-Unis), versão grátis completa de en, au, aux, à + país e da procedência",
               "telas": 5,
               "exercicios": 8
             },
