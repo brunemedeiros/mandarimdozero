@@ -107,6 +107,10 @@ Grátis: 1 por nível. Cada jogo novo: ~20 frases em pt-BR e en, revisor-conteud
    puxa primeiro as frases nunca respondidas, depois as erradas por último e só então as certas (`pickRound`). Chaves
    `games.perRound` e `games.round.label` apagadas (sem uso). Testes: jogos-progresso 114/114; os testes que tocam no
    cartão passam pela tela do jogo (Curta).
+   **Proposta 2026-11-10 (crítica com a skill frontend-design, aguarda a autora)**: na tela do jogo, mapa das frases
+   (`.cg-intro-map`, um pedaço por frase: verde certa, vermelho errada, vazio não vista) com "N de M frases vistas, X%
+   certas" e a regra "Para concluir: passar por todas e acertar pelo menos 70%"; botões com a ação ("Jogar 10 frases",
+   "Jogar as N frases"); saiu o título "Escolha a partida". Mesmas cores e fonte do site. Commit próprio, fácil de desfazer.
 6. Etapa "Escreva a resposta" dentro da partida.
 7. Etapas "Corrija o erro" e "Traduza a frase inteira" (conteúdo novo, revisão e aprovação).
 8. Jogos de revisão do nível e respostas alternativas.

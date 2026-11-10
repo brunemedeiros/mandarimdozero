@@ -273,10 +273,17 @@ function createConjGames({ games, soon = [], speak, ids, isLocked, onLocked, lan
     show(true);
     const bar = grabBar();
     const st = conjGameStatus(g), cur = roundSize(), both = g.items.length > g.perRound;
-    const status = st.done ? `<span class="expr-card-seal cg-intro-seal">${esc(tt('games.doneSeal', { pct: st.pct }))}</span>`
-      : (st.seen ? `<p class="cg-intro-status">${esc(tt('games.intro.status', { seen: st.seen, total: st.total, pct: st.pct }))}</p>` : '');
-    const opt = (size, n, sub) => `<button type="button" class="cg-intro-opt ${cur === size || !both ? 'is-current' : ''}" data-cg-start="${size}">
-        <span class="cg-intro-opt-title">${esc(tt(both ? 'games.round.' + size : 'games.intro.start', { n }))}</span>
+    // Mapa das frases (crítica de design, 2026-11-10): um pedaço por frase do jogo, verde = última resposta certa,
+    // vermelho = errada, vazio = ainda não vista. Mostra o progresso e a regra do "Concluído" (todas + 70%) de relance.
+    const rec = conjGameRecord(g.id, false);
+    const cells = g.items.map(it => { const e = rec && rec.items[String(it.id)]; return e ? (e.ok ? 'is-right' : 'is-wrong') : 'is-new'; });
+    const mapLabel = tt('games.intro.mapAria', { seen: st.seen, total: st.total, right: st.right });
+    const map = `<div class="cg-intro-map" role="img" aria-label="${esc(mapLabel)}" style="--n:${g.items.length}">${cells.map(c => `<span class="${c}"></span>`).join('')}</div>`;
+    const status = st.done
+      ? `<span class="expr-card-seal cg-intro-seal">${esc(tt('games.doneSeal', { pct: st.pct }))}</span>`
+      : `<p class="cg-intro-rule">${esc(st.seen ? tt('games.intro.status', { seen: st.seen, total: st.total, pct: st.pct }) : tt('games.intro.fresh', { total: st.total }))} ${esc(tt('games.intro.rule', { pct: CONJ_GAME_DONE_PCT }))}</p>`;
+    const opt = (size, n, sub, title) => `<button type="button" class="cg-intro-opt ${cur === size || !both ? 'is-current' : ''}" data-cg-start="${size}">
+        <span class="cg-intro-opt-title">${esc(tt(title, { n }))}</span>
         ${sub ? `<span class="cg-intro-opt-sub">${esc(tt(sub))}</span>` : ''}
       </button>`;
     $(ids.content).innerHTML = `
@@ -285,11 +292,10 @@ function createConjGames({ games, soon = [], speak, ids, isLocked, onLocked, lan
         <h2 class="cg-title">${rich(L(g.title))}</h2>
       </div>
       <div class="cg-intro">
-        ${status}
+        <div class="cg-intro-progress">${map}${status}</div>
         <p class="cg-intro-lede">${rich(L(g.lede))}</p>
-        <h3 class="cg-intro-choose">${esc(tt('games.intro.choose'))}</h3>
-        <div class="cg-intro-opts">
-          ${both ? opt('short', g.perRound, 'games.intro.shortSub') + opt('full', g.items.length, 'games.intro.fullSub') : opt('full', g.items.length, '')}
+        <div class="cg-intro-opts" role="group" aria-label="${esc(tt('games.intro.choose'))}">
+          ${both ? opt('short', g.perRound, 'games.intro.shortSub', 'games.intro.playShort') + opt('full', g.items.length, 'games.intro.fullSub', 'games.intro.playFull') : opt('full', g.items.length, '', 'games.intro.playFull')}
         </div>
       </div>`;
     const btns = $(ids.content).querySelectorAll('[data-cg-start]');

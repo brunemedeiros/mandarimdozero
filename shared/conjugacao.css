@@ -286,9 +286,14 @@
 /* Tela do jogo antes da partida (2026-11-08): apresentação, quanto já fez e Curta x Completa em dois cartões grandes */
 #view-conjugaison .cg-intro{ position:relative; display:flex; flex-direction:column; gap:14px; background:var(--paper); border:1px solid var(--paper-line); border-radius:20px; padding:24px 22px; box-shadow:var(--shadow-card); }
 #view-conjugaison .cg-intro-lede{ margin:0; font-size:15.5px; line-height:1.55; color:var(--ink); max-width:62ch; }
-#view-conjugaison .cg-intro-status{ margin:0; font-size:13.5px; font-weight:800; color:var(--ink-soft); }
+/* Mapa das frases: um pedaço por frase (verde certa, vermelho errada, vazio não vista); o único destaque da tela */
+#view-conjugaison .cg-intro-progress{ display:flex; flex-direction:column; gap:10px; }
+#view-conjugaison .cg-intro-map{ display:grid; grid-template-columns:repeat(var(--n), minmax(0,1fr)); gap:3px; }
+#view-conjugaison .cg-intro-map span{ height:14px; border-radius:4px; background:var(--paper-warm); box-shadow:inset 0 0 0 1.5px var(--paper-line); }
+#view-conjugaison .cg-intro-map .is-right{ background:var(--jade); box-shadow:none; }
+#view-conjugaison .cg-intro-map .is-wrong{ background:var(--error-red); box-shadow:none; }
+#view-conjugaison .cg-intro-rule{ margin:0; font-size:13.5px; font-weight:700; line-height:1.45; color:var(--ink-soft); }
 #view-conjugaison .cg-intro-seal{ position:static; align-self:flex-start; transform:none; }
-#view-conjugaison .cg-intro-choose{ margin:6px 0 0; font-size:15px; font-weight:900; color:var(--ink); }
 #view-conjugaison .cg-intro-opts{ display:grid; grid-template-columns:1fr; gap:10px; }
 @media (min-width:760px){ #view-conjugaison .cg-intro-opts{ grid-template-columns:1fr 1fr; } }
 #view-conjugaison .cg-intro-opt{ position:relative; display:flex; flex-direction:column; align-items:flex-start; gap:4px; min-height:72px; padding:14px 16px; text-align:left; cursor:pointer;

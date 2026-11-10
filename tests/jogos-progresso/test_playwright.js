@@ -53,6 +53,9 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
     await page.goto(`http://127.0.0.1:${port}/fr/index.html`);
     await page.waitForFunction(() => typeof STATE !== 'undefined' && STATE.cards && STATE.cards.length > 0 && CURRENT_USER === false, null, { timeout: 15000 });
     const L = lang + ':';
+    // A comemoração da sequência (1º estudo do dia) abre 500 ms depois do fim da partida e cai em cima dos cliques; ela tem
+    // teste próprio (jogos-padrao-trilha), então aqui fica escondida.
+    await page.addStyleTag({ content: '#streak-modal-overlay{ display:none !important; }' });
     check(L + ' STATE.conjGames começa vazio', await page.evaluate(() => JSON.stringify(STATE.conjGames) === '{}'));
     check(L + ' status sem progresso = 0, não concluído', await page.evaluate(() => { const s = conjGameStatus(CONJ_GAMES[0]); return s.seen === 0 && s.right === 0 && !s.done && s.total === CONJ_GAMES[0].items.length; }));
 
@@ -171,7 +174,8 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
     // Etapa 4: resultado com os erros e "Revisar erros" escrevendo; erros de outros dias voltam num cartão no topo.
     // a comemoração da sequência tem teste próprio (jogos-padrao-trilha); aqui ela só atrapalharia os cliques
     const hideStreak = () => page.evaluate(() => { const m = document.getElementById('streak-modal-overlay'); if (m) m.style.display = 'none'; });
-    await page.evaluate(() => { maybeShowStreakCelebration = () => {}; const m = document.getElementById('streak-modal-overlay'); if (m) m.style.display = 'none'; STATE.conjGames = {}; CONJ_GAMES_UI.renderList(); });
+    await page.evaluate(() => { maybeShowStreakCelebration = () => {};
+      const m = document.getElementById('streak-modal-overlay'); if (m) m.style.display = 'none'; STATE.conjGames = {}; CONJ_GAMES_UI.renderList(); });
     await page.click('.cg-play[data-game="etre-avoir"]'); await page.evaluate(() => { const b = document.querySelector('[data-cg-start="short"]') || document.querySelector('[data-cg-start]'); if (b) b.click(); });
     await page.waitForSelector('.cg-choice');
     const n2 = await page.evaluate(() => CONJ_GAMES_UI.state.order.length);
@@ -238,7 +242,7 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
     await page.click('.cg-play[data-game="etre-avoir"]');
     await page.waitForSelector('.cg-intro');
     const t0 = await page.evaluate(() => ({ playing: !!document.querySelector('.cg-choice'), title: document.querySelector('#conj-game-content .cg-title').textContent,
-      lede: (document.querySelector('.cg-intro-lede') || {}).textContent || '', status: !!document.querySelector('.cg-intro-status'), bar: !!document.querySelector('#conj-game-wrap .activity-exit-btn'),
+      lede: (document.querySelector('.cg-intro-lede') || {}).textContent || '', status: /\d+ (de|of) \d+/.test((document.querySelector('.cg-intro-rule') || {}).textContent || ''), mapNew: document.querySelectorAll('.cg-intro-map .is-new').length, bar: !!document.querySelector('#conj-game-wrap .activity-exit-btn'),
       opts: [...document.querySelectorAll('[data-cg-start]')].map(b => b.dataset.cgStart + ':' + b.classList.contains('is-current') + ':' + b.querySelector('.cg-intro-opt-title').textContent.trim()),
       total: CONJ_GAMES.find(g => g.id === 'etre-avoir').items.length, toggleOnQuestion: !!document.querySelector('.cg-round') }));
     check(L + ' cartão abre a tela do jogo (sem começar), com título, apresentação e o X', !t0.playing && /avoir/.test(t0.title) && t0.lede.length > 30 && !t0.status && t0.bar, t0);
@@ -258,8 +262,10 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
     check(L + ' "Jogar de novo" direto: a 2ª partida curta traz todas as ' + unseen + ' frases ainda não vistas', second.filter(id => !first.includes(id)).length === unseen && second.length === 10, { first, second });
     await hideStreak(); await page.click('#conj-game-wrap .activity-exit-btn');
     await page.click('.cg-play[data-game="etre-avoir"]'); await page.waitForSelector('.cg-intro');
-    const st1 = await page.evaluate(() => (document.querySelector('.cg-intro-status') || {}).textContent || '');
-    check(L + ' tela do jogo mostra quanto já fez', /19/.test(st1) && (pt ? /frases respondidas/.test(st1) : /sentences answered/.test(st1)), st1);
+    const st1 = await page.evaluate(() => (document.querySelector('.cg-intro-rule') || {}).textContent || '');
+    check(L + ' tela do jogo mostra quanto já fez e a regra do Concluído', /19/.test(st1) && (pt ? /frases vistas/.test(st1) && /70%/.test(st1) : /sentences seen/.test(st1) && /70%/.test(st1)), st1);
+    const mp = await page.evaluate(() => { const m = document.querySelector('.cg-intro-map'); return { n: m.children.length, right: m.querySelectorAll('.is-right').length, wrong: m.querySelectorAll('.is-wrong').length, fresh: m.querySelectorAll('.is-new').length, aria: m.getAttribute('aria-label') }; });
+    check(L + ' mapa das frases: um pedaço por frase, com certas, erradas e não vistas', mp.n === 19 && mp.right + mp.wrong + mp.fresh === 19 && mp.right >= 10 && new RegExp('^' + (mp.right + mp.wrong) + ' ').test(mp.aria), mp);
     await page.click('[data-cg-start="full"]'); await page.waitForSelector('.cg-choice');
     const f = await page.evaluate(() => ({ n: CONJ_GAMES_UI.state.order.length, ids: new Set(CONJ_GAMES_UI.state.order.map(i => i.id)).size, saved: localStorage.getItem('conj-games-round') }));
     check(L + ' Completa: todas as frases do jogo, sem repetir, e lembrada', f.n === t0.total && f.ids === t0.total && f.saved === 'full', f);
