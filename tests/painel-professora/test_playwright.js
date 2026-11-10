@@ -282,24 +282,9 @@ const PANEL_STUB = (who) => {
           { id: 9002, teacher_id: 'P', student_id: 'S', classroom_id: null, language_app_key: window.__appKey, class_date: '2026-09-26', topic: null, homework: null, notes: '[Notion] fofoca', attendance_label_id: 61, skills: [] }]; });
       await ev(() => switchTeacherPanelSection('classlogs'));
       await page.waitForSelector('#admin-create-class-log-form [data-class-log-extras="new"]');
-      // Revisar do Notion: editar e mostrar ao aluno / deixar só para mim
-      await ev(() => document.querySelector('[data-classlog-view="check"]').click());   // 2026-11-10: revisão do Notion fica em Para conferir
-      await page.waitForSelector('#admin-notion-review [data-notion-review="9001"]');
-      L('Notion: bloco de revisão com as 2 aulas marcadas', await ev(() => document.querySelectorAll('#admin-notion-review [data-notion-review]').length === 2 && document.querySelector('#admin-notion-review summary').textContent.includes('2')));
-      L('Notion: tópico e "para a próxima aula" em caixas separadas', await ev(() => [...document.querySelectorAll('[data-notion-review="9001"] [data-notion-field]')].map(x => x.dataset.notionField + ':' + x.value).join('|') === 'topic:Conversa sobre eleições e voltar com o ex|homework:ler o texto que ela esqueceu'));
-      await ev(() => { document.querySelector('#admin-notion-review details').open = true; });
-      await page.fill('[data-notion-review="9001"] [data-notion-field="topic"]', 'Conversa sobre eleições');
-      await page.fill('[data-notion-review="9001"] [data-notion-field="homework"]', 'Ler o texto');
-      await shot('aulas-notion-revisao');
-      await page.click('[data-notion-show="9001"]');
-      await page.waitForFunction(() => window.__DB.teacher_class_logs.find(l => l.id === 9001).topic === 'Conversa sobre eleições');
-      L('Notion: mostrar ao aluno grava só o texto editado e tira a marca das Anotações', await ev(() => { const l = window.__DB.teacher_class_logs.find(x => x.id === 9001); return l.homework === 'Ler o texto' && l.notes === 'Conversa sobre eleições e voltar com o ex\nPara a próxima aula: ler o texto que ela esqueceu'; }), await ev(() => window.__DB.teacher_class_logs.find(x => x.id === 9001)));
-      await page.waitForFunction(() => document.querySelectorAll('#admin-notion-review [data-notion-review]').length === 1);
-      await page.click('[data-notion-keep="9002"]');
-      await page.waitForFunction(() => window.__DB.teacher_class_logs.find(l => l.id === 9002).notes === 'fofoca');
-      L('Notion: deixar só para mim não mostra nada ao aluno', await ev(() => { const l = window.__DB.teacher_class_logs.find(x => x.id === 9002); return l.topic === null && l.homework === null; }));
-      await page.waitForFunction(() => !document.querySelector('#admin-notion-review details'));
-      L('Notion: bloco some quando acaba a revisão', true);
+      // 2026-11-10: o bloco antigo "Revisar do Notion" (importação única de 15/10) saiu; o Conectar Notion faz esse trabalho.
+      await ev(() => document.querySelector('[data-classlog-view="check"]').click());
+      L('Revisar do Notion antigo não aparece mais (nem com aula marcada [Notion])', await ev(() => !document.getElementById('admin-notion-review') && !document.querySelector('[data-notion-review]') && !!document.querySelector('#admin-classlogs-check #admin-notion-box')));
       await ev(() => document.querySelector('[data-classlog-view="register"]').click());
       await ev(() => { window.__DB.teacher_class_logs = []; });
       L('aulas: Presença com Sem registro, Presente e Faltou', await ev(() => [...document.querySelectorAll('[data-class-log-extras="new"] .att-choice')].map(l => l.textContent.trim()).join('|') === `${t('panel.classLog.attendanceNone')}|Presente|Faltou`));
@@ -389,7 +374,7 @@ const PANEL_STUB = (who) => {
       await ev(() => document.querySelector('[data-classlog-view="calendar"]').click());
       await page.waitForSelector('#admin-classlogs-calendar .cal');
       L('calendário: Registrar some e o mês aparece', await ev(() => document.getElementById('admin-classlogs-register').hidden && !document.getElementById('admin-classlogs-calendar-wrap').hidden));
-      L('calendário: link de agenda da professora acima do mês', await ev(() => !!document.querySelector('#admin-classlogs-calendar-wrap > [data-calendar-feed]')));
+      L('calendário: link de agenda da professora acima do mês', await ev(() => !!document.querySelector('#admin-classlogs-calendar-wrap > .painel > [data-calendar-feed]')));
       await ev(() => { document.querySelector('#admin-classlogs-calendar-wrap [data-calendar-feed]').open = true; });
       await page.waitForSelector('#admin-classlogs-calendar-wrap [data-calendar-feed-url]');
       L('calendário: professora recebe o link dela', await ev(() => /^https:\/\/agenda\.profbrune\.com\.br\/[ab]{16}$/.test(document.querySelector('#admin-classlogs-calendar-wrap [data-calendar-feed-url]').value)));
@@ -474,6 +459,56 @@ const PANEL_STUB = (who) => {
           return hidden && shown;
         } finally { window.fetchClassLogs = orig; ADMIN_CLASS_LOGS_STATE.showFuture = origShow; }
       }));
+      if (SHOTS){
+        await ev(() => { const d = (n) => new Date(Date.now() - n * 864e5 - new Date().getTimezoneOffset() * 6e4).toISOString().slice(0, 10);
+          window.__savedList = ADMIN_CLASS_LOGS_STATE._list;
+          ADMIN_CLASS_LOGS_STATE._list = { logs: Array.from({ length: 26 }, (_, i) => ({ id: 8100 + i, class_date: d(i * 2 + 1), created_at: new Date().toISOString(), topic: ['Passé composé', 'Imparfait', 'Subjonctif', 'Conversa livre'][i % 4], homework: i % 3 ? null : 'Exercícios 3 e 4', __studentUsername: ['ana', 'bia'][i % 2], attendance_label_id: 61 })), showUsername: true, people: 2 };
+          ADMIN_CLASS_LOGS_STATE.listShown = 20; document.querySelector('[data-classlog-view="register"]').click(); repaintClassLogsList();
+          document.querySelector('[data-class-log-search]').closest('details').scrollIntoView({ block: 'start' }); window.scrollBy(0, -80); });
+        await page.waitForTimeout(600);
+        await shot('aulas-registradas-meses');
+        await ev(() => { document.querySelector('[data-classlog-view="calendar"]').click(); const f = document.querySelector('#admin-classlogs-calendar-wrap [data-calendar-feed]'); f.open = true; f.scrollIntoView({ block: 'start' }); window.scrollBy(0, -80); });
+        await page.waitForTimeout(1200);
+        await shot('link-agenda-painel');
+        await ev(() => { ADMIN_CLASS_LOGS_STATE._list = window.__savedList; repaintClassLogsList(); document.querySelector('[data-classlog-view="check"]').click(); });
+      }
+      // Proposta 4 (2026-11-10): busca, um bloco por mês e "mostrar mais" de 20 em 20 (testa direto na lista da aba, com 45 aulas)
+      L('aulas registradas: 20 por vez, agrupadas por mês, busca e mostrar mais', await ev(async () => {
+        const origList = ADMIN_CLASS_LOGS_STATE._list, origShow = ADMIN_CLASS_LOGS_STATE.showFuture;
+        const d = (n) => new Date(Date.now() - n * 864e5 - new Date().getTimezoneOffset() * 6e4).toISOString().slice(0, 10);
+        const logs = Array.from({ length: 45 }, (_, i) => ({ id: 8000 + i, class_date: d(i * 2 + 1), created_at: new Date().toISOString(), topic: i === 7 ? 'Subjonctif présent' : 'Revisão ' + i, __studentUsername: 'ana' }));
+        try {
+          ADMIN_CLASS_LOGS_STATE._list = { logs, showUsername: true, people: 1 }; ADMIN_CLASS_LOGS_STATE.showFuture = false; ADMIN_CLASS_LOGS_STATE.listQuery = ''; ADMIN_CLASS_LOGS_STATE.listShown = 20;
+          repaintClassLogsList();
+          const box = document.getElementById('admin-classlogs-list-box');
+          const first = box.querySelectorAll('[data-edit-class-log]').length === 20 && box.querySelectorAll('.aulas-mes').length >= 1 && /faltam 25/.test(box.querySelector('[data-class-log-more]').textContent)
+            && /\(45\)/.test(document.querySelector('[data-classlog-count]').textContent);
+          box.querySelector('[data-class-log-more]').click();
+          const more = box.querySelectorAll('[data-edit-class-log]').length === 40;
+          const input = document.querySelector('[data-class-log-search]');
+          input.value = 'subjonctif'; input.dispatchEvent(new Event('input', { bubbles: true }));
+          await new Promise(r => setTimeout(r, 350));
+          const found = box.querySelectorAll('[data-edit-class-log]').length === 1 && box.querySelector('[data-edit-class-log="8007"]') && !box.querySelector('[data-class-log-more]');
+          input.value = 'nada assim'; input.dispatchEvent(new Event('input', { bubbles: true }));
+          await new Promise(r => setTimeout(r, 350));
+          const none = !box.querySelector('[data-edit-class-log]') && box.textContent.includes(t('admin.classLogs.searchEmpty'));
+          input.value = ''; input.dispatchEvent(new Event('input', { bubbles: true }));
+          await new Promise(r => setTimeout(r, 350));
+          return first && more && !!found && none;
+        } finally { ADMIN_CLASS_LOGS_STATE._list = origList; ADMIN_CLASS_LOGS_STATE.showFuture = origShow; ADMIN_CLASS_LOGS_STATE.listQuery = ''; ADMIN_CLASS_LOGS_STATE.listShown = 20; repaintClassLogsList(); }
+      }));
+      // Proposta 6: link de agenda da professora no Design System; apagar aula usa a janela do painel
+      L('calendário: link de agenda da professora numa caixa do painel', await ev(() => !!document.querySelector('#admin-classlogs-calendar-wrap .painel [data-calendar-feed][data-calendar-feed-painel] .aulas-titulo')));
+      await ev(() => { window.__DB.teacher_class_logs.push({ id: 9901, teacher_id: 'P', student_id: 'S', classroom_id: null, language_app_key: window.__appKey, class_date: '2026-10-01', topic: 'Para apagar', created_at: new Date().toISOString() }); return refreshClassLogsListBox(document.getElementById('admin-classlogs-list-box')); });
+      await ev(() => document.querySelector('[data-classlog-view="register"]').click());
+      await page.waitForSelector('[data-delete-class-log="9901"]');
+      await ev(() => document.querySelector('[data-delete-class-log="9901"]').click());
+      await page.waitForSelector('dialog.p-dialogo--alerta[open]');
+      L('apagar aula: confirmação na janela do painel', await ev(() => document.querySelector('dialog.p-dialogo--alerta[open]').textContent.includes(t('admin.classLogs.deleteTitle'))));
+      await page.locator('dialog.p-dialogo--alerta[open] .p-perigo').click();
+      await page.waitForFunction(() => !window.__DB.teacher_class_logs.some(l => l.id === 9901));
+      L('apagar aula: confirmar apaga', true);
+      await ev(() => document.querySelector('[data-classlog-view="check"]').click());
       // 128: caixa do Notion acima de Registrar | Calendário
       await ev(() => { window.notionCall = async (action, extra) => { (window.__notionCalls = window.__notionCalls || []).push([action, extra]);
         if (action === 'databases') return { ok: true, databases: [{ id: '1ed6b6a3e89f80b5a448000bc2dc1582', title: 'Calendário de Aulas' }] };

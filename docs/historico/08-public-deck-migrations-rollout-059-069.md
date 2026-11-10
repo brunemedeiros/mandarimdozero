@@ -617,3 +617,17 @@ Número 086 já usado por outras conversas (`086_friends_streak_milestones_and_c
 - Staging e produção (2026-11-09, produção versão 20261109230551, "pode publicar"). Teste local `tests/aulas-presenca/test_131.sql` 5/5.
 - Mesmo PR: Aulas (Alunos, Turmas, Nova aula, Aulas registradas) em caixas do Design System iguais à do Notion
   (`shared/aulas-painel.css`, HTML em `shared/admin-class-logs.js`); prévia aprovada pela autora. Painel da professora 805/805.
+
+## 132 -- Notion: ex-aluna no histórico, linha ligada à mão; Banco arquiva ex-aluna (2026-11-10)
+
+- Pedidos da autora: (1) ligar a Carmen (ex-aluna) só para o histórico; (2) linha "Sem nome" (ex.: "Pitch - Maximiliane Winter")
+  não tinha botão; (3) arquivar a Carmen no Banco dava "new row violates row-level security policy" (a checagem exigia vínculo
+  ativo da conta ligada em todo UPDATE).
+- `132_notion_former_and_manual.sql`: ALTER POLICY de `review_bank_students` (arquivado aceita conta que já teve vínculo);
+  `notion_name_links.history_only` + RPC `notion_link_former` (aula entra no histórico, sem aviso no Mural: `app.mural_skip`);
+  colunas `notion_pages.manual_*` + RPC `notion_assign_page` (liga só a linha) e `notion_discard` (descarta para sempre);
+  `notion_former_students` (grupo "Ex-alunos (só para o histórico)"). Teste local `tests/aulas-presenca/test_132.sql` 12/12.
+- Staging e produção (2026-11-10, produção versão 20261110132227). Tela no PR das propostas 4 e 6.
+- Propostas 4 e 6 da auditoria (mesmo PR): Aulas registradas com busca, blocos por mês e "mostrar mais" de 20 em 20; link de
+  agenda da professora em caixa do Design System (o do aluno fica como estava); apagar aula com `PainelUI.confirmar`; o bloco
+  antigo "Revisar do Notion" (importação de 15/10, 0 aulas pendentes na produção) saiu, com as chaves `panel.classLog.review.*`.

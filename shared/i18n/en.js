@@ -1535,11 +1535,16 @@ window.I18N_CATALOG['en'] = {
   'admin.classLogs.observationsOpt': 'Observations (optional)', // ALTA
   'admin.classLogs.notesOpt': 'Your private notes, the student doesn\'t see them (optional)', // ALTA
   'admin.classLogs.noFields': '(no fields filled in)', // ALTA
+  'admin.classLogs.searchPh': 'Search by topic, student, class or date', // ALTA
+  'admin.classLogs.searchEmpty': 'No lessons match this search.', // ALTA
+  'admin.classLogs.monthCount': { one: '{n} lesson', other: '{n} lessons' }, // ALTA
+  'admin.classLogs.showMore': 'Show {n} more ({rest} left)', // ALTA
   'admin.classLogs.listTitle': 'Recorded classes ({n})', // ALTA
   'admin.classLogs.futureHidden': 'Showing up to today. {n} upcoming classes (created from your calendar) are in the Calendar.', // ALTA
   'admin.classLogs.showFuture': 'Show upcoming ({n})', // ALTA
   'admin.classLogs.hideFuture': 'Hide upcoming', // ALTA
   'admin.classLogs.emptyFor': 'No class recorded yet', // ALTA
+  'admin.classLogs.deleteTitle': 'Delete this lesson?', // ALTA
   'admin.classLogs.deleteConfirm': 'Delete this class record? This action cannot be undone.', // ALTA
   'admin.classLogs.deleted': '✓ Record deleted.', // ALTA
   'admin.classLogs.updated': '✓ Class updated.', // ALTA
@@ -3734,14 +3739,6 @@ window.I18N_CATALOG['en'] = {
   'myClassLogs.view.list': 'List', // ALTA
   'myClassLogs.classLabel': 'Lesson', // ALTA
   'panel.classLog.cal.count': { one: '{n} lesson', other: '{n} lessons' }, // ALTA
-  'panel.classLog.review.title': { one: 'Review from Notion ({n} lesson)', other: 'Review from Notion ({n} lessons)' }, // ALTA
-  'panel.classLog.review.hint': 'These texts came from Notion and may include notes meant only for you, so the student can\'t see them yet. Edit anything you want and choose: show to the student or keep for yourself. The original text stays in your Notes.', // ALTA
-  'panel.classLog.review.toTopic': 'Topic (the student sees it)', // ALTA
-  'panel.classLog.review.toHomework': 'For next lesson (the student sees it)', // ALTA
-  'panel.classLog.review.show': 'Show to student', // ALTA
-  'panel.classLog.review.keep': 'Keep for myself', // ALTA
-  'panel.classLog.review.shown': 'The student can see this text now.', // ALTA
-  'panel.classLog.review.kept': 'Kept only in your Notes.', // ALTA
   'panel.classLog.classroomsSelected': { one: '{n} class', other: '{n} classes' }, // ALTA
   'panel.classLog.membersCount': { one: '{n} student', other: '{n} students' }, // ALTA
   'studentPanel.menu': '🎒 Student', // ALTA
