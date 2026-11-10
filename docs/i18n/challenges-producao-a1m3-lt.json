@@ -1,5 +1,5 @@
 {
- "_sobre": "Retrato (2026-10-19, só leitura) do Ouça e traduza do Módulo 3 que está NA PRODUÇÃO (tabela challenges): 10 desafios, numeração anterior ao commit 2fb4ca1, que reduziu o lote do repositório para 6 sem reimportar. O overlay en segue a produção; o validador usa este retrato no lugar do lote para estes ids.",
+ "_sobre": "HISTÓRICO (não é mais fonte de nada). Retrato (2026-10-19, só leitura) do Ouça e traduza do Módulo 3 que está NA PRODUÇÃO (tabela challenges): 10 desafios, numeração anterior ao commit 2fb4ca1, que reduziu o lote do repositório para 6 sem reimportar. O overlay en segue a produção; o validador usa este retrato no lugar do lote para estes ids. Em 2026-11-10 (opção A da dona) o lote lote-a1-m3.json voltou a ter estes 10, nos mesmos códigos, com explicação.",
  "challenges": [
   {
    "id": "lt-a1m3-001",

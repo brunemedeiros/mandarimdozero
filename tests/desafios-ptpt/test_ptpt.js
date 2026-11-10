@@ -82,7 +82,8 @@ for (const f of fs.readdirSync(dir).filter(f => /^(lote|modulo)-.*\.json$/.test(
   const j = JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8'));
   for (const c of (Array.isArray(j) ? j : (j.challenges || j.items || []))) all.push({ ...c, _src: f });
 }
-for (const f of ['docs/i18n/challenges-producao-a1m3-lt.json', 'docs/i18n/challenges-producao-sem-fonte.json']){
+// O retrato do Módulo 3 (challenges-producao-a1m3-lt.json) saiu daqui em 2026-11-10: o lote lote-a1-m3.json voltou a ter os 10 da produção.
+for (const f of ['docs/i18n/challenges-producao-sem-fonte.json']){
   for (const c of JSON.parse(fs.readFileSync(path.join(ROOT, f), 'utf8')).challenges) all.push({ ...c, _src: f });
 }
 const CONHECIDAS = new Set([]); // formas de Portugal ainda presentes no repositório (nenhuma depois de 2026-10-26)
