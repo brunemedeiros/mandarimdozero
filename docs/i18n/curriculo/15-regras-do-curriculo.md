@@ -107,3 +107,17 @@ Regras de conteúdo e de sequência decididas pela dona. Cada regra vale para fr
     (`08 v2`, seção 7).
 
 16. **Teto de tempo por módulo: SUSPENSA até nova medição** (decisão 325, 2026-11-03; a medição real, decisão 297, mostrou a estimativa inflada; o script não acusa mais o teto). Texto histórico: **Teto de tempo por módulo** (dona, decisão 252, 2026-10-26; revista pela decisão 270, 2026-10-27): cada módulo tem **no máximo 3h55** de trilha, **para todos os módulos, sem exceção** (estimativa do mapa, confiança baixa, não medida). Histórico: 3h45 com exceção do último módulo de cada nível (252); 3h50 (257, por causa de "Comer e beber", ~3h50 com *prendre* em "Verbos muito usados"); 3h55 para todos (270, por causa de "Apresentar-se", ~3h55 com *monsieur / madame* e *bonne journée / bonne soirée* em "Cumprimentar e se despedir"); com isso some a exceção do último módulo de cada nível (o A2 "Opinião, cultura e mundo", ~3h55, fica dentro do teto). O teto já era usado pelas decisões 216, 242 e 244, sem regra própria. Conferido por `node fr/scripts/curriculo_mapa.js --conferir` (`REGRAS.tetoModuloMin`). **Em revisão desde a decisão 308**: "Apresentar-se" fica com o tempo digitado (~3h55) mesmo com os 16 cartões de "Cumprimentar e se despedir" (pela conta antiga seriam +20 min); a medição real (decisão 297: mediana de 108 s por lição) é insumo, não regra, e nenhum teto novo é proposto agora (decisão 300).
+
+17. **Lição curta** (dona, decisões 338 a 348, 2026-11-09 e 2026-11-10; maquete em `maquete-licao-curta/`, unidade 1 inteira):
+    - **Título pela função** e abertura com o objetivo e o tamanho ("4 cartões · 1 frase · cerca de 2 minutos"); 3 a 5 cartões (regra 13), uns 2 a 3 minutos.
+    - **Cartão novo sozinho na tela**, só com o áudio (um por forma do par); **sem ícone dentro da lição**: só imagem de verdade, ou nada (decisão 341).
+    - **Ordem cartão, exercício**, um de cada vez; exceção aceita: dois cartões que só fazem sentido juntos (*et toi ?* e *je vais bien*) seguidos, treinados na frase-modelo.
+    - **Pergunta e resposta viram cartões**, com etiqueta (Pergunta, Resposta, Fala, Pedido); toda função tem uma **pergunta de função** ("O que você diz?").
+    - **Frase-modelo é cartão** (tela própria, com áudio) e a frase é **montada em telas seguintes**, nunca na mesma tela do cartão.
+    - **Exercícios**: "Complete" com 2 opções, **alternando** erro de grafia e outra palavra já vista (ou a outra metade do par); V/F no modelo do Busuu (**frase em francês com áudio em cima, afirmação embaixo**); "O que você diz?"; "Monte a frase" com peças sobrando.
+    - **Cada informação aparece uma vez só** na tela (sem caixa de contexto que repita a pergunta); explicação de grafia vai **da escrita para o som** ("*oi* se pronuncia /uá/").
+    - **Painel da resposta** com a frase certa, a tradução, o áudio e uma **explicação curta**, que muda conforme o erro; a tela errada **volta no fim da lição**.
+    - **Painel x nota**: nota curta sobre um cartão vira explicação do painel; **nota que traz formas que não são cartões, conjugação ou sistematização continua nota**, em tela própria, logo depois do gatilho, com o V/F dela.
+    - Forma **só escrita** (STP, SVP, A+) **sem botão de áudio**.
+    - **Tela final** com a lista do que foi visto, com áudio e etiqueta ("Esses cartões já entram na sua Revisão."); **diálogos numa lição própria no fim da unidade**, antes da Revisão da unidade.
+    - Na trilha, cada lição aparece **só com o título** (as palavras da lição não aparecem no mapa).

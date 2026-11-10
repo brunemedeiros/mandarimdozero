@@ -58,10 +58,13 @@ function licoesDaUnidade(u){
   if (typeof u.licoes_08 === 'number') return u.licoes_08;
   return licoesPelaRegra(u);
 }
+// Lição curta (regra 17, decisão 338): os diálogos da unidade ficam numa lição própria, a última antes da
+// Revisão da unidade, declarada em `licoes` com `tipo: 'dialogos'` e sem cartões.
+function temLicaoDeDialogos(u){ return Array.isArray(u.licoes) && u.licoes.some(l => l.tipo === 'dialogos'); }
 function licoesPelaRegra(u){
   if (u.tipo !== 'vocabulario') return 0;
   const n = palavrasDaUnidade(u).length;
-  return (n > REGRAS.palavrasAte3Licoes ? 4 : 3) + (u.licao_pronuncia ? 1 : 0) + 1;
+  return (n > REGRAS.palavrasAte3Licoes ? 4 : 3) + (u.licao_pronuncia ? 1 : 0) + (temLicaoDeDialogos(u) ? 1 : 0) + 1;
 }
 
 // Notas que contam: todas menos as cortadas e as que só entram "se couber" (o 08 diz "~76, 77 com le château").
@@ -275,7 +278,15 @@ function conferirLicoesDaUnidade(mapa){
     if (ids.includes('checkpoint')) problemas.push({ unidade: u.id, problema: '"checkpoint" é a Revisão da unidade, não entra em licoes' });
     const comLicao = (u.cartoes || []).filter(c => typeof c.licao === 'number');
     for (const c of comLicao) if (!nums.includes(c.licao)) problemas.push({ unidade: u.id, problema: 'cartão numa lição não declarada', palavra: c.palavra, licao: c.licao });
-    for (const n of nums) if (!comLicao.some(c => c.licao === n)) problemas.push({ unidade: u.id, problema: 'lição sem cartão', licao: n });
+    const deDialogos = u.licoes.filter(l => l.tipo === 'dialogos').map(l => l.licao);
+    for (const n of nums) if (!deDialogos.includes(n) && !comLicao.some(c => c.licao === n)) problemas.push({ unidade: u.id, problema: 'lição sem cartão', licao: n });
+    for (const n of deDialogos){
+      if (comLicao.some(c => c.licao === n)) problemas.push({ unidade: u.id, problema: 'lição de diálogos com cartão', licao: n });
+      if (n !== Math.max(...nums)) problemas.push({ unidade: u.id, problema: 'lição de diálogos não é a última', licao: n });
+      if (!(u.dialogos || []).some(d => d.licao === n)) problemas.push({ unidade: u.id, problema: 'lição de diálogos sem diálogo', licao: n });
+    }
+    if (deDialogos.length > 1) problemas.push({ unidade: u.id, problema: 'mais de uma lição de diálogos', licoes: deDialogos });
+    if (deDialogos.length) for (const d of u.dialogos || []) if (d.licao !== deDialogos[0]) problemas.push({ unidade: u.id, problema: 'diálogo fora da lição de diálogos', dialogo: d.titulo, licao: d.licao });
     if (nums.length + 1 + (u.licao_pronuncia ? 1 : 0) !== licoesDaUnidade(u)) problemas.push({ unidade: u.id, problema: 'lições declaradas + Revisão não batem com a conta', declaradas: nums.length, conta: licoesDaUnidade(u) });
     for (const nota of u.notas || []){
       if (!nota.momento) continue;
@@ -319,7 +330,7 @@ function tabela(mapa){
 
 module.exports = {
   REGRAS, carregarMapa, carregarExcecoes, unidadesEmOrdem, indicePorId, palavrasDaUnidade, cartoesDaUnidade, cartoesAB,
-  licoesDaUnidade, licoesPelaRegra, notasDaUnidade, palavrasDaNota, conferirLicoesDaUnidade, tempoDoModulo, formatarTempo, contasDoModulo, contasDoNivel, contas,
+  licoesDaUnidade, licoesPelaRegra, temLicaoDeDialogos, notasDaUnidade, palavrasDaNota, conferirLicoesDaUnidade, tempoDoModulo, formatarTempo, contasDoModulo, contasDoNivel, contas,
   conferirCartoesPorLicao, sinaisUnidadeGrande, conferirRegra14, conferirChaves, chavesPublicadasForaDoMapa, conferirVersaoGratis,
   gramaticasAbrigadasPor, conferirTetoTempo, conferirTitulosNotasVocab, conferirIdFuncao, conferirExcecoes, conferirTudo, tabela,
   TITULO_NOTA_VOCAB,

@@ -36,7 +36,8 @@
                 320,
                 321,
                 322,
-                324
+                324,
+                338
               ],
               "licoes": [
                 {
@@ -59,6 +60,13 @@
                   "id": "despedir-se",
                   "id_novo": true,
                   "titulo": "Despedir-se"
+                },
+                {
+                  "licao": 5,
+                  "id": "dialogos-da-unidade",
+                  "id_novo": true,
+                  "tipo": "dialogos",
+                  "titulo": "Diálogos da unidade"
                 }
               ],
               "cartoes": [
@@ -393,14 +401,14 @@
                   "titulo": "Encontro na rua",
                   "registro": "informal",
                   "origem": "novo (substitui as falas publicadas A1-1-d0 a d3)",
-                  "licao": 2,
+                  "licao": 5,
                   "decisao": 320
                 },
                 {
                   "titulo": "Na portaria",
                   "registro": "formal",
                   "origem": "novo",
-                  "licao": 4,
+                  "licao": 5,
                   "decisao": 270
                 }
               ]

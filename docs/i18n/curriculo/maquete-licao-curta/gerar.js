@@ -1,24 +1,96 @@
 #!/usr/bin/env node
-// Gera index.html (página única, sem dependências) a partir de fonte.html:
-// embute os áudios reais do site (fr/audio-manifest.js) como data: URIs, para a
-// maquete abrir sozinha. Sem imagens dentro da lição (decisão 341).
+// Gera index.html (página única, sem dependências) a partir de fonte.html e do rascunho da unidade 1
+// (piloto-m1/A1-1/A1-1.json, fonte única do conteúdo das telas: regra 17, decisões 338 a 348).
+// Embute as telas (TELAS) e os áudios reais do site (fr/audio-manifest.js, como data: URIs).
+// Sem imagens dentro da lição (decisão 341).
 // Uso: node docs/i18n/curriculo/maquete-licao-curta/gerar.js
+'use strict';
 const fs = require('fs');
 const path = require('path');
 const raiz = path.resolve(__dirname, '../../../..');
 const fonte = fs.readFileSync(path.join(__dirname, 'fonte.html'), 'utf8');
+const R = JSON.parse(fs.readFileSync(path.join(raiz, 'docs/i18n/curriculo/piloto-m1/A1-1/A1-1.json'), 'utf8'));
+
+const pt = x => (x && x['pt-BR']) || '';
+const minusc = s => s ? s.charAt(0).toLowerCase() + s.slice(1) : s;
+const cartao = fr => {
+  const c = R.cartoes.find(x => x.fr === fr);
+  if (!c) throw new Error('cartão não encontrado: ' + fr);
+  return c;
+};
+const frase = fr => {
+  const f = R.frases_na_frase.find(x => x.fr === fr);
+  if (!f) throw new Error('frase não encontrada: ' + fr);
+  return f;
+};
+const erros = t => t.explicacao_erro ? Object.fromEntries(Object.entries(t.explicacao_erro).map(([k, v]) => [k, pt(v)])) : undefined;
+const iniciais = nome => nome.trim().split(/\s+/).pop().charAt(0).toUpperCase();
+
+// Converte uma tela do rascunho para o formato que a maquete desenha. Função pura.
+function telaDaMaquete(t, licao, telasDaLicao){
+  const base = { id: t.id, lesson: licao.tipo === 'dialogos' ? 5 : licao.ordem };
+  switch (t.tipo){
+    case 'abertura': return { ...base, type: 'intro', n: licao.ordem, title: pt(licao.titulo), goal: pt(t.objetivo), size: pt(t.tamanho) };
+    case 'cartao': {
+      const c = cartao(t.cartao);
+      return { ...base, type: 'item', kind: 'Palavra nova', fr: c.fr, tr: pt(c.traducao), role: pt(c.papel_na_funcao) || undefined,
+        audios: t.audios || c.fr.split(' / ').map(x => [x, x]) };
+    }
+    case 'frase': {
+      const f = frase(t.frase);
+      return { ...base, type: 'item', kind: 'Frase nova', fr: f.fr, tr: f['pt-BR'], role: pt(t.papel) || undefined, audios: [[f.fr, '']] };
+    }
+    case 'complete': return { ...base, type: 'complete', before: t.antes, after: t.depois, tr: pt(t.traducao), opts: t.opcoes, answer: t.resposta,
+      full: t.frase_completa, why_ok: pt(t.explicacao), why_err: erros(t) };
+    case 'vf': return { ...base, type: 'vf', fr: t.fr, noAudio: !!t.sem_audio, stmt: pt(t.afirmacao), answer: t.resposta,
+      full: t.frase_do_painel, fullTr: pt(t.traducao_do_painel), why_ok: pt(t.explicacao) };
+    case 'funcao': return { ...base, type: 'funcao', q: pt(t.pergunta), opts: t.opcoes, answer: t.resposta, fullTr: pt(t.traducao_do_painel),
+      why_ok: pt(t.explicacao), why_err: erros(t) };
+    case 'nota': {
+      const n = R.notas.find(x => x.id === t.nota);
+      if (!n) throw new Error('nota não encontrada: ' + t.nota);
+      const rot = t.rotulos || {}, mudas = t.so_escrita || [];
+      return { ...base, type: 'nota', kind: 'Nota · ' + n.tipo_visivel, title: pt(n.titulo), text: pt(n.texto),
+        ex: n.exemplos.map(e => [e.fr, e['pt-BR'], rot[e.fr] || null, mudas.includes(e.fr)]) };
+    }
+    case 'montar': return { ...base, type: 'montar', tr: pt(t.traducao), tiles: t.pecas, answer: t.resposta, full: t.frase_completa, why_ok: pt(t.explicacao) };
+    case 'fim': {
+      // Lista do que foi visto (regra 17): os cartões da lição, as frases-modelo e a frase montada.
+      const lista = [];
+      for (const x of telasDaLicao){
+        if (x.tipo === 'cartao'){ const c = cartao(x.cartao); lista.push([c.fr, pt(c.traducao), minusc(pt(c.papel_na_funcao)) || null]); }
+        if (x.tipo === 'frase'){ const f = frase(x.frase); lista.push([f.fr, f['pt-BR'], 'frase']); }
+        if (x.tipo === 'montar') lista.push([x.frase_completa, pt(x.traducao), 'frase']);
+      }
+      return { ...base, type: 'fim', list: lista };
+    }
+    case 'dialogo': {
+      const d = R.dialogos.find(x => pt(x.titulo) === t.dialogo);
+      if (!d) throw new Error('diálogo não encontrado: ' + t.dialogo);
+      const entendeu = d.check.find(c => c.tipo === 'understand');
+      return { ...base, type: 'dialogo', title: pt(d.titulo), scene: pt(d.cena),
+        who: { A: iniciais(d.falantes.A.nome), B: iniciais(d.falantes.B.nome) },
+        lines: d.falas.map(f => [f.falante, f.fr, f['pt-BR']]),
+        q: pt(entendeu.pergunta), opts: entendeu.opcoes.map(pt), answer: pt(entendeu.opcoes.find(o => o.certa)),
+        full: t.frase_do_painel, fullTr: pt(t.traducao_do_painel), why_ok: pt(t.explicacao) };
+    }
+    default: throw new Error('tipo de tela desconhecido: ' + t.tipo);
+  }
+}
+
+const TELAS = R.licoes.filter(l => l.telas).flatMap(l => l.telas.map(t => telaDaMaquete(t, l, l.telas)));
 
 const manifesto = fs.readFileSync(path.join(raiz, 'fr/audio-manifest.js'), 'utf8');
 const AUD = {};
-const frases = ['salut', 'bonjour', 'bonsoir', 'ça va', 'merci', 'de rien', "s'il te plaît", "s'il vous plaît", 'pardon', 'au revoir', 'à bientôt', 'Salut ! Ça va bien ?'];
-for (const f of frases) {
+const comAudioReal = ['salut', 'bonjour', 'bonsoir', 'ça va', 'merci', 'de rien', "s'il te plaît", "s'il vous plaît", 'pardon', 'au revoir', 'à bientôt'];
+for (const f of comAudioReal) {
   const re = new RegExp('"' + f.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '"\\s*:\\s*"([^"]+)"');
   const m = manifesto.match(re);
   if (!m) throw new Error('sem áudio no manifesto: ' + f);
   AUD[f] = 'data:audio/mpeg;base64,' + fs.readFileSync(path.join(raiz, 'fr/audio', m[1])).toString('base64');
 }
 
-const saida = fonte.replace('/*__ASSETS__*/', 'const AUD=' + JSON.stringify(AUD) + ';');
+const saida = fonte.replace('/*__ASSETS__*/', 'const AUD=' + JSON.stringify(AUD) + ';\nconst TELAS=' + JSON.stringify(TELAS) + ';');
 if (saida === fonte) throw new Error('marcador /*__ASSETS__*/ não encontrado');
 fs.writeFileSync(path.join(__dirname, 'index.html'), saida);
-console.log('index.html:', Object.keys(AUD).length, 'áudios,', Math.round(saida.length / 1024), 'KB');
+console.log('index.html:', TELAS.length, 'telas,', Object.keys(AUD).length, 'áudios,', Math.round(saida.length / 1024), 'KB');

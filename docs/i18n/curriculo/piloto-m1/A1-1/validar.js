@@ -36,14 +36,44 @@ confere(new Set(R.cartoes.map(c => c.frase_do_cartao)).size === R.cartoes.length
 const marcadas = P.carregarFrases();
 for (const f of R.frases_na_frase.filter(f => f.chave !== 'nova')) confere(P.papelDaFrase(marcadas, f.chave) === f.papel, `papel de ${f.chave} diverge do frases_na_frase.json`);
 confere(M.conferirLicoesDaUnidade(mapa).length === 0, 'conferência de lições do mapa acusou problema');
-// Diálogos: mesma lição no rascunho e no mapa (decisão 320); só a lição do diálogo tem inclui_dialogo e o diálogo na sequência.
+// Diálogos: mesma lição no rascunho e no mapa (decisões 320 e 338: lição própria no fim); só a lição do diálogo tem inclui_dialogo e a tela do diálogo.
 const numLicao = Object.fromEntries(u.licoes.map(l => [l.id, l.licao]));
 confere(JSON.stringify(R.dialogos.map(d => [d.titulo['pt-BR'], numLicao[d.licao]])) === JSON.stringify((u.dialogos || []).map(d => [d.titulo, d.licao])), 'diálogos do rascunho (título ou lição) divergem do mapa');
 for (const l of R.licoes.filter(l => l.id !== 'checkpoint')){
   const seus = R.dialogos.filter(d => d.licao === l.id).map(d => d.titulo['pt-BR']);
-  const naSequencia = R.dialogos.filter(d => l.sequencia.some(s => s.includes(`"${d.titulo['pt-BR']}"`))).map(d => d.titulo['pt-BR']);
+  const naSequencia = R.dialogos.filter(d => (l.telas || []).some(t => t.tipo === 'dialogo' && t.dialogo === d.titulo['pt-BR'])).map(d => d.titulo['pt-BR']);
   confere(l.inclui_dialogo === (seus.length > 0), `lição ${l.id}: inclui_dialogo não bate com os diálogos dela`);
   confere(JSON.stringify(naSequencia) === JSON.stringify(seus), `lição ${l.id}: sequência não traz exatamente os diálogos dela`);
+}
+
+// Telas da lição curta (regra 17): cada cartão uma vez, na lição e na ordem do mapa; nota em tela própria depois do gatilho ou como painel;
+// exercícios coerentes (resposta entre as opções, frase completa = partes) e "Complete" alternando grafia e outra palavra (decisão 342).
+const comTelas = R.licoes.filter(l => l.id !== 'checkpoint');
+for (const l of comTelas){
+  const telas = l.telas || [];
+  confere(telas.length > 0, `lição ${l.id} sem telas`);
+  const ids = telas.map(t => t.id);
+  const cartoesNasTelas = telas.filter(t => t.tipo === 'cartao').map(t => t.cartao);
+  confere(JSON.stringify(cartoesNasTelas) === JSON.stringify(R.cartoes.filter(c => c.licao === l.id).map(c => c.fr)), `lição ${l.id}: telas de cartão fora da ordem ou da lista do mapa`);
+  if (l.tipo !== 'dialogos') confere(telas[0].tipo === 'abertura' && telas[telas.length - 1].tipo === 'fim', `lição ${l.id}: começa sem abertura ou termina sem a tela final`);
+  for (const t of telas){
+    if (t.tipo === 'frase') confere(R.frases_na_frase.some(f => f.fr === t.frase), `tela ${t.id}: frase fora do frases_na_frase`);
+    if (t.tipo === 'nota'){
+      const n = R.notas.find(x => x.id === t.nota);
+      confere(n && n.destino === 'nota' && n.momento.licao === l.id, `tela ${t.id}: nota inexistente, de outra lição ou marcada como painel`);
+      const gatilho = n && cartoesNasTelas.includes(n.momento.depois_do_cartao) ? ids.indexOf(telas.find(x => x.tipo === 'cartao' && x.cartao === n.momento.depois_do_cartao).id) : -1;
+      confere(gatilho >= 0 && gatilho < ids.indexOf(t.id), `tela ${t.id}: nota antes do gatilho (regra 4)`);
+    }
+    if (['complete', 'funcao', 'vf'].includes(t.tipo) && t.tipo !== 'vf') confere(t.opcoes.includes(t.resposta), `tela ${t.id}: resposta fora das opções`);
+    if (t.tipo === 'complete') confere(t.opcoes.length === 2 && t.antes + t.resposta + t.depois === t.frase_completa, `tela ${t.id}: "Complete" sem 2 opções ou com frase completa diferente das partes`);
+    if (t.tipo === 'montar') confere(t.resposta.join(' ') === t.frase_completa && t.resposta.every(p => t.pecas.includes(p)) && t.pecas.length > t.resposta.length, `tela ${t.id}: peças, resposta e frase não batem (ou não sobra peça)`);
+  }
+  const completes = telas.filter(t => t.tipo === 'complete').map(t => t.distrator === 'grafia' ? 'grafia' : 'palavra');
+  if (completes.length >= 2) confere(new Set(completes).size === 2, `lição ${l.id}: os "Complete" não alternam grafia e outra palavra (decisão 342)`);
+}
+for (const n of R.notas){
+  if (n.destino === 'nota') confere(comTelas.some(l => (l.telas || []).some(t => t.tipo === 'nota' && t.nota === n.id)), `nota "${n.id}" sem tela`);
+  else confere(n.destino === 'painel' && (n.paineis || []).length > 0 && n.paineis.every(id => comTelas.some(l => (l.telas || []).some(t => t.id === id && t.explicacao))), `nota "${n.id}": painel sem tela de exercício com explicação`);
 }
 
 // ---------------------------------------------------------------- 2) só palavras vistas
@@ -79,6 +109,28 @@ for (const d of R.dialogos){
     const r = V.validarTexto(prox.palavra.split(' / ')[0], { tipo: 'dialogo', posicao: p.posicao }, 'A1-1', p.mapa, excecoes);
     confere(r.nao_vistas.length > 0, `autoteste: "${prox.palavra}" (lição ${prox.licao}) passou como vista no diálogo "${nome}"`);
   }
+}
+
+// Exercícios das telas (obrigatório): na posição da tela (cartões das lições anteriores + os desta lição já mostrados). O distrator de grafia
+// é errado de propósito e não entra; o V/F logo depois de uma nota mostra uma forma da própria nota (informativo, como os exemplos dela).
+for (const l of comTelas.filter(l => l.tipo !== 'dialogos')){
+  const n = numLicao[l.id];
+  const base = posicaoNoFimDaLicao(mapa, 'A1-1', n - 1);
+  let vistos = u.cartoes.filter(c => c.licao < n).length;
+  l.telas.forEach((t, i) => {
+    if (t.tipo === 'cartao') { vistos++; return; }
+    const ctx = { tipo: 'exercicio_licao', posicao: vistos };
+    const onde = `${l.id} ${t.id}`;
+    const textos = [];
+    if (t.tipo === 'complete') { textos.push(t.frase_completa); if (t.distrator !== 'grafia') textos.push(...t.opcoes); }
+    if (t.tipo === 'funcao') textos.push(...t.opcoes);
+    if (t.tipo === 'montar') textos.push(t.frase_completa, ...t.pecas);
+    if (t.tipo === 'vf') {
+      const depoisDeNota = l.telas[i - 1] && l.telas[i - 1].tipo === 'nota';
+      add(depoisDeNota ? 'Exercícios das telas: V/F de nota (informativo)' : 'Exercícios das telas', !depoisDeNota, onde, t.fr, ctx, 'A1-1', base.mapa);
+    }
+    for (const x of textos) add('Exercícios das telas', true, onde, x, ctx, 'A1-1', base.mapa);
+  });
 }
 
 // Frases "Na frase": na ficha logo depois do cartão que ilustram (informativo); as essenciais também na Revisão da unidade (obrigatório).

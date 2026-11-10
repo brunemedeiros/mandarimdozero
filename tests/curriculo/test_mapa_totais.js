@@ -22,8 +22,8 @@ check('A1: 762 cartões A/B (385 × 2 − 8 de reconhecimento; decisão 330: ne�
 check('A1: 195 novos + 190 publicados', A1.novos === 195 && A1.publicados === 190, [A1.novos, A1.publicados]);
 check('A1: cartões por módulo 67/40/51/52/36/29/39/41/30 (decisões 334 e 335: "Perguntar a idade dos outros: até 69", 13, desce para "Família e pessoas próximas"; era 80/27)',
   JSON.stringify(A1.porModulo.map(m => m.cartoes)) === JSON.stringify([67, 40, 51, 52, 36, 29, 39, 41, 30]), A1.porModulo.map(m => m.cartoes));
-check('A1: ~152 lições (M1 23, M2 15, M3 19, M4 22, M5 14, M6 12, M7 18, M8 17, M9 12; decisão 335: as 5 lições de "Perguntar a idade dos outros: até 69" passam do M1 ao M2; era M1 28, M2 10)',
-  JSON.stringify(A1.porModulo.map(m => m.licoes)) === JSON.stringify([23, 15, 19, 22, 14, 12, 18, 17, 12]), A1.porModulo.map(m => m.licoes));
+check('A1: ~153 lições (M1 24, M2 15, M3 19, M4 22, M5 14, M6 12, M7 18, M8 17, M9 12; decisão 335: as 5 lições de "Perguntar a idade dos outros: até 69" passam do M1 ao M2; decisão 338: +1 lição de diálogos em "Cumprimentar e se despedir")',
+  JSON.stringify(A1.porModulo.map(m => m.licoes)) === JSON.stringify([24, 15, 19, 22, 14, 12, 18, 17, 12]), A1.porModulo.map(m => m.licoes));
 check('A1: ~31h00 de trilha', A1.tempo === 31 * 60, C.formatarTempo(A1.tempo));
 check('A1: "Apresentar-se" fica com o tempo digitado ~3h55 (decisão 270; 16 cartões na A1-1 não mudam a regra, decisões 300 e 308)', A1.porModulo[0].tempo === 3 * 60 + 55, C.formatarTempo(A1.porModulo[0].tempo));
 check('A1: 131 notas (decisão 333: a nota de ida e procedência de "Países e cidades" vira duas; era 130)', A1.notas === 131, A1.notas);
@@ -54,9 +54,10 @@ console.log('== "Cumprimentar e se despedir" (A1-1), unidade polida pela dona (d
   check('as 10 chaves publicadas continuam na unidade', JSON.stringify(u.cartoes.filter(c => c.chave !== 'nova').map(c => c.chave).sort()) ===
     JSON.stringify(['A1-1-v0', 'A1-1-v1', 'A1-1-v2', 'A1-1-v3', 'A1-1-v4', 'A1-1-v5', 'A1-1-v6', 'A1-1-v7', 'A1-1-v8', 'A1-1-v9']));
   check('6 cartões novos (chave "nova"), todos com A e B', u.cartoes.filter(c => c.chave === 'nova').length === 6 && C.cartoesAB(u) === 32, C.cartoesAB(u));
-  check('4 lições + Revisão da unidade', C.licoesDaUnidade(u) === 5, C.licoesDaUnidade(u));
-  check('lições com id: reaproveita ola-e-tchau, cortesia-e-como-vai e informal-agradecer; despedir-se é nova (decisão 284)',
-    JSON.stringify(u.licoes.map(l => l.id)) === JSON.stringify(['ola-e-tchau', 'cortesia-e-como-vai', 'informal-agradecer', 'despedir-se']), u.licoes.map(l => l.id));
+  check('4 lições de cartões + lição de diálogos + Revisão da unidade (decisão 338)', C.licoesDaUnidade(u) === 6, C.licoesDaUnidade(u));
+  check('lições com id: reaproveita ola-e-tchau, cortesia-e-como-vai e informal-agradecer; despedir-se e dialogos-da-unidade são novas (decisões 284 e 338)',
+    JSON.stringify(u.licoes.map(l => l.id)) === JSON.stringify(['ola-e-tchau', 'cortesia-e-como-vai', 'informal-agradecer', 'despedir-se', 'dialogos-da-unidade']), u.licoes.map(l => l.id));
+  check('os dois diálogos ficam na lição 5, "Diálogos da unidade" (decisão 338)', u.dialogos.length === 2 && u.dialogos.every(d => d.licao === 5) && C.temLicaoDeDialogos(u));
   const titulos = C.notasDaUnidade(u).map(n => n.titulo);
   check('9 notas na ordem da dona', JSON.stringify(titulos) === JSON.stringify(['"Bonjour" ou "Bonsoir"?', 'Madame, monsieur e mademoiselle',
     'Ça va pode ser pergunta ou resposta', "Como perguntar 'tudo bem?'", 'Como responder', '"S\'il vous plaît" no dia a dia',
@@ -249,6 +250,29 @@ console.log('== funções puras (regras isoladas)');
   }
   check('título de nota de vocabulário fora do padrão é acusado',
     C.conferirTitulosNotasVocab({ niveis: [{ id: 'A1', modulos: [{ id: 'x', ordem: 1, unidades: [{ id: 'u', notas: [{ tipo: 'Vocab', titulo: 'Outros traços' }] }] }] }] }).length === 1);
+}
+
+console.log('== lição de diálogos (regra 17, decisão 338)');
+{
+  const cartao = (palavra, licao) => ({ palavra, licao, chave: 'nova' });
+  const unidade = (licoes, cartoes, dialogos) => ({ id: 'u', tipo: 'vocabulario', licoes_08: licoes.length + 1, licoes, cartoes, dialogos });
+  const mapaCom = u => ({ niveis: [{ id: 'A1', modulos: [{ id: 'x', ordem: 1, unidades: [u] }] }] });
+  const tres = [cartao('a', 1), cartao('b', 1), cartao('c', 1)];
+  const L = [{ licao: 1, id: 'um' }, { licao: 2, id: 'dialogos', tipo: 'dialogos' }];
+  check('lição de diálogos sem cartão, a última, com o diálogo: nenhum problema',
+    C.conferirLicoesDaUnidade(mapaCom(unidade(L, tres, [{ titulo: 'D', licao: 2 }]))).length === 0);
+  check('lição comum sem cartão continua acusada',
+    C.conferirLicoesDaUnidade(mapaCom(unidade([{ licao: 1, id: 'um' }, { licao: 2, id: 'dois' }], tres, []))).some(p => p.problema === 'lição sem cartão'));
+  check('lição de diálogos com cartão é acusada',
+    C.conferirLicoesDaUnidade(mapaCom(unidade(L, [...tres, cartao('d', 2)], [{ titulo: 'D', licao: 2 }]))).some(p => p.problema === 'lição de diálogos com cartão'));
+  check('lição de diálogos que não é a última é acusada',
+    C.conferirLicoesDaUnidade(mapaCom(unidade([{ licao: 1, id: 'dialogos', tipo: 'dialogos' }, { licao: 2, id: 'dois' }], [cartao('a', 2), cartao('b', 2), cartao('c', 2)], [{ titulo: 'D', licao: 1 }]))).some(p => p.problema === 'lição de diálogos não é a última'));
+  check('lição de diálogos sem diálogo é acusada',
+    C.conferirLicoesDaUnidade(mapaCom(unidade(L, tres, []))).some(p => p.problema === 'lição de diálogos sem diálogo'));
+  check('diálogo fora da lição de diálogos é acusado',
+    C.conferirLicoesDaUnidade(mapaCom(unidade(L, tres, [{ titulo: 'D', licao: 2 }, { titulo: 'E', licao: 1 }]))).some(p => p.problema === 'diálogo fora da lição de diálogos'));
+  check('a regra das lições conta a lição de diálogos (+1)',
+    C.licoesPelaRegra({ tipo: 'vocabulario', licoes: L, cartoes: tres }) === C.licoesPelaRegra({ tipo: 'vocabulario', licoes: [L[0]], cartoes: tres }) + 1);
 }
 
 summary('curriculo mapa totais');
