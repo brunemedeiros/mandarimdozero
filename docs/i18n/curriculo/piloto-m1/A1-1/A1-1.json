@@ -1135,44 +1135,36 @@
    ]
   },
   {
-   "id": "dialogos-da-unidade",
+   "id": "conversar-com-amigo",
    "ordem": 5,
    "id_novo": true,
    "tipo": "dialogos",
+   "cartoes": [],
+   "inclui_dialogo": true,
    "titulo": {
     "publicado": null,
-    "pt-BR": "Diálogos da unidade",
+    "pt-BR": "Conversar com um amigo",
     "en": null,
     "a_confirmar": false
    },
-   "cartoes": [],
-   "inclui_dialogo": true,
    "telas": [
-    {
-     "id": "l5-intro",
-     "tipo": "abertura",
-     "objetivo": {
-      "pt-BR": "Hora de juntar tudo! Duas conversas: uma informal e outra formal. Repare em como cada um fala.",
-      "en": null
-     },
-     "tamanho": {
-      "pt-BR": "2 diálogos · cerca de 3 minutos",
-      "en": null
-     }
-    },
     {
      "id": "d1-cena",
      "tipo": "dialogo_cena",
-     "dialogo": "Encontro na rua",
+     "dialogo": "De manhã, Léa encontra o vizinho Hugo.",
      "foco": {
       "pt-BR": "Ouça com atenção: repare em como eles se cumprimentam e se despedem.",
+      "en": null
+     },
+     "tamanho": {
+      "pt-BR": "1 conversa · cerca de 3 minutos",
       "en": null
      }
     },
     {
      "id": "d1-ouvir",
      "tipo": "dialogo_ouvir",
-     "dialogo": "Encontro na rua",
+     "dialogo": "De manhã, Léa encontra o vizinho Hugo.",
      "pergunta": {
       "pt-BR": "Eles se falam de um jeito formal ou informal?",
       "en": null
@@ -1189,37 +1181,95 @@
      ],
      "resposta": 0,
      "explicacao": {
-      "pt-BR": "Eles usam <b>coucou</b>, <b>salut</b> e <b>et toi ?</b>: é uma conversa informal.",
-      "en": null
-     }
-    },
-    {
-     "id": "d1-montar",
-     "tipo": "dialogo_montar",
-     "dialogo": "Encontro na rua",
-     "distratores": {
-      "0": "Merci !",
-      "1": "Léa ! Bonjour !",
-      "2": "Salut, Hugo ! Tu vas bien ?",
-      "3": "Je vais bien, et vous ?",
-      "4": "Très bien, merci !",
-      "5": "Bonjour, Léa !",
-      "6": "Merci ! Salut, à bientôt !"
-     },
-     "explicacao": {
-      "pt-BR": "Você montou a conversa só pelo ouvido! Entre amigos: <b>coucou</b>, <b>et toi ?</b> e <b>à plus</b>.",
+      "pt-BR": "Eles usam <b>salut</b>, <b>coucou</b> e <b>et toi ?</b>: é uma conversa informal.",
       "en": null
      }
     },
     {
      "id": "d1-ler",
      "tipo": "dialogo_ler",
-     "dialogo": "Encontro na rua"
+     "dialogo": "De manhã, Léa encontra o vizinho Hugo."
+    },
+    {
+     "id": "d1-vf",
+     "tipo": "dialogo_vf",
+     "dialogo": "De manhã, Léa encontra o vizinho Hugo.",
+     "fala": 1,
+     "afirmacao": {
+      "pt-BR": "Aqui, <i>et toi ?</i> é o \"e você?\" informal.",
+      "en": null
+     },
+     "resposta": true,
+     "explicacao": {
+      "pt-BR": "Com amigos, a pergunta volta com <b>et toi ?</b>; no formal, com <b>et vous ?</b>",
+      "en": null
+     }
+    },
+    {
+     "id": "d1-montar",
+     "tipo": "dialogo_montar",
+     "dialogo": "De manhã, Léa encontra o vizinho Hugo.",
+     "distratores": {
+      "0": {
+       "texto": "Salu, Hugo ! Ça va ?",
+       "tipo": "grafia"
+      },
+      "1": {
+       "texto": "Coucou, Léa ! Je vais bien, et vous ?",
+       "tipo": "registro"
+      },
+      "2": {
+       "texto": "Pas mal, mersi !",
+       "tipo": "grafia"
+      },
+      "3": {
+       "texto": "Bonne journé !",
+       "tipo": "grafia"
+      },
+      "4": {
+       "texto": "Merci ! Salut, à plu !",
+       "tipo": "grafia"
+      },
+      "5": {
+       "texto": "À plus, monsieur !",
+       "tipo": "registro"
+      }
+     },
+     "explicacao": {
+      "pt-BR": "Você montou a conversa pelo ouvido. Repare na grafia de <b>salut</b>, <b>merci</b> e <b>à plus</b>.",
+      "en": null
+     }
+    },
+    {
+     "id": "d1-lacuna",
+     "tipo": "dialogo_lacuna",
+     "dialogo": "De manhã, Léa encontra o vizinho Hugo.",
+     "fala": 1,
+     "antes": "Coucou, Léa ! Je vais bien, ",
+     "depois": " ?",
+     "opcoes": [
+      "é tuá",
+      "et toi"
+     ],
+     "resposta": "et toi",
+     "explicacao": {
+      "pt-BR": "Em francês, o <b>t</b> de <b>et</b> não se pronuncia, e <b>oi</b> se pronuncia /uá/: <b>et toi</b> soa /ê tuá/.",
+      "en": null
+     }
+    },
+    {
+     "id": "d1-ordenar",
+     "tipo": "dialogo_ordenar",
+     "dialogo": "De manhã, Léa encontra o vizinho Hugo.",
+     "explicacao": {
+      "pt-BR": "Cumprimento, como vai, resposta, bom dia e despedida: o caminho de toda a unidade.",
+      "en": null
+     }
     },
     {
      "id": "d1-entendeu",
      "tipo": "dialogo_entendeu",
-     "dialogo": "Encontro na rua",
+     "dialogo": "De manhã, Léa encontra o vizinho Hugo.",
      "pergunta": {
       "pt-BR": "Como a Léa está?",
       "en": null
@@ -1247,7 +1297,7 @@
     {
      "id": "d1-papel",
      "tipo": "dialogo_papel",
-     "dialogo": "Encontro na rua",
+     "dialogo": "De manhã, Léa encontra o vizinho Hugo.",
      "situacao": {
       "pt-BR": "Agora é você: à noite, você encontra a Léa.",
       "en": null
@@ -1343,30 +1393,51 @@
     {
      "id": "d1-fim",
      "tipo": "dialogo_fim",
-     "dialogo": "Encontro na rua",
+     "dialogo": "De manhã, Léa encontra o vizinho Hugo.",
      "fala": {
       "pt-BR": "Muito bem! Agora você conversa com um amigo do começo ao fim.",
       "en": null
      },
      "frases": [
-      2,
-      3,
-      6
+      0,
+      1,
+      4
      ]
-    },
+    }
+   ],
+   "muda": "nova (decisões 338 e 355): o diálogo informal em lição própria, no fim da unidade"
+  },
+  {
+   "id": "conversar-formal",
+   "ordem": 6,
+   "id_novo": true,
+   "tipo": "dialogos",
+   "cartoes": [],
+   "inclui_dialogo": true,
+   "titulo": {
+    "publicado": null,
+    "pt-BR": "Conversar de um jeito formal",
+    "en": null,
+    "a_confirmar": false
+   },
+   "telas": [
     {
      "id": "d2-cena",
      "tipo": "dialogo_cena",
-     "dialogo": "Na portaria",
+     "dialogo": "À noite, o Sr. Martin encontra a vizinha, Sra. Dubois.",
      "foco": {
       "pt-BR": "Ouça com atenção: repare em como eles se tratam.",
+      "en": null
+     },
+     "tamanho": {
+      "pt-BR": "1 conversa · cerca de 4 minutos",
       "en": null
      }
     },
     {
      "id": "d2-ouvir",
      "tipo": "dialogo_ouvir",
-     "dialogo": "Na portaria",
+     "dialogo": "À noite, o Sr. Martin encontra a vizinha, Sra. Dubois.",
      "pergunta": {
       "pt-BR": "Eles se falam de um jeito formal ou informal?",
       "en": null
@@ -1388,19 +1459,66 @@
      }
     },
     {
+     "id": "d2-ler",
+     "tipo": "dialogo_ler",
+     "dialogo": "À noite, o Sr. Martin encontra a vizinha, Sra. Dubois."
+    },
+    {
+     "id": "d2-vf",
+     "tipo": "dialogo_vf",
+     "dialogo": "À noite, o Sr. Martin encontra a vizinha, Sra. Dubois.",
+     "fala": 3,
+     "afirmacao": {
+      "pt-BR": "Aqui, a Sra. Dubois pede desculpa porque esbarrou nele.",
+      "en": null
+     },
+     "resposta": false,
+     "explicacao": {
+      "pt-BR": "Como pergunta, <b>pardon ?</b> pede que a pessoa repita: ela não ouviu.",
+      "en": null
+     }
+    },
+    {
      "id": "d2-montar",
      "tipo": "dialogo_montar",
-     "dialogo": "Na portaria",
+     "dialogo": "À noite, o Sr. Martin encontra a vizinha, Sra. Dubois.",
      "distratores": {
-      "0": "Bonjour, madame.",
-      "1": "Bonsoir, monsieur. Comment vas-tu ?",
-      "2": "Très bien, merci. Et toi ?",
-      "3": "Merci !",
-      "4": "Tu vas bien, madame ?",
-      "5": "Très bien, de rien, monsieur.",
-      "6": "Bonsoir, madame !",
-      "7": "Merci, monsieur. À bientôt !",
-      "8": "Au revoir, madame. À plus !"
+      "0": {
+       "texto": "Bonsoir, madam.",
+       "tipo": "grafia"
+      },
+      "1": {
+       "texto": "Bonsoir, monsieur. Comment vas-tu ?",
+       "tipo": "registro"
+      },
+      "2": {
+       "texto": "Très bien, merci. Et toi ?",
+       "tipo": "registro"
+      },
+      "3": {
+       "texto": "Pardom ?",
+       "tipo": "grafia"
+      },
+      "4": {
+       "texto": "Tu vas bien, madame ?",
+       "tipo": "registro"
+      },
+      "5": {
+       "texto": "Très bien, merci, monsieu.",
+       "tipo": "grafia"
+      },
+      "6": {
+       "texto": "Bonne soiré, madame !",
+       "tipo": "grafia"
+      },
+      "7": {
+       "texto": "Merci, monsieur. Au revoar !",
+       "tipo": "grafia"
+      },
+      "8": {
+       "texto": "Salut, madame. À plus !",
+       "tipo": "registro"
+      }
      },
      "explicacao": {
       "pt-BR": "Você montou a conversa formal pelo ouvido: <b>vous</b>, <b>madame</b> e <b>monsieur</b> do começo ao fim.",
@@ -1408,42 +1526,63 @@
      }
     },
     {
-     "id": "d2-ler",
-     "tipo": "dialogo_ler",
-     "dialogo": "Na portaria"
+     "id": "d2-lacuna",
+     "tipo": "dialogo_lacuna",
+     "dialogo": "À noite, o Sr. Martin encontra a vizinha, Sra. Dubois.",
+     "fala": 2,
+     "antes": "Très bien, merci. ",
+     "depois": " ?",
+     "opcoes": [
+      "Et vous",
+      "É vu"
+     ],
+     "resposta": "Et vous",
+     "explicacao": {
+      "pt-BR": "O <b>t</b> de <b>et</b> e o <b>s</b> de <b>vous</b> não se pronunciam: <b>et vous</b> soa /ê vu/.",
+      "en": null
+     }
+    },
+    {
+     "id": "d2-ordenar",
+     "tipo": "dialogo_ordenar",
+     "dialogo": "À noite, o Sr. Martin encontra a vizinha, Sra. Dubois.",
+     "explicacao": {
+      "pt-BR": "Cumprimento, como vai, pedido para repetir, boa noite e despedida.",
+      "en": null
+     }
     },
     {
      "id": "d2-entendeu",
      "tipo": "dialogo_entendeu",
-     "dialogo": "Na portaria",
+     "dialogo": "À noite, o Sr. Martin encontra a vizinha, Sra. Dubois.",
      "pergunta": {
-      "pt-BR": "Por que a Sra. Dubois diz \"Pardon ?\"",
+      "pt-BR": "Como a Sra. Dubois está?",
       "en": null
      },
      "opcoes": [
       {
-       "pt-BR": "Ela não ouviu e quer que ele repita",
+       "pt-BR": "Muito bem",
        "en": null
       },
       {
-       "pt-BR": "Ela esbarrou nele",
+       "pt-BR": "Mais ou menos",
        "en": null
       },
       {
-       "pt-BR": "Ela está agradecendo",
+       "pt-BR": "Cansada",
        "en": null
       }
      ],
      "resposta": 0,
      "explicacao": {
-      "pt-BR": "Como pergunta, <b>pardon ?</b> pede que a pessoa repita.",
+      "pt-BR": "Ela responde <b>très bien, merci</b>: está muito bem.",
       "en": null
      }
     },
     {
      "id": "d2-papel",
      "tipo": "dialogo_papel",
-     "dialogo": "Na portaria",
+     "dialogo": "À noite, o Sr. Martin encontra a vizinha, Sra. Dubois.",
      "situacao": {
       "pt-BR": "Agora é você: de manhã, você encontra o Sr. Martin.",
       "en": null
@@ -1539,7 +1678,7 @@
     {
      "id": "d2-fim",
      "tipo": "dialogo_fim",
-     "dialogo": "Na portaria",
+     "dialogo": "À noite, o Sr. Martin encontra a vizinha, Sra. Dubois.",
      "fala": {
       "pt-BR": "Parabéns! Você acompanhou uma conversa inteira no formal.",
       "en": null
@@ -1551,7 +1690,7 @@
      ]
     }
    ],
-   "muda": "nova (decisão 338): os diálogos saem do fim das lições 2 e 4; caminho de 7 telas por diálogo e diálogos que fecham a unidade (decisões 353 e 354)"
+   "muda": "nova (decisões 338 e 355): o diálogo formal em lição própria, no fim da unidade"
   },
   {
    "id": "checkpoint",
@@ -1568,16 +1707,12 @@
  "dialogos": [
   {
    "titulo": {
-    "pt-BR": "Encontro na rua",
-    "en": null
-   },
-   "registro": "informal",
-   "cena": {
     "pt-BR": "De manhã, Léa encontra o vizinho Hugo.",
     "en": null
    },
-   "licao": "dialogos-da-unidade",
-   "muda": "reescrito (decisão 354): fecha a unidade inteira (cumprimentar, como vai, cortesia e despedida); as falas publicadas A1-1-d0 a d3 continuam fora (decisão 320)",
+   "registro": "informal",
+   "licao": "conversar-com-amigo",
+   "muda": "reescrito (decisões 354 e 355): fecha a unidade; começa com salut (sem o pardon sem motivo); título = frase da cena",
    "falantes": {
     "A": {
      "nome": "Léa",
@@ -1592,20 +1727,6 @@
     {
      "chave": "nova",
      "falante": "A",
-     "fr": "Pardon !",
-     "pt-BR": "Desculpe!",
-     "en": null
-    },
-    {
-     "chave": "nova",
-     "falante": "B",
-     "fr": "Léa ! Coucou !",
-     "pt-BR": "Léa! Oi!",
-     "en": null
-    },
-    {
-     "chave": "nova",
-     "falante": "A",
      "fr": "Salut, Hugo ! Ça va ?",
      "pt-BR": "Oi, Hugo! Tudo bem?",
      "en": null
@@ -1613,8 +1734,8 @@
     {
      "chave": "nova",
      "falante": "B",
-     "fr": "Je vais bien, et toi ?",
-     "pt-BR": "Estou bem, e você?",
+     "fr": "Coucou, Léa ! Je vais bien, et toi ?",
+     "pt-BR": "Oi, Léa! Estou bem, e você?",
      "en": null
     },
     {
@@ -1627,8 +1748,8 @@
     {
      "chave": "nova",
      "falante": "B",
-     "fr": "Bonne journée, Léa !",
-     "pt-BR": "Tenha um bom dia, Léa!",
+     "fr": "Bonne journée !",
+     "pt-BR": "Tenha um bom dia!",
      "en": null
     },
     {
@@ -1636,6 +1757,13 @@
      "falante": "A",
      "fr": "Merci ! Salut, à plus !",
      "pt-BR": "Obrigada! Tchau, até mais!",
+     "en": null
+    },
+    {
+     "chave": "nova",
+     "falante": "B",
+     "fr": "À plus !",
+     "pt-BR": "Até mais!",
      "en": null
     }
    ],
@@ -1648,16 +1776,12 @@
   },
   {
    "titulo": {
-    "pt-BR": "Na portaria",
-    "en": null
-   },
-   "registro": "formal",
-   "cena": {
     "pt-BR": "À noite, o Sr. Martin encontra a vizinha, Sra. Dubois.",
     "en": null
    },
-   "licao": "dialogos-da-unidade",
-   "muda": "reescrito (decisão 354): fecha a unidade inteira; Pardon ? como pedido para repetir (nota da lição 3)",
+   "registro": "formal",
+   "licao": "conversar-formal",
+   "muda": "reescrito (decisão 354): fecha a unidade inteira; Pardon ? como pedido para repetir (nota da lição 3); título = frase da cena (decisão 355)",
    "falantes": {
     "A": {
      "nome": "Sr. Martin",

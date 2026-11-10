@@ -60,9 +60,11 @@ Regras de código: `.claude/rules/qualidade-de-codigo.md`. Regras por área: `.c
 ## Lição curta, rascunho com telas e voz da professora (decisões 338 a 351)
 - **Onde fica:** regras na regra 17 do `docs/i18n/curriculo/15-regras-do-curriculo.md`; conteúdo de cada lição em `telas` no rascunho da
   unidade (piloto: `docs/i18n/curriculo/piloto-m1/A1-1/A1-1.json`; tipos: `abertura`, `cartao`, `frase`, `complete`, `vf`, `funcao`, `nota`,
-  `montar`, `fim`; na lição de diálogos, `dialogo_cena`, `dialogo_ouvir`, `dialogo_montar`, `dialogo_ler`, `dialogo_entendeu`,
-  `dialogo_papel` (turnos: `outro` = fala do personagem; `opcoes` + `certa` + `dicas` = escolha da aluna) e `dialogo_fim`, nessa ordem por
-  diálogo, conferida pelo `validar.js`; os textos dos exercícios do diálogo são validados no contexto `dialogo`, em que as notas contam); notas com `destino` (`nota` = tela própria; `painel` = vira a explicação dos exercícios em `paineis`).
+  `montar`, `fim`; nas lições de diálogo (uma por diálogo, `tipo: 'dialogos'`), `dialogo_cena`, `dialogo_ouvir`, `dialogo_ler`, `dialogo_vf`,
+  `dialogo_montar` (distrator `{texto, tipo: 'grafia'|'registro'}` por fala), `dialogo_lacuna`, `dialogo_ordenar`, `dialogo_entendeu`,
+  `dialogo_papel` (turnos: `outro` = fala do personagem; `opcoes` + `certa` + `dicas` = escolha da aluna) e `dialogo_fim`, nessa ordem,
+  conferida pelo `validar.js`; textos dos exercícios do diálogo validados no contexto `dialogo`, em que as notas contam; grafia errada
+  de propósito não entra); notas com `destino` (`nota` = tela própria; `painel` = vira a explicação dos exercícios em `paineis`).
   Lição de diálogos: `tipo: 'dialogos'` em `licoes` do `mapa.json` (`temLicaoDeDialogos` e `conferirLicoesDaUnidade` em `fr/scripts/curriculo_mapa.js`).
   Maquete clicável gerada do rascunho: `docs/i18n/curriculo/maquete-licao-curta/gerar.js` (`fonte.html` tem só o desenho e os comentários `WHY`).
   Voz da professora (todo texto que fala com o aluno): `docs/voz-da-professora.md`.

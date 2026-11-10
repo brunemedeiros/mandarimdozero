@@ -37,7 +37,8 @@
                 321,
                 322,
                 324,
-                338
+                338,
+                355
               ],
               "licoes": [
                 {
@@ -63,10 +64,17 @@
                 },
                 {
                   "licao": 5,
-                  "id": "dialogos-da-unidade",
+                  "id": "conversar-com-amigo",
                   "id_novo": true,
                   "tipo": "dialogos",
-                  "titulo": "Diálogos da unidade"
+                  "titulo": "Conversar com um amigo"
+                },
+                {
+                  "licao": 6,
+                  "id": "conversar-formal",
+                  "id_novo": true,
+                  "tipo": "dialogos",
+                  "titulo": "Conversar de um jeito formal"
                 }
               ],
               "cartoes": [
@@ -398,17 +406,17 @@
               ],
               "dialogos": [
                 {
-                  "titulo": "Encontro na rua",
+                  "titulo": "De manhã, Léa encontra o vizinho Hugo.",
                   "registro": "informal",
                   "origem": "novo (substitui as falas publicadas A1-1-d0 a d3)",
                   "licao": 5,
                   "decisao": 320
                 },
                 {
-                  "titulo": "Na portaria",
+                  "titulo": "À noite, o Sr. Martin encontra a vizinha, Sra. Dubois.",
                   "registro": "formal",
                   "origem": "novo",
-                  "licao": 5,
+                  "licao": 6,
                   "decisao": 270
                 }
               ]

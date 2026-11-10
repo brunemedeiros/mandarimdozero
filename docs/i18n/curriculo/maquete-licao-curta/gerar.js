@@ -36,7 +36,7 @@ function construirTelas(R, tolerante){
     const d = R.dialogos.find(x => pt(x.titulo) === titulo);
     if (!d) throw new Error('diálogo não encontrado: ' + titulo);
     const voz = f => (f.emoji === '👨' ? 'm' : 'f');
-    return { title: pt(d.titulo), scene: pt(d.cena),
+    return { title: pt(d.titulo),
       who: { A: iniciais(d.falantes.A.nome), B: iniciais(d.falantes.B.nome) },
       names: { A: d.falantes.A.nome, B: d.falantes.B.nome },
       voices: { A: voz(d.falantes.A), B: voz(d.falantes.B) },
@@ -45,7 +45,7 @@ function construirTelas(R, tolerante){
 
   // Converte uma tela do rascunho para o formato que a maquete desenha. Função pura.
   function telaDaMaquete(t, licao, telasDaLicao){
-    const base = { id: t.id, lesson: licao.tipo === 'dialogos' ? 5 : licao.ordem };
+    const base = { id: t.id, lesson: licao.ordem };
     switch (t.tipo){
       case 'abertura': return { ...base, type: 'intro', n: licao.ordem, title: pt(licao.titulo), goal: pt(t.objetivo), size: pt(t.tamanho) };
       case 'cartao': {
@@ -82,10 +82,13 @@ function construirTelas(R, tolerante){
         return { ...base, type: 'fim', say: pt(t.fala), list: lista };
       }
       // Lição de diálogos em 6 etapas (decisão 353). Os dados do diálogo vão juntos em `dlg`.
-      case 'dialogo_cena': return { ...base, type: 'd_cena', dlg: dialogo(t.dialogo), foco: pt(t.foco) };
+      case 'dialogo_cena': return { ...base, type: 'd_cena', dlg: dialogo(t.dialogo), n: licao.ordem, licao: pt(licao.titulo), foco: pt(t.foco), size: pt(t.tamanho) };
+      case 'dialogo_vf': return { ...base, type: 'd_vf', dlg: dialogo(t.dialogo), fala: t.fala, stmt: pt(t.afirmacao), answer: t.resposta, why_ok: pt(t.explicacao) };
+      case 'dialogo_lacuna': return { ...base, type: 'd_lacuna', dlg: dialogo(t.dialogo), fala: t.fala, before: t.antes, after: t.depois, opts: t.opcoes, answer: t.resposta, why_ok: pt(t.explicacao) };
+      case 'dialogo_ordenar': return { ...base, type: 'd_ordenar', dlg: dialogo(t.dialogo), why_ok: pt(t.explicacao) };
       case 'dialogo_ouvir': return { ...base, type: 'd_ouvir', dlg: dialogo(t.dialogo), q: pt(t.pergunta), opts: t.opcoes.map(pt), answer: t.resposta, why_ok: pt(t.explicacao) };
       case 'dialogo_ler': return { ...base, type: 'd_ler', dlg: dialogo(t.dialogo) };
-      case 'dialogo_montar': return { ...base, type: 'd_montar', dlg: dialogo(t.dialogo), distratores: t.distratores, why_ok: pt(t.explicacao) };
+      case 'dialogo_montar': return { ...base, type: 'd_montar', dlg: dialogo(t.dialogo), distratores: Object.fromEntries(Object.entries(t.distratores).map(([k, v]) => [k, v.texto])), why_ok: pt(t.explicacao) };
       case 'dialogo_entendeu': return { ...base, type: 'd_entendeu', dlg: dialogo(t.dialogo), q: pt(t.pergunta), opts: t.opcoes.map(pt), answer: t.resposta, why_ok: pt(t.explicacao) };
       case 'dialogo_papel': return { ...base, type: 'd_papel', dlg: dialogo(t.dialogo), situacao: pt(t.situacao), outro: t.outro_falante,
         turnos: t.turnos.map(x => x.outro ? { outro: [x.outro.fr, x.outro['pt-BR']] }
