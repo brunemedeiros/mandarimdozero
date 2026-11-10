@@ -142,3 +142,9 @@ no fim do `<style>` de fr/zh (o teste de i18n já ignora tudo a partir do bloco 
   passa a aparecer como desatualizado (nova `generationKey`); regenerar é ação explícita da professora (cota mensal). Os mp3 pré-gerados do manifest NÃO mudam sozinhos.
 - Deploy: `tts-generate` v14 na produção em 2026-11-05 (autorizado pela dona). Staging não tem essa função publicada pelo MCP; não mexi. `engine.generated.mjs` da `review-bank-agent` regerado (só os números das versões; a rotina não usa), sem novo deploy.
 - Testes: `tests/tts-google/test_tts_core.mjs` 120/120, `fr/scripts/test_spoken_text.py` 178/178, `tests/audio-sem-ipa` 15/15, `tests/registro` 88/89 (a falha é antiga: literais de appKey).
+
+## "×" entre palavras vira pausa (2026-11-06)
+- Pedido da dona: "brésiliens × brésiliennes" era lido como "vezes". Agora, entre letras e com espaço dos dois lados, o × vira pausa curta (vírgula), como a barra " / ". "4×20" e "2 × 3" (números) ficam.
+- Voz do navegador: `crossToPause` em `shared/core/voz.js`. TTS: `fr.cross-pause` e `pt.cross-pause` em `tts_core.mjs` e `spoken_text.py` (paridade testada).
+- Versões: fr 5 para 6, pt 4 para 5, `SPOKEN_RULES_VERSION` 6 para 7 (registry regerado; `engine.generated.mjs` regerado, só números). `tts-generate` v15 na produção em 2026-11-06 (autorizado pela dona).
+- Testes: `tests/tts-google` 123/123, `fr/scripts/test_spoken_text.py` 180/180, `tests/audio-sem-ipa` 19/19, `test_quase_iguais` 2768/0 (a linha de base antiga de 4 falhas já não aparece), contrato dos ganchos 29/29, registro 88/89 (falha antiga: literais de appKey).
