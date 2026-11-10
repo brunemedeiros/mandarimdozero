@@ -138,4 +138,13 @@ console.log('== relatório (fumaça: roda sobre o conteúdo real sem gravar)');
   check('relatório cita nome do módulo e da unidade', /### A1 M1 "Apresentar-se"/.test(rel.md) && /#### M1\.1 "Cumprimentar e se despedir" \(A1-1\)/.test(rel.md));
 }
 
+console.log('== forma ensinada inteira em outro lugar, mas com as partes vistas (decisão 358)');
+{
+  const mapaReal = M.carregarMapa(), exc = M.carregarExcecoes();
+  const r = V.validarTexto("J'habite à Paris.", { tipo: 'exercicio_licao', posicao: 'fim' }, 'A1-9', mapaReal, exc);
+  check("\"J'habite à Paris.\" no fim da A1-9: j' + habite (cartão habiter) contam como vistos; Paris é nome", r.nao_vistas.length === 0 && r.nomes_proprios.includes('Paris'), r);
+  const r2 = V.validarTexto("J'habite à Lyon.", { tipo: 'exercicio_licao', posicao: 'fim' }, 'A1-2', mapaReal, exc);
+  check("antes do cartão habiter (A1-2), j'habite continua não visto", r2.nao_vistas.includes("j'habite"), r2);
+}
+
 summary('curriculo palavras vistas');

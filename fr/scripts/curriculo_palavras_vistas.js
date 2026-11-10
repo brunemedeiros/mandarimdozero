@@ -234,7 +234,13 @@ function vistasComMemo(mapa, excecoes, unidadeId, ctx, dados){
 // `incerta` (ex.: "devant" antes do cartão não vira "forma de devoir").
 function classificar(forma, vistas, conhecidas){
   if (vistas.formas.has(forma)) return { tipo: 'vista' };
-  if (conhecidas && conhecidas.has(forma)) return { tipo: 'nao_vista', partes: [forma] };
+  if (conhecidas && conhecidas.has(forma)){
+    // Forma ensinada inteira em outro lugar (ex.: "j'habite" no exemplo de uma nota), mas com todas as partes já vistas aqui
+    // ("j'" + "habite", do cartão habiter): está vista (decisão 358).
+    const partes = partesDoToken(forma);
+    if (partes.length > 1 && partes.every(p => vistas.formas.has(p))) return { tipo: 'vista' };
+    return { tipo: 'nao_vista', partes: [forma] };
+  }
   const partes = partesDoToken(forma);
   if (partes.length > 1){
     const res = partes.map(p => classificar(p, vistas, conhecidas));
