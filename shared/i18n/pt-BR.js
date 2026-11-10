@@ -880,6 +880,7 @@ window.I18N_CATALOG['pt-BR'] = {
   'games.type.label': 'Escreva a forma que completa a frase',
   'games.type.placeholder': 'Sua resposta',
   'games.type.check': 'Corrigir',
+  'games.type.intro': 'Agora sem opções: escreva a resposta.',
   'games.almost': 'Quase!',
   'games.youAnswered': 'Você respondeu:',
   'games.dueTitle': 'Revisar erros ({n})',

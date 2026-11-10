@@ -75,6 +75,7 @@ async function bootPage(browser, lang, port, theme, viewport){
   await page.addInitScript(() => { try { sessionStorage.setItem('guest_mode', '1'); } catch (e) {} });
   await page.goto(`http://127.0.0.1:${port}/${lang}/index.html`);
   await page.waitForFunction(() => typeof STATE !== 'undefined' && STATE.cards && STATE.cards.length > 0 && CURRENT_USER === false, null, { timeout: 15000 });
+  await page.evaluate(() => { try { CONJ_GAMES_TYPED_HALF = false; } catch (e) {} }); // etapa 6 (2026-11-10): este teste cobre só a escolha; a metade escrita é testada em tests/jogos-progresso
   return { page, errors, ctx };
 }
 

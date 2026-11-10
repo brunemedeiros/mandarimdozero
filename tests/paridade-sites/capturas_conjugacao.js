@@ -43,6 +43,7 @@ const STUB = `(function(){
     }, theme);
     await page.goto(`http://127.0.0.1:${port}/fr/index.html`);
     await page.waitForFunction(() => typeof STATE !== 'undefined' && CURRENT_USER === false, null, { timeout: 20000 });
+    await page.evaluate(() => { try { CONJ_GAMES_TYPED_HALF = false; } catch (e) {} }); // etapa 6 (2026-11-10): este teste cobre só a escolha; a metade escrita é testada em tests/jogos-progresso
     await page.evaluate((th) => document.documentElement.setAttribute('data-theme', th), theme);
     await page.addStyleTag({ content: '*{animation:none !important;transition:none !important;caret-color:transparent !important}' });
     await page.evaluate(() => { window.speechSynthesis && (window.speechSynthesis.speak = () => {}); HTMLMediaElement.prototype.play = function(){ return Promise.resolve(); }; });

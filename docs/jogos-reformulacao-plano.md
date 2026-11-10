@@ -107,10 +107,15 @@ Grátis: 1 por nível. Cada jogo novo: ~20 frases em pt-BR e en, revisor-conteud
    puxa primeiro as frases nunca respondidas, depois as erradas por último e só então as certas (`pickRound`). Chaves
    `games.perRound` e `games.round.label` apagadas (sem uso). Testes: jogos-progresso 114/114; os testes que tocam no
    cartão passam pela tela do jogo (Curta).
-   **Proposta 2026-11-10 (crítica com a skill frontend-design, aguarda a autora)**: na tela do jogo, mapa das frases
+   **Aprovada pela autora em 2026-11-10 (crítica com a skill frontend-design)**: na tela do jogo, mapa das frases
    (`.cg-intro-map`, um pedaço por frase: verde certa, vermelho errada, vazio não vista) com "N de M frases vistas, X%
    certas" e a regra "Para concluir: passar por todas e acertar pelo menos 70%"; botões com a ação ("Jogar 10 frases",
    "Jogar as N frases"); saiu o título "Escolha a partida". Mesmas cores e fonte do site. Commit próprio, fácil de desfazer.
-6. Etapa "Escreva a resposta" dentro da partida.
+6. **Feita (2026-11-10, aguarda a autora ver)**: opção (a) da autora, igual ao artifact. Em toda partida a 1ª metade das
+   frases é de escolha e a 2ª é escrevendo (`S.stages`, shared/conj-games.js; Curta 5 + 5, Completa metade de cada,
+   arredondando a escolha para cima). Na 1ª frase escrita, o aviso "Agora sem opções: escreva a resposta."
+   (`games.type.intro`). Escrever usa a mesma tela do "Revisar erros" (campo, teclado de acentos, Corrigir/Enter,
+   "quase" = acerto). Interruptor `CONJ_GAMES_TYPED_HALF` (ligado no site): os testes que só cobrem a escolha
+   (conjugacao, jogos-padrao-trilha, paridade) o desligam; a metade escrita é testada em jogos-progresso (124/124).
 7. Etapas "Corrija o erro" e "Traduza a frase inteira" (conteúdo novo, revisão e aprovação).
 8. Jogos de revisão do nível e respostas alternativas.

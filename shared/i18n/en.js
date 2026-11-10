@@ -861,6 +861,7 @@ window.I18N_CATALOG['en'] = {
   'games.type.label': 'Type the form that completes the sentence', // ALTA
   'games.type.placeholder': 'Your answer', // ALTA
   'games.type.check': 'Check', // ALTA
+  'games.type.intro': 'No options now: type the answer.', // ALTA
   'games.almost': 'Almost!', // ALTA
   'games.youAnswered': 'You answered:', // ALTA
   'games.dueTitle': 'Review mistakes ({n})', // ALTA

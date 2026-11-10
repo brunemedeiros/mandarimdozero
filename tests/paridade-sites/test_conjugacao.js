@@ -56,6 +56,7 @@ async function fingerprint(browser, root){
   });
   await page.goto(`http://127.0.0.1:${port}/fr/index.html`);
   await page.waitForFunction(() => typeof STATE !== 'undefined' && CURRENT_USER === false, null, { timeout: 20000 });
+  await page.evaluate(() => { try { CONJ_GAMES_TYPED_HALF = false; } catch (e) {} }); // etapa 6 (2026-11-10): este teste cobre só a escolha; a metade escrita é testada em tests/jogos-progresso
   await page.evaluate(() => { window.speechSynthesis && (window.speechSynthesis.speak = () => {}); HTMLMediaElement.prototype.play = function(){ return Promise.resolve(); }; });
   const out = {};
   const grab = async (name, fn, arg) => { out[name] = await page.evaluate(fn, arg); };

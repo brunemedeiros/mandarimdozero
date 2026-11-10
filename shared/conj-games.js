@@ -14,6 +14,9 @@
 // Concluído (proposta da autora, ajustes em confirmação): todas as frases do jogo já respondidas, somando as partidas,
 // e pelo menos CONJ_GAME_DONE_PCT% delas com a última resposta certa.
 const CONJ_GAME_DONE_PCT = 70;
+// Etapa 6 (decisão da autora, 2026-11-10, como o artifact de jogos): em toda partida a 1ª metade das frases é de ESCOLHA e a
+// 2ª metade é ESCREVENDO a forma (Curta: 5 + 5; Completa: metade de cada). let: os testes que só cobrem a escolha desligam.
+let CONJ_GAMES_TYPED_HALF = true;
 function conjGameRecord(gameId, create){
   if (typeof STATE === 'undefined' || !STATE || !STATE.conjGames || typeof STATE.conjGames !== 'object') return null;
   const r = STATE.conjGames[gameId];
@@ -71,7 +74,7 @@ function createConjGames({ games, soon = [], speak, ids, isLocked, onLocked, lan
 
   // mode: 'choice' (partida normal, duas opções) ou 'type' ("Revisar erros": escrever a forma). gameAt[i]: jogo da frase i
   // quando a revisão mistura jogos (senão vale S.game).
-  const S = { game: null, order: [], gameAt: [], mode: 'choice', idx: 0, hits: 0, log: [], answered: false, shownAt: 0, dirty: false };
+  const S = { game: null, order: [], gameAt: [], stages: [], mode: 'choice', idx: 0, hits: 0, log: [], answered: false, shownAt: 0, dirty: false };
 
   // Selo (regra 7 da dona, 2026-10-22): recurso Premium com o bloqueio DESLIGADO mostra só "⭐ Premium" e abre para
   // todos; com o bloqueio LIGADO, quem não tem a permissão vê "⭐ Premium" + cadeado e, ao tocar, o aviso Premium.
@@ -215,7 +218,9 @@ function createConjGames({ games, soon = [], speak, ids, isLocked, onLocked, lan
     if (isLocked && isLocked(g)){ if (onLocked) onLocked(g); return; }
     const pool = onlyIds ? g.items.filter(it => onlyIds.includes(it.id)) : g.items;
     const order = onlyIds ? shuffle(pool) : (roundSize() === 'full' ? shuffle(pool) : pickRound(g));
-    Object.assign(S, { game: g, order, gameAt: [], mode: 'choice', idx: 0, hits: 0, log: [], answered: false });
+    const half = CONJ_GAMES_TYPED_HALF && !onlyIds ? Math.ceil(order.length / 2) : order.length;
+    const stages = order.map((_, i) => (i < half ? 'choice' : 'type'));
+    Object.assign(S, { game: g, order, gameAt: [], stages, mode: 'choice', idx: 0, hits: 0, log: [], answered: false });
     if (typeof trackEvent === 'function') trackEvent('lesson_start', 'conj_game', { game: g.id });
     show(true);
     renderQuestion();
@@ -229,7 +234,7 @@ function createConjGames({ games, soon = [], speak, ids, isLocked, onLocked, lan
     if (!ok.length) return;
     const mixed = shuffle(ok);
     const one = mixed.every(e => e.g === mixed[0].g) ? mixed[0].g : null;
-    Object.assign(S, { game: one, order: mixed.map(e => e.it), gameAt: mixed.map(e => e.g), mode: 'type', idx: 0, hits: 0, log: [], answered: false });
+    Object.assign(S, { game: one, order: mixed.map(e => e.it), gameAt: mixed.map(e => e.g), stages: mixed.map(() => 'type'), mode: 'type', idx: 0, hits: 0, log: [], answered: false });
     if (typeof trackEvent === 'function') trackEvent('lesson_start', 'conj_game_review', { games: [...new Set(mixed.map(e => e.g.id))].join(','), n: mixed.length });
     show(true);
     renderQuestion();
@@ -269,7 +274,7 @@ function createConjGames({ games, soon = [], speak, ids, isLocked, onLocked, lan
     const g = games.find(x => x.id === gameId);
     if (!g) return;
     if (isLocked && isLocked(g)){ if (onLocked) onLocked(g); return; }
-    Object.assign(S, { game: g, order: [], gameAt: [], mode: 'intro', idx: 0, hits: 0, log: [], answered: false });
+    Object.assign(S, { game: g, order: [], gameAt: [], stages: [], mode: 'intro', idx: 0, hits: 0, log: [], answered: false });
     show(true);
     const bar = grabBar();
     const st = conjGameStatus(g), cur = roundSize(), both = g.items.length > g.perRound;
@@ -335,7 +340,8 @@ function createConjGames({ games, soon = [], speak, ids, isLocked, onLocked, lan
   const setProgress = pct => { if (window.activityBarProgress) window.activityBarProgress(ids.wrap, pct); };
 
   function renderQuestion(){
-    if (S.mode === 'type') return renderTypeQuestion();
+    // etapa da frase: escolha ou escrever (a revisão de erros é toda escrita)
+    if (S.mode === 'type' || S.stages[S.idx] === 'type') return renderTypeQuestion();
     const it = item(), g = gOf();
     S.answered = false;
     const bar = grabBar();
@@ -380,10 +386,11 @@ function createConjGames({ games, soon = [], speak, ids, isLocked, onLocked, lan
     const keys = typeof frAccentPickerHTML === 'function' ? frAccentPickerHTML(expected) : '';
     $(ids.content).innerHTML = `
       <div class="cg-head">
-        <span class="cg-eyebrow">${esc(tt('games.review.eyebrow'))}${g.level ? ` · ${esc(g.level)}` : ''}</span>
+        <span class="cg-eyebrow">${esc(tt(S.mode === 'type' ? 'games.review.eyebrow' : 'games.tabGames'))}${g.level ? ` · ${esc(g.level)}` : ''}</span>
         <h2 class="cg-title">${rich(L(g.title))}</h2>
       </div>
       ${progressHTML()}
+      ${S.mode !== 'type' && S.stages.indexOf('type') === S.idx ? `<p class="cg-stage-intro">${esc(tt('games.type.intro'))}</p>` : ''}
       <div class="cg-stage">
         <div class="cg-panel">
           <span class="cg-verb" lang="${lang}">(${it.verb ? esc(it.verb) + ' · ' : ''}${esc(optsHint(g))})</span>

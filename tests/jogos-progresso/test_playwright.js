@@ -56,6 +56,8 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
     // A comemoração da sequência (1º estudo do dia) abre 500 ms depois do fim da partida e cai em cima dos cliques; ela tem
     // teste próprio (jogos-padrao-trilha), então aqui fica escondida.
     await page.addStyleTag({ content: '#streak-modal-overlay{ display:none !important; }' });
+    // Os blocos das etapas 1 a 5 jogam só escolhendo; a metade escrita (etapa 6) tem bloco próprio no fim.
+    await page.evaluate(() => { CONJ_GAMES_TYPED_HALF = false; });
     check(L + ' STATE.conjGames começa vazio', await page.evaluate(() => JSON.stringify(STATE.conjGames) === '{}'));
     check(L + ' status sem progresso = 0, não concluído', await page.evaluate(() => { const s = conjGameStatus(CONJ_GAMES[0]); return s.seen === 0 && s.right === 0 && !s.done && s.total === CONJ_GAMES[0].items.length; }));
 
@@ -276,6 +278,31 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
     check(L + ' tecla 1 escolhe Curta (10) e lembra', await page.evaluate(() => CONJ_GAMES_UI.state.order.length === 10 && localStorage.getItem('conj-games-round') === 'short'));
     await hideStreak(); await page.click('#conj-game-wrap .activity-exit-btn');
     check(L + ' X na tela do jogo volta para a lista', await page.evaluate(() => { CONJ_GAMES_UI.openIntro('tu-vous'); document.querySelector('#conj-game-wrap .activity-exit-btn').click(); return document.getElementById('conj-select-wrap').style.display === 'block' && !!document.querySelector('.cg-game-card'); }));
+
+    // Etapa 6 (2026-11-10, como o artifact): 1ª metade escolhendo, 2ª metade escrevendo; aviso na 1ª frase escrita.
+    await page.evaluate(() => { CONJ_GAMES_TYPED_HALF = true; STATE.conjGames = {}; try { localStorage.setItem('conj-games-round', 'short'); } catch (e) {} CONJ_GAMES_UI.renderList(); });
+    await page.click('.cg-play[data-game="tu-vous"]'); await page.waitForSelector('.cg-intro');
+    await page.click('[data-cg-start="short"]'); await page.waitForSelector('.cg-choice');
+    const stg = await page.evaluate(() => CONJ_GAMES_UI.state.stages.join());
+    check(L + ' partida Curta: 5 escolhendo + 5 escrevendo', stg === 'choice,choice,choice,choice,choice,type,type,type,type,type', stg);
+    const seen6 = [];
+    for (let i = 0; i < 10; i++){
+      const r = await page.evaluate(i => {
+        const S = CONJ_GAMES_UI.state, it = S.order[S.idx];
+        const info = { choice: document.querySelectorAll('.cg-choice').length, input: !!document.getElementById('cg-input'), intro: (document.querySelector('.cg-stage-intro') || {}).textContent || '', eyebrow: document.querySelector('.cg-eyebrow').textContent };
+        if (info.choice) document.querySelector('.cg-choice[data-k="' + it.ans + '"]').click();
+        else { const inp = document.getElementById('cg-input'); inp.value = i === 6 ? 'nope' : it[it.ans]; inp.dispatchEvent(new Event('input')); document.getElementById('cg-check').click(); }
+        return info;
+      }, i);
+      seen6.push(r);
+      await page.waitForTimeout(380); await page.click('#cg-next');
+    }
+    await page.waitForSelector('.cg-result');
+    check(L + ' frases 1-5 com opções, 6-10 com campo de escrever', seen6.slice(0, 5).every(x => x.choice === 2 && !x.input) && seen6.slice(5).every(x => x.choice === 0 && x.input), seen6.map(x => x.choice + '/' + x.input));
+    check(L + ' aviso "Agora sem opções" só na 1ª frase escrita; cabeçalho continua "Jogos"', seen6[5].intro.length > 10 && seen6.filter(x => x.intro).length === 1 && /^(Jogos|Games)/.test(seen6[7].eyebrow), seen6.map(x => x.intro));
+    const r6 = await page.evaluate(() => ({ title: document.querySelector('.cg-result .cg-title').textContent, hits: CONJ_GAMES_UI.state.hits, given: [...document.querySelectorAll('.cg-review-given')].map(x => x.textContent.trim()), again: !!document.getElementById('cg-again'), rounds: STATE.conjGames['tu-vous'].rounds }));
+    check(L + ' fim da partida mista: 9/10, o erro escrito aparece com o que ela escreveu, conta como partida', r6.hits === 9 && r6.given.length === 1 && /nope/.test(r6.given[0]) && r6.again && r6.rounds === 1 && r6.title === (pt ? 'Fim da partida' : 'End of round'), r6);
+    await page.click('#cg-to-list');
 
     // Recomeçar o curso lista os Jogos no que volta para o zero.
     const restartKey = await page.evaluate(() => t('restart.zero.games'));

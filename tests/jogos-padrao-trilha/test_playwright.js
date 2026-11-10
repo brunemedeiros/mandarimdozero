@@ -55,6 +55,7 @@ const T = { 'pt-BR': { cont: 'Continuar →', see: 'Ver resultado →', revealed
     await page.addInitScript(([th, lg]) => { try { sessionStorage.setItem('guest_mode', '1'); localStorage.setItem('theme', th); localStorage.setItem('ui-language', lg); } catch (e) {} try { document.documentElement.dataset.theme = th; } catch (e) {} }, [theme, lang]);
     await page.goto(`http://127.0.0.1:${port}/fr/index.html`);
     await page.waitForFunction(() => typeof STATE !== 'undefined' && STATE.cards && STATE.cards.length > 0 && CURRENT_USER === false, null, { timeout: 15000 });
+    await page.evaluate(() => { try { CONJ_GAMES_TYPED_HALF = false; } catch (e) {} }); // etapa 6 (2026-11-10): este teste cobre só a escolha; a metade escrita é testada em tests/jogos-progresso
     await page.evaluate(() => { window.__events = []; window.__sounds = []; const ps = playFeedbackSound; playFeedbackSound = (v) => { window.__sounds.push(v); return ps(v); }; const o = trackEvent; trackEvent = (a, b, c) => { window.__events.push([a, b, c]); return o(a, b, c); }; switchTab('conjugaison'); });
     await page.click('#conj-mode-games');
     await page.click('.cg-play[data-game="etre-avoir"]'); await page.evaluate(() => { const b = document.querySelector('[data-cg-start="short"]') || document.querySelector('[data-cg-start]'); if (b) b.click(); });
