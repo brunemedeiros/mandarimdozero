@@ -3637,6 +3637,12 @@ window.I18N_CATALOG['en'] = {
   'panel.notion.r.noName': 'Row without a student.', // ALTA
   'panel.notion.connectedToast': 'Notion connected.', // ALTA
   'panel.notion.cancelledToast': 'Notion connection cancelled.', // ALTA
+  'panel.gcal.more': 'More Google Calendar options', // ALTA
+  'panel.gcal.on': 'Connected', // ALTA
+  'panel.gcal.toReview': '{n} to review', // ALTA
+  'panel.gcal.ind.linked': 'linked lessons', // ALTA
+  'panel.gcal.ind.review': 'to review', // ALTA
+  'panel.gcal.ind.waiting': 'waiting for an account', // ALTA
   'panel.gcal.title': 'Google Calendar', // ALTA
   'panel.gcal.oneWay': 'One-way sync: Google Calendar → site. The site only reads your calendar; nothing is written to your Google account.', // ALTA
   'panel.gcal.howItWorks': 'Connect your Google account and choose the calendars with your lessons. Every 15 minutes the site reads the events and creates or updates each lesson on the right day and time, recognizing the student by the name in the title or the guest\'s email. If you move a lesson in Google, the site follows.', // ALTA

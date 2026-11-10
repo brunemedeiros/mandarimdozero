@@ -328,6 +328,7 @@ const PANEL_STUB = (who) => {
       L('aulas: Todos não deixa ninguém marcado no formulário', await ev(() => !document.querySelector('[data-classlog-student-checkbox]:checked, [data-classlog-classroom-checkbox]:checked') && document.getElementById('admin-create-class-log-btn').disabled));
       await page.check('[data-classlog-classroom-checkbox][value="501"]');
       L('aulas: em Todos, marcar a turma no formulário não esconde as outras aulas', await ev(() => document.querySelectorAll('#admin-classlogs-list-box [data-edit-class-log]').length === 2));
+      if (SHOTS && width === 1200) await page.screenshot({ path: `${SHOTS}/${lang}-${theme}-${width}-aba-registrar-inteira.png`, fullPage: true });
       if (SHOTS) await page.addStyleTag({ content: '.toast, #toast-container, .toast-stack, header, .topbar, .app-header{ visibility:hidden !important; }' });
       if (SHOTS) await page.locator('#admin-classlogs-register').screenshot({ path: `${SHOTS}/${lang}-${theme}-${width}-aulas-caixas.png` });
       L('aulas: Alunos, Turmas, Nova aula e Aulas registradas em caixas do painel', await ev(() => document.getElementById('admin-classlogs-register').classList.contains('painel')
@@ -390,12 +391,13 @@ const PANEL_STUB = (who) => {
       L('calendário: professora recebe o link dela', await ev(() => /^https:\/\/agenda\.profbrune\.com\.br\/[ab]{16}$/.test(document.querySelector('#admin-classlogs-calendar-wrap [data-calendar-feed-url]').value)));
       await page.waitForSelector('#admin-gcal-box .gcal-review-item');
       L('google: bloco diz que é sincronização em um sentido', await ev(() => /Google Agenda → site/.test(document.querySelector('#admin-gcal-box .gcal-oneway').textContent)));
-      L('google: aberto sozinho porque há evento para revisar, com contador', await ev(() => document.getElementById('admin-gcal-box').open && document.querySelector('#admin-gcal-box [data-gcal-badge]').textContent === '12'));
+      L('google: aberto sozinho porque há evento para revisar, com contador', await ev(() => document.getElementById('admin-gcal-box').open && document.querySelector('#admin-gcal-box [data-gcal-badge]').dataset.n === '12' && document.querySelector('#admin-gcal-box [data-gcal-badge]').textContent === '12 para revisar'));
       L('google (119): 10 por vez, com "mostrar mais" e as abas Para revisar e Pulados', await ev(() => document.querySelectorAll('#admin-gcal-box .gcal-review-item').length === 10 && !!document.querySelector('#admin-gcal-box [data-gcal-more]') && document.querySelector('[data-gcal-tab="open"]').classList.contains('is-active') && /1/.test(document.querySelector('[data-gcal-tab="skipped"]').textContent)));
       L('google (119): mais recente primeiro', await ev(() => document.querySelector('#admin-gcal-box .gcal-review-item').dataset.gcalEvent === '77'));
       L('google: conectada mostra "Conectar de novo" (sem precisar desconectar)', await ev(() => { const b = document.querySelector('#admin-gcal-box .gcal-actions [data-gcal-connect]'); return !!b && b.textContent.trim() === t('panel.gcal.reconnect'); }));
       L('google: duas agendas com o modo de cada uma', await ev(() => [...document.querySelectorAll('#admin-gcal-box [data-gcal-mode]')].map(x => x.value).join(',') === 'matched,all'));
       L('google: alunos sem conta listados', await ev(() => document.querySelector('#admin-gcal-box .gcal-waiting').textContent.includes('Olivia')));
+      if (SHOTS) await page.locator('#admin-gcal-box .gcal-review-item').first().screenshot({ path: `${SHOTS}/${lang}-${theme}-${width}-gcal-item.png` });
       await ev(() => { const sel = document.querySelector('#admin-gcal-box [data-gcal-target]'); sel.value = [...sel.options].find(o => o.value.startsWith('student|')).value; });
       if (SHOTS) { await page.waitForTimeout(3500); await ev(() => { document.getElementById('admin-gcal-box').scrollIntoView({ block: 'start' }); window.scrollBy(0, -110); }); }
       await shot('aulas-google-agenda');
@@ -501,6 +503,8 @@ const PANEL_STUB = (who) => {
       await page.waitForSelector('[data-cal-day-panel]');
       L('calendário: clicar no dia mostra as aulas do dia e "Agendar aula neste dia"', await ev(() => document.querySelectorAll('[data-cal-day-panel] [data-cal-log]').length >= 1 && !!document.querySelector('[data-cal-schedule]')));
       await shot('aulas-calendario');
+      L('calendário: Alunos, Turmas, Nova aula e Aulas registradas ficam escondidos na visão Calendário', await ev(() => { const r = document.getElementById('admin-classlogs-register'); return r.hidden && getComputedStyle(r).display === 'none'; }));
+      if (SHOTS && width === 1200) await page.screenshot({ path: `${SHOTS}/${lang}-${theme}-${width}-aba-calendario-inteira.png`, fullPage: true });
       await ev(() => document.querySelector('[data-cal-schedule]').click());
       L('calendário: "Agendar neste dia" volta ao Registrar com a data preenchida', await ev((d) => !document.getElementById('admin-classlogs-register').hidden && document.getElementById('admin-class-log-date').value === d, startDay));
       L('aulas: sem rolagem horizontal', await ev(() => document.documentElement.scrollWidth <= window.innerWidth + 1), await ev(() => [document.documentElement.scrollWidth, window.innerWidth]));
