@@ -59,7 +59,12 @@ const PANEL_STUB = (who) => {
     if (name === 'notion_review_items') return { data: { data: (window.__notionItems || [
       { id: 501, state: 'approval', name: 'Ana 🇧🇷', target: 'Ana Souza', class_date: '2026-10-21', topic: 'Passé composé', homework: 'Exercícios', attendance: 'Aula dada✅' },
       { id: 502, state: 'approval', name: 'Ana 🇧🇷', target: 'Ana Souza', class_date: '2026-10-20', topic: 'Imparfait' },
-      { id: 503, state: 'review', reason: 'nome não reconhecido', name: 'Fred 🇧🇷', class_date: '2026-10-22', topic: 'Futur' }]) }, error: null };
+      { id: 503, state: 'review', reason: 'nome não reconhecido', name: 'Fred 🇧🇷', class_date: '2026-10-22', topic: 'Futur' },
+      { id: 504, state: 'review', reason: 'sem aluno', name: null, class_date: '2026-10-16', topic: 'Pitch - Maxi', attendance: 'Pitch de vendas / contato com lead' }]) }, error: null };
+    if (name === 'notion_former_students') return { data: { data: [{ student_id: 'EX1', language_app_key: window.__appKey, name: 'Carmen da Silva' }] }, error: null };
+    if (name === 'notion_link_former'){ window.__notionFormer = args; return { data: { ok: true, n: 3 }, error: null }; }
+    if (name === 'notion_assign_page'){ window.__notionAssign = args; return { data: { ok: true, state: 'linked' }, error: null }; }
+    if (name === 'notion_discard'){ window.__notionDiscard = args; return { data: { ok: true, n: 1 }, error: null }; }
     if (name === 'notion_approve'){ window.__notionApprove = args; window.__notionItems = []; return { data: { ok: true, n: 1 }, error: null }; }
     if (name === 'notion_link_name'){ window.__notionLink = args; return { data: { ok: true, n: 1 }, error: null }; }
     if (name === 'notion_save_source'){ window.__notionSave = args; return { data: { ok: true }, error: null }; }
@@ -277,24 +282,9 @@ const PANEL_STUB = (who) => {
           { id: 9002, teacher_id: 'P', student_id: 'S', classroom_id: null, language_app_key: window.__appKey, class_date: '2026-09-26', topic: null, homework: null, notes: '[Notion] fofoca', attendance_label_id: 61, skills: [] }]; });
       await ev(() => switchTeacherPanelSection('classlogs'));
       await page.waitForSelector('#admin-create-class-log-form [data-class-log-extras="new"]');
-      // Revisar do Notion: editar e mostrar ao aluno / deixar só para mim
-      await ev(() => document.querySelector('[data-classlog-view="check"]').click());   // 2026-11-10: revisão do Notion fica em Para conferir
-      await page.waitForSelector('#admin-notion-review [data-notion-review="9001"]');
-      L('Notion: bloco de revisão com as 2 aulas marcadas', await ev(() => document.querySelectorAll('#admin-notion-review [data-notion-review]').length === 2 && document.querySelector('#admin-notion-review summary').textContent.includes('2')));
-      L('Notion: tópico e "para a próxima aula" em caixas separadas', await ev(() => [...document.querySelectorAll('[data-notion-review="9001"] [data-notion-field]')].map(x => x.dataset.notionField + ':' + x.value).join('|') === 'topic:Conversa sobre eleições e voltar com o ex|homework:ler o texto que ela esqueceu'));
-      await ev(() => { document.querySelector('#admin-notion-review details').open = true; });
-      await page.fill('[data-notion-review="9001"] [data-notion-field="topic"]', 'Conversa sobre eleições');
-      await page.fill('[data-notion-review="9001"] [data-notion-field="homework"]', 'Ler o texto');
-      await shot('aulas-notion-revisao');
-      await page.click('[data-notion-show="9001"]');
-      await page.waitForFunction(() => window.__DB.teacher_class_logs.find(l => l.id === 9001).topic === 'Conversa sobre eleições');
-      L('Notion: mostrar ao aluno grava só o texto editado e tira a marca das Anotações', await ev(() => { const l = window.__DB.teacher_class_logs.find(x => x.id === 9001); return l.homework === 'Ler o texto' && l.notes === 'Conversa sobre eleições e voltar com o ex\nPara a próxima aula: ler o texto que ela esqueceu'; }), await ev(() => window.__DB.teacher_class_logs.find(x => x.id === 9001)));
-      await page.waitForFunction(() => document.querySelectorAll('#admin-notion-review [data-notion-review]').length === 1);
-      await page.click('[data-notion-keep="9002"]');
-      await page.waitForFunction(() => window.__DB.teacher_class_logs.find(l => l.id === 9002).notes === 'fofoca');
-      L('Notion: deixar só para mim não mostra nada ao aluno', await ev(() => { const l = window.__DB.teacher_class_logs.find(x => x.id === 9002); return l.topic === null && l.homework === null; }));
-      await page.waitForFunction(() => !document.querySelector('#admin-notion-review details'));
-      L('Notion: bloco some quando acaba a revisão', true);
+      // 2026-11-10: o bloco antigo "Revisar do Notion" (importação única de 15/10) saiu; o Conectar Notion faz esse trabalho.
+      await ev(() => document.querySelector('[data-classlog-view="check"]').click());
+      L('Revisar do Notion antigo não aparece mais (nem com aula marcada [Notion])', await ev(() => !document.getElementById('admin-notion-review') && !document.querySelector('[data-notion-review]') && !!document.querySelector('#admin-classlogs-check #admin-notion-box')));
       await ev(() => document.querySelector('[data-classlog-view="register"]').click());
       await ev(() => { window.__DB.teacher_class_logs = []; });
       L('aulas: Presença com Sem registro, Presente e Faltou', await ev(() => [...document.querySelectorAll('[data-class-log-extras="new"] .att-choice')].map(l => l.textContent.trim()).join('|') === `${t('panel.classLog.attendanceNone')}|Presente|Faltou`));
@@ -384,7 +374,7 @@ const PANEL_STUB = (who) => {
       await ev(() => document.querySelector('[data-classlog-view="calendar"]').click());
       await page.waitForSelector('#admin-classlogs-calendar .cal');
       L('calendário: Registrar some e o mês aparece', await ev(() => document.getElementById('admin-classlogs-register').hidden && !document.getElementById('admin-classlogs-calendar-wrap').hidden));
-      L('calendário: link de agenda da professora acima do mês', await ev(() => !!document.querySelector('#admin-classlogs-calendar-wrap > [data-calendar-feed]')));
+      L('calendário: link de agenda da professora acima do mês', await ev(() => !!document.querySelector('#admin-classlogs-calendar-wrap > .painel > [data-calendar-feed]')));
       await ev(() => { document.querySelector('#admin-classlogs-calendar-wrap [data-calendar-feed]').open = true; });
       await page.waitForSelector('#admin-classlogs-calendar-wrap [data-calendar-feed-url]');
       L('calendário: professora recebe o link dela', await ev(() => /^https:\/\/agenda\.profbrune\.com\.br\/[ab]{16}$/.test(document.querySelector('#admin-classlogs-calendar-wrap [data-calendar-feed-url]').value)));
@@ -469,6 +459,56 @@ const PANEL_STUB = (who) => {
           return hidden && shown;
         } finally { window.fetchClassLogs = orig; ADMIN_CLASS_LOGS_STATE.showFuture = origShow; }
       }));
+      if (SHOTS){
+        await ev(() => { const d = (n) => new Date(Date.now() - n * 864e5 - new Date().getTimezoneOffset() * 6e4).toISOString().slice(0, 10);
+          window.__savedList = ADMIN_CLASS_LOGS_STATE._list;
+          ADMIN_CLASS_LOGS_STATE._list = { logs: Array.from({ length: 26 }, (_, i) => ({ id: 8100 + i, class_date: d(i * 2 + 1), created_at: new Date().toISOString(), topic: ['Passé composé', 'Imparfait', 'Subjonctif', 'Conversa livre'][i % 4], homework: i % 3 ? null : 'Exercícios 3 e 4', __studentUsername: ['ana', 'bia'][i % 2], attendance_label_id: 61 })), showUsername: true, people: 2 };
+          ADMIN_CLASS_LOGS_STATE.listShown = 20; document.querySelector('[data-classlog-view="register"]').click(); repaintClassLogsList();
+          document.querySelector('[data-class-log-search]').closest('details').scrollIntoView({ block: 'start' }); window.scrollBy(0, -80); });
+        await page.waitForTimeout(600);
+        await shot('aulas-registradas-meses');
+        await ev(() => { document.querySelector('[data-classlog-view="calendar"]').click(); const f = document.querySelector('#admin-classlogs-calendar-wrap [data-calendar-feed]'); f.open = true; f.scrollIntoView({ block: 'start' }); window.scrollBy(0, -80); });
+        await page.waitForTimeout(1200);
+        await shot('link-agenda-painel');
+        await ev(() => { ADMIN_CLASS_LOGS_STATE._list = window.__savedList; repaintClassLogsList(); document.querySelector('[data-classlog-view="check"]').click(); });
+      }
+      // Proposta 4 (2026-11-10): busca, um bloco por mês e "mostrar mais" de 20 em 20 (testa direto na lista da aba, com 45 aulas)
+      L('aulas registradas: 20 por vez, agrupadas por mês, busca e mostrar mais', await ev(async () => {
+        const origList = ADMIN_CLASS_LOGS_STATE._list, origShow = ADMIN_CLASS_LOGS_STATE.showFuture;
+        const d = (n) => new Date(Date.now() - n * 864e5 - new Date().getTimezoneOffset() * 6e4).toISOString().slice(0, 10);
+        const logs = Array.from({ length: 45 }, (_, i) => ({ id: 8000 + i, class_date: d(i * 2 + 1), created_at: new Date().toISOString(), topic: i === 7 ? 'Subjonctif présent' : 'Revisão ' + i, __studentUsername: 'ana' }));
+        try {
+          ADMIN_CLASS_LOGS_STATE._list = { logs, showUsername: true, people: 1 }; ADMIN_CLASS_LOGS_STATE.showFuture = false; ADMIN_CLASS_LOGS_STATE.listQuery = ''; ADMIN_CLASS_LOGS_STATE.listShown = 20;
+          repaintClassLogsList();
+          const box = document.getElementById('admin-classlogs-list-box');
+          const first = box.querySelectorAll('[data-edit-class-log]').length === 20 && box.querySelectorAll('.aulas-mes').length >= 1 && /faltam 25/.test(box.querySelector('[data-class-log-more]').textContent)
+            && /\(45\)/.test(document.querySelector('[data-classlog-count]').textContent);
+          box.querySelector('[data-class-log-more]').click();
+          const more = box.querySelectorAll('[data-edit-class-log]').length === 40;
+          const input = document.querySelector('[data-class-log-search]');
+          input.value = 'subjonctif'; input.dispatchEvent(new Event('input', { bubbles: true }));
+          await new Promise(r => setTimeout(r, 350));
+          const found = box.querySelectorAll('[data-edit-class-log]').length === 1 && box.querySelector('[data-edit-class-log="8007"]') && !box.querySelector('[data-class-log-more]');
+          input.value = 'nada assim'; input.dispatchEvent(new Event('input', { bubbles: true }));
+          await new Promise(r => setTimeout(r, 350));
+          const none = !box.querySelector('[data-edit-class-log]') && box.textContent.includes(t('admin.classLogs.searchEmpty'));
+          input.value = ''; input.dispatchEvent(new Event('input', { bubbles: true }));
+          await new Promise(r => setTimeout(r, 350));
+          return first && more && !!found && none;
+        } finally { ADMIN_CLASS_LOGS_STATE._list = origList; ADMIN_CLASS_LOGS_STATE.showFuture = origShow; ADMIN_CLASS_LOGS_STATE.listQuery = ''; ADMIN_CLASS_LOGS_STATE.listShown = 20; repaintClassLogsList(); }
+      }));
+      // Proposta 6: link de agenda da professora no Design System; apagar aula usa a janela do painel
+      L('calendário: link de agenda da professora numa caixa do painel', await ev(() => !!document.querySelector('#admin-classlogs-calendar-wrap .painel [data-calendar-feed][data-calendar-feed-painel] .aulas-titulo')));
+      await ev(() => { window.__DB.teacher_class_logs.push({ id: 9901, teacher_id: 'P', student_id: 'S', classroom_id: null, language_app_key: window.__appKey, class_date: '2026-10-01', topic: 'Para apagar', created_at: new Date().toISOString() }); return refreshClassLogsListBox(document.getElementById('admin-classlogs-list-box')); });
+      await ev(() => document.querySelector('[data-classlog-view="register"]').click());
+      await page.waitForSelector('[data-delete-class-log="9901"]');
+      await ev(() => document.querySelector('[data-delete-class-log="9901"]').click());
+      await page.waitForSelector('dialog.p-dialogo--alerta[open]');
+      L('apagar aula: confirmação na janela do painel', await ev(() => document.querySelector('dialog.p-dialogo--alerta[open]').textContent.includes(t('admin.classLogs.deleteTitle'))));
+      await page.locator('dialog.p-dialogo--alerta[open] .p-perigo').click();
+      await page.waitForFunction(() => !window.__DB.teacher_class_logs.some(l => l.id === 9901));
+      L('apagar aula: confirmar apaga', true);
+      await ev(() => document.querySelector('[data-classlog-view="check"]').click());
       // 128: caixa do Notion acima de Registrar | Calendário
       await ev(() => { window.notionCall = async (action, extra) => { (window.__notionCalls = window.__notionCalls || []).push([action, extra]);
         if (action === 'databases') return { ok: true, databases: [{ id: '1ed6b6a3e89f80b5a448000bc2dc1582', title: 'Calendário de Aulas' }] };
@@ -476,8 +516,8 @@ const PANEL_STUB = (who) => {
           suggested: { date: 'Dt', student: 'Al', topic: 'title', homework: 'Px' }, field_types: { date: ['date'], student: ['select', 'title'], topic: ['title', 'rich_text'], homework: ['rich_text', 'title'], attendance: ['select'], skills: ['multi_select'], language: ['select'] } };
         return { ok: true, results: [] }; }; });
       await page.waitForSelector('#admin-notion-box [data-notion-item]');
-      L('notion: caixa em Para conferir, aberta porque há o que conferir, com "3 para conferir" e o selo Conectado', await ev(() => { const b = document.getElementById('admin-notion-box'); return b.open && b.querySelector('[data-notion-badge]').textContent === '3 para conferir' && !b.querySelector('[data-notion-on]').hidden && b.parentElement.classList.contains('painel') && !b.classList.contains('painel') && !!b.closest('#admin-classlogs-check'); }));
-      L('Para conferir: contador da aba soma Notion (3) e Google', await ev(() => { const c = document.querySelector('[data-classlog-check-count]'); return !c.hidden && Number(c.textContent) === 3 + GCAL_STATE.review.filter(e => e.match_state !== 'ignored' && !e.skipped_at).length; }), await ev(() => document.querySelector('[data-classlog-check-count]').textContent));
+      L('notion: caixa em Para conferir, aberta porque há o que conferir, com "4 para conferir" e o selo Conectado', await ev(() => { const b = document.getElementById('admin-notion-box'); return b.open && b.querySelector('[data-notion-badge]').textContent === '4 para conferir' && !b.querySelector('[data-notion-on]').hidden && b.parentElement.classList.contains('painel') && !b.classList.contains('painel') && !!b.closest('#admin-classlogs-check'); }));
+      L('Para conferir: contador da aba soma Notion (4) e Google', await ev(() => { const c = document.querySelector('[data-classlog-check-count]'); return !c.hidden && Number(c.textContent) === 4 + GCAL_STATE.review.filter(e => e.match_state !== 'ignored' && !e.skipped_at).length; }), await ev(() => document.querySelector('[data-classlog-check-count]').textContent));
       if (SHOTS) { await ev(() => { document.getElementById('admin-notion-box').scrollIntoView({ block: 'start' }); window.scrollBy(0, -110); }); await shot('notion-aprovar'); }
       L('notion: diz que é só leitura e mostra o banco lido', await ev(() => /Só leitura/.test(document.querySelector('#admin-notion-box .notion-fonte').textContent) && document.querySelector('#admin-notion-box .notion-fonte').textContent.includes('Calendário de Aulas')));
       L('notion: resumo com atualizadas em 7 dias, ligadas, para aprovar e para revisar', await ev(() => [...document.querySelectorAll('#admin-notion-box .notion-resumo .p-indicador-valor')].map(x => x.textContent).join() === '3,9,2,1'));
@@ -489,6 +529,24 @@ const PANEL_STUB = (who) => {
       await ev(() => document.querySelector('[data-notion-item="503"] [data-notion-do="link"]').click());
       await page.waitForFunction(() => !!window.__notionLink);
       L('notion: ligar o nome manda o nome do Notion, o aluno e o idioma', await ev(() => window.__notionLink.p_name === 'Fred 🇧🇷' && window.__notionLink.p_action === 'student' && !!window.__notionLink.p_student && !!window.__notionLink.p_lang));
+      // 132: linha sem nome tem "Ligar esta aula" e "Descartar"; ex-aluna aparece no grupo "só para o histórico"
+      await page.waitForSelector('[data-notion-item="504"] [data-notion-do="assign"]');
+      L('notion (132): linha sem nome com Ligar esta aula e Descartar', await ev(() => { const li = document.querySelector('[data-notion-item="504"]'); return !!li.querySelector('[data-notion-do="assign"]') && !!li.querySelector('[data-notion-do="discard"]') && !li.querySelector('[data-notion-do="link"]'); }));
+      L('notion (132): ex-alunos no seletor, só para o histórico', await ev(() => { const g = [...document.querySelectorAll('[data-notion-item="504"] [data-notion-target] optgroup')].map(x => x.label); return g.includes('Ex-alunos (só para o histórico)') && !!document.querySelector('[data-notion-item="504"] option[value^="former|EX1|"]'); }));
+      if (SHOTS) await page.locator('[data-notion-item="504"]').screenshot({ path: `${SHOTS}/${lang}-${theme}-${width}-notion-sem-nome.png` });
+      await ev(() => { const sel = document.querySelector('[data-notion-item="504"] [data-notion-target]'); sel.value = [...sel.options].find(o => o.value.startsWith('former|')).value; document.querySelector('[data-notion-item="504"] [data-notion-do="assign"]').click(); });
+      await page.waitForFunction(() => !!window.__notionAssign);
+      L('notion (132): ligar esta aula a uma ex-aluna manda a linha, a aluna e "só histórico"', await ev(() => { const a = window.__notionAssign; return a.p_id === 504 && a.p_action === 'student' && a.p_student === 'EX1' && a.p_history === true; }), await ev(() => window.__notionAssign));
+      await ev(() => { window.__notionItems = [{ id: 505, state: 'review', reason: 'nome não reconhecido', name: 'Carmen da Silva M de Castro', class_date: '2026-10-13', topic: 'Les pancartes' }, { id: 506, state: 'review', reason: 'sem aluno', name: null, class_date: '2026-10-16', topic: 'Pitch' }]; return renderNotionBox({ quiet: true }); });
+      await ev(() => document.querySelector('[data-notion-tab="review"]').click());
+      await page.waitForSelector('[data-notion-item="505"] [data-notion-target]');
+      await ev(() => { const sel = document.querySelector('[data-notion-item="505"] [data-notion-target]'); sel.value = [...sel.options].find(o => o.value.startsWith('former|')).value; document.querySelector('[data-notion-item="505"] [data-notion-do="link"]').click(); });
+      await page.waitForFunction(() => !!window.__notionFormer);
+      L('notion (132): ligar o nome a uma ex-aluna usa notion_link_former', await ev(() => window.__notionFormer.p_name === 'Carmen da Silva M de Castro' && window.__notionFormer.p_student === 'EX1' && !!window.__notionFormer.p_lang));
+      await ev(() => document.querySelector('[data-notion-item="506"] [data-notion-do="discard"]').click());
+      await page.waitForFunction(() => !!window.__notionDiscard);
+      L('notion (132): descartar linha para revisar usa notion_discard', await ev(() => JSON.stringify(window.__notionDiscard.p_ids) === '[506]'));
+      await ev(() => { window.__notionItems = null; return renderNotionBox({ quiet: true }); });
       await ev(() => document.querySelector('[data-notion-tab="approval"]').click());
       await ev(() => document.querySelector('[data-notion-approve-all]').click());
       await page.waitForFunction(() => !!window.__notionApprove);
