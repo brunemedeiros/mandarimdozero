@@ -123,3 +123,4 @@ Correção: migration `100_review_bank_agent_other_students` (o estado devolve `
   Estado da rotina depois: 11 alunos gerenciados (todos de francês) e 18 em `other_students`.
 - Atenção Fred: o caderno tem 15 MB (alterado pela última vez em 2026-10-01); a exportação em HTML e o text/plain provavelmente falham. Avisar a dona para arquivá-lo no artifact só depois da primeira leitura bem-sucedida.
 - Regra da dona (2026-11-09): não criar caderno novo nem trocar o `notebook_id` de nenhum aluno sem aprovação explícita (ex.: o caderno do Fred, de 15 MB, foi só uma sugestão).
+- 2026-11-10 (pedido da dona): Carmen (francês) virou ex-aluna e foi ARQUIVADA no Banco (`status = 'arquivado'`; 72 itens e 63 cartões mantidos, conta e vínculo não foram mexidos). A rotina só lê alunos `ativo`, então ela saiu sozinha do estado (10 gerenciados).
