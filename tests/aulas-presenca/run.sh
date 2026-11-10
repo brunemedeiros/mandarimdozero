@@ -58,3 +58,7 @@ psql -h /tmp/pg -p 54329 -U pguser aulas94 -q -At -f "$HERE/test_128.sql" 2>&1 |
 $P aulas94 -f "$MIG/131_notion_discard_sticks.sql" >/dev/null
 $P aulas94 -f "$MIG/131_notion_discard_sticks.sql" >/dev/null
 psql -h /tmp/pg -p 54329 -U pguser aulas94 -q -At -f "$HERE/test_131.sql" 2>&1 | grep -v '^\s*$'
+# 132: ex-aluna no histórico, linha ligada à mão, Banco arquiva ex-aluna.
+$P aulas94 -f "$MIG/132_notion_former_and_manual.sql" >/dev/null
+$P aulas94 -f "$MIG/132_notion_former_and_manual.sql" >/dev/null
+psql -h /tmp/pg -p 54329 -U pguser aulas94 -q -At -f "$HERE/test_132.sql" 2>&1 | grep -v '^\s*$'

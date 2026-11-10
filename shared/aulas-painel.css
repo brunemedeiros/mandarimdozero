@@ -78,3 +78,21 @@
   #admin-classlogs-content .class-log-views { max-width: 100%; overflow-x: auto; }
   #admin-classlogs-content .class-log-views .deck-topbar-btn { padding-left: .55rem; padding-right: .55rem; white-space: nowrap; }
 }
+
+/* Aulas registradas (proposta 4, 2026-11-10): busca, um bloco por mês e "mostrar mais" de 20 em 20. */
+.painel .aulas-box input[data-class-log-search] { margin: 0; }
+.painel .aulas-lista-aulas { display: flex; flex-direction: column; gap: 1rem; }
+.painel .aulas-mes { display: flex; flex-direction: column; gap: .5rem; }
+.painel .aulas-mes-titulo { margin: 0; font-size: .95rem; font-weight: 800; color: var(--p-tinta); }
+.painel .class-log-more { align-self: flex-start; width: auto; margin: 0; }
+
+/* Link de agenda da professora (Aulas > Calendário), caixa do Design System (teacher-class-logs.js, calendarFeedBoxHTML(true)). */
+.painel.feed-painel { margin: 0 0 1rem; }
+.painel .calendar-feed-box .calendar-feed-actions { display: flex; flex-wrap: wrap; gap: .5rem; }
+.painel .calendar-feed-box .calendar-feed-actions a[role=button] { width: auto; margin: 0; text-decoration: none; }
+.painel .calendar-feed-box .calendar-feed-copy { display: flex; gap: .5rem; align-items: center; }
+.painel .calendar-feed-box .calendar-feed-copy input { flex: 1; min-width: 0; margin: 0; font-size: .85rem; }
+.painel .calendar-feed-box .calendar-feed-copy button { width: auto; margin: 0; }
+@media (max-width: 600px) {
+  .painel .calendar-feed-box .calendar-feed-actions a[role=button], .painel .calendar-feed-box .calendar-feed-copy button, .painel .class-log-more { min-height: 44px; }
+}
