@@ -141,8 +141,15 @@ function finishCurrentLesson(u){
   renderUnitCompleteScreen(u, unitXpEarned);
 }
 
+// Etapa D, lote 3 (2026-11-04): o progresso da sessão vai para a barra do topo (shared/activity-focus.js); a linha "N / total" do
+// cartão continua (é onde fica o ⋯ dos pedidos do Banco), sem a barrinha própria (CSS em fr/zh index.html).
+function reviewTopBarProgress(done, total){
+  if (typeof activityBarProgress !== 'function') return;
+  activityBarProgress('review-session-wrap', total ? Math.round(100 * Math.min(done, total) / total) : 0);
+}
 function renderReviewViewInner(){
   syncReviewBackLink();
+  reviewTopBarProgress(STATE.reviewIndex, STATE.reviewQueue.length);
   stopExerciseAudio();
   const el = document.getElementById('review-content');
   syncReviewPrevRow(false);
@@ -361,6 +368,7 @@ function renderSpeedReview(){
     return;
   }
 
+  reviewTopBarProgress(SPEED_STATE.index, SPEED_STATE.queue.length);
   if (SPEED_STATE.index >= SPEED_STATE.queue.length){
     stopSpeedTimer();
     if (!SPEED_STATE.dailyCounted){

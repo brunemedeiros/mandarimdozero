@@ -25,6 +25,13 @@
   status = 200
   force = true
 
+# Volta do login do Notion (Conectar Notion, migration 128): repasse para a Edge Function notion-sync.
+[[redirects]]
+  from = "/notion/callback"
+  to = "https://eigjocalzwamisgqilhg.supabase.co/functions/v1/notion-sync/callback"
+  status = 200
+  force = true
+
 # agenda.profbrune.com.br/<senha> -> Edge Function (status 200 = repasse; quem assina só vê o domínio da agenda).
 [[redirects]]
   from = "/:token"

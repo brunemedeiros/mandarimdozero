@@ -11,11 +11,8 @@ const dir = path.join(root, 'fr/scripts/challenges_import');
 for (const f of fs.readdirSync(dir).filter(f => /^lote-.*\.json$/.test(f) && !/content/.test(f))) {
   for (const c of JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8'))) sources.push({ ...c, _src: f });
 }
-// Ouça e traduza do Módulo 3: a produção ainda tem os 10 desafios antigos (o lote do repositório caiu para 6 sem
-// reimportar). O overlay en segue a produção, então estes ids são conferidos contra o retrato dela.
-for (const c of JSON.parse(fs.readFileSync(path.join(root, 'docs/i18n/challenges-producao-a1m3-lt.json'), 'utf8')).challenges) {
-  sources.push({ ...c, _src: 'docs/i18n/challenges-producao-a1m3-lt.json' });
-}
+// Ouça e traduza do Módulo 3: desde 2026-11-10 (opção A da dona) o lote lote-a1-m3.json tem os 10 desafios da produção, nos
+// mesmos códigos, com explicação; o retrato docs/i18n/challenges-producao-a1m3-lt.json ficou só como registro histórico.
 // 16 Desafios da primeira leva (accent-*-001, expr-a1/a2/b2-*, lt-a1/a2/b1/b2-001): publicados na produção e sem fonte
 // no repositório. Conferidos contra o retrato da produção (2026-10-26).
 for (const c of JSON.parse(fs.readFileSync(path.join(root, 'docs/i18n/challenges-producao-sem-fonte.json'), 'utf8')).challenges) {

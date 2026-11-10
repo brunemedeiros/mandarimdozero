@@ -750,6 +750,7 @@ function startReviewSession(opts){
   STATE.reviewCardState = null;
   STATE.reviewHistory = [];
   STATE.reviewPeek = null;
+  STATE.reviewRequeued = {};
   renderReviewView();
 }
 
@@ -882,9 +883,12 @@ function regradeReviewEntry(idx, newGrade){
     const at = q.lastIndexOf(card);
     if (at >= STATE.reviewIndex) q.splice(at, 1);
     e.requeued = false;
-  } else if (!e.requeued && newGrade === 0 && q.length - STATE.reviewIndex >= 3){
+    if (STATE.reviewRequeued) delete STATE.reviewRequeued[card.id];
+  } else if (!e.requeued && newGrade === 0 && q.length - STATE.reviewIndex >= 3 && !(STATE.reviewRequeued && STATE.reviewRequeued[card.id])){
     q.push(card);
     e.requeued = true;
+    if (!STATE.reviewRequeued) STATE.reviewRequeued = {};
+    STATE.reviewRequeued[card.id] = true;
   }
   if (typeof logBankHomeStudy === 'function'){
     const kind = e.local && e.local.kind;
@@ -988,7 +992,9 @@ function gradeCurrentCard(grade){
     // (fsrsIntervalFromStability nunca agenda em horas) -- este requeue é só
     // reforço extra quando ainda cabe hoje com distância de verdade.
     const remaining = STATE.reviewQueue.length - STATE.reviewIndex - 1;
-    if (remaining >= 3){ STATE.reviewQueue.push(card); histRequeued = true; }
+    // No máximo UM reforço por cartão na sessão (2026-11-06, caso da Rachel): sem teto, quem erra a digitação via o mesmo cartão voltar sem fim.
+    if (!STATE.reviewRequeued) STATE.reviewRequeued = {};
+    if (remaining >= 3 && !STATE.reviewRequeued[card.id]){ STATE.reviewQueue.push(card); STATE.reviewRequeued[card.id] = true; histRequeued = true; }
   }
   if (STATE.reviewSessionClassReview){
     if (!STATE.reviewHistory) STATE.reviewHistory = [];

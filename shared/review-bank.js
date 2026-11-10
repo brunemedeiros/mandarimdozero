@@ -455,10 +455,10 @@ async function rbReloadCur(){ if (RB.cur) await rbLoadStudentData(RB.cur); }
 // "reiniciar progresso" marcado sobem a revisão (cartão novo, FSRS do zero). Ids dos campos vêm do cartão de referência.
 async function rbSyncDeliveredCard(item, s, resetProgress){
   if (!item.teacher_flashcard_id || !s || s.language_app_key === 'mandarim') return { ok: true, skipped: true };
-  const card = rbBuildCard(item, s);
-  if (!card.ok) return { ok: false, error: card.error };
   const { data: row, error: e1 } = await supabaseClient.from('teacher_flashcards').select('id,fields,card_generation_mode,revision').eq('id', item.teacher_flashcard_id).maybeSingle();
   if (e1 || !row) return { ok: false, error: e1 ? e1.message : 'card' };
+  const card = rbBuildCard(item, s, { existingMode: row.card_generation_mode }); // cartão já entregue mantém o tipo (verbo com várias formas só vira Normal em cartão novo)
+  if (!card.ok) return { ok: false, error: card.error };
   const oldIds = (row.fields || []).map(f => f.id);
   const fields = card.fields.map((f, k) => (oldIds.length === card.fields.length ? Object.assign({}, f, { id: oldIds[k] }) : f));
   const modeChanged = row.card_generation_mode !== card.mode;

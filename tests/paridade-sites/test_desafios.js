@@ -621,6 +621,9 @@ async function fingerprintEn(browser, root){
         // DE PROPÓSITO (palpite + opções numeradas + passos). Cena do player de Expressão (antes: desfoque/devolutiva única; agora: expr-wrap)
         // não se compara; o resto, sim. "dep_" de Expressão compara só o estado (o tamanho do HTML leva o player junto).
         if (/challenge-hypothesis|challenge-feedback-meaning|challenge-microactivity/.test(a) && /expr-wrap|expr-panel|expr-final/.test(b)){ iguais++; passed++; continue; }
+        // Etapa D (2026-11-04, aprovada pela dona; docs/telas-exercicio-etapa-d-proposta.md): Ouça e traduza, Acentuação e Complete a frase
+        // ganharam cabeçalho, barra do topo, comando, "Não sei" e "Continuar" (ch-step-wrap). Cena com esses players não se compara; o resto, sim.
+        if (/ch-step-wrap/.test(b) && !/ch-step-wrap/.test(a)){ iguais++; passed++; continue; }
         const idDep = (k.match(/^dep_(.+)_\d+$/) || [])[1];
         if (idDep && String(A.expr_ids || '').split(',').includes(idDep)){ a = a.replace(/^"\d+/, '"'); b = b.replace(/^"\d+/, '"'); }
         if (a === b){ iguais++; passed++; continue; }
