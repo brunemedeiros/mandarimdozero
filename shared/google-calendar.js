@@ -238,6 +238,7 @@ async function renderGoogleCalendarBox(opts){
   if (badge){ badge.textContent = n ? t('panel.gcal.toReview', { n }) : ''; badge.dataset.n = String(n); badge.hidden = !n; }
   const on = host.querySelector('[data-gcal-on]');
   if (on) on.hidden = !(GCAL_STATE.status && GCAL_STATE.status.connected);
+  if (typeof updateClassLogCheckTab === 'function') updateClassLogCheckTab();
   // Primeira vez: aberto se há algo para revisar ou se ainda não conectou; depois, mantém o que a professora escolheu.
   host.open = GCAL_STATE.open === null ? (!!n || !(GCAL_STATE.status && GCAL_STATE.status.connected)) : GCAL_STATE.open;
 }

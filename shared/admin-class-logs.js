@@ -459,7 +459,7 @@ function wireClassLogsListBox(listBox){
   });
 }
 
-// Mural > Aulas e materiais com "Todos" (listAll): a lista mostra as aulas de todos os alunos e turmas, sem
+// Aba Aulas (listAll, padrão desde 2026-11-10): a lista mostra as aulas de todos os alunos e turmas, sem
 // marcar ninguém no formulário de Nova aula (para não registrar uma aula para todo mundo sem querer).
 function classLogListTargets(){
   const st = ADMIN_CLASS_LOGS_STATE;
@@ -557,7 +557,7 @@ async function renderTeacherClassCalendar(){
   const now = new Date();
   const cal = ADMIN_CLASS_LOGS_STATE.cal || (ADMIN_CLASS_LOGS_STATE.cal = { y: now.getFullYear(), m: now.getMonth() });
   const range = classCalendarMonthRange(cal.y, cal.m);
-  // Mural > Aulas e materiais com uma turma ou um aluno escolhido: o calendário mostra só as aulas dele (121).
+  // scope (turma ou aluno escolhido) ficou do Mural > Aulas e materiais (121); hoje a aba Aulas abre sem escopo.
   const scope = ADMIN_CLASS_LOGS_STATE.scope;
   const logs = (await fetchTeacherClassLogsRange(range.from, range.to))
     .filter(l => !scope || (scope.classroomId ? l.classroom_id === scope.classroomId : l.student_id === scope.studentId));
@@ -635,16 +635,30 @@ async function renderTeacherClassCalendar(){
   });
 }
 
+// Aulas (decisão da autora, 2026-11-10): aba própria do painel com as abas internas Aulas | Calendário | Para conferir (N).
+// 'register' = Aulas (Alunos, Turmas, Nova aula, Aulas registradas); 'check' = Notion + Google Agenda + Revisar do Notion antigo.
+const CLASS_LOG_VIEWS = ['register', 'calendar', 'check'];
 function switchClassLogsView(view){
-  ADMIN_CLASS_LOGS_STATE.view = view === 'calendar' ? 'calendar' : 'register';
+  ADMIN_CLASS_LOGS_STATE.view = CLASS_LOG_VIEWS.includes(view) ? view : 'register';
+  const v = ADMIN_CLASS_LOGS_STATE.view;
   document.querySelectorAll('[data-classlog-view]').forEach(b => {
-    const on = b.dataset.classlogView === ADMIN_CLASS_LOGS_STATE.view;
+    const on = b.dataset.classlogView === v;
     b.classList.toggle('is-active', on); b.setAttribute('aria-selected', on ? 'true' : 'false');
   });
-  const reg = document.getElementById('admin-classlogs-register'), calHost = document.getElementById('admin-classlogs-calendar-wrap');
-  if (reg) reg.hidden = ADMIN_CLASS_LOGS_STATE.view !== 'register';
-  if (calHost) calHost.hidden = ADMIN_CLASS_LOGS_STATE.view !== 'calendar';
-  if (ADMIN_CLASS_LOGS_STATE.view === 'calendar') renderTeacherClassCalendar();
+  const show = { 'admin-classlogs-register': 'register', 'admin-classlogs-calendar-wrap': 'calendar', 'admin-classlogs-check': 'check' };
+  Object.entries(show).forEach(([id, key]) => { const el = document.getElementById(id); if (el) el.hidden = v !== key; });
+  if (v === 'calendar') renderTeacherClassCalendar();
+}
+
+// Contador da aba "Para conferir": o que falta aprovar ou revisar no Notion + eventos do Google para revisar.
+function updateClassLogCheckTab(){
+  const el = document.querySelector('[data-classlog-check-count]');
+  if (!el) return;
+  const notion = typeof NOTION_STATE !== 'undefined' && NOTION_STATE.items ? NOTION_STATE.items.filter(i => i.state === 'approval' || i.state === 'review').length : 0;
+  const gcal = typeof GCAL_STATE !== 'undefined' && Array.isArray(GCAL_STATE.review) ? GCAL_STATE.review.filter(e => e.match_state !== 'ignored' && !e.skipped_at).length : 0;
+  const n = notion + gcal;
+  el.textContent = n ? String(n) : '';
+  el.hidden = !n;
 }
 
 async function renderAdminClassLogsView(){
@@ -702,14 +716,19 @@ async function renderAdminClassLogsView(){
       : '';
 
   wrap.innerHTML = `
-    ${typeof notionBoxShellHTML === 'function' ? notionBoxShellHTML() : ''}
     <div class="deck-topbar panel-nav class-log-views" role="tablist" aria-label="${t('panel.classLog.views')}">
-      <button type="button" class="deck-topbar-btn" role="tab" data-classlog-view="register">${t('panel.classLog.view.register')}</button>
+      <button type="button" class="deck-topbar-btn" role="tab" data-classlog-view="register">${t('panel.classLog.view.lessons')}</button>
       <button type="button" class="deck-topbar-btn" role="tab" data-classlog-view="calendar">${t('panel.classLog.view.calendar')}</button>
+      <button type="button" class="deck-topbar-btn" role="tab" data-classlog-view="check">${t('panel.classLog.view.check')} <span class="class-log-check-count" data-classlog-check-count hidden></span></button>
     </div>
-    <div id="admin-classlogs-calendar-wrap" hidden>${typeof googleCalendarBoxShellHTML === 'function' ? googleCalendarBoxShellHTML() : ''}${calendarFeedBoxHTML()}<div id="admin-classlogs-calendar"></div></div>
+    <div id="admin-classlogs-check" hidden>
+      <p class="profile-edit-hint class-log-check-hint">${t('panel.classLog.checkHint')}</p>
+      ${typeof notionBoxShellHTML === 'function' ? notionBoxShellHTML() : ''}
+      ${typeof googleCalendarBoxShellHTML === 'function' ? googleCalendarBoxShellHTML() : ''}
+      <div id="admin-notion-review"></div>
+    </div>
+    <div id="admin-classlogs-calendar-wrap" hidden>${calendarFeedBoxHTML()}<div id="admin-classlogs-calendar"></div></div>
     <div id="admin-classlogs-register" class="painel aulas-painel">
-    <div id="admin-notion-review"></div>
     <details class="aulas-box" open>
       <summary><span class="aulas-titulo">🧑‍🎓 ${t('admin.common.students')}</span>
         <span class="p-selo" id="admin-classlog-selection-counter">${selectionCountLabel}</span></summary>

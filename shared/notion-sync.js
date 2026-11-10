@@ -240,6 +240,7 @@ async function renderNotionBox(opts){
   const n = NOTION_STATE.items.filter(i => i.state === 'approval' || i.state === 'review').length;
   const badge = host.querySelector('[data-notion-badge]');
   if (badge){ badge.textContent = n ? t('panel.notion.toCheck', { n }) : ''; badge.hidden = !n; }
+  if (typeof updateClassLogCheckTab === 'function') updateClassLogCheckTab();
   const on = host.querySelector('[data-notion-on]');
   if (on) on.hidden = !(NOTION_STATE.status && NOTION_STATE.status.connected && NOTION_STATE.status.source && NOTION_STATE.status.source.enabled);
   host.open = NOTION_STATE.open === null ? !!n : NOTION_STATE.open;

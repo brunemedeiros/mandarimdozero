@@ -3547,7 +3547,10 @@ window.I18N_CATALOG['en'] = {
   'panel.classLog.repeatUntil': 'Until', // ALTA
   'panel.classLog.repeatHint': 'Creates one lesson a week, same day and time, until that date (52 at most).', // ALTA
   'panel.classLog.views': 'How to see the lessons', // ALTA
-  'panel.classLog.view.register': 'Log', // ALTA
+  'panel.classLog.view.lessons': 'Lessons', // ALTA
+  'panel.classLog.view.check': 'To check', // ALTA
+  'panel.tab.materialsShort': 'Materials', // ALTA
+  'panel.classLog.checkHint': 'Lessons that came from Notion and Google Calendar and need you: approve them, say whose they are, or discard them.', // ALTA
   'panel.classLog.view.calendar': 'Calendar', // ALTA
   'panel.classLog.cal.prev': 'Previous month', // ALTA
   'panel.classLog.cal.next': 'Next month', // ALTA
@@ -3771,7 +3774,6 @@ window.I18N_CATALOG['en'] = {
   'mural.onlyFor': '🔒 Only for {name}', // ALTA
   'mural.individualChip': 'With {name}', // ALTA
   'mural.tab.mural': 'Board', // ALTA
-  'mural.tab.aulas': 'Lessons and materials', // ALTA
   'mural.tab.people': 'People', // ALTA
   'mural.pick.label': 'Class or student:', // ALTA
   'mural.pick.all': 'Everyone', // ALTA
