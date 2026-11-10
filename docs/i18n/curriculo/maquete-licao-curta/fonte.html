@@ -126,6 +126,18 @@ button.lesson:hover{border-color:var(--brand)}
 .lesson .t{flex:1;min-width:0;font-weight:800}
 .bubbles{display:grid;gap:10px}
 .bub{display:flex;gap:8px;align-items:flex-end}
+.bub.novo{animation:entra .25s ease}
+@keyframes entra{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.bub .vertr{border:0;background:none;color:var(--brand-dark);font:inherit;font-size:.78rem;font-weight:700;cursor:pointer;padding:0;margin-top:2px}
+.bub .branco{border:2px dashed var(--line);background:transparent}
+.cast{display:flex;gap:16px;flex-wrap:wrap}
+.cast span{display:flex;align-items:center;gap:6px;font-weight:700}
+.who.on{outline:3px solid var(--brand);outline-offset:2px}
+.play-big{display:flex;align-items:center;justify-content:center;gap:10px;border:2px solid var(--line);border-bottom-width:4px;background:var(--card);color:var(--brand-dark);border-radius:16px;padding:16px;font:inherit;font-weight:800;font-size:1.05rem;cursor:pointer;width:100%}
+.play-big svg{width:26px;height:26px}
+.linhas{display:grid;gap:8px}
+.linhas .opt{text-align:left;font-size:1rem}
+.vez{font-weight:800;color:var(--ink-soft);font-size:.9rem;margin:0}
 .bub.b{flex-direction:row-reverse}
 .who{width:36px;height:36px;flex:none;border-radius:50%;display:grid;place-items:center;font-weight:800;background:var(--pink-tint);color:var(--ink)}
 .bub.b .who{background:var(--brand-tint);color:var(--brand-dark)}
@@ -224,6 +236,32 @@ function speak(text){
     speechSynthesis.speak(u);
   }catch(e){}
 }
+// Diálogo com duas vozes (decisão da dona, 2026-10-15): no app, Achernar (feminina) e Charon (masculina);
+// na maquete, a voz do navegador com tom mais agudo ou mais grave.
+let fila=0;
+function falar(text, voz, onend){
+  let feito=false; const fim=()=>{ if(!feito){ feito=true; onend&&onend(); } };
+  try{
+    if(!('speechSynthesis' in window)) return setTimeout(fim,300);
+    const u=new SpeechSynthesisUtterance(SAY[text]||text); u.lang='fr-FR'; u.rate=.9;
+    const vs=speechSynthesis.getVoices().filter(v=>/^fr/i.test(v.lang));
+    const masc=vs.find(v=>/thomas|paul|henri|nicolas|daniel|male|homme/i.test(v.name)&&!/female/i.test(v.name));
+    if(vs.length) u.voice = voz==='m' ? (masc||vs[0]) : (vs.find(v=>v!==masc)||vs[0]);
+    u.pitch = voz==='m' ? .7 : 1.25;
+    u.onend=fim; u.onerror=fim;
+    speechSynthesis.speak(u);
+  }catch(e){}
+  setTimeout(fim, 900+text.length*90); // sem evento de fim (alguns navegadores), segue assim mesmo
+}
+function tocarFalas(d, idxs, aCada, noFim){
+  const eu=++fila; try{ speechSynthesis.cancel(); }catch(e){}
+  let k=0;
+  const passo=()=>{ if(eu!==fila) return; if(k>=idxs.length){ noFim&&noFim(); return; }
+    const j=idxs[k++]; aCada&&aCada(j); falar(d.lines[j][1], d.voices[d.lines[j][0]], ()=>setTimeout(passo,250)); };
+  passo();
+}
+function pararFalas(){ fila++; try{ speechSynthesis.cancel(); }catch(e){} }
+const PLAY='<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 5v14l12-7z"/></svg>';
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const SPK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M16.5 8.5a5 5 0 0 1 0 7"/><path d="M19 6a8.5 8.5 0 0 1 0 12"/></svg>';
 const audBtn=(text,label)=>`<button class="aud${label?'':' round'}" data-say="${esc(text)}" aria-label="Ouvir ${esc(text)}">${SPK}${label?`<span>${esc(label)}</span>`:''}</button>`;
@@ -517,16 +555,24 @@ const WHY={
   "titulo": "Tela final",
   "texto": "<p>Mesma tela das outras lições.</p>"
  },
- "dialogo": {
-  "chip": "Encontro na rua",
-  "titulo": "A lição de diálogo",
-  "texto": "<p>\"Encontro na rua\" (informal), que hoje fecha a lição 2, abre a lição 5. No lugar do ícone, a inicial de quem fala.</p>"
- },
- "dialogo2": {
-  "chip": "Na portaria",
-  "titulo": "O diálogo formal",
-  "texto": "<p>\"Na portaria\", que hoje fecha a lição 4, é o segundo diálogo da lição 5. Usa as quatro lições: cumprimentar, perguntar como vai, agradecer e se despedir.</p><p>As outras checagens do rascunho (completar e ouvir) continuam; aqui aparece só \"Você entendeu?\".</p>"
- }
+ "d1-cena": {"chip": "Cena", "titulo": "1. A professora apresenta a cena", "texto": "<p>Decisão 353, etapa 1: quem são, onde estão e <b>no que reparar</b>, em uma frase. A pergunta de foco é a mesma que vem logo depois, sem texto.</p>"},
+ "d1-ouvir": {"chip": "Ouvir sem texto", "titulo": "2. Ouvir primeiro, sem ler", "texto": "<p>Etapa 2: a conversa toca inteira, com as duas vozes alternando (aqui, a voz do navegador mais aguda e mais grave), e só a inicial de quem fala acende. Depois, uma pergunta geral: formal ou informal?</p><p>Treina o ouvido antes da leitura.</p>"},
+ "d1-ler": {"chip": "Ler fala por fala", "titulo": "3. Ler e ouvir, fala por fala", "texto": "<p>Etapa 3: cada toque em \"Próxima fala\" mostra e toca uma fala. A tradução aparece só se a aluna pedir.</p>"},
+ "d1-completar": {"chip": "Complete a conversa", "titulo": "4. Exercício: completar uma fala", "texto": "<p>Etapa 4, primeiro exercício: a conversa aparece com uma fala em branco e 2 opções, como o \"Complete\" das lições.</p>"},
+ "d1-quem": {"chip": "Quem disse?", "titulo": "4. Exercício: quem disse?", "texto": "<p>A fala aparece com o áudio; a aluna escolhe quem disse. Obriga a prestar atenção em quem pergunta e quem responde.</p>"},
+ "d1-ordenar": {"chip": "Ordenar", "titulo": "4. Exercício: pôr as falas em ordem", "texto": "<p>As falas vêm embaralhadas; a aluna toca na ordem certa.</p>"},
+ "d1-entendeu": {"chip": "Você entendeu?", "titulo": "4. Exercício: compreensão", "texto": "<p>A pergunta de compreensão que o rascunho já tinha (\"Como o Hugo está?\"), agora sem o diálogo na tela.</p>"},
+ "d1-papel": {"chip": "Sua vez", "titulo": "5. Fazer o papel de um personagem", "texto": "<p>Etapa 5, o ponto alto: o Hugo fala em áudio e a aluna escolhe as falas da Léa, uma de cada vez, entre 2 opções. É \"conversar de verdade\" dentro do que já sabe.</p><p>No futuro, ela poderá gravar a própria voz nesta tela.</p>"},
+ "d1-fim": {"chip": "Fim do diálogo", "titulo": "6. Tela final do diálogo", "texto": "<p>Etapa 6: a fala da professora e as frases úteis da conversa, com áudio.</p><p>Com os dois diálogos completos, a lição 5 ficou longa: depois de testar, você decide se mantém junta ou separa em duas lições.</p>"},
+ "d2-cena": {"chip": "Cena", "titulo": "1. Segundo diálogo: a cena", "texto": "<p>Mesmo caminho completo no diálogo formal, como você pediu.</p>"},
+ "d2-ouvir": {"chip": "Ouvir sem texto", "titulo": "2. Ouvir primeiro: formal ou informal?", "texto": "<p>A mesma pergunta do primeiro diálogo, agora com resposta diferente: é o contraste que a unidade ensina.</p>"},
+ "d2-ler": {"chip": "Ler fala por fala", "titulo": "3. Ler e ouvir, fala por fala", "texto": "<p>Sete falas: cumprimento, como vai, resposta, boa noite e despedida.</p>"},
+ "d2-completar": {"chip": "Complete a conversa", "titulo": "4. Completar: bonne soirée", "texto": "<p>O distrator <i>Bonjour, madame !</i> treina a diferença entre cumprimentar e desejar boa noite (lição 4).</p>"},
+ "d2-quem": {"chip": "Quem disse?", "titulo": "4. Quem disse?", "texto": "<p><i>Merci, monsieur. Au revoir !</i>: quem chama o outro de <i>monsieur</i> é ela.</p>"},
+ "d2-ordenar": {"chip": "Ordenar", "titulo": "4. Ordenar a despedida", "texto": "<p>Só as 3 últimas falas, para a tela não ficar comprida.</p>"},
+ "d2-entendeu": {"chip": "Você entendeu?", "titulo": "4. Compreensão", "texto": "<p>A pergunta que o rascunho já tinha (\"Como a Sra. Dubois está?\").</p>"},
+ "d2-papel": {"chip": "Sua vez", "titulo": "5. Fazer o papel da Sra. Dubois", "texto": "<p>Aqui a aluna faz a personagem feminina, que responde no formal. As falas dela têm \"obrigada\", coerente com quem fala.</p>"},
+ "d2-fim": {"chip": "Fim da lição", "titulo": "6. Tela final", "texto": "<p>Fecha a lição de diálogos e volta para a unidade.</p>"}
 };
 const S=[...TELAS,{id:'unidade',lesson:'u',type:'unidade'}].map(t=>{const w=WHY[t.id]||{chip:t.id,titulo:'',texto:''};return Object.assign({},t,{chip:w.chip,why:[w.titulo,w.texto]});});
 
@@ -540,7 +586,8 @@ const LESSONS=[[1,'Lição 1','l1-intro'],[2,'Lição 2','l2-intro'],[3,'Lição
 
 function setProgress(){
   const s=S[i]; const same=S.filter(x=>x.lesson===s.lesson); const k=same.indexOf(s);
-  const end=same.findIndex(x=>x.type==='fim');
+  const fins=same.map((x,n)=>(x.type==='fim'||x.type==='d_fim')?n:-1).filter(n=>n>=0);
+  const end=fins.length?fins[fins.length-1]:same.length-1;
   const pct = end>0 ? Math.min(100,Math.round(k/end*100)) : 100;
   $('progbar').style.width=pct+'%';
 }
@@ -562,6 +609,7 @@ function setWhy(){
   [...$('tabs').children].forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.l)===String(s.lesson)));
 }
 function go(n){
+  pararFalas();
   i=Math.max(0,Math.min(S.length-1,typeof n==='string'?idx(n):n)); picked=[];
   panel.className='panel'; panel.innerHTML=''; screen.style.paddingBottom='';
   render(); setProgress(); setWhy();
@@ -569,6 +617,7 @@ function go(n){
 function next(){
   const s=S[i];
   if(s.type==='fim') return go('unidade');
+  if(s.type==='d_fim' && (!S[i+1] || S[i+1].lesson!==s.lesson)) return go('unidade');
   go(i+1);
 }
 
@@ -583,6 +632,21 @@ function showPanel(ok, s, extra){
   screen.style.paddingBottom=(panel.offsetHeight+12)+'px';
   speak(fr);
 }
+// Painel dos exercícios de diálogo: mostra a fala (com áudio na voz do personagem) ou só a resposta em português.
+function painelDialogo(ok, why, d, j, rotulo){
+  panel.className='panel show '+(ok?'ok':'err');
+  const linha = (d && j!=null) ? `<div class="ans"><div class="t">${esc(d.names[d.lines[j][0]])}: ${esc(d.lines[j][1])}<span>${esc(d.lines[j][2])}</span></div>${audBtn(d.lines[j][1],'')}</div>` : (rotulo?`<div class="ans"><div class="t">${esc(rotulo)}</div></div>`:'');
+  panel.innerHTML=`<h4><span class="mark">${ok?'✓':'✕'}</span>${ok?'Isso mesmo!':'Quase lá!'}</h4>${linha}
+    <div class="prof"><img src="${FOTO}" alt="Prof. Brune"><div class="fala"><span class="nome">Prof. Brune</span><p class="why">${why}</p></div></div>
+    <button class="btn" id="cont">Continuar</button>`;
+  $('cont').onclick=next; $('cont').focus({preventScroll:true});
+  screen.style.paddingBottom=(panel.offsetHeight+12)+'px';
+  if(d && j!=null) falar(d.lines[j][1], d.voices[d.lines[j][0]]);
+}
+const bolha=(d,j,o)=>{ o=o||{}; const [w,f,t]=d.lines[j]; const lado=(o.direita!=null?o.direita:w==='B')?'b':'';
+  return `<div class="bub ${lado} ${o.novo?'novo':''}"><span class="who">${d.who[w]}</span><div class="txt ${o.branco?'branco':''}"><b>${o.branco?'______':esc(f)}</b>${o.branco?'':(o.trad?`<span>${esc(t)}</span>`:`<button class="vertr" data-tr="${esc(t)}">ver tradução</button>`)}</div>${o.branco?'':audBtn(f,'')}</div>`; };
+const elenco=d=>`<div class="cast">${['A','B'].map(w=>`<span><span class="who" data-w="${w}">${d.who[w]}</span>${esc(d.names[w])}</span>`).join('')}</div>`;
+const tagDlg=(d,txt)=>`<div class="tags"><span class="tag pink">${esc(d.title)}</span><span class="tag">${esc(txt)}</span></div>`;
 const frBox=s=>s.fr?`<div class="frbox">${s.noAudio?'':audBtn(s.fr,'')}<b>${esc(s.fr)}</b></div>`:'';
 
 function render(){
@@ -651,13 +715,54 @@ function render(){
       ${row('★','Revisão da unidade','')}
     </div>`;
   }
-  if(s.type==='dialogo'){
-    h=`<span class="tag pink">Lição 5 · Diálogos</span>
-      <div class="fr-mid" style="text-align:left;font-size:1.15rem">${esc(s.title)}</div>
-      <p class="small" style="margin:0">${esc(s.scene)}</p>
-      <div class="bubbles">${s.lines.map(([w,f,t])=>`<div class="bub ${w==='B'?'b':''}"><span class="who">${s.who[w]}</span><div class="txt"><b>${esc(f)}</b><span>${esc(t)}</span></div>${audBtn(f,'')}</div>`).join('')}</div>
+  const d=s.dlg;
+  if(s.type==='d_cena'){
+    h=`<span class="tag pink">Lição 5 · Diálogo</span><div class="grow">
+      <div class="fr-mid" style="text-align:left">${esc(d.title)}</div>
+      <p class="small" style="margin:0">${esc(d.scene)}</p>${elenco(d)}
+      <div class="prof intro-fala"><img src="${FOTO}" alt="Prof. Brune"><div class="fala"><span class="nome">Prof. Brune</span><span>${esc(s.foco)}</span></div></div>
+    </div><button class="btn" id="go">Ouvir a conversa</button>`;
+  }
+  if(s.type==='d_ouvir'){
+    h=`${tagDlg(d,'Ouça sem ler')}<div class="grow ex">${elenco(d)}
+      <button class="play-big" id="play">${PLAY}<span>Ouvir a conversa</span></button>
       <p class="q">${esc(s.q)}</p>
-      <div class="opts">${s.opts.map(o=>`<button class="opt" data-o="${esc(o)}">${esc(o)}</button>`).join('')}</div>`;
+      <div class="opts two">${s.opts.map((o,k)=>`<button class="opt" data-k="${k}">${esc(o)}</button>`).join('')}</div></div>`;
+  }
+  if(s.type==='d_ler'){
+    h=`${tagDlg(d,'Leia e ouça')}<div class="grow ex"><div class="bubbles" id="falas"></div></div>
+      <button class="btn" id="prox">Primeira fala</button>`;
+  }
+  if(s.type==='d_completar'){
+    h=`${tagDlg(d,'Complete a conversa')}<div class="grow ex"><div class="bubbles">${d.lines.map((_,j)=>bolha(d,j,{branco:j===s.fala,trad:false})).join('')}</div>
+      <div class="opts two">${s.opts.map(o=>`<button class="opt" data-o="${esc(o)}">${esc(o)}</button>`).join('')}</div></div>`;
+  }
+  if(s.type==='d_quem'){
+    const [,f]=d.lines[s.fala];
+    h=`${tagDlg(d,'Quem disse?')}<div class="grow ex"><div class="frbox">${audBtn(f,'')}<b>${esc(f)}</b></div>
+      <div class="opts two">${['A','B'].map(w=>`<button class="opt" data-w="${w}">${esc(d.names[w])}</button>`).join('')}</div></div>`;
+  }
+  if(s.type==='d_ordenar'){
+    const emb=[...s.falas].reverse(); if(emb.length>2) emb.push(emb.shift());
+    h=`${tagDlg(d,'Ponha em ordem')}<div class="grow ex"><p class="vez">Toque nas falas na ordem da conversa.</p>
+      <div class="linhas" id="ordem"></div>
+      <div class="linhas" id="pecas">${emb.map(j=>`<button class="opt" data-j="${j}">${esc(d.lines[j][1])}</button>`).join('')}</div>
+    </div><button class="btn" id="check" disabled>Verificar</button>`;
+  }
+  if(s.type==='d_entendeu'){
+    h=`${tagDlg(d,'Você entendeu?')}<div class="grow ex"><p class="vez">Sem olhar a conversa:</p><p class="q">${esc(s.q)}</p>
+      <div class="opts">${s.opts.map((o,k)=>`<button class="opt" data-k="${k}">${esc(o)}</button>`).join('')}</div></div>`;
+  }
+  if(s.type==='d_papel'){
+    h=`${tagDlg(d,'Sua vez')}<div class="grow ex"><p class="vez">Você é ${d.voices[s.falante]==='f'?'a':'o'} ${esc(d.names[s.falante])}. Escolha as suas falas.</p>
+      <div class="bubbles" id="falas"></div><div class="opts" id="escolha"></div></div>`;
+  }
+  if(s.type==='d_fim'){
+    h=`<div class="done-hero"><h2>Conversa concluída!</h2></div>
+      <div class="prof intro-fala"><img src="${FOTO}" alt="Prof. Brune"><div class="fala"><span class="nome">Prof. Brune</span><span>${esc(s.say)}</span></div></div>
+      <p class="small" style="margin:0">Frases úteis desta conversa:</p>
+      <div class="ex-list">${s.frases.map(j=>`<div class="ex-row">${audBtn(d.lines[j][1],'')}<div class="t"><b>${esc(d.lines[j][1])}</b><span>${esc(d.lines[j][2])}</span></div></div>`).join('')}</div>
+      <button class="btn" id="go">Continuar</button>`;
   }
   screen.innerHTML=h;
   bind(s);
@@ -693,14 +798,58 @@ function bind(s){
     };
   }
   if(s.type==='unidade') screen.querySelectorAll('[data-to]').forEach(b=>b.onclick=()=>go(b.dataset.to));
-  if(s.type==='dialogo'){
-    screen.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{
-      const ok=b.dataset.o===s.answer;
-      screen.querySelectorAll('.opt').forEach(x=>{x.disabled=true; if(x.dataset.o===s.answer) x.classList.add('right'); else if(x===b) x.classList.add('wrong');});
-      showPanel(ok,s);
-      if(s.id==='dialogo2'){ $('cont').textContent='Voltar à unidade'; $('cont').onclick=()=>go('unidade'); }
-    });
+  const d=s.dlg;
+  const marca=(sel,certo)=>(b)=>{ screen.querySelectorAll(sel).forEach(x=>{ x.disabled=true; if(certo(x)) x.classList.add('right'); else if(x===b) x.classList.add('wrong'); }); };
+  if(s.type==='d_ouvir'||s.type==='d_entendeu'){
+    const p=$('play');
+    if(p) p.onclick=()=>{ const ids=d.lines.map((_,j)=>j);
+      tocarFalas(d, ids, j=>{ screen.querySelectorAll('.cast .who').forEach(w=>w.classList.toggle('on', w.dataset.w===d.lines[j][0])); },
+        ()=>screen.querySelectorAll('.cast .who').forEach(w=>w.classList.remove('on'))); };
+    screen.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{ pararFalas(); const ok=+b.dataset.k===s.answer;
+      marca('.opt',x=>+x.dataset.k===s.answer)(b); painelDialogo(ok, s.why_ok, null, null, 'Resposta: '+s.opts[s.answer]); });
   }
+  if(s.type==='d_ler'){
+    let k=0; const box=$('falas'), btn=$('prox');
+    btn.onclick=()=>{ if(k>=d.lines.length) return next();
+      box.insertAdjacentHTML('beforeend', bolha(d,k,{novo:true})); falar(d.lines[k][1], d.voices[d.lines[k][0]]); k++;
+      btn.textContent = k>=d.lines.length ? 'Continuar' : 'Próxima fala'; };
+  }
+  if(s.type==='d_completar'){
+    screen.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{ const ok=b.dataset.o===s.answer;
+      marca('.opt',x=>x.dataset.o===s.answer)(b); painelDialogo(ok, s.why_ok, d, s.fala); });
+  }
+  if(s.type==='d_quem'){
+    const certo=d.lines[s.fala][0];
+    screen.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{ const ok=b.dataset.w===certo;
+      marca('.opt',x=>x.dataset.w===certo)(b); painelDialogo(ok, s.why_ok, d, s.fala); });
+  }
+  if(s.type==='d_ordenar'){
+    const ordem=$('ordem'), chk=$('check'); const escolhidas=[];
+    const desenha=()=>{ ordem.innerHTML=escolhidas.map((j,n)=>`<div class="ex-row"><b>${n+1}.</b><div class="t">${esc(d.lines[j][1])}</div></div>`).join('');
+      screen.querySelectorAll('.linhas .opt').forEach(b=>b.disabled=escolhidas.includes(+b.dataset.j)); chk.disabled=escolhidas.length!==s.falas.length; };
+    screen.querySelectorAll('.linhas .opt').forEach(b=>b.onclick=()=>{ escolhidas.push(+b.dataset.j); desenha(); });
+    chk.onclick=()=>{ const ok=JSON.stringify(escolhidas)===JSON.stringify(s.falas); chk.disabled=true;
+      ordem.innerHTML=s.falas.map(j=>bolha(d,j,{trad:true})).join(''); $('pecas').hidden=true;
+      painelDialogo(ok, s.why_ok, null, null, ok?'':'A ordem certa está acima.'); };
+  }
+  if(s.type==='d_papel'){
+    const box=$('falas'), esc2=$('escolha'); let k=0, erros=0;
+    const minha=j=>d.lines[j][0]===s.falante;
+    const anda=()=>{
+      if(k>=d.lines.length){ esc2.innerHTML=''; return painelDialogo(erros===0, s.why_ok, null, null, erros===0?'Você fez a conversa inteira!':'Na próxima, tente sem errar nenhuma fala.'); }
+      const j=k;
+      if(!minha(j)){ box.insertAdjacentHTML('beforeend', bolha(d,j,{novo:true,direita:false})); esc2.innerHTML='';
+        falar(d.lines[j][1], d.voices[d.lines[j][0]], ()=>{ if(S[i]===s){ k++; anda(); } }); return; }
+      const certa=d.lines[j][1], outra=s.distratores[j]; const ops=j%2?[certa,outra]:[outra,certa];
+      esc2.innerHTML=ops.map(o=>`<button class="opt" data-o="${esc(o)}">${esc(o)}</button>`).join('');
+      esc2.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{ const ok=b.dataset.o===certa; if(!ok) erros++;
+        marca('#escolha .opt',x=>x.dataset.o===certa)(b);
+        setTimeout(()=>{ box.insertAdjacentHTML('beforeend', bolha(d,j,{novo:true,direita:true})); esc2.innerHTML='';
+          falar(certa, d.voices[s.falante], ()=>{ if(S[i]===s){ k++; anda(); } }); }, ok?150:900); });
+    };
+    anda();
+  }
+  screen.querySelectorAll('.vertr').forEach(b=>b.onclick=()=>{ b.outerHTML=`<span>${esc(b.dataset.tr)}</span>`; });
 }
 
 document.addEventListener('click',e=>{

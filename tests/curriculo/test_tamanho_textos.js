@@ -32,6 +32,11 @@ check('nota que virou painel não conta como nota (o texto dela aparece nos pain
 check('erro conta junto com a explicação (é o que o aluno lê ao errar)',
   T.textosLongos(rascunho([{ id: 'p', tipo: 'vf', explicacao: pt(x(100)), explicacao_erro: { o: pt(x(51)) } }])).some(a => a.tipo === 'painelComErro'));
 
+check('diálogo: a fala da cena conta como abertura e a da tela final do diálogo como fala final (decisão 353)', (() => {
+  const a = T.textosLongos(rascunho([{ id: 'c', tipo: 'dialogo_cena', foco: pt(x(121)) }, { id: 'df', tipo: 'dialogo_fim', fala: pt(x(71)) }]));
+  return a.length === 2 && a.some(z => z.onde === 'c' && z.tipo === 'abertura') && a.some(z => z.onde === 'df' && z.tipo === 'falaFinal');
+})());
+
 console.log('== rascunho real da unidade 1');
 const R = require(path.join(ROOT, 'docs/i18n/curriculo/piloto-m1/A1-1/A1-1.json'));
 const achados = T.textosLongos(R);

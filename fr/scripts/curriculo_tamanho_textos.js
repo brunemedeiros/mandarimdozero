@@ -22,7 +22,8 @@ function textosLongos(rascunho, limites = LIMITES){
   for (const licao of rascunho.licoes || []){
     for (const t of licao.telas || []){
       if (t.tipo === 'abertura') confere(t.id, 'abertura', tamanho(t.objetivo));
-      if (t.tipo === 'fim' && t.fala) confere(t.id, 'falaFinal', tamanho(t.fala));
+      if (t.tipo === 'dialogo_cena') confere(t.id, 'abertura', tamanho(t.foco)); // a professora apresenta a cena (decisão 353)
+      if ((t.tipo === 'fim' || t.tipo === 'dialogo_fim') && t.fala) confere(t.id, 'falaFinal', tamanho(t.fala));
       if (t.explicacao){
         const base = tamanho(t.explicacao);
         confere(t.id, 'painel', base);

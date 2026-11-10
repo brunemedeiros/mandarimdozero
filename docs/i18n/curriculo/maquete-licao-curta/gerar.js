@@ -14,7 +14,8 @@ const { execFileSync } = require('child_process');
 const fonte = fs.readFileSync(path.join(__dirname, 'fonte.html'), 'utf8');
 const RASCUNHO = 'docs/i18n/curriculo/piloto-m1/A1-1/A1-1.json';
 
-function construirTelas(R){
+// `tolerante`: para a comparação com um commit antigo, tela de tipo que não existe mais é ignorada.
+function construirTelas(R, tolerante){
   const pt = x => (x && x['pt-BR']) || '';
   const minusc = s => s ? s.charAt(0).toLowerCase() + s.slice(1) : s;
   const cartao = fr => {
@@ -29,6 +30,18 @@ function construirTelas(R){
   };
   const erros = t => t.explicacao_erro ? Object.fromEntries(Object.entries(t.explicacao_erro).map(([k, v]) => [k, pt(v)])) : undefined;
   const iniciais = nome => nome.trim().split(/\s+/).pop().charAt(0).toUpperCase();
+  // Dados de um diálogo para a maquete: falas, iniciais, nomes e a voz de cada personagem (pelo emoji do falante:
+  // 👩 = voz feminina, 👨 = masculina; decisão da dona de 2026-10-15: duas vozes alternando).
+  const dialogo = titulo => {
+    const d = R.dialogos.find(x => pt(x.titulo) === titulo);
+    if (!d) throw new Error('diálogo não encontrado: ' + titulo);
+    const voz = f => (f.emoji === '👨' ? 'm' : 'f');
+    return { title: pt(d.titulo), scene: pt(d.cena),
+      who: { A: iniciais(d.falantes.A.nome), B: iniciais(d.falantes.B.nome) },
+      names: { A: d.falantes.A.nome, B: d.falantes.B.nome },
+      voices: { A: voz(d.falantes.A), B: voz(d.falantes.B) },
+      lines: d.falas.map(f => [f.falante, f.fr, f['pt-BR']]) };
+  };
 
   // Converte uma tela do rascunho para o formato que a maquete desenha. Função pura.
   function telaDaMaquete(t, licao, telasDaLicao){
@@ -68,21 +81,26 @@ function construirTelas(R){
         }
         return { ...base, type: 'fim', say: pt(t.fala), list: lista };
       }
-      case 'dialogo': {
-        const d = R.dialogos.find(x => pt(x.titulo) === t.dialogo);
-        if (!d) throw new Error('diálogo não encontrado: ' + t.dialogo);
-        const entendeu = d.check.find(c => c.tipo === 'understand');
-        return { ...base, type: 'dialogo', title: pt(d.titulo), scene: pt(d.cena),
-          who: { A: iniciais(d.falantes.A.nome), B: iniciais(d.falantes.B.nome) },
-          lines: d.falas.map(f => [f.falante, f.fr, f['pt-BR']]),
-          q: pt(entendeu.pergunta), opts: entendeu.opcoes.map(pt), answer: pt(entendeu.opcoes.find(o => o.certa)),
-          full: t.frase_do_painel, fullTr: pt(t.traducao_do_painel), why_ok: pt(t.explicacao) };
+      // Lição de diálogos em 6 etapas (decisão 353). Os dados do diálogo vão juntos em `dlg`.
+      case 'dialogo_cena': return { ...base, type: 'd_cena', dlg: dialogo(t.dialogo), foco: pt(t.foco) };
+      case 'dialogo_ouvir': return { ...base, type: 'd_ouvir', dlg: dialogo(t.dialogo), q: pt(t.pergunta), opts: t.opcoes.map(pt), answer: t.resposta, why_ok: pt(t.explicacao) };
+      case 'dialogo_ler': return { ...base, type: 'd_ler', dlg: dialogo(t.dialogo) };
+      case 'dialogo_completar': {
+        const d = dialogo(t.dialogo);
+        return { ...base, type: 'd_completar', dlg: d, fala: t.fala, opts: t.opcoes, answer: d.lines[t.fala][1], why_ok: pt(t.explicacao) };
       }
-      default: throw new Error('tipo de tela desconhecido: ' + t.tipo);
+      case 'dialogo_quem': return { ...base, type: 'd_quem', dlg: dialogo(t.dialogo), fala: t.fala, why_ok: pt(t.explicacao) };
+      case 'dialogo_ordenar': return { ...base, type: 'd_ordenar', dlg: dialogo(t.dialogo), falas: t.falas, why_ok: pt(t.explicacao) };
+      case 'dialogo_entendeu': return { ...base, type: 'd_entendeu', dlg: dialogo(t.dialogo), q: pt(t.pergunta), opts: t.opcoes.map(pt), answer: t.resposta, why_ok: pt(t.explicacao) };
+      case 'dialogo_papel': return { ...base, type: 'd_papel', dlg: dialogo(t.dialogo), falante: t.falante, distratores: t.distratores, why_ok: pt(t.explicacao) };
+      case 'dialogo_fim': return { ...base, type: 'd_fim', dlg: dialogo(t.dialogo), say: pt(t.fala), frases: t.frases };
+      default:
+        if (tolerante) return null;
+        throw new Error('tipo de tela desconhecido: ' + t.tipo);
     }
   }
 
-  return R.licoes.filter(l => l.telas).flatMap(l => l.telas.map(t => telaDaMaquete(t, l, l.telas)));
+  return R.licoes.filter(l => l.telas).flatMap(l => l.telas.map(t => telaDaMaquete(t, l, l.telas))).filter(Boolean);
 }
 
 const TELAS = construirTelas(JSON.parse(fs.readFileSync(path.join(raiz, RASCUNHO), 'utf8')));
@@ -93,7 +111,7 @@ const argAntes = process.argv.find(a => a.startsWith('--antes='));
 if (argAntes){
   const ref = argAntes.slice('--antes='.length);
   const velho = JSON.parse(execFileSync('git', ['show', `${ref}:${RASCUNHO}`], { cwd: raiz, encoding: 'utf8' }));
-  const porId = Object.fromEntries(construirTelas(velho).map(t => [t.id, t]));
+  const porId = Object.fromEntries(construirTelas(velho, true).map(t => [t.id, t]));
   for (const t of TELAS){
     const v = porId[t.id]; if (!v) continue;
     const mudou = {};

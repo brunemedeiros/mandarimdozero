@@ -1161,35 +1161,270 @@
      }
     },
     {
-     "id": "dialogo",
-     "tipo": "dialogo",
+     "id": "d1-cena",
+     "tipo": "dialogo_cena",
      "dialogo": "Encontro na rua",
-     "frase_do_painel": "Je vais bien, et toi ?",
-     "traducao_do_painel": {
-      "pt-BR": "Estou bem, e você?",
-      "en": null
-     },
-     "explicacao": {
-      "pt-BR": "O Hugo responde <b>Je vais bien</b>: ele está bem.",
+     "foco": {
+      "pt-BR": "Uma conversa rápida entre vizinhos. Repare: eles falam de um jeito formal ou informal?",
       "en": null
      }
     },
     {
-     "id": "dialogo2",
-     "tipo": "dialogo",
-     "dialogo": "Na portaria",
-     "frase_do_painel": "Très bien, merci.",
-     "traducao_do_painel": {
-      "pt-BR": "Muito bem, obrigada.",
+     "id": "d1-ouvir",
+     "tipo": "dialogo_ouvir",
+     "dialogo": "Encontro na rua",
+     "pergunta": {
+      "pt-BR": "Eles se falam de um jeito formal ou informal?",
       "en": null
      },
+     "opcoes": [
+      {
+       "pt-BR": "Informal",
+       "en": null
+      },
+      {
+       "pt-BR": "Formal",
+       "en": null
+      }
+     ],
+     "resposta": 0,
      "explicacao": {
-      "pt-BR": "A Sra. Dubois responde <b>Très bien, merci</b>: ela está muito bem.",
+      "pt-BR": "Eles usam <b>salut</b> e <b>tu vas bien ?</b>: é uma conversa informal.",
       "en": null
      }
+    },
+    {
+     "id": "d1-ler",
+     "tipo": "dialogo_ler",
+     "dialogo": "Encontro na rua"
+    },
+    {
+     "id": "d1-completar",
+     "tipo": "dialogo_completar",
+     "dialogo": "Encontro na rua",
+     "fala": 2,
+     "opcoes": [
+      "Salut !",
+      "Ça va !"
+     ],
+     "explicacao": {
+      "pt-BR": "O Hugo devolveu a pergunta, e a Léa responde que está tudo bem: <b>ça va !</b>",
+      "en": null
+     }
+    },
+    {
+     "id": "d1-quem",
+     "tipo": "dialogo_quem",
+     "dialogo": "Encontro na rua",
+     "fala": 1,
+     "explicacao": {
+      "pt-BR": "Quem responde e devolve a pergunta é o Hugo: <b>et toi ?</b>",
+      "en": null
+     }
+    },
+    {
+     "id": "d1-ordenar",
+     "tipo": "dialogo_ordenar",
+     "dialogo": "Encontro na rua",
+     "falas": [
+      0,
+      1,
+      2
+     ],
+     "explicacao": {
+      "pt-BR": "Primeiro a pergunta, depois a resposta que devolve a pergunta, e por fim a resposta da Léa.",
+      "en": null
+     }
+    },
+    {
+     "id": "d1-entendeu",
+     "tipo": "dialogo_entendeu",
+     "dialogo": "Encontro na rua",
+     "pergunta": {
+      "pt-BR": "Como o Hugo está?",
+      "en": null
+     },
+     "opcoes": [
+      {
+       "pt-BR": "Bem",
+       "en": null
+      },
+      {
+       "pt-BR": "Mal",
+       "en": null
+      },
+      {
+       "pt-BR": "Cansado",
+       "en": null
+      }
+     ],
+     "resposta": 0,
+     "explicacao": {
+      "pt-BR": "O Hugo responde <b>je vais bien</b>: ele está bem.",
+      "en": null
+     }
+    },
+    {
+     "id": "d1-papel",
+     "tipo": "dialogo_papel",
+     "dialogo": "Encontro na rua",
+     "falante": "A",
+     "distratores": {
+      "0": "Bonsoir, madame.",
+      "2": "De rien !"
+     },
+     "explicacao": {
+      "pt-BR": "Você fez a Léa: cumprimentou, perguntou como o Hugo está e respondeu.",
+      "en": null
+     }
+    },
+    {
+     "id": "d1-fim",
+     "tipo": "dialogo_fim",
+     "dialogo": "Encontro na rua",
+     "fala": {
+      "pt-BR": "Muito bem! Essa conversa você já consegue ter com um vizinho.",
+      "en": null
+     },
+     "frases": [
+      0,
+      1
+     ]
+    },
+    {
+     "id": "d2-cena",
+     "tipo": "dialogo_cena",
+     "dialogo": "Na portaria",
+     "foco": {
+      "pt-BR": "À noite, na portaria, dois vizinhos se encontram. Repare em como eles se tratam.",
+      "en": null
+     }
+    },
+    {
+     "id": "d2-ouvir",
+     "tipo": "dialogo_ouvir",
+     "dialogo": "Na portaria",
+     "pergunta": {
+      "pt-BR": "Eles se falam de um jeito formal ou informal?",
+      "en": null
+     },
+     "opcoes": [
+      {
+       "pt-BR": "Informal",
+       "en": null
+      },
+      {
+       "pt-BR": "Formal",
+       "en": null
+      }
+     ],
+     "resposta": 1,
+     "explicacao": {
+      "pt-BR": "Eles usam <b>madame</b>, <b>monsieur</b> e <b>comment allez-vous ?</b>: é uma conversa formal.",
+      "en": null
+     }
+    },
+    {
+     "id": "d2-ler",
+     "tipo": "dialogo_ler",
+     "dialogo": "Na portaria"
+    },
+    {
+     "id": "d2-completar",
+     "tipo": "dialogo_completar",
+     "dialogo": "Na portaria",
+     "fala": 4,
+     "opcoes": [
+      "Bonne soirée, madame !",
+      "Bonjour, madame !"
+     ],
+     "explicacao": {
+      "pt-BR": "Na saída, à noite, ele deseja uma boa noite: <b>bonne soirée</b>.",
+      "en": null
+     }
+    },
+    {
+     "id": "d2-quem",
+     "tipo": "dialogo_quem",
+     "dialogo": "Na portaria",
+     "fala": 5,
+     "explicacao": {
+      "pt-BR": "Quem agradece e chama o vizinho de <b>monsieur</b> é a Sra. Dubois.",
+      "en": null
+     }
+    },
+    {
+     "id": "d2-ordenar",
+     "tipo": "dialogo_ordenar",
+     "dialogo": "Na portaria",
+     "falas": [
+      4,
+      5,
+      6
+     ],
+     "explicacao": {
+      "pt-BR": "Ele deseja uma boa noite, ela agradece e se despede, e ele se despede também.",
+      "en": null
+     }
+    },
+    {
+     "id": "d2-entendeu",
+     "tipo": "dialogo_entendeu",
+     "dialogo": "Na portaria",
+     "pergunta": {
+      "pt-BR": "Como a Sra. Dubois está?",
+      "en": null
+     },
+     "opcoes": [
+      {
+       "pt-BR": "Muito bem",
+       "en": null
+      },
+      {
+       "pt-BR": "Mais ou menos",
+       "en": null
+      },
+      {
+       "pt-BR": "Cansada",
+       "en": null
+      }
+     ],
+     "resposta": 0,
+     "explicacao": {
+      "pt-BR": "A Sra. Dubois responde <b>très bien, merci</b>: ela está muito bem.",
+      "en": null
+     }
+    },
+    {
+     "id": "d2-papel",
+     "tipo": "dialogo_papel",
+     "dialogo": "Na portaria",
+     "falante": "B",
+     "distratores": {
+      "1": "Salut ! Tu vas bien ?",
+      "3": "De rien !",
+      "5": "Bonjour, monsieur !"
+     },
+     "explicacao": {
+      "pt-BR": "Você fez a Sra. Dubois: respondeu no formal, agradeceu e se despediu.",
+      "en": null
+     }
+    },
+    {
+     "id": "d2-fim",
+     "tipo": "dialogo_fim",
+     "dialogo": "Na portaria",
+     "fala": {
+      "pt-BR": "Parabéns! Você acompanhou uma conversa inteira no formal.",
+      "en": null
+     },
+     "frases": [
+      1,
+      4
+     ]
     }
    ],
-   "muda": "nova (decisão 338): os diálogos saem do fim das lições 2 e 4"
+   "muda": "nova (decisão 338): os diálogos saem do fim das lições 2 e 4; cada diálogo em 6 etapas (decisão 353)"
   },
   {
    "id": "checkpoint",
@@ -1215,7 +1450,7 @@
     "en": null
    },
    "licao": "dialogos-da-unidade",
-   "muda": "decisão 320: diálogo informal novo no fim da lição 2 (antes das fórmulas de cortesia), só com cartões das lições 1 e 2; as 4 falas publicadas (A1-1-d0 a d3) saem do diálogo: na implementação, as chaves vão para o arquivo de aposentados (progresso guardado, volta se a fala voltar) ou são preservadas como frases da unidade, se o código permitir",
+   "muda": "decisão 320: diálogo informal novo no fim da lição 2 (antes das fórmulas de cortesia), só com cartões das lições 1 e 2; as 4 falas publicadas (A1-1-d0 a d3) saem do diálogo: na implementação, as chaves vão para o arquivo de aposentados (progresso guardado, volta se a fala voltar) ou são preservadas como frases da unidade, se o código permitir; as checagens antigas (fill, listen, understand) viraram telas da lição de diálogos (decisão 353)",
    "falantes": {
     "A": {
      "nome": "Léa",
@@ -1249,46 +1484,6 @@
      "en": null
     }
    ],
-   "check": [
-    {
-     "tipo": "fill",
-     "fala": 2,
-     "opcoes_erradas": [
-      "Bonsoir !",
-      "Salut !"
-     ]
-    },
-    {
-     "tipo": "listen",
-     "fala": 0,
-     "opcoes_erradas": [
-      "Bonjour, madame !",
-      "Bonsoir, monsieur !"
-     ]
-    },
-    {
-     "tipo": "understand",
-     "pergunta": {
-      "pt-BR": "Como o Hugo está?",
-      "en": null
-     },
-     "opcoes": [
-      {
-       "pt-BR": "Bem",
-       "en": null,
-       "certa": true
-      },
-      {
-       "pt-BR": "Mal",
-       "en": null
-      },
-      {
-       "pt-BR": "Cansado",
-       "en": null
-      }
-     ]
-    }
-   ],
    "falas_publicadas_que_saem": [
     "A1-1-d0",
     "A1-1-d1",
@@ -1307,7 +1502,7 @@
     "en": null
    },
    "licao": "dialogos-da-unidade",
-   "muda": "novo (decisão 270); falas da dona; Comment allez-vous ? e Très bien são vistas pelas notas (decisões 253 e 283)",
+   "muda": "novo (decisão 270); falas da dona; Comment allez-vous ? e Très bien são vistas pelas notas (decisões 253 e 283); as checagens antigas (fill, listen, understand) viraram telas da lição de diálogos (decisão 353)",
    "falantes": {
     "A": {
      "nome": "Sr. Martin",
@@ -1367,46 +1562,6 @@
      "fr": "Au revoir, madame !",
      "pt-BR": "Até logo, senhora!",
      "en": null
-    }
-   ],
-   "check": [
-    {
-     "tipo": "fill",
-     "fala": 4,
-     "opcoes_erradas": [
-      "Bonjour, madame !",
-      "De rien, madame !"
-     ]
-    },
-    {
-     "tipo": "listen",
-     "fala": 1,
-     "opcoes_erradas": [
-      "Bonsoir, monsieur. Vous allez bien ?",
-      "Au revoir, monsieur !"
-     ]
-    },
-    {
-     "tipo": "understand",
-     "pergunta": {
-      "pt-BR": "Como a Sra. Dubois está?",
-      "en": null
-     },
-     "opcoes": [
-      {
-       "pt-BR": "Muito bem",
-       "en": null,
-       "certa": true
-      },
-      {
-       "pt-BR": "Mais ou menos",
-       "en": null
-      },
-      {
-       "pt-BR": "Cansada",
-       "en": null
-      }
-     ]
     }
    ],
    "exige_codigo": "hoje cada unidade tem um diálogo só (campo \"dialogue\" do fr/content.js); dois diálogos na mesma lição pedem mudança de formato"
