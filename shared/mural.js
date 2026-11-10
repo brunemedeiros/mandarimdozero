@@ -632,11 +632,11 @@ async function muralSideHTML(ctx, data){
 }
 
 function muralOpenLesson(ctx){
-  if (ctx.role === 'teacher'){ muralOpenTeacherTab('aulas'); renderTeacherMuralSection(); }
+  if (ctx.role === 'teacher'){ muralOpenTeacherTab('aulas', 'classlogs'); renderTeacherMuralSection(); }
   else if (typeof switchStudentPanelSection === 'function') switchStudentPanelSection('classlogs');
 }
 function muralOpenMaterial(ctx){
-  if (ctx.role === 'teacher'){ muralOpenTeacherTab('aulas'); renderTeacherMuralSection(); }
+  if (ctx.role === 'teacher'){ muralOpenTeacherTab('aulas', 'materials'); renderTeacherMuralSection(); }
   else if (typeof switchStudentPanelSection === 'function') switchStudentPanelSection('materials');
 }
 
@@ -674,6 +674,12 @@ function mountMuralBoard(host, ctx, teacherId){
 function muralOpenTeacherTab(tab, fromSection){
   const st = MURAL_STATE.teacher;
   st.tab = ['mural', 'aulas', 'pessoas'].includes(tab) ? tab : 'mural';
+  // Aulas e materiais tem as abas Aulas | Calendário | Para conferir | Materiais: quem chega por "materials" cai em Materiais,
+  // quem chega por "classlogs" (aula, ficha do aluno) cai em Aulas.
+  if (typeof ADMIN_CLASS_LOGS_STATE !== 'undefined'){
+    if (fromSection === 'materials') ADMIN_CLASS_LOGS_STATE.view = 'materials';
+    else if (fromSection === 'classlogs' && ADMIN_CLASS_LOGS_STATE.view === 'materials') ADMIN_CLASS_LOGS_STATE.view = 'register';
+  }
   if (fromSection === 'classlogs' && typeof ADMIN_CLASS_LOGS_STATE !== 'undefined' && ADMIN_CLASS_LOGS_STATE.studentIds.size === 1){
     st.sel = 's:' + [...ADMIN_CLASS_LOGS_STATE.studentIds][0];
   }
@@ -765,7 +771,9 @@ async function renderTeacherMuralSection(){
   }
 
   if (st.tab === 'aulas'){
-    muralShowTeacherBox(['classlogs', 'materials']);
+    // Material de apoio só na aba Materiais de Aulas e materiais (switchClassLogsView troca depois sem recarregar).
+    const onMaterials = typeof ADMIN_CLASS_LOGS_STATE !== 'undefined' && ADMIN_CLASS_LOGS_STATE.view === 'materials';
+    muralShowTeacherBox(onMaterials ? ['classlogs', 'materials'] : ['classlogs']);
     muralApplyAulasScope(st.sel);
     renderAdminClassLogsView();
     renderAdminSupportMaterialsView();

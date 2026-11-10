@@ -278,6 +278,7 @@ const PANEL_STUB = (who) => {
       await ev(() => switchTeacherPanelSection('classlogs'));
       await page.waitForSelector('#admin-create-class-log-form [data-class-log-extras="new"]');
       // Revisar do Notion: editar e mostrar ao aluno / deixar só para mim
+      await ev(() => document.querySelector('[data-classlog-view="check"]').click());   // 2026-11-10: revisão do Notion fica em Para conferir
       await page.waitForSelector('#admin-notion-review [data-notion-review="9001"]');
       L('Notion: bloco de revisão com as 2 aulas marcadas', await ev(() => document.querySelectorAll('#admin-notion-review [data-notion-review]').length === 2 && document.querySelector('#admin-notion-review summary').textContent.includes('2')));
       L('Notion: tópico e "para a próxima aula" em caixas separadas', await ev(() => [...document.querySelectorAll('[data-notion-review="9001"] [data-notion-field]')].map(x => x.dataset.notionField + ':' + x.value).join('|') === 'topic:Conversa sobre eleições e voltar com o ex|homework:ler o texto que ela esqueceu'));
@@ -294,6 +295,7 @@ const PANEL_STUB = (who) => {
       L('Notion: deixar só para mim não mostra nada ao aluno', await ev(() => { const l = window.__DB.teacher_class_logs.find(x => x.id === 9002); return l.topic === null && l.homework === null; }));
       await page.waitForFunction(() => !document.querySelector('#admin-notion-review details'));
       L('Notion: bloco some quando acaba a revisão', true);
+      await ev(() => document.querySelector('[data-classlog-view="register"]').click());
       await ev(() => { window.__DB.teacher_class_logs = []; });
       L('aulas: Presença com Sem registro, Presente e Faltou', await ev(() => [...document.querySelectorAll('[data-class-log-extras="new"] .att-choice')].map(l => l.textContent.trim()).join('|') === `${t('panel.classLog.attendanceNone')}|Presente|Faltou`));
       L('aulas: 7 Competências', await ev(() => document.querySelectorAll('[data-class-log-extras="new"] input[data-skill]').length === 7));
@@ -329,7 +331,7 @@ const PANEL_STUB = (who) => {
       await page.check('[data-classlog-classroom-checkbox][value="501"]');
       L('aulas: em Todos, marcar a turma no formulário não esconde as outras aulas', await ev(() => document.querySelectorAll('#admin-classlogs-list-box [data-edit-class-log]').length === 2));
       if (SHOTS && width === 1200) await page.screenshot({ path: `${SHOTS}/${lang}-${theme}-${width}-aba-registrar-inteira.png`, fullPage: true });
-      if (SHOTS) await page.addStyleTag({ content: '.toast, #toast-container, .toast-stack, header, .topbar, .app-header{ visibility:hidden !important; }' });
+      if (SHOTS) await page.addStyleTag({ content: '#toast-layer, .topbar{ visibility:hidden !important; }' });
       if (SHOTS) await page.locator('#admin-classlogs-register').screenshot({ path: `${SHOTS}/${lang}-${theme}-${width}-aulas-caixas.png` });
       L('aulas: Alunos, Turmas, Nova aula e Aulas registradas em caixas do painel', await ev(() => document.getElementById('admin-classlogs-register').classList.contains('painel')
         && document.querySelectorAll('#admin-classlogs-register > details.aulas-box').length === 4 && /\(2\)/.test(document.querySelector('[data-classlog-count]').textContent)));
@@ -389,6 +391,23 @@ const PANEL_STUB = (who) => {
       await ev(() => { document.querySelector('#admin-classlogs-calendar-wrap [data-calendar-feed]').open = true; });
       await page.waitForSelector('#admin-classlogs-calendar-wrap [data-calendar-feed-url]');
       L('calendário: professora recebe o link dela', await ev(() => /^https:\/\/agenda\.profbrune\.com\.br\/[ab]{16}$/.test(document.querySelector('#admin-classlogs-calendar-wrap [data-calendar-feed-url]').value)));
+      await ev(() => document.querySelector('[data-classlog-view="check"]').click());   // Google Agenda fica em Para conferir
+      L('abas: Aulas, Calendário, Para conferir e Materiais', await ev(() => [...document.querySelectorAll('[data-classlog-view]')].map(b => b.dataset.classlogView).join() === 'register,calendar,check,materials' && !document.getElementById('admin-classlogs-check').hidden && document.getElementById('admin-classlogs-calendar-wrap').hidden && !!document.querySelector('#admin-classlogs-check #admin-gcal-box') && !!document.querySelector('#admin-classlogs-check #admin-notion-box')));
+      if (SHOTS){
+        await page.waitForTimeout(1500);
+        await ev(() => { document.querySelector('.class-log-views').scrollIntoView({ block: 'start' }); window.scrollBy(0, -230); });
+        await shot('aba-para-conferir');
+        await ev(() => document.querySelector('[data-classlog-view="materials"]').click());
+        await page.waitForTimeout(800);
+        await shot('aba-materiais');
+        await ev(() => document.querySelector('[data-classlog-view="register"]').click());
+        await page.waitForTimeout(800);
+        await shot('aba-aulas');
+        await ev(() => document.querySelector('[data-classlog-view="check"]').click());
+      }
+      L('abas: cabem na tela sem rolagem para o lado', await ev(() => { const r = document.querySelector('#admin-classlogs-content .class-log-views').getBoundingClientRect(); return r.right <= window.innerWidth + 1 && document.documentElement.scrollWidth <= window.innerWidth + 1; }), await ev(() => [document.querySelector('#admin-classlogs-content .class-log-views').getBoundingClientRect().right, window.innerWidth, document.documentElement.scrollWidth]));
+      L('Materiais: o Material de apoio só aparece na aba Materiais', await ev(() => { document.querySelector('[data-classlog-view="materials"]').click(); const a = document.getElementById('admin-materials-content').style.display === '' && document.getElementById('admin-classlogs-check').hidden;
+        document.querySelector('[data-classlog-view="check"]').click(); return a && document.getElementById('admin-materials-content').style.display === 'none'; }));
       await page.waitForSelector('#admin-gcal-box .gcal-review-item');
       L('google: bloco diz que é sincronização em um sentido', await ev(() => /Google Agenda → site/.test(document.querySelector('#admin-gcal-box .gcal-oneway').textContent)));
       L('google: aberto sozinho porque há evento para revisar, com contador', await ev(() => document.getElementById('admin-gcal-box').open && document.querySelector('#admin-gcal-box [data-gcal-badge]').dataset.n === '12' && document.querySelector('#admin-gcal-box [data-gcal-badge]').textContent === '12 para revisar'));
@@ -455,7 +474,8 @@ const PANEL_STUB = (who) => {
           suggested: { date: 'Dt', student: 'Al', topic: 'title', homework: 'Px' }, field_types: { date: ['date'], student: ['select', 'title'], topic: ['title', 'rich_text'], homework: ['rich_text', 'title'], attendance: ['select'], skills: ['multi_select'], language: ['select'] } };
         return { ok: true, results: [] }; }; });
       await page.waitForSelector('#admin-notion-box [data-notion-item]');
-      L('notion: caixa no topo de Aulas, aberta porque há o que conferir, com "3 para conferir" e o selo Conectado', await ev(() => { const b = document.getElementById('admin-notion-box'); return b.open && b.querySelector('[data-notion-badge]').textContent === '3 para conferir' && !b.querySelector('[data-notion-on]').hidden && b.parentElement.classList.contains('painel') && !b.classList.contains('painel') && b.compareDocumentPosition(document.querySelector('.class-log-views')) & Node.DOCUMENT_POSITION_FOLLOWING; }));
+      L('notion: caixa em Para conferir, aberta porque há o que conferir, com "3 para conferir" e o selo Conectado', await ev(() => { const b = document.getElementById('admin-notion-box'); return b.open && b.querySelector('[data-notion-badge]').textContent === '3 para conferir' && !b.querySelector('[data-notion-on]').hidden && b.parentElement.classList.contains('painel') && !b.classList.contains('painel') && !!b.closest('#admin-classlogs-check'); }));
+      L('Para conferir: contador da aba soma Notion (3) e Google', await ev(() => { const c = document.querySelector('[data-classlog-check-count]'); return !c.hidden && Number(c.textContent) === 3 + GCAL_STATE.review.filter(e => e.match_state !== 'ignored' && !e.skipped_at).length; }), await ev(() => document.querySelector('[data-classlog-check-count]').textContent));
       if (SHOTS) { await ev(() => { document.getElementById('admin-notion-box').scrollIntoView({ block: 'start' }); window.scrollBy(0, -110); }); await shot('notion-aprovar'); }
       L('notion: diz que é só leitura e mostra o banco lido', await ev(() => /Só leitura/.test(document.querySelector('#admin-notion-box .notion-fonte').textContent) && document.querySelector('#admin-notion-box .notion-fonte').textContent.includes('Calendário de Aulas')));
       L('notion: resumo com atualizadas em 7 dias, ligadas, para aprovar e para revisar', await ev(() => [...document.querySelectorAll('#admin-notion-box .notion-resumo .p-indicador-valor')].map(x => x.textContent).join() === '3,9,2,1'));
@@ -494,6 +514,8 @@ const PANEL_STUB = (who) => {
       L('notion: sem conexão mostra Conectar Notion', await ev(() => !!document.querySelector('#admin-notion-box [data-notion-connect]') && !document.querySelector('#admin-notion-box [data-notion-sync]')));
       await ev(() => { window.__notionStatus = null; });
       await ev(() => { delete window.__gcalResolved; });
+      await ev(() => document.querySelector('[data-classlog-view="calendar"]').click());
+      await page.waitForSelector('#admin-classlogs-calendar .cal');
       if (SHOTS) { await page.waitForTimeout(3500); await ev(() => { document.querySelector('#admin-classlogs-calendar-wrap [data-calendar-feed]').scrollIntoView({ block: 'start' }); window.scrollBy(0, -110); }); }
       await shot('aulas-link-agenda');
       // a aula agendada pode cair no mês seguinte: avança até achar

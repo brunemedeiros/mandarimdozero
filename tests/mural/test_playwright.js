@@ -245,7 +245,10 @@ const MURAL_FAKE = (who) => {
     await ev(() => document.querySelector('[data-mural-sel^="c:"]').click());
     await ev(() => document.querySelector('[data-mural-tab="aulas"]').click());
     await page.waitForFunction(() => document.getElementById('admin-classlogs-content').style.display === '');
-    L('Aulas e materiais: aulas e material de apoio à mostra, mural escondido', await ev(() => document.getElementById('admin-materials-content').style.display === '' && document.getElementById('admin-mural-content').style.display === 'none'));
+    // 2026-11-10: Aulas | Calendário | Para conferir | Materiais; o Material de apoio só aparece na aba Materiais.
+    // Neste cenário a professora ainda não tem aluno com vínculo: sem abas, o Material de apoio fica à mostra (as abas são testadas em painel-professora).
+    await page.waitForFunction(() => !!document.querySelector('#admin-classlogs-content .profile-empty-note, [data-classlog-view]'));
+    L('Aulas e materiais: sem aluno, aviso de vincular e material de apoio à mostra, mural escondido', await ev(() => (document.querySelector('[data-classlog-view]') || document.getElementById('admin-materials-content').style.display === '') && document.getElementById('admin-mural-content').style.display === 'none'));
     L('Aulas e materiais: filtrado pela turma escolhida', await ev(() => ADMIN_CLASS_LOGS_STATE.scope && ADMIN_CLASS_LOGS_STATE.scope.classroomId === window.__M.classrooms[0].id));
     L('Aulas e materiais tem "Todos"', await ev(() => !!document.querySelector('[data-mural-sel="all"]')));
     await ev(() => { ADMIN_CLASS_LOGS_STATE.studentIds = new Set(['S2']); switchTeacherPanelSection('classlogs'); });
