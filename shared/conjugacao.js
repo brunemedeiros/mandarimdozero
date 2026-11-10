@@ -752,13 +752,7 @@ function renderConjSessionResult(contentEl){
   trackEvent('lesson_complete', 'conjugation_session', { score: CONJ_STATE.score, total: CONJ_STATE.totalFields, pct });
   const mistakes = CONJ_STATE.mistakes;
   const tenseLabel = k => conjTenseLabel(k);
-  contentEl.innerHTML = `
-    <div class="conj-session-result">
-      <div class="big-emoji">${pct >= 70 ? '🎉' : '💪'}</div>
-      <h3>${t('fr.conj.sessionDone')}</h3>
-      <div class="score-num">${Math.round(CONJ_STATE.score)}/${CONJ_STATE.totalFields}</div>
-      <p>${pct >= 70 ? t('fr.conj.wellDone') : t('fr.conj.keepPracticing')}</p>
-      ${mistakes.length ? `
+  const reviewHTML = mistakes.length ? `
         <div class="conj-review">
           <div class="conj-review-title">${t('fr.conj.reviewTitle', { n: mistakes.length })}</div>
           <ul class="conj-review-list">${mistakes.map(m => {
@@ -768,13 +762,15 @@ function renderConjSessionResult(contentEl){
               <span class="conj-review-form">${pron ? `<i>${escapeHTML(pron)}</i> ` : ''}${m.given.trim() ? conjAnswerViewHTML(m.given, m.target) : '<span class="conj-review-empty">—</span>'} <span class="conj-review-arrow">→</span> <b>${escapeHTML(m.display)}</b></span>
             </li>`;
           }).join('')}</ul>
-        </div>` : ''}
-      <div class="conj-result-actions">
-        ${mistakes.length ? `<button class="btn btn-primary" id="conj-practice-mistakes-btn">${t('fr.conj.practiceMistakes')}</button>` : ''}
-        <button class="btn ${mistakes.length ? 'btn-secondary' : 'btn-primary'}" id="conj-restart-btn">${t('fr.conj.newSession')}</button>
-      </div>
-    </div>
-  `;
+        </div>` : '';
+  // Tela de conclusão única (shared/core/conclusao.js). "Concluir sessão" volta à escolha de verbos e tempos (a tela principal da Conjugação).
+  contentEl.innerHTML = conclusaoHTML({ icon: pct >= 70 ? '🎉' : '💪', title: t('fr.conj.sessionDone'), cls: 'conj-session-result',
+    sub: pct >= 70 ? t('fr.conj.wellDone') : t('fr.conj.keepPracticing'),
+    stats: [{ label: t('zh.path.lessonDone.score'), value: `${Math.round(CONJ_STATE.score)}/${CONJ_STATE.totalFields}` }],
+    body: reviewHTML,
+    actions: mistakes.length
+      ? [{ id: 'conj-practice-mistakes-btn', label: t('fr.conj.practiceMistakes') }, { id: 'conj-restart-btn', label: t('fr.conj.newSession'), secondary: true }]
+      : [{ id: 'conj-restart-btn', label: t('fr.conj.newSession') }] });
   document.getElementById('conj-restart-btn').addEventListener('click', () => {
     document.getElementById('conj-select-wrap').style.display = 'block';
     document.getElementById('conj-practice-wrap').style.display = 'none';

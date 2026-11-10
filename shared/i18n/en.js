@@ -381,7 +381,7 @@ window.I18N_CATALOG['en'] = {
   'review.speed.points': '{n} pts', // ALTA
   'review.speed.answered': { one: 'You answered {n} word this round.', other: 'You answered {n} words this round.' }, // ALTA
   'review.back': 'Back', // ALTA
-  'review.practiceMore': 'Practice more', // ALTA
+  'review.practiceMore': 'Keep reviewing', // ALTA
   'review.complete.title': 'Review complete!', // ALTA
   'review.complete.reviewed': { one: 'You reviewed {n} card this session.', other: 'You reviewed {n} cards this session.' }, // ALTA
   'review.session.deckEmptyTitle': 'No cards in this Deck yet', // ALTA
@@ -784,7 +784,7 @@ window.I18N_CATALOG['en'] = {
   'fr.conj.sessionDone': 'Session complete!', // ALTA
   'fr.conj.wellDone': 'Great job!', // ALTA
   'fr.conj.keepPracticing': 'Keep practicing these conjugations.', // ALTA
-  'fr.conj.newSession': 'New session', // ALTA
+  'fr.conj.newSession': 'Finish session', // ALTA
   'fr.conj.verbCounter': 'Verb {i} of {n}', // ALTA
   'fr.conj.currentVerb': 'Current verb', // ALTA
   'fr.conj.regular': 'Regular verb', // ALTA
