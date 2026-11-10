@@ -104,3 +104,23 @@ Correção: migration `100_review_bank_agent_other_students` (o estado devolve `
 - 2026-10-15: função v8 na produção (autorizada pela autora), motor regerado no PR #337 (Banco ligado a Turma: `rbReadyToDeliver`
   aceita turma; `teacherId` no cartão). Atalhos fixados no commit c57286f; `index.ts` igual ao da v7. A rotina segue só para
   alunos ligados a uma conta (`core.mjs` exige `linked_student_id`).
+
+## Caderno alterado e avisos de leitura (2026-11-08)
+- Pedido da dona (sugestões 1 e 2): a tarefa `trig_01Ta2vz9PGZktySgX5qMxQj9` agora (1) consulta só os metadados do caderno de cada aluno gerenciado (Drive `get_file_metadata`, sem abrir o conteúdo) e lê o caderno
+  também quando `modifiedTime` é dos últimos 3 dias e posterior a `last_entry_read`, mesmo sem aula na agenda (releitura é segura: o servidor ignora itens repetidos); (2) a mensagem da manhã traz avisos de caderno:
+  "alterado em DD/MM, sem entrada nova depois de DD/MM", "aula de DD/MM, caderno ainda sem alteração" (só aula de ontem ou de hoje) e "caderno que não exportou (texto simples)".
+- Texto igual em `docs/rotina-banco/tarefa-nova-producao.txt` (colar de novo na tarefa se mudar). Só o prompt mudou: nenhuma função ou migration.
+- Motivo: Rachel teve aulas em 23/10, 30/10 e 06/11, mas o caderno só foi alterado em 06/11, depois da última leitura (16/10); e a rotina só lia quando havia aula na agenda dentro de 7 dias.
+- 2026-11-08 (pedido da dona): agenda principal também aceita evento cujo título traz o nome do aluno como palavra inteira, sem convidado e sem "Agendamento" (caso "Maxi - PLE"); a rotina já tinha incluído a data por conta própria, agora é regra. Texto igual em `docs/rotina-banco/tarefa-nova-producao.txt`.
+- Conector Google Docs NÃO está na lista da tarefa agendada (`mcp_connections`) e a janela "Editar tarefa agendada > Configurações avançadas > Conectores" não permite marcar. Não recriar a tarefa por MCP (a cópia `trig_015AkoX1hyDJuWs1MimQDTbE`, criada assim, ficou sem conectores e foi desligada). Sem o conector, a leitura estruturada do Passo 3 é ignorada e vale o texto simples.
+
+## Divisão entre os dois Bancos: francês no site, português no artifact (decisão da dona, 2026-11-06; aplicada em 2026-11-09)
+- Mensagem do artifact (a dona confirmou a decisão em 2026-11-09). Causa: as duas rotinas cadastravam sozinhas alunos novos da agenda; Clare, Jordan e Justin ficaram duplicados e Maxi e Taryn Crosby (português) foram parar no site.
+- Texto da tarefa do site (`trig_01Ta2vz9PGZktySgX5qMxQj9`, igual a `docs/rotina-banco/tarefa-nova-producao.txt`): só processa e só cadastra alunos de francês (pasta de francês e, no outro drive, só caderno de francês; nunca a pasta de português);
+  leitura do caderno com HTML primeiro e NUNCA pular um aluno sem tentar todas as formas (HTML, leitura estruturada, text/plain, read_file_content), registrando o motivo e sem mexer em `last_entry_read` se nada funcionar.
+  A ordem "text/plain primeiro" da mensagem NÃO foi adotada (só depois de testar num caderno pequeno).
+- Dados (produção, autorizado): `agent_managed = false` para Clare, Jordan, Justin, Maxi e Taryn Crosby (178 itens aprovados e 69 pendentes guardados, nada apagado, sem conta nem cartão); Fred (francês, já existia no site, importado) com `agent_managed = true` (caderno `19HsT4NbULrJIrMhX_FlY7X8VvKO5YL0yp5EaWmIkXQg`, última leitura 28/08).
+  Estado da rotina depois: 11 alunos gerenciados (todos de francês) e 18 em `other_students`.
+- Atenção Fred: o caderno tem 15 MB (alterado pela última vez em 2026-10-01); a exportação em HTML e o text/plain provavelmente falham. Avisar a dona para arquivá-lo no artifact só depois da primeira leitura bem-sucedida.
+- Regra da dona (2026-11-09): não criar caderno novo nem trocar o `notebook_id` de nenhum aluno sem aprovação explícita (ex.: o caderno do Fred, de 15 MB, foi só uma sugestão).
+- 2026-11-10 (pedido da dona): Carmen (francês) virou ex-aluna e foi ARQUIVADA no Banco (`status = 'arquivado'`; 72 itens e 63 cartões mantidos, o vínculo de aluna foi removido pela própria dona e conferido em 2026-11-10: não há mais linha dela em `teacher_students`). A rotina só lê alunos `ativo`, então ela saiu sozinha do estado (10 gerenciados).

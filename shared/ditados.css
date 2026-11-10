@@ -196,3 +196,9 @@
 @media (prefers-reduced-motion: reduce){
   .dictation-card{ transition:none; }
 }
+
+/* Etapa D, lote 2 (2026-11-04): cabeçalho no molde da lição (linha pequena "Ditados · nível · módulo" em cima, tarefa embaixo,
+   depois a barra do topo); o espaço fica com o cabeçalho, não com a linha pequena. */
+.lesson-unit-context .dictation-player-module{ margin:0 0 2px; }
+.lesson-unit-context .dictation-player-task{ margin:0; }
+.dictation-cmd{ margin-top:4px; }

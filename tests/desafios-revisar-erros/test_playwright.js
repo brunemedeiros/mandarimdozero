@@ -71,7 +71,8 @@ const shown = (page, id) => page.evaluate(i => { const e = document.getElementBy
     check(label + ' sem rolagem horizontal', await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1));
     if (OUT) await page.screenshot({ path: path.join(OUT, `player-${label}.png`) });
     // voltar: categorias reaparecem, foco sai
-    await page.click('#challenge-back-to-list');
+    // etapa D (2026-11-04): todos os tipos têm a barra do topo; o X faz o papel do link de voltar
+    await page.click('#challenge-player-wrap .activity-exit-btn');
     await page.waitForSelector('#challenges-review-card', { timeout: 8000 });
     await page.waitForTimeout(300);
     check(label + ' voltou às categorias', await shown(page, 'challenges-categories-wrap') && !(await shown(page, 'challenge-player-wrap')));

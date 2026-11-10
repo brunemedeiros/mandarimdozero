@@ -261,7 +261,8 @@ async function fingerprint(browser, root){
   });
   await page.clock.runFor(2000);
   // voltar à lista e sair da aba (para o áudio)
-  await click('#dictation-back-to-list');
+  // etapa D (2026-11-04): o link fica escondido atrás do ✕ da barra; clicar pelo próprio botão vale nas duas árvores.
+  await page.evaluate(() => document.getElementById('dictation-back-to-list').click()); await page.waitForTimeout(50);
   out.voltar_lista = await html('#view-dictation');
   await page.evaluate(() => switchTab('path'));
   out.depois_sair = await page.evaluate(() => String(dictationAudioEl));
@@ -310,6 +311,9 @@ async function fingerprint(browser, root){
       total++;
       const a = norm(antes[k]), b = norm(depois[k]);
       if (a === b){ iguais++; passed++; continue; }
+      // Etapa D, lote 2 (2026-11-04, aprovada pela dona; docs/telas-exercicio-etapa-d-proposta.md): o player ganhou cabeçalho, comando e a barra
+      // da lição (lesson-unit-context, activity-lesson-bar). Cena com o player novo não se compara; o resto, sim.
+      if (/lesson-unit-context/.test(b) && !/lesson-unit-context/.test(a)){ iguais++; passed++; continue; }
       let i = 0; while (i < a.length && a[i] === b[i]) i++;
       check('igual ao fr de antes: ' + k, false, { antes: a.slice(Math.max(0, i - 160), i + 200), depois: (b || '').slice(Math.max(0, i - 160), i + 200) });
     }
