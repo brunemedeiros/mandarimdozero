@@ -113,7 +113,7 @@ async function scenes(page, visit){
       // (--brand-fill, --success-fill, --grade-fill-*), botões de nota recoloridos (.grade-*, .rb-big.is-*) e o .xp-suffix da regra de XP.
       // E regra NOVA no fr (gcal-*, bv-*, tm-note...) só importa se cair no desafios.css: o que este teste guarda é que as regras
       // movidas continuam as mesmas; recurso novo de outra tela não é "regra que mudou de lugar".
-      const DELIB = /expr-|challenge-queue-interstitial|\.lesson-complete|\.lc-stat|\.lesson-boundary-title|conclusao|\.accent-feedback(?: \.accent-feedback-header)?\|\|\{"text-align|\.accent-feedback-correct-box|\.audio-btn-md\|\||activity-lesson-bar|cg-progress-bar|conj-progress-bar|cg-dontknow|\.cg-choice\|\|\{"position|\.cg-choice\.is-wrong|#conj-practice-wrap \.conj-progress|^:root\|\||\.rb-big\.is-(ok|help|good|bad)\||^\.grade-(again|hard|good|easy)\||^\.xp-suffix\|/;
+      const DELIB = /expr-|\.accent-feedback(?: \.accent-feedback-header)?\|\|\{"text-align|\.accent-feedback-correct-box|\.audio-btn-md\|\||activity-lesson-bar|cg-progress-bar|conj-progress-bar|cg-dontknow|\.cg-choice\|\|\{"position|\.cg-choice\.is-wrong|#conj-practice-wrap \.conj-progress|^:root\|\||\.rb-big\.is-(ok|help|good|bad)\||^\.grade-(again|hard|good|easy)\||^\.xp-suffix\|/;
       const sumiu = [...ca].filter(([k, n]) => (cb.get(k) || 0) < n).map(([k]) => k).filter(k => !DELIB.test(k));
       const keysMoved = new Set(rb.filter(r => /desafios\.css$/.test(r.sheet)).map(key));
       // Regra de OUTRA tela que outra sessão mexeu depois do refactor (ex.: #view-progress .stat-card) não é o que este teste guarda: só

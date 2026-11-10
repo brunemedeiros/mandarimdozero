@@ -202,7 +202,7 @@ const PT_CONFIG = `({
     L('ser (irregular): "e"/"sao" = quase, "fora" errada, XP em dobro (9 certas = 18)', c2.almost === 2 && c2.wrong === 1 && c2.xp - xp1 === 18 && c2.tempo === 'Irregular', [c2, c2.xp - xp1]);
     await page.click('#conj-next-verb-btn');
     await page.waitForSelector('.conj-session-result');
-    const r = await page.evaluate(() => ({ score: document.querySelector('.lc-stat-value').textContent, items: [...document.querySelectorAll('.conj-review-list li')].map(li => li.textContent.replace(/\s+/g, ' ').trim()),
+    const r = await page.evaluate(() => ({ score: document.querySelector('.score-num').textContent, items: [...document.querySelectorAll('.conj-review-list li')].map(li => li.textContent.replace(/\s+/g, ' ').trim()),
       sessions: STATE.daily.conjugationSessions, modes: STATE.modesUsed.conjugation, missao: REVISAO_CONJ_CHALLENGES.find(m => m.id === 'conj1').get(STATE.daily) }));
     L('resultado: placar, revisão com o pronome do português e as missões', r.score === '20/24' && r.items.length === 6 && /falar, Presente/.test(r.items[0]) && /^falar, Presente ele /.test(r.items[0])
       && r.sessions === 1 && r.modes === true && r.missao === 1, r);

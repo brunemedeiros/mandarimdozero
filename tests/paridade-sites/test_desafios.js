@@ -32,7 +32,7 @@ async function fingerprint(browser, root, keys){
   const { page, ctx, server, errors } = await H.boot(browser, root, { lang: 'pt-BR' });
   const out = {};
   // a duração dos mp3 no checklist do admin chega quando o áudio carrega (momento variável): fica de fora
-  const html = (sel) => page.evaluate((s) => { const e = document.querySelector(s); if (!e) return null; const c = e.cloneNode(true); c.querySelectorAll('.challenges-admin-audio-duration').forEach(x => { x.textContent = ''; }); c.querySelectorAll('.conclusao, .speed-gameover, .conj-session-result, .challenge-queue-interstitial, .review-empty:has(.review-complete-actions), .story-complete, .exercise-result').forEach(n => n.replaceWith(document.createComment('CONCLUSAO'))); return c.innerHTML; }, sel).then(v => (typeof v === 'string' ? v.replace(VERIFICAR_RE, '>VERIFICAR</button>') : v));
+  const html = (sel) => page.evaluate((s) => { const e = document.querySelector(s); if (!e) return null; const c = e.cloneNode(true); c.querySelectorAll('.challenges-admin-audio-duration').forEach(x => { x.textContent = ''; }); return c.innerHTML; }, sel).then(v => (typeof v === 'string' ? v.replace(VERIFICAR_RE, '>VERIFICAR</button>') : v));
   const click = (sel) => page.evaluate((s) => { const e = document.querySelector(s); if (!e) throw new Error('sem ' + s); e.click(); }, sel);
   const state = () => page.evaluate(() => JSON.stringify({ done: STATE.completedChallenges, rev: STATE.challengeReviews, xp: STATE.xp,
     daily: STATE.daily, modes: STATE.modesUsed, saved: serializeState(), badges: collectBadgeMetrics(STATE), cur: typeof CURRENT_CHALLENGE_PLAYER !== 'undefined' ? CURRENT_CHALLENGE_PLAYER : 'x' }));
@@ -538,7 +538,7 @@ async function fingerprintEn(browser, root){
   const { page, ctx, server, errors } = await H.boot(browser, root, { lang: 'en', rows: rowsComTraducaoEn() });
   const out = {};
   // a duração dos mp3 no checklist do admin chega quando o áudio carrega (momento variável): fica de fora
-  const html = (sel) => page.evaluate((s) => { const e = document.querySelector(s); if (!e) return null; const c = e.cloneNode(true); c.querySelectorAll('.challenges-admin-audio-duration').forEach(x => { x.textContent = ''; }); c.querySelectorAll('.conclusao, .speed-gameover, .conj-session-result, .challenge-queue-interstitial, .review-empty:has(.review-complete-actions), .story-complete, .exercise-result').forEach(n => n.replaceWith(document.createComment('CONCLUSAO'))); return c.innerHTML; }, sel).then(v => (typeof v === 'string' ? v.replace(VERIFICAR_RE, '>VERIFICAR</button>') : v));
+  const html = (sel) => page.evaluate((s) => { const e = document.querySelector(s); if (!e) return null; const c = e.cloneNode(true); c.querySelectorAll('.challenges-admin-audio-duration').forEach(x => { x.textContent = ''; }); return c.innerHTML; }, sel).then(v => (typeof v === 'string' ? v.replace(VERIFICAR_RE, '>VERIFICAR</button>') : v));
   await page.evaluate(() => switchTab('challenges'));
   await page.waitForFunction(() => document.querySelector('#challenges-categories .challenge-category-card'));
   out.categorias = await html('#view-challenges');
