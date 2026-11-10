@@ -256,5 +256,5 @@ para outra frase) e a regra dos Desafios é ~2 por unidade (5 unidades = 10). O 
 produção, com explicação em pt-BR e en (as 6 antigas reaproveitadas e ajustadas; 4 novas: "Le musée est loin d'ici.", "Elle est
 américaine.", "Tu veux du sucre ?", "Une bouteille d'eau, s'il vous plaît."), revisadas pelo revisor de conteúdo. Em "Tu veux du sucre ?"
 sai a aceita de Portugal "Tu queres açúcar?" e entra "Você quer um pouco de açúcar?"; em "Je cherche une robe." sai a aceita em inglês
-"I look for a dress.". Gravação na produção: `docs/rollout-sql/ouca-traduza-m3-explicacoes.sql` (só com autorização; o Staging não tem
-estes desafios). O retrato `challenges-producao-a1m3-lt.json` virou só histórico; validador e teste de PT-PT usam o lote.
+"I look for a dress.". Gravado na produção em 2026-11-10 (autorizado) pelo `docs/rollout-sql/ouca-traduza-m3-explicacoes.sql`; conferido por hash
+(explicação + aceitas dos 10: `b983e24d75e17e2505f1dd28566e9b72`, igual ao lote). O Staging não tem estes desafios. O retrato `challenges-producao-a1m3-lt.json` virou só histórico; validador e teste de PT-PT usam o lote.
