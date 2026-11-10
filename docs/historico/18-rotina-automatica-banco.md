@@ -122,3 +122,4 @@ Correção: migration `100_review_bank_agent_other_students` (o estado devolve `
 - Dados (produção, autorizado): `agent_managed = false` para Clare, Jordan, Justin, Maxi e Taryn Crosby (178 itens aprovados e 69 pendentes guardados, nada apagado, sem conta nem cartão); Fred (francês, já existia no site, importado) com `agent_managed = true` (caderno `19HsT4NbULrJIrMhX_FlY7X8VvKO5YL0yp5EaWmIkXQg`, última leitura 28/08).
   Estado da rotina depois: 11 alunos gerenciados (todos de francês) e 18 em `other_students`.
 - Atenção Fred: o caderno tem 15 MB (alterado pela última vez em 2026-10-01); a exportação em HTML e o text/plain provavelmente falham. Avisar a dona para arquivá-lo no artifact só depois da primeira leitura bem-sucedida.
+- Regra da dona (2026-11-09): não criar caderno novo nem trocar o `notebook_id` de nenhum aluno sem aprovação explícita (ex.: o caderno do Fred, de 15 MB, foi só uma sugestão).
