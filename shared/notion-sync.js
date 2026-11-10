@@ -146,7 +146,7 @@ function notionSetupHTML(){
         <select id="notion-col-${f}" data-notion-col="${f}">
           <option value="">${t(NOTION_REQUIRED.includes(f) ? 'panel.notion.pickColumn' : 'panel.notion.noColumn')}</option>
           ${opts.map(p => `<option value="${escapeHTML(p.id)}" ${current && current[f] === p.id ? 'selected' : ''}>${escapeHTML(p.name)}</option>`).join('')}
-        </select></div>`;
+        </select>${f === 'student' ? `<small class="p-ajuda">${t('panel.notion.relationHint')}</small>` : ''}</div>`;
     };
     return `<fieldset class="p-grupo">
       <legend>${t('panel.notion.columnsTitle', { title: escapeHTML(s.title || '') })}</legend>
@@ -240,6 +240,7 @@ async function renderNotionBox(opts){
   const n = NOTION_STATE.items.filter(i => i.state === 'approval' || i.state === 'review').length;
   const badge = host.querySelector('[data-notion-badge]');
   if (badge){ badge.textContent = n ? t('panel.notion.toCheck', { n }) : ''; badge.hidden = !n; }
+  if (typeof updateClassLogCheckTab === 'function') updateClassLogCheckTab();
   const on = host.querySelector('[data-notion-on]');
   if (on) on.hidden = !(NOTION_STATE.status && NOTION_STATE.status.connected && NOTION_STATE.status.source && NOTION_STATE.status.source.enabled);
   host.open = NOTION_STATE.open === null ? !!n : NOTION_STATE.open;

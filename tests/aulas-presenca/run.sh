@@ -49,3 +49,12 @@ psql -h /tmp/pg -p 54329 -U pguser aulas94 -q -At -f "$HERE/test_124.sql" 2>&1 |
 $P aulas94 -f "$MIG/128_notion_sync.sql" >/dev/null
 $P aulas94 -f "$MIG/128_notion_sync.sql" >/dev/null
 psql -h /tmp/pg -p 54329 -U pguser aulas94 -q -At -f "$HERE/test_128.sql" 2>&1 | grep -v '^\s*$'
+# 130: trocar coluna/banco/data relê todas as linhas do Notion.
+$P aulas94 -f "$MIG/130_notion_remap.sql" >/dev/null
+$P aulas94 -f "$MIG/130_notion_remap.sql" >/dev/null
+psql -h /tmp/pg -p 54329 -U pguser aulas94 -q -At -f "$HERE/test_130.sql" 2>&1 | grep -v '^\s*$'
+psql -h /tmp/pg -p 54329 -U pguser aulas94 -q -At -f "$HERE/test_128.sql" 2>&1 | grep -E 'verificações|FALHOU'
+# 131: descartar vale para sempre.
+$P aulas94 -f "$MIG/131_notion_discard_sticks.sql" >/dev/null
+$P aulas94 -f "$MIG/131_notion_discard_sticks.sql" >/dev/null
+psql -h /tmp/pg -p 54329 -U pguser aulas94 -q -At -f "$HERE/test_131.sql" 2>&1 | grep -v '^\s*$'
