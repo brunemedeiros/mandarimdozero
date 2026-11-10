@@ -70,6 +70,8 @@ Regras de código: `.claude/rules/qualidade-de-codigo.md`. Regras por área: `.c
   Voz da professora (todo texto que fala com o aluno): `docs/voz-da-professora.md`.
 - **Como mudar:** texto de tela ou nota só no rascunho (nunca no `index.html`, que é gerado); depois `node .../maquete-licao-curta/gerar.js`
   (`--antes=<commit>` mostra o texto anterior ao lado, para revisão).
+- **Regras das telas num lugar só:** `fr/scripts/curriculo_licao_curta.js` (`conferirTelas`, `textosDasTelas`, `posicaoNoFimDaLicao`); o `validar.js`
+  de cada unidade só chama essas funções (não copie as conferências para o validador de outra unidade).
 - **Como testar:** `node docs/i18n/curriculo/piloto-m1/A1-1/validar.js` (coerência das telas com o mapa, alternância dos distratores,
   "só palavras vistas" nos exercícios na posição de cada tela e tamanho dos textos), `node tests/curriculo/test_mapa_totais.js` (casos da
   lição de diálogos) e `node tests/curriculo/test_tamanho_textos.js` (limites da voz da professora, `fr/scripts/curriculo_tamanho_textos.js`).
