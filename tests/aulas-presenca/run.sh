@@ -62,3 +62,8 @@ psql -h /tmp/pg -p 54329 -U pguser aulas94 -q -At -f "$HERE/test_131.sql" 2>&1 |
 $P aulas94 -f "$MIG/132_notion_former_and_manual.sql" >/dev/null
 $P aulas94 -f "$MIG/132_notion_former_and_manual.sql" >/dev/null
 psql -h /tmp/pg -p 54329 -U pguser aulas94 -q -At -f "$HERE/test_132.sql" 2>&1 | grep -v '^\s*$'
+# 133: ex-aluna sem linha de vínculo (Notion, Google Agenda, Banco).
+$P aulas94 -f "$MIG/133_former_students_history.sql" >/dev/null
+$P aulas94 -f "$MIG/133_former_students_history.sql" >/dev/null
+psql -h /tmp/pg -p 54329 -U pguser aulas94 -q -At -f "$HERE/test_133.sql" 2>&1 | grep -v '^\s*$'
+for t in 117 128 130 131 132; do psql -h /tmp/pg -p 54329 -U pguser aulas94 -q -At -f "$HERE/test_$t.sql" 2>&1 | grep -E 'verificações|FALHOU|ERRO|ERROR'; done
