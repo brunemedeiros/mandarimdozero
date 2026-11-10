@@ -632,11 +632,11 @@ async function muralSideHTML(ctx, data){
 }
 
 function muralOpenLesson(ctx){
-  if (ctx.role === 'teacher'){ muralOpenTeacherTab('aulas', 'classlogs'); renderTeacherMuralSection(); }
+  if (ctx.role === 'teacher'){ switchTeacherPanelSection('classlogs'); }
   else if (typeof switchStudentPanelSection === 'function') switchStudentPanelSection('classlogs');
 }
 function muralOpenMaterial(ctx){
-  if (ctx.role === 'teacher'){ muralOpenTeacherTab('aulas', 'materials'); renderTeacherMuralSection(); }
+  if (ctx.role === 'teacher'){ switchTeacherPanelSection('materials'); }
   else if (typeof switchStudentPanelSection === 'function') switchStudentPanelSection('materials');
 }
 
@@ -669,41 +669,14 @@ function mountMuralBoard(host, ctx, teacherId){
   renderMuralFeed(board, ctx);
 }
 
-// ---------- Professora: Mural | Aulas e materiais | Pessoas ----------
-// sel: 'all' | 'c:<turma>' | 's:<aluno>'. "Todos" só existe em Aulas e materiais e em Pessoas (o mural é sempre de alguém).
-function muralOpenTeacherTab(tab, fromSection){
-  const st = MURAL_STATE.teacher;
-  st.tab = ['mural', 'aulas', 'pessoas'].includes(tab) ? tab : 'mural';
-  // Aulas e materiais tem as abas Aulas | Calendário | Para conferir | Materiais: quem chega por "materials" cai em Materiais,
-  // quem chega por "classlogs" (aula, ficha do aluno) cai em Aulas.
-  if (typeof ADMIN_CLASS_LOGS_STATE !== 'undefined'){
-    if (fromSection === 'materials') ADMIN_CLASS_LOGS_STATE.view = 'materials';
-    else if (fromSection === 'classlogs' && ADMIN_CLASS_LOGS_STATE.view === 'materials') ADMIN_CLASS_LOGS_STATE.view = 'register';
-  }
-  if (fromSection === 'classlogs' && typeof ADMIN_CLASS_LOGS_STATE !== 'undefined' && ADMIN_CLASS_LOGS_STATE.studentIds.size === 1){
-    st.sel = 's:' + [...ADMIN_CLASS_LOGS_STATE.studentIds][0];
-  }
-}
-
+// ---------- Professora: Mural | Pessoas ----------
+// sel: 'all' | 'c:<turma>' | 's:<aluno>'. "Todos" só existe em Pessoas (o mural é sempre de alguém).
+// Aulas e Materiais viraram abas do painel (2026-11-10, shared/teacher-panel.js).
 function muralShowTeacherBox(ids){
   ['mural', 'classlogs', 'materials', 'people'].forEach(s => {
     const el = document.getElementById(`admin-${s}-content`);
     if (el) el.style.display = ids.includes(s) ? '' : 'none';
   });
-}
-
-function muralApplyAulasScope(sel){
-  const scope = sel && sel.startsWith('c:') ? { classroomId: Number(sel.slice(2)) } : sel && sel.startsWith('s:') ? { studentId: sel.slice(2) } : null;
-  if (typeof ADMIN_CLASS_LOGS_STATE !== 'undefined'){
-    ADMIN_CLASS_LOGS_STATE.scope = scope;
-    // "Todos": a lista mostra as aulas de todo mundo (listAll) e o formulário de Nova aula começa sem ninguém marcado.
-    const wasAll = ADMIN_CLASS_LOGS_STATE.listAll;
-    ADMIN_CLASS_LOGS_STATE.listAll = !scope;
-    if (scope?.studentId){ ADMIN_CLASS_LOGS_STATE.studentIds = new Set([scope.studentId]); ADMIN_CLASS_LOGS_STATE.classroomIds = new Set(); }
-    else if (scope?.classroomId){ ADMIN_CLASS_LOGS_STATE.classroomIds = new Set([String(scope.classroomId)]); ADMIN_CLASS_LOGS_STATE.studentIds = new Set(); }
-    else if (!wasAll){ ADMIN_CLASS_LOGS_STATE.studentIds = new Set(); ADMIN_CLASS_LOGS_STATE.classroomIds = new Set(); }
-  }
-  if (typeof MATERIALS_VIEW !== 'undefined') MATERIALS_VIEW.filtros.aluno = scope?.studentId || '';
 }
 
 async function renderTeacherMuralSection(){
@@ -714,8 +687,8 @@ async function renderTeacherMuralSection(){
   const list = await muralLoadList();
   muralApplyBadges();
   const st = MURAL_STATE.teacher;
-  // Sem o Mural (erro de rede, banco sem a 087), Aulas e materiais continuam abrindo: só o mural e Pessoas dependem dele.
-  const tch = list?.as_teacher || (st.tab === 'aulas' ? { classrooms: [], roster: [] } : null);
+  if (!['mural', 'pessoas'].includes(st.tab)) st.tab = 'mural';
+  const tch = list?.as_teacher || null;
   if (!tch){ muralShowTeacherBox(['mural']); wrap.innerHTML = `<p class="profile-empty-note">${muralErrorText('not_authorized')}</p>`; return; }
   const classrooms = tch.classrooms || [];
   const roster = tch.roster || [];
@@ -731,7 +704,7 @@ async function renderTeacherMuralSection(){
     shell.innerHTML = `
       <div class="mc-shell">
         <div class="deck-topbar panel-subnav mc-tabs" role="tablist" aria-label="${escapeHTML(t('mural.title'))}">
-          ${tabBtn('mural', t('mural.tab.mural'), allUnread)}${tabBtn('aulas', t('mural.tab.aulas'))}${tabBtn('pessoas', t('mural.tab.people'))}
+          ${tabBtn('mural', t('mural.tab.mural'), allUnread)}${tabBtn('pessoas', t('mural.tab.people'))}
         </div>
         <div class="mc-picker">
           <span class="mc-picker-label">${t('mural.pick.label')}</span>
@@ -770,15 +743,6 @@ async function renderTeacherMuralSection(){
     });
   }
 
-  if (st.tab === 'aulas'){
-    // Material de apoio só na aba Materiais de Aulas e materiais (switchClassLogsView troca depois sem recarregar).
-    const onMaterials = typeof ADMIN_CLASS_LOGS_STATE !== 'undefined' && ADMIN_CLASS_LOGS_STATE.view === 'materials';
-    muralShowTeacherBox(onMaterials ? ['classlogs', 'materials'] : ['classlogs']);
-    muralApplyAulasScope(st.sel);
-    renderAdminClassLogsView();
-    renderAdminSupportMaterialsView();
-    return;
-  }
   if (st.tab === 'pessoas'){
     muralShowTeacherBox(['people']);
     renderMuralPeople(document.getElementById('admin-people-content'), st, classrooms, roster);

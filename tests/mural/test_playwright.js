@@ -157,8 +157,8 @@ const MURAL_FAKE = (who) => {
     await ev(() => switchTab('teacher-panel'));
     await ev(() => document.querySelector('[data-teacher-section="mural"]').click());
     await page.waitForSelector('#admin-mural-shell .mc-tabs');
-    L('painel: abas Alunos, Cartões e Mural (Aulas e Material dentro do Mural)', await ev(() => [...document.querySelectorAll('[data-teacher-section]')].map(b => b.dataset.teacherSection).join() === 'students,flashcards,mural'));
-    L('Mural: abas Mural | Aulas e materiais | Pessoas', await ev(() => [...document.querySelectorAll('[data-mural-tab]')].map(b => b.dataset.muralTab).join() === 'mural,aulas,pessoas'));
+    L('painel: abas Alunos, Cartões, Mural, Aulas e Materiais (2026-11-10)', await ev(() => [...document.querySelectorAll('[data-teacher-section]')].map(b => b.dataset.teacherSection).join() === 'students,flashcards,mural,classlogs,materials'));
+    L('Mural: abas Mural | Pessoas (Aulas e Materiais viraram abas do painel, 2026-11-10)', await ev(() => [...document.querySelectorAll('[data-mural-tab]')].map(b => b.dataset.muralTab).join() === 'mural,pessoas'));
     L('formulário de nova turma escondido até clicar', !(await ev(() => document.querySelector('.mural-new-form').offsetParent)));
     await page.waitForSelector('#admin-mural-content .mc-cover');
     L('sem turmas: abre o mural do primeiro aluno, com capa', await ev(() => document.querySelector('#admin-mural-content .mc-cover-title').textContent === 'Ana Souza' && !document.querySelector('[data-mural-cover-edit]')));
@@ -241,19 +241,17 @@ const MURAL_FAKE = (who) => {
     await page.click('#admin-mural-content .mural-publish');
     await page.waitForSelector('#admin-mural-content .mural-post');
     L('post individual vai para o aluno', await ev(() => window.__rpcCalls.some(c => c[0] === 'mural_create_post' && c[1].p_classroom_id === null && c[1].p_student_id === 'S2')));
-    // Aulas e materiais: dentro do Mural, já filtrado pela escolha
-    await ev(() => document.querySelector('[data-mural-sel^="c:"]').click());
-    await ev(() => document.querySelector('[data-mural-tab="aulas"]').click());
+    // Aulas e Materiais são abas do painel (2026-11-10): abrem fora do Mural, que fica escondido.
+    await ev(() => switchTeacherPanelSection('classlogs'));
     await page.waitForFunction(() => document.getElementById('admin-classlogs-content').style.display === '');
-    // 2026-11-10: Aulas | Calendário | Para conferir | Materiais; o Material de apoio só aparece na aba Materiais.
-    // Neste cenário a professora ainda não tem aluno com vínculo: sem abas, o Material de apoio fica à mostra (as abas são testadas em painel-professora).
-    await page.waitForFunction(() => !!document.querySelector('#admin-classlogs-content .profile-empty-note, [data-classlog-view]'));
-    L('Aulas e materiais: sem aluno, aviso de vincular e material de apoio à mostra, mural escondido', await ev(() => (document.querySelector('[data-classlog-view]') || document.getElementById('admin-materials-content').style.display === '') && document.getElementById('admin-mural-content').style.display === 'none'));
-    L('Aulas e materiais: filtrado pela turma escolhida', await ev(() => ADMIN_CLASS_LOGS_STATE.scope && ADMIN_CLASS_LOGS_STATE.scope.classroomId === window.__M.classrooms[0].id));
-    L('Aulas e materiais tem "Todos"', await ev(() => !!document.querySelector('[data-mural-sel="all"]')));
-    await ev(() => { ADMIN_CLASS_LOGS_STATE.studentIds = new Set(['S2']); switchTeacherPanelSection('classlogs'); });
+    L('Aulas: aba do painel, mural e material de apoio escondidos', await ev(() => TEACHER_PANEL_STATE.section === 'classlogs' && document.getElementById('admin-mural-shell').style.display === 'none' && document.getElementById('admin-mural-content').style.display === 'none' && document.getElementById('admin-materials-content').style.display === 'none'));
+    await ev(() => switchTeacherPanelSection('materials'));
+    L('Materiais: aba do painel, só o material de apoio', await ev(() => TEACHER_PANEL_STATE.section === 'materials' && document.getElementById('admin-materials-content').style.display === '' && document.getElementById('admin-classlogs-content').style.display === 'none'));
+    await ev(() => { ADMIN_CLASS_LOGS_STATE.studentIds = new Set(['S2']); ADMIN_CLASS_LOGS_STATE.fromFicha = true; switchTeacherPanelSection('classlogs'); });
     await page.waitForFunction(() => document.getElementById('admin-classlogs-content').style.display === '');
-    L('atalho antigo "Aulas" (ficha do aluno) abre Mural > Aulas e materiais do aluno', await ev(() => TEACHER_PANEL_STATE.section === 'mural' && MURAL_STATE.teacher.tab === 'aulas' && MURAL_STATE.teacher.sel === 's:S2'));
+    L('atalho da ficha do aluno abre Aulas só com as aulas dele', await ev(() => TEACHER_PANEL_STATE.section === 'classlogs' && ADMIN_CLASS_LOGS_STATE.listAll === false && ADMIN_CLASS_LOGS_STATE.studentIds.has('S2')));
+    await ev(() => switchTeacherPanelSection('mural'));
+    await page.waitForSelector('[data-mural-tab="mural"]');
     await ev(() => { document.querySelector('[data-mural-tab="mural"]').click(); });
     await page.waitForSelector('#admin-mural-content .mc-cover');
     // aviso automático (gatilho 121): aula registrada na turma

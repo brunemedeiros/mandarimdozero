@@ -233,7 +233,7 @@ const PANEL_STUB = (who) => {
       await ev(() => switchTab('teacher-panel'));
       await page.waitForTimeout(400);
       const tabs = await ev(() => [...document.querySelectorAll('#view-teacher-panel [data-teacher-section]')].map(b => b.textContent.trim()));
-      L('professora: 3 abas, Alunos | Cartões | Mural (Aulas e Material foram para dentro do Mural, 2026-10-29)', tabs.length === 3 && /Mural/.test(tabs[2]), tabs);
+      L('professora: 5 abas, Alunos | Cartões | Mural | Aulas | Materiais (Aulas e Materiais saíram do Mural, 2026-11-10)', tabs.length === 5 && /Mural/.test(tabs[2]) && /Aulas|Classes|Lessons/.test(tabs[3]) && /Materiais|Materials/.test(tabs[4]), tabs);
       L('professora: Alunos abre (sem aviso de acesso negado)', !(await ev(() => document.getElementById('admin-students-content').textContent.includes(t('admin.common.adminOnly')))));
       L('professora: sem formulário de vincular (só a admin vincula)', await ev(() => !document.querySelector('#admin-assign-student-form')));
       // ---- convite: link ----
@@ -320,14 +320,11 @@ const PANEL_STUB = (who) => {
       L('aulas: aula de turma é 1 linha sem aluno e com a turma', await ev(() => { const r = window.__DB.teacher_class_logs[1]; return r.student_id === null && r.classroom_id === 501 && r.attendance_label_id === 62; }), await ev(() => window.__DB.teacher_class_logs[1]));
       await page.waitForSelector('#admin-classlogs-list-box .class-log-classroom');
       L('aulas: lista da turma mostra o nome da turma', await ev(() => document.querySelector('#admin-classlogs-list-box .class-log-classroom').textContent.includes('Dupla')));
-      // "Todos" no Mural > Aulas e materiais: vindo de uma turma, a lista mostra as aulas de todos, sem marcar ninguém no formulário (bug 2026-11-03)
-      await ev(() => { MURAL_STATE.teacher.sel = 'c:501'; muralApplyAulasScope('c:501'); return renderAdminClassLogsView(); });
-      await page.waitForFunction(() => document.querySelectorAll('#admin-classlogs-list-box [data-edit-class-log]').length === 1);
-      L('aulas: com uma turma escolhida, só as aulas dela', true);
-      await ev(() => { MURAL_STATE.teacher.sel = 'all'; muralApplyAulasScope('all'); return renderAdminClassLogsView(); });
+      // Aba Aulas do painel (2026-11-10): abre com as aulas de todos, sem marcar ninguém no formulário (antes era o "Todos" do Mural > Aulas e materiais).
+      await ev(() => switchTeacherPanelSection('classlogs'));
       await page.waitForFunction(() => document.querySelectorAll('#admin-classlogs-list-box [data-edit-class-log]').length === 2);
-      L('aulas: Todos lista as aulas do aluno e da turma juntas', true);
-      L('aulas: Todos não deixa ninguém marcado no formulário', await ev(() => !document.querySelector('[data-classlog-student-checkbox]:checked, [data-classlog-classroom-checkbox]:checked') && document.getElementById('admin-create-class-log-btn').disabled));
+      L('aulas: a aba Aulas lista as aulas do aluno e da turma juntas', true);
+      L('painel: abas Alunos, Cartões, Mural, Aulas e Materiais; Aulas ativa', await ev(() => [...document.querySelectorAll('[data-teacher-section]')].map(b => b.dataset.teacherSection).join() === 'students,flashcards,mural,classlogs,materials' && document.querySelector('[data-teacher-section="classlogs"]').classList.contains('is-active') && document.getElementById('admin-mural-shell').style.display === 'none' && document.getElementById('admin-materials-content').style.display === 'none'));
       await page.check('[data-classlog-classroom-checkbox][value="501"]');
       L('aulas: em Todos, marcar a turma no formulário não esconde as outras aulas', await ev(() => document.querySelectorAll('#admin-classlogs-list-box [data-edit-class-log]').length === 2));
       if (SHOTS && width === 1200) await page.screenshot({ path: `${SHOTS}/${lang}-${theme}-${width}-aba-registrar-inteira.png`, fullPage: true });
@@ -392,22 +389,27 @@ const PANEL_STUB = (who) => {
       await page.waitForSelector('#admin-classlogs-calendar-wrap [data-calendar-feed-url]');
       L('calendário: professora recebe o link dela', await ev(() => /^https:\/\/agenda\.profbrune\.com\.br\/[ab]{16}$/.test(document.querySelector('#admin-classlogs-calendar-wrap [data-calendar-feed-url]').value)));
       await ev(() => document.querySelector('[data-classlog-view="check"]').click());   // Google Agenda fica em Para conferir
-      L('abas: Aulas, Calendário, Para conferir e Materiais', await ev(() => [...document.querySelectorAll('[data-classlog-view]')].map(b => b.dataset.classlogView).join() === 'register,calendar,check,materials' && !document.getElementById('admin-classlogs-check').hidden && document.getElementById('admin-classlogs-calendar-wrap').hidden && !!document.querySelector('#admin-classlogs-check #admin-gcal-box') && !!document.querySelector('#admin-classlogs-check #admin-notion-box')));
+      L('abas internas de Aulas: Aulas, Calendário e Para conferir', await ev(() => [...document.querySelectorAll('[data-classlog-view]')].map(b => b.dataset.classlogView).join() === 'register,calendar,check' && !document.getElementById('admin-classlogs-check').hidden && document.getElementById('admin-classlogs-calendar-wrap').hidden && !!document.querySelector('#admin-classlogs-check #admin-gcal-box') && !!document.querySelector('#admin-classlogs-check #admin-notion-box')));
       if (SHOTS){
         await page.waitForTimeout(1500);
         await ev(() => { document.querySelector('.class-log-views').scrollIntoView({ block: 'start' }); window.scrollBy(0, -230); });
         await shot('aba-para-conferir');
-        await ev(() => document.querySelector('[data-classlog-view="materials"]').click());
-        await page.waitForTimeout(800);
+        await ev(() => switchTeacherPanelSection('materials'));
+        await page.waitForTimeout(1200);
+        await ev(() => { window.scrollTo(0, 0); });
         await shot('aba-materiais');
+        await ev(() => switchTeacherPanelSection('classlogs'));
+        await page.waitForSelector('[data-classlog-view="register"]');
         await ev(() => document.querySelector('[data-classlog-view="register"]').click());
         await page.waitForTimeout(800);
         await shot('aba-aulas');
         await ev(() => document.querySelector('[data-classlog-view="check"]').click());
       }
       L('abas: cabem na tela sem rolagem para o lado', await ev(() => { const r = document.querySelector('#admin-classlogs-content .class-log-views').getBoundingClientRect(); return r.right <= window.innerWidth + 1 && document.documentElement.scrollWidth <= window.innerWidth + 1; }), await ev(() => [document.querySelector('#admin-classlogs-content .class-log-views').getBoundingClientRect().right, window.innerWidth, document.documentElement.scrollWidth]));
-      L('Materiais: o Material de apoio só aparece na aba Materiais', await ev(() => { document.querySelector('[data-classlog-view="materials"]').click(); const a = document.getElementById('admin-materials-content').style.display === '' && document.getElementById('admin-classlogs-check').hidden;
-        document.querySelector('[data-classlog-view="check"]').click(); return a && document.getElementById('admin-materials-content').style.display === 'none'; }));
+      L('Materiais: aba própria do painel, sem as Aulas e sem o Mural', await ev(async () => { switchTeacherPanelSection('materials'); const a = document.getElementById('admin-materials-content').style.display === '' && document.getElementById('admin-classlogs-content').style.display === 'none' && document.getElementById('admin-mural-shell').style.display === 'none';
+        switchTeacherPanelSection('classlogs'); return a; }));
+      await page.waitForSelector('[data-classlog-view="check"]');
+      await ev(() => document.querySelector('[data-classlog-view="check"]').click());
       await page.waitForSelector('#admin-gcal-box .gcal-review-item');
       L('google: bloco diz que é sincronização em um sentido', await ev(() => /Google Agenda → site/.test(document.querySelector('#admin-gcal-box .gcal-oneway').textContent)));
       L('google: aberto sozinho porque há evento para revisar, com contador', await ev(() => document.getElementById('admin-gcal-box').open && document.querySelector('#admin-gcal-box [data-gcal-badge]').dataset.n === '12' && document.querySelector('#admin-gcal-box [data-gcal-badge]').textContent === '12 para revisar'));

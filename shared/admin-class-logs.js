@@ -459,7 +459,7 @@ function wireClassLogsListBox(listBox){
   });
 }
 
-// Mural > Aulas e materiais com "Todos" (listAll): a lista mostra as aulas de todos os alunos e turmas, sem
+// Aba Aulas (listAll, padrão desde 2026-11-10): a lista mostra as aulas de todos os alunos e turmas, sem
 // marcar ninguém no formulário de Nova aula (para não registrar uma aula para todo mundo sem querer).
 function classLogListTargets(){
   const st = ADMIN_CLASS_LOGS_STATE;
@@ -557,7 +557,7 @@ async function renderTeacherClassCalendar(){
   const now = new Date();
   const cal = ADMIN_CLASS_LOGS_STATE.cal || (ADMIN_CLASS_LOGS_STATE.cal = { y: now.getFullYear(), m: now.getMonth() });
   const range = classCalendarMonthRange(cal.y, cal.m);
-  // Mural > Aulas e materiais com uma turma ou um aluno escolhido: o calendário mostra só as aulas dele (121).
+  // scope (turma ou aluno escolhido) ficou do Mural > Aulas e materiais (121); hoje a aba Aulas abre sem escopo.
   const scope = ADMIN_CLASS_LOGS_STATE.scope;
   const logs = (await fetchTeacherClassLogsRange(range.from, range.to))
     .filter(l => !scope || (scope.classroomId ? l.classroom_id === scope.classroomId : l.student_id === scope.studentId));
@@ -635,10 +635,9 @@ async function renderTeacherClassCalendar(){
   });
 }
 
-// Aulas e materiais (proposta da autora, 2026-11-10): uma linha de abas só, Aulas | Calendário | Para conferir (N) | Materiais.
-// 'register' = Aulas (Para quem, Nova aula, Aulas registradas); 'check' = Notion + Google Agenda + Revisar do Notion antigo;
-// 'materials' = Material de apoio (#admin-materials-content, fora deste bloco).
-const CLASS_LOG_VIEWS = ['register', 'calendar', 'check', 'materials'];
+// Aulas (decisão da autora, 2026-11-10): aba própria do painel com as abas internas Aulas | Calendário | Para conferir (N).
+// 'register' = Aulas (Alunos, Turmas, Nova aula, Aulas registradas); 'check' = Notion + Google Agenda + Revisar do Notion antigo.
+const CLASS_LOG_VIEWS = ['register', 'calendar', 'check'];
 function switchClassLogsView(view){
   ADMIN_CLASS_LOGS_STATE.view = CLASS_LOG_VIEWS.includes(view) ? view : 'register';
   const v = ADMIN_CLASS_LOGS_STATE.view;
@@ -648,10 +647,6 @@ function switchClassLogsView(view){
   });
   const show = { 'admin-classlogs-register': 'register', 'admin-classlogs-calendar-wrap': 'calendar', 'admin-classlogs-check': 'check' };
   Object.entries(show).forEach(([id, key]) => { const el = document.getElementById(id); if (el) el.hidden = v !== key; });
-  // Material de apoio só aparece na aba Materiais (quando o painel de Aulas está montado: Mural > Aulas e materiais).
-  const mats = document.getElementById('admin-materials-content');
-  const logs = document.getElementById('admin-classlogs-content');
-  if (mats && logs && logs.style.display !== 'none' && document.getElementById('admin-classlogs-register')) mats.style.display = v === 'materials' ? '' : 'none';
   if (v === 'calendar') renderTeacherClassCalendar();
 }
 
@@ -678,9 +673,6 @@ async function renderAdminClassLogsView(){
   const students = await fetchMyStudents();
   if (!students.length){
     wrap.innerHTML = `<p class="profile-empty-note">${t('admin.classLogs.linkFirst')}</p>`;
-    // Sem aluno não há abas: o Material de apoio fica à mostra embaixo (como antes das abas).
-    const mats = document.getElementById('admin-materials-content');
-    if (mats && wrap.style.display !== 'none') mats.style.display = '';
     return;
   }
   ADMIN_CLASS_LOGS_STATE._studentsCache = students;
@@ -728,7 +720,6 @@ async function renderAdminClassLogsView(){
       <button type="button" class="deck-topbar-btn" role="tab" data-classlog-view="register">${t('panel.classLog.view.lessons')}</button>
       <button type="button" class="deck-topbar-btn" role="tab" data-classlog-view="calendar">${t('panel.classLog.view.calendar')}</button>
       <button type="button" class="deck-topbar-btn" role="tab" data-classlog-view="check">${t('panel.classLog.view.check')} <span class="class-log-check-count" data-classlog-check-count hidden></span></button>
-      <button type="button" class="deck-topbar-btn" role="tab" data-classlog-view="materials">${t('panel.classLog.view.materials')}</button>
     </div>
     <div id="admin-classlogs-check" hidden>
       <p class="profile-edit-hint class-log-check-hint">${t('panel.classLog.checkHint')}</p>
