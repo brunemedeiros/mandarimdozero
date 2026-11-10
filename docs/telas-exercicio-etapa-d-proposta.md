@@ -45,7 +45,7 @@ Grátis x Premium: nada muda (só a moldura da tela). Paridade: tudo em `shared/
 
 ## Entrega
 
-### Lote 1, Desafios (2026-11-04, na branch, sem PR)
+### Lote 1, Desafios (2026-11-04; publicado pelo PR #450 em 2026-11-08)
 - `shared/desafios-telas.js`: barra do topo em todos os tipos; `chStepRender` (cabeçalho "Desafios · nível / categoria", barra, 50%),
   `chStepAnswered` (100%, "Não sei" some, teclas desligadas, foco no Continuar ou Tentar de novo), `challengeContinueButtonHTML`
   ("Continuar →", verde no acerto; mesmo id do Concluir). "Não sei": revela, sem som, conta como erro (`recordChallengeReviewOutcome` 'fail'),
@@ -57,7 +57,7 @@ Grátis x Premium: nada muda (só a moldura da tela). Paridade: tudo em `shared/
   `desafios-expressoes-passos` (Acentuação também com barra), neutralizações datadas em `paridade-sites/test_desafios.js` e `test_desafios_css.js`.
   Iguais à main: `paridade-sites/test_desafios.js` 362 falhas e `desafios-progresso` 22/23 (já existiam).
 
-### Lote 2, Ditados (2026-11-04, na branch, sem PR)
+### Lote 2, Ditados (2026-11-04; publicado pelo PR #450 em 2026-11-08)
 - `shared/activity-focus.js`: área nova `dictation` (modo foco e barra da lição; o ✕ aciona "← Voltar aos ditados", que fica escondido).
 - `shared/ditados.js`: cabeçalho "Ditados · nível · módulo" + tarefa (`lesson-unit-context`), barra logo abaixo, comando `dict.cmd`
   ("Ouça e escreva o que você ouvir" / "Listen and write what you hear", inglês needs_review, confiança alta); progresso 50% escrevendo, 100% no
@@ -65,7 +65,7 @@ Grátis x Premium: nada muda (só a moldura da tela). Paridade: tudo em `shared/
 - Testes: `tests/desafios-etapa-d/` 508/508 (lotes 1 e 2). Ajustados de propósito: `paridade-sites/test_ditados.js` (neutralização datada do player
   novo; 828/828) e `test_ditados_motor.js` (sai pelo ✕; 41/41). `tests/ditado/` 58/58 e `modo-foco` 19/19 sem mudança.
 
-### Lote 3, Revisão (2026-11-04, na branch, sem PR)
+### Lote 3, Revisão (2026-11-04; publicado pelo PR #450 em 2026-11-08)
 - `shared/activity-focus.js`: a sessão da Revisão (`review-session-wrap`) ganha a barra da lição (⚑, ⌨️, ✕; o ✕ aciona o link de voltar, que
   continua mudando de texto e de destino: modos, Deck ou Aluno). Achado e corrigido junto: o ✕ dizia "Sair do jogo" ao leitor de tela em toda
   atividade; agora é "Sair"/"Exit" (`activity.exit`) na Revisão, Prática da Conjugação, Desafios e Ditados, e "Sair do jogo" só nos Jogos.
