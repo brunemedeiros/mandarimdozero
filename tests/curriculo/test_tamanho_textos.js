@@ -37,6 +37,11 @@ check('diálogo: a fala da cena conta como abertura e a da tela final do diálog
   return a.length === 2 && a.some(z => z.onde === 'c' && z.tipo === 'abertura') && a.some(z => z.onde === 'df' && z.tipo === 'falaFinal');
 })());
 
+check('"sua vez": situação conta como abertura e cada dica como painel (decisão 354)', (() => {
+  const a = T.textosLongos(rascunho([{ id: 'p', tipo: 'dialogo_papel', situacao: pt(x(121)), turnos: [{ opcoes: ['a', 'b', 'c'], certa: 0, dicas: { b: pt(x(111)), c: pt(x(20)) } }] }]));
+  return a.length === 2 && a.some(z => z.tipo === 'abertura') && a.some(z => z.tipo === 'painel' && z.onde.includes('dica: b'));
+})());
+
 console.log('== rascunho real da unidade 1');
 const R = require(path.join(ROOT, 'docs/i18n/curriculo/piloto-m1/A1-1/A1-1.json'));
 const achados = T.textosLongos(R);

@@ -24,6 +24,10 @@ function textosLongos(rascunho, limites = LIMITES){
       if (t.tipo === 'abertura') confere(t.id, 'abertura', tamanho(t.objetivo));
       if (t.tipo === 'dialogo_cena') confere(t.id, 'abertura', tamanho(t.foco)); // a professora apresenta a cena (decisão 353)
       if ((t.tipo === 'fim' || t.tipo === 'dialogo_fim') && t.fala) confere(t.id, 'falaFinal', tamanho(t.fala));
+      if (t.tipo === 'dialogo_papel'){ // "sua vez" (decisão 354): a situação como abertura, cada dica como painel
+        confere(t.id, 'abertura', tamanho(t.situacao));
+        for (const x of t.turnos || []) for (const [opcao, dica] of Object.entries(x.dicas || {})) confere(`${t.id} (dica: ${opcao})`, 'painel', tamanho(dica));
+      }
       if (t.explicacao){
         const base = tamanho(t.explicacao);
         confere(t.id, 'painel', base);

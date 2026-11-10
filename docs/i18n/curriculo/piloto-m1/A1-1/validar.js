@@ -74,26 +74,27 @@ for (const l of comTelas){
 }
 // Voz da professora calorosa, mas curta (decisão 352): limites em curriculo_tamanho_textos.js.
 for (const a of T.textosLongos(R)) confere(false, `texto longo demais em ${a.onde} (${a.tipo}): ${a.tamanho} caracteres, limite ${a.limite}`);
-// Lição de diálogos em 6 etapas (decisão 353): cada diálogo tem cena, ouvir, ler, exercícios, papel e tela final, nessa ordem;
-// índices de fala válidos, resposta entre as opções, distrator do papel diferente da fala certa.
-const ETAPAS = ['dialogo_cena', 'dialogo_ouvir', 'dialogo_ler', 'exercicios', 'dialogo_papel', 'dialogo_fim'];
-const EXERCICIOS_DE_DIALOGO = ['dialogo_completar', 'dialogo_quem', 'dialogo_ordenar', 'dialogo_entendeu'];
+// Lição de diálogos (decisões 353 e 354): cada diálogo tem cena, ouvir sem texto, montar pelo áudio, ouvir e ler inteira, compreensão,
+// sua vez (conversa nova) e tela final, nessa ordem; um distrator por fala no "montar"; no "sua vez", resposta certa entre as opções
+// e uma dica para cada opção errada.
+const ETAPAS = ['dialogo_cena', 'dialogo_ouvir', 'dialogo_montar', 'dialogo_ler', 'dialogo_entendeu', 'dialogo_papel', 'dialogo_fim'];
 for (const l of comTelas.filter(l => l.tipo === 'dialogos')){
   for (const d of R.dialogos){
     const nome = d.titulo['pt-BR'];
     const minhas = l.telas.filter(t => t.dialogo === nome);
-    const etapas = minhas.map(t => EXERCICIOS_DE_DIALOGO.includes(t.tipo) ? 'exercicios' : t.tipo).filter((x, i, a) => a[i - 1] !== x);
-    confere(JSON.stringify(etapas) === JSON.stringify(ETAPAS), `diálogo "${nome}": etapas fora da ordem ${ETAPAS.join(' > ')} (${etapas.join(' > ')})`);
+    confere(JSON.stringify(minhas.map(t => t.tipo)) === JSON.stringify(ETAPAS), `diálogo "${nome}": telas fora da ordem ${ETAPAS.join(' > ')} (${minhas.map(t => t.tipo).join(' > ')})`);
     const falaOk = i => Number.isInteger(i) && i >= 0 && i < d.falas.length;
     for (const t of minhas){
-      if (['dialogo_completar', 'dialogo_quem'].includes(t.tipo)) confere(falaOk(t.fala), `tela ${t.id}: fala fora do diálogo`);
-      if (t.tipo === 'dialogo_completar') confere(t.opcoes.length === 2 && t.opcoes.includes(d.falas[t.fala].fr), `tela ${t.id}: "Complete" sem 2 opções ou sem a fala certa`);
-      if (t.tipo === 'dialogo_ordenar') confere(t.falas.length >= 3 && t.falas.every(falaOk) && t.falas.every((x, i, a) => i === 0 || a[i - 1] < x), `tela ${t.id}: falas para ordenar inválidas`);
       if (['dialogo_ouvir', 'dialogo_entendeu'].includes(t.tipo)) confere(Number.isInteger(t.resposta) && t.resposta >= 0 && t.resposta < t.opcoes.length, `tela ${t.id}: resposta fora das opções`);
+      if (t.tipo === 'dialogo_montar') confere(JSON.stringify(Object.keys(t.distratores).map(Number)) === JSON.stringify(d.falas.map((_, i) => i))
+        && d.falas.every((f, i) => t.distratores[i] !== f.fr), `tela ${t.id}: falta um distrator por fala (ou distrator igual à fala)`);
       if (t.tipo === 'dialogo_papel'){
-        const minhasFalas = d.falas.map((f, i) => f.falante === t.falante ? i : -1).filter(i => i >= 0);
-        confere(['A', 'B'].includes(t.falante) && JSON.stringify(Object.keys(t.distratores).map(Number)) === JSON.stringify(minhasFalas)
-          && minhasFalas.every(i => t.distratores[i] !== d.falas[i].fr), `tela ${t.id}: papel sem um distrator por fala do personagem (ou distrator igual à fala)`);
+        confere(['A', 'B'].includes(t.outro_falante) && t.turnos.some(x => x.outro) && t.turnos.some(x => x.opcoes), `tela ${t.id}: "sua vez" sem falas do outro ou sem escolhas`);
+        for (const x of t.turnos.filter(x => x.opcoes)){
+          const erradas = x.opcoes.filter((_, k) => k !== x.certa);
+          confere(Number.isInteger(x.certa) && x.certa >= 0 && x.certa < x.opcoes.length && x.opcoes.length === 3, `tela ${t.id}: escolha sem 3 opções ou com resposta fora delas`);
+          confere(JSON.stringify(Object.keys(x.dicas).sort()) === JSON.stringify(erradas.slice().sort()), `tela ${t.id}: cada opção errada precisa de uma dica (e só elas)`);
+        }
       }
       if (t.tipo === 'dialogo_fim') confere(t.frases.every(falaOk), `tela ${t.id}: frase da tela final fora do diálogo`);
     }
@@ -128,10 +129,12 @@ for (const d of R.dialogos){
   const nome = d.titulo['pt-BR'];
   const p = posicaoNoFimDaLicao(mapa, 'A1-1', numLicao[d.licao]);
   for (const f of d.falas) add(`Diálogo "${nome}" (fim da lição ${numLicao[d.licao]})`, true, f.chave === 'nova' ? `nova (${f.falante})` : f.chave, f.fr, { tipo: 'dialogo', posicao: p.posicao }, 'A1-1', p.mapa);
-  // Distratores em francês dos exercícios do diálogo (decisão 353): completar e fazer um papel.
+  // Textos em francês dos exercícios do diálogo (decisões 353 e 354): distratores do "montar", falas do outro e opções do "sua vez".
+  // Contexto de diálogo (notas contam, decisão 253): são parte da conversa da lição de diálogos.
   for (const t of (R.licoes.find(l => l.id === d.licao).telas || []).filter(t => t.dialogo === nome)){
-    const textos = t.tipo === 'dialogo_completar' ? t.opcoes.filter(o => o !== d.falas[t.fala].fr) : t.tipo === 'dialogo_papel' ? Object.values(t.distratores) : [];
-    for (const o of textos) add('Exercícios do diálogo (distratores)', true, `${nome} ${t.id}`, o, { tipo: 'exercicio_licao', posicao: p.posicao }, 'A1-1', p.mapa);
+    const textos = t.tipo === 'dialogo_montar' ? Object.values(t.distratores)
+      : t.tipo === 'dialogo_papel' ? t.turnos.flatMap(x => x.outro ? [x.outro.fr] : x.opcoes) : [];
+    for (const o of textos) add('Exercícios do diálogo', true, `${nome} ${t.id}`, o, { tipo: 'dialogo', posicao: p.posicao }, 'A1-1', p.mapa);
   }
   // Autoteste: um cartão de lição posterior, que nenhuma nota das lições anteriores mostra (ex.: merci aparece em "Très bien, merci !"
   // da nota "Como responder"), tem de ser acusado nesta posição; sem isso, um diálogo do meio passaria como se fosse o fim.

@@ -85,14 +85,12 @@ function construirTelas(R, tolerante){
       case 'dialogo_cena': return { ...base, type: 'd_cena', dlg: dialogo(t.dialogo), foco: pt(t.foco) };
       case 'dialogo_ouvir': return { ...base, type: 'd_ouvir', dlg: dialogo(t.dialogo), q: pt(t.pergunta), opts: t.opcoes.map(pt), answer: t.resposta, why_ok: pt(t.explicacao) };
       case 'dialogo_ler': return { ...base, type: 'd_ler', dlg: dialogo(t.dialogo) };
-      case 'dialogo_completar': {
-        const d = dialogo(t.dialogo);
-        return { ...base, type: 'd_completar', dlg: d, fala: t.fala, opts: t.opcoes, answer: d.lines[t.fala][1], why_ok: pt(t.explicacao) };
-      }
-      case 'dialogo_quem': return { ...base, type: 'd_quem', dlg: dialogo(t.dialogo), fala: t.fala, why_ok: pt(t.explicacao) };
-      case 'dialogo_ordenar': return { ...base, type: 'd_ordenar', dlg: dialogo(t.dialogo), falas: t.falas, why_ok: pt(t.explicacao) };
+      case 'dialogo_montar': return { ...base, type: 'd_montar', dlg: dialogo(t.dialogo), distratores: t.distratores, why_ok: pt(t.explicacao) };
       case 'dialogo_entendeu': return { ...base, type: 'd_entendeu', dlg: dialogo(t.dialogo), q: pt(t.pergunta), opts: t.opcoes.map(pt), answer: t.resposta, why_ok: pt(t.explicacao) };
-      case 'dialogo_papel': return { ...base, type: 'd_papel', dlg: dialogo(t.dialogo), falante: t.falante, distratores: t.distratores, why_ok: pt(t.explicacao) };
+      case 'dialogo_papel': return { ...base, type: 'd_papel', dlg: dialogo(t.dialogo), situacao: pt(t.situacao), outro: t.outro_falante,
+        turnos: t.turnos.map(x => x.outro ? { outro: [x.outro.fr, x.outro['pt-BR']] }
+          : { pedido: pt(x.pedido), opcoes: x.opcoes, certa: x.certa, dicas: Object.fromEntries(Object.entries(x.dicas).map(([k, v]) => [k, pt(v)])) }),
+        why_ok: pt(t.explicacao) };
       case 'dialogo_fim': return { ...base, type: 'd_fim', dlg: dialogo(t.dialogo), say: pt(t.fala), frases: t.frases };
       default:
         if (tolerante) return null;
