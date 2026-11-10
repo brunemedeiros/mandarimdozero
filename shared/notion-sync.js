@@ -8,7 +8,7 @@ const NOTION_FIELDS = ['date', 'student', 'topic', 'homework', 'attendance', 'sk
 const NOTION_REQUIRED = ['date', 'student'];
 const NOTION_PAGE = 10;
 // setup: null | { step: 'databases', list } | { step: 'columns', database_id, title, properties, suggested, field_types }
-const NOTION_STATE = { status: null, items: [], bank: null, open: null, busy: false, tab: 'approval', shown: NOTION_PAGE, setup: null };
+const NOTION_STATE = { status: null, items: [], bank: null, former: null, open: null, busy: false, tab: 'approval', shown: NOTION_PAGE, setup: null };
 
 async function notionCall(action, extra){
   const { data: { session } } = await supabaseClient.auth.getSession();
@@ -38,6 +38,11 @@ async function notionLoad(){
       .select('id,name,language_app_key,linked_student_id,classroom_id').eq('status', 'ativo').order('name');
     NOTION_STATE.bank = (data || []).filter(b => !b.linked_student_id && !b.classroom_id);
   }
+  // 132: ex-alunos (vínculo encerrado), para ligar um nome ou uma linha "só para o histórico".
+  if (NOTION_STATE.former === null){
+    const { data } = await supabaseClient.rpc('notion_former_students');
+    NOTION_STATE.former = (data && Array.isArray(data.data)) ? data.data : [];
+  }
 }
 
 function notionDay(iso, long){
@@ -48,6 +53,7 @@ function notionTargetOptionsHTML(){
   const students = (ADMIN_CLASS_LOGS_STATE._studentsCache || []);
   const rooms = (ADMIN_CLASS_LOGS_STATE._classroomsCache || []);
   const bank = NOTION_STATE.bank || [];
+  const former = NOTION_STATE.former || [];
   const lang = k => STUDENT_LANGUAGE_LABELS[k] || k;
   return `<option value="">${t('panel.notion.pick')}</option>
     ${students.length ? `<optgroup label="${escapeHTML(t('admin.common.students'))}">${students.map(s =>
@@ -55,7 +61,9 @@ function notionTargetOptionsHTML(){
     ${rooms.length ? `<optgroup label="${escapeHTML(t('panel.classLog.classrooms'))}">${rooms.map(c =>
       `<option value="classroom|${c.id}|${escapeHTML(c.language_app_key)}">👥 ${escapeHTML(c.name)}</option>`).join('')}</optgroup>` : ''}
     ${bank.length ? `<optgroup label="${escapeHTML(t('panel.gcal.noAccountGroup'))}">${bank.map(b =>
-      `<option value="bank_student|${escapeHTML(b.id)}|${escapeHTML(b.language_app_key)}">${escapeHTML(b.name)} · ${escapeHTML(lang(b.language_app_key))}</option>`).join('')}</optgroup>` : ''}`;
+      `<option value="bank_student|${escapeHTML(b.id)}|${escapeHTML(b.language_app_key)}">${escapeHTML(b.name)} · ${escapeHTML(lang(b.language_app_key))}</option>`).join('')}</optgroup>` : ''}
+    ${former.length ? `<optgroup label="${escapeHTML(t('panel.notion.formerGroup'))}">${former.map(f =>
+      `<option value="former|${escapeHTML(f.student_id)}|${escapeHTML(f.language_app_key)}">${escapeHTML(f.name)} · ${escapeHTML(lang(f.language_app_key))}</option>`).join('')}</optgroup>` : ''}`;
 }
 
 function notionReason(r){
@@ -86,13 +94,16 @@ function notionItemHTML(it){
       </div></div></li>`;
   }
   if (it.state === 'review'){
-    return `<li data-notion-item="${it.id}" data-notion-name="${escapeHTML(it.name || '')}"><div class="p-item notion-item-revisar">${head.replace('</div>', `<span class="p-item-descricao notion-motivo">${escapeHTML(notionReason(it.reason))}</span></div>`)}
-      ${it.name ? `<div class="notion-ligar">
+    return `<li data-notion-item="${it.id}" data-notion-state="review" data-notion-name="${escapeHTML(it.name || '')}"><div class="p-item notion-item-revisar">${head.replace('</div>', `<span class="p-item-descricao notion-motivo">${escapeHTML(notionReason(it.reason))}</span></div>`)}
+      <div class="notion-ligar">
         <select data-notion-target aria-label="${escapeHTML(t('panel.notion.pick'))}">${notionTargetOptionsHTML()}</select>
-        <button type="button" class="p-pequeno" data-notion-do="link">${t('panel.notion.link')}</button>
-        <button type="button" class="outline secondary p-pequeno" data-notion-do="ignore">${t('panel.notion.ignoreName')}</button>
-        <small class="p-ajuda">${t('panel.notion.linkHint', { name: escapeHTML(it.name) })}</small>
-      </div>` : ''}</div></li>`;
+        ${it.name
+          ? `<button type="button" class="p-pequeno" data-notion-do="link">${t('panel.notion.link')}</button>
+             <button type="button" class="outline secondary p-pequeno" data-notion-do="ignore">${t('panel.notion.ignoreName')}</button>`
+          : `<button type="button" class="p-pequeno" data-notion-do="assign">${t('panel.notion.assignRow')}</button>`}
+        <button type="button" class="outline secondary p-pequeno" data-notion-do="discard">${t('panel.notion.discard')}</button>
+        <small class="p-ajuda">${it.name ? t('panel.notion.linkHint', { name: escapeHTML(it.name) }) : t('panel.notion.assignHint')} ${t('panel.notion.formerHint')}</small>
+      </div></div></li>`;
   }
   return `<li data-notion-item="${it.id}"><div class="p-item p-item--suave">${head}</div></li>`;
 }
@@ -337,19 +348,36 @@ function wireNotionBox(root){
     if (!li) return;
     const id = Number(li.dataset.notionItem);
     const act = btn.dataset.notionDo;
-    if (act === 'approve' || act === 'discard'){
+    const target = () => {
+      const v = (li.querySelector('[data-notion-target]') || {}).value || '';
+      if (!v){ showToast(t('panel.notion.pickFirst')); return null; }
+      const [kind, id2, lang] = v.split('|');
+      return { kind, id: id2, lang: lang || null };
+    };
+    if (act === 'approve' || (act === 'discard' && li.dataset.notionState !== 'review')){
       await notionAfter(supabaseClient.rpc('notion_approve', { p_ids: [id], p_approve: act === 'approve' }), t(act === 'approve' ? 'panel.notion.approved' : 'panel.notion.discarded'), li);
+    } else if (act === 'discard'){
+      await notionAfter(supabaseClient.rpc('notion_discard', { p_ids: [id] }), t('panel.notion.discarded'), li);
+    } else if (act === 'assign'){
+      // 132: só esta linha (ex.: sem a Ficha do Aluno no Notion). Ex-aluna = só para o histórico.
+      const tg = target(); if (!tg) return;
+      const former = tg.kind === 'former';
+      await notionAfter(supabaseClient.rpc('notion_assign_page', { p_id: id, p_action: former ? 'student' : tg.kind,
+        p_student: (former || tg.kind === 'student') ? tg.id : null, p_classroom: tg.kind === 'classroom' ? Number(tg.id) : null,
+        p_bank: tg.kind === 'bank_student' ? tg.id : null, p_lang: tg.lang, p_history: former }), t('panel.notion.linked'), li);
     } else if (act === 'link' || act === 'ignore'){
       const name = li.dataset.notionName;
-      let args = { p_name: name, p_action: 'ignore' };
       if (act === 'link'){
-        const v = (li.querySelector('[data-notion-target]') || {}).value || '';
-        if (!v){ showToast(t('panel.notion.pickFirst')); return; }
-        const [kind, target, lang] = v.split('|');
-        args = { p_name: name, p_action: kind, p_student: kind === 'student' ? target : null, p_classroom: kind === 'classroom' ? Number(target) : null,
-          p_bank: kind === 'bank_student' ? target : null, p_lang: lang || null };
+        const tg = target(); if (!tg) return;
+        if (tg.kind === 'former'){
+          await notionAfter(supabaseClient.rpc('notion_link_former', { p_name: name, p_student: tg.id, p_lang: tg.lang }), t('panel.notion.linked'), li);
+          return;
+        }
+        await notionAfter(supabaseClient.rpc('notion_link_name', { p_name: name, p_action: tg.kind, p_student: tg.kind === 'student' ? tg.id : null,
+          p_classroom: tg.kind === 'classroom' ? Number(tg.id) : null, p_bank: tg.kind === 'bank_student' ? tg.id : null, p_lang: tg.lang }), t('panel.notion.linked'), li);
+        return;
       }
-      await notionAfter(supabaseClient.rpc('notion_link_name', args), t('panel.notion.linked'), li);
+      await notionAfter(supabaseClient.rpc('notion_link_name', { p_name: name, p_action: 'ignore' }), t('panel.notion.linked'), li);
     }
   });
   // Volta do consentimento do Notion (?notion=ok|erro|cancelado): já abre a escolha do banco.

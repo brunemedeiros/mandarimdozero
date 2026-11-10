@@ -3559,6 +3559,10 @@ window.I18N_CATALOG['en'] = {
   'panel.classLog.cal.empty': 'No lessons on this day.', // ALTA
   'panel.classLog.cal.schedule': 'Schedule a lesson on this day', // ALTA
   'myClassLogs.upcoming': 'Upcoming lessons', // ALTA
+  'panel.notion.formerGroup': 'Former students (history only)', // ALTA
+  'panel.notion.formerHint': 'Former student: the lesson only goes into their history, with no Board notice.', // ALTA
+  'panel.notion.assignRow': 'Link this lesson', // ALTA
+  'panel.notion.assignHint': 'This row has no student record in Notion. Pick who this one lesson belongs to, or discard it if it isn\'t a lesson (e.g. a sales pitch).', // ALTA
   'panel.notion.title': 'Notion', // ALTA
   'panel.notion.more': 'More Notion options', // ALTA
   'panel.notion.oneWayShort': 'Read-only, from Notion to the site', // ALTA

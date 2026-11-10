@@ -59,7 +59,12 @@ const PANEL_STUB = (who) => {
     if (name === 'notion_review_items') return { data: { data: (window.__notionItems || [
       { id: 501, state: 'approval', name: 'Ana 🇧🇷', target: 'Ana Souza', class_date: '2026-10-21', topic: 'Passé composé', homework: 'Exercícios', attendance: 'Aula dada✅' },
       { id: 502, state: 'approval', name: 'Ana 🇧🇷', target: 'Ana Souza', class_date: '2026-10-20', topic: 'Imparfait' },
-      { id: 503, state: 'review', reason: 'nome não reconhecido', name: 'Fred 🇧🇷', class_date: '2026-10-22', topic: 'Futur' }]) }, error: null };
+      { id: 503, state: 'review', reason: 'nome não reconhecido', name: 'Fred 🇧🇷', class_date: '2026-10-22', topic: 'Futur' },
+      { id: 504, state: 'review', reason: 'sem aluno', name: null, class_date: '2026-10-16', topic: 'Pitch - Maxi', attendance: 'Pitch de vendas / contato com lead' }]) }, error: null };
+    if (name === 'notion_former_students') return { data: { data: [{ student_id: 'EX1', language_app_key: window.__appKey, name: 'Carmen da Silva' }] }, error: null };
+    if (name === 'notion_link_former'){ window.__notionFormer = args; return { data: { ok: true, n: 3 }, error: null }; }
+    if (name === 'notion_assign_page'){ window.__notionAssign = args; return { data: { ok: true, state: 'linked' }, error: null }; }
+    if (name === 'notion_discard'){ window.__notionDiscard = args; return { data: { ok: true, n: 1 }, error: null }; }
     if (name === 'notion_approve'){ window.__notionApprove = args; window.__notionItems = []; return { data: { ok: true, n: 1 }, error: null }; }
     if (name === 'notion_link_name'){ window.__notionLink = args; return { data: { ok: true, n: 1 }, error: null }; }
     if (name === 'notion_save_source'){ window.__notionSave = args; return { data: { ok: true }, error: null }; }
@@ -476,8 +481,8 @@ const PANEL_STUB = (who) => {
           suggested: { date: 'Dt', student: 'Al', topic: 'title', homework: 'Px' }, field_types: { date: ['date'], student: ['select', 'title'], topic: ['title', 'rich_text'], homework: ['rich_text', 'title'], attendance: ['select'], skills: ['multi_select'], language: ['select'] } };
         return { ok: true, results: [] }; }; });
       await page.waitForSelector('#admin-notion-box [data-notion-item]');
-      L('notion: caixa em Para conferir, aberta porque há o que conferir, com "3 para conferir" e o selo Conectado', await ev(() => { const b = document.getElementById('admin-notion-box'); return b.open && b.querySelector('[data-notion-badge]').textContent === '3 para conferir' && !b.querySelector('[data-notion-on]').hidden && b.parentElement.classList.contains('painel') && !b.classList.contains('painel') && !!b.closest('#admin-classlogs-check'); }));
-      L('Para conferir: contador da aba soma Notion (3) e Google', await ev(() => { const c = document.querySelector('[data-classlog-check-count]'); return !c.hidden && Number(c.textContent) === 3 + GCAL_STATE.review.filter(e => e.match_state !== 'ignored' && !e.skipped_at).length; }), await ev(() => document.querySelector('[data-classlog-check-count]').textContent));
+      L('notion: caixa em Para conferir, aberta porque há o que conferir, com "4 para conferir" e o selo Conectado', await ev(() => { const b = document.getElementById('admin-notion-box'); return b.open && b.querySelector('[data-notion-badge]').textContent === '4 para conferir' && !b.querySelector('[data-notion-on]').hidden && b.parentElement.classList.contains('painel') && !b.classList.contains('painel') && !!b.closest('#admin-classlogs-check'); }));
+      L('Para conferir: contador da aba soma Notion (4) e Google', await ev(() => { const c = document.querySelector('[data-classlog-check-count]'); return !c.hidden && Number(c.textContent) === 4 + GCAL_STATE.review.filter(e => e.match_state !== 'ignored' && !e.skipped_at).length; }), await ev(() => document.querySelector('[data-classlog-check-count]').textContent));
       if (SHOTS) { await ev(() => { document.getElementById('admin-notion-box').scrollIntoView({ block: 'start' }); window.scrollBy(0, -110); }); await shot('notion-aprovar'); }
       L('notion: diz que é só leitura e mostra o banco lido', await ev(() => /Só leitura/.test(document.querySelector('#admin-notion-box .notion-fonte').textContent) && document.querySelector('#admin-notion-box .notion-fonte').textContent.includes('Calendário de Aulas')));
       L('notion: resumo com atualizadas em 7 dias, ligadas, para aprovar e para revisar', await ev(() => [...document.querySelectorAll('#admin-notion-box .notion-resumo .p-indicador-valor')].map(x => x.textContent).join() === '3,9,2,1'));
@@ -489,6 +494,24 @@ const PANEL_STUB = (who) => {
       await ev(() => document.querySelector('[data-notion-item="503"] [data-notion-do="link"]').click());
       await page.waitForFunction(() => !!window.__notionLink);
       L('notion: ligar o nome manda o nome do Notion, o aluno e o idioma', await ev(() => window.__notionLink.p_name === 'Fred 🇧🇷' && window.__notionLink.p_action === 'student' && !!window.__notionLink.p_student && !!window.__notionLink.p_lang));
+      // 132: linha sem nome tem "Ligar esta aula" e "Descartar"; ex-aluna aparece no grupo "só para o histórico"
+      await page.waitForSelector('[data-notion-item="504"] [data-notion-do="assign"]');
+      L('notion (132): linha sem nome com Ligar esta aula e Descartar', await ev(() => { const li = document.querySelector('[data-notion-item="504"]'); return !!li.querySelector('[data-notion-do="assign"]') && !!li.querySelector('[data-notion-do="discard"]') && !li.querySelector('[data-notion-do="link"]'); }));
+      L('notion (132): ex-alunos no seletor, só para o histórico', await ev(() => { const g = [...document.querySelectorAll('[data-notion-item="504"] [data-notion-target] optgroup')].map(x => x.label); return g.includes('Ex-alunos (só para o histórico)') && !!document.querySelector('[data-notion-item="504"] option[value^="former|EX1|"]'); }));
+      if (SHOTS) await page.locator('[data-notion-item="504"]').screenshot({ path: `${SHOTS}/${lang}-${theme}-${width}-notion-sem-nome.png` });
+      await ev(() => { const sel = document.querySelector('[data-notion-item="504"] [data-notion-target]'); sel.value = [...sel.options].find(o => o.value.startsWith('former|')).value; document.querySelector('[data-notion-item="504"] [data-notion-do="assign"]').click(); });
+      await page.waitForFunction(() => !!window.__notionAssign);
+      L('notion (132): ligar esta aula a uma ex-aluna manda a linha, a aluna e "só histórico"', await ev(() => { const a = window.__notionAssign; return a.p_id === 504 && a.p_action === 'student' && a.p_student === 'EX1' && a.p_history === true; }), await ev(() => window.__notionAssign));
+      await ev(() => { window.__notionItems = [{ id: 505, state: 'review', reason: 'nome não reconhecido', name: 'Carmen da Silva M de Castro', class_date: '2026-10-13', topic: 'Les pancartes' }, { id: 506, state: 'review', reason: 'sem aluno', name: null, class_date: '2026-10-16', topic: 'Pitch' }]; return renderNotionBox({ quiet: true }); });
+      await ev(() => document.querySelector('[data-notion-tab="review"]').click());
+      await page.waitForSelector('[data-notion-item="505"] [data-notion-target]');
+      await ev(() => { const sel = document.querySelector('[data-notion-item="505"] [data-notion-target]'); sel.value = [...sel.options].find(o => o.value.startsWith('former|')).value; document.querySelector('[data-notion-item="505"] [data-notion-do="link"]').click(); });
+      await page.waitForFunction(() => !!window.__notionFormer);
+      L('notion (132): ligar o nome a uma ex-aluna usa notion_link_former', await ev(() => window.__notionFormer.p_name === 'Carmen da Silva M de Castro' && window.__notionFormer.p_student === 'EX1' && !!window.__notionFormer.p_lang));
+      await ev(() => document.querySelector('[data-notion-item="506"] [data-notion-do="discard"]').click());
+      await page.waitForFunction(() => !!window.__notionDiscard);
+      L('notion (132): descartar linha para revisar usa notion_discard', await ev(() => JSON.stringify(window.__notionDiscard.p_ids) === '[506]'));
+      await ev(() => { window.__notionItems = null; return renderNotionBox({ quiet: true }); });
       await ev(() => document.querySelector('[data-notion-tab="approval"]').click());
       await ev(() => document.querySelector('[data-notion-approve-all]').click());
       await page.waitForFunction(() => !!window.__notionApprove);
