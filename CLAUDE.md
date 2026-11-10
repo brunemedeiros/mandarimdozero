@@ -71,6 +71,7 @@ Se uma regra deste arquivo ficar específica de uma pasta, mova-a para `.claude/
   diz "não existir" -- o histórico/instrução pode estar desatualizado.
 - Testes ficam versionados em `tests/<tema>/`. Sempre rodar a regressão da área tocada e relatar números reais.
 - Commit sem identificador de modelo; PR/merge só a pedido.
+- **Cadernos dos alunos** (pedido da dona, 2026-11-09): nunca criar caderno (Google Doc) novo nem trocar o `notebook_id` de um aluno sem aprovação explícita dela; sugerir é permitido.
 - Branch antiga que ainda acrescenta seções no fim do `CLAUDE.md`: no conflito, ficar com o `CLAUDE.md` da `main` e
   mover o texto novo para `docs/historico/` (e as regras curtas para `.claude/rules/` ou para cá). Nada se descarta.
 
