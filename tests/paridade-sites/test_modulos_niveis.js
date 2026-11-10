@@ -61,7 +61,7 @@ async function fingerprint(browser, root){
   // Clique pelo DOM (a janela de sequência do dia pode cobrir a tela; aqui só importa o que o clique faz).
   const click = (sel) => page.evaluate((s) => { const e = document.querySelector(s); if (!e) throw new Error('sem ' + s); e.click(); }, sel);
   // Tela de conclusão única (2026-11-10, decisão da autora): as telas de conclusão trocaram de marcação DE PROPÓSITO (shared/core/conclusao.js); o antes (várias marcações) e o depois (.conclusao) viram o mesmo marcador nos dois lados. O resto da tela continua comparado.
-  const html = (sel) => page.evaluate((s) => { const e = document.querySelector(s); if (!e) return null; const c = e.cloneNode(true); c.querySelectorAll('.conclusao, .speed-gameover, .conj-session-result, .challenge-queue-interstitial, .review-empty:has(.review-complete-actions), .story-complete, .exercise-result').forEach(n => n.replaceWith(document.createComment('CONCLUSAO'))); return c.innerHTML; }, sel);
+  const html = (sel) => page.evaluate((s) => { const e = document.querySelector(s); if (!e) return null; const c = e.cloneNode(true); c.querySelectorAll('.conclusao, .speed-gameover, .conj-session-result, .challenge-queue-interstitial, .review-empty:has(.review-complete-actions), .story-complete, .exercise-result').forEach(n => n.replaceWith(document.createComment('CONCLUSAO'))); return c.innerHTML.replace(/\s*<!--CONCLUSAO-->\s*/g, '<!--CONCLUSAO-->'); }, sel);
   // estado salvo sem o carimbo de tempo do save (o relógio está congelado, mas não depende de nada disto)
   const saved = () => page.evaluate(() => JSON.stringify(serializeState()));
 

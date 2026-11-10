@@ -148,7 +148,7 @@ async function sequencia(browser, root, site, lang, opts = {}){
   // style="display:none;" (escrito no HTML) e style="display: none;" (o mesmo valor regravado pelo JS) são o mesmo CSS
   const norm = (s) => String(s).replace(/127\.0\.0\.1:\d+/g, 'HOST').replace(/ tc-sticky/g, '').replace(/style=\\+"([^"\\]*)\\+"/g, (m, css) => m.replace(css, css.replace(/:\s+/g, ':')));
   // Tela de conclusão única (2026-11-10, decisão da autora): as telas de conclusão trocaram de marcação DE PROPÓSITO (shared/core/conclusao.js); o antes (várias marcações) e o depois (.conclusao) viram o mesmo marcador nos dois lados. O resto da tela continua comparado.
-  const html = (sel) => page.evaluate((s) => { const e = document.querySelector(s); if (!e) return null; const c = e.cloneNode(true); c.querySelectorAll('.conclusao, .speed-gameover, .conj-session-result, .challenge-queue-interstitial, .review-empty:has(.review-complete-actions), .story-complete, .exercise-result').forEach(n => n.replaceWith(document.createComment('CONCLUSAO'))); return c.innerHTML; }, sel);
+  const html = (sel) => page.evaluate((s) => { const e = document.querySelector(s); if (!e) return null; const c = e.cloneNode(true); c.querySelectorAll('.conclusao, .speed-gameover, .conj-session-result, .challenge-queue-interstitial, .review-empty:has(.review-complete-actions), .story-complete, .exercise-result').forEach(n => n.replaceWith(document.createComment('CONCLUSAO'))); return c.innerHTML.replace(/\s*<!--CONCLUSAO-->\s*/g, '<!--CONCLUSAO-->'); }, sel);
   const cena = async (n, extra) => {
     const v = await page.evaluate(() => ({ e: __estado(), audio: window.__audio.splice(0).join(',') }));
     cenas.push({ n, v: norm(JSON.stringify(Object.assign(v, extra || {}))) });
