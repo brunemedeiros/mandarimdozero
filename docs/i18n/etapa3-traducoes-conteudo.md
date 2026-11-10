@@ -249,3 +249,12 @@ realinhamento feito no lote D foi desfeito. Retrato da produção: `docs/i18n/ch
 usa esse retrato para estes ids). As explicações em inglês desses 6 (tabela acima, linhas `lt-a1m3-*`) saíram do overlay,
 porque na produção esses desafios não têm explicação nem em português; voltam se o lote novo for importado.
 Decisão pendente da dona: importar o lote novo de 6 (apaga 4 desafios da produção) ou manter os 10.
+
+**Decidido (2026-11-10, opção A da dona): manter os 10.** Motivos: 4 contas já têm progresso nesses desafios ("Tu veux du sucre ?" em 4,
+"Je prends un kilo de pommes." e "Une bouteille d'eau, s'il vous plaît." em 3), o lote de 6 renumerava os códigos (o progresso iria
+para outra frase) e a regra dos Desafios é ~2 por unidade (5 unidades = 10). O `lote-a1-m3.json` voltou a ter os 10, nos códigos da
+produção, com explicação em pt-BR e en (as 6 antigas reaproveitadas e ajustadas; 4 novas: "Le musée est loin d'ici.", "Elle est
+américaine.", "Tu veux du sucre ?", "Une bouteille d'eau, s'il vous plaît."), revisadas pelo revisor de conteúdo. Em "Tu veux du sucre ?"
+sai a aceita de Portugal "Tu queres açúcar?" e entra "Você quer um pouco de açúcar?"; em "Je cherche une robe." sai a aceita em inglês
+"I look for a dress.". Gravação na produção: `docs/rollout-sql/ouca-traduza-m3-explicacoes.sql` (só com autorização; o Staging não tem
+estes desafios). O retrato `challenges-producao-a1m3-lt.json` virou só histórico; validador e teste de PT-PT usam o lote.
