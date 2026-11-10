@@ -3111,10 +3111,12 @@ body.lesson-focus .acq-phase-banner{ margin-bottom:10px; padding:4px 12px; }
   color: var(--ink); display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin-bottom:4px;
 }
 .guest-warning-link{
-  background: var(--ink); color: var(--gold-bright); border:none; border-radius:8px; padding:6px 12px;
+  background: var(--brand-fill); color: var(--on-brand-fill); border:none; border-radius:8px; padding:6px 12px;
   font-family:var(--font-body); font-weight:800; font-size:12px; cursor:pointer;
 }
-.guest-warning-link:hover{ filter:brightness(1.15); }
+.guest-warning-link:hover{ background: var(--brand-fill-hover); }
+/* A frase é um bloco só: sem isso, o texto e o <strong> viram itens do flex e ganham o gap entre eles (2026-11-10). */
+.guest-warning-text{ flex:1 1 220px; min-width:0; }
 
 /* Conjugação (.conj-*): shared/conjugacao.css, comum aos sites que têm a tela (etapa 5a da paridade). */
 
