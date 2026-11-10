@@ -36,8 +36,8 @@ Se uma regra deste arquivo ficar específica de uma pasta, mova-a para `.claude/
 - **Nunca apagar progresso de memória (FSRS) por engano**; mudanças de dado em produção só com autorização explícita.
 - **Site em inglês não tem NADA em português** (decisão da autora, 2026-10-15): inclui avisos gravados pelo banco, push e
   e-mail; texto montado no servidor sai no idioma do site de quem recebe (`_ui_lang`, ver `.claude/rules/i18n.md`).
-- **Voz da professora** (decisões 350 e 351, 2026-11-10): todo texto que fala com o aluno é a Prof. Brune falando, como em sala de aula
-  (1ª pessoa, "você", calorosa); nada de vivência inventada; continua "lição", não "aula". Guia e áreas: `docs/voz-da-professora.md`.
+- **Voz da professora** (decisões 350 a 352, 2026-11-10): todo texto que fala com o aluno é a Prof. Brune falando, como em sala de aula
+  (1ª pessoa, "você", calorosa mas curta); nada de vivência inventada; continua "lição", não "aula". Guia e áreas: `docs/voz-da-professora.md`.
 - **Português do Brasil coloquial** em todo texto de interface e notas (ex.: "pechinchar", não "regatear");
   sem "--" e sem "pra" em texto visível.
 - **Terminologia**: "aluno/aluna" = vínculo ativo em `teacher_students`; "usuário/conta" = qualquer perfil.

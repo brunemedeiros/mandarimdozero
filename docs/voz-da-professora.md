@@ -1,6 +1,6 @@
 # Voz da professora (persona do site)
 
-Decisões 350 e 351 (2026-11-10, `docs/i18n/curriculo/12-decisoes-apos-maquete-m1.md`). Regra curta no `CLAUDE.md`;
+Decisões 350 a 352 (2026-11-10, `docs/i18n/curriculo/12-decisoes-apos-maquete-m1.md`). Regra curta no `CLAUDE.md`;
 lembrete por pasta em `.claude/rules/voz-da-professora.md`.
 
 ## A ideia
@@ -10,14 +10,16 @@ quem explica, corrige, incentiva e avisa é a **Prof. Brune**, falando com o alu
 inteiro** (trilha, Revisão, Desafios, Conjugação, Ditados, avisos do sino, push, e-mails e mensagens de tela). A trilha foi
 a primeira área (unidade 1 do francês, piloto); as outras áreas seguem a tabela do fim deste guia.
 
-## Como ela fala (voz calorosa, escolhida pela dona na decisão 351)
+## Como ela fala (voz calorosa e curta: decisões 351 e 352)
 
 1. **Primeira pessoa, tratando o aluno por "você"**: "Vou te ensinar...", "Vou separar em dois grupos para ficar fácil",
    "eu não recomendo *mademoiselle*", "Eu, por exemplo, digo *désolée*".
-2. **Calorosa e encorajadora, sem exagero**: abre a lição com boas-vindas ("Que bom ter você aqui!", "Vamos começar?"),
-   comemora no fim ("Parabéns! Você já sabe cumprimentar em francês."), acolhe o erro ("Não se preocupe, esse erro é muito
-   comum no começo!", "Você escreveu como se ouve, e isso é um ótimo sinal!"). Sem emoji, sem "Uau", sem pontos de exclamação
-   em toda frase.
+2. **Calorosa, mas curta** (a dona achou a primeira versão calorosa cansativa de ler): **um toque de calor por tela**, não
+   por frase. O calor fica na abertura ("Que bom ter você aqui! ... Vamos lá?"), no título do painel ("Isso mesmo!" / "Quase lá!"),
+   numa frase curta de incentivo no erro ("Esse erro é comum no começo!", "Você escreveu como se ouve!") e na fala final
+   ("Parabéns! Você já sabe cumprimentar em francês."). A **explicação em si é direta**. Sem emoji, sem "Uau".
+   **Limites** (caracteres visíveis, conferidos por `fr/scripts/curriculo_tamanho_textos.js` no validador de cada unidade):
+   abertura 120, explicação do painel 110, incentivo do erro + explicação 150, fala final 70, nota 340.
 3. **Jeito de sala de aula**: "Repare", "Olhe a grafia", "Não confunda", "Cuidado com a tradução ao pé da letra", e retoma o
    que já foi visto ("Lembra do *salut* lá da primeira lição?").
 4. **"Em francês..." / "os franceses..."**, nunca "usamos" ou "nós dizemos" (a professora é brasileira; "nós" fica ambíguo).
@@ -43,12 +45,22 @@ a primeira área (unidade 1 do francês, piloto); as outras áreas seguem a tabe
 
 ## Exemplo antes e depois (painel de erro, lição 1, restaurante às 20h, aluno marcou *Salut !*)
 
-- Antes: "*Salut* é só para amigos e pessoas próximas, e o garçom você não conhece. À noite, ao chegar num lugar, dizemos *bonsoir*."
-- Depois: "Não se preocupe, esse erro é muito comum no começo! O garçom você não conhece. À noite, quando você chega num lugar,
-  troque o *bonjour* pelo *bonsoir*. E o *salut*, a gente guarda para os amigos."
+- Neutra (antes): "*Salut* é só para amigos e pessoas próximas, e o garçom você não conhece. À noite, ao chegar num lugar, dizemos *bonsoir*."
+- Calorosa e longa (recusada, cansativa): "Não se preocupe, esse erro é muito comum no começo! O garçom você não conhece. À noite, quando
+  você chega num lugar, troque o *bonjour* pelo *bonsoir*. E o *salut*, a gente guarda para os amigos."
+- **Calorosa e curta (a usada)**: título "Quase lá!" e "Esse erro é comum no começo! À noite, ao chegar, troque *bonjour* por *bonsoir*.
+  *Salut* fica para os amigos."
 
 Referência completa: `docs/i18n/curriculo/piloto-m1/A1-1/A1-1.json` (notas, `telas[].explicacao`, `explicacao_erro`, `objetivo`,
-`fala` da tela final) e a maquete `docs/i18n/curriculo/maquete-licao-curta/` (`node .../gerar.js --antes=d9d5725` mostra o texto neutro ao lado).
+`fala` da tela final) e a maquete `docs/i18n/curriculo/maquete-licao-curta/` (`node .../gerar.js --antes=<commit>` mostra o texto
+anterior ao lado: `d9d5725` = neutro, `090598e` = calorosa longa).
+
+## Mascote (ideia para o futuro)
+
+A dona gostaria de um mascote animado como o da Duolingo. Por enquanto fica a foto. Caminho realista, em etapas: (1) a foto atual;
+(2) um **avatar ilustrado da própria Prof. Brune** com 4 ou 5 expressões fixas (explicando, comemorando, "quase lá", pensando),
+trocadas conforme a tela, feito por ilustrador(a); (3) só depois, **animação** (Rive ou Lottie) a partir dessas ilustrações.
+A etapa 2 já dá a maior parte do efeito e cabe no site sem código novo pesado (só trocar a imagem por estado).
 
 ## Áreas e situação
 

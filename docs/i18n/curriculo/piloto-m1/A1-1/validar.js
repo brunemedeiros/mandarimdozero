@@ -11,6 +11,7 @@ const ROOT = path.resolve(__dirname, '..', '..', '..', '..', '..');
 const V = require(path.join(ROOT, 'fr/scripts/curriculo_palavras_vistas.js'));
 const M = require(path.join(ROOT, 'fr/scripts/curriculo_mapa.js'));
 const P = require(path.join(ROOT, 'fr/scripts/curriculo_papel.js'));
+const T = require(path.join(ROOT, 'fr/scripts/curriculo_tamanho_textos.js'));
 const R = require('./A1-1.json');
 
 const mapa = M.carregarMapa();
@@ -71,6 +72,8 @@ for (const l of comTelas){
   const completes = telas.filter(t => t.tipo === 'complete').map(t => t.distrator === 'grafia' ? 'grafia' : 'palavra');
   if (completes.length >= 2) confere(new Set(completes).size === 2, `lição ${l.id}: os "Complete" não alternam grafia e outra palavra (decisão 342)`);
 }
+// Voz da professora calorosa, mas curta (decisão 352): limites em curriculo_tamanho_textos.js.
+for (const a of T.textosLongos(R)) confere(false, `texto longo demais em ${a.onde} (${a.tipo}): ${a.tamanho} caracteres, limite ${a.limite}`);
 for (const n of R.notas){
   if (n.destino === 'nota') confere(comTelas.some(l => (l.telas || []).some(t => t.tipo === 'nota' && t.nota === n.id)), `nota "${n.id}" sem tela`);
   else confere(n.destino === 'painel' && (n.paineis || []).length > 0 && n.paineis.every(id => comTelas.some(l => (l.telas || []).some(t => t.id === id && t.explicacao))), `nota "${n.id}": painel sem tela de exercício com explicação`);

@@ -17,10 +17,11 @@ paths:
 
 # Voz da professora (persona do site)
 
-Guia completo, áreas e situação: `docs/voz-da-professora.md` (decisões 350 e 351).
+Guia completo, áreas e situação: `docs/voz-da-professora.md` (decisões 350 a 352).
 
-- Todo texto que fala com o aluno é a **Prof. Brune falando**, como em sala de aula: primeira pessoa, "você", voz calorosa e
-  encorajadora sem exagero ("Que bom ter você aqui!", "Repare", "Não se preocupe, esse erro é muito comum no começo!").
+- Todo texto que fala com o aluno é a **Prof. Brune falando**, como em sala de aula: primeira pessoa, "você", voz **calorosa, mas
+  curta**: um toque de calor por tela (abertura, título do painel, uma frase de incentivo no erro, fala final); a explicação é direta.
+  Limites de tamanho em `fr/scripts/curriculo_tamanho_textos.js` (abertura 120, painel 110, painel com erro 150, fala final 70, nota 340).
 - "Em francês..." / "os franceses...", nunca "usamos"; nada de vivência pessoal inventada (só a dona escreve as dela).
 - Explicação de painel serve para acerto e erro (não começa com "Isso!"); incentivo do erro vai no texto daquele erro.
 - Continua "lição", não "aula". No site em inglês, a mesma professora em inglês. Português do Brasil coloquial, sem "pra",

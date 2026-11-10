@@ -289,7 +289,7 @@
      "id": "l1-intro",
      "tipo": "abertura",
      "objetivo": {
-      "pt-BR": "Que bom ter você aqui! Na nossa primeira lição, eu vou te ensinar a cumprimentar as pessoas em francês: de dia, à noite, com os amigos e com quem você ainda não conhece. Vamos começar?",
+      "pt-BR": "Que bom ter você aqui! Hoje vou te ensinar a cumprimentar em francês, de dia e à noite. Vamos lá?",
       "en": null
      },
      "tamanho": {
@@ -319,12 +319,12 @@
      "frase_completa": "Salut, Léa !",
      "distrator": "grafia",
      "explicacao": {
-      "pt-BR": "Repare: o <b>salut</b> serve a qualquer hora, mas só com os amigos e as pessoas próximas. E o <b>coucou</b> é mais carinhoso ainda: família, amigos e crianças.",
+      "pt-BR": "<b>Salut</b> é para amigos e pessoas próximas, a qualquer hora. <b>Coucou</b> é ainda mais carinhoso.",
       "en": null
      },
      "explicacao_erro": {
       "Salu": {
-       "pt-BR": "Faltou uma letrinha! Olhe a grafia: <b>salut</b> termina em <b>t</b>, e esse <b>t</b> não se pronuncia. ",
+       "pt-BR": "O <b>t</b> final de <b>salut</b> não se pronuncia. ",
        "en": null
       }
      }
@@ -349,7 +349,7 @@
       "en": null
      },
      "explicacao": {
-      "pt-BR": "O <b>bonjour</b> é o cumprimento padrão do dia: você pode usar de manhã até o fim da tarde, com qualquer pessoa, do padeiro ao seu chefe.",
+      "pt-BR": "<b>Bonjour</b> vale de manhã até o fim da tarde, com qualquer pessoa.",
       "en": null
      }
     },
@@ -376,16 +376,16 @@
       "en": null
      },
      "explicacao": {
-      "pt-BR": "À noite, quando você chega num lugar, troque o <b>bonjour</b> pelo <b>bonsoir</b>. E o <b>salut</b>, a gente guarda para os amigos.",
+      "pt-BR": "À noite, ao chegar, troque <b>bonjour</b> por <b>bonsoir</b>. <b>Salut</b> fica para os amigos.",
       "en": null
      },
      "explicacao_erro": {
       "Salut !": {
-       "pt-BR": "Não se preocupe, esse erro é muito comum no começo! O garçom você não conhece. ",
+       "pt-BR": "Esse erro é comum no começo! ",
        "en": null
       },
       "Bonjour !": {
-       "pt-BR": "Foi por pouco: o <b>bonjour</b> vale só até o fim da tarde. ",
+       "pt-BR": "<b>Bonjour</b> vale só até o fim da tarde. ",
        "en": null
       }
      }
@@ -415,7 +415,7 @@
       "en": null
      },
      "explicacao": {
-      "pt-BR": "Prefira sempre <b>madame</b> com qualquer mulher adulta: o <b>mademoiselle</b> hoje é evitado, e assim não tem risco de alguém achar indelicado.",
+      "pt-BR": "Use <b>madame</b> com qualquer mulher adulta: <b>mademoiselle</b> hoje é evitado.",
       "en": null
      }
     },
@@ -445,7 +445,7 @@
      ],
      "frase_completa": "Bonsoir, monsieur !",
      "explicacao": {
-      "pt-BR": "Repare nas duas escolhas: é noite, então <b>bonsoir</b>; é um homem, então <b>monsieur</b>.",
+      "pt-BR": "É noite: <b>bonsoir</b>. É um homem: <b>monsieur</b>.",
       "en": null
      }
     },
@@ -453,7 +453,7 @@
      "id": "l1-fim",
      "tipo": "fim",
      "fala": {
-      "pt-BR": "Parabéns! Você já sabe cumprimentar em francês. Ouça de novo o que vimos hoje antes de seguir:",
+      "pt-BR": "Parabéns! Você já sabe cumprimentar em francês.",
       "en": null
      }
     }
@@ -481,7 +481,7 @@
      "id": "l2-intro",
      "tipo": "abertura",
      "objetivo": {
-      "pt-BR": "Você já sabe cumprimentar. Agora eu vou te ensinar o passo seguinte: perguntar \"tudo bem?\" e responder, com os amigos e com quem você trata por senhor ou senhora. Vamos lá?",
+      "pt-BR": "Agora vamos perguntar \"tudo bem?\" e responder, com amigos e com quem você trata por senhor ou senhora.",
       "en": null
      },
      "tamanho": {
@@ -521,12 +521,12 @@
      "frase_completa": "Salut, ça va ? Oui, ça va.",
      "distrator": "outra palavra",
      "explicacao": {
-      "pt-BR": "Repare que curioso: o <b>ça va</b> serve para perguntar e para responder. Na pergunta, é \"tudo bem?\"; na resposta, \"tudo bem\".",
+      "pt-BR": "Repare: <b>ça va</b> serve para perguntar (\"tudo bem?\") e para responder (\"tudo bem\").",
       "en": null
      },
      "explicacao_erro": {
       "bonsoir": {
-       "pt-BR": "<b>Bonsoir</b> é um cumprimento, não uma pergunta. ",
+       "pt-BR": "<b>Bonsoir</b> é cumprimento, não pergunta. ",
        "en": null
       }
      }
@@ -576,16 +576,16 @@
       "en": null
      },
      "explicacao": {
-      "pt-BR": "Com pessoas idosas e com quem você não conhece, use o formal: <b>vous allez bien ?</b> ou <b>comment allez-vous ?</b> É um sinal de respeito.",
+      "pt-BR": "Com desconhecidos e pessoas idosas, use o formal: <b>vous allez bien ?</b>",
       "en": null
      },
      "explicacao_erro": {
       "Tu vas bien ?": {
-       "pt-BR": "O <b>tu vas bien ?</b> é informal: é para família, amigos e gente da mesma idade. ",
+       "pt-BR": "<b>Tu vas bien ?</b> é informal. ",
        "en": null
       },
       "Ça va ?": {
-       "pt-BR": "O <b>ça va ?</b> é o mais comum, mas é informal. ",
+       "pt-BR": "<b>Ça va ?</b> é informal. ",
        "en": null
       }
      }
@@ -630,7 +630,7 @@
       "en": null
      },
      "explicacao": {
-      "pt-BR": "Cuidado com a tradução ao pé da letra, que engana muita gente: <b>pas mal</b> é \"nada mal\", ou seja, a pessoa está bem.",
+      "pt-BR": "Cuidado com o pé da letra: <b>pas mal</b> quer dizer que a pessoa está bem.",
       "en": null
      }
     },
@@ -660,12 +660,12 @@
      "frase_completa": "Je vais bien, et toi ?",
      "distrator": "grafia",
      "explicacao": {
-      "pt-BR": "Para devolver a pergunta, use <b>et toi ?</b> com os amigos e a família, e <b>et vous ?</b> com quem você trata por senhor ou senhora.",
+      "pt-BR": "<b>Et toi ?</b> com amigos; <b>et vous ?</b> com senhor ou senhora.",
       "en": null
      },
      "explicacao_erro": {
       "toa": {
-       "pt-BR": "Você escreveu como se ouve, e isso é um ótimo sinal! Só que, em francês, <b>oi</b> se pronuncia /uá/: <b>toi</b>. ",
+       "pt-BR": "Você escreveu como se ouve! Em francês, <b>oi</b> se pronuncia /uá/. ",
        "en": null
       }
      }
@@ -695,7 +695,7 @@
      ],
      "frase_completa": "Bonsoir, madame. Vous allez bien ?",
      "explicacao": {
-      "pt-BR": "Você chamou a pessoa de <b>madame</b>, então a pergunta fica no formal: <b>vous allez bien ?</b>",
+      "pt-BR": "Com <b>madame</b>, a pergunta é formal: <b>vous allez bien ?</b>",
       "en": null
      }
     },
@@ -703,7 +703,7 @@
      "id": "l2-fim",
      "tipo": "fim",
      "fala": {
-      "pt-BR": "Muito bem! Agora você já pergunta e responde \"tudo bem?\" em francês. Ouça de novo o que vimos:",
+      "pt-BR": "Muito bem! Agora você já pergunta e responde \"tudo bem?\".",
       "en": null
      }
     }
@@ -733,7 +733,7 @@
      "id": "l3-intro",
      "tipo": "abertura",
      "objetivo": {
-      "pt-BR": "Nesta lição, eu vou te mostrar as palavrinhas mágicas do francês: agradecer, responder a um obrigado, pedir por favor e pedir desculpa ou licença. Com elas, você já consegue falar com educação em qualquer lugar.",
+      "pt-BR": "Hoje vou te mostrar as palavrinhas mágicas: obrigado, de nada, por favor e com licença.",
       "en": null
      },
      "tamanho": {
@@ -763,12 +763,12 @@
      "frase_completa": "Je vais bien, merci.",
      "distrator": "outra palavra",
      "explicacao": {
-      "pt-BR": "Repare que o <b>merci</b> não muda: serve para \"obrigado\" e para \"obrigada\", conforme quem fala.",
+      "pt-BR": "<b>Merci</b> não muda: é \"obrigado\" ou \"obrigada\", conforme quem fala.",
       "en": null
      },
      "explicacao_erro": {
       "bonjour": {
-       "pt-BR": "<b>Bonjour</b> é um cumprimento: não fecha a resposta. ",
+       "pt-BR": "<b>Bonjour</b> é cumprimento. ",
        "en": null
       }
      }
@@ -793,7 +793,7 @@
       "en": null
      },
      "explicacao": {
-      "pt-BR": "<b>De rien</b> é \"de nada\": é assim que você responde quando alguém te diz <b>merci</b>.",
+      "pt-BR": "<b>De rien</b> é \"de nada\", a resposta a um <b>merci</b>.",
       "en": null
      }
     },
@@ -826,7 +826,7 @@
       "en": null
      },
      "explicacao": {
-      "pt-BR": "Você vai ver muito em mensagem: <b>STP</b> é a forma curta de <b>s'il te plaît</b>, comum entre amigos.",
+      "pt-BR": "<b>STP</b> é o <b>s'il te plaît</b> curtinho das mensagens entre amigos.",
       "en": null
      },
      "sem_audio": true
@@ -854,16 +854,16 @@
       "en": null
      },
      "explicacao": {
-      "pt-BR": "O <b>pardon</b> serve para pedir licença e para pedir desculpa por algo pequeno, como um esbarrão. É uma das palavras que você mais vai usar na rua.",
+      "pt-BR": "<b>Pardon</b> serve para pedir licença ou desculpa por algo pequeno, como um esbarrão.",
       "en": null
      },
      "explicacao_erro": {
       "Merci, madame !": {
-       "pt-BR": "O <b>merci</b> é para agradecer. ",
+       "pt-BR": "<b>Merci</b> é para agradecer. ",
        "en": null
       },
       "De rien, madame !": {
-       "pt-BR": "O <b>de rien</b> é a resposta a um <b>merci</b>. ",
+       "pt-BR": "<b>De rien</b> responde a um <b>merci</b>. ",
        "en": null
       }
      }
@@ -897,7 +897,7 @@
       "en": null
      },
      "explicacao": {
-      "pt-BR": "Com desconhecidos, use <b>excusez-moi</b>; o <b>excuse-moi</b> fica para os amigos e a família.",
+      "pt-BR": "Com desconhecidos, <b>excusez-moi</b>; com amigos e família, <b>excuse-moi</b>.",
       "en": null
      }
     },
@@ -923,12 +923,12 @@
      "frase_completa": "Excusez-moi, monsieur !",
      "distrator": "grafia",
      "explicacao": {
-      "pt-BR": "Na forma formal, a palavra termina em <b>-ez</b>: <b>excusez-moi</b>.",
+      "pt-BR": "Na forma formal, termina em <b>-ez</b>: <b>excusez-moi</b>.",
       "en": null
      },
      "explicacao_erro": {
       "Excusé-moi": {
-       "pt-BR": "O som está certinho! Só que, em francês, <b>-ez</b> no fim da palavra também se pronuncia /ê/, o mesmo som de <b>é</b>. ",
+       "pt-BR": "O som está certo! Em francês, <b>-ez</b> final se pronuncia /ê/, como <b>é</b>. ",
        "en": null
       }
      }
@@ -937,7 +937,7 @@
      "id": "l3-fim",
      "tipo": "fim",
      "fala": {
-      "pt-BR": "Ótimo! Com essas palavras, você já fala com educação em qualquer lugar. Ouça de novo o que vimos:",
+      "pt-BR": "Ótimo! Agora você já fala com educação em francês.",
       "en": null
      }
     }
@@ -964,7 +964,7 @@
      "id": "l4-intro",
      "tipo": "abertura",
      "objetivo": {
-      "pt-BR": "Chegamos à última lição de palavras desta unidade! Eu vou te ensinar a se despedir e a desejar um bom dia ou uma boa noite. Depois dela, vêm os diálogos.",
+      "pt-BR": "Última lição de palavras da unidade! Vou te ensinar a se despedir e a desejar um bom dia.",
       "en": null
      },
      "tamanho": {
@@ -995,16 +995,16 @@
       "en": null
      },
      "explicacao": {
-      "pt-BR": "O <b>au revoir</b> é a despedida que serve com qualquer pessoa, conhecida ou não. Na dúvida, é com ele que você vai.",
+      "pt-BR": "<b>Au revoir</b> serve com qualquer pessoa. Na dúvida, use ele.",
       "en": null
      },
      "explicacao_erro": {
       "Bonjour, madame !": {
-       "pt-BR": "O <b>bonjour</b> é para quando você chega, não para quando sai. ",
+       "pt-BR": "<b>Bonjour</b> é para chegar, não para sair. ",
        "en": null
       },
       "Pardon, madame !": {
-       "pt-BR": "O <b>pardon</b> é para pedir licença ou desculpa. ",
+       "pt-BR": "<b>Pardon</b> é para licença ou desculpa. ",
        "en": null
       }
      }
@@ -1037,7 +1037,7 @@
       "en": null
      },
      "explicacao": {
-      "pt-BR": "O <b>à plus</b> (ou <b>A+</b>, por escrito) é a despedida do dia a dia entre amigos.",
+      "pt-BR": "<b>À plus</b> (ou <b>A+</b>) é o \"até mais\" do dia a dia entre amigos.",
       "en": null
      }
     },
@@ -1063,12 +1063,12 @@
      "frase_completa": "Merci, bonne journée !",
      "distrator": "par",
      "explicacao": {
-      "pt-BR": "Essa é uma confusão bem comum, então repare: para cumprimentar, quando você chega, diz <b>bonjour</b> ou <b>bonsoir</b>. Para desejar um bom dia ou uma boa noite, na hora de sair, diz <b>bonne journée</b> ou <b>bonne soirée</b>.",
+      "pt-BR": "Ao chegar: <b>bonjour</b>. Na saída, para desejar um bom dia: <b>bonne journée</b>.",
       "en": null
      },
      "explicacao_erro": {
       "soirée": {
-       "pt-BR": "Olhe a tradução: ela pede \"um bom dia\". ",
+       "pt-BR": "A tradução pede \"um bom dia\". ",
        "en": null
       }
      }
@@ -1095,12 +1095,12 @@
      "frase_completa": "Salut, à bientôt !",
      "distrator": "grafia",
      "explicacao": {
-      "pt-BR": "<b>À bientôt</b> é \"até breve\": uma despedida simpática, que serve com qualquer pessoa.",
+      "pt-BR": "<b>À bientôt</b> é \"até breve\" e serve com qualquer pessoa.",
       "en": null
      },
      "explicacao_erro": {
       "bientô": {
-       "pt-BR": "Você escreveu como se ouve! Só que, em francês, o <b>t</b> no fim de <b>bientôt</b> não se pronuncia, mas se escreve. ",
+       "pt-BR": "Você escreveu como se ouve! O <b>t</b> final de <b>bientôt</b> não se pronuncia. ",
        "en": null
       }
      }
@@ -1120,7 +1120,7 @@
       "en": null
      },
      "explicacao": {
-      "pt-BR": "Lembra do <b>salut</b> lá da primeira lição? Ele também serve para se despedir dos amigos: é o nosso \"tchau\" informal. Com quem você não conhece, prefira <b>au revoir</b>.",
+      "pt-BR": "Lembra do <b>salut</b>? Entre amigos, ele também é \"tchau\". Com desconhecidos, <b>au revoir</b>.",
       "en": null
      }
     },
@@ -1128,7 +1128,7 @@
      "id": "l4-fim",
      "tipo": "fim",
      "fala": {
-      "pt-BR": "Parabéns, você terminou as lições de palavras da unidade! Ouça de novo o que vimos, e depois vamos aos diálogos.",
+      "pt-BR": "Parabéns! Agora vamos aos diálogos.",
       "en": null
      }
     }
@@ -1152,7 +1152,7 @@
      "id": "l5-intro",
      "tipo": "abertura",
      "objetivo": {
-      "pt-BR": "Agora é hora de juntar tudo! Você vai ouvir duas conversas: uma entre vizinhos que se falam de um jeito informal, e outra entre vizinhos que se tratam por senhor e senhora. Preste atenção em como cada um cumprimenta, pergunta como o outro está e se despede.",
+      "pt-BR": "Hora de juntar tudo! Duas conversas: uma informal e outra com senhor e senhora. Repare em como cada um fala.",
       "en": null
      },
      "tamanho": {
@@ -1170,7 +1170,7 @@
       "en": null
      },
      "explicacao": {
-      "pt-BR": "Repare na resposta do Hugo: <b>Je vais bien</b>. Ele está bem.",
+      "pt-BR": "O Hugo responde <b>Je vais bien</b>: ele está bem.",
       "en": null
      }
     },
@@ -1184,7 +1184,7 @@
       "en": null
      },
      "explicacao": {
-      "pt-BR": "Repare na resposta da Sra. Dubois: <b>Très bien, merci</b>. Ela está muito bem.",
+      "pt-BR": "A Sra. Dubois responde <b>Très bien, merci</b>: ela está muito bem.",
       "en": null
      }
     }
@@ -1687,7 +1687,7 @@
     "l1-ex-bonsoir"
    ],
    "texto": {
-    "pt-BR": "Vou te contar como os franceses escolhem o cumprimento. <strong>Bonjour</strong> vale de manhã até o fim da tarde: é o cumprimento padrão do dia, com qualquer pessoa. À noite, quando você chega num lugar, troque por <strong>bonsoir</strong>. O <strong>salut</strong> serve a qualquer hora, mas guarde para os amigos e as pessoas próximas: com desconhecidos ou numa situação formal, ele soa informal demais. E o <strong>coucou</strong> é mais carinhoso ainda: é para a família, os amigos e as crianças.",
+    "pt-BR": "<strong>Bonjour</strong> vale de manhã até o fim da tarde, com qualquer pessoa. À noite, ao chegar num lugar, troque por <strong>bonsoir</strong>. <strong>Salut</strong> serve a qualquer hora, mas só com amigos e pessoas próximas. E <strong>coucou</strong> é ainda mais carinhoso: família, amigos e crianças.",
     "en": null
    },
    "exemplos": [
@@ -1756,7 +1756,7 @@
    },
    "destino": "nota",
    "texto": {
-    "pt-BR": "Uma dica importante para acertar na educação: com um homem que você não conhece, diga <strong>monsieur</strong>; com uma mulher, <strong>madame</strong>. Hoje, <strong>madame</strong> serve para qualquer mulher adulta, casada ou não. Você ainda vai ver <strong>mademoiselle</strong> (senhorita) por aí, mas eu não recomendo: muita gente acha antiquado ou até indelicado. Tanto que, em 2012, a França tirou essa opção dos formulários oficiais.",
+    "pt-BR": "Com um homem que você não conhece, diga <strong>monsieur</strong>; com uma mulher, <strong>madame</strong>, casada ou não. Você ainda vai ver <strong>mademoiselle</strong> (senhorita), mas eu não recomendo: muita gente acha antiquado ou indelicado. Em 2012, a França até tirou essa opção dos formulários oficiais.",
     "en": null
    },
    "exemplos": [
@@ -1821,7 +1821,7 @@
     "l2-ex-cava"
    ],
    "texto": {
-    "pt-BR": "Agora repare numa coisa curiosa: <strong>ça va</strong> serve para perguntar e para responder! Na pergunta, é \"tudo bem?\"; na resposta, \"tudo bem\". Então uma conversa entre amigos pode ser assim:",
+    "pt-BR": "Repare: <strong>ça va</strong> serve para perguntar e para responder. Na pergunta, é \"tudo bem?\"; na resposta, \"tudo bem\". Assim:",
     "en": null
    },
    "exemplos": [
@@ -1872,7 +1872,7 @@
    },
    "destino": "nota",
    "texto": {
-    "pt-BR": "Em francês, há vários jeitos de perguntar como a pessoa está, e eu vou separar em dois grupos para ficar fácil. <strong>Informal</strong>, com família, amigos e jovens da mesma idade, mesmo que não se conheçam: <strong>Ça va ?</strong>, o mais comum, <strong>Tu vas bien ?</strong> e <strong>Comment vas-tu ?</strong>, que na fala do dia a dia soa um pouco mais cuidado. <strong>Formal</strong>, com desconhecidos, chefes e superiores, pessoas idosas e quem presta um serviço: <strong>Vous allez bien ?</strong> e <strong>Comment allez-vous ?</strong>. Ficou na dúvida? Use o formal: ninguém vai achar ruim.",
+    "pt-BR": "Vou separar em dois grupos. <strong>Informal</strong> (família, amigos, gente da mesma idade, mesmo sem se conhecer): <strong>Ça va ?</strong>, o mais comum, <strong>Tu vas bien ?</strong> e <strong>Comment vas-tu ?</strong>, um pouco mais cuidado. <strong>Formal</strong> (desconhecidos, chefes, pessoas idosas, quem presta um serviço): <strong>Vous allez bien ?</strong> e <strong>Comment allez-vous ?</strong>. Na dúvida, use o formal.",
     "en": null
    },
    "exemplos": [
@@ -1953,7 +1953,7 @@
    },
    "destino": "nota",
    "texto": {
-    "pt-BR": "Além de <strong>je vais bien</strong>, você vai ouvir outras respostas, e vale a pena reconhecer cada uma. <strong>Très bien</strong> é \"muito bem\". <strong>Pas mal</strong>, ao pé da letra, é \"nada mal\", mas quer dizer que a pessoa está bem. E, entre amigos, você pode ouvir <strong>bof</strong>: é um \"mais ou menos\" sem muito ânimo, bem informal.",
+    "pt-BR": "Além de <strong>je vais bien</strong>, você vai ouvir: <strong>très bien</strong> (muito bem), <strong>pas mal</strong> (\"nada mal\", ou seja, a pessoa está bem) e, entre amigos, <strong>bof</strong>, um \"mais ou menos\" sem ânimo.",
     "en": null
    },
    "exemplos": [
@@ -2015,7 +2015,7 @@
    },
    "destino": "nota",
    "texto": {
-    "pt-BR": "Na fala, use sempre a forma inteira: <strong>s'il te plaît</strong> com amigos e família, <strong>s'il vous plaît</strong> com quem você não conhece. Na dúvida, fique com <strong>s'il vous plaît</strong>, que é sempre a escolha mais segura. Por escrito, as duas costumam encolher: numa mensagem de amigo, você vai ver <strong>STP</strong>; em avisos, placas e mensagens mais formais, <strong>SVP</strong>.",
+    "pt-BR": "Na fala, use a forma inteira: <strong>s'il te plaît</strong> com amigos e família, <strong>s'il vous plaît</strong> com quem você não conhece (na dúvida, é a mais segura). Por escrito, elas encolhem: <strong>STP</strong> em mensagem de amigo, <strong>SVP</strong> em avisos e placas.",
     "en": null
    },
    "exemplos": [
@@ -2071,7 +2071,7 @@
    },
    "destino": "nota",
    "texto": {
-    "pt-BR": "Essa dúvida aparece muito no começo, então vou explicar com calma. <strong>Pardon</strong> tem três usos: pedir licença, pedir desculpa por algo pequeno (um esbarrão, por exemplo) e, como pergunta, pedir que a pessoa repita: <strong>Pardon ?</strong> Quando você quiser chamar a atenção de alguém ou se desculpar com mais cuidado, use <strong>excusez-moi</strong> com desconhecidos e <strong>excuse-moi</strong> com amigos e família. E, para dizer \"sinto muito\", o francês tem <strong>désolé</strong>, ou <strong>désolée</strong> se quem fala é mulher. Eu, por exemplo, digo <strong>désolée</strong>.",
+    "pt-BR": "<strong>Pardon</strong> serve para pedir licença, pedir desculpa por algo pequeno e, como pergunta, pedir que repitam: <strong>Pardon ?</strong> Para chamar a atenção ou se desculpar com mais cuidado: <strong>excusez-moi</strong> com desconhecidos, <strong>excuse-moi</strong> com amigos. \"Sinto muito\" é <strong>désolé</strong>, ou <strong>désolée</strong> se quem fala é mulher, como eu.",
     "en": null
    },
    "exemplos": [
@@ -2139,7 +2139,7 @@
    },
    "destino": "nota",
    "texto": {
-    "pt-BR": "Com os amigos, <strong>à bientôt</strong> é comum, mas eu vou te contar qual é a despedida mais usada no dia a dia (e quase sempre em mensagem): <strong>à plus</strong>, que por escrito costuma virar só <strong>A+</strong>. Atenção a um detalhe: aqui o <strong>s</strong> de <i>plus</i> se pronuncia. Com desconhecidos ou numa situação formal, continue com <strong>à bientôt</strong>.",
+    "pt-BR": "Com amigos, a despedida mais usada no dia a dia é <strong>à plus</strong>, que por escrito vira <strong>A+</strong>. Atenção: aqui o <strong>s</strong> de <i>plus</i> se pronuncia. Com desconhecidos, fique com <strong>à bientôt</strong>.",
     "en": null
    },
    "exemplos": [
@@ -2198,7 +2198,7 @@
     "l4-ex-salut"
    ],
    "texto": {
-    "pt-BR": "Lembra do <strong>salut</strong> lá da primeira lição? Ele também serve para se despedir dos amigos: é o nosso \"tchau\" informal. Com quem você não conhece, prefira <strong>au revoir</strong>.",
+    "pt-BR": "Lembra do <strong>salut</strong>? Entre amigos, ele também é \"tchau\". Com quem você não conhece, use <strong>au revoir</strong>.",
     "en": null
    },
    "exemplos": [
