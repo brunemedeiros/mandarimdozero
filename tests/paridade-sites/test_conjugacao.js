@@ -60,7 +60,8 @@ async function fingerprint(browser, root){
   const out = {};
   const grab = async (name, fn, arg) => { out[name] = await page.evaluate(fn, arg); };
   const click = (sel) => page.evaluate((s) => { const e = document.querySelector(s); if (!e) throw new Error('sem ' + s); e.click(); }, sel);
-  const html = (sel) => page.evaluate((s) => { const e = document.querySelector(s); return e ? e.innerHTML : null; }, sel);
+  // Tela de conclusão única (2026-11-10, decisão da autora): as telas de conclusão trocaram de marcação DE PROPÓSITO (shared/core/conclusao.js); o antes (várias marcações) e o depois (.conclusao) viram o mesmo marcador nos dois lados. O resto da tela continua comparado.
+  const html = (sel) => page.evaluate((s) => { const e = document.querySelector(s); if (!e) return null; const c = e.cloneNode(true); c.querySelectorAll('.conclusao, .speed-gameover, .conj-session-result, .challenge-queue-interstitial, .review-empty:has(.review-complete-actions), .story-complete, .exercise-result').forEach(n => n.replaceWith(document.createComment('CONCLUSAO'))); return c.innerHTML; }, sel);
   const view = () => html('#view-conjugaison');
   const state = () => page.evaluate(() => JSON.stringify({ conj: CONJ_STATE, checked: CONJ_STATE.checked ? [...CONJ_STATE.checked] : null,
     daily: STATE.daily, xp: STATE.xp, modes: STATE.modesUsed, saved: serializeState(),
