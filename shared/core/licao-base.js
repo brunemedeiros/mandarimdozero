@@ -205,11 +205,19 @@ function renderReviewViewInner(){
     // convidar a repetir a mesma bateria -- "Voltar" leva pra trilha,
     // "Praticar mais" leva pra PRATICAR (Combinar/Palavras difíceis), não
     // reinicia esta mesma sessão de revisão.
-    el.innerHTML = conclusaoHTML({ icon: '🎉', title: t('review.complete.title'),
-      sub: tp('review.complete.reviewed', STATE.reviewQueue.length === 1 ? 1 : 2, { n: STATE.reviewQueue.length }), cls: 'review-complete-actions',
-      actions: STATE.reviewSessionClassReview
-        ? [{ id: 'review-class-back', label: t('review.backToStudent') }]
-        : [{ id: 'review-again', label: t('review.back'), secondary: true }, { id: 'review-go-practice', label: t('review.practiceMore') }] });
+    el.innerHTML = `
+      <div class="review-empty">
+        <div class="big-emoji">🎉</div>
+        <h3>${t('review.complete.title')}</h3>
+        <p>${tp('review.complete.reviewed', STATE.reviewQueue.length === 1 ? 1 : 2, { n: STATE.reviewQueue.length })}</p>
+        <div class="review-complete-actions">
+          ${STATE.reviewSessionClassReview
+            ? `<button class="btn btn-primary" id="review-class-back">${t('review.backToStudent')}</button>`
+            : `<button class="btn btn-secondary" id="review-again">${t('review.back')}</button>
+          <button class="btn btn-primary" id="review-go-practice">${t('review.practiceMore')}</button>`}
+        </div>
+      </div>
+    `;
     checkUnitCompletion();
     document.getElementById('review-class-back')?.addEventListener('click', backToClassReviewTab);
     document.getElementById('review-again')?.addEventListener('click', () => {
@@ -352,10 +360,19 @@ function renderSpeedReview(){
     // bateria de revisão -- Voltar/Praticar mais, igual à conclusão do
     // Flashcard (ver renderReviewView).
     releaseBadgeCelebrations();
-    el.innerHTML = conclusaoHTML({ icon: '💔', title: t('review.speed.gameOver'), cls: 'speed-gameover',
-      sub: `${tp('review.speed.answered', SPEED_STATE.index === 1 ? 1 : 2, { n: SPEED_STATE.index })}<br>${speedIsRecord ? `${t('review.records.newRecord')} ${speedRecordText(reviewRecords())}` : t('review.records.yourRecord', { record: speedRecordText(reviewRecords()) })}`,
-      stats: [{ label: t('zh.path.lessonDone.score'), value: t('review.speed.points', { n: SPEED_STATE.score }) }],
-      actions: [{ id: 'speed-back-btn', label: t('review.back'), secondary: true }, { id: 'speed-practice-btn', label: t('review.practiceMore') }] });
+    el.innerHTML = `
+      <div class="speed-gameover">
+        <div class="big-emoji">💔</div>
+        <h3>${t('review.speed.gameOver')}</h3>
+        <div class="score-num">${t('review.speed.points', { n: SPEED_STATE.score })}</div>
+        <p>${tp('review.speed.answered', SPEED_STATE.index === 1 ? 1 : 2, { n: SPEED_STATE.index })}</p>
+        <p class="review-record-line">${speedIsRecord ? `${t('review.records.newRecord')} ${speedRecordText(reviewRecords())}` : t('review.records.yourRecord', { record: speedRecordText(reviewRecords()) })}</p>
+        <div class="review-complete-actions">
+          <button class="btn btn-secondary" id="speed-back-btn">${t('review.back')}</button>
+          <button class="btn btn-primary" id="speed-practice-btn">${t('review.practiceMore')}</button>
+        </div>
+      </div>
+    `;
     document.getElementById('speed-back-btn').addEventListener('click', () => switchTab('path'));
     document.getElementById('speed-practice-btn').addEventListener('click', backToReviewModeSelect);
     return;
@@ -389,10 +406,18 @@ function renderSpeedReview(){
     const speedStreakRecord2 = recordSpeedReviewStreak(SPEED_STATE.bestStreak || 0);
     if (speedIsRecord2 || speedStreakRecord2) saveState();
     releaseBadgeCelebrations();
-    el.innerHTML = conclusaoHTML({ icon: '🏆', title: t('review.complete.title'), cls: 'speed-gameover',
-      sub: speedIsRecord2 || speedStreakRecord2 ? `${t('review.records.newRecord')} ${speedRecordText(reviewRecords())}` : t('review.records.yourRecord', { record: speedRecordText(reviewRecords()) }),
-      stats: [{ label: t('zh.path.lessonDone.score'), value: t('review.speed.points', { n: SPEED_STATE.score }) }],
-      actions: [{ id: 'speed-back-btn', label: t('review.back'), secondary: true }, { id: 'speed-practice-btn', label: t('review.practiceMore') }] });
+    el.innerHTML = `
+      <div class="speed-gameover">
+        <div class="big-emoji">🏆</div>
+        <h3>${t('review.complete.title')}</h3>
+        <div class="score-num">${t('review.speed.points', { n: SPEED_STATE.score })}</div>
+        <p class="review-record-line">${speedIsRecord2 || speedStreakRecord2 ? `${t('review.records.newRecord')} ${speedRecordText(reviewRecords())}` : t('review.records.yourRecord', { record: speedRecordText(reviewRecords()) })}</p>
+        <div class="review-complete-actions">
+          <button class="btn btn-secondary" id="speed-back-btn">${t('review.back')}</button>
+          <button class="btn btn-primary" id="speed-practice-btn">${t('review.practiceMore')}</button>
+        </div>
+      </div>
+    `;
     document.getElementById('speed-back-btn').addEventListener('click', () => switchTab('path'));
     document.getElementById('speed-practice-btn').addEventListener('click', backToReviewModeSelect);
     return;

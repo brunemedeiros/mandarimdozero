@@ -774,6 +774,8 @@ a.pill:hover{ border-color: var(--imperial-gold); }
   font-size:15px; cursor:pointer;
 }
 
+.story-complete{ text-align:center; padding:40px 20px; }
+.story-complete .big-emoji{ font-size:52px; margin-bottom:12px; }
 
 /* ---------- Bloco de Unidade: lista vertical, peso próprio ----------
    A Unidade é quem carrega o peso visual principal da trilha agora
@@ -1602,15 +1604,20 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
 .cloze-type-wrap ~ .exercise-dontknow:hover{ border-color: var(--ink-soft); color: var(--ink); background: var(--paper-warm); }
 .cloze-type-wrap ~ .exercise-dontknow.disabled{ display:none; }
 
+.exercise-result{ text-align:center; padding: 40px 20px; }
+.exercise-result .big-emoji{ font-size:48px; margin-bottom:10px; }
+.exercise-result h3{ margin:0 0 6px; font-size:20px; }
+.exercise-result p{ margin:0; color: var(--ink-soft); font-size:14px; }
+.exercise-result .score-num{ font-size:34px; font-weight:800; color: var(--seal-red-dark); margin: 14px 0; }
 
 /* ---------- Tela final "Parabéns" (estilo Busuu) ---------- */
-</style>
-<!-- Tela de conclusão única (.lesson-complete + partes opcionais): peça comum em shared/conclusao.css, ligada aqui para manter a ordem da cascata. -->
-<link rel="stylesheet" href="../shared/conclusao.css">
-<style>
+.lesson-complete{ text-align:center; padding: 20px 4px; }
+.lesson-complete-icon{ font-size:52px; margin-bottom:8px; }
+.lesson-complete h2{ margin:0 0 18px; font-size:22px; }
 /* Tela leve entre lições da mesma unidade (Modelo B) -- reaproveita
    .lesson-complete/.lesson-complete-icon acima, só acrescenta o nome da
    lição e, quando há cartões devidos, um aviso que puxa pro Flashcard. */
+.lesson-boundary-title{ font-size:15px; color: var(--ink-soft); margin: -8px 0 18px; }
 .lesson-boundary-due{
   display:inline-block; margin: 0 0 8px; padding:8px 16px; border-radius:999px;
   background: rgba(192,35,31,0.08); color: var(--seal-red-dark); font-weight:700; font-size:13.5px;
@@ -1626,6 +1633,10 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
 .lesson-boundary-challenge-chip.done{ background: rgba(227,179,65,0.18); color: var(--seal-red-dark); }
 .lbc-chip-count{ font-weight:800; opacity:.75; flex-shrink:0; }
 .lbc-chip-check{ font-weight:800; flex-shrink:0; }
+.lesson-complete-stats{ display:flex; gap:12px; margin-bottom:22px; }
+.lc-stat{ flex:1; background: var(--paper-warm); border:1px solid var(--paper-line); border-radius: var(--radius); padding:14px; }
+.lc-stat-label{ font-size:11px; text-transform:uppercase; letter-spacing:.05em; color: var(--ink-soft); font-weight:800; margin-bottom:6px; }
+.lc-stat-value{ font-size:24px; font-weight:800; color: var(--seal-red-dark); }
 
 /* Tela "Unidade concluída!" (Fase 4) -- lista de competências/objetivo
    comunicacional, mesmo padrão visual de .module-skills (Tier 4/6, FR-only)
@@ -1732,6 +1743,8 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
 .review-empty .big-emoji{ font-size:52px; margin-bottom:12px; }
 .review-empty h3{ margin:0 0 6px; font-size:19px; }
 .review-empty p{ color:var(--ink-soft); margin:0 0 20px; font-size:14px; }
+.review-complete-actions{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
+.review-complete-actions .btn{ min-width:140px; }
 
 /* "Você está em dia" / "Ainda não há revisões" -- substitui os tiles de
    Flashcard/Speed Review quando não há nada devido (projeto "Reorganização
@@ -2027,6 +2040,9 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
 .speed-option.incorrect{ border-color: var(--seal-red); background: rgba(192,35,31,0.12); }
 .speed-option.disabled{ pointer-events:none; }
 
+.speed-gameover{ text-align:center; padding: 50px 20px; }
+.speed-gameover .big-emoji{ font-size:56px; margin-bottom:12px; }
+.speed-gameover .score-num{ font-size:38px; font-weight:800; color: var(--seal-red-dark); margin:14px 0; }
 .speed-streak-note{ font-size:13px; color: var(--ink-soft); margin-top:6px; }
 .review-progress-bar{ flex:1; height:8px; background:var(--paper-warm); border-radius:4px; overflow:hidden; }
 .review-progress-fill{ height:100%; background: linear-gradient(90deg, var(--seal-red), var(--imperial-gold)); border-radius:4px; transition: width .3s ease; }
@@ -5874,7 +5890,6 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
 <script src="../shared/core/quase-iguais-chaves.js"></script>
 <script src="../shared/core/quase-iguais-pinyin.js"></script>
 <script src="../shared/core/quase-iguais-dados.js"></script>
-<script src="../shared/core/conclusao.js"></script>
 <script src="../shared/core/licao-base.js"></script>
 <script src="../shared/core/licao-dialogo.js"></script>
 <script src="../shared/core/licao-exercicios.js"></script>

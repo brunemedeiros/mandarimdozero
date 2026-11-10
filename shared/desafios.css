@@ -92,6 +92,11 @@
 }
 .challenge-queue-level-name{ font-family: var(--font-display); font-size:18px; font-weight:800; color: var(--ink); }
 .challenge-queue-level-progress{ font-size:13px; color: var(--ink-soft); margin-top:2px; }
+.challenge-queue-interstitial{ text-align:center; padding:40px 20px; }
+.challenge-queue-interstitial .big-emoji{ font-size:48px; margin-bottom:14px; }
+.challenge-queue-interstitial h3{ font-size:20px; margin:0 0 8px; }
+.challenge-queue-interstitial p{ color: var(--ink-soft); margin:0 0 24px; }
+.challenge-queue-interstitial .btn{ max-width:280px; margin:0 auto; }
 .challenges-empty{ text-align:center; padding:40px 20px; color: var(--ink-soft); }
 .challenges-empty .big-emoji{ font-size:40px; margin-bottom:10px; }
 .challenge-expression{ display:flex; align-items:center; justify-content:center; gap:10px; font-size:24px; font-weight:800; text-align:center; margin-bottom:16px; color: var(--ink); }
