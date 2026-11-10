@@ -14,12 +14,13 @@ paths:
 Histórico: `docs/historico/02-*`, `03-*`, `11-*`.
 
 - Dois painéis: **Admin** (`#view-admin-badges`: Badges, Analytics, Notificações, Reports, Planos; sem Tags, que se editam no cartão/Deck) gate
-  `isAdminUser()` + Admin Mode; **Professora** (`#view-teacher-panel`, `shared/teacher-panel.js`: Alunos, Cartões, Mural; Aulas e Material
-  ficam dentro do Mural, aba "Aulas e materiais", desde a 121; `switchTeacherPanelSection('classlogs'|'materials')` ainda funciona e abre lá) gate `isTeacherUser()` (papel, `shared/permissions.js` + RPC `my_permissions`), nunca o Admin Mode.
+  `isAdminUser()` + Admin Mode; **Professora** (`#view-teacher-panel`, `shared/teacher-panel.js`: Alunos | Cartões | Mural | Aulas | Materiais desde
+  2026-11-10; o Mural ficou com Mural | Pessoas; Aulas tem as abas internas Aulas | Calendário | Para conferir (N), com Notion e Google Agenda em
+  Para conferir; atalho da ficha do aluno marca `ADMIN_CLASS_LOGS_STATE.fromFicha` e abre só as aulas dele) gate `isTeacherUser()` (papel, `shared/permissions.js` + RPC `my_permissions`), nunca o Admin Mode.
 - Papéis/permissões vêm do banco (075/076: `account_roles`, `role_permissions`); a tela só esconde, quem barra é RLS/RPC.
   Dar/tirar plano só pelas RPCs `admin_grant_role`/`admin_revoke_role` (UPDATE direto em `profiles.plan_tier` falha).
 - Aba **Alunos** (Design System novo): quadro geral com situação (Em dia 0 a 3 dias, Atenção 4 a 6, Parado 7+) e ficha em página própria; peças HTML em `shared/teacher-students-ui.js`, dados e eventos em `shared/admin-students.js`. Vincular direto (janela) é só da admin; a professora convida pela seção "Convidar aluno" (`shared/teacher-invites.js`, DS: busca, link, pendentes; confirmações pelo `PainelUI.confirmar`). Ficha tem Decks do aluno em árvore; `fetchStudentPanelData`/`renderStudentPanelHTML` alimentam o Analytics do perfil público. Remover vínculo usa `PainelUI.confirmar`. Testes: `tests/painel-alunos/`, `tests/k10/`.
-- Aba **Aulas** (dentro do Mural > Aulas e materiais, filtrada pela turma/aluno escolhido via `ADMIN_CLASS_LOGS_STATE.scope`): tela antiga da `main` (`shared/admin-class-logs.js`, calendário, Presença, Notion, link de agenda). A versão no Design System ficou na branch `claude/aulas-design-system` (sem PR).
+- Aba **Aulas** (aba do painel; `ADMIN_CLASS_LOGS_STATE.scope` ficou sem uso desde que saiu do Mural): `shared/admin-class-logs.js` (calendário, Presença, Notion, link de agenda); Alunos, Turmas, Nova aula e Aulas registradas em caixas do Design System iguais à do Notion (`shared/aulas-painel.css`, 2026-11-09). A versão antiga da branch `claude/aulas-design-system` ficou superada.
 - Aba **Cartões** (Design System novo): abas Criar cartão / Cartões criados; o Banco de Revisão é a sub-navegação "Cartões | Banco de Revisão" do painel e mantém o visual antigo. HTML em `shared/teacher-cards-ui.js`, dados e eventos em `shared/admin-flashcards.js` (ganchos `data-*` preservados; testes fase-g/h/i usam `tests/painel-cartoes/helpers.js`). Testes: `tests/painel-cartoes/`.
 - Aba **Material de apoio** (Design System novo): lista por mês de envio + formulário ao lado; envio a várias pessoas = 1 linha por aluno, agrupadas na tela (`tmtGroupMaterials`); editar/apagar vale para o envio todo; editar não troca o arquivo; link só vira href se for http(s) (também na vista da aluna). HTML em `shared/teacher-materials-ui.js`, dados e eventos em `shared/admin-support-materials.js`. Testes: `tests/painel-materiais/`.
 - **Painel de Admin** (Design System novo, 5 abas): navegação em `shared/admin-panel.js`; cada aba tem peças de HTML `shared/admin-<aba>-ui.js` (dado -> string, testadas em Node) e controlador `shared/admin-<aba>.js` (dados, eventos delegados). Analytics ainda divide cálculos em `admin-analytics-calc.js`. Janelas são `<dialog class="p-dialogo">` montadas pela tela (nada de modais no index.html); apagar/tirar acesso/enviar e-mail usam `PainelUI.confirmar`. Admin Mode só no botão 🔒 do topo. Manter `data-admin-section`, `#view-admin-badges` e `isAdminUser` (testes antigos). Testes: `tests/painel-admin/` (harness com banco em memória). Analytics busca em páginas de 1000 (teto 50000 eventos, 10000 técnicos) e Reports tem teto de 200: os dois avisam na tela quando cortam.
@@ -41,7 +42,7 @@ Histórico: `docs/historico/02-*`, `03-*`, `11-*`.
   "Cartões da professora". Aprovar = RPC `approve_review_bank_item` (atômica, 1 cartão por item); cortar arquiva, nunca apaga.
   Item sensível ou com "Para conferir" nunca vira cartão sozinho. Doc: `docs/historico/15-auditoria-banco-revisao.md`.
 - Mural (087, `shared/mural.js`): turmas (`classrooms`) e murais individuais; tabelas sem policy, tudo por RPC `mural_*`.
-  Estilo Classroom (121, CSS em `shared/mural-classroom.css`): abas Mural | Aulas e materiais | Pessoas, capa (cor/foto só a
+  Estilo Classroom (121, CSS em `shared/mural-classroom.css`): abas Mural | Pessoas (Aulas e Materiais saíram em 2026-11-10), capa (cor/foto só a
   professora, `mural_set_cover`), avisos automáticos `kind` lesson/material (texto lido ao vivo por `_mural_ref`, sem editar).
   Aluno só vê com vínculo ativo; recado "só para um aluno" exige o aluno na turma. Anexos no bucket privado `mural`
   (`<professora>/<autor>/<arquivo>`), lidos por link assinado; apagar post devolve os caminhos e o app limpa o Storage.
@@ -58,6 +59,8 @@ Histórico: `docs/historico/02-*`, `03-*`, `11-*`.
 - Google Agenda → site (117, `shared/google-calendar.js`, Edge Function `google-calendar`): só LÊ o Google, nunca escreve.
   Reconhece o aluno pelos "nomes na agenda" do Banco, e-mail do convidado ou regra aprendida; aula do Google tem horário travado
   no site (`google_event_ref`). Ida e volta é decisão futura da autora; não escrever no Google sem ela pedir.
+- Notion -> site (128, `shared/notion-sync.js`, Edge Function `notion-sync`): só LÊ o Notion. Linha casa com a aula do mesmo aluno/turma e
+  dia (ou cria); de antes da ligação fica "para aprovar" (aprovar não gera aviso: `app.mural_skip`). Plano: `docs/notion/plano-conectar-notion.md`.
 - Rotina automática do Banco (`supabase/functions/review-bank-agent`, migrations 089, 090 e 097 a 100): a tarefa da madrugada só INSERE itens/recaps de alunos
   com `agent_managed = true` e gera cartões pelo mesmo motor do site; `engine.generated.mjs` é GERADO (`node scripts/build-review-bank-agent.js`,
   nunca editar à mão). Mudou `shared/review-bank*.js` ou o motor de cartões: regerar, rodar `tests/banco-revisao/test_agent_core.js`, novo deploy.

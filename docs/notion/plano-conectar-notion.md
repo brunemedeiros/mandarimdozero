@@ -42,6 +42,11 @@ Notion (61 com Tópico ou "Para a próxima aula") e nada entrou no site, que só
 
 Grátis x Premium: faz parte do plano Professora (como o Google Agenda); para o aluno não muda nada.
 
-## Perguntas para a autora (antes de codar)
+## Decisões da autora (2026-11-05)
 
-Ver a conversa de 2026-11-03.
+- Não depender do Google Agenda: linha sem aula no dia cria a aula no site; se o Google trouxer o evento depois, ele se liga à mesma aula.
+- Edição: o Notion grava na aula quando a linha muda lá; editar no site não volta ao Notion (um sentido só).
+- Aulas atrasadas (antes do dia da ligação) entram todas "para aprovar", sem aviso no Mural nem sino.
+- Tópico vai direto para o aluno nas aulas novas (o texto de dentro da página do Notion não é lido).
+
+Estado e testes: `docs/historico/08-public-deck-migrations-rollout-059-069.md`, seção 128.

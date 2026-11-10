@@ -133,3 +133,18 @@ no fim do `<style>` de fr/zh (o teste de i18n já ignora tudo a partir do bloco 
   (ui 86, mapa 61, celular 108, marco 34+14, pular checkpoint 19, prova 43, helpers 6, histórias 4, a0 11, validador 8) OK.
   `tests/trilha/test_trail_state_model.js` falha com `t is not defined` também sem esta mudança (pré-existente, i18n).
   Prints conferidos em fr/zh × claro/escuro e 390px, 0 pageerrors.
+
+## Pronúncia entre barras não é lida (2026-11-05)
+- Pedido da dona: `/bʁe.zi.ljɛ̃/` e `/Muá, sé Bia/` são dicas de tela; a voz não deve lê-las. Voz do navegador: `stripPronunciationHints` em `shared/core/voz.js` (PR 437).
+- mp3 do `tts-generate`: mesma regra no texto falado de fr e pt (`fr.pronunciation-hints`, `pt.pronunciation-hints`, antes da regra de barra com espaços), em
+  `supabase/functions/tts-generate/tts_core.mjs` e em `fr/scripts/challenges_pipeline/spoken_text.py` (paridade testada). zh não muda (não usa IPA).
+- Versões das regras: fr 4 para 5 e pt 3 para 4 (`index.ts`, `languages/registry.json` + `registry.js` regerado, `SPOKEN_RULES_VERSION` 5 para 6). Efeito: todo áudio TTS de Field de fr e pt já gerado
+  passa a aparecer como desatualizado (nova `generationKey`); regenerar é ação explícita da professora (cota mensal). Os mp3 pré-gerados do manifest NÃO mudam sozinhos.
+- Deploy: `tts-generate` v14 na produção em 2026-11-05 (autorizado pela dona). Staging não tem essa função publicada pelo MCP; não mexi. `engine.generated.mjs` da `review-bank-agent` regerado (só os números das versões; a rotina não usa), sem novo deploy.
+- Testes: `tests/tts-google/test_tts_core.mjs` 120/120, `fr/scripts/test_spoken_text.py` 178/178, `tests/audio-sem-ipa` 15/15, `tests/registro` 88/89 (a falha é antiga: literais de appKey).
+
+## "×" entre palavras vira pausa (2026-11-06)
+- Pedido da dona: "brésiliens × brésiliennes" era lido como "vezes". Agora, entre letras e com espaço dos dois lados, o × vira pausa curta (vírgula), como a barra " / ". "4×20" e "2 × 3" (números) ficam.
+- Voz do navegador: `crossToPause` em `shared/core/voz.js`. TTS: `fr.cross-pause` e `pt.cross-pause` em `tts_core.mjs` e `spoken_text.py` (paridade testada).
+- Versões: fr 5 para 6, pt 4 para 5, `SPOKEN_RULES_VERSION` 6 para 7 (registry regerado; `engine.generated.mjs` regerado, só números). `tts-generate` v15 na produção em 2026-11-06 (autorizado pela dona).
+- Testes: `tests/tts-google` 123/123, `fr/scripts/test_spoken_text.py` 180/180, `tests/audio-sem-ipa` 19/19, `test_quase_iguais` 2768/0 (a linha de base antiga de 4 falhas já não aparece), contrato dos ganchos 29/29, registro 88/89 (falha antiga: literais de appKey).

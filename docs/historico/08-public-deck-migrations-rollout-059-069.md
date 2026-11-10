@@ -572,3 +572,62 @@ Número 086 já usado por outras conversas (`086_friends_streak_milestones_and_c
 - `shared/supabase_migrations/126_etapa7_aviso_para_hoje.sql`: só UPDATE de `notification_templates.body` (ids 39 e 41 pt, 119 e 120
   en, `review_overdue`), condicionado ao texto antigo; desfazer no comentário. Detalhes: `docs/i18n/etapa7-vocabulario-auditoria.md` seção 11.
 - Staging: aplicada (2026-11-03; lá só existem 39 e 41). Produção: aplicada (2026-11-03, autorizada, versão `20261103224909`); conferido: as 4 linhas com o texto novo.
+
+## 128 -- Conectar Notion (2026-11-05, decisões da autora)
+
+- `shared/supabase_migrations/128_notion_sync.sql`: `notion_connections` (token só para o servidor), `notion_sources` (banco,
+  mapa de colunas, "importar desde", dia da ligação), `notion_pages` (cópia das colunas ligadas de cada linha), `notion_name_links`
+  (nome do Notion -> aluno/turma/aluno do Banco/ignorar), `teacher_class_logs.notion_page_ref`. `_notion_apply` reconhece o aluno
+  (nome ligado, Banco, turma, primeiro nome) e completa a aula do mesmo aluno/turma, dia e idioma (a do Google primeiro) ou cria a
+  aula; linha de antes do dia da ligação fica "para aprovar" e `notion_approve` grava sem aviso no Mural (`app.mural_skip`, troca de
+  `_mural_lesson_trigger` da 121). Regra de edição: o Notion só grava quando a linha muda lá; o site nunca escreve no Notion.
+  Desconectar esvazia o token e as cópias (UPDATE, sem DELETE). Cron `notion-sync` de hora em hora, com a senha do cron do Google.
+- Edge Function `notion-sync` (`supabase/functions/notion-sync/index.ts` + `map.mjs`): login OAuth do Notion, lista de bancos,
+  colunas com sugestão, leitura incremental. Tela: `shared/notion-sync.js` + `shared/notion-sync.css` (caixa no topo de
+  Aulas e materiais). Página `privacidade-notion.html`. Repasse `/notion/callback` no Netlify.
+- Staging: migration aplicada (2026-11-05, versão 20261105144747; 5 tabelas, cron criado, sem execute para anon/app nas funções
+  internas); função `notion-sync` v1 publicada (secrets colocados pela autora em 2026-11-08: sem login = 401).
+- Produção (2026-11-08, autorizada): migration aplicada (versão 20261108171207; 5 tabelas, cron `7 * * * *`, sem execute para anon,
+  955 aulas antes e depois); função `notion-sync` v1 (sem login = 401, callback sem estado = 400 "Link expirado").
+  A outra 128 da `main` virou `129_review_bank_agent_state_pending` (outra sessão).
+- Ajuste na mesclagem: a caixa virou `<div class="painel"><details class="notion-box">` porque `PainelUI.confirmar()` prende a
+  janela no 1º `.painel` visível e, num `<details>` fechado, a janela não aparecia (quebrava "Apagar material", 210/210 de novo).
+- Testes: SQL local 128 19/19; peças `tests/notion/test_map.mjs` 10/10; painel-professora 793/793 (com a caixa do Notion);
+  i18n 2336/2336, sem português no en 6/6, paridade CSS 5/5.
+- 2026-11-08: a autora conectou (117 linhas desde 09/10). Coluna "Ficha do Aluno" (relação) só aparece se o banco ligado também for
+  compartilhado com a integração (aviso na tela de colunas; relação com nome de aluno passa a ser a sugestão para Aluno).
+
+## 130 -- Notion: trocar coluna/banco/data relê todas as linhas (2026-11-09)
+
+- Achado: depois de trocar "Aluno/a" pela "Ficha do Aluno", 86 linhas ficaram "Sem nome": `notion_save_source` zerava o cursor, mas
+  `notion_ingest` pula a linha cuja data de edição no Notion não mudou. `130_notion_remap.sql`: ao mudar banco, colunas ou "trazer a
+  partir de", `notion_pages.last_edited` vira null (relê tudo; aula já ligada não é regravada). Conserto único: linhas "sem aluno"
+  relidas (cursor zerado).
+- Staging e produção (2026-11-09, versão 20261109204102, pedido da autora "pode publicar os ajustes"); `notion-sync` v6 no Staging e
+  v2 na produção (sugestão da relação). Teste local `tests/aulas-presenca/test_130.sql` 6/6; peças do Notion 13/13.
+- Mesmo PR: "Aulas registradas" mostra só até hoje; as próximas (229 criadas pelo Google Agenda, eventos repetidos até fev/2027)
+  ficam atrás do botão "Mostrar as próximas (N)" e continuam no Calendário. Painel da professora 799/799.
+
+## 131 -- Notion: "Descartar" vale para sempre (2026-11-09)
+
+- Achado na releitura completa pedida pela autora: a única linha descartada voltou para "Para aprovar" (descartar só marcava o
+  estado; qualquer releitura ou edição no Notion recalculava). `131_notion_discard_sticks.sql`: coluna `notion_pages.discarded_at`
+  (ADD COLUMN), `notion_approve(.., false)` grava, `_notion_apply` respeita. A linha que já tinha voltado não dá para identificar:
+  a autora descarta de novo.
+- Staging e produção (2026-11-09, produção versão 20261109230551, "pode publicar"). Teste local `tests/aulas-presenca/test_131.sql` 5/5.
+- Mesmo PR: Aulas (Alunos, Turmas, Nova aula, Aulas registradas) em caixas do Design System iguais à do Notion
+  (`shared/aulas-painel.css`, HTML em `shared/admin-class-logs.js`); prévia aprovada pela autora. Painel da professora 805/805.
+
+## 132 -- Notion: ex-aluna no histórico, linha ligada à mão; Banco arquiva ex-aluna (2026-11-10)
+
+- Pedidos da autora: (1) ligar a Carmen (ex-aluna) só para o histórico; (2) linha "Sem nome" (ex.: "Pitch - Maximiliane Winter")
+  não tinha botão; (3) arquivar a Carmen no Banco dava "new row violates row-level security policy" (a checagem exigia vínculo
+  ativo da conta ligada em todo UPDATE).
+- `132_notion_former_and_manual.sql`: ALTER POLICY de `review_bank_students` (arquivado aceita conta que já teve vínculo);
+  `notion_name_links.history_only` + RPC `notion_link_former` (aula entra no histórico, sem aviso no Mural: `app.mural_skip`);
+  colunas `notion_pages.manual_*` + RPC `notion_assign_page` (liga só a linha) e `notion_discard` (descarta para sempre);
+  `notion_former_students` (grupo "Ex-alunos (só para o histórico)"). Teste local `tests/aulas-presenca/test_132.sql` 12/12.
+- Staging e produção (2026-11-10, produção versão 20261110132227). Tela no PR das propostas 4 e 6.
+- Propostas 4 e 6 da auditoria (mesmo PR): Aulas registradas com busca, blocos por mês e "mostrar mais" de 20 em 20; link de
+  agenda da professora em caixa do Design System (o do aluno fica como estava); apagar aula com `PainelUI.confirmar`; o bloco
+  antigo "Revisar do Notion" (importação de 15/10, 0 aulas pendentes na produção) saiu, com as chaves `panel.classLog.review.*`.

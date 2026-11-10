@@ -33,7 +33,7 @@ const LANGUAGE_REGISTRY_DATA = {
       "tts": {
         "voice": "fr-FR",
         "baseRate": 0.9,
-        "spokenRulesVersion": 4
+        "spokenRulesVersion": 6
       },
       "modules": [
         "desafios",
@@ -149,7 +149,7 @@ const LANGUAGE_REGISTRY_DATA = {
       "tts": {
         "voice": "pt-BR",
         "baseRate": 1,
-        "spokenRulesVersion": 3
+        "spokenRulesVersion": 5
       },
       "modules": [],
       "hasLevelTest": false,
