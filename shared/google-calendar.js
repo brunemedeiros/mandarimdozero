@@ -72,64 +72,85 @@ function gcalTargetOptionsHTML(){
 function gcalReviewItemHTML(ev){
   const cancelled = ev.match_state === 'cancelled';
   const who = (ev.attendees || []).map(a => a.name || a.email).filter(Boolean).join(', ');
-  return `<li class="gcal-review-item" data-gcal-event="${ev.id}">
-    <div class="gcal-review-head"><b>${escapeHTML(ev.title || t('panel.gcal.noTitle'))}</b>
-      <span class="profile-edit-hint">${escapeHTML(gcalWhen(ev))}${ev.calendar_summary ? ' · ' + escapeHTML(ev.calendar_summary) : ''}${who ? ' · ' + escapeHTML(who) : ''}</span></div>
+  return `<li class="gcal-review-item" data-gcal-event="${ev.id}"><div class="p-item gcal-item">
+    <div class="p-item-conteudo">
+      <span class="p-item-titulo">${escapeHTML(ev.title || t('panel.gcal.noTitle'))}</span>
+      <span class="p-item-descricao">${escapeHTML(gcalWhen(ev))}${ev.calendar_summary ? ' · ' + escapeHTML(ev.calendar_summary) : ''}${who ? ' · ' + escapeHTML(who) : ''}</span>
+      ${cancelled ? `<span class="p-item-descricao">${t('panel.gcal.cancelledHint')}</span>` : ''}
+    </div>
     ${cancelled
-      ? `<p class="profile-edit-hint">${t('panel.gcal.cancelledHint')}</p>
-         <div class="gcal-review-actions">
-           <button type="button" class="btn btn-secondary mural-small-btn" data-gcal-do="keep">${t('panel.gcal.keep')}</button>
-           <button type="button" class="btn tinv-ghost mural-small-btn" data-gcal-do="unlink">${t('panel.gcal.unlink')}</button>
+      ? `<div class="p-item-acoes">
+           <button type="button" class="p-pequeno" data-gcal-do="keep">${t('panel.gcal.keep')}</button>
+           <button type="button" class="outline secondary p-pequeno" data-gcal-do="unlink">${t('panel.gcal.unlink')}</button>
          </div>`
-      : `<div class="gcal-review-actions">
-           <select class="profile-edit-input" data-gcal-target aria-label="${escapeHTML(t('panel.gcal.pick'))}">${gcalTargetOptionsHTML()}</select>
-           <button type="button" class="btn btn-primary mural-small-btn" data-gcal-do="assign">${t('panel.gcal.assign')}</button>
+      : `<div class="gcal-ligar">
+           <select data-gcal-target aria-label="${escapeHTML(t('panel.gcal.pick'))}">${gcalTargetOptionsHTML()}</select>
+           <button type="button" class="p-pequeno" data-gcal-do="assign">${t('panel.gcal.assign')}</button>
          </div>
-         <div class="gcal-review-actions gcal-review-more">
-           <button type="button" class="btn tinv-ghost mural-small-btn" data-gcal-do="ignore">${t('panel.gcal.ignore')}</button>
-           <button type="button" class="btn tinv-ghost mural-small-btn" data-gcal-do="outside" title="${escapeHTML(t('panel.gcal.outsideTitle'))}">${t('panel.gcal.outside')}</button>
+         <div class="gcal-review-actions">
+           <button type="button" class="outline secondary p-pequeno" data-gcal-do="ignore">${t('panel.gcal.ignore')}</button>
+           <button type="button" class="outline secondary p-pequeno" data-gcal-do="outside" title="${escapeHTML(t('panel.gcal.outsideTitle'))}">${t('panel.gcal.outside')}</button>
+           <button type="button" class="outline secondary p-pequeno gcal-skip" data-gcal-do="${ev.skipped_at ? 'unskip' : 'skip'}">${t(ev.skipped_at ? 'panel.gcal.unskip' : 'panel.gcal.skip')}</button>
          </div>
          <label class="gcal-remember"><input type="checkbox" data-gcal-remember checked> ${t('panel.gcal.remember')}</label>`}
-    <div class="gcal-review-actions">
-      <button type="button" class="admin-select-link gcal-skip" data-gcal-do="${ev.skipped_at ? 'unskip' : 'skip'}">${t(ev.skipped_at ? 'panel.gcal.unskip' : 'panel.gcal.skip')}</button>
+    ${cancelled ? `<div class="gcal-review-actions"><button type="button" class="outline secondary p-pequeno gcal-skip" data-gcal-do="${ev.skipped_at ? 'unskip' : 'skip'}">${t(ev.skipped_at ? 'panel.gcal.unskip' : 'panel.gcal.skip')}</button></div>` : ''}
+  </div></li>`;
+}
+
+function gcalMenuHTML(){
+  return `<details class="p-menu" data-alinhar="fim">
+    <summary role="button" class="outline secondary p-pequeno" aria-label="${escapeHTML(t('panel.gcal.more'))}">⋯</summary>
+    <div class="p-menu-lista" role="menu">
+      <button type="button" class="p-menu-item" role="menuitem" data-gcal-refresh>${t('panel.gcal.refreshList')}</button>
+      <button type="button" class="p-menu-item" role="menuitem" data-gcal-connect>${t('panel.gcal.reconnect')}</button>
+      <div class="p-menu-sep" role="separator"></div>
+      <button type="button" class="p-menu-item p-menu-item--perigo" role="menuitem" data-gcal-disconnect>${t('panel.gcal.disconnect')}</button>
     </div>
-  </li>`;
+  </details>`;
 }
 
 function gcalBoxHTML(){
   const st = GCAL_STATE.status;
-  if (!st) return `<p class="profile-empty-note">${t('panel.gcal.loadError')}</p>`;
-  const intro = `<p class="profile-edit-hint gcal-oneway">${t('panel.gcal.oneWay')}</p>`;
+  if (!st) return `<p class="p-alerta">${t('panel.gcal.loadError')}</p>`;
+  const intro = `<p class="p-descricao gcal-oneway">${t('panel.gcal.oneWay')}</p>`;
   if (!st.connected){
-    return `${intro}<p class="profile-edit-hint">${t('panel.gcal.howItWorks')}</p>
-      <button type="button" class="btn btn-primary mural-small-btn" data-gcal-connect>${t('panel.gcal.connect')}</button>`;
+    return `${intro}<p class="p-descricao">${t('panel.gcal.howItWorks')}</p>
+      <div class="gcal-actions"><button type="button" data-gcal-connect>${t('panel.gcal.connect')}</button></div>`;
   }
   const c = st.counts || {};
   const sources = st.sources || [];
   const anyOn = sources.some(s => s.enabled);
   const err = st.last_error === 'reconnect' ? t('panel.gcal.errReconnect') : (st.last_error ? t('panel.gcal.errGeneric') : '');
+  const ind = (n, key) => `<div class="p-indicador"><span class="p-indicador-valor">${Number(n) || 0}</span><span class="p-indicador-rotulo">${t(key)}</span></div>`;
   return `${intro}
-    <p class="gcal-account">${t('panel.gcal.connectedAs', { email: escapeHTML(st.google_email || '?') })} · ${t('panel.gcal.lastRead', { when: escapeHTML(gcalAgo(st.last_sync_at)) })}</p>
-    ${err ? `<p class="gcal-error" role="alert">${err}</p>` : ''}
-    ${st.last_error === 'reconnect' ? `<button type="button" class="btn btn-primary mural-small-btn" data-gcal-connect>${t('panel.gcal.reconnect')}</button>` : ''}
-    <div class="section-label">${t('panel.gcal.calendars')}</div>
-    <p class="profile-edit-hint">${t('panel.gcal.calendarsHint')}</p>
-    <ul class="gcal-sources">${sources.map(s => `<li data-gcal-source="${escapeHTML(s.calendar_id)}">
-      <label class="gcal-source-name"><input type="checkbox" data-gcal-enabled ${s.enabled ? 'checked' : ''}> ${escapeHTML(s.summary || s.calendar_id)}${s.is_primary ? ` <span class="profile-edit-hint">(${t('panel.gcal.primary')})</span>` : ''}</label>
-      <select class="profile-edit-input" data-gcal-mode ${s.enabled ? '' : 'disabled'}>
-        <option value="all" ${s.mode === 'all' ? 'selected' : ''}>${t('panel.gcal.modeAll')}</option>
-        <option value="matched" ${s.mode === 'matched' ? 'selected' : ''}>${t('panel.gcal.modeMatched')}</option>
-      </select></li>`).join('') || `<li class="profile-empty-note">${t('panel.gcal.noCalendars')}</li>`}</ul>
-    <div class="gcal-actions">
-      <button type="button" class="btn btn-secondary mural-small-btn" data-gcal-sync ${anyOn ? '' : 'disabled'}>${t('panel.gcal.syncNow')}</button>
-      <button type="button" class="btn tinv-ghost mural-small-btn" data-gcal-refresh>${t('panel.gcal.refreshList')}</button>
-      <button type="button" class="admin-select-link gcal-skip" data-gcal-connect>${t('panel.gcal.reconnect')}</button>
-      <a href="#" class="admin-select-link" data-gcal-disconnect>${t('panel.gcal.disconnect')}</a>
+    <div class="notion-topo">
+      <div class="notion-fonte">
+        <strong class="gcal-account">${t('panel.gcal.connectedAs', { email: escapeHTML(st.google_email || '?') })}</strong>
+        <span class="p-ajuda">${t('panel.gcal.lastRead', { when: escapeHTML(gcalAgo(st.last_sync_at)) })}</span>
+      </div>
+      <div class="gcal-actions">
+        <button type="button" class="outline secondary p-pequeno" data-gcal-sync ${anyOn ? '' : 'disabled'}>${t('panel.gcal.syncNow')}</button>
+        ${st.last_error === 'reconnect' ? `<button type="button" class="p-pequeno" data-gcal-connect>${t('panel.gcal.reconnect')}</button>` : ''}
+        ${gcalMenuHTML()}
+      </div>
     </div>
-    <p class="gcal-counts">${t('panel.gcal.counts', { linked: c.linked || 0, review: c.review || 0, waiting: c.no_account || 0 })}</p>
-    ${(st.waiting || []).length ? `<details class="gcal-waiting"><summary>${t('panel.gcal.waitingTitle')}</summary>
-      <p class="profile-edit-hint">${t('panel.gcal.waitingHint')}</p>
-      <ul>${st.waiting.map(w => `<li>${escapeHTML(w.name)}: ${w.n}</li>`).join('')}</ul></details>` : ''}
+    ${err ? `<p class="p-alerta gcal-error" role="alert">${err}</p>` : ''}
+    <div class="p-resumo notion-resumo">
+      ${ind(c.linked, 'panel.gcal.ind.linked')}${ind(c.review, 'panel.gcal.ind.review')}${ind(c.no_account, 'panel.gcal.ind.waiting')}
+    </div>
+    <fieldset class="p-grupo gcal-agendas">
+      <legend>${t('panel.gcal.calendars')}</legend>
+      <p class="p-descricao">${t('panel.gcal.calendarsHint')}</p>
+      <ul class="p-itens gcal-sources">${sources.map(s => `<li data-gcal-source="${escapeHTML(s.calendar_id)}"><div class="p-item">
+        <label class="gcal-source-name p-item-conteudo"><span class="p-item-titulo"><input type="checkbox" data-gcal-enabled ${s.enabled ? 'checked' : ''}> ${escapeHTML(s.summary || s.calendar_id)}${s.is_primary ? ` <span class="p-selo">${t('panel.gcal.primary')}</span>` : ''}</span></label>
+        <select data-gcal-mode ${s.enabled ? '' : 'disabled'} aria-label="${escapeHTML(s.summary || s.calendar_id)}">
+          <option value="all" ${s.mode === 'all' ? 'selected' : ''}>${t('panel.gcal.modeAll')}</option>
+          <option value="matched" ${s.mode === 'matched' ? 'selected' : ''}>${t('panel.gcal.modeMatched')}</option>
+        </select></div></li>`).join('') || `<li><p class="p-descricao">${t('panel.gcal.noCalendars')}</p></li>`}</ul>
+    </fieldset>
+    ${(st.waiting || []).length ? `<details class="gcal-waiting"><summary>${t('panel.gcal.waitingTitle')} <span class="p-selo">${st.waiting.length}</span></summary>
+      <p class="p-descricao">${t('panel.gcal.waitingHint')}</p>
+      <ul class="gcal-waiting-lista">${st.waiting.map(w => `<li>${escapeHTML(w.name)} <span class="p-ajuda">· ${w.n}</span></li>`).join('')}</ul></details>` : ''}
     ${GCAL_STATE.review.length ? gcalReviewHTML() : ''}`;
 }
 
@@ -150,19 +171,21 @@ function gcalReviewHTML(){
   const hint = tab === 'skipped' ? 'panel.gcal.skippedHint' : tab === 'outside' ? 'panel.gcal.outsideHint' : '';
   const empty = tab === 'skipped' ? 'panel.gcal.emptySkipped' : tab === 'outside' ? 'panel.gcal.emptyOutside' : 'panel.gcal.emptyOpen';
   const tabBtn = (key, label) => `<button type="button" class="gcal-tab${tab === key ? ' is-active' : ''}" data-gcal-tab="${key}" aria-pressed="${tab === key}">${label}</button>`;
-  return `<div class="section-label">${t('panel.gcal.reviewTitle', { n: open.length })}</div>
-    <p class="profile-edit-hint">${t('panel.gcal.reviewHint')}</p>
-    <div class="gcal-review-bar">
-      <div class="gcal-tabs">${tabBtn('open', t('panel.gcal.tabOpen', { n: open.length }))}${tabBtn('skipped', t('panel.gcal.tabSkipped', { n: skipped.length }))}${tabBtn('outside', t('panel.gcal.tabOutside', { n: outside.length }))}</div>
-      <select class="profile-edit-input" data-gcal-sort aria-label="${escapeHTML(t('panel.gcal.sortLabel'))}">
+  return `<section class="notion-revisao gcal-revisao">
+    <div class="notion-revisao-topo">
+      <strong class="aulas-titulo">${t('panel.gcal.reviewTitle', { n: open.length })}</strong>
+      <select data-gcal-sort aria-label="${escapeHTML(t('panel.gcal.sortLabel'))}">
         <option value="recent" ${GCAL_STATE.sort !== 'oldest' ? 'selected' : ''}>${t('panel.gcal.sortRecent')}</option>
         <option value="oldest" ${GCAL_STATE.sort === 'oldest' ? 'selected' : ''}>${t('panel.gcal.sortOldest')}</option>
       </select>
     </div>
-    ${hint ? `<p class="profile-edit-hint">${t(hint)}</p>` : ''}
-    ${shown.length ? `<ul class="gcal-review">${shown.map(itemHTML).join('')}</ul>`
-      : `<p class="profile-empty-note">${t(empty)}</p>`}
-    ${rest > 0 ? `<button type="button" class="btn tinv-ghost mural-small-btn gcal-more" data-gcal-more>${t('panel.gcal.showMore', { n: Math.min(rest, GCAL_PAGE), rest })}</button>` : ''}`;
+    <p class="p-descricao">${t('panel.gcal.reviewHint')}</p>
+    <div class="p-seg gcal-tabs" role="group" aria-label="${escapeHTML(t('panel.gcal.reviewTitle', { n: open.length }))}">${tabBtn('open', t('panel.gcal.tabOpen', { n: open.length }))}${tabBtn('skipped', t('panel.gcal.tabSkipped', { n: skipped.length }))}${tabBtn('outside', t('panel.gcal.tabOutside', { n: outside.length }))}</div>
+    ${hint ? `<p class="p-descricao">${t(hint)}</p>` : ''}
+    ${shown.length ? `<ul class="p-itens gcal-review">${shown.map(itemHTML).join('')}</ul>`
+      : `<p class="p-descricao">${t(empty)}</p>`}
+    ${rest > 0 ? `<button type="button" class="outline secondary p-pequeno gcal-more" data-gcal-more>${t('panel.gcal.showMore', { n: Math.min(rest, GCAL_PAGE), rest })}</button>` : ''}
+  </section>`;
 }
 
 // Aba Fora do site: uma linha por pessoa (e-mail do convidado, senão o título), com o evento mais recente na frente.
@@ -185,13 +208,13 @@ function gcalOutsideGroups(events){
 function gcalOutsideItemHTML(g){
   const who = (g.attendees || []).map(a => a.name || a.email).filter(Boolean).join(', ');
   const day = iso => iso ? fmtDate(new Date(iso), { day: 'numeric', month: 'short', year: 'numeric' }) : '';
-  return `<li class="gcal-review-item" data-gcal-event="${g.id}">
-    <div class="gcal-review-head"><b>${escapeHTML(g.title || t('panel.gcal.noTitle'))}</b>
-      <span class="profile-edit-hint">${t(g.n === 1 ? 'panel.gcal.outsideCountOne' : 'panel.gcal.outsideCount', { n: g.n })} · ${g.n > 1 ? t('panel.gcal.dateRange', { from: escapeHTML(day(g.first_at)), to: escapeHTML(day(g.start_at)) }) : escapeHTML(day(g.start_at))}${who ? ' · ' + escapeHTML(who) : ''}</span></div>
-    <div class="gcal-review-actions">
-      <button type="button" class="btn btn-secondary mural-small-btn" data-gcal-do="restore">${t('panel.gcal.restore')}</button>
+  return `<li class="gcal-review-item" data-gcal-event="${g.id}"><div class="p-item">
+    <div class="p-item-conteudo">
+      <span class="p-item-titulo">${escapeHTML(g.title || t('panel.gcal.noTitle'))}</span>
+      <span class="p-item-descricao">${t(g.n === 1 ? 'panel.gcal.outsideCountOne' : 'panel.gcal.outsideCount', { n: g.n })} · ${g.n > 1 ? t('panel.gcal.dateRange', { from: escapeHTML(day(g.first_at)), to: escapeHTML(day(g.start_at)) }) : escapeHTML(day(g.start_at))}${who ? ' · ' + escapeHTML(who) : ''}</span>
     </div>
-  </li>`;
+    <div class="p-item-acoes"><button type="button" class="outline secondary p-pequeno" data-gcal-do="restore">${t('panel.gcal.restore')}</button></div>
+  </div></li>`;
 }
 
 // Troca de aba/ordem/"mostrar mais": só redesenha (sem buscar de novo).
@@ -212,16 +235,22 @@ async function renderGoogleCalendarBox(opts){
   body.innerHTML = gcalBoxHTML();
   const n = GCAL_STATE.review.filter(e => e.match_state !== 'ignored' && !e.skipped_at).length;
   const badge = host.querySelector('[data-gcal-badge]');
-  if (badge){ badge.textContent = n ? String(n) : ''; badge.hidden = !n; }
+  if (badge){ badge.textContent = n ? t('panel.gcal.toReview', { n }) : ''; badge.dataset.n = String(n); badge.hidden = !n; }
+  const on = host.querySelector('[data-gcal-on]');
+  if (on) on.hidden = !(GCAL_STATE.status && GCAL_STATE.status.connected);
+  if (typeof updateClassLogCheckTab === 'function') updateClassLogCheckTab();
   // Primeira vez: aberto se há algo para revisar ou se ainda não conectou; depois, mantém o que a professora escolheu.
   host.open = GCAL_STATE.open === null ? (!!n || !(GCAL_STATE.status && GCAL_STATE.status.connected)) : GCAL_STATE.open;
 }
 
+// O .painel fica num <div> por fora (como no Notion): o PainelUI.confirmar() prende a janela no 1º .painel visível.
 function googleCalendarBoxShellHTML(){
-  return `<details class="profile-section gcal-box" id="admin-gcal-box">
-    <summary class="section-label">📅 ${t('panel.gcal.title')} <span class="gcal-badge" data-gcal-badge hidden></span></summary>
-    <div class="gcal-body" data-gcal-body></div>
-  </details>`;
+  return `<div class="painel aulas-painel gcal-painel"><details class="aulas-box gcal-box" id="admin-gcal-box">
+    <summary><span class="aulas-titulo">📅 ${t('panel.gcal.title')}</span>
+      <span class="p-selo p-selo--ok" data-gcal-on hidden>${t('panel.gcal.on')}</span>
+      <span class="p-selo p-selo--aviso" data-gcal-badge hidden></span></summary>
+    <div class="aulas-corpo gcal-body" data-gcal-body></div>
+  </details></div>`;
 }
 
 // Depois de um botão: a tela fica onde estava (decisão da autora, 2026-10-23: nada de pular ao salvar).
@@ -256,6 +285,8 @@ function wireGoogleCalendarBox(root){
   });
   host.addEventListener('click', async (e) => {
     if (GCAL_STATE.busy) return;
+    const menu = e.target.closest('.p-menu-item') && e.target.closest('details.p-menu');
+    if (menu) menu.open = false;
     const tabBtn = e.target.closest('[data-gcal-tab]');
     if (tabBtn){ GCAL_STATE.tab = tabBtn.dataset.gcalTab; GCAL_STATE.shown = GCAL_PAGE; gcalRepaint(); return; }
     if (e.target.closest('[data-gcal-more]')){ GCAL_STATE.shown += GCAL_PAGE; gcalRepaint(); return; }

@@ -589,9 +589,31 @@ Número 086 já usado por outras conversas (`086_friends_streak_milestones_and_c
   internas); função `notion-sync` v1 publicada (secrets colocados pela autora em 2026-11-08: sem login = 401).
 - Produção (2026-11-08, autorizada): migration aplicada (versão 20261108171207; 5 tabelas, cron `7 * * * *`, sem execute para anon,
   955 aulas antes e depois); função `notion-sync` v1 (sem login = 401, callback sem estado = 400 "Link expirado").
-  ATENÇÃO: a `main` tem outra `128_review_bank_agent_state_pending` (outra sessão); número repetido, como 072/073.
+  A outra 128 da `main` virou `129_review_bank_agent_state_pending` (outra sessão).
 - Ajuste na mesclagem: a caixa virou `<div class="painel"><details class="notion-box">` porque `PainelUI.confirmar()` prende a
   janela no 1º `.painel` visível e, num `<details>` fechado, a janela não aparecia (quebrava "Apagar material", 210/210 de novo).
 - Testes: SQL local 128 19/19; peças `tests/notion/test_map.mjs` 10/10; painel-professora 793/793 (com a caixa do Notion);
   i18n 2336/2336, sem português no en 6/6, paridade CSS 5/5.
-- Falta: a autora conectar o Notion dela na produção (Mural > Aulas e materiais > Notion) e conferir a 1ª leitura.
+- 2026-11-08: a autora conectou (117 linhas desde 09/10). Coluna "Ficha do Aluno" (relação) só aparece se o banco ligado também for
+  compartilhado com a integração (aviso na tela de colunas; relação com nome de aluno passa a ser a sugestão para Aluno).
+
+## 130 -- Notion: trocar coluna/banco/data relê todas as linhas (2026-11-09)
+
+- Achado: depois de trocar "Aluno/a" pela "Ficha do Aluno", 86 linhas ficaram "Sem nome": `notion_save_source` zerava o cursor, mas
+  `notion_ingest` pula a linha cuja data de edição no Notion não mudou. `130_notion_remap.sql`: ao mudar banco, colunas ou "trazer a
+  partir de", `notion_pages.last_edited` vira null (relê tudo; aula já ligada não é regravada). Conserto único: linhas "sem aluno"
+  relidas (cursor zerado).
+- Staging e produção (2026-11-09, versão 20261109204102, pedido da autora "pode publicar os ajustes"); `notion-sync` v6 no Staging e
+  v2 na produção (sugestão da relação). Teste local `tests/aulas-presenca/test_130.sql` 6/6; peças do Notion 13/13.
+- Mesmo PR: "Aulas registradas" mostra só até hoje; as próximas (229 criadas pelo Google Agenda, eventos repetidos até fev/2027)
+  ficam atrás do botão "Mostrar as próximas (N)" e continuam no Calendário. Painel da professora 799/799.
+
+## 131 -- Notion: "Descartar" vale para sempre (2026-11-09)
+
+- Achado na releitura completa pedida pela autora: a única linha descartada voltou para "Para aprovar" (descartar só marcava o
+  estado; qualquer releitura ou edição no Notion recalculava). `131_notion_discard_sticks.sql`: coluna `notion_pages.discarded_at`
+  (ADD COLUMN), `notion_approve(.., false)` grava, `_notion_apply` respeita. A linha que já tinha voltado não dá para identificar:
+  a autora descarta de novo.
+- Staging e produção (2026-11-09, produção versão 20261109230551, "pode publicar"). Teste local `tests/aulas-presenca/test_131.sql` 5/5.
+- Mesmo PR: Aulas (Alunos, Turmas, Nova aula, Aulas registradas) em caixas do Design System iguais à do Notion
+  (`shared/aulas-painel.css`, HTML em `shared/admin-class-logs.js`); prévia aprovada pela autora. Painel da professora 805/805.

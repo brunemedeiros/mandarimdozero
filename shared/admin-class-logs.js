@@ -363,17 +363,21 @@ function classLogEditFormHTML(log){
 
 function classLogRowHTML(log, showUsername){
   const isEditing = ADMIN_CLASS_LOGS_STATE.editingId === log.id;
+  const who = showUsername && log.__studentUsername ? `<span class="aulas-quem">@${escapeHTML(log.__studentUsername)}</span> · ` : '';
+  const when = `${fmtDate(new Date(`${log.class_date}T00:00:00`))}${classLogTimeLabel(log)}`;
+  const badges = classLogRowBadgesHTML(log);
+  const fields = classLogFieldRowsHTML(log);
   return `
-    <div class="admin-badge-row" style="align-items:flex-start;">
-      <div class="admin-badge-info">
-        <div class="admin-badge-name">${showUsername && log.__studentUsername ? `<span style="opacity:.6">@${escapeHTML(log.__studentUsername)}</span> · ` : ''}${fmtDate(new Date(`${log.class_date}T00:00:00`))}${classLogTimeLabel(log)}</div>
-        ${!isEditing ? `${classLogRowBadgesHTML(log)}<div class="admin-badge-desc">${classLogFieldRowsHTML(log) || (classLogRowBadgesHTML(log) ? '' : `<em>${t('admin.classLogs.noFields')}</em>`)}</div>` : classLogEditFormHTML(log)}
+    <li class="aulas-item${isEditing ? ' is-editando' : ''}"><div class="p-item">
+      <div class="p-item-conteudo">
+        <span class="p-item-titulo">${who}${when}</span>
+        ${!isEditing ? `${badges}<div class="p-item-descricao">${fields || (badges ? '' : `<em>${t('admin.classLogs.noFields')}</em>`)}</div>` : classLogEditFormHTML(log)}
       </div>
-      ${!isEditing ? `
-      <button class="admin-badge-delete-btn" data-edit-class-log="${log.id}" title="${t('myFlashcards.row.editTitle')}">✏️</button>
-      <button class="admin-badge-delete-btn" data-delete-class-log="${log.id}" title="${t('admin.common.delete')}">✕</button>
-      ` : ''}
-    </div>
+      ${!isEditing ? `<div class="p-item-acoes">
+        <button type="button" class="outline secondary p-pequeno" data-edit-class-log="${log.id}" title="${t('myFlashcards.row.editTitle')}" aria-label="${t('myFlashcards.row.editTitle')}">✏️</button>
+        <button type="button" class="outline secondary p-pequeno" data-delete-class-log="${log.id}" title="${t('admin.common.delete')}" aria-label="${t('admin.common.delete')}">✕</button>
+      </div>` : ''}
+    </div></li>
   `;
 }
 
@@ -386,14 +390,30 @@ async function buildClassLogsListBoxHTML(selectedStudents, selectedClassrooms){
   logs.sort((a, b) => (b.class_date.localeCompare(a.class_date)) || (new Date(b.created_at) - new Date(a.created_at)));
   const showUsername = selectedStudents.length + selectedClassrooms.length > 1;
   selectedStudents = selectedStudents.concat(selectedClassrooms);
+  // Aulas futuras (o Google Agenda cria as dos eventos repetidos com meses de antecedência) ficam escondidas por padrão:
+  // a lista mostra até hoje; o botão mostra as próximas. Elas continuam no Calendário.
+  const today = new Date(Date.now() - new Date().getTimezoneOffset() * 6e4).toISOString().slice(0, 10);
+  const future = logs.filter(l => l.class_date > today);
+  const past = logs.filter(l => l.class_date <= today);
+  const showFuture = !!ADMIN_CLASS_LOGS_STATE.showFuture;
+  const shown = showFuture ? logs : past;
+  const futureBar = future.length ? `<p class="admin-badge-desc class-log-future-bar">${t('admin.classLogs.futureHidden', { n: future.length })}
+      <button type="button" class="secondary outline p-pequeno" data-class-log-future>${t(showFuture ? 'admin.classLogs.hideFuture' : 'admin.classLogs.showFuture', { n: future.length })}</button></p>` : '';
 
   return `
-    <div class="section-label">${t('admin.classLogs.listTitle', { n: logs.length })}</div>
-    ${logs.length ? logs.map(log => classLogRowHTML(log, showUsername)).join('') : `<p class="profile-empty-note">${t('admin.classLogs.emptyFor')}${adminEmptyForSuffix(selectedStudents.length)}.</p>`}
+    <div hidden data-classlog-n="${shown.length}"></div>
+    ${futureBar}
+    ${shown.length ? `<ul class="p-itens aulas-itens">${shown.map(log => classLogRowHTML(log, showUsername)).join('')}</ul>` : `<p class="profile-empty-note">${t('admin.classLogs.emptyFor')}${adminEmptyForSuffix(selectedStudents.length)}.</p>`}
   `;
 }
 
 function wireClassLogsListBox(listBox){
+  listBox.querySelectorAll('[data-class-log-future]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      ADMIN_CLASS_LOGS_STATE.showFuture = !ADMIN_CLASS_LOGS_STATE.showFuture;
+      await refreshClassLogsListBox(listBox);
+    });
+  });
   listBox.querySelectorAll('[data-edit-class-log]').forEach(btn => {
     btn.addEventListener('click', async () => {
       ADMIN_CLASS_LOGS_STATE.editingId = Number(btn.dataset.editClassLog);
@@ -439,7 +459,7 @@ function wireClassLogsListBox(listBox){
   });
 }
 
-// Mural > Aulas e materiais com "Todos" (listAll): a lista mostra as aulas de todos os alunos e turmas, sem
+// Aba Aulas (listAll, padrão desde 2026-11-10): a lista mostra as aulas de todos os alunos e turmas, sem
 // marcar ninguém no formulário de Nova aula (para não registrar uma aula para todo mundo sem querer).
 function classLogListTargets(){
   const st = ADMIN_CLASS_LOGS_STATE;
@@ -451,6 +471,14 @@ async function refreshClassLogsListBox(listBox){
   const { students, rooms } = classLogListTargets();
   listBox.innerHTML = await buildClassLogsListBoxHTML(students, rooms);
   wireClassLogsListBox(listBox);
+  syncClassLogCount();
+}
+
+// O título da caixa "Aulas registradas (N)" fica no <summary>; o número vem da lista montada.
+function syncClassLogCount(){
+  const n = document.querySelector('#admin-classlogs-list-box [data-classlog-n]');
+  const el = document.querySelector('[data-classlog-count]');
+  if (n && el) el.textContent = t('admin.classLogs.listTitle', { n: n.dataset.classlogN });
 }
 
 // Atualiza tudo que depende da seleção de alunos SEM recriar o <form> de
@@ -529,7 +557,7 @@ async function renderTeacherClassCalendar(){
   const now = new Date();
   const cal = ADMIN_CLASS_LOGS_STATE.cal || (ADMIN_CLASS_LOGS_STATE.cal = { y: now.getFullYear(), m: now.getMonth() });
   const range = classCalendarMonthRange(cal.y, cal.m);
-  // Mural > Aulas e materiais com uma turma ou um aluno escolhido: o calendário mostra só as aulas dele (121).
+  // scope (turma ou aluno escolhido) ficou do Mural > Aulas e materiais (121); hoje a aba Aulas abre sem escopo.
   const scope = ADMIN_CLASS_LOGS_STATE.scope;
   const logs = (await fetchTeacherClassLogsRange(range.from, range.to))
     .filter(l => !scope || (scope.classroomId ? l.classroom_id === scope.classroomId : l.student_id === scope.studentId));
@@ -607,16 +635,30 @@ async function renderTeacherClassCalendar(){
   });
 }
 
+// Aulas (decisão da autora, 2026-11-10): aba própria do painel com as abas internas Aulas | Calendário | Para conferir (N).
+// 'register' = Aulas (Alunos, Turmas, Nova aula, Aulas registradas); 'check' = Notion + Google Agenda + Revisar do Notion antigo.
+const CLASS_LOG_VIEWS = ['register', 'calendar', 'check'];
 function switchClassLogsView(view){
-  ADMIN_CLASS_LOGS_STATE.view = view === 'calendar' ? 'calendar' : 'register';
+  ADMIN_CLASS_LOGS_STATE.view = CLASS_LOG_VIEWS.includes(view) ? view : 'register';
+  const v = ADMIN_CLASS_LOGS_STATE.view;
   document.querySelectorAll('[data-classlog-view]').forEach(b => {
-    const on = b.dataset.classlogView === ADMIN_CLASS_LOGS_STATE.view;
+    const on = b.dataset.classlogView === v;
     b.classList.toggle('is-active', on); b.setAttribute('aria-selected', on ? 'true' : 'false');
   });
-  const reg = document.getElementById('admin-classlogs-register'), calHost = document.getElementById('admin-classlogs-calendar-wrap');
-  if (reg) reg.hidden = ADMIN_CLASS_LOGS_STATE.view !== 'register';
-  if (calHost) calHost.hidden = ADMIN_CLASS_LOGS_STATE.view !== 'calendar';
-  if (ADMIN_CLASS_LOGS_STATE.view === 'calendar') renderTeacherClassCalendar();
+  const show = { 'admin-classlogs-register': 'register', 'admin-classlogs-calendar-wrap': 'calendar', 'admin-classlogs-check': 'check' };
+  Object.entries(show).forEach(([id, key]) => { const el = document.getElementById(id); if (el) el.hidden = v !== key; });
+  if (v === 'calendar') renderTeacherClassCalendar();
+}
+
+// Contador da aba "Para conferir": o que falta aprovar ou revisar no Notion + eventos do Google para revisar.
+function updateClassLogCheckTab(){
+  const el = document.querySelector('[data-classlog-check-count]');
+  if (!el) return;
+  const notion = typeof NOTION_STATE !== 'undefined' && NOTION_STATE.items ? NOTION_STATE.items.filter(i => i.state === 'approval' || i.state === 'review').length : 0;
+  const gcal = typeof GCAL_STATE !== 'undefined' && Array.isArray(GCAL_STATE.review) ? GCAL_STATE.review.filter(e => e.match_state !== 'ignored' && !e.skipped_at).length : 0;
+  const n = notion + gcal;
+  el.textContent = n ? String(n) : '';
+  el.hidden = !n;
 }
 
 async function renderAdminClassLogsView(){
@@ -653,17 +695,17 @@ async function renderAdminClassLogsView(){
 
   const langsPresent = [...new Set(students.map(s => s.language_app_key))];
   const langFilterHTML = langsPresent.length > 1 ? `
-    <div class="leaderboard-tabs" role="tablist" aria-label="${t('admin.common.langFilterAria')}" style="justify-content:flex-start; margin-bottom:8px;">
-      <button type="button" class="leaderboard-tab ${ADMIN_CLASS_LOGS_STATE.langFilter === 'all' ? 'active' : ''}" data-lang-filter="all">${t('admin.common.all')} (${students.length})</button>
-      ${langsPresent.map(key => `<button type="button" class="leaderboard-tab ${ADMIN_CLASS_LOGS_STATE.langFilter === key ? 'active' : ''}" data-lang-filter="${key}">${STUDENT_LANGUAGE_LABELS[key] || key} (${students.filter(s => s.language_app_key === key).length})</button>`).join('')}
+    <div class="p-seg" role="group" aria-label="${t('admin.common.langFilterAria')}">
+      <button type="button" class="${ADMIN_CLASS_LOGS_STATE.langFilter === 'all' ? 'active' : ''}" aria-pressed="${ADMIN_CLASS_LOGS_STATE.langFilter === 'all'}" data-lang-filter="all">${t('admin.common.all')} (${students.length})</button>
+      ${langsPresent.map(key => `<button type="button" class="${ADMIN_CLASS_LOGS_STATE.langFilter === key ? 'active' : ''}" aria-pressed="${ADMIN_CLASS_LOGS_STATE.langFilter === key}" data-lang-filter="${key}">${STUDENT_LANGUAGE_LABELS[key] || key} (${students.filter(s => s.language_app_key === key).length})</button>`).join('')}
     </div>
   ` : '';
 
   // Busca casa por nome E @usuário (mesmo padrão de admin-flashcards.js).
   const studentCheckboxesHTML = students.map(s => `
-    <label data-student-row data-lang="${s.language_app_key}" data-searchtext="${escapeHTML(`${s.display_name || ''} ${s.username || ''}`.toLowerCase())}" style="display:flex; align-items:center; gap:8px; cursor:pointer; padding:6px 0; width:100%; box-sizing:border-box;">
+    <label class="aulas-opcao" data-student-row data-lang="${s.language_app_key}" data-searchtext="${escapeHTML(`${s.display_name || ''} ${s.username || ''}`.toLowerCase())}">
       <input type="checkbox" data-classlog-student-checkbox value="${s.student_id}" ${ADMIN_CLASS_LOGS_STATE.studentIds.has(s.student_id) ? 'checked' : ''}>
-      ${classLogStudentLabel(s)} · ${STUDENT_LANGUAGE_LABELS[s.language_app_key] || s.language_app_key}
+      <span>${classLogStudentLabel(s)} <small class="p-ajuda">· ${STUDENT_LANGUAGE_LABELS[s.language_app_key] || s.language_app_key}</small></span>
     </label>
   `).join('');
 
@@ -674,42 +716,51 @@ async function renderAdminClassLogsView(){
       : '';
 
   wrap.innerHTML = `
-    ${typeof notionBoxShellHTML === 'function' ? notionBoxShellHTML() : ''}
     <div class="deck-topbar panel-nav class-log-views" role="tablist" aria-label="${t('panel.classLog.views')}">
-      <button type="button" class="deck-topbar-btn" role="tab" data-classlog-view="register">${t('panel.classLog.view.register')}</button>
+      <button type="button" class="deck-topbar-btn" role="tab" data-classlog-view="register">${t('panel.classLog.view.lessons')}</button>
       <button type="button" class="deck-topbar-btn" role="tab" data-classlog-view="calendar">${t('panel.classLog.view.calendar')}</button>
+      <button type="button" class="deck-topbar-btn" role="tab" data-classlog-view="check">${t('panel.classLog.view.check')} <span class="class-log-check-count" data-classlog-check-count hidden></span></button>
     </div>
-    <div id="admin-classlogs-calendar-wrap" hidden>${typeof googleCalendarBoxShellHTML === 'function' ? googleCalendarBoxShellHTML() : ''}${calendarFeedBoxHTML()}<div id="admin-classlogs-calendar"></div></div>
-    <div id="admin-classlogs-register">
-    <div id="admin-notion-review"></div>
-    <div class="profile-section">
-      <div class="section-label">${t('admin.common.students')}</div>
-      <p class="profile-edit-hint">${t('admin.classLogs.pickStudentsHint')}</p>
-      ${langFilterHTML}
-      <input type="text" id="admin-classlog-search" class="profile-edit-input" placeholder="${t('admin.common.searchPlaceholder')}" autocomplete="off" style="margin-bottom:8px;">
-      <div style="display:flex; gap:12px; margin-bottom:4px;">
-        <a href="#" id="admin-classlog-select-all" class="admin-select-link">${t('publicProfile.selectAll')}</a>
-        <a href="#" id="admin-classlog-select-none" class="admin-select-link">${t('publicProfile.clear')}</a>
+    <div id="admin-classlogs-check" hidden>
+      <p class="profile-edit-hint class-log-check-hint">${t('panel.classLog.checkHint')}</p>
+      ${typeof notionBoxShellHTML === 'function' ? notionBoxShellHTML() : ''}
+      ${typeof googleCalendarBoxShellHTML === 'function' ? googleCalendarBoxShellHTML() : ''}
+      <div id="admin-notion-review"></div>
+    </div>
+    <div id="admin-classlogs-calendar-wrap" hidden>${calendarFeedBoxHTML()}<div id="admin-classlogs-calendar"></div></div>
+    <div id="admin-classlogs-register" class="painel aulas-painel">
+    <details class="aulas-box" open>
+      <summary><span class="aulas-titulo">🧑‍🎓 ${t('admin.common.students')}</span>
+        <span class="p-selo" id="admin-classlog-selection-counter">${selectionCountLabel}</span></summary>
+      <div class="aulas-corpo">
+        <p class="p-descricao">${t('admin.classLogs.pickStudentsHint')}</p>
+        ${langFilterHTML}
+        <input type="search" id="admin-classlog-search" placeholder="${t('admin.common.searchPlaceholder')}" autocomplete="off" aria-label="${t('admin.common.searchPlaceholder')}">
+        <div class="aulas-atalhos">
+          <a href="#" id="admin-classlog-select-all">${t('publicProfile.selectAll')}</a>
+          <a href="#" id="admin-classlog-select-none">${t('publicProfile.clear')}</a>
+        </div>
+        <div class="aulas-lista">${studentCheckboxesHTML}</div>
       </div>
-      <div class="profile-edit-input" style="height:auto; max-height:180px; overflow-y:auto; display:flex; flex-direction:column;">
-        ${studentCheckboxesHTML}
-      </div>
-      ${rooms.length ? `
-      <div class="section-label" style="margin-top:12px;">${t('panel.classLog.classrooms')}</div>
-      <p class="profile-edit-hint">${t('panel.classLog.classroomsHint')}</p>
-      <div class="profile-edit-input" style="height:auto; max-height:140px; overflow-y:auto; display:flex; flex-direction:column;">
-        ${rooms.map(c => `<label data-classroom-row data-lang="${c.language_app_key}" style="display:flex; align-items:center; gap:8px; cursor:pointer; padding:6px 0;">
+    </details>
+    ${rooms.length ? `
+    <details class="aulas-box" open>
+      <summary><span class="aulas-titulo">👥 ${t('panel.classLog.classrooms')}</span><span class="p-selo">${rooms.length}</span></summary>
+      <div class="aulas-corpo">
+        <p class="p-descricao">${t('panel.classLog.classroomsHint')}</p>
+        <div class="aulas-lista">
+        ${rooms.map(c => `<label class="aulas-opcao" data-classroom-row data-lang="${c.language_app_key}">
           <input type="checkbox" data-classlog-classroom-checkbox value="${c.id}" ${ADMIN_CLASS_LOGS_STATE.classroomIds.has(String(c.id)) ? 'checked' : ''}>
-          👥 ${escapeHTML(c.name)} · ${STUDENT_LANGUAGE_LABELS[c.language_app_key] || c.language_app_key} · ${tp('panel.classLog.membersCount', c.members.length)}
+          <span>${escapeHTML(c.name)} <small class="p-ajuda">· ${STUDENT_LANGUAGE_LABELS[c.language_app_key] || c.language_app_key} · ${tp('panel.classLog.membersCount', c.members.length)}</small></span>
         </label>`).join('')}
-      </div>` : ''}
-      <p class="profile-edit-hint" id="admin-classlog-selection-counter" style="font-weight:700; margin-top:6px;">${selectionCountLabel}</p>
-    </div>
+        </div>
+      </div>
+    </details>` : ''}
 
-
-    <div class="profile-section">
-      <div class="section-label">${t('admin.classLogs.newTitle')}<span id="admin-classlog-content-subtitle">${newLogSubtitle}</span></div>
-      <p class="profile-edit-hint" id="admin-classlog-content-hint" style="${selectedStudents.length || selectedRooms.length ? 'display:none;' : ''}">${t('admin.classLogs.needStudent')}</p>
+    <details class="aulas-box" open>
+      <summary><span class="aulas-titulo">✍️ ${t('admin.classLogs.newTitle')}<span id="admin-classlog-content-subtitle" class="aulas-sub">${newLogSubtitle}</span></span></summary>
+      <div class="aulas-corpo">
+      <p class="p-descricao" id="admin-classlog-content-hint" style="${selectedStudents.length || selectedRooms.length ? 'display:none;' : ''}">${t('admin.classLogs.needStudent')}</p>
       <form id="admin-create-class-log-form" class="profile-edit-form">
         <label class="profile-edit-label" for="admin-class-log-date">${t('admin.common.date')}</label>
         <input type="date" id="admin-class-log-date" class="profile-edit-input" value="${todayStr()}">
@@ -730,13 +781,17 @@ async function renderAdminClassLogsView(){
         <textarea id="admin-class-log-notes" class="profile-edit-input" rows="3" placeholder="${t('admin.classLogs.notesPlaceholder')}"></textarea>
         ${classLogExtrasFormHTML('new', null)}
         <p class="profile-edit-error" id="admin-create-class-log-error"></p>
-        <button type="submit" class="btn btn-primary btn-block" id="admin-create-class-log-btn" ${selectedStudents.length || selectedRooms.length ? '' : 'disabled'}>${t('admin.classLogs.register')}${adminForStudentsSuffix(selectedStudents.length)}${selectedRooms.length ? ` · ${tp('panel.classLog.classroomsSelected', selectedRooms.length)}` : ''}</button>
+        <button type="submit" id="admin-create-class-log-btn" ${selectedStudents.length || selectedRooms.length ? '' : 'disabled'}>${t('admin.classLogs.register')}${adminForStudentsSuffix(selectedStudents.length)}${selectedRooms.length ? ` · ${tp('panel.classLog.classroomsSelected', selectedRooms.length)}` : ''}</button>
       </form>
-    </div>
+      </div>
+    </details>
 
-    <div class="profile-section" id="admin-classlogs-list-box">
+    <details class="aulas-box" open>
+      <summary><span class="aulas-titulo">📚 <span data-classlog-count>${t('admin.classLogs.listTitle', { n: '…' })}</span></span></summary>
+      <div class="aulas-corpo" id="admin-classlogs-list-box">
       ${await (async () => { const tg = classLogListTargets(); return buildClassLogsListBoxHTML(tg.students, tg.rooms); })()}
-    </div>
+      </div>
+    </details>
     </div>
   `;
   wrap.querySelectorAll('[data-classlog-view]').forEach(b => b.addEventListener('click', () => switchClassLogsView(b.dataset.classlogView)));
@@ -748,6 +803,7 @@ async function renderAdminClassLogsView(){
   switchClassLogsView(ADMIN_CLASS_LOGS_STATE.view);
 
   wireClassLogsListBox(document.getElementById('admin-classlogs-list-box'));
+  syncClassLogCount();
   wireAttendancePicker(wrap);
   renderNotionReviewBox(document.getElementById('admin-notion-review'));
 
@@ -785,7 +841,7 @@ async function renderAdminClassLogsView(){
   wrap.querySelectorAll('[data-lang-filter]').forEach(pill => {
     pill.addEventListener('click', () => {
       ADMIN_CLASS_LOGS_STATE.langFilter = pill.dataset.langFilter;
-      wrap.querySelectorAll('[data-lang-filter]').forEach(p => p.classList.toggle('active', p === pill));
+      wrap.querySelectorAll('[data-lang-filter]').forEach(p => { p.classList.toggle('active', p === pill); p.setAttribute('aria-pressed', String(p === pill)); });
       applyClassLogPickerFilters(wrap);
     });
   });

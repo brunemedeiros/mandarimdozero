@@ -1536,6 +1536,9 @@ window.I18N_CATALOG['en'] = {
   'admin.classLogs.notesOpt': 'Your private notes, the student doesn\'t see them (optional)', // ALTA
   'admin.classLogs.noFields': '(no fields filled in)', // ALTA
   'admin.classLogs.listTitle': 'Recorded classes ({n})', // ALTA
+  'admin.classLogs.futureHidden': 'Showing up to today. {n} upcoming classes (created from your calendar) are in the Calendar.', // ALTA
+  'admin.classLogs.showFuture': 'Show upcoming ({n})', // ALTA
+  'admin.classLogs.hideFuture': 'Hide upcoming', // ALTA
   'admin.classLogs.emptyFor': 'No class recorded yet', // ALTA
   'admin.classLogs.deleteConfirm': 'Delete this class record? This action cannot be undone.', // ALTA
   'admin.classLogs.deleted': '✓ Record deleted.', // ALTA
@@ -3544,7 +3547,10 @@ window.I18N_CATALOG['en'] = {
   'panel.classLog.repeatUntil': 'Until', // ALTA
   'panel.classLog.repeatHint': 'Creates one lesson a week, same day and time, until that date (52 at most).', // ALTA
   'panel.classLog.views': 'How to see the lessons', // ALTA
-  'panel.classLog.view.register': 'Log', // ALTA
+  'panel.classLog.view.lessons': 'Lessons', // ALTA
+  'panel.classLog.view.check': 'To check', // ALTA
+  'panel.tab.materialsShort': 'Materials', // ALTA
+  'panel.classLog.checkHint': 'Lessons that came from Notion and Google Calendar and need you: approve them, say whose they are, or discard them.', // ALTA
   'panel.classLog.view.calendar': 'Calendar', // ALTA
   'panel.classLog.cal.prev': 'Previous month', // ALTA
   'panel.classLog.cal.next': 'Next month', // ALTA
@@ -3590,6 +3596,7 @@ window.I18N_CATALOG['en'] = {
   'panel.notion.cancel': 'Cancel', // ALTA
   'panel.notion.columnsTitle': 'Columns of "{title}"', // ALTA
   'panel.notion.columnsHint': 'Tell the site which Notion column holds each piece of information. Only Date and Student are required; anything left blank isn\'t read.', // ALTA
+  'panel.notion.relationHint': 'A column linked to another database (a relation, like a student record) only shows up here if that other database is also shared with the site in Notion (⋯ > Connections). The site only reads each page\'s name.', // ALTA
   'panel.notion.f.date': 'Date', // ALTA
   'panel.notion.f.student': 'Student or class', // ALTA
   'panel.notion.f.topic': 'Lesson topic', // ALTA
@@ -3633,6 +3640,12 @@ window.I18N_CATALOG['en'] = {
   'panel.notion.r.noName': 'Row without a student.', // ALTA
   'panel.notion.connectedToast': 'Notion connected.', // ALTA
   'panel.notion.cancelledToast': 'Notion connection cancelled.', // ALTA
+  'panel.gcal.more': 'More Google Calendar options', // ALTA
+  'panel.gcal.on': 'Connected', // ALTA
+  'panel.gcal.toReview': '{n} to review', // ALTA
+  'panel.gcal.ind.linked': 'linked lessons', // ALTA
+  'panel.gcal.ind.review': 'to review', // ALTA
+  'panel.gcal.ind.waiting': 'waiting for an account', // ALTA
   'panel.gcal.title': 'Google Calendar', // ALTA
   'panel.gcal.oneWay': 'One-way sync: Google Calendar → site. The site only reads your calendar; nothing is written to your Google account.', // ALTA
   'panel.gcal.howItWorks': 'Connect your Google account and choose the calendars with your lessons. Every 15 minutes the site reads the events and creates or updates each lesson on the right day and time, recognizing the student by the name in the title or the guest\'s email. If you move a lesson in Google, the site follows.', // ALTA
@@ -3761,7 +3774,6 @@ window.I18N_CATALOG['en'] = {
   'mural.onlyFor': '🔒 Only for {name}', // ALTA
   'mural.individualChip': 'With {name}', // ALTA
   'mural.tab.mural': 'Board', // ALTA
-  'mural.tab.aulas': 'Lessons and materials', // ALTA
   'mural.tab.people': 'People', // ALTA
   'mural.pick.label': 'Class or student:', // ALTA
   'mural.pick.all': 'Everyone', // ALTA
