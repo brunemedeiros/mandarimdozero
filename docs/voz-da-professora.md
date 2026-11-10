@@ -66,7 +66,7 @@ A etapa 2 já dá a maior parte do efeito e cabe no site sem código novo pesado
 
 | Área | Onde ficam os textos | Situação |
 |---|---|---|
-| Trilha (lições, notas, painéis) | rascunhos `docs/i18n/curriculo/piloto-m1/<unidade>/`; publicado em `fr/content.js`, `courses/**`, `zh/content.js` | Unidade 1 do francês feita no rascunho; as outras unidades, ao redesenhar cada uma no formato da lição curta |
+| Trilha (lições, notas, painéis) | rascunhos `docs/i18n/curriculo/piloto-m1/<unidade>/`; publicado em `fr/content.js`, `courses/**`, `zh/content.js` | Unidades 1 e 2 do francês feitas no rascunho; as outras unidades, ao redesenhar cada uma no formato da lição curta |
 | Microtextos da interface (títulos do painel, fim de lição, toasts) | `shared/i18n/pt-BR.js` e `en.js` (ex.: `review.almost`, `feedback.almostArrow`, `dlgCheck.almost`, `fr.conj.wellDone`) | Pendente (português não muda sem aprovação: `tests/i18n`, `DELIBERATE_PT_CHANGES`) |
 | Revisão (flashcards) | `shared/i18n/*.js` (chaves `review.*`), `shared/srs.js` | Pendente |
 | Desafios e Ditados | `fr/challenges.js`, `fr/scripts/challenges_import/**`, `fr/dictations.js` | Pendente |

@@ -715,13 +715,14 @@
                   ]
                 }
               ],
-              "licoes_08": 4,
-              "licoes_motivo": "3 lições (a 2ª é a lição de pronúncia do alfabeto, com cartões) + Revisão da unidade (decisões 326 e 327)",
+              "licoes_08": 6,
+              "licoes_motivo": "3 lições de cartões (a 2ª é a lição de pronúncia do alfabeto, com cartões) + 2 lições de diálogo + Revisão da unidade (decisões 326, 327 e 356)",
               "decisoes": [
                 326,
                 327,
                 328,
-                330
+                330,
+                356
               ],
               "licoes": [
                 {
@@ -741,15 +742,36 @@
                   "titulo": "Dizer a nacionalidade",
                   "cartoes_aceitos": 6,
                   "decisao": 327
+                },
+                {
+                  "licao": 4,
+                  "id": "conhecer-alguem",
+                  "id_novo": true,
+                  "tipo": "dialogos",
+                  "titulo": "Conhecer alguém"
+                },
+                {
+                  "licao": 5,
+                  "id": "apresentar-se-formal",
+                  "id_novo": true,
+                  "tipo": "dialogos",
+                  "titulo": "Apresentar-se de um jeito formal"
                 }
               ],
               "dialogos": [
                 {
-                  "titulo": "Primeiro encontro",
+                  "titulo": "Numa festa, Ana conhece o Léo.",
                   "registro": "informal",
-                  "origem": "publicado (falas A1-2-d0 a d2 ficam; d3 e d4 trocadas por duas falas novas com a negação, decisão 326)",
-                  "licao": 3,
-                  "decisao": 326
+                  "origem": "publicado (falas A1-2-d0 a d2 ficam; d3 e d4 trocadas por duas falas novas com a negação, decisão 326; mais duas falas com enchanté / enchantée, decisão 356)",
+                  "licao": 4,
+                  "decisao": 356
+                },
+                {
+                  "titulo": "No hotel, a recepcionista Claire atende o Sr. Costa.",
+                  "registro": "formal",
+                  "origem": "novo (decisão 356)",
+                  "licao": 5,
+                  "decisao": 356
                 }
               ],
               "progresso_modulo_concluido": "quem já concluiu o módulo \"Apresentar-se\" continua com ele concluído e com o Ponto de verificação aprovado; a unidade nova aparece aberta (decisão 330, item 4)"

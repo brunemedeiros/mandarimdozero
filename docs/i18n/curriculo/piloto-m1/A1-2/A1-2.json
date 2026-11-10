@@ -78,7 +78,11 @@
    "licao": "pronomes-e-nome",
    "origem": "novo",
    "muda": "novo (decisão 327): gatilho da nota de tônicos",
-   "frase_do_cartao": "nova-moi-cest"
+   "frase_do_cartao": "nova-moi-cest",
+   "papel_na_funcao": {
+    "pt-BR": "Resposta",
+    "en": null
+   }
   },
   {
    "ordem": 4,
@@ -143,7 +147,11 @@
    "licao": "nome-e-ser",
    "origem": "novo",
    "muda": "novo (lição de pronúncia, decisão 108)",
-   "frase_do_cartao": "nova-ecrit"
+   "frase_do_cartao": "nova-ecrit",
+   "papel_na_funcao": {
+    "pt-BR": "Pergunta",
+    "en": null
+   }
   },
   {
    "ordem": 9,
@@ -244,18 +252,259 @@
     "nova: enchanté / enchantée"
    ],
    "inclui_dialogo": false,
-   "sequencia": [
-    "ponte (unidade anterior)",
-    "cartão je",
-    "cartão tu / vous",
-    "nota \"Tu\" ou \"vous\"? + V/F",
-    "cartão s'appeler",
-    "nota Tu t'appelles comment ? + V/F",
-    "cartão moi, c'est…",
-    "nota Moi, toi, vous: para dar destaque + V/F",
-    "cartão enchanté / enchantée",
-    "checagem rápida",
-    "praticando"
+   "telas": [
+    {
+     "id": "u2-l1-intro",
+     "tipo": "abertura",
+     "objetivo": {
+      "pt-BR": "Agora você vai se apresentar! Vou te ensinar a dizer o seu nome e a perguntar o nome de alguém.",
+      "en": null
+     },
+     "tamanho": {
+      "pt-BR": "5 cartões · 2 frases · cerca de 3 minutos",
+      "en": null
+     }
+    },
+    {
+     "id": "u2-je",
+     "tipo": "cartao",
+     "cartao": "je"
+    },
+    {
+     "id": "u2-tuvous",
+     "tipo": "cartao",
+     "cartao": "tu / vous"
+    },
+    {
+     "id": "u2-nota-tuvous",
+     "tipo": "nota",
+     "nota": "tu-vs-vous",
+     "rotulos": {
+      "tu": "informal",
+      "vous": "formal ou plural"
+     }
+    },
+    {
+     "id": "u2-ex-nota-tuvous",
+     "tipo": "vf",
+     "fr": "Vous allez bien ?",
+     "afirmacao": {
+      "pt-BR": "Serve para perguntar a dois amigos ao mesmo tempo.",
+      "en": null
+     },
+     "resposta": true,
+     "frase_do_painel": "Vous allez bien ?",
+     "traducao_do_painel": {
+      "pt-BR": "Vocês estão bem?",
+      "en": null
+     },
+     "explicacao": {
+      "pt-BR": "<b>Vous</b> também é \"vocês\": com um amigo, <b>tu</b>; com dois ou mais, <b>vous</b>.",
+      "en": null
+     }
+    },
+    {
+     "id": "u2-ex-tu",
+     "tipo": "complete",
+     "antes": "",
+     "depois": " vas bien ?",
+     "traducao": {
+      "pt-BR": "Você está bem?",
+      "en": null
+     },
+     "opcoes": [
+      "Je",
+      "Tu"
+     ],
+     "resposta": "Tu",
+     "frase_completa": "Tu vas bien ?",
+     "distrator": "outra palavra",
+     "explicacao": {
+      "pt-BR": "Com <b>vas</b>, quem está bem é \"você\": <b>tu vas</b>. Para \"eu\", é <b>je vais</b>.",
+      "en": null
+     },
+     "explicacao_erro": {
+      "Je": {
+       "pt-BR": "<b>Je</b> é \"eu\". ",
+       "en": null
+      }
+     }
+    },
+    {
+     "id": "u2-sappeler",
+     "tipo": "cartao",
+     "cartao": "s'appeler"
+    },
+    {
+     "id": "u2-frase-comment",
+     "tipo": "frase",
+     "frase": "Comment tu t'appelles ?",
+     "papel": {
+      "pt-BR": "Pergunta",
+      "en": null
+     }
+    },
+    {
+     "id": "u2-nota-tappelles",
+     "tipo": "nota",
+     "nota": "tu-tappelles-comment"
+    },
+    {
+     "id": "u2-ex-nota-tappelles",
+     "tipo": "vf",
+     "fr": "Tu t'appelles comment ?",
+     "afirmacao": {
+      "pt-BR": "É um erro de quem está aprendendo francês.",
+      "en": null
+     },
+     "resposta": false,
+     "frase_do_painel": "Tu t'appelles comment ?",
+     "traducao_do_painel": {
+      "pt-BR": "Como você se chama?",
+      "en": null
+     },
+     "explicacao": {
+      "pt-BR": "É o jeito mais comum na fala do dia a dia, e quer dizer o mesmo que <b>Comment tu t'appelles ?</b>",
+      "en": null
+     }
+    },
+    {
+     "id": "u2-frase-je",
+     "tipo": "frase",
+     "frase": "Je m'appelle Léo.",
+     "papel": {
+      "pt-BR": "Resposta",
+      "en": null
+     }
+    },
+    {
+     "id": "u2-ex-je",
+     "tipo": "complete",
+     "antes": "Je ",
+     "depois": " Léo.",
+     "traducao": {
+      "pt-BR": "Eu me chamo Léo.",
+      "en": null
+     },
+     "opcoes": [
+      "m'apelle",
+      "m'appelle"
+     ],
+     "resposta": "m'appelle",
+     "frase_completa": "Je m'appelle Léo.",
+     "distrator": "grafia",
+     "explicacao": {
+      "pt-BR": "Em <b>m'appelle</b>, o <b>pp</b> e o <b>ll</b> soam como um <b>p</b> e um <b>l</b> só.",
+      "en": null
+     },
+     "explicacao_erro": {
+      "m'apelle": {
+       "pt-BR": "Você escreveu como se ouve! ",
+       "en": null
+      }
+     }
+    },
+    {
+     "id": "u2-moicest",
+     "tipo": "cartao",
+     "cartao": "moi, c'est…"
+    },
+    {
+     "id": "u2-nota-moi",
+     "tipo": "nota",
+     "nota": "moi-toi-vous"
+    },
+    {
+     "id": "u2-ex-nota-moi",
+     "tipo": "vf",
+     "fr": "Moi, c'est Ana.",
+     "afirmacao": {
+      "pt-BR": "Aqui, <i>moi</i> dá destaque ao \"eu\".",
+      "en": null
+     },
+     "resposta": true,
+     "frase_do_painel": "Moi, c'est Ana.",
+     "traducao_do_painel": {
+      "pt-BR": "Eu sou a Ana.",
+      "en": null
+     },
+     "explicacao": {
+      "pt-BR": "<b>Moi</b> é o \"eu\" com destaque: <b>moi, c'est</b> e o nome.",
+      "en": null
+     }
+    },
+    {
+     "id": "u2-enchante",
+     "tipo": "cartao",
+     "cartao": "enchanté / enchantée"
+    },
+    {
+     "id": "u2-ex-enchante",
+     "tipo": "funcao",
+     "pergunta": {
+      "pt-BR": "A Ana acaba de conhecer o Léo e quer dizer \"prazer\". O que ela diz?",
+      "en": null
+     },
+     "opcoes": [
+      "Enchanté !",
+      "Enchantée !",
+      "Merci !"
+     ],
+     "resposta": "Enchantée !",
+     "traducao_do_painel": {
+      "pt-BR": "Prazer!",
+      "en": null
+     },
+     "explicacao": {
+      "pt-BR": "Quem fala é mulher: <b>enchantée</b>, com <b>e</b> no fim. O som é o mesmo.",
+      "en": null
+     },
+     "explicacao_erro": {
+      "Enchanté !": {
+       "pt-BR": "<b>Enchanté</b> é quando quem fala é homem. ",
+       "en": null
+      },
+      "Merci !": {
+       "pt-BR": "<b>Merci</b> é para agradecer. ",
+       "en": null
+      }
+     }
+    },
+    {
+     "id": "u2-l1-montar",
+     "tipo": "montar",
+     "traducao": {
+      "pt-BR": "Prazer, eu sou a Ana.",
+      "en": null
+     },
+     "pecas": [
+      "c'est",
+      "Enchantée,",
+      "Ana.",
+      "moi,",
+      "je",
+      "Enchanté,"
+     ],
+     "resposta": [
+      "Enchantée,",
+      "moi,",
+      "c'est",
+      "Ana."
+     ],
+     "frase_completa": "Enchantée, moi, c'est Ana.",
+     "explicacao": {
+      "pt-BR": "Quem fala é a Ana: <b>enchantée</b>, e <b>moi, c'est</b> para dizer o nome.",
+      "en": null
+     }
+    },
+    {
+     "id": "u2-l1-fim",
+     "tipo": "fim",
+     "fala": {
+      "pt-BR": "Muito bem! Agora você já sabe se apresentar.",
+      "en": null
+     }
+    }
    ]
   },
   {
@@ -277,17 +526,180 @@
     "nova: Ça s'écrit comment ?"
    ],
    "inclui_dialogo": false,
-   "sequencia": [
-    "ponte (lição 1)",
-    "cartão le prénom",
-    "cartão le nom",
-    "cartão épeler",
-    "nota O alfabeto em francês (grade com 🔊 por letra)",
-    "cartão Ça s'écrit comment ?",
-    "nota Os acentos ao soletrar + V/F",
-    "prática de pronúncia: ouvir a letra e escolher (G/J, E/I, U); ouvir um nome soletrado e digitar (Ana, Léo, Dubois); acentos só de reconhecimento: ouvir um nome soletrado com acento e escolher a grafia certa (Léo, François), sem pedir para dizer ou escrever o nome do acento (decisão 330)",
-    "checagem rápida",
-    "praticando"
+   "telas": [
+    {
+     "id": "u2-l2-intro",
+     "tipo": "abertura",
+     "objetivo": {
+      "pt-BR": "Agora vamos soletrar! Vou te mostrar o alfabeto em francês e como pedir que alguém soletre o nome.",
+      "en": null
+     },
+     "tamanho": {
+      "pt-BR": "4 cartões · 1 frase · cerca de 3 minutos",
+      "en": null
+     }
+    },
+    {
+     "id": "u2-prenom",
+     "tipo": "cartao",
+     "cartao": "le prénom"
+    },
+    {
+     "id": "u2-nom",
+     "tipo": "cartao",
+     "cartao": "le nom"
+    },
+    {
+     "id": "u2-ex-nom",
+     "tipo": "vf",
+     "fr": "Ana Dubois",
+     "afirmacao": {
+      "pt-BR": "Aqui, <i>Dubois</i> é o <i>prénom</i>.",
+      "en": null
+     },
+     "resposta": false,
+     "frase_do_painel": "Mon nom, c'est Dubois.",
+     "traducao_do_painel": {
+      "pt-BR": "Meu sobrenome é Dubois.",
+      "en": null
+     },
+     "explicacao": {
+      "pt-BR": "<b>Ana</b> é o <i>prénom</i> (o primeiro nome); <b>Dubois</b> é o <i>nom</i> (o sobrenome).",
+      "en": null
+     }
+    },
+    {
+     "id": "u2-epeler",
+     "tipo": "cartao",
+     "cartao": "épeler"
+    },
+    {
+     "id": "u2-nota-alfabeto",
+     "tipo": "nota",
+     "nota": "alfabeto"
+    },
+    {
+     "id": "u2-ex-gj",
+     "tipo": "ouvir_escolher",
+     "pergunta": {
+      "pt-BR": "Ouça a letra e escolha.",
+      "en": null
+     },
+     "audio": "gé",
+     "opcoes": [
+      "G",
+      "J"
+     ],
+     "resposta": "G",
+     "explicacao": {
+      "pt-BR": "<b>G</b> soa \"gê\" e <b>J</b> soa \"ji\": o contrário do que parece.",
+      "en": null
+     }
+    },
+    {
+     "id": "u2-ex-u",
+     "tipo": "ouvir_escolher",
+     "pergunta": {
+      "pt-BR": "Ouça a letra e escolha.",
+      "en": null
+     },
+     "audio": "u",
+     "opcoes": [
+      "I",
+      "U"
+     ],
+     "resposta": "U",
+     "explicacao": {
+      "pt-BR": "O <b>U</b> é o \"i\" com biquinho; o <b>I</b> é o nosso \"i\".",
+      "en": null
+     }
+    },
+    {
+     "id": "u2-ecrit",
+     "tipo": "cartao",
+     "cartao": "Ça s'écrit comment ?"
+    },
+    {
+     "id": "u2-nota-acentos",
+     "tipo": "nota",
+     "nota": "acentos"
+    },
+    {
+     "id": "u2-ex-acento",
+     "tipo": "ouvir_escolher",
+     "pergunta": {
+      "pt-BR": "Ouça o nome soletrado e escolha a grafia.",
+      "en": null
+     },
+     "audio": "L, E accent aigu, O",
+     "opcoes": [
+      "Lèo",
+      "Léo"
+     ],
+     "resposta": "Léo",
+     "explicacao": {
+      "pt-BR": "<i>Accent aigu</i> é o acento agudo: <b>é</b>. O <i>accent grave</i> é o de <b>è</b>.",
+      "en": null
+     }
+    },
+    {
+     "id": "u2-ex-digitar",
+     "tipo": "digitar",
+     "pergunta": {
+      "pt-BR": "Ouça o sobrenome soletrado e escreva.",
+      "en": null
+     },
+     "audio": "D, U, B, O, I, S",
+     "resposta": "Dubois",
+     "explicacao": {
+      "pt-BR": "<b>Dubois</b>: D, U, B, O, I, S. Repare no <b>U</b> com biquinho.",
+      "en": null
+     }
+    },
+    {
+     "id": "u2-frase-ecrit",
+     "tipo": "frase",
+     "frase": "Dubois ? Ça s'écrit comment ?",
+     "papel": {
+      "pt-BR": "Pergunta",
+      "en": null
+     }
+    },
+    {
+     "id": "u2-l2-montar",
+     "tipo": "montar",
+     "traducao": {
+      "pt-BR": "Como se escreve?",
+      "en": null
+     },
+     "pecas": [
+      "comment",
+      "Ça",
+      "?",
+      "s'écrit",
+      "c'est",
+      "épeler"
+     ],
+     "resposta": [
+      "Ça",
+      "s'écrit",
+      "comment",
+      "?"
+     ],
+     "frase_completa": "Ça s'écrit comment ?",
+     "explicacao": {
+      "pt-BR": "Para pedir que alguém soletre: <b>Ça s'écrit comment ?</b>",
+      "en": null
+     }
+    },
+    {
+     "id": "u2-l2-fim",
+     "tipo": "fim",
+     "fala": {
+      "pt-BR": "Ótimo! Agora você já soletra o seu nome em francês.",
+      "en": null
+     }
+    }
    ]
   },
   {
@@ -308,23 +720,833 @@
     "A1-9-v2",
     "nova: ne… pas"
    ],
-   "inclui_dialogo": true,
+   "inclui_dialogo": false,
    "cartoes_obs": "6 cartões, aceito pela dona (decisões 326 e 327)",
-   "sequencia": [
-    "ponte (lição 2)",
-    "cartão être",
-    "nota t'es + V/F",
-    "cartão le pays",
-    "cartão français / française",
-    "nota Français, française: o feminino que se ouve + V/F",
-    "cartão brésilien / brésilienne",
-    "cartão américain / américaine",
-    "cartão ne… pas",
-    "nota Ne… pas: o não em volta do verbo + V/F",
-    "checagem rápida",
-    "praticando",
-    "diálogo \"Primeiro encontro\" + Você entendeu?"
+   "telas": [
+    {
+     "id": "u2-l3-intro",
+     "tipo": "abertura",
+     "objetivo": {
+      "pt-BR": "Agora vou te ensinar a dizer a sua nacionalidade e a perguntar a de alguém.",
+      "en": null
+     },
+     "tamanho": {
+      "pt-BR": "6 cartões · 2 frases · cerca de 4 minutos",
+      "en": null
+     }
+    },
+    {
+     "id": "u2-etre",
+     "tipo": "cartao",
+     "cartao": "être"
+    },
+    {
+     "id": "u2-frase-etre",
+     "tipo": "frase",
+     "frase": "Tu es français ?",
+     "papel": {
+      "pt-BR": "Pergunta",
+      "en": null
+     }
+    },
+    {
+     "id": "u2-nota-tes",
+     "tipo": "nota",
+     "nota": "tes"
+    },
+    {
+     "id": "u2-ex-nota-tes",
+     "tipo": "vf",
+     "fr": "T'es français ?",
+     "afirmacao": {
+      "pt-BR": "É a forma certa para um texto formal.",
+      "en": null
+     },
+     "resposta": false,
+     "frase_do_painel": "Tu es français ?",
+     "traducao_do_painel": {
+      "pt-BR": "Você é francês?",
+      "en": null
+     },
+     "explicacao": {
+      "pt-BR": "<b>T'es</b> é da fala e das mensagens entre amigos. Por escrito, <b>tu es</b>.",
+      "en": null
+     }
+    },
+    {
+     "id": "u2-pays",
+     "tipo": "cartao",
+     "cartao": "le pays"
+    },
+    {
+     "id": "u2-ex-pays",
+     "tipo": "complete",
+     "antes": "Tu es de quel ",
+     "depois": " ?",
+     "traducao": {
+      "pt-BR": "De que país você é?",
+      "en": null
+     },
+     "opcoes": [
+      "pays",
+      "pais"
+     ],
+     "resposta": "pays",
+     "frase_completa": "Tu es de quel pays ?",
+     "distrator": "grafia",
+     "explicacao": {
+      "pt-BR": "<b>Pays</b> se escreve com <b>y</b>, e o <b>s</b> final não se pronuncia.",
+      "en": null
+     },
+     "explicacao_erro": {
+      "pais": {
+       "pt-BR": "Você escreveu como em português! ",
+       "en": null
+      }
+     }
+    },
+    {
+     "id": "u2-francais",
+     "tipo": "cartao",
+     "cartao": "français / française"
+    },
+    {
+     "id": "u2-nota-fem",
+     "tipo": "nota",
+     "nota": "feminino-que-se-ouve"
+    },
+    {
+     "id": "u2-ex-nota-fem",
+     "tipo": "vf",
+     "fr": "française",
+     "afirmacao": {
+      "pt-BR": "Soa igual a <i>français</i>.",
+      "en": null
+     },
+     "resposta": false,
+     "frase_do_painel": "française",
+     "traducao_do_painel": {
+      "pt-BR": "francesa",
+      "en": null
+     },
+     "explicacao": {
+      "pt-BR": "No feminino, o <b>e</b> faz o <b>s</b> soar como \"z\": <b>française</b>.",
+      "en": null
+     }
+    },
+    {
+     "id": "u2-bresilien",
+     "tipo": "cartao",
+     "cartao": "brésilien / brésilienne"
+    },
+    {
+     "id": "u2-frase-bresil",
+     "tipo": "frase",
+     "frase": "Je suis brésilienne.",
+     "papel": {
+      "pt-BR": "Resposta",
+      "en": null
+     }
+    },
+    {
+     "id": "u2-ex-bresil",
+     "tipo": "complete",
+     "antes": "Je suis ",
+     "depois": ".",
+     "traducao": {
+      "pt-BR": "Eu sou brasileira.",
+      "en": null
+     },
+     "opcoes": [
+      "brésilien",
+      "brésilienne"
+     ],
+     "resposta": "brésilienne",
+     "frase_completa": "Je suis brésilienne.",
+     "distrator": "par",
+     "explicacao": {
+      "pt-BR": "No feminino, <b>brésilienne</b>: o <b>-enne</b> faz o <b>n</b> soar.",
+      "en": null
+     },
+     "explicacao_erro": {
+      "brésilien": {
+       "pt-BR": "A tradução pede \"brasileira\". ",
+       "en": null
+      }
+     }
+    },
+    {
+     "id": "u2-americain",
+     "tipo": "cartao",
+     "cartao": "américain / américaine"
+    },
+    {
+     "id": "u2-nepas",
+     "tipo": "cartao",
+     "cartao": "ne… pas"
+    },
+    {
+     "id": "u2-nota-nepas",
+     "tipo": "nota",
+     "nota": "ne-pas"
+    },
+    {
+     "id": "u2-ex-nota-nepas",
+     "tipo": "vf",
+     "fr": "Je ne suis pas française.",
+     "afirmacao": {
+      "pt-BR": "Aqui, o <i>pas</i> vem antes do verbo.",
+      "en": null
+     },
+     "resposta": false,
+     "frase_do_painel": "Je ne suis pas française.",
+     "traducao_do_painel": {
+      "pt-BR": "Eu não sou francesa.",
+      "en": null
+     },
+     "explicacao": {
+      "pt-BR": "O <b>ne</b> vem antes do verbo e o <b>pas</b> depois: <b>je ne suis pas</b>.",
+      "en": null
+     }
+    },
+    {
+     "id": "u2-ex-funcao",
+     "tipo": "funcao",
+     "pergunta": {
+      "pt-BR": "A Ana é brasileira. O Léo pergunta: \"Tu es française ?\". O que ela responde?",
+      "en": null
+     },
+     "opcoes": [
+      "Oui, je suis française.",
+      "Non, je ne suis pas française.",
+      "Non, je suis française."
+     ],
+     "resposta": "Non, je ne suis pas française.",
+     "traducao_do_painel": {
+      "pt-BR": "Não, eu não sou francesa.",
+      "en": null
+     },
+     "explicacao": {
+      "pt-BR": "Para dizer que não é: <b>ne</b> antes do verbo e <b>pas</b> depois.",
+      "en": null
+     },
+     "explicacao_erro": {
+      "Oui, je suis française.": {
+       "pt-BR": "A Ana é brasileira, não francesa. ",
+       "en": null
+      },
+      "Non, je suis française.": {
+       "pt-BR": "Falta o <b>ne… pas</b> em volta do verbo. ",
+       "en": null
+      }
+     }
+    },
+    {
+     "id": "u2-l3-montar",
+     "tipo": "montar",
+     "traducao": {
+      "pt-BR": "Eu sou americana.",
+      "en": null
+     },
+     "pecas": [
+      "suis",
+      "Je",
+      "américaine.",
+      "américain.",
+      "ne"
+     ],
+     "resposta": [
+      "Je",
+      "suis",
+      "américaine."
+     ],
+     "frase_completa": "Je suis américaine.",
+     "explicacao": {
+      "pt-BR": "Quem fala é mulher: <b>américaine</b>, com <b>-e</b> no fim, e o <b>n</b> soa.",
+      "en": null
+     }
+    },
+    {
+     "id": "u2-l3-fim",
+     "tipo": "fim",
+     "fala": {
+      "pt-BR": "Parabéns! Agora você já diz a sua nacionalidade.",
+      "en": null
+     }
+    }
    ]
+  },
+  {
+   "id": "conhecer-alguem",
+   "ordem": 4,
+   "id_novo": true,
+   "tipo": "dialogos",
+   "cartoes": [],
+   "inclui_dialogo": true,
+   "titulo": {
+    "publicado": null,
+    "pt-BR": "Conhecer alguém",
+    "en": null,
+    "a_confirmar": false
+   },
+   "telas": [
+    {
+     "id": "u2-d1-cena",
+     "tipo": "dialogo_cena",
+     "dialogo": "Numa festa, Ana conhece o Léo.",
+     "foco": {
+      "pt-BR": "Ouça com atenção: repare em como eles perguntam o nome e a nacionalidade.",
+      "en": null
+     },
+     "tamanho": {
+      "pt-BR": "1 conversa · cerca de 3 minutos",
+      "en": null
+     }
+    },
+    {
+     "id": "u2-d1-ouvir",
+     "tipo": "dialogo_ouvir",
+     "dialogo": "Numa festa, Ana conhece o Léo.",
+     "pergunta": {
+      "pt-BR": "Eles se falam de um jeito formal ou informal?",
+      "en": null
+     },
+     "opcoes": [
+      {
+       "pt-BR": "Informal",
+       "en": null
+      },
+      {
+       "pt-BR": "Formal",
+       "en": null
+      }
+     ],
+     "resposta": 0,
+     "explicacao": {
+      "pt-BR": "Eles usam <b>tu</b>, <b>toi</b> e <b>moi, c'est</b>: é uma conversa informal.",
+      "en": null
+     }
+    },
+    {
+     "id": "u2-d1-ler",
+     "tipo": "dialogo_ler",
+     "dialogo": "Numa festa, Ana conhece o Léo."
+    },
+    {
+     "id": "u2-d1-vf",
+     "tipo": "dialogo_vf",
+     "dialogo": "Numa festa, Ana conhece o Léo.",
+     "fala": 2,
+     "afirmacao": {
+      "pt-BR": "Aqui, a Ana diz o nome dela e pergunta a nacionalidade do Léo.",
+      "en": null
+     },
+     "resposta": true,
+     "explicacao": {
+      "pt-BR": "<b>Moi, c'est Ana</b> diz o nome; <b>tu es français ?</b> pergunta a nacionalidade.",
+      "en": null
+     }
+    },
+    {
+     "id": "u2-d1-montar",
+     "tipo": "dialogo_montar",
+     "dialogo": "Numa festa, Ana conhece o Léo.",
+     "distratores": {
+      "0": {
+       "texto": "Bonjour, comment vous appelez-vous ?",
+       "tipo": "registro"
+      },
+      "1": {
+       "texto": "Je m'apelle Léo. Et toi ?",
+       "tipo": "grafia"
+      },
+      "2": {
+       "texto": "Moi, c'est Ana. Vous êtes français ?",
+       "tipo": "registro"
+      },
+      "3": {
+       "texto": "Oui, je suis fransais. Et toi, tu es française ?",
+       "tipo": "grafia"
+      },
+      "4": {
+       "texto": "Non, je ne suis pas française. Je suis brésiliène !",
+       "tipo": "grafia"
+      },
+      "5": {
+       "texto": "Anchanté, Ana !",
+       "tipo": "grafia"
+      },
+      "6": {
+       "texto": "Anchantée !",
+       "tipo": "grafia"
+      }
+     },
+     "explicacao": {
+      "pt-BR": "Você montou a conversa pelo ouvido. Repare na grafia de <b>m'appelle</b>, <b>français</b> e <b>enchanté</b>.",
+      "en": null
+     }
+    },
+    {
+     "id": "u2-d1-lacuna",
+     "tipo": "dialogo_lacuna",
+     "dialogo": "Numa festa, Ana conhece o Léo.",
+     "fala": 3,
+     "antes": "Oui, je suis français. Et toi, tu es ",
+     "depois": " ?",
+     "opcoes": [
+      "françaize",
+      "française"
+     ],
+     "resposta": "française",
+     "explicacao": {
+      "pt-BR": "Entre vogais, o <b>s</b> soa como \"z\", mas se escreve <b>s</b>: <b>française</b>.",
+      "en": null
+     }
+    },
+    {
+     "id": "u2-d1-ordenar",
+     "tipo": "dialogo_ordenar",
+     "dialogo": "Numa festa, Ana conhece o Léo.",
+     "explicacao": {
+      "pt-BR": "Nome, nacionalidade e, no fim, o prazer de se conhecer.",
+      "en": null
+     }
+    },
+    {
+     "id": "u2-d1-entendeu",
+     "tipo": "dialogo_entendeu",
+     "dialogo": "Numa festa, Ana conhece o Léo.",
+     "pergunta": {
+      "pt-BR": "A Ana é francesa?",
+      "en": null
+     },
+     "opcoes": [
+      {
+       "pt-BR": "Não, ela é brasileira",
+       "en": null
+      },
+      {
+       "pt-BR": "Sim, ela é francesa",
+       "en": null
+      },
+      {
+       "pt-BR": "Não, ela é americana",
+       "en": null
+      }
+     ],
+     "resposta": 0,
+     "explicacao": {
+      "pt-BR": "Ela diz <b>je ne suis pas française</b> e <b>je suis brésilienne</b>.",
+      "en": null
+     }
+    },
+    {
+     "id": "u2-d1-papel",
+     "tipo": "dialogo_papel",
+     "dialogo": "Numa festa, Ana conhece o Léo.",
+     "situacao": {
+      "pt-BR": "Agora é você: numa festa, você conhece a Ana. No exercício, o seu nome é Sam.",
+      "en": null
+     },
+     "outro_falante": "A",
+     "turnos": [
+      {
+       "pedido": {
+        "pt-BR": "Pergunte o nome dela.",
+        "en": null
+       },
+       "opcoes": [
+        "Tu t'appelles comment ?",
+        "Je m'appelle comment ?",
+        "Ça s'écrit comment ?"
+       ],
+       "certa": 0,
+       "dicas": {
+        "Je m'appelle comment ?": {
+         "pt-BR": "<b>Je m'appelle</b> é \"eu me chamo\". Para perguntar a ela: <b>tu t'appelles</b>.",
+         "en": null
+        },
+        "Ça s'écrit comment ?": {
+         "pt-BR": "Essa pergunta é \"como se escreve?\", não o nome.",
+         "en": null
+        }
+       }
+      },
+      {
+       "outro": {
+        "fr": "Moi, c'est Ana. Et toi ?",
+        "pt-BR": "Eu sou a Ana. E você?",
+        "en": null
+       }
+      },
+      {
+       "pedido": {
+        "pt-BR": "Diga o seu nome.",
+        "en": null
+       },
+       "opcoes": [
+        "Toi, c'est Sam.",
+        "Moi, c'est Sam.",
+        "Merci, Sam."
+       ],
+       "certa": 1,
+       "dicas": {
+        "Toi, c'est Sam.": {
+         "pt-BR": "<b>Toi</b> é \"você\". Para falar de você mesmo: <b>moi</b>.",
+         "en": null
+        },
+        "Merci, Sam.": {
+         "pt-BR": "<b>Merci</b> é para agradecer.",
+         "en": null
+        }
+       }
+      },
+      {
+       "outro": {
+        "fr": "Enchantée, Sam !",
+        "pt-BR": "Prazer, Sam!",
+        "en": null
+       }
+      },
+      {
+       "pedido": {
+        "pt-BR": "Pergunte se ela é francesa.",
+        "en": null
+       },
+       "opcoes": [
+        "Je suis française ?",
+        "Tu es français ?",
+        "Tu es française ?"
+       ],
+       "certa": 2,
+       "dicas": {
+        "Je suis française ?": {
+         "pt-BR": "<b>Je suis</b> é \"eu sou\". Para perguntar a ela: <b>tu es</b>.",
+         "en": null
+        },
+        "Tu es français ?": {
+         "pt-BR": "A Ana é mulher: <b>française</b>, com <b>e</b>.",
+         "en": null
+        }
+       }
+      },
+      {
+       "outro": {
+        "fr": "Non, je suis brésilienne !",
+        "pt-BR": "Não, sou brasileira!",
+        "en": null
+       }
+      }
+     ],
+     "explicacao": {
+      "pt-BR": "Você conheceu alguém em francês: perguntou o nome, disse o seu e perguntou a nacionalidade.",
+      "en": null
+     }
+    },
+    {
+     "id": "u2-d1-fim",
+     "tipo": "dialogo_fim",
+     "dialogo": "Numa festa, Ana conhece o Léo.",
+     "fala": {
+      "pt-BR": "Muito bem! Agora você já conhece alguém em francês.",
+      "en": null
+     },
+     "frases": [
+      0,
+      2,
+      4
+     ]
+    }
+   ],
+   "muda": "nova (decisão 356): o diálogo informal em lição própria"
+  },
+  {
+   "id": "apresentar-se-formal",
+   "ordem": 5,
+   "id_novo": true,
+   "tipo": "dialogos",
+   "cartoes": [],
+   "inclui_dialogo": true,
+   "titulo": {
+    "publicado": null,
+    "pt-BR": "Apresentar-se de um jeito formal",
+    "en": null,
+    "a_confirmar": false
+   },
+   "telas": [
+    {
+     "id": "u2-d2-cena",
+     "tipo": "dialogo_cena",
+     "dialogo": "No hotel, a recepcionista Claire atende o Sr. Costa.",
+     "foco": {
+      "pt-BR": "Ouça com atenção: repare em como eles se tratam e em como ele soletra o sobrenome.",
+      "en": null
+     },
+     "tamanho": {
+      "pt-BR": "1 conversa · cerca de 4 minutos",
+      "en": null
+     }
+    },
+    {
+     "id": "u2-d2-ouvir",
+     "tipo": "dialogo_ouvir",
+     "dialogo": "No hotel, a recepcionista Claire atende o Sr. Costa.",
+     "pergunta": {
+      "pt-BR": "Eles se falam de um jeito formal ou informal?",
+      "en": null
+     },
+     "opcoes": [
+      {
+       "pt-BR": "Informal",
+       "en": null
+      },
+      {
+       "pt-BR": "Formal",
+       "en": null
+      }
+     ],
+     "resposta": 1,
+     "explicacao": {
+      "pt-BR": "Eles usam <b>vous</b>, <b>madame</b> e <b>monsieur</b>: é uma conversa formal.",
+      "en": null
+     }
+    },
+    {
+     "id": "u2-d2-ler",
+     "tipo": "dialogo_ler",
+     "dialogo": "No hotel, a recepcionista Claire atende o Sr. Costa."
+    },
+    {
+     "id": "u2-d2-vf",
+     "tipo": "dialogo_vf",
+     "dialogo": "No hotel, a recepcionista Claire atende o Sr. Costa.",
+     "fala": 2,
+     "afirmacao": {
+      "pt-BR": "Aqui, a Claire pede que ele soletre o sobrenome.",
+      "en": null
+     },
+     "resposta": true,
+     "explicacao": {
+      "pt-BR": "<b>Ça s'écrit comment ?</b> pede que a pessoa soletre.",
+      "en": null
+     }
+    },
+    {
+     "id": "u2-d2-montar",
+     "tipo": "dialogo_montar",
+     "dialogo": "No hotel, a recepcionista Claire atende o Sr. Costa.",
+     "distratores": {
+      "0": {
+       "texto": "Bonsoir, monsieur. Comment tu t'appelles ?",
+       "tipo": "registro"
+      },
+      "1": {
+       "texto": "Bonsoir, madame. Je m'apelle Lucas Costa.",
+       "tipo": "grafia"
+      },
+      "2": {
+       "texto": "Pardon, Costa ? Ça s'écri comment ?",
+       "tipo": "grafia"
+      },
+      "3": {
+       "texto": "Ça s'écrit K, O, S, T, A.",
+       "tipo": "grafia"
+      },
+      "4": {
+       "texto": "Merci. Tu es français ?",
+       "tipo": "registro"
+      },
+      "5": {
+       "texto": "Non, je ne suis pas français. Je suis brézilien.",
+       "tipo": "grafia"
+      },
+      "6": {
+       "texto": "Anchantée, monsieur Costa.",
+       "tipo": "grafia"
+      },
+      "7": {
+       "texto": "Salut, madame.",
+       "tipo": "registro"
+      }
+     },
+     "explicacao": {
+      "pt-BR": "Você montou a conversa formal pelo ouvido: <b>vous</b>, <b>madame</b> e <b>monsieur</b> do começo ao fim.",
+      "en": null
+     }
+    },
+    {
+     "id": "u2-d2-lacuna",
+     "tipo": "dialogo_lacuna",
+     "dialogo": "No hotel, a recepcionista Claire atende o Sr. Costa.",
+     "fala": 4,
+     "antes": "Merci. Vous ",
+     "depois": " français ?",
+     "opcoes": [
+      "zêtes",
+      "êtes"
+     ],
+     "resposta": "êtes",
+     "explicacao": {
+      "pt-BR": "Em <b>vous êtes</b>, o <b>s</b> de <b>vous</b> soa \"z\" e se liga ao <b>êtes</b>: /vu zét/.",
+      "en": null
+     }
+    },
+    {
+     "id": "u2-d2-ordenar",
+     "tipo": "dialogo_ordenar",
+     "dialogo": "No hotel, a recepcionista Claire atende o Sr. Costa.",
+     "explicacao": {
+      "pt-BR": "Nome, soletrar o sobrenome, nacionalidade e o prazer de se conhecer.",
+      "en": null
+     }
+    },
+    {
+     "id": "u2-d2-entendeu",
+     "tipo": "dialogo_entendeu",
+     "dialogo": "No hotel, a recepcionista Claire atende o Sr. Costa.",
+     "pergunta": {
+      "pt-BR": "O Sr. Costa é francês?",
+      "en": null
+     },
+     "opcoes": [
+      {
+       "pt-BR": "Não, ele é brasileiro",
+       "en": null
+      },
+      {
+       "pt-BR": "Sim, ele é francês",
+       "en": null
+      },
+      {
+       "pt-BR": "Não, ele é americano",
+       "en": null
+      }
+     ],
+     "resposta": 0,
+     "explicacao": {
+      "pt-BR": "Ele diz <b>je ne suis pas français</b> e <b>je suis brésilien</b>.",
+      "en": null
+     }
+    },
+    {
+     "id": "u2-d2-papel",
+     "tipo": "dialogo_papel",
+     "dialogo": "No hotel, a recepcionista Claire atende o Sr. Costa.",
+     "situacao": {
+      "pt-BR": "Agora é você: na recepção, a Claire atende você. No exercício, o seu nome é Sam Moreau.",
+      "en": null
+     },
+     "outro_falante": "A",
+     "turnos": [
+      {
+       "outro": {
+        "fr": "Bonjour ! Comment vous appelez-vous ?",
+        "pt-BR": "Bom dia! Como você se chama?",
+        "en": null
+       }
+      },
+      {
+       "pedido": {
+        "pt-BR": "Diga o seu nome.",
+        "en": null
+       },
+       "opcoes": [
+        "Tu t'appelles Sam Moreau.",
+        "Je m'appelle Sam Moreau.",
+        "Ça s'écrit Sam Moreau."
+       ],
+       "certa": 1,
+       "dicas": {
+        "Tu t'appelles Sam Moreau.": {
+         "pt-BR": "<b>Tu t'appelles</b> é \"você se chama\". Para você: <b>je m'appelle</b>.",
+         "en": null
+        },
+        "Ça s'écrit Sam Moreau.": {
+         "pt-BR": "<b>Ça s'écrit</b> é para soletrar.",
+         "en": null
+        }
+       }
+      },
+      {
+       "outro": {
+        "fr": "Pardon, Moreau ? Ça s'écrit comment ?",
+        "pt-BR": "Como? Moreau? Como se escreve?",
+        "en": null
+       }
+      },
+      {
+       "pedido": {
+        "pt-BR": "Soletre o sobrenome.",
+        "en": null
+       },
+       "opcoes": [
+        "Ça s'écrit comment ?",
+        "Je ne suis pas Moreau.",
+        "Ça s'écrit M, O, R, E, A, U."
+       ],
+       "certa": 2,
+       "dicas": {
+        "Ça s'écrit comment ?": {
+         "pt-BR": "Essa é a pergunta; agora é a sua vez de soletrar.",
+         "en": null
+        },
+        "Je ne suis pas Moreau.": {
+         "pt-BR": "Ela quer que você soletre: <b>ça s'écrit</b> e as letras.",
+         "en": null
+        }
+       }
+      },
+      {
+       "outro": {
+        "fr": "Très bien. Bonne journée !",
+        "pt-BR": "Muito bem. Tenha um bom dia!",
+        "en": null
+       }
+      },
+      {
+       "pedido": {
+        "pt-BR": "Agradeça e se despeça.",
+        "en": null
+       },
+       "opcoes": [
+        "Salut, à plus !",
+        "Merci, madame. Au revoir !",
+        "De rien, madame."
+       ],
+       "certa": 1,
+       "dicas": {
+        "Salut, à plus !": {
+         "pt-BR": "Com a recepcionista, no formal: <b>au revoir</b>.",
+         "en": null
+        },
+        "De rien, madame.": {
+         "pt-BR": "<b>De rien</b> responde a um <b>merci</b>; aqui, agradeça.",
+         "en": null
+        }
+       }
+      }
+     ],
+     "explicacao": {
+      "pt-BR": "Você se apresentou no formal, soletrou o sobrenome e se despediu.",
+      "en": null
+     }
+    },
+    {
+     "id": "u2-d2-fim",
+     "tipo": "dialogo_fim",
+     "dialogo": "No hotel, a recepcionista Claire atende o Sr. Costa.",
+     "fala": {
+      "pt-BR": "Parabéns! Você se apresentou no formal e soletrou o sobrenome.",
+      "en": null
+     },
+     "frases": [
+      0,
+      2,
+      5
+     ]
+    }
+   ],
+   "muda": "nova (decisão 356): diálogo formal novo em lição própria"
   },
   {
    "id": "checkpoint",
@@ -341,16 +1563,11 @@
  "dialogos": [
   {
    "titulo": {
-    "pt-BR": "Primeiro encontro",
+    "pt-BR": "Numa festa, Ana conhece o Léo.",
     "en": null
    },
    "registro": "informal",
-   "cena": {
-    "pt-BR": "Numa festa de boas-vindas, dois desconhecidos se apresentam.",
-    "en": null
-   },
-   "licao": "nacionalidades",
-   "muda": "publicado; as três primeiras falas ficam com a chave; as duas últimas trocam para a negação, com chave nova (decisão 326); as chaves A1-2-d3 e A1-2-d4 vão para o arquivo de aposentados na implementação",
+   "licao": "conhecer-alguem",
    "falantes": {
     "A": {
      "nome": "Ana",
@@ -399,54 +1616,100 @@
      "pt-BR": "Não, eu não sou francesa. Sou brasileira!",
      "en": null,
      "muda": "substitui A1-2-d4 (Oui, je suis brésilienne !)"
-    }
-   ],
-   "check": [
-    {
-     "tipo": "fill",
-     "fala": 4,
-     "opcoes_erradas": [
-      "Oui, je suis française.",
-      "Non, je suis française."
-     ],
-     "muda": "era a fala 1"
     },
     {
-     "tipo": "listen",
-     "fala": 2,
-     "opcoes_erradas": [
-      "Je m'appelle Ana.",
-      "Bonjour, comment tu t'appelles ?"
-     ]
+     "chave": "nova",
+     "falante": "B",
+     "fr": "Enchanté, Ana !",
+     "pt-BR": "Prazer, Ana!",
+     "en": null
     },
     {
-     "tipo": "understand",
-     "pergunta": {
-      "pt-BR": "A Ana é francesa?",
-      "en": null
-     },
-     "opcoes": [
-      {
-       "pt-BR": "Não, ela é brasileira",
-       "en": null,
-       "certa": true
-      },
-      {
-       "pt-BR": "Sim, ela é francesa",
-       "en": null
-      },
-      {
-       "pt-BR": "Não, ela é americana",
-       "en": null
-      }
-     ],
-     "muda": "era \"De que país é a Ana?\"; agora cobra a negação"
+     "chave": "nova",
+     "falante": "A",
+     "fr": "Enchantée !",
+     "pt-BR": "Prazer!",
+     "en": null
     }
    ],
-   "falas_publicadas_que_saem": [
-    "A1-2-d3",
-    "A1-2-d4"
-   ]
+   "muda": "publicado; as três primeiras falas ficam com a chave; as duas últimas trocam para a negação, com chave nova (decisão 326); as chaves A1-2-d3 e A1-2-d4 vão para o arquivo de aposentados na implementação; lição própria e título = frase da cena; ganha enchanté / enchantée no fim; as checagens antigas viraram telas (decisão 356)"
+  },
+  {
+   "titulo": {
+    "pt-BR": "No hotel, a recepcionista Claire atende o Sr. Costa.",
+    "en": null
+   },
+   "registro": "formal",
+   "licao": "apresentar-se-formal",
+   "falantes": {
+    "A": {
+     "nome": "Claire",
+     "emoji": "👩"
+    },
+    "B": {
+     "nome": "Sr. Costa",
+     "emoji": "👨"
+    }
+   },
+   "falas": [
+    {
+     "chave": "nova",
+     "falante": "A",
+     "fr": "Bonsoir, monsieur. Comment vous appelez-vous ?",
+     "pt-BR": "Boa noite, senhor. Como o senhor se chama?",
+     "en": null
+    },
+    {
+     "chave": "nova",
+     "falante": "B",
+     "fr": "Bonsoir, madame. Je m'appelle Lucas Costa.",
+     "pt-BR": "Boa noite, senhora. Eu me chamo Lucas Costa.",
+     "en": null
+    },
+    {
+     "chave": "nova",
+     "falante": "A",
+     "fr": "Pardon, Costa ? Ça s'écrit comment ?",
+     "pt-BR": "Como? Costa? Como se escreve?",
+     "en": null
+    },
+    {
+     "chave": "nova",
+     "falante": "B",
+     "fr": "Ça s'écrit C, O, S, T, A.",
+     "pt-BR": "Escreve-se C, O, S, T, A.",
+     "en": null
+    },
+    {
+     "chave": "nova",
+     "falante": "A",
+     "fr": "Merci. Vous êtes français ?",
+     "pt-BR": "Obrigada. O senhor é francês?",
+     "en": null
+    },
+    {
+     "chave": "nova",
+     "falante": "B",
+     "fr": "Non, je ne suis pas français. Je suis brésilien.",
+     "pt-BR": "Não, eu não sou francês. Sou brasileiro.",
+     "en": null
+    },
+    {
+     "chave": "nova",
+     "falante": "A",
+     "fr": "Enchantée, monsieur Costa.",
+     "pt-BR": "Muito prazer, senhor Costa.",
+     "en": null
+    },
+    {
+     "chave": "nova",
+     "falante": "B",
+     "fr": "Enchanté, madame.",
+     "pt-BR": "Muito prazer, senhora.",
+     "en": null
+    }
+   ],
+   "muda": "novo (decisão 356): o diálogo formal da unidade, com vous, soletrar o sobrenome, a negação e enchanté / enchantée"
   }
  ],
  "frases_na_frase": [
@@ -668,8 +1931,9 @@
     "depois_do_cartao": "tu / vous",
     "afterKey": "A1-2-v1"
    },
+   "destino": "nota",
    "texto": {
-    "pt-BR": "Você já usou <strong>tu</strong> e <strong>vous</strong> na unidade anterior, em <i>Tu vas bien ?</i> e <i>Vous allez bien ?</i>, e acabou de ver <i>Vous êtes madame Dubois ?</i>. A regra: <strong>tu</strong> é para amigos, família, crianças e colegas da mesma idade. <strong>Vous</strong> é para quem você não conhece, pessoas mais velhas e situações de trabalho. <strong>Vous</strong> também é \"vocês\": para falar com duas pessoas ou mais, use sempre <strong>vous</strong>. Na dúvida, comece com <strong>vous</strong>: é melhor do que parecer íntimo demais.",
+    "pt-BR": "Você já usou <strong>tu</strong> e <strong>vous</strong> em <i>Tu vas bien ?</i> e <i>Vous allez bien ?</i>. <strong>Tu</strong> é para amigos, família, crianças e gente da mesma idade. <strong>Vous</strong> é para quem você não conhece, pessoas mais velhas e o trabalho. E <strong>vous</strong> também é \"vocês\": com duas pessoas ou mais, sempre <strong>vous</strong>. Na dúvida, use <strong>vous</strong>.",
     "en": null
    },
    "exemplos": [
@@ -723,8 +1987,9 @@
     "depois_do_cartao": "s'appeler",
     "afterKey": "A1-2-v2"
    },
+   "destino": "nota",
    "texto": {
-    "pt-BR": "Na fala do dia a dia, a palavra da pergunta costuma ir para o fim: <strong>Tu t'appelles comment ?</strong> quer dizer o mesmo que <i>Comment tu t'appelles ?</i>. Com quem você trata por <strong>vous</strong>, a pergunta mais cuidada é <strong>Comment vous appelez-vous ?</strong>.",
+    "pt-BR": "Na fala do dia a dia, a pergunta costuma terminar com <strong>comment</strong>: <strong>Tu t'appelles comment ?</strong> quer dizer o mesmo que <i>Comment tu t'appelles ?</i>. Com quem você trata por <strong>vous</strong>, pergunte <strong>Comment vous appelez-vous ?</strong>.",
     "en": null
    },
    "exemplos": [
@@ -780,8 +2045,9 @@
     "depois_do_cartao": "moi, c'est…",
     "afterKey": "nova"
    },
+   "destino": "nota",
    "texto": {
-    "pt-BR": "Você já usa <strong>et toi ?</strong> e <strong>et vous ?</strong>. Esse <strong>toi</strong> é o \"você\" com destaque: a forma que aparece sozinha ou depois de <i>et</i>. O \"eu\" com destaque é <strong>moi</strong>: <i>Moi, c'est Ana.</i> Ele também pode vir junto de <i>je</i>, para reforçar: <i>Moi, je m'appelle Léo.</i> Depois de <i>et</i>, use sempre <strong>moi</strong>: <i>Et moi ?</i> Já o <strong>vous</strong> é igual como sujeito e com destaque: <i>Vous êtes madame Dubois ?</i>, <i>Et vous ?</i>",
+    "pt-BR": "Lembra do <strong>et toi ?</strong>? Esse <strong>toi</strong> é o \"você\" com destaque. O \"eu\" com destaque é <strong>moi</strong>: <i>Moi, c'est Ana.</i> Ele também reforça o <i>je</i>: <i>Moi, je m'appelle Léo.</i> Depois de <i>et</i>, sempre <strong>moi</strong>: <i>Et moi ?</i> E o <strong>vous</strong> não muda: <i>Et vous ?</i>",
     "en": null
    },
    "exemplos": [
@@ -841,8 +2107,9 @@
     "depois_do_cartao": "épeler",
     "afterKey": "nova"
    },
+   "destino": "nota",
    "texto": {
-    "pt-BR": "Para soletrar (<i>épeler</i>), você precisa do nome das letras em francês. Toque no 🔊 ao lado de cada letra para ouvir. Atenção às que mais confundem: <strong>G</strong> soa como o nosso \"gê\" e <strong>J</strong> soa \"ji\"; <strong>E</strong> não é \"é\" nem \"ê\": é um som curto, com os lábios um pouco arredondados; <strong>U</strong> é o \"i\" com biquinho; <strong>H</strong> é \"ache\"; <strong>W</strong> é \"double vé\" (vê duplo) e <strong>Y</strong> é \"i grec\" (i grego).",
+    "pt-BR": "Para soletrar, você precisa do nome das letras em francês. Toque em cada letra para ouvir. Atenção às que mais confundem: <strong>G</strong> soa \"gê\" e <strong>J</strong> soa \"ji\"; <strong>E</strong> é um som curto, com os lábios arredondados; <strong>U</strong> é o \"i\" com biquinho; <strong>H</strong> é \"ache\"; <strong>W</strong> é \"double vé\" e <strong>Y</strong> é \"i grec\".",
     "en": null
    },
    "exemplos": [],
@@ -852,136 +2119,110 @@
    "muda": "nova (decisão 327): formato em grade, 26 letras com o nome em francês e 🔊 ao lado de cada uma, sem IPA; exige código (formato de nota novo)",
    "formato": "grade",
    "grade": [
-    {
-     "letra": "A",
-     "nome_fr": "a",
-     "audio": "a"
-    },
-    {
-     "letra": "B",
-     "nome_fr": "bé",
-     "audio": "bé"
-    },
-    {
-     "letra": "C",
-     "nome_fr": "cé",
-     "audio": "cé"
-    },
-    {
-     "letra": "D",
-     "nome_fr": "dé",
-     "audio": "dé"
-    },
-    {
-     "letra": "E",
-     "nome_fr": "e",
-     "audio": "e"
-    },
-    {
-     "letra": "F",
-     "nome_fr": "effe",
-     "audio": "effe"
-    },
-    {
-     "letra": "G",
-     "nome_fr": "gé",
-     "audio": "gé"
-    },
-    {
-     "letra": "H",
-     "nome_fr": "ache",
-     "audio": "ache"
-    },
-    {
-     "letra": "I",
-     "nome_fr": "i",
-     "audio": "i"
-    },
-    {
-     "letra": "J",
-     "nome_fr": "ji",
-     "audio": "ji"
-    },
-    {
-     "letra": "K",
-     "nome_fr": "ka",
-     "audio": "ka"
-    },
-    {
-     "letra": "L",
-     "nome_fr": "elle",
-     "audio": "elle"
-    },
-    {
-     "letra": "M",
-     "nome_fr": "emme",
-     "audio": "emme"
-    },
-    {
-     "letra": "N",
-     "nome_fr": "enne",
-     "audio": "enne"
-    },
-    {
-     "letra": "O",
-     "nome_fr": "o",
-     "audio": "o"
-    },
-    {
-     "letra": "P",
-     "nome_fr": "pé",
-     "audio": "pé"
-    },
-    {
-     "letra": "Q",
-     "nome_fr": "qu",
-     "audio": "qu"
-    },
-    {
-     "letra": "R",
-     "nome_fr": "erre",
-     "audio": "erre"
-    },
-    {
-     "letra": "S",
-     "nome_fr": "esse",
-     "audio": "esse"
-    },
-    {
-     "letra": "T",
-     "nome_fr": "té",
-     "audio": "té"
-    },
-    {
-     "letra": "U",
-     "nome_fr": "u",
-     "audio": "u"
-    },
-    {
-     "letra": "V",
-     "nome_fr": "vé",
-     "audio": "vé"
-    },
-    {
-     "letra": "W",
-     "nome_fr": "double vé",
-     "audio": "double vé"
-    },
-    {
-     "letra": "X",
-     "nome_fr": "ixe",
-     "audio": "ixe"
-    },
-    {
-     "letra": "Y",
-     "nome_fr": "i grec",
-     "audio": "i grec"
-    },
-    {
-     "letra": "Z",
-     "nome_fr": "zède",
-     "audio": "zède"
-    }
+    [
+     "A",
+     "a"
+    ],
+    [
+     "B",
+     "bé"
+    ],
+    [
+     "C",
+     "cé"
+    ],
+    [
+     "D",
+     "dé"
+    ],
+    [
+     "E",
+     "e"
+    ],
+    [
+     "F",
+     "effe"
+    ],
+    [
+     "G",
+     "gé"
+    ],
+    [
+     "H",
+     "ache"
+    ],
+    [
+     "I",
+     "i"
+    ],
+    [
+     "J",
+     "ji"
+    ],
+    [
+     "K",
+     "ka"
+    ],
+    [
+     "L",
+     "elle"
+    ],
+    [
+     "M",
+     "emme"
+    ],
+    [
+     "N",
+     "enne"
+    ],
+    [
+     "O",
+     "o"
+    ],
+    [
+     "P",
+     "pé"
+    ],
+    [
+     "Q",
+     "ku"
+    ],
+    [
+     "R",
+     "erre"
+    ],
+    [
+     "S",
+     "esse"
+    ],
+    [
+     "T",
+     "té"
+    ],
+    [
+     "U",
+     "u"
+    ],
+    [
+     "V",
+     "vé"
+    ],
+    [
+     "W",
+     "double vé"
+    ],
+    [
+     "X",
+     "ixe"
+    ],
+    [
+     "Y",
+     "i grec"
+    ],
+    [
+     "Z",
+     "zède"
+    ]
    ],
    "grade_obs": "a coluna nome_fr é o nome da letra escrito em francês (o que o 🔊 fala); na tela aparecem a letra e o 🔊, o nome escrito aparece na grade (decisão 329; L, \"elle\", pode ser confundido com o pronome)"
   },
@@ -1004,8 +2245,9 @@
     "depois_do_cartao": "Ça s'écrit comment ?",
     "afterKey": "nova"
    },
+   "destino": "nota",
    "texto": {
-    "pt-BR": "Quando alguém pergunta <i>Ça s'écrit comment ?</i>, a resposta soletrada diz também os acentos, logo depois da letra: <i>Léo</i> = L, E <strong>accent aigu</strong>, O. Os nomes: <strong>é</strong> <i>accent aigu</i> (agudo), <strong>è</strong> <i>accent grave</i> (grave), <strong>ê</strong> <i>accent circonflexe</i> (circunflexo), <strong>ç</strong> <i>cédille</i> (cedilha) e <strong>ë</strong> <i>tréma</i> (trema). Por enquanto, basta reconhecer quando ouvir.",
+    "pt-BR": "Ao soletrar, o acento vem logo depois da letra: <i>Léo</i> = L, E <strong>accent aigu</strong>, O. Os nomes: <strong>é</strong> <i>accent aigu</i>, <strong>è</strong> <i>accent grave</i>, <strong>ê</strong> <i>accent circonflexe</i>, <strong>ç</strong> <i>cédille</i> e <strong>ë</strong> <i>tréma</i>. Por enquanto, basta reconhecer quando ouvir.",
     "en": null
    },
    "exemplos": [
@@ -1078,8 +2320,9 @@
     "depois_do_cartao": "être",
     "afterKey": "A1-2-v4"
    },
+   "destino": "nota",
    "texto": {
-    "pt-BR": "Na fala corrida, <strong>tu es</strong> muitas vezes vira <strong>t'es</strong>: <i>T'es français ?</i>. Aparece até em mensagens escritas entre amigos. Nos exercícios, escreva a forma padrão, <strong>tu es</strong>; o <i>t'es</i> é para você reconhecer quando ouvir.",
+    "pt-BR": "Na fala corrida, <strong>tu es</strong> muitas vezes vira <strong>t'es</strong>: <i>T'es français ?</i> Aparece até em mensagem entre amigos. Por escrito, use <strong>tu es</strong>; o <i>t'es</i> é para você reconhecer quando ouvir.",
     "en": null
    },
    "exemplos": [
@@ -1133,8 +2376,9 @@
     "depois_do_cartao": "français / française",
     "afterKey": "A1-2-v7"
    },
+   "destino": "nota",
    "texto": {
-    "pt-BR": "Em <strong>français</strong>, o <i>s</i> do fim não se pronuncia. No feminino, o <i>e</i> final faz o <i>s</i> soar, como um \"z\": <strong>française</strong>. Por isso, só de ouvir, você sabe se é um homem ou uma mulher. Muitas nacionalidades funcionam assim: a letra final, muda no masculino, aparece na voz no feminino.",
+    "pt-BR": "Em <strong>français</strong>, o <i>s</i> final não se pronuncia. No feminino, o <i>e</i> faz o <i>s</i> soar como \"z\": <strong>française</strong>. Por isso, só de ouvir, você já sabe se é homem ou mulher. Muitas nacionalidades funcionam assim.",
     "en": null
    },
    "exemplos": [
@@ -1188,8 +2432,9 @@
     "depois_do_cartao": "ne… pas",
     "afterKey": "nova"
    },
+   "destino": "nota",
    "texto": {
-    "pt-BR": "Para dizer \"não\" numa frase, o francês usa duas palavras, uma de cada lado do verbo: <strong>ne</strong> antes e <strong>pas</strong> depois. <i>Je suis française</i> vira <i>Je <strong>ne</strong> suis <strong>pas</strong> française.</i> Antes de vogal, <strong>ne</strong> vira <strong>n'</strong>: <i>Tu <strong>n'</strong>es <strong>pas</strong> français ?</i>",
+    "pt-BR": "Para dizer \"não\", o francês usa duas palavras, uma de cada lado do verbo: <strong>ne</strong> antes e <strong>pas</strong> depois. <i>Je suis française</i> vira <i>Je <strong>ne</strong> suis <strong>pas</strong> française.</i> Antes de vogal, <strong>ne</strong> vira <strong>n'</strong>: <i>Tu <strong>n'</strong>es <strong>pas</strong> français ?</i>",
     "en": null
    },
    "exemplos": [
@@ -1532,5 +2777,6 @@
   "fr/scripts/challenges_import/modulo-a1-m1-content.json (na revisão dos Desafios do módulo, decisão 281)",
   "áudio (skill audio-tts): cartões, frases, exemplos das notas, as 26 letras e as 2 falas novas (duas vozes)",
   "node scripts/gerar_mapa_cron.js + novo deploy do notification-cron (a ordem das palavras e das unidades muda)"
- ]
+ ],
+ "formato": "lição curta: regra 17 do 15-regras-do-curriculo.md (decisões 338 a 356). Cada lição tem `telas` na ordem em que aparecem; a maquete (maquete-licao-curta/gerar.js) é gerada daqui."
 }

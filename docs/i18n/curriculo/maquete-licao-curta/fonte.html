@@ -162,6 +162,15 @@ aside{display:grid;gap:16px;min-width:0}
 .jump button{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:99px;padding:5px 11px;font:inherit;font-size:.82rem;font-weight:700;cursor:pointer}
 .jump button[aria-current="true"]{background:var(--brand);color:var(--on-brand);border-color:var(--brand)}
 .small{font-size:.85rem;color:var(--ink-soft)}
+.grade{display:grid;grid-template-columns:repeat(auto-fill,minmax(58px,1fr));gap:6px}
+.letra{border:1px solid var(--line);border-radius:12px;padding:6px 4px;background:var(--card);color:var(--ink);text-align:center;cursor:pointer;font:inherit}
+.letra:hover{border-color:var(--brand)}
+.letra b{display:block;font-size:1.2rem}
+.letra span{font-size:.72rem;color:var(--ink-soft)}
+.campo{width:100%;padding:14px;border:2px solid var(--line);border-radius:14px;font:inherit;font-size:1.2rem;background:var(--card);color:var(--ink)}
+.unit-tabs{display:flex;flex-wrap:wrap;gap:8px}
+.unit-tabs button{border:0;background:none;color:var(--ink-soft);font:inherit;font-weight:800;cursor:pointer;padding:4px 2px;border-bottom:3px solid transparent}
+.unit-tabs button[aria-pressed="true"]{color:var(--brand-dark);border-bottom-color:var(--brand)}
 /* a professora (decisão 350): foto e nome nas falas dela */
 .prof{display:flex;gap:10px;align-items:flex-start}
 .prof img{width:40px;height:40px;border-radius:50%;object-fit:cover;flex:none;border:2px solid var(--card)}
@@ -176,9 +185,10 @@ aside{display:grid;gap:16px;min-width:0}
 
 <div class="wrap">
   <header class="top">
-    <div class="eyebrow">Maquete · Unidade 1 "Cumprimentar e se despedir" · módulo "Apresentar-se"</div>
-    <h1>Lições curtas da unidade 1: lições 1 a 6</h1>
+    <div class="eyebrow">Maquete · módulo "Apresentar-se"</div>
+    <h1>Lições curtas: unidades 1 e 2</h1>
     <p>Clique como se fosse a aluna. Ao lado, o porquê de cada tela. Nada disso está no app ainda.</p>
+    <div class="unit-tabs" id="units"></div>
     <div class="lesson-tabs" id="tabs"></div>
   </header>
 
@@ -273,6 +283,33 @@ const audBtn=(text,label)=>`<button class="aud${label?'':' round'}" data-say="${
 /* Comentários da maquete (só para a dona; não vão para o app), por id de tela. O conteúdo das telas vem do
    rascunho piloto-m1/A1-1/A1-1.json (TELAS, injetado pelo gerar.js). */
 const WHY={
+ "unidade-2": {"titulo": "A unidade 2", "texto": "<p>Decisão 356: 3 lições de cartões e 2 de diálogo (uma por diálogo), antes da Revisão da unidade. Na trilha, só os títulos.</p>"},
+ "u2-l1-intro": {"titulo": "Lição 1: dizer o nome", "texto": "<p>5 cartões e 3 notas: é a lição mais carregada da unidade (cerca de 3 minutos). As três notas continuam notas porque trazem formas que não são cartões ou sistematizam.</p>"},
+ "u2-nota-tuvous": {"titulo": "Nota que continua nota", "texto": "<p>Sistematiza <i>tu</i> x <i>vous</i> e traz o <i>vous</i> de \"vocês\", que não é cartão. Etiquetas nos exemplos: informal, formal ou plural.</p>"},
+ "u2-ex-tu": {"titulo": "\"Complete\" com outra palavra", "texto": "<p><i>Je</i> x <i>tu</i>, retomando o <i>tu vas bien ?</i> da unidade 1.</p>"},
+ "u2-frase-comment": {"titulo": "Pergunta como cartão", "texto": "<p>Decisão 338: a pergunta do nome é um cartão (frase essencial do cartão <i>s'appeler</i>).</p>"},
+ "u2-nota-tappelles": {"titulo": "Nota que continua nota", "texto": "<p>Traz <i>Comment vous appelez-vous ?</i>, a forma formal, que não é cartão e volta no diálogo da lição 5. Os exercícios aceitam as duas ordens da pergunta (decisão 330).</p>"},
+ "u2-frase-je": {"titulo": "Resposta como cartão", "texto": "<p>A resposta ao nome: <i>Je m'appelle Léo.</i></p>"},
+ "u2-ex-je": {"titulo": "\"Complete\" com erro de grafia", "texto": "<p><i>m'apelle</i>: o erro de quem escreve de ouvido.</p>"},
+ "u2-ex-enchante": {"titulo": "Pergunta de função", "texto": "<p><i>Enchanté</i> e <i>enchantée</i> soam igual: a escolha depende de quem fala.</p>"},
+ "u2-nota-alfabeto": {"titulo": "A grade do alfabeto", "texto": "<p>Decisões 327 e 329: as 26 letras, cada uma com o nome escrito em francês e o áudio, sem IPA. Toque nas letras.</p>"},
+ "u2-ex-gj": {"titulo": "Ouça e escolha: G ou J", "texto": "<p>A prática de pronúncia prevista para esta lição (decisão 330), no formato curto: ouvir a letra e escolher entre duas.</p>"},
+ "u2-ex-u": {"titulo": "Ouça e escolha: I ou U", "texto": "<p>O U do francês, o \"i\" com biquinho.</p>"},
+ "u2-ex-acento": {"titulo": "Acento só de reconhecimento", "texto": "<p>Decisão 330: ouvir o nome soletrado com o acento e escolher a grafia, sem pedir para dizer o nome do acento. Faz as vezes do V/F da nota.</p>"},
+ "u2-ex-digitar": {"titulo": "Ouça e escreva", "texto": "<p>Ouvir um sobrenome soletrado e digitar (decisão 330). Maiúscula e minúscula não contam.</p>"},
+ "u2-l3-intro": {"titulo": "Lição 3: a nacionalidade", "texto": "<p>6 cartões (exceção aceita, decisões 327 e 329), uns 4 minutos.</p>"},
+ "u2-frase-etre": {"titulo": "Pergunta como cartão, antes do cartão français", "texto": "<p><i>Tu es français ?</i> vem antes do cartão <i>français</i>, com a tradução à vista (regra 11). É o gatilho da nota <i>t'es</i>.</p>"},
+ "u2-ex-pays": {"titulo": "\"Complete\" com erro de grafia", "texto": "<p><i>pais</i>: a grafia do português.</p>"},
+ "u2-ex-bresil": {"titulo": "\"Complete\" com a outra metade do par", "texto": "<p><i>brésilien</i> x <i>brésilienne</i>: só a tradução decide.</p>"},
+ "u2-nepas": {"titulo": "Cartão só de reconhecimento", "texto": "<p>Decisão 330: aparece como cartão, mas na Revisão não pede para produzir.</p>"},
+ "u2-ex-funcao": {"titulo": "A negação em uso", "texto": "<p>A Ana responde que não é francesa. Os erros: dizer que é, ou dizer não sem o <i>ne… pas</i>.</p>"},
+ "u2-d1-cena": {"titulo": "Lição 4: conhecer alguém", "texto": "<p>O diálogo publicado (falas A1-2-d0 a d2 ficam), com título = frase da cena e mais duas falas no fim (<i>Enchanté, Ana ! / Enchantée !</i>), para fechar a unidade.</p>"},
+ "u2-d1-montar": {"titulo": "Monte a conversa pelo áudio", "texto": "<p>Distratores de registro (<i>vous</i> no lugar de <i>tu</i>) e de grafia (<i>m'apelle</i>, <i>fransais</i>, <i>brésiliène</i>, <i>anchanté</i>).</p>"},
+ "u2-d1-lacuna": {"titulo": "Lacuna: o s que soa z", "texto": "<p><i>française</i> x <i>françaize</i>: o som \"z\" se escreve com <b>s</b>.</p>"},
+ "u2-d1-papel": {"titulo": "Sua vez", "texto": "<p>No exercício, a aluna se chama <b>Sam</b> (nome neutro) e não diz a própria nacionalidade, para não supor o gênero de quem estuda. Ela pergunta o nome, diz o dela e pergunta a nacionalidade da Ana.</p>"},
+ "u2-d2-cena": {"titulo": "Lição 5: diálogo formal novo", "texto": "<p>Decisão 356: um diálogo formal novo, no hotel, porque soletrar o sobrenome na recepção é a situação real mais comum. Usa <i>Comment vous appelez-vous ?</i>, <i>Pardon ?</i> da unidade 1, soletrar, a negação e <i>enchanté / enchantée</i>.</p>"},
+ "u2-d2-lacuna": {"titulo": "Lacuna: a ligação", "texto": "<p><i>vous êtes</i> soa /vu zét/: o <b>s</b> de <i>vous</i> se liga ao <i>êtes</i>.</p>"},
+ "u2-d2-papel": {"titulo": "Sua vez no formal", "texto": "<p>A aluna (Sam Moreau no exercício) diz o nome, soletra o sobrenome e se despede no formal.</p>"},
  "l1-intro": {
   "chip": "Início",
   "titulo": "Abertura com o objetivo",
@@ -338,7 +375,7 @@ const WHY={
   "titulo": "Tela final com a lista",
   "texto": "<p>Ponto 4: tudo o que foi visto, com áudio. Na voz calorosa (decisão 351), a professora fala antes da lista; a frase \"Esses cartões já entram na sua Revisão.\" continua.</p>"
  },
- "unidade": {
+ "unidade-1": {
   "chip": "A unidade",
   "titulo": "Como a trilha mostra a unidade",
   "texto": "<p>Na trilha, como hoje, cada lição aparece <b>só com o título</b>. As palavras de cada lição ficam aqui, só para você:</p><ul><li><b>1</b>: salut / coucou · bonjour · bonsoir · monsieur / madame</li><li><b>2</b>: <span class=\"qa\">P</span>ça va · tu vas bien ? / vous allez bien ? <span class=\"qa r\">R</span>ça va · je vais bien · et toi ? / et vous ?</li><li><b>3</b>: <span class=\"qa\">F</span>merci <span class=\"qa r\">R</span>de rien · s'il te plaît / s'il vous plaît · pardon · excuse-moi / excusez-moi</li><li><b>4</b>: au revoir · à bientôt · bonne journée / bonne soirée</li><li><b>5</b>: diálogos \"Encontro na rua\" (informal) e \"Na portaria\" (formal)</li></ul><p>Clique em qualquer lição, menos a Revisão.</p>"
@@ -574,7 +611,10 @@ const WHY={
  "d2-papel": {"chip": "Sua vez", "titulo": "Sua vez: conversa formal nova", "texto": "<p>De manhã, com o Sr. Martin. A fala dele não chama a aluna de <i>madame</i> nem de <i>monsieur</i>, porque não sabemos quem está estudando.</p>"},
  "d2-fim": {"chip": "Fim da lição", "titulo": "Fim da lição 6", "texto": "<p>A tela padrão; depois, volta para a unidade.</p>"}
 };
-const S=[...TELAS,{id:'unidade',lesson:'u',type:'unidade'}].map(t=>{const w=WHY[t.id]||{chip:t.id,titulo:'',texto:''};return Object.assign({},t,{chip:w.chip,why:[w.titulo,w.texto]});});
+const CHIP={intro:'Início',complete:'Complete',vf:'V ou F',funcao:'O que você diz?',nota:'Nota',montar:'Monte a frase',fim:'Fim da lição',ouvir:'Ouça e escolha',digitar:'Digite',
+  d_cena:'Cena',d_ouvir:'Ouvir sem texto',d_ler:'Ouça e leia',d_vf:'V ou F',d_montar:'Monte a conversa',d_lacuna:'Complete a frase',d_ordenar:'Coloque na ordem',d_entendeu:'Você entendeu?',d_papel:'Sua vez',d_fim:'Fim da lição',unidade:'A unidade'};
+const chipPadrao=t=>t.type==='item'?t.fr:(CHIP[t.type]||t.id);
+const S=[...TELAS,...UNIDADES.map(u=>({id:'unidade-'+u.n,lesson:u.n+'.u',unit:u.n,type:'unidade'}))].map(t=>{const w=WHY[t.id]||{};return Object.assign({},t,{chip:w.chip||chipPadrao(t),why:[w.titulo||chipPadrao(t),w.texto||'']});});
 
 
 /* ---------- estado ---------- */
@@ -582,7 +622,13 @@ let i=0, interacted=false, picked=[];
 const $=id=>document.getElementById(id);
 const screen=$('screen'), panel=$('panel');
 const idx=id=>S.findIndex(s=>s.id===id);
-const LESSONS=[[1,'Lição 1','l1-intro'],[2,'Lição 2','l2-intro'],[3,'Lição 3','l3-intro'],[4,'Lição 4','l4-intro'],['u','A unidade','unidade'],[5,'Lição 5','d1-cena'],[6,'Lição 6','d2-cena']];
+// Abas: as unidades e, embaixo, as lições da unidade aberta e a tela "A unidade".
+function desenhaAbas(s){
+  $('units').innerHTML=UNIDADES.map(u=>`<button data-u="${u.n}" aria-pressed="${u.n===s.unit}">Unidade ${u.n}</button>`).join('');
+  const u=UNIDADES.find(x=>x.n===s.unit);
+  $('tabs').innerHTML=u.licoes.map(l=>`<button data-to="${l.primeira}" aria-pressed="${l.key===s.lesson}">Lição ${l.n}</button>`).join('')
+    +`<button data-to="unidade-${u.n}" aria-pressed="${s.type==='unidade'}">A unidade</button>`;
+}
 
 function setProgress(){
   const s=S[i]; const same=S.filter(x=>x.lesson===s.lesson); const k=same.indexOf(s);
@@ -606,7 +652,7 @@ function setWhy(){
   }
   const same=S.filter(x=>x.lesson===s.lesson);
   $('jump').innerHTML=same.map(x=>`<button data-j="${x.id}" aria-current="${x===s}">${esc(x.chip)}</button>`).join('');
-  [...$('tabs').children].forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.l)===String(s.lesson)));
+  desenhaAbas(s);
 }
 function go(n){
   pararFalas();
@@ -616,8 +662,8 @@ function go(n){
 }
 function next(){
   const s=S[i];
-  if(s.type==='fim') return go('unidade');
-  if(s.type==='d_fim' && (!S[i+1] || S[i+1].lesson!==s.lesson)) return go('unidade');
+  if(s.type==='fim') return go('unidade-'+s.unit);
+  if(s.type==='d_fim' && (!S[i+1] || S[i+1].lesson!==s.lesson)) return go('unidade-'+s.unit);
   go(i+1);
 }
 
@@ -653,7 +699,7 @@ function render(){
   const s=S[i]; let h='';
   if(s.type==='intro'){
     h=`<div class="grow">
-      <span class="tag">Lição ${s.n} de 6</span>
+      <span class="tag">Lição ${s.n} de ${s.total}</span>
       <div class="fr-mid" style="text-align:left">${esc(s.title)}</div>
       <div class="prof intro-fala"><img src="${FOTO}" alt="Prof. Brune"><div class="fala"><span class="nome">Prof. Brune</span><span>${esc(s.goal)}</span></div></div>
       <p class="small" style="margin:0">${esc(s.size)}</p>
@@ -686,6 +732,7 @@ function render(){
   if(s.type==='nota'){
     h=`<span class="tag note">${s.kind}</span><div class="grow" style="justify-content:flex-start">
       <div class="notebox"><div class="prof" style="align-items:center;margin-bottom:8px"><img src="${FOTO}" alt="Prof. Brune"><span class="nome">Prof. Brune explica</span></div><h3>${esc(s.title)}</h3><p>${s.text}</p></div>
+      ${s.grade?`<div class="grade">${s.grade.map(([L,nome])=>`<button class="letra" data-say="${esc(nome)}" aria-label="Ouvir ${esc(L)}"><b>${esc(L)}</b><span>${esc(nome)}</span></button>`).join('')}</div>`:''}
       <div class="ex-list">${s.ex.map(([f,t,l,mudo])=>`<div class="ex-row">${mudo?'<span class="aud round" style="visibility:hidden">'+SPK+'</span>':audBtn(f,'')}<div class="t"><b>${esc(f)}${l?`<span class="lbl">${esc(l)}</span>`:''}</b><span>${esc(t)}</span></div></div>`).join('')}</div>
     </div><button class="btn" id="go">Entendi</button>`;
   }
@@ -704,21 +751,25 @@ function render(){
       <button class="btn" id="go">Continuar</button>`;
   }
   if(s.type==='unidade'){
-    const row=(n,t,cls,id)=>id?`<button class="lesson ${cls}" data-to="${id}"><span class="n">${n}</span><span class="t">${t}</span></button>`:`<div class="lesson ${cls}"><span class="n">${n}</span><span class="t">${t}</span></div>`;
-    h=`<span class="tag">Unidade 1 · Cumprimentar e se despedir</span>
-    <div class="lessons">
-      ${row('✓','Cumprimentar alguém','done','l1-intro')}
-      ${row('✓','Perguntar como a pessoa está e responder','done','l2-intro')}
-      ${row('✓','Fórmulas de cortesia','done','l3-intro')}
-      ${row('4','Despedir-se','cur','l4-intro')}
-      ${row('5','Conversar com um amigo','','d1-cena')}
-      ${row('6','Conversar de um jeito formal','','d2-cena')}
-      ${row('★','Revisão da unidade','')}
-    </div>`;
+    const u=UNIDADES.find(x=>x.n===s.unit);
+    h=`<span class="tag">Unidade ${u.n} · ${esc(u.titulo)}</span>
+    <div class="lessons">${u.licoes.map(l=>`<button class="lesson" data-to="${l.primeira}"><span class="n">${l.n}</span><span class="t">${esc(l.titulo)}</span></button>`).join('')}
+      <div class="lesson"><span class="n">★</span><span class="t">Revisão da unidade</span></div></div>`;
+  }
+  if(s.type==='ouvir'){
+    h=`<span class="tag">Ouça e escolha</span><div class="grow ex"><p class="q">${esc(s.q)}</p>
+      <button class="play-big" id="ouvir">${PLAY}<span>Ouvir</span></button>
+      <div class="opts two">${s.opts.map(o=>`<button class="opt" data-o="${esc(o)}">${esc(o)}</button>`).join('')}</div></div>`;
+  }
+  if(s.type==='digitar'){
+    h=`<span class="tag">Ouça e escreva</span><div class="grow ex"><p class="q">${esc(s.q)}</p>
+      <button class="play-big" id="ouvir">${PLAY}<span>Ouvir</span></button>
+      <input class="campo" id="campo" autocomplete="off" autocapitalize="words" spellcheck="false" aria-label="Sua resposta">
+    </div><button class="btn" id="check" disabled>Verificar</button>`;
   }
   const d=s.dlg;
   if(s.type==='d_cena'){
-    h=`<div class="tags"><span class="tag">Lição ${s.n} de 6</span><span class="tag pink">${esc(s.licao)}</span></div><div class="grow">
+    h=`<div class="tags"><span class="tag">Lição ${s.n} de ${s.total}</span><span class="tag pink">${esc(s.licao)}</span></div><div class="grow">
       <div class="fr-mid" style="text-align:left">${esc(d.title)}</div>${elenco(d)}
       <div class="prof intro-fala"><img src="${FOTO}" alt="Prof. Brune"><div class="fala"><span class="nome">Prof. Brune</span><span>${esc(s.foco)}</span></div></div>
       <p class="small" style="margin:0">${esc(s.size)}</p>
@@ -807,6 +858,20 @@ function bind(s){
     };
   }
   if(s.type==='unidade') screen.querySelectorAll('[data-to]').forEach(b=>b.onclick=()=>go(b.dataset.to));
+  if(s.type==='ouvir'||s.type==='digitar'){
+    const toca=()=>falar(s.audio,'f'); $('ouvir').onclick=toca; setTimeout(()=>{ if(S[i]===s) toca(); },300);
+  }
+  if(s.type==='ouvir'){
+    screen.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{ const ok=b.dataset.o===s.answer;
+      marca('.opt',x=>x.dataset.o===s.answer)(b); painelDialogo(ok, s.why_ok, null, null, 'Resposta: '+s.answer); });
+  }
+  if(s.type==='digitar'){
+    const campo=$('campo'), chk=$('check');
+    campo.oninput=()=>{ chk.disabled=!campo.value.trim(); };
+    const confere=()=>{ if(chk.disabled) return; const ok=campo.value.trim().toLowerCase()===s.answer.toLowerCase();
+      chk.disabled=true; campo.disabled=true; painelDialogo(ok, s.why_ok, null, null, 'Resposta: '+s.answer); };
+    chk.onclick=confere; campo.onkeydown=e=>{ if(e.key==='Enter'){ e.preventDefault(); confere(); } };
+  }
   const d=s.dlg;
   const marca=(sel,certo)=>(b)=>{ screen.querySelectorAll(sel).forEach(x=>{ x.disabled=true; if(certo(x)) x.classList.add('right'); else if(x===b) x.classList.add('wrong'); }); };
   if(s.type==='d_ouvir'||s.type==='d_entendeu'){
@@ -890,8 +955,8 @@ document.addEventListener('click',e=>{
   const a=e.target.closest('[data-say]'); if(a){ e.preventDefault(); speak(a.dataset.say); }
 });
 $('restart').onclick=()=>{ const s=S[i]; const first=S.find(x=>x.lesson===s.lesson); go(first.id); };
-$('tabs').innerHTML=LESSONS.map(([l,t])=>`<button data-l="${l}" aria-pressed="false">${t}</button>`).join('');
-$('tabs').onclick=e=>{const b=e.target.closest('[data-l]'); if(b){ const L=LESSONS.find(x=>String(x[0])===b.dataset.l); go(L[2]); }};
+$('tabs').onclick=e=>{const b=e.target.closest('[data-to]'); if(b) go(b.dataset.to);};
+$('units').onclick=e=>{const b=e.target.closest('[data-u]'); if(b){ const u=UNIDADES.find(x=>String(x.n)===b.dataset.u); go(u.licoes[0].primeira); }};
 $('jump').onclick=e=>{const b=e.target.closest('[data-j]'); if(b) go(b.dataset.j);};
 try{ speechSynthesis.getVoices(); }catch(e){}
 go(0);

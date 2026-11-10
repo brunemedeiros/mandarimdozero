@@ -22,8 +22,8 @@ check('A1: 762 cartões A/B (385 × 2 − 8 de reconhecimento; decisão 330: ne�
 check('A1: 195 novos + 190 publicados', A1.novos === 195 && A1.publicados === 190, [A1.novos, A1.publicados]);
 check('A1: cartões por módulo 67/40/51/52/36/29/39/41/30 (decisões 334 e 335: "Perguntar a idade dos outros: até 69", 13, desce para "Família e pessoas próximas"; era 80/27)',
   JSON.stringify(A1.porModulo.map(m => m.cartoes)) === JSON.stringify([67, 40, 51, 52, 36, 29, 39, 41, 30]), A1.porModulo.map(m => m.cartoes));
-check('A1: ~154 lições (M1 25, M2 15, M3 19, M4 22, M5 14, M6 12, M7 18, M8 17, M9 12; decisão 335: as 5 lições de "Perguntar a idade dos outros: até 69" passam do M1 ao M2; decisões 338 e 355: +2 lições de diálogo em "Cumprimentar e se despedir")',
-  JSON.stringify(A1.porModulo.map(m => m.licoes)) === JSON.stringify([25, 15, 19, 22, 14, 12, 18, 17, 12]), A1.porModulo.map(m => m.licoes));
+check('A1: ~156 lições (M1 27, M2 15, M3 19, M4 22, M5 14, M6 12, M7 18, M8 17, M9 12; decisão 335: as 5 lições de "Perguntar a idade dos outros: até 69" passam do M1 ao M2; decisões 338, 355 e 356: +2 lições de diálogo em "Cumprimentar e se despedir" e +2 em "Dizer o nome e a nacionalidade")',
+  JSON.stringify(A1.porModulo.map(m => m.licoes)) === JSON.stringify([27, 15, 19, 22, 14, 12, 18, 17, 12]), A1.porModulo.map(m => m.licoes));
 check('A1: ~31h00 de trilha', A1.tempo === 31 * 60, C.formatarTempo(A1.tempo));
 check('A1: "Apresentar-se" fica com o tempo digitado ~3h55 (decisão 270; 16 cartões na A1-1 não mudam a regra, decisões 300 e 308)', A1.porModulo[0].tempo === 3 * 60 + 55, C.formatarTempo(A1.porModulo[0].tempo));
 check('A1: 131 notas (decisão 333: a nota de ida e procedência de "Países e cidades" vira duas; era 130)', A1.notas === 131, A1.notas);
@@ -80,8 +80,9 @@ console.log('== "Dizer o nome e a nacionalidade" (A1-2) e "Dizer de onde é, ond
   check('A1-2: tu / vous mantém a chave A1-2-v1; américain / américaine mantém A1-9-v2', u.cartoes[1].chave === 'A1-2-v1' && u.cartoes[13].chave === 'A1-9-v2');
   check('A1-2: enchanté / enchantée é cartão novo em par (chave "nova", decisão 330)', u.cartoes[4].chave === 'nova' && u.cartoes[4].origem === 'novo');
   check('A1-2: ne… pas só de reconhecimento (decisão 330); a unidade tem 29 cartões A/B', u.cartoes[14].reconhecimento_so === true && C.cartoesAB(u) === 29, C.cartoesAB(u));
-  check('A1-2: lições reaproveitam os ids publicados (decisão 284)', JSON.stringify(u.licoes.map(l => l.id)) === JSON.stringify(['pronomes-e-nome', 'nome-e-ser', 'nacionalidades']), u.licoes.map(l => l.id));
-  check('A1-2: 3 lições + Revisão da unidade', C.licoesDaUnidade(u) === 4, C.licoesDaUnidade(u));
+  check('A1-2: lições de cartões reaproveitam os ids publicados (decisão 284); as 2 de diálogo são novas (decisão 356)', JSON.stringify(u.licoes.map(l => l.id)) === JSON.stringify(['pronomes-e-nome', 'nome-e-ser', 'nacionalidades', 'conhecer-alguem', 'apresentar-se-formal']), u.licoes.map(l => l.id));
+  check('A1-2: 3 lições de cartões + 2 de diálogo + Revisão da unidade', C.licoesDaUnidade(u) === 6, C.licoesDaUnidade(u));
+  check('A1-2: um diálogo por lição, o informal na 4 e o formal (novo) na 5 (decisão 356)', JSON.stringify(u.dialogos.map(d => [d.registro, d.licao])) === JSON.stringify([['informal', 4], ['formal', 5]]));
   const titulos = C.notasDaUnidade(u).map(n => n.titulo);
   check('A1-2: 8 notas, cada uma com momento (gatilho, decisão 326)', titulos.length === 8 && C.notasDaUnidade(u).every(n => n.momento), titulos);
   const acentos = C.notasDaUnidade(u).find(n => n.titulo === 'Os acentos ao soletrar');

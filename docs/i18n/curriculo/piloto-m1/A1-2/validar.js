@@ -11,6 +11,7 @@ const ROOT = path.resolve(__dirname, '..', '..', '..', '..', '..');
 const V = require(path.join(ROOT, 'fr/scripts/curriculo_palavras_vistas.js'));
 const M = require(path.join(ROOT, 'fr/scripts/curriculo_mapa.js'));
 const P = require(path.join(ROOT, 'fr/scripts/curriculo_papel.js'));
+const L = require(path.join(ROOT, 'fr/scripts/curriculo_licao_curta.js'));
 const R = require('./A1-2.json');
 const UID = 'A1-2';
 
@@ -64,12 +65,8 @@ confere(M.conferirLicoesDaUnidade(mapa).length === 0, 'conferência de lições 
 // Diálogos: mesma lição no rascunho e no mapa (decisão 320); só a lição do diálogo tem inclui_dialogo e o diálogo na sequência.
 const numLicao = Object.fromEntries(u.licoes.map(l => [l.id, l.licao]));
 confere(JSON.stringify(R.dialogos.map(d => [d.titulo['pt-BR'], numLicao[d.licao]])) === JSON.stringify((u.dialogos || []).map(d => [d.titulo, d.licao])), 'diálogos do rascunho (título ou lição) divergem do mapa');
-for (const l of R.licoes.filter(l => l.id !== 'checkpoint')){
-  const seus = R.dialogos.filter(d => d.licao === l.id).map(d => d.titulo['pt-BR']);
-  const naSequencia = R.dialogos.filter(d => l.sequencia.some(s => s.includes(`"${d.titulo['pt-BR']}"`))).map(d => d.titulo['pt-BR']);
-  confere(l.inclui_dialogo === (seus.length > 0), `lição ${l.id}: inclui_dialogo não bate com os diálogos dela`);
-  confere(JSON.stringify(naSequencia) === JSON.stringify(seus), `lição ${l.id}: sequência não traz exatamente os diálogos dela`);
-}
+// Telas da lição curta (regra 17), lições de diálogo, notas em tela ou painel e tamanho dos textos: fr/scripts/curriculo_licao_curta.js.
+for (const problema of L.conferirTelas(R)) confere(false, problema);
 
 // ---------------------------------------------------------------- 2) só palavras vistas
 const posDoCartao = palavra => u.cartoes.findIndex(c => c.palavra === palavra) + 1; // n cartões vistos ao chegar na nota
@@ -78,33 +75,10 @@ const idFrase = f => f.chave === 'nova' ? f.id_rascunho : f.chave;
 const casos = [];
 const add = (grupo, obrigatorio, onde, fr, contexto, unidade, mapaDoCaso) => casos.push({ grupo, obrigatorio, onde, fr, contexto, unidade: unidade || UID, mapa: mapaDoCaso || mapa });
 
-// Posição do fim de uma lição (decisões 253 e 320): os cartões das lições 1 a n (prefixo da ordem do mapa) e só as notas dessas lições.
-// Na última lição é o fim da unidade (todos os cartões e notas). Função pura: devolve {mapa, posicao} sem mexer no mapa real.
-function posicaoNoFimDaLicao(mapaReal, unidadeId, n){
-  const un = M.indicePorId(mapaReal)[unidadeId].unidade;
-  if (n >= Math.max(...un.licoes.map(l => l.licao))) return { mapa: mapaReal, posicao: 'fim' };
-  const copia = JSON.parse(JSON.stringify(mapaReal));
-  const uc = M.indicePorId(copia)[unidadeId].unidade;
-  uc.notas = (uc.notas || []).filter(x => x.momento && x.momento.licao <= n);
-  return { mapa: copia, posicao: un.cartoes.filter(c => c.licao <= n).length };
-}
 confere(u.cartoes.every((c, i, a) => i === 0 || a[i - 1].licao <= c.licao), 'cartões do mapa fora da ordem das lições (a posição do fim da lição depende disso)');
 
-// Diálogo e "Você entendeu?": na posição do fim da lição do diálogo (fim da lição 3, decisão 326).
-for (const d of R.dialogos){
-  const nome = d.titulo['pt-BR'];
-  const p = posicaoNoFimDaLicao(mapa, UID, numLicao[d.licao]);
-  for (const f of d.falas) add(`Diálogo "${nome}" (fim da lição ${numLicao[d.licao]})`, true, f.chave === 'nova' ? `nova (${f.falante})` : f.chave, f.fr, { tipo: 'dialogo', posicao: p.posicao }, UID, p.mapa);
-  for (const c of d.check) for (const o of c.opcoes_erradas || []) add('Você entendeu? (opções)', true, `${nome} ${c.tipo}`, o, { tipo: 'exercicio_licao', posicao: p.posicao }, UID, p.mapa);
-  // Autoteste: um cartão de lição posterior, que nenhuma nota das lições anteriores mostra (ex.: merci aparece em "Très bien, merci !"
-  // da nota "Como responder"), tem de ser acusado nesta posição; sem isso, um diálogo do meio passaria como se fosse o fim.
-  const exemplosAntes = u.notas.filter(x => x.momento && x.momento.licao <= numLicao[d.licao]).flatMap(x => (x.exemplos || []).map(e => e.fr.toLowerCase()));
-  const prox = u.cartoes.find(c => c.licao > numLicao[d.licao] && !exemplosAntes.some(e => e.includes(c.palavra.split(' / ')[0].toLowerCase())));
-  if (prox && p.posicao !== 'fim'){
-    const r = V.validarTexto(prox.palavra.split(' / ')[0], { tipo: 'dialogo', posicao: p.posicao }, UID, p.mapa, excecoes);
-    confere(r.nao_vistas.length > 0, `autoteste: "${prox.palavra}" (lição ${prox.licao}) passou como vista no diálogo "${nome}"`);
-  }
-}
+// Falas dos diálogos e textos dos exercícios das telas (lições de cartões e de diálogo): fr/scripts/curriculo_licao_curta.js.
+for (const c of L.textosDasTelas(R, M, mapa, UID)) add(c.grupo, c.obrigatorio, c.onde, c.fr, c.contexto, UID, c.mapa);
 
 // Frases "Na frase": na ficha logo depois do cartão que ilustram (informativo); as essenciais também na Revisão da unidade (obrigatório).
 for (const f of R.frases_na_frase){

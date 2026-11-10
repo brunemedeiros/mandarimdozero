@@ -127,6 +127,6 @@ Se uma regra deste arquivo ficar específica de uma pasta, mova-a para `.claude/
   verificação e Desafios; `07` + maquete preservados); explorar gravação de apresentação/diálogo/habilidade como recurso geral; testar entonação
   pergunta x afirmação no TTS fr antes da lição de som; corretor de pronúncia (API) no futuro.
 - Pendência (decisão 291): curso de **Pronúncia do Francês** (futuro; letras mudas e exceções, nasais, ligação, *oi* = "uá"); comparação com a Duolingo em `docs/i18n/curriculo/dados/comparacao-duolingo-x-regras-fr.md`.
-- Voz da professora em todo o site (`docs/voz-da-professora.md`, tabela de áreas): trilha feita só no rascunho da unidade 1 do fr (`piloto-m1/A1-1`, lição curta, nada publicado); pendentes: microtextos da interface, Revisão, Desafios, Ditados, Conjugação, avisos/push, texto dos e-mails, zh e pt.
+- Voz da professora em todo o site (`docs/voz-da-professora.md`, tabela de áreas): trilha feita só nos rascunhos das unidades 1 e 2 do fr (`piloto-m1/A1-1` e `A1-2`, lição curta, nada publicado); pendentes: microtextos da interface, Revisão, Desafios, Ditados, Conjugação, avisos/push, texto dos e-mails, zh e pt.
 - Pendências da autora: layout do áudio nas opções do checkpoint do zh; módulos/aba de Desafios do chinês;
   diálogos com personagens nomeados (placeholders de perfil); Stripe. País dos alunos: já preenchido nos 13 alunos (conferido 2026-10-14).
