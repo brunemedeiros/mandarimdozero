@@ -188,7 +188,15 @@ function challengeRetryButtonsHTML(){
 function challengeCompleteButtonHTML(){
   return `<button class="btn btn-primary challenge-complete-btn" id="challenge-complete-btn" style="margin-top:16px;width:100%;">${chT('ch.complete')}</button>`;
 }
-function wireChallengeCompleteButton(c){
+// XP da Acentuação (decisão da autora, 2026-11-10; mesmo padrão da trilha, constantes de shared/srs.js, ver .claude/rules/xp.md): digitar certo
+// = EXERCISE_XP_PRODUCE, "quase" = EXERCISE_XP_ALMOST, errou = 0 (nem há Concluir). Só na PRIMEIRA conclusão (refazer concluído ou "Revisar erros" = 0).
+function accentXP(c, outcome){
+  if (isChallengeCompleted(c.id) || challengePreviewMode) return 0;
+  return outcome === 'ok' ? EXERCISE_XP_PRODUCE : outcome === 'partial' ? EXERCISE_XP_ALMOST : 0;
+}
+// Quanto de XP o último "Concluir" pagou (a tela de conclusão mostra; 0 = nada a mostrar).
+let challengeLastXP = 0;
+function wireChallengeCompleteButton(c, xpGain){
   const retry = document.getElementById('challenge-retry-btn');
   if (retry){
     retry.addEventListener('click', () => openChallengePlayer(c.id));
@@ -203,6 +211,8 @@ function wireChallengeCompleteButton(c){
   const btn = document.getElementById('challenge-complete-btn');
   if (!btn) return;
   btn.addEventListener('click', () => {
+    challengeLastXP = 0;
+    if (xpGain > 0 && !isChallengeCompleted(c.id)){ challengeLastXP = xpGain; addXP(xpGain); } // XP antes de marcar concluído
     markChallengeCompleted(c.id);
     if (challengeReviewQueueActive){
       const nextId = dueChallengeReviews()[0];
@@ -1302,7 +1312,7 @@ function checkAccentAnswer(c){
   document.getElementById('accent-replay-slow-btn').addEventListener('click', (e) => {
     if (c.audioFile) playPregeneratedAudio(`challenges/${c.audioFile}`, e.currentTarget, false, SLOW_AUDIO_RATE);
   });
-  wireChallengeCompleteButton(c);
+  wireChallengeCompleteButton(c, accentXP(c, outcome));
 }
 
 
