@@ -30,6 +30,7 @@
 // novo precisa ser criado pra esta function funcionar.
 
 import { createClient } from 'npm:@supabase/supabase-js@2';
+import { buildReplyEmail } from './email.ts';
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 const anonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
@@ -42,47 +43,22 @@ const resendFromEmail = Deno.env.get('RESEND_FROM_EMAIL');
 // confiar só em o front-end esconder o botão de responder.
 const ADMIN_EMAIL = 'brunemed1310@gmail.com';
 
-// Nome de exibição do curso por idioma estudado e rodapé do e-mail de resposta, no idioma do SITE de quem recebe
-// (progress.data._meta.uiLanguage; regra do projeto: site em inglês não tem nada em português). Mesmo mapeamento
-// key->rótulo de shared/admin-reports.js (REPORT_LANGUAGE_LABELS) e de course_name() em scripts/generate_pwa_assets.py,
-// repetido aqui porque Edge Functions rodam isoladas (Deno, sem bundler) e não importam os arquivos JS do front-end.
-const COURSE_NAME_BY_UI_LANG: Record<string, Record<string, string>> = {
-  'pt-BR': {
-    frances: 'Francês com Prof. Brune',
-    mandarim: 'Chinês com Prof. Brune',
-    portugues: 'Português com Prof. Brune',
-    _default: 'Idiomas com Prof. Brune',
-  },
-  en: {
-    frances: 'French with Prof. Brune',
-    mandarim: 'Chinese with Prof. Brune',
-    portugues: 'Portuguese with Prof. Brune',
-    _default: 'Languages with Prof. Brune',
-  },
+// Texto e visual do e-mail (padrão Prof Brune, idioma do site de quem recebe): ./email.ts, testado em tests/email-report-reply/.
+
+// CORS em toda resposta (regra do projeto): a tela Admin > Reports chama esta função pelo navegador
+// (supabaseClient.functions.invoke), que manda um OPTIONS antes do POST. Sem isto o navegador barrava a chamada.
+const CORS_HEADERS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
-// Idioma do e-mail: o do site da conta, se conhecido; senão (convidado ou conta sem a preferência) o idioma do curso
-// manda: o curso de português só existe em inglês (Q-04); fr e zh seguem em português como sempre.
-function replyUiLanguage(languageAppKey: string | null | undefined, accountUiLanguage: string | null | undefined): 'pt-BR' | 'en' {
-  if (accountUiLanguage === 'en') return 'en';
-  if (accountUiLanguage === 'pt-BR') return 'pt-BR';
-  return languageAppKey === 'portugues' ? 'en' : 'pt-BR';
-}
-
-function replyFooter(languageAppKey: string | null | undefined, accountUiLanguage: string | null | undefined): string {
-  const ui = replyUiLanguage(languageAppKey, accountUiLanguage);
-  const names = COURSE_NAME_BY_UI_LANG[ui];
-  const courseName = names[languageAppKey || ''] || names._default;
-  return ui === 'en'
-    ? `Reply to the report you sent in ${courseName}.`
-    : `Resposta ao report que você enviou no ${courseName}.`;
-}
-
 function jsonResponse(body: Record<string, unknown>, status: number): Response {
-  return new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } });
+  return new Response(JSON.stringify(body), { status, headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' } });
 }
 
 Deno.serve(async (req: Request) => {
+  if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS_HEADERS });
   if (req.method !== 'POST') {
     return jsonResponse({ ok: false, error: 'method_not_allowed' }, 405);
   }
@@ -145,20 +121,13 @@ Deno.serve(async (req: Request) => {
     return jsonResponse({ ok: false, error: 'email_not_configured' }, 500);
   }
 
-  const footer = replyFooter(report.language_app_key, accountUiLanguage);
-
-  // white-space:pre-wrap preserva as quebras de linha que a admin digitou
-  // no textarea, sem precisar converter \n em <br> manualmente.
-  const html = `<div style="font-family:-apple-system,sans-serif;max-width:480px;margin:0 auto;padding:24px;">
-    <p style="font-size:15px;line-height:1.6;color:#241A15;white-space:pre-wrap;">${body.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</p>
-    <p style="font-size:12px;color:#93856F;margin-top:32px;">${footer}</p>
-  </div>`;
+  const { html, text } = buildReplyEmail(body, report.language_app_key, accountUiLanguage);
 
   try {
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${resendApiKey}` },
-      body: JSON.stringify({ from: resendFromEmail, to, subject, html, text: body }),
+      body: JSON.stringify({ from: resendFromEmail, to, subject, html, text }),
     });
     if (!res.ok) {
       console.error('report-reply-send: falha ao enviar e-mail', reportId, res.status, await res.text());
