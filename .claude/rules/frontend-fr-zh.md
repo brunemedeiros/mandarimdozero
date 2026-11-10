@@ -41,6 +41,11 @@ paths:
   Use os helpers (fr: `FamiliaLatina` / `typedAnswerVerdictForExpected`; zh: `acceptedFormsTyped` + `typedVariants`), nunca
   `acceptedForms()` cru. Erro marcado em vermelho: `typedAttemptHTML` (comum, `shared/core/licao-feedback.js`; a forma de comparar de cada idioma vem de `LANG_HOOKS.typedAttemptForm`). O teclado de letras ganha uma fileira com letras que a resposta
   pede e ele não tem (`frAccentPickerHTML(resposta)`). Guarda: `tests/respostas-digitadas/`.
+- **Áudio de apoio só com ícone** (decisão da autora, 2026-11-06, PR 443; vale para todos os sites e cursos): quando o áudio acompanha uma frase já na tela
+  (exemplos das Expressões, caixa da resposta do Monte a frase, "Original" do Ouça e traduza, palavra certa da Acentuação), usar ícones redondos `.audio-btn`
+  (🔊 cinza, o da Revisão e da Conjugação) + 🐢, ambos `audio-btn-md`, ao lado da frase (`audioIconsHTML` em `shared/desafios-telas.js`; CSS em `shared/desafios.css`).
+  Botão com texto ("▶ Ouvir"/"🐢 Devagar") só onde o áudio é o exercício (botão principal do Ouça e traduza, Acentuação, Ditados) ou o cartão de cima do Monte a frase.
+  O `.audio-btn` (base, `-lg`, `-md`, `.speaking`) mora em `shared/audio-btn.css` (ligado em `fr/index.html` e `zh/index.html` no mesmo ponto da cascata de antes; site novo só liga o arquivo).
 - **Telas de exercício seguem o molde da trilha** (decisão da autora, 2026-10-23, vale para Jogos, Desafios, Revisão e futuros): o comando
   fica SEMPRE no idioma do site, em qualquer nível (rótulo pequeno `t('fr.exercise.whatMeans')`, nos Desafios `chT('ch.expr.whatMeans')` com o mesmo texto, acima do cartão com o item; nunca frase em
   francês vinda do conteúdo); saída pelo X com barra de progresso (não link "← Voltar"); ⚑ e pílula de Atalhos do teclado; respostas com

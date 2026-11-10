@@ -81,8 +81,23 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
   check('acento: erro leve tem Concluir', await page.isVisible('#challenge-complete-btn'));
   check('acento: erro leve sem Tentar de novo', !(await page.isVisible('#challenge-retry-btn')));
   check('acento: erro leve marcado como parcial', await page.isVisible('.accent-feedback.partial'));
+  const xp0 = await ev(() => STATE.xp);
   await page.click('#challenge-complete-btn');
   check('acento: erro leve conclui', await done('accent-old-001'));
+  check('acento: "quase" na primeira conclusão paga EXERCISE_XP_ALMOST (1)', (await ev(() => STATE.xp)) - xp0 === 1, (await ev(() => STATE.xp)) - xp0);
+  // XP da Acentuação (decisão da autora, 2026-11-10): certo = 2, só na primeira conclusão; refazer concluído = 0.
+  await ev(() => { STATE.completedChallenges['accent-old-001'] = false; openChallengePlayer('accent-old-001'); });
+  await page.fill('#accent-answer-input', 'école');
+  await page.click('#accent-verify-btn');
+  const xp1 = await ev(() => STATE.xp);
+  await page.click('#challenge-complete-btn');
+  check('acento: certo na primeira conclusão paga EXERCISE_XP_PRODUCE (2)', (await ev(() => STATE.xp)) - xp1 === 2, (await ev(() => STATE.xp)) - xp1);
+  await ev(() => openChallengePlayer('accent-old-001'));
+  await page.fill('#accent-answer-input', 'école');
+  await page.click('#accent-verify-btn');
+  const xp2 = await ev(() => STATE.xp);
+  await page.click('#challenge-complete-btn');
+  check('acento: refazer desafio concluído não paga XP', (await ev(() => STATE.xp)) === xp2);
 
   // ---- Ouça e traduza ----
   await ev(() => openChallengePlayer('lt-old-001'));
