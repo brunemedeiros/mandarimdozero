@@ -57,6 +57,20 @@ Regras de código: `.claude/rules/qualidade-de-codigo.md`. Regras por área: `.c
   campo `palavras` do `mapa.json` (as de explicação, realidade e cultura ainda não listam palavras). Gramática não libera formas (ex.: *il faut*).
   Exceções valem só na unidade citada (não acumulam). Nome próprio: maiúscula no meio da frase ou lista de nomes.
 
+## Lição curta, rascunho com telas e voz da professora (decisões 338 a 351)
+- **Onde fica:** regras na regra 17 do `docs/i18n/curriculo/15-regras-do-curriculo.md`; conteúdo de cada lição em `telas` no rascunho da
+  unidade (piloto: `docs/i18n/curriculo/piloto-m1/A1-1/A1-1.json`; tipos: `abertura`, `cartao`, `frase`, `complete`, `vf`, `funcao`, `nota`,
+  `montar`, `fim`, `dialogo`); notas com `destino` (`nota` = tela própria; `painel` = vira a explicação dos exercícios em `paineis`).
+  Lição de diálogos: `tipo: 'dialogos'` em `licoes` do `mapa.json` (`temLicaoDeDialogos` e `conferirLicoesDaUnidade` em `fr/scripts/curriculo_mapa.js`).
+  Maquete clicável gerada do rascunho: `docs/i18n/curriculo/maquete-licao-curta/gerar.js` (`fonte.html` tem só o desenho e os comentários `WHY`).
+  Voz da professora (todo texto que fala com o aluno): `docs/voz-da-professora.md`.
+- **Como mudar:** texto de tela ou nota só no rascunho (nunca no `index.html`, que é gerado); depois `node .../maquete-licao-curta/gerar.js`
+  (`--antes=<commit>` mostra o texto anterior ao lado, para revisão).
+- **Como testar:** `node docs/i18n/curriculo/piloto-m1/A1-1/validar.js` (coerência das telas com o mapa, alternância dos distratores e
+  "só palavras vistas" nos exercícios na posição de cada tela) e `node tests/curriculo/test_mapa_totais.js` (casos da lição de diálogos).
+- **O que não fazer:** não validar o distrator de grafia (é errado de propósito); não pôr frase com palavra de lição posterior num exercício
+  (como "Na frase" valia; como exercício, não); não escrever vivência pessoal da professora sem a dona.
+
 ## Como testar
 - Testes por tema em `tests/<tema>/`; bateria completa e suítes instáveis: `.claude/rules/testes.md`.
 - Mudou progresso/trilha: rode `tests/curriculo-ids`, `tests/e4/test_progresso_ida_e_volta.js`, `tests/e4/test_core_carregado.js` e as capturas

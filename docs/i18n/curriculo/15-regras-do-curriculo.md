@@ -121,3 +121,5 @@ Regras de conteúdo e de sequência decididas pela dona. Cada regra vale para fr
     - Forma **só escrita** (STP, SVP, A+) **sem botão de áudio**.
     - **Tela final** com a lista do que foi visto, com áudio e etiqueta ("Esses cartões já entram na sua Revisão."); **diálogos numa lição própria no fim da unidade**, antes da Revisão da unidade.
     - Na trilha, cada lição aparece **só com o título** (as palavras da lição não aparecem no mapa).
+
+18. **Voz da professora** (dona, decisões 350 e 351, 2026-11-10): abertura, notas, explicações do painel e tela final são a **Prof. Brune falando**, na voz calorosa (1ª pessoa, "você", "Repare", "Lembra do... ?"), com foto e nome dela; a explicação do painel serve para acerto e erro, e o incentivo do erro fica no texto daquele erro. Guia: `docs/voz-da-professora.md`.

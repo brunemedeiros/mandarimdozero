@@ -66,7 +66,7 @@ function construirTelas(R){
           if (x.tipo === 'frase'){ const f = frase(x.frase); lista.push([f.fr, f['pt-BR'], 'frase']); }
           if (x.tipo === 'montar') lista.push([x.frase_completa, pt(x.traducao), 'frase']);
         }
-        return { ...base, type: 'fim', list: lista };
+        return { ...base, type: 'fim', say: pt(t.fala), list: lista };
       }
       case 'dialogo': {
         const d = R.dialogos.find(x => pt(x.titulo) === t.dialogo);
@@ -97,7 +97,7 @@ if (argAntes){
   for (const t of TELAS){
     const v = porId[t.id]; if (!v) continue;
     const mudou = {};
-    for (const campo of ['goal', 'text', 'why_ok']) if (v[campo] && v[campo] !== t[campo]) mudou[campo] = v[campo];
+    for (const campo of ['goal', 'text', 'why_ok', 'say']) if (v[campo] && v[campo] !== t[campo]) mudou[campo] = v[campo];
     if (v.why_err && JSON.stringify(v.why_err) !== JSON.stringify(t.why_err)) mudou.why_err = v.why_err;
     if (Object.keys(mudou).length) ANTES[t.id] = mudou;
   }

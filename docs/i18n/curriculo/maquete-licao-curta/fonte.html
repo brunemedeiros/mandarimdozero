@@ -194,7 +194,7 @@ aside{display:grid;gap:16px;min-width:0}
     <div class="why-box">
       <div class="eyebrow">Sobre a maquete</div>
       <ul>
-        <li><b>A professora</b>: a foto e o nome da Prof. Brune aparecem onde ela fala com você: abertura, notas e painel da resposta (decisão 350). A foto é a mesma dos e-mails do site.</li>
+        <li><b>A professora</b>: voz calorosa (decisão 351). A foto e o nome da Prof. Brune aparecem onde ela fala com você: abertura, notas, painel da resposta e tela final. A foto é a mesma dos e-mails do site.</li>
         <li><b>Imagens</b>: fora a foto da professora, nenhuma por enquanto (decisão 341). O espaço volta quando houver imagem de verdade.</li>
         <li><b>Distratores</b>: em cada "Complete", ou um erro de grafia, ou outra palavra já vista que não serve ali (decisão 342).</li>
         <li><b>Áudio</b>: <i>salut</i>, <i>bonjour</i>, <i>bonsoir</i>, <i>ça va</i>, <i>merci</i>, <i>de rien</i>, <i>s'il te plaît</i>, <i>s'il vous plaît</i>, <i>pardon</i>, <i>au revoir</i> e <i>à bientôt</i> são áudios reais do site. O resto usa a voz do navegador, só na maquete.</li>
@@ -232,6 +232,11 @@ const audBtn=(text,label)=>`<button class="aud${label?'':' round'}" data-say="${
 /* Comentários da maquete (só para a dona; não vão para o app), por id de tela. O conteúdo das telas vem do
    rascunho piloto-m1/A1-1/A1-1.json (TELAS, injetado pelo gerar.js). */
 const WHY={
+ "l5-intro": {
+  "chip": "Início",
+  "titulo": "Abertura da lição de diálogos",
+  "texto": "<p>A lição 5 também abre com a professora, que diz o que prestar atenção nas duas conversas (decisão 351).</p>"
+ },
  "l1-intro": {
   "chip": "Início",
   "titulo": "Abertura com o objetivo",
@@ -295,7 +300,7 @@ const WHY={
  "l1-fim": {
   "chip": "Fim da lição",
   "titulo": "Tela final com a lista",
-  "texto": "<p>Ponto 4: tudo o que foi visto, com áudio. Frase aprovada: \"Esses cartões já entram na sua Revisão.\"</p>"
+  "texto": "<p>Ponto 4: tudo o que foi visto, com áudio. Na voz calorosa (decisão 351), a professora fala antes da lista; a frase \"Esses cartões já entram na sua Revisão.\" continua.</p>"
  },
  "unidade": {
   "chip": "A unidade",
@@ -531,7 +536,7 @@ let i=0, interacted=false, picked=[];
 const $=id=>document.getElementById(id);
 const screen=$('screen'), panel=$('panel');
 const idx=id=>S.findIndex(s=>s.id===id);
-const LESSONS=[[1,'Lição 1','l1-intro'],[2,'Lição 2','l2-intro'],[3,'Lição 3','l3-intro'],[4,'Lição 4','l4-intro'],['u','A unidade','unidade'],[5,'Lição 5','dialogo']];
+const LESSONS=[[1,'Lição 1','l1-intro'],[2,'Lição 2','l2-intro'],[3,'Lição 3','l3-intro'],[4,'Lição 4','l4-intro'],['u','A unidade','unidade'],[5,'Lição 5','l5-intro']];
 
 function setProgress(){
   const s=S[i]; const same=S.filter(x=>x.lesson===s.lesson); const k=same.indexOf(s);
@@ -546,6 +551,7 @@ function setWhy(){
   if(a){
     const partes=[];
     if(a.goal) partes.push(`<p><b>Abertura:</b> ${esc(a.goal)}</p>`);
+    if(a.say) partes.push(`<p><b>Fala final:</b> ${esc(a.say)}</p>`);
     if(a.text) partes.push(`<p><b>Nota:</b> ${a.text}</p>`);
     if(a.why_ok) partes.push(`<p><b>Painel:</b> ${a.why_ok}</p>`);
     if(a.why_err) partes.push(...Object.entries(a.why_err).map(([k,v])=>`<p><b>Painel, se errar com <i>${esc(k)}</i>:</b> ${v}</p>`));
@@ -569,7 +575,7 @@ function next(){
 function showPanel(ok, s, extra){
   const fr=s.full||s.answer, tr=s.fullTr||s.tr||'';
   panel.className='panel show '+(ok?'ok':'err');
-  panel.innerHTML=`<h4><span class="mark">${ok?'✓':'✕'}</span>${ok?'Muito bem!':'Quase!'}</h4>
+  panel.innerHTML=`<h4><span class="mark">${ok?'✓':'✕'}</span>${ok?'Isso mesmo!':'Quase lá!'}</h4>
     <div class="ans"><div class="t">${esc(fr)}<span>${esc(tr)}</span></div>${audBtn(fr,'')}</div>
     <div class="prof"><img src="${FOTO}" alt="Prof. Brune"><div class="fala"><span class="nome">Prof. Brune</span><p class="why">${extra||s.why_ok}</p></div></div>
     <button class="btn" id="cont">Continuar</button>`;
@@ -627,7 +633,8 @@ function render(){
     </div><button class="btn" id="check" disabled>Verificar</button>`;
   }
   if(s.type==='fim'){
-    h=`<div class="done-hero"><h2>Lição concluída!</h2><p class="small" style="margin:0">Você viu nesta lição:</p></div>
+    h=`<div class="done-hero"><h2>Lição concluída!</h2></div>
+      ${s.say?`<div class="prof intro-fala"><img src="${FOTO}" alt="Prof. Brune"><div class="fala"><span class="nome">Prof. Brune</span><span>${esc(s.say)}</span></div></div>`:'<p class="small" style="margin:0;text-align:center">Você viu nesta lição:</p>'}
       <div class="ex-list">${s.list.map(([f,t,l])=>`<div class="ex-row">${audBtn(f,'')}<div class="t"><b>${esc(f)}${l?`<span class="lbl">${esc(l)}</span>`:''}</b><span>${esc(t)}</span></div></div>`).join('')}</div>
       <p class="small" style="margin:0;text-align:center">Esses cartões já entram na sua Revisão.</p>
       <button class="btn" id="go">Continuar</button>`;
@@ -640,7 +647,7 @@ function render(){
       ${row('✓','Perguntar como a pessoa está e responder','done','l2-intro')}
       ${row('✓','Fórmulas de cortesia','done','l3-intro')}
       ${row('4','Despedir-se','cur','l4-intro')}
-      ${row('5','Diálogos da unidade','','dialogo')}
+      ${row('5','Diálogos da unidade','','l5-intro')}
       ${row('★','Revisão da unidade','')}
     </div>`;
   }
