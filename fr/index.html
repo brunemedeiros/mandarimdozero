@@ -1136,18 +1136,10 @@ button.correct-feedback-continue{ background: var(--success-fill); color: var(--
 .gram-block-variants li + li{ margin-top:6px; }
 /* Tabela (.gram-table-*), exercício (.gram-exercise*) e cenário (.scenario-*): shared/gramatica-cenario.css, comum aos sites. */
 
-/* ---------- Audio button (TTS) ---------- */
-.audio-btn, .custom-audio-btn{
-  border:none; background: var(--paper-warm); color: var(--seal-red-dark);
-  width:26px; height:26px; border-radius:50%; cursor:pointer; font-size:13px;
-  display:inline-flex; align-items:center; justify-content:center; flex-shrink:0;
-  transition: transform .12s ease, background .15s ease; padding:0; line-height:1;
-}
-.audio-btn:hover, .custom-audio-btn:hover{ background: var(--paper-line); transform: scale(1.08); }
-.audio-btn:active, .custom-audio-btn:active{ transform: scale(.94); }
-.audio-btn.speaking{ background: var(--seal-red); color: var(--gold-bright); animation: pulseAudio .6s ease infinite; }
-@keyframes pulseAudio{ 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.12); } }
-.audio-btn-lg{ width:38px; height:38px; font-size:17px; }
+</style>
+<!-- Botão redondo de áudio (🔊): peça comum em shared/audio-btn.css, ligada aqui para manter a ordem da cascata. -->
+<link rel="stylesheet" href="../shared/audio-btn.css">
+<style>
 
 /* ---------- Fase 8a: imagem/múltipla escolha no flashcard (ver CLAUDE.md) ---------- */
 .flashcard-image{ max-width:100%; max-height:180px; border-radius:12px; margin:10px auto; display:block; object-fit:contain; }
@@ -3807,11 +3799,6 @@ button.att-swatch[aria-pressed="false"]{ background:transparent; font-weight:600
 .att-menu-actions{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
 .att-menu-actions .btn{ width:auto; min-width:0; margin:0; padding:8px 14px; }
 @media (max-width: 600px){ label.att-choice, .skill-toggle, button.att-swatch, .att-more{ min-height:44px; } }
-.notion-review-item{ display:grid; gap:6px; padding:10px 0; border-top:1px solid var(--paper-line); }
-.notion-review-item .profile-edit-input{ margin:0; }
-.notion-review-actions{ display:flex; flex-wrap:wrap; gap:8px; }
-.notion-review-actions .btn{ width:auto; min-width:0; margin:0; padding:8px 14px; }
-.notion-review summary{ cursor:pointer; }
 .class-log-when{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:10px; }
 .class-log-when .profile-edit-input{ margin:0; }
 .class-log-repeat{ align-self:flex-start; margin:4px 0; }
@@ -3839,31 +3826,8 @@ button.att-swatch[aria-pressed="false"]{ background:transparent; font-weight:600
   .cal-chip{ font-size:0; padding:0; height:6px; border-radius:3px; } .cal-chip b{ display:none; }
   .cal-nav, .cal-today-btn{ min-height:44px; min-width:44px; }
 }
-/* Google Agenda -> site (117, shared/google-calendar.js) */
-.gcal-box > summary { cursor: pointer; list-style: revert; }
-.gcal-body { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
-.gcal-badge { display: inline-block; min-width: 1.4em; padding: 0 6px; border-radius: 999px; background: var(--brand-fill); color: var(--on-brand-fill); font-size: 0.75rem; text-align: center; }
-.gcal-oneway { font-weight: 700; }
-.gcal-error { color: var(--error-red); font-weight: 700; margin: 0; }
-.gcal-sources, .gcal-review { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
-.gcal-sources li { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; }
-.gcal-sources select { max-width: 260px; }
-.gcal-actions, .gcal-review-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-.gcal-review-item { border: 1px solid var(--border, rgba(0,0,0,.12)); border-radius: 12px; padding: 10px; display: flex; flex-direction: column; gap: 6px; }
-.gcal-review-head { display: flex; flex-direction: column; gap: 2px; }
-.gcal-review-actions select { flex: 1; min-width: 180px; }
-.gcal-remember { font-size: 0.85rem; display: flex; gap: 6px; align-items: center; }
-.gcal-counts, .gcal-account { margin: 0; }
-.gcal-review-bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; }
-.gcal-review-bar select { max-width: 240px; }
-.gcal-tabs { display: flex; flex-wrap: wrap; gap: 6px; }
-.gcal-tab { border: 1px solid var(--border, rgba(0,0,0,.12)); background: transparent; color: inherit; border-radius: 999px; padding: 6px 14px; font: inherit; font-weight: 700; cursor: pointer; }
-.gcal-tab.is-active { background: var(--brand-fill); color: var(--on-brand-fill); border-color: var(--brand-fill); }
-.gcal-skip { background: none; border: none; padding: 0; font: inherit; cursor: pointer; }
-.gcal-more { align-self: flex-start; }
-@media (max-width: 600px) {
-  .gcal-actions .btn, .gcal-review-actions .btn, .gcal-tab, .gcal-skip, .gcal-more { min-height: 44px; }
-}
+/* Google Agenda -> site (117): caixa no Design System do painel, CSS em shared/aulas-painel.css */
+
 /* Link de agenda (103): assinatura ICS em Aulas (professora e aluno) */
 .calendar-feed-box > summary { cursor: pointer; list-style: revert; }
 .calendar-feed-body { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
@@ -4136,6 +4100,10 @@ body[data-activity-focus] .activity-focus-bar{ margin-bottom:14px; }
 #app.lesson-focus #review-session-wrap{ max-width:760px; margin-left:auto; margin-right:auto; }
 /* #conj-practice-wrap no modo foco e .conj-actions/.conj-verb-pager: shared/conjugacao.css. */
 @media (max-width:620px){ body[data-activity-focus] .activity-report-btn, .activity-lesson-bar .lesson-close-btn{ width:44px; height:44px; } }
+/* Etapa D, lote 3 (2026-11-04): na Revisão o progresso fica na barra do topo; a linha "N / total" fica sem a barrinha própria. O jogo de
+   pares não tem fila: a trilha some e ficam só ⚑, ⌨️ e ✕. */
+#review-session-wrap .review-progress-bar{ display:none; }
+#review-session-wrap[data-review-mode="match"] .activity-lesson-bar .lesson-progress-track{ visibility:hidden; }
 /* Conjugação: abas Praticar | Jogos e os Jogos (.cg-*): shared/conjugacao.css. */
 /* ---------- Cara de jogo: telas (passo 4, docs/historico/15) ----------
    Bloco único com o visual "de jogo" das telas fora de Amigos: pódio e "faltam
@@ -4427,6 +4395,8 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
 <!-- Boas-vindas da 1ª lição do curso (Etapa 6) -->
 <link rel="stylesheet" href="../shared/boas-vindas.css">
 <link rel="stylesheet" href="../shared/mural-classroom.css">
+<link rel="stylesheet" href="../shared/notion-sync.css">
+<link rel="stylesheet" href="../shared/aulas-painel.css">
 <!-- Janelas do topo (🔥 sequência e ⭐ XP da semana), shared/janelas-topo.js e shared/xp-semana.js -->
 <link rel="stylesheet" href="../shared/janelas-topo.css">
 <!-- Recomeçar o curso e retomada guiada (shared/recomecar-curso.js) -->
@@ -4690,7 +4660,7 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
           <option data-i18n="review.settings.newPerDay.10" value="10">10 (recomendado)</option>
           <option data-i18n="ui.review.newPerDay.15" value="15">15 (ritmo mais rápido)</option>
           <option data-i18n="ui.review.newPerDay.20" value="20">20 (ritmo bem rápido)</option>
-          <option data-i18n="ui.review.newPerDay.unlimited" value="9999">Sem limite (todas as pendentes de uma vez)</option>
+          <option data-i18n="ui.review.newPerDay.unlimited" value="9999">Sem limite (todas as novas de uma vez)</option>
         </select>
         <div data-i18n="ui.review.intensity" class="section-label">Intensidade da sessão</div>
         <select class="review-settings-select" id="review-intensity-select">
@@ -4974,6 +4944,8 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
       <button class="deck-topbar-btn is-active" role="tab" aria-selected="true" data-teacher-section="students" data-i18n="panel.tab.students">Alunos</button>
       <button class="deck-topbar-btn" role="tab" aria-selected="false" data-teacher-section="flashcards" data-i18n="panel.tab.cards">Cartões</button>
       <button class="deck-topbar-btn" role="tab" aria-selected="false" data-teacher-section="mural" data-i18n="panel.tab.mural">Mural</button>
+      <button class="deck-topbar-btn" role="tab" aria-selected="false" data-teacher-section="classlogs" data-i18n="panel.tab.classlogs">Aulas</button>
+      <button class="deck-topbar-btn" role="tab" aria-selected="false" data-teacher-section="materials" data-i18n="panel.tab.materialsShort">Materiais</button>
     </div>
     <div id="admin-students-content"></div>
     <div id="admin-cards-subnav" class="deck-topbar panel-nav panel-subnav" role="tablist" style="display:none;" aria-label="Cartões ou Banco de Revisão">
@@ -5675,6 +5647,7 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
 <script src="../shared/teacher-class-logs.js"></script>
 <script src="../shared/admin-class-logs.js"></script>
 <script src="../shared/google-calendar.js"></script>
+<script src="../shared/notion-sync.js"></script>
 <script src="../shared/teacher-support-materials.js"></script>
 <script src="../shared/teacher-materials-ui.js"></script>
 <script src="../shared/admin-support-materials.js"></script>

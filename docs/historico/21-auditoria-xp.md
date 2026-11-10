@@ -78,3 +78,6 @@ Tudo o que for decidido sobre XP vale para todos os sites (fr, zh, pt e futuros)
 - Motivo: a autora achou 2 XP pouco para uma sequência maior de exercícios (escolha, Monte a frase, Sua vez). Decisão: mesmo padrão da trilha.
 - Valores: escolha certa `EXERCISE_XP_RECOGNIZE` 1, Monte a frase certo `EXERCISE_XP_PRODUCE` 2, Sua vez certa 2 / "quase" `EXERCISE_XP_ALMOST` 1, errou ou "Não sei" 0 (teto 5). Só na 1ª conclusão, pago no Concluir; refazer ou "Revisar erros" = 0.
 - Código: `exprXPBreakdown` (substitui `exprTurnXP`) em `shared/desafios-telas.js`; a tela final mostra o total em destaque (+N XP) e o ganho de cada passo. Teste: `tests/desafios-expressoes-passos/` (175/175).
+
+## Acentuação passa a dar XP (2026-11-10)
+- Decisão da autora ("Sim!" à pergunta se a Acentuação deveria dar XP como a trilha; vale para todos os sites): certo 2 (`EXERCISE_XP_PRODUCE`), "quase" 1 (`EXERCISE_XP_ALMOST`), errou 0; só na primeira conclusão, pago no Concluir (`accentXP`). Ouça e traduza e Complete a frase seguem sem XP (pergunta aberta à autora). Teste: `tests/desafios-conclusao/` 22/22.

@@ -41,6 +41,11 @@ paths:
   Use os helpers (fr: `FamiliaLatina` / `typedAnswerVerdictForExpected`; zh: `acceptedFormsTyped` + `typedVariants`), nunca
   `acceptedForms()` cru. Erro marcado em vermelho: `typedAttemptHTML` (comum, `shared/core/licao-feedback.js`; a forma de comparar de cada idioma vem de `LANG_HOOKS.typedAttemptForm`). O teclado de letras ganha uma fileira com letras que a resposta
   pede e ele não tem (`frAccentPickerHTML(resposta)`). Guarda: `tests/respostas-digitadas/`.
+- **Áudio de apoio só com ícone** (decisão da autora, 2026-11-06, PR 443; vale para todos os sites e cursos): quando o áudio acompanha uma frase já na tela
+  (exemplos das Expressões, caixa da resposta do Monte a frase, "Original" do Ouça e traduza, palavra certa da Acentuação), usar ícones redondos `.audio-btn`
+  (🔊 cinza, o da Revisão e da Conjugação) + 🐢, ambos `audio-btn-md`, ao lado da frase (`audioIconsHTML` em `shared/desafios-telas.js`; CSS em `shared/desafios.css`).
+  Botão com texto ("▶ Ouvir"/"🐢 Devagar") só onde o áudio é o exercício (botão principal do Ouça e traduza, Acentuação, Ditados) ou o cartão de cima do Monte a frase.
+  O `.audio-btn` (base, `-lg`, `-md`, `.speaking`) mora em `shared/audio-btn.css` (ligado em `fr/index.html` e `zh/index.html` no mesmo ponto da cascata de antes; site novo só liga o arquivo).
 - **Telas de exercício seguem o molde da trilha** (decisão da autora, 2026-10-23, vale para Jogos, Desafios, Revisão e futuros): o comando
   fica SEMPRE no idioma do site, em qualquer nível (rótulo pequeno `t('fr.exercise.whatMeans')`, nos Desafios `chT('ch.expr.whatMeans')` com o mesmo texto, acima do cartão com o item; nunca frase em
   francês vinda do conteúdo); saída pelo X com barra de progresso (não link "← Voltar"); ⚑ e pílula de Atalhos do teclado; respostas com
@@ -59,14 +64,17 @@ paths:
 - **Ditados** (lista, linha "Revisão do A1" da trilha, player, correção, resultado, registro da tentativa): motor comum em
   `shared/ditados.js` (CSS em `shared/ditados.css`, depois do `<style>`); o que é do idioma (ditados, família latina, voz, teclado, mp3,
   abreviações, ganchos dos Desafios) vai em `fr/ditados-config.js` (`registerDictations`). Nunca copiar para um `app.js`; o zh não
-  carrega (decisão da dona pendente). Guarda: `tests/paridade-sites/test_ditados*.js`.
+  carrega (decisão da dona pendente). Guarda: `tests/paridade-sites/test_ditados*.js`. Player no molde da lição (etapa D, 2026-11-04): modo foco,
+  cabeçalho, comando `dict.cmd` e barra do topo (área `dictation` em `shared/activity-focus.js`; 50% escrevendo, 100% no resultado).
 - **Desafios** (catálogo, Free x Premium, textos `chT`, revisão espaçada, correção de cada tipo, telas do aluno, linha "Desafios do Módulo N"
   da trilha, admin e importação): motor comum em `shared/desafios.js`, `shared/desafios-telas.js` e `shared/desafios-admin.js` (CSS em
   `shared/desafios.css`, logo depois do `<style>`); o que é do idioma (família da Acentuação, teclado, tabela, textos que citam o idioma) vai em
   `fr/desafios-config.js` (`registerChallenges`). Nunca copiar para um `app.js`; o zh não carrega (decisão da dona pendente).
   Guarda: `tests/paridade-sites/test_desafios*.js`.
   **Expressões em passos** (palpite, resposta, "Veja em frases" com "Quando usar", "Monte a frase", "Sua vez" com XP só na 1ª conclusão, final): `exprShowOptions`...
-  `exprShowFinal` em `shared/desafios-telas.js`; barra do topo só nelas (`data-lesson-bar`, `shared/activity-focus.js`); texto novo = chave em `CHALLENGE_I18N`
+  `exprShowFinal` em `shared/desafios-telas.js`; barra do topo em todos os tipos (`data-lesson-bar`, `shared/activity-focus.js`; Ouça e traduza,
+  Acentuação e Complete a frase pela etapa D, `chStepRender`/`chStepAnswered`: comando `ch.cmd.*`, pergunta 50% e devolutiva 100%, "Não sei" revela e
+  conta como erro, "Continuar →" verde no acerto, foco no próximo botão; teste `tests/desafios-etapa-d/`); texto novo = chave em `CHALLENGE_I18N`
   (pt-BR e en). Os testes `tests/paridade-sites/test_desafios*.js` e `test_conjugacao*.js` comparam "antes x depois" do refactor: mudança de propósito
   entra na lista de neutralizações do teste (com data e motivo), nunca apagando a comparação. Testes: `tests/desafios-expressoes-passos/`.
   Dados opcionais de cada expressão: `example/secondExample.{pt,mark}` (tradução e trecho exato do francês a destacar), `literal.{pt,note}` (tradução literal e nota de origem); no site em outro idioma vêm do overlay (`docs/i18n/challenges-en.json`: `example`, `secondExample`, `literal`, `literalNote`) e nunca entram em `CHALLENGE_SITE_LANG_FIELDS` (sem o campo, a parte some; o desafio não). Teste: `tests/desafios-exemplos-traducao/`. Gravar SQL no navegador troca `\n` por `\r\n`: usar `chr(10)` (`docs/i18n/lote-exemplos-expressoes/gerar.py`) e conferir por hash.

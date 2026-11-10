@@ -592,7 +592,9 @@ async function fingerprintEn(browser, root){
     const ICONES_AUDIO = (x) => x.replace(/(?:\\n\s*| )?<span class=\\"expr-order-icons\\">.*?<\/button><\/span>/g, '').replace(/(?:\\n\s*)?<div class=\\"audio-btn-row\\">\s*(?:\\n\s*)?<button class=\\"dictation-play-btn\\" id=\\"(?:lt|accent)-replay-btn\\">.*?<\/div>/g, '');
     // Selo do cartão concluído das Expressões: "no álbum" virou "Concluído" (decisão da autora, 2026-11-06); neutralizado nos dois lados (aceita barras de escape em qualquer profundidade).
     const SELO = (x) => x.replace(/(expr-card-seal(?:\\)*">)(?:no álbum|in your album|Concluído|Completed)/g, '$1SELO');
-    const norm = (v) => SELO(ICONES_AUDIO(JSON.stringify(v))).replace(/127\.0\.0\.1:\d+/g, 'HOST').replace(/ch\.verify=(Vérifier|Verificar|Check)/g, 'ch.verify=VERIFICAR').replace(/\\"(Vérifier|Verificar|Check)\\"/g, '\\"VERIFICAR\\"').replace(VERIFICAR_RE, '>VERIFICAR</button>').replace(/mailto:(?:brunemed1310@gmail\.com|contato@profbrune\.com\.br)/g, 'mailto:EMAIL')
+    // Acentuação: a palavra certa foi para a caixa da resposta (feedback-inner-box + linha com ícones, 2026-11-06); volta ao desenho antigo nos dois lados.
+    const CAIXA_ACENTO = (x) => x.replace(/<div class=\\"feedback-inner-box accent-feedback-correct-box\\"><div class=\\"expr-order-line\\"><span class=\\"accent-feedback-correct-word\\">(.*?)<\/span><\/div><\/div>/g, '<div class=\\"accent-feedback-correct-word\\">$1</div>');
+    const norm = (v) => SELO(CAIXA_ACENTO(ICONES_AUDIO(JSON.stringify(v)))).replace(/127\.0\.0\.1:\d+/g, 'HOST').replace(/ch\.verify=(Vérifier|Verificar|Check)/g, 'ch.verify=VERIFICAR').replace(/\\"(Vérifier|Verificar|Check)\\"/g, '\\"VERIFICAR\\"').replace(VERIFICAR_RE, '>VERIFICAR</button>').replace(/mailto:(?:brunemed1310@gmail\.com|contato@profbrune\.com\.br)/g, 'mailto:EMAIL')
       // Expressões, ajustes de 2026-10-30 (decisão da autora; docs/historico/21-auditoria-xp.md): (1) o áudio da expressão toca sozinho ao abrir a pergunta
       // (como na trilha): tira do registro de toques os mp3 das expressões, nos dois lados; (2) XP por passo (escolha 1, montar 2, Sua vez 2/1; antes só a Sua vez):
       // o XP guardado no estado (xp e daily.xp) é neutralizado nos dois lados. O resto da comparação segue valendo.
@@ -621,6 +623,9 @@ async function fingerprintEn(browser, root){
         // DE PROPÓSITO (palpite + opções numeradas + passos). Cena do player de Expressão (antes: desfoque/devolutiva única; agora: expr-wrap)
         // não se compara; o resto, sim. "dep_" de Expressão compara só o estado (o tamanho do HTML leva o player junto).
         if (/challenge-hypothesis|challenge-feedback-meaning|challenge-microactivity/.test(a) && /expr-wrap|expr-panel|expr-final/.test(b)){ iguais++; passed++; continue; }
+        // Etapa D (2026-11-04, aprovada pela dona; docs/telas-exercicio-etapa-d-proposta.md): Ouça e traduza, Acentuação e Complete a frase
+        // ganharam cabeçalho, barra do topo, comando, "Não sei" e "Continuar" (ch-step-wrap). Cena com esses players não se compara; o resto, sim.
+        if (/ch-step-wrap/.test(b) && !/ch-step-wrap/.test(a)){ iguais++; passed++; continue; }
         const idDep = (k.match(/^dep_(.+)_\d+$/) || [])[1];
         if (idDep && String(A.expr_ids || '').split(',').includes(idDep)){ a = a.replace(/^"\d+/, '"'); b = b.replace(/^"\d+/, '"'); }
         if (a === b){ iguais++; passed++; continue; }

@@ -17,6 +17,12 @@ const SITES = (process.env.SITES || 'fr,zh').split(',');
 // tem HTML. As duas são conferidas em tests/paridade-sites/test_correcoes_5d.js.)
 const CORRECOES = [
   ['shared/core/exercicios-licao.js', '    .map(i => u.vocab[i])\n', '    .map(i => (u.vocab || [])[i])\n'],
+  // Reforço de "Errei" (2026-11-06, caso da Rachel; tests/banco-revisao-limites/): no máximo UM reforço por cartão na sessão (antes o cartão
+  // voltava sem fim enquanto sobrassem 3 à frente). Mudança de propósito: a sequência clica "Errei" várias vezes e a árvore nova tem menos cenas.
+  ['shared/core/revisao-decks.js', '    if (remaining >= 3) STATE.reviewQueue.push(card);\n',
+    '    if (!STATE.reviewRequeued) STATE.reviewRequeued = {};\n    if (remaining >= 3 && !STATE.reviewRequeued[card.id]){ STATE.reviewQueue.push(card); STATE.reviewRequeued[card.id] = true; }\n'],
+  ['shared/core/revisao-decks.js', '  STATE.reviewSessionStartedAt = Date.now();\n  STATE.reviewCardState = null;\n  renderReviewView();\n}',
+    '  STATE.reviewSessionStartedAt = Date.now();\n  STATE.reviewCardState = null;\n  STATE.reviewRequeued = {};\n  renderReviewView();\n}'],
 ];
 let passed = 0, failed = 0;
 const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FALHOU:', n, x !== undefined ? String(typeof x === 'string' ? x : JSON.stringify(x)).slice(0, 900) : ''); } };

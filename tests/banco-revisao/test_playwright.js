@@ -717,7 +717,7 @@ const BANK_STUB = (who, appKey) => {
       await page.waitForFunction(() => window.__DB.teacher_flashcards.find(c => c.id === 991).status === 'archived');
       L('"Parece errado" pausa o cartão só dela e ele sai da fila de hoje', await ev(() => window.__DB.review_bank_requests.find(x => x.item_id === 'i7').kind === 'errado' && !STATE.reviewQueue.some(c => String(c.rowId) === '991') && !STATE.cards.some(c => c.origin === 'teacher' && String(c.rowId) === '991' && c.flashcardStatus === 'active')));
       L('menu ⋯ some quando o cartão atual não é da professora ou a fila acabou', await ev(() => { const el = document.getElementById('rq-open'); const c = STATE.reviewQueue[STATE.reviewIndex]; return el ? !!c && c.origin === 'teacher' : true; }));
-      await page.click('#review-back-to-modes');
+      await page.click('#review-session-wrap .activity-exit-btn'); // etapa D, lote 3 (2026-11-04): o ✕ da barra no lugar do link de voltar
       await page.waitForFunction(() => document.getElementById('view-student-panel').classList.contains('active'));
       L('voltar leva ao Aluno > Revisão e encerra o escopo', await ev(() => document.getElementById('my-class-review-content').style.display !== 'none' && STATE.reviewSessionClassReview === false && !eligibleReviewPool().some(c => c.origin === 'teacher')));
       // terminar a sessão: tela de conclusão com "Voltar ao Aluno"

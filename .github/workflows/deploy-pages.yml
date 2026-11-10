@@ -49,6 +49,11 @@ jobs:
         with:
           path: '.'
 
+      # O passo "syncing_files" do GitHub às vezes passa de 10 min (padrão do deploy-pages) e o deploy era cancelado
+      # (PRs #452 e #453, 2026-11-09/10). Pedimos 30 min, mas o deploy-pages@v4 continua cancelando em 10 min (PR #459):
+      # o valor não funciona como esperado. Quando acontecer, rodar o deploy de novo uma vez (até hoje passou na 2ª).
       - name: Publica no GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+        with:
+          timeout: 1800000
