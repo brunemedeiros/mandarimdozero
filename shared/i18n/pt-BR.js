@@ -1210,7 +1210,7 @@ window.I18N_CATALOG['pt-BR'] = {
   'profile.err.photoSaveProfile': 'Foto enviada, mas não foi possível salvar no perfil. Tente de novo.',
   'profile.err.photoRemove': 'Não foi possível remover a foto agora.',
   'profile.loading': 'Carregando perfil...',
-  'profile.guestNote': '⚠️ Modo convidado — crie uma conta para ter um perfil salvo (username, bio) e visível entre sessões.',
+  'profile.guestNote': '⚠️ Modo convidado — crie uma conta para ter um perfil salvo (nome de usuário, bio) e visível entre sessões.',
   'profile.guestLogin': 'Entrar com Google para salvar',
   'profile.noBadges': 'Nenhuma conquista ainda — sua primeira lição já desbloqueia uma.',
   'profile.avatarAlt': 'Foto de perfil',

@@ -43,8 +43,9 @@ const ETAPA6 = (v) => etapa7(PROGRESSO_ORDEM(FAIXA_CONVIDADO(v))).split('Ver o q
   // da professora. Só a linha vazia e hidden sai; com o botão dentro a cena continua diferente.
   .replace(/<div id=\\?"review-prev-row\\?" class=\\?"review-prev-row\\?" hidden=\\?"\\?"><\/div>/g, '');
 // Faixa do modo convidado (conserto de 2026-11-10, pedido da dona): a frase ganhou um <span class="guest-warning-text"> em volta,
-// para o "não" em negrito não ganhar o espaço do flex. Na comparação, a etiqueta sai das duas árvores; o texto continua comparado.
-const FAIXA_CONVIDADO = (v) => v.replace(/<span class=\\?"guest-warning-text\\?">([\s\S]*?)<\/span>(?=(\\n|\n)\s*<button class=\\?"guest-warning-link)/g, '$1');
+// para o "não" em negrito não ganhar o espaço do flex; e "username" virou "nome de usuário". Na comparação, a etiqueta sai das duas árvores; o texto continua comparado.
+const FAIXA_CONVIDADO = (v) => v.replace(/<span class=\\?"guest-warning-text\\?">([\s\S]*?)<\/span>(?=(\\n|\n)\s*<button class=\\?"guest-warning-link)/g, '$1')
+  .split('perfil salvo (username, bio)').join('perfil salvo (nome de usuário, bio)'); // texto da faixa do Perfil, aprovado pela dona
 // Perfil > Progresso (decisão da dona, 2026-10-31): Conquistas saíram de cima dos números e foram para o fim da tela.
 // Na árvore antiga, o bloco (título + grade) é movido para o fim; na nova, sai o comentário que explica a ordem.
 // Assim a comparação continua provando que números, gráficos e conquistas têm o mesmo conteúdo.
