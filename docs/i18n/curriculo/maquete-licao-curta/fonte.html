@@ -148,6 +148,14 @@ aside{display:grid;gap:16px;min-width:0}
 .jump button{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:99px;padding:5px 11px;font:inherit;font-size:.82rem;font-weight:700;cursor:pointer}
 .jump button[aria-current="true"]{background:var(--brand);color:var(--on-brand);border-color:var(--brand)}
 .small{font-size:.85rem;color:var(--ink-soft)}
+/* a professora (decisão 350): foto e nome nas falas dela */
+.prof{display:flex;gap:10px;align-items:flex-start}
+.prof img{width:40px;height:40px;border-radius:50%;object-fit:cover;flex:none;border:2px solid var(--card)}
+.prof .fala{min-width:0;display:grid;gap:2px}
+.prof .nome{font-size:.72rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-soft)}
+.intro-fala{background:var(--paper-warm);border-radius:16px;padding:12px 14px}
+.antes{background:var(--paper-warm);border-radius:12px;padding:10px 12px;margin-top:6px}
+.antes p{margin:0 0 6px}
 .qa{display:inline-block;font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:1px 6px;border-radius:6px;background:var(--brand-tint);color:var(--brand-dark);margin-right:4px}
 .qa.r{background:var(--pink-tint);color:var(--ink)}
 </style>
@@ -175,6 +183,10 @@ aside{display:grid;gap:16px;min-width:0}
       <h2 id="why-title"></h2>
       <div id="why-text"></div>
     </div>
+    <div class="why-box" id="antes-box" hidden>
+      <div class="eyebrow">Texto anterior (antes da voz da professora)</div>
+      <div class="antes" id="antes-text"></div>
+    </div>
     <div class="why-box">
       <div class="eyebrow">Ir para</div>
       <div class="jump" id="jump"></div>
@@ -182,7 +194,8 @@ aside{display:grid;gap:16px;min-width:0}
     <div class="why-box">
       <div class="eyebrow">Sobre a maquete</div>
       <ul>
-        <li><b>Imagens</b>: nenhuma por enquanto (decisão 341). O espaço volta quando houver imagem de verdade.</li>
+        <li><b>A professora</b>: a foto e o nome da Prof. Brune aparecem onde ela fala com você: abertura, notas e painel da resposta (decisão 350). A foto é a mesma dos e-mails do site.</li>
+        <li><b>Imagens</b>: fora a foto da professora, nenhuma por enquanto (decisão 341). O espaço volta quando houver imagem de verdade.</li>
         <li><b>Distratores</b>: em cada "Complete", ou um erro de grafia, ou outra palavra já vista que não serve ali (decisão 342).</li>
         <li><b>Áudio</b>: <i>salut</i>, <i>bonjour</i>, <i>bonsoir</i>, <i>ça va</i>, <i>merci</i>, <i>de rien</i>, <i>s'il te plaît</i>, <i>s'il vous plaît</i>, <i>pardon</i>, <i>au revoir</i> e <i>à bientôt</i> são áudios reais do site. O resto usa a voz do navegador, só na maquete.</li>
         <li><b>Erro</b>: no app, a tela errada volta no fim da lição. Aqui ela só segue.</li>
@@ -528,6 +541,16 @@ function setProgress(){
 }
 function setWhy(){
   const s=S[i]; $('why-title').textContent=s.why[0]; $('why-text').innerHTML=s.why[1];
+  const a=ANTES[s.id];
+  $('antes-box').hidden=!a;
+  if(a){
+    const partes=[];
+    if(a.goal) partes.push(`<p><b>Abertura:</b> ${esc(a.goal)}</p>`);
+    if(a.text) partes.push(`<p><b>Nota:</b> ${a.text}</p>`);
+    if(a.why_ok) partes.push(`<p><b>Painel:</b> ${a.why_ok}</p>`);
+    if(a.why_err) partes.push(...Object.entries(a.why_err).map(([k,v])=>`<p><b>Painel, se errar com <i>${esc(k)}</i>:</b> ${v}</p>`));
+    $('antes-text').innerHTML=partes.join('');
+  }
   const same=S.filter(x=>x.lesson===s.lesson);
   $('jump').innerHTML=same.map(x=>`<button data-j="${x.id}" aria-current="${x===s}">${esc(x.chip)}</button>`).join('');
   [...$('tabs').children].forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.l)===String(s.lesson)));
@@ -548,7 +571,7 @@ function showPanel(ok, s, extra){
   panel.className='panel show '+(ok?'ok':'err');
   panel.innerHTML=`<h4><span class="mark">${ok?'✓':'✕'}</span>${ok?'Muito bem!':'Quase!'}</h4>
     <div class="ans"><div class="t">${esc(fr)}<span>${esc(tr)}</span></div>${audBtn(fr,'')}</div>
-    <p class="why">${extra||s.why_ok}</p>
+    <div class="prof"><img src="${FOTO}" alt="Prof. Brune"><div class="fala"><span class="nome">Prof. Brune</span><p class="why">${extra||s.why_ok}</p></div></div>
     <button class="btn" id="cont">Continuar</button>`;
   $('cont').onclick=next; $('cont').focus({preventScroll:true});
   screen.style.paddingBottom=(panel.offsetHeight+12)+'px';
@@ -562,7 +585,7 @@ function render(){
     h=`<div class="grow">
       <span class="tag">Lição ${s.n} de 5</span>
       <div class="fr-mid" style="text-align:left">${esc(s.title)}</div>
-      <p style="margin:0">${esc(s.goal)}</p>
+      <div class="prof intro-fala"><img src="${FOTO}" alt="Prof. Brune"><div class="fala"><span class="nome">Prof. Brune</span><span>${esc(s.goal)}</span></div></div>
       <p class="small" style="margin:0">${esc(s.size)}</p>
     </div><button class="btn" id="go">Começar</button>`;
   }
@@ -592,7 +615,7 @@ function render(){
   }
   if(s.type==='nota'){
     h=`<span class="tag note">${s.kind}</span><div class="grow" style="justify-content:flex-start">
-      <div class="notebox"><h3>${esc(s.title)}</h3><p>${s.text}</p></div>
+      <div class="notebox"><div class="prof" style="align-items:center;margin-bottom:8px"><img src="${FOTO}" alt="Prof. Brune"><span class="nome">Prof. Brune explica</span></div><h3>${esc(s.title)}</h3><p>${s.text}</p></div>
       <div class="ex-list">${s.ex.map(([f,t,l,mudo])=>`<div class="ex-row">${mudo?'<span class="aud round" style="visibility:hidden">'+SPK+'</span>':audBtn(f,'')}<div class="t"><b>${esc(f)}${l?`<span class="lbl">${esc(l)}</span>`:''}</b><span>${esc(t)}</span></div></div>`).join('')}</div>
     </div><button class="btn" id="go">Entendi</button>`;
   }
