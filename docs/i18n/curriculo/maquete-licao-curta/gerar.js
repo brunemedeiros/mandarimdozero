@@ -10,7 +10,7 @@ const fonte = fs.readFileSync(path.join(__dirname, 'fonte.html'), 'utf8');
 
 const manifesto = fs.readFileSync(path.join(raiz, 'fr/audio-manifest.js'), 'utf8');
 const AUD = {};
-const frases = ['salut', 'bonjour', 'bonsoir', 'ça va', 'merci', 'de rien', "s'il te plaît", "s'il vous plaît", 'pardon', 'Salut ! Ça va bien ?'];
+const frases = ['salut', 'bonjour', 'bonsoir', 'ça va', 'merci', 'de rien', "s'il te plaît", "s'il vous plaît", 'pardon', 'au revoir', 'à bientôt', 'Salut ! Ça va bien ?'];
 for (const f of frases) {
   const re = new RegExp('"' + f.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '"\\s*:\\s*"([^"]+)"');
   const m = manifesto.match(re);
