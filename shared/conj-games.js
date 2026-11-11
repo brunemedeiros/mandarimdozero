@@ -344,7 +344,10 @@ function createConjGames({ games, soon = [], speak, ids, isLocked, onLocked, lan
       const i = s.indexOf(it.clue);
       return i < 0 ? esc(s) : esc(s.slice(0, i)) + `<mark class="cg-clue">${esc(it.clue)}</mark>` + esc(s.slice(i + it.clue.length));
     };
-    const gap = filled ? `<span class="cg-fill">${esc(it[it.ans])}</span>` : '<span class="cg-blank" aria-label="___">&nbsp;</span>';
+    // Pista DENTRO da resposta ("Je connaissais déjà", "prenait toujours"): marcada dentro da forma preenchida (2026-11-11).
+    const ansTxt = String(it[it.ans]), inAns = filled && it.clue && !it.before.includes(it.clue) && !it.after.includes(it.clue) ? ansTxt.indexOf(it.clue) : -1;
+    const fillHTML = inAns < 0 ? esc(ansTxt) : esc(ansTxt.slice(0, inAns)) + `<mark class="cg-clue">${esc(it.clue)}</mark>` + esc(ansTxt.slice(inAns + it.clue.length));
+    const gap = filled ? `<span class="cg-fill">${fillHTML}</span>` : '<span class="cg-blank" aria-label="___">&nbsp;</span>';
     // Espaço antes de ? ! : ; (tipografia francesa) vira inseparável: o sinal não cai sozinho na linha de baixo.
     return `<p class="cg-sentence" lang="${lang}">${mark(it.before)}${gap}${mark(it.after)}</p>`.replace(/ ([?!:;])/g, '\u00a0$1');
   }

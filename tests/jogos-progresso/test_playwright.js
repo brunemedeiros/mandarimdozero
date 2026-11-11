@@ -336,6 +336,17 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
     check(L + ' "Não sei" volta no Corrija o erro com a lacuna vazia e o campo', dkOwn && dkOwn.wrongForm === null && dkOwn.blank && dkOwn.input, dkOwn);
     await page.click('#cg-to-list');
 
+    // Pista DENTRO da resposta ("Je connaissais déjà", "prenait toujours") aparece marcada na forma preenchida.
+    const pis = [];
+    for (const id of [14, 15]){
+      await page.evaluate(id => { const g = CONJ_GAMES.find(x => x.id === 'pc-imparfait'); CONJ_GAMES_UI.startReview([{ g, it: g.items.find(i => i.id === id) }]); }, id);
+      await page.waitForSelector('#cg-input');
+      await page.evaluate(() => { const it = CONJ_GAMES_UI.state.order[0]; const inp = document.getElementById('cg-input'); inp.value = it[it.ans]; inp.dispatchEvent(new Event('input')); document.getElementById('cg-check').click(); });
+      pis.push(await page.evaluate(() => (document.querySelector('.cg-sentence .cg-fill .cg-clue') || {}).textContent || ''));
+      await page.click('#conj-game-wrap .activity-exit-btn');
+    }
+    check(L + ' pista dentro da resposta fica marcada (déjà, toujours)', pis.join() === 'déjà,toujours', pis);
+
     // Recomeçar o curso lista os Jogos no que volta para o zero.
     const restartKey = await page.evaluate(() => t('restart.zero.games'));
     check(L + ' texto do Recomeçar existe no idioma do site', restartKey && restartKey !== 'restart.zero.games' && (lang === 'en' ? !/Jogos/.test(restartKey) : /Jogos/.test(restartKey)), restartKey);
