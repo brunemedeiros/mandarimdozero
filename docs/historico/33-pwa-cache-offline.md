@@ -56,3 +56,27 @@ recebe os arquivos novos; o conserto 2 é o que garante isso no recarregar manua
 Sem internet, só a caixa do Ranking fica em "Preparando tudo..." (precisa do Supabase), o esperado.
 
 Não conferido no ar: o momento logo depois de uma publicação (exige outra publicação; coberto pelo teste) e celular de verdade.
+
+## Depois da conferência: logada sem internet e a decisão "só com internet" (2026-11-11)
+
+Teste da autora no celular (modo avião, logada): app aberto pela metade, trilha vazia. Reproduzido no ar com sessão simulada:
+- **Transição de versão (uma vez só):** o celular trocou para a versão nova logo depois da publicação e a versão antiga só tinha 18
+  arquivos para passar adiante; sem internet, `shared/*` vinha como página. Some depois de uma abertura com internet.
+- **Logada, ~40 s de espera:** a biblioteca do Supabase (`@supabase/supabase-js@2` pelo CDN, hoje 2.119.0, versão que muda sozinha)
+  repete cada leitura que falha 4 vezes (esperas de 1, 2 e 4 s), e o app soma as próprias repetições (`loadState`, 3 tentativas).
+- **Depois da espera:** "0 de 92 lições" com o aviso "ainda confirmando seu progresso". Não há cópia local do progresso;
+  `progressLoadedOk` impede salvar, então nada se perde, mas estudar sem internet não conta.
+
+Decisão da autora: **por enquanto o site só funciona com internet**. Sem internet, a abertura mostra a tela comum
+`shared/offline.html` ("Você está sem internet. Conecte-se para usar o site.", botão "Tentar de novo"; em inglês no site em
+inglês; cor de cada site, claro e escuro), que volta sozinha para o app no evento `online`. O SW guarda a tela na instalação
+(`OFFLINE_URL`) e, para arquivo sem cópia, devolve erro de rede em vez da página. Mantidos: revalidação (304), cópia na
+instalação, `paraAPagina` e `CACHE_PREFIX`.
+
+Testes: `tests/pwa-cache/test_playwright.js` 21/21 (8 itens novos de fr e zh: tela em pt-BR e en, "Tentar de novo", erro de rede, volta
+sozinho); contra a `main` sem a tela, 13/21. `test_aviso_versao_playwright.js` 14/14; `tests/cores-marca/` 96/96 (36+8+20+6+26);
+`tests/paridade-sites/test_css_compartilhado.js` 5/5. Capturas fr e zh, claro e escuro, 390 px e 1280 px: botão `--brand-fill` com
+branco, 48 px de altura, sem rolagem lateral, 0 erro de página.
+
+Adiados pela autora (registrados no "Estado atual" do `CLAUDE.md`): aviso/estudo sem internet para quem está logada e fixar a versão da
+biblioteca do Supabase (caminho com menos risco: CDN com versão fixa e guardada pelo SW, sem mexer nos 127 testes que interceptam o CDN).

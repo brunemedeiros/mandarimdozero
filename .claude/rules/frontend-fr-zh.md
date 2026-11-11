@@ -39,6 +39,8 @@ paths:
   `CACHE_PREFIX`; a instalação busca de novo o que a versão anterior guardava (abre sem internet logo depois de publicar). No teste com
   SW ligado, nunca usar `route()` (desliga o cache HTTP do SW). O SW entrega à página com `Cache-Control: no-cache` (`paraAPagina`), senão
   recarregar a aba mistura `index.html` novo com scripts antigos. Guarda: `tests/pwa-cache/test_playwright.js`.
+- **Por enquanto o site só funciona com internet** (decisão da autora, 2026-11-11): sem internet, abrir o site mostra a tela comum
+  `shared/offline.html` (pré-cache de cada SW, `OFFLINE_URL`), em pt-BR ou en; nunca o app pela metade. Site novo põe `OFFLINE_URL` no SW.
 - Diálogo: palavras do vocabulário da unidade em COR + negrito (`.dlg-new`, `var(--seal-red-dark)`), nunca sublinhado
   (sublinhado = pontuação faltando/bloco no lugar errado). Transcrição (pinyin) também destacada (`.dlg-new-py`,
   alinhada por busca, `dlgHighlightPinyin`). zh: pinyin acima do hanzi. Idioma novo reutiliza essas classes.

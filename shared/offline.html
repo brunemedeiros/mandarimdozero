@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<!--
+  Tela "Sem internet" (decisão da autora, 2026-11-11: por enquanto o site só funciona com internet).
+  O service worker de cada site (fr/service-worker.js, zh/service-worker.js) guarda esta página na instalação e a entrega
+  no lugar do app quando uma abertura (navegação) não consegue falar com o servidor. Como ela é servida no endereço que a
+  pessoa abriu (ex.: /fr/index.html), os caminhos relativos daqui valem a partir da pasta do site: ./logo/... é o logo do
+  site e ../shared/... a pasta comum. Volta sozinha para o app quando a internet volta (evento 'online') ou no botão.
+  Textos: idioma do site guardado em localStorage['ui-language'] (o mesmo de shared/i18n/i18n.js): 'en' = inglês, o
+  resto = português do Brasil (padrão do site). Tema: localStorage['app_theme'] (shared/theme.js) ou o do sistema.
+-->
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Sem internet · Prof. Brune</title>
+<link rel="stylesheet" href="../shared/fonts/nunito.css">
+<script>
+  (function(){
+    var root = document.documentElement;
+    root.setAttribute('data-site', /\/zh(\/|$)/.test(location.pathname) ? 'zh' : 'fr');
+    try { var t = localStorage.getItem('app_theme'); if (t === 'dark' || t === 'light') root.setAttribute('data-theme', t); } catch (e) {}
+  })();
+</script>
+<style>
+  :root{
+    --brand-fill: #2879B3; --brand-fill-hover: #1D5A82; --on-brand-fill: #FFFFFF;
+    --ink: #201335; --ink-soft: #5C4E73; --paper: #FAF5EA; --paper-warm: #F0E8D8; --paper-line: #E1D6C0;
+  }
+  :root[data-site="zh"]{
+    --brand-fill: #C0231F; --brand-fill-hover: #8E1915; --on-brand-fill: #FFFFFF;
+    --ink: #211714; --ink-soft: #5C4A3F; --paper: #FBF4E8; --paper-warm: #F3E6CE; --paper-line: #E2CFA6;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){ --ink: #EDE6F5; --ink-soft: #C5B8D9; --paper: #17121F; --paper-warm: #201A2C; --paper-line: #362C42; }
+    :root[data-site="zh"]:not([data-theme="light"]){ --ink: #F1E4D6; --ink-soft: #C7B5A5; --paper: #1B1512; --paper-warm: #251C17; --paper-line: #3C2F27; }
+  }
+  :root[data-theme="dark"]{ --ink: #EDE6F5; --ink-soft: #C5B8D9; --paper: #17121F; --paper-warm: #201A2C; --paper-line: #362C42; }
+  :root[data-site="zh"][data-theme="dark"]{ --ink: #F1E4D6; --ink-soft: #C7B5A5; --paper: #1B1512; --paper-warm: #251C17; --paper-line: #3C2F27; }
+
+  *{ box-sizing: border-box; }
+  html, body{ margin: 0; min-height: 100%; }
+  body{
+    background: var(--paper); color: var(--ink);
+    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px 16px;
+  }
+  .card{
+    width: 100%; max-width: 420px; text-align: center;
+    background: var(--paper-warm); border: 1px solid var(--paper-line); border-radius: 20px; padding: 32px 24px;
+  }
+  .logo{ width: 64px; height: 64px; display: block; margin: 0 auto 16px; }
+  h1{ font-size: 22px; font-weight: 900; margin: 0 0 8px; }
+  p{ margin: 0 0 8px; font-size: 16px; line-height: 1.5; }
+  .soft{ color: var(--ink-soft); font-size: 14px; margin-bottom: 24px; }
+  button{
+    background: var(--brand-fill); color: var(--on-brand-fill);
+    border: 0; border-radius: 14px; padding: 12px 24px; min-height: 48px; min-width: 180px;
+    font: inherit; font-weight: 800; font-size: 16px; cursor: pointer;
+  }
+  button:hover{ background: var(--brand-fill-hover); }
+  button:focus-visible{ outline: 3px solid var(--ink); outline-offset: 3px; }
+</style>
+</head>
+<body>
+  <main class="card" role="alert">
+    <img class="logo" src="./logo/ativo3-icone.svg" alt="" onerror="this.remove()">
+    <h1 id="titulo">Você está sem internet</h1>
+    <p id="texto">Conecte-se para usar o site.</p>
+    <p class="soft" id="volta">Esta tela volta sozinha para o site quando a internet voltar.</p>
+    <button type="button" id="tentar">Tentar de novo</button>
+  </main>
+<script>
+  (function(){
+    var TEXTOS = {
+      'pt-BR': { title: 'Sem internet · Prof. Brune', titulo: 'Você está sem internet', texto: 'Conecte-se para usar o site.',
+                 volta: 'Esta tela volta sozinha para o site quando a internet voltar.', tentar: 'Tentar de novo' },
+      'en': { title: 'Offline · Prof. Brune', titulo: "You're offline", texto: 'Connect to the internet to use the site.',
+              volta: "This screen goes back to the site on its own when you're back online.", tentar: 'Try again' }
+    };
+    var lang = 'pt-BR';
+    try { if ((localStorage.getItem('ui-language') || '').toLowerCase() === 'en') lang = 'en'; } catch (e) {}
+    var t = TEXTOS[lang];
+    document.documentElement.lang = lang;
+    document.title = t.title;
+    ['titulo', 'texto', 'volta', 'tentar'].forEach(function(id){ document.getElementById(id).textContent = t[id]; });
+    function voltar(){ location.reload(); }
+    document.getElementById('tentar').addEventListener('click', voltar);
+    window.addEventListener('online', voltar);
+  })();
+</script>
+</body>
+</html>
