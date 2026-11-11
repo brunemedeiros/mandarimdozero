@@ -79,6 +79,10 @@ console.log('== par informal / formal em duas telas e "Relacione os pares" (deci
   check('cartão em duas telas (forma 0 e 1) e "Relacione" válidos: nenhum problema', problemas(r).length === 0, problemas(r));
   check('cartão em duas telas sem o registro é acusado', acusa(x => { comPar(x); delete tela(x, 'p1').registro; }, 'numa tela só ou em duas'));
   check('formas fora de ordem (formal antes do informal) são acusadas', acusa(x => { comPar(x); tela(x, 'p0').forma = 1; tela(x, 'p1').forma = 0; }, 'numa tela só ou em duas'));
+  check('registro diferente de informal ou formal é acusado (decisão 361)', acusa(x => { comPar(x); tela(x, 'p1').registro = 'formel'; }, 'registro deve ser informal ou formal'));
+  check('"com quem": texto padrão pelo registro, e o da tela quando houver (decisão 361)',
+    L.comQuem({ registro: 'informal' }) === L.COM_QUEM_PADRAO.informal && L.comQuem({ registro: 'formal' }) === L.COM_QUEM_PADRAO.formal
+    && L.comQuem({ registro: 'formal', com_quem: pt('Com várias pessoas') })['pt-BR'] === 'Com várias pessoas');
   check('"Relacione" com 2 pares é acusado', acusa(x => { comPar(x); tela(x, 'rel').pares.pop(); }, '"Relacione" com menos de 3 pares'));
   check('"Relacione" com tradução repetida é acusado', acusa(x => { comPar(x); tela(x, 'rel').pares[1][1] = 'você (informal)'; }, 'item repetido'));
 }

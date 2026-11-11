@@ -309,7 +309,11 @@
       "pt-BR": "o senhor, a senhora / vocês",
       "en": null
      },
-     "registro": "formal"
+     "registro": "formal",
+     "com_quem": {
+      "pt-BR": "Com quem você trata por senhor ou senhora, e com várias pessoas",
+      "en": null
+     }
     },
     {
      "id": "u2-ex-vous",

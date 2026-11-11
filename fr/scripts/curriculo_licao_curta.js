@@ -10,6 +10,16 @@ const ETAPAS_DIALOGO = ['dialogo_cena', 'dialogo_ouvir', 'dialogo_ler', 'dialogo
 
 const licoesComTelas = R => R.licoes.filter(l => l.id !== 'checkpoint');
 
+// Par informal / formal em duas telas (decisão 360): no centro da tela, embaixo da tradução, vai com quem se usa cada forma
+// (decisão 361; a etiqueta só no topo passava batida). Texto padrão por registro; a tela pode trazer o seu em `com_quem`
+// (limite em curriculo_tamanho_textos.js).
+const REGISTROS = ['informal', 'formal'];
+const COM_QUEM_PADRAO = {
+  informal: { 'pt-BR': 'Com amigos e família', en: null },
+  formal: { 'pt-BR': 'Com quem você trata por senhor ou senhora', en: null },
+};
+const comQuem = t => t.com_quem || COM_QUEM_PADRAO[t.registro] || null;
+
 // Devolve a lista de problemas (texto) das telas do rascunho R. Vazia = tudo certo.
 function conferirTelas(R){
   const problemas = [];
@@ -44,6 +54,9 @@ function conferirTelas(R){
       if (t.tipo === 'frase'){
         confere(R.frases_na_frase.some(f => f.fr === t.frase), `tela ${t.id}: frase fora do frases_na_frase`);
         if (t.forma !== undefined) confere([0, 1].includes(t.forma) && t.frase.split(' / ').length === 2 && t.traducao && t.registro, `tela ${t.id}: frase em par mostrada por forma sem forma 0/1, tradução ou registro`);
+      }
+      if (t.forma !== undefined && (t.tipo === 'cartao' || t.tipo === 'frase')){
+        confere(REGISTROS.includes(t.registro), `tela ${t.id}: registro deve ser informal ou formal`);
       }
       if (t.tipo === 'relacionar'){
         const esq = t.pares.map(x => x[0]), dir = t.pares.map(x => x[1]);
@@ -163,4 +176,4 @@ function textosDasTelas(R, M, mapa, unidadeId){
   return casos;
 }
 
-module.exports = { ETAPAS_DIALOGO, conferirTelas, posicaoNoFimDaLicao, textosDasTelas };
+module.exports = { ETAPAS_DIALOGO, COM_QUEM_PADRAO, comQuem, conferirTelas, posicaoNoFimDaLicao, textosDasTelas };

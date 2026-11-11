@@ -11,6 +11,7 @@ const fs = require('fs');
 const path = require('path');
 const raiz = path.resolve(__dirname, '../../../..');
 const { execFileSync } = require('child_process');
+const L = require('../../../../fr/scripts/curriculo_licao_curta.js');
 const fonte = fs.readFileSync(path.join(__dirname, 'fonte.html'), 'utf8');
 const RASCUNHOS = [
   { unidade: 1, caminho: 'docs/i18n/curriculo/piloto-m1/A1-1/A1-1.json' },
@@ -64,7 +65,7 @@ function construirTelas(R, unidade, tolerante){
         const c = cartao(t.cartao);
         if (t.forma !== undefined){ // cartão em par mostrado uma forma por tela (decisão 360)
           const f = c.fr.split(' / ')[t.forma];
-          return { ...base, type: 'item', kind: 'Palavra nova', fr: f, tr: pt(t.traducao), role: pt(c.papel_na_funcao) || undefined, reg: t.registro, audios: [[f, f]] };
+          return { ...base, type: 'item', kind: 'Palavra nova', fr: f, tr: pt(t.traducao), role: pt(c.papel_na_funcao) || undefined, reg: t.registro, quem: pt(L.comQuem(t)), audios: [[f, f]] };
         }
         return { ...base, type: 'item', kind: 'Palavra nova', fr: c.fr, tr: pt(c.traducao), role: pt(c.papel_na_funcao) || undefined,
           audios: t.audios || c.fr.split(' / ').map(x => [x, x]) };
@@ -72,7 +73,7 @@ function construirTelas(R, unidade, tolerante){
       case 'frase': {
         const f = frase(t.frase);
         const formas = f.fr.split(' / ');
-        if (t.forma !== undefined) return { ...base, type: 'item', kind: 'Frase nova', fr: formas[t.forma], tr: pt(t.traducao), role: pt(t.papel) || undefined, reg: t.registro, audios: [[formas[t.forma], '']] };
+        if (t.forma !== undefined) return { ...base, type: 'item', kind: 'Frase nova', fr: formas[t.forma], tr: pt(t.traducao), role: pt(t.papel) || undefined, reg: t.registro, quem: pt(L.comQuem(t)), audios: [[formas[t.forma], '']] };
         // Frase em par numa tela só (informal / formal, decisão 359): um áudio para cada forma.
         return { ...base, type: 'item', kind: 'Frase nova', fr: f.fr, tr: f['pt-BR'], role: pt(t.papel) || undefined,
           audios: formas.length > 1 ? formas.map((x, k) => [x, k ? 'formal' : 'informal']) : [[f.fr, '']] };
