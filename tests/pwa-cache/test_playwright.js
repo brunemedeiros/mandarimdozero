@@ -6,7 +6,9 @@
 //   2. versão nova continua chegando: um arquivo alterado no servidor (ETag novo) chega na próxima abertura, vai para o
 //      cache do SW e o app usa a versão nova (mesmo com o arquivo ainda "fresco" no cache HTTP, max-age=600);
 //   3. um service-worker.js novo (outro __BUILD_ID__) é instalado e assume (controllerchange), como no deploy;
-//   4. sem internet, o app abre do cache do SW.
+//   4. sem internet, abrir o site mostra a tela "Sem internet" (shared/offline.html, decisão da autora de 2026-11-11: por
+//      enquanto o site só funciona com internet), em pt-BR ou em inglês conforme o idioma do site, e volta sozinho ao app
+//      quando a internet volta; um arquivo sem cópia guardada vira erro de rede, nunca a página no lugar do script.
 //   6. recarregar a mesma aba (puxar para baixo, F5) logo depois de uma publicação traz tudo novo, sem misturar
 //      index.html novo com scripts antigos guardados na memória da aba (max-age=600 do GitHub Pages);
 //   5. no mesmo endereço (app.profbrune.com.br/fr e /zh), publicar um site não apaga o cache do outro.
@@ -87,16 +89,30 @@ async function rodar(browser, site){
   r.swNovoAssumiu = await page.evaluate(() => window.__trocou > 0);
   r.cacheNovo = await page.evaluate(async () => (await caches.keys()).filter(k => k.includes('deploy2')).length);
   // sem internet LOGO depois da publicação (o SW novo acabou de assumir, sem nenhuma abertura com internet no meio):
-  // é o caso mais difícil, o cache novo precisa já ter tudo o que o app usa
+  // a tela "Sem internet" precisa já estar no cache novo
   r.arquivosNoCacheNovo = await page.evaluate(async () => { for (const k of await caches.keys()) if (k.includes('deploy2')) return (await (await caches.open(k)).keys()).length; return 0; });
   await ctx.setOffline(true);
   const errosOffline = [];
   await page.close(); page = await ctx.newPage();
   page.on('pageerror', e => errosOffline.push(String(e).slice(0, 120)));
   await page.goto(base + 'index.html').catch(e => errosOffline.push(e.message.slice(0, 120)));
-  r.offline = await page.waitForFunction(() => typeof LANG_HOOKS === 'object' && document.readyState === 'complete', null, { timeout: 20000 }).then(() => true).catch(() => false);
+  const tela = () => page.evaluate(() => ({ titulo: (document.querySelector('h1') || {}).textContent || '', botao: (document.getElementById('tentar') || {}).textContent || '', app: typeof LANG_HOOKS === 'object' })).catch(() => ({}));
+  await page.waitForSelector('#tentar', { timeout: 20000 }).catch(() => {});
+  r.telaPt = await tela();
+  // arquivo que a página pede e não está guardado: erro de rede, não a página no lugar
+  r.arquivoSemCopia = await page.evaluate(async () => { try { const x = await fetch('../shared/nao-existe-' + Date.now() + '.js'); return 'veio ' + x.status + ' ' + (x.headers.get('content-type') || ''); } catch (e) { return 'erro de rede'; } });
+  // site em inglês
+  await page.evaluate(() => localStorage.setItem('ui-language', 'en'));
+  await page.reload().catch(() => {}); await page.waitForSelector('#tentar', { timeout: 20000 }).catch(() => {});
+  r.telaEn = await tela();
+  await page.evaluate(() => localStorage.removeItem('ui-language'));
+  // "Tentar de novo" ainda sem internet: continua na tela
+  await page.click('#tentar').catch(() => {}); await page.waitForSelector('#tentar', { timeout: 20000 }).catch(() => {});
+  r.tentarSemInternet = await tela();
   r.errosOffline = errosOffline.slice(0, 3);
+  // a internet volta: a tela volta sozinha para o app (evento 'online')
   await ctx.setOffline(false);
+  r.voltouSozinho = await page.waitForFunction(() => typeof LANG_HOOKS === 'object' && document.readyState === 'complete', null, { timeout: 30000 }).then(() => true).catch(() => false);
   await ctx.close(); server.close();
   return r;
 }
@@ -165,7 +181,11 @@ async function convivencia(browser){
       check(`${site}: service-worker.js novo (deploy) instala e assume, com cache novo`, r.swNovoAssumiu && r.cacheNovo === 1, r);
       const rr = await recarregarDepoisDePublicar(browser, site);
       check(`${site}: recarregar a aba logo depois de publicar traz index.html, content.js e shared/ novos (sem misturar versões)`, rr.html && rr.content && rr.shared, rr);
-      check(`${site}: sem internet logo depois da publicação, abre do cache (sem erro de script)`, r.offline && r.errosOffline.length === 0, r);
+      check(`${site}: sem internet (logo depois da publicação), abre a tela "Sem internet" em pt-BR, sem o app e sem erro`, r.telaPt.titulo === 'Você está sem internet' && r.telaPt.botao === 'Tentar de novo' && !r.telaPt.app && r.errosOffline.length === 0, r);
+      check(`${site}: tela "Sem internet" em inglês no site em inglês`, r.telaEn.titulo === "You're offline" && r.telaEn.botao === 'Try again', r.telaEn);
+      check(`${site}: "Tentar de novo" sem internet continua na tela`, r.tentarSemInternet.botao === 'Tentar de novo', r.tentarSemInternet);
+      check(`${site}: arquivo sem cópia guardada vira erro de rede (nunca a página no lugar do script)`, r.arquivoSemCopia === 'erro de rede', r.arquivoSemCopia);
+      check(`${site}: a internet volta e a tela volta sozinha para o app`, r.voltouSozinho, r);
     }
     check('fr e zh no mesmo endereço: publicar o zh não apaga o cache do fr (nem o contrário)', await convivencia(browser), undefined);
   } finally { await browser.close(); }

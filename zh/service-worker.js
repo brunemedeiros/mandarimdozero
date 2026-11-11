@@ -15,7 +15,11 @@
 const BUILD_ID = '__BUILD_ID__';
 const CACHE_PREFIX = 'chines-com-prof-brune-';
 const CACHE_NAME = CACHE_PREFIX + BUILD_ID;
+// Tela "Sem internet" (decisão da autora, 2026-11-11: por enquanto o site só funciona com internet). Comum a todos os
+// sites; entregue no lugar do app quando uma abertura não consegue falar com o servidor (ver o 'fetch' abaixo).
+const OFFLINE_URL = '../shared/offline.html';
 const PRECACHE_URLS = [
+  OFFLINE_URL,
   './',
   './index.html',
   './app.js',
@@ -95,7 +99,12 @@ self.addEventListener('fetch', (event) => {
         caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
         return paraAPagina(response);
       })
-      .catch(() => caches.match(event.request).then((cached) => cached || caches.match('./index.html')))
+      // Sem internet: abrir o site (navegação) mostra a tela "Sem internet", nunca o app pela metade (2026-11-11: logada,
+      // o app esperava ~40 s pelo servidor e mostrava a trilha zerada). Arquivo pedido por uma página já aberta: a cópia
+      // guardada, se houver; senão erro de rede (antes ia a página no lugar do script, "Unexpected token '<'").
+      .catch(() => (event.request.mode === 'navigate'
+        ? caches.match(OFFLINE_URL)
+        : caches.match(event.request)).then((cached) => cached || Response.error()))
   );
 });
 
