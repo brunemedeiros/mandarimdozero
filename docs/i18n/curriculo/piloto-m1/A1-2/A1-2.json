@@ -147,11 +147,7 @@
    "licao": "nome-e-ser",
    "origem": "novo",
    "muda": "novo (lição de pronúncia, decisão 108)",
-   "frase_do_cartao": "nova-ecrit",
-   "papel_na_funcao": {
-    "pt-BR": "Pergunta",
-    "en": null
-   }
+   "frase_do_cartao": "nova-ecrit"
   },
   {
    "ordem": 9,
@@ -296,7 +292,7 @@
       "en": null
      },
      "explicacao": {
-      "pt-BR": "<b>Tu</b> é o \"você\" informal: amigos, família, crianças.",
+      "pt-BR": "<b>Tu</b> é o \"você\" informal: com colegas, amigos, família, crianças e jovens da sua idade.",
       "en": null
      }
     },
@@ -306,12 +302,12 @@
      "cartao": "tu / vous",
      "forma": 1,
      "traducao": {
-      "pt-BR": "o senhor, a senhora / vocês",
+      "pt-BR": "o senhor, a senhora",
       "en": null
      },
      "registro": "formal",
-     "com_quem": {
-      "pt-BR": "Com quem você trata por senhor ou senhora, e com várias pessoas",
+     "traducao_plural": {
+      "pt-BR": "vocês",
       "en": null
      }
     },
@@ -391,11 +387,7 @@
     {
      "id": "u2-frase-comment",
      "tipo": "frase",
-     "frase": "Comment tu t'appelles ?",
-     "papel": {
-      "pt-BR": "Pergunta",
-      "en": null
-     }
+     "frase": "Comment tu t'appelles ?"
     },
     {
      "id": "u2-nota-tappelles",
@@ -738,11 +730,7 @@
     {
      "id": "u2-frase-ecrit",
      "tipo": "frase",
-     "frase": "Dubois ? Ça s'écrit comment ?",
-     "papel": {
-      "pt-BR": "Pergunta",
-      "en": null
-     }
+     "frase": "Dubois ? Ça s'écrit comment ?"
     },
     {
      "id": "u2-l2-montar",
@@ -822,11 +810,7 @@
     {
      "id": "u2-frase-etre",
      "tipo": "frase",
-     "frase": "Tu es français ?",
-     "papel": {
-      "pt-BR": "Pergunta",
-      "en": null
-     }
+     "frase": "Tu es français ?"
     },
     {
      "id": "u2-nota-tes",

@@ -10,7 +10,6 @@ const LIMITES = {
   painelComErro: 150, // incentivo do erro + explicação, como o aluno lê quando erra
   falaFinal: 70,      // fala da professora na tela final
   nota: 340,          // texto da nota em tela própria (sem os exemplos)
-  comQuem: 70,        // com quem se usa a forma, no centro da tela do par informal / formal (decisão 361)
 };
 
 function semTags(html){ return String(html || '').replace(/<[^>]+>/g, ''); }
@@ -23,7 +22,6 @@ function textosLongos(rascunho, limites = LIMITES){
   for (const licao of rascunho.licoes || []){
     for (const t of licao.telas || []){
       if (t.tipo === 'abertura') confere(t.id, 'abertura', tamanho(t.objetivo));
-      if (t.com_quem) confere(t.id, 'comQuem', tamanho(t.com_quem));
       if (t.tipo === 'dialogo_cena') confere(t.id, 'abertura', tamanho(t.foco)); // a professora apresenta a cena (decisão 353)
       if ((t.tipo === 'fim' || t.tipo === 'dialogo_fim') && t.fala) confere(t.id, 'falaFinal', tamanho(t.fala));
       if (t.tipo === 'dialogo_papel'){ // "sua vez" (decisão 354): a situação como abertura, cada dica como painel

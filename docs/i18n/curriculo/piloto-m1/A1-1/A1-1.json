@@ -107,11 +107,7 @@
    "licao": "cortesia-e-como-vai",
    "origem": "novo",
    "muda": "novo (decisão 313)",
-   "frase_do_cartao": "nova-vous-allez-bien",
-   "papel_na_funcao": {
-    "pt-BR": "Pergunta",
-    "en": null
-   }
+   "frase_do_cartao": "nova-vous-allez-bien"
   },
   {
    "ordem": 6,
@@ -567,7 +563,7 @@
       "en": null
      },
      "explicacao": {
-      "pt-BR": "<b>Tu vas bien ?</b> é do informal: amigos, família, gente da mesma idade.",
+      "pt-BR": "<b>Tu vas bien ?</b> é a forma informal: com colegas, amigos, família e jovens da sua idade.",
       "en": null
      }
     },
@@ -590,7 +586,11 @@
       "pt-BR": "o senhor (a senhora) está bem?",
       "en": null
      },
-     "registro": "formal"
+     "registro": "formal",
+     "traducao_plural": {
+      "pt-BR": "vocês estão bem?",
+      "en": null
+     }
     },
     {
      "id": "l2-ex-tuvas",
@@ -672,7 +672,7 @@
       "en": null
      },
      "explicacao": {
-      "pt-BR": "<b>Et toi ?</b> é do informal: amigos e família. Com um senhor, vem a forma formal.",
+      "pt-BR": "<b>Toi</b> é o \"você\" informal: com colegas, amigos, família e jovens da sua idade. Com um senhor, <b>et vous ?</b>",
       "en": null
      }
     },
@@ -695,7 +695,11 @@
       "pt-BR": "e o senhor? e a senhora?",
       "en": null
      },
-     "registro": "formal"
+     "registro": "formal",
+     "traducao_plural": {
+      "pt-BR": "e vocês?",
+      "en": null
+     }
     },
     {
      "id": "l2-ex-ettoi-formal",
@@ -977,7 +981,7 @@
       "en": null
      },
      "explicacao": {
-      "pt-BR": "<b>S'il te plaît</b> é do informal: amigos e família.",
+      "pt-BR": "<b>S'il te plaît</b> é a forma informal: com colegas, amigos, família e jovens da sua idade.",
       "en": null
      }
     },
@@ -1116,7 +1120,7 @@
       "en": null
      },
      "explicacao": {
-      "pt-BR": "<b>Excuse-moi</b> é do informal: amigos e família.",
+      "pt-BR": "<b>Excuse-moi</b> é a forma informal: com colegas, amigos, família e jovens da sua idade.",
       "en": null
      }
     },

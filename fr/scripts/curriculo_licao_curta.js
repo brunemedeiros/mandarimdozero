@@ -10,15 +10,17 @@ const ETAPAS_DIALOGO = ['dialogo_cena', 'dialogo_ouvir', 'dialogo_ler', 'dialogo
 
 const licoesComTelas = R => R.licoes.filter(l => l.id !== 'checkpoint');
 
-// Par informal / formal em duas telas (decisão 360): no centro da tela, embaixo da tradução, vai com quem se usa cada forma
-// (decisão 361; a etiqueta só no topo passava batida). Texto padrão por registro; a tela pode trazer o seu em `com_quem`
-// (limite em curriculo_tamanho_textos.js).
+// Par informal / formal em duas telas (decisão 360): o registro vai junto da tradução, não numa etiqueta nem num quadro
+// (decisão 361, a dona: tira o foco da palavra). A forma formal com vous pode trazer o sentido de "vocês" em `traducao_plural`.
+// Ex.: "Qual é a sua nacionalidade? (formal) ou Qual é a nacionalidade de vocês?". Função pura; null se faltar a tradução no idioma.
 const REGISTROS = ['informal', 'formal'];
-const COM_QUEM_PADRAO = {
-  informal: { 'pt-BR': 'Com amigos e família', en: null },
-  formal: { 'pt-BR': 'Com quem você trata por senhor ou senhora', en: null },
-};
-const comQuem = t => t.com_quem || COM_QUEM_PADRAO[t.registro] || null;
+const OU = { 'pt-BR': 'ou', en: 'or' };
+function traducaoNaTela(t, idioma = 'pt-BR'){
+  const tr = t.traducao && t.traducao[idioma];
+  if (!tr) return null;
+  const plural = t.traducao_plural && t.traducao_plural[idioma];
+  return `${tr} (${t.registro})` + (plural ? ` ${OU[idioma]} ${plural}` : '');
+}
 
 // Devolve a lista de problemas (texto) das telas do rascunho R. Vazia = tudo certo.
 function conferirTelas(R){
@@ -33,6 +35,12 @@ function conferirTelas(R){
     confere(l.inclui_dialogo === (seus.length > 0), `lição ${l.id}: inclui_dialogo não bate com os diálogos dela`);
     confere(JSON.stringify(nasTelas) === JSON.stringify(seus), `lição ${l.id}: as telas não trazem exatamente os diálogos dela`);
   }
+
+  // Pergunta não leva rótulo "Pergunta": o "?" já diz (decisão 361, a dona). Continuam Resposta, Pedido, Fala e o "Pergunta e
+  // resposta" do ça va (a mesma forma serve para as duas, e não tem "?").
+  const soPergunta = x => ((x || {})['pt-BR'] || '') === 'Pergunta';
+  for (const c of R.cartoes) confere(!soPergunta(c.papel_na_funcao), `cartão "${c.fr}": rótulo de pergunta (o "?" já diz)`);
+  for (const l of comTelas) for (const t of l.telas || []) confere(!soPergunta(t.papel), `tela ${t.id}: rótulo de pergunta (o "?" já diz)`);
 
   // Lições de cartões: cada cartão uma vez, na ordem; nota depois do gatilho; exercícios coerentes; "Complete" alternando (decisão 342).
   for (const l of comTelas.filter(l => l.tipo !== 'dialogos')){
@@ -57,6 +65,7 @@ function conferirTelas(R){
       }
       if (t.forma !== undefined && (t.tipo === 'cartao' || t.tipo === 'frase')){
         confere(REGISTROS.includes(t.registro), `tela ${t.id}: registro deve ser informal ou formal`);
+        confere(!t.traducao_plural || t.forma === 1, `tela ${t.id}: o "vocês" (traducao_plural) só vai na forma formal`);
       }
       if (t.tipo === 'relacionar'){
         const esq = t.pares.map(x => x[0]), dir = t.pares.map(x => x[1]);
@@ -176,4 +185,4 @@ function textosDasTelas(R, M, mapa, unidadeId){
   return casos;
 }
 
-module.exports = { ETAPAS_DIALOGO, COM_QUEM_PADRAO, comQuem, conferirTelas, posicaoNoFimDaLicao, textosDasTelas };
+module.exports = { ETAPAS_DIALOGO, conferirTelas, traducaoNaTela, posicaoNoFimDaLicao, textosDasTelas };

@@ -21,11 +21,7 @@
     "en": null
    },
    "licao": "nacionalidades-2",
-   "origem": "publicado",
-   "papel_na_funcao": {
-    "pt-BR": "Pergunta",
-    "en": null
-   }
+   "origem": "publicado"
   },
   {
    "chave": "A1-9-v3",
@@ -85,11 +81,7 @@
     "en": null
    },
    "licao": "nacionalidade-e-origem",
-   "origem": "novo",
-   "papel_na_funcao": {
-    "pt-BR": "Pergunta e resposta",
-    "en": null
-   }
+   "origem": "novo"
   },
   {
    "chave": "A1-2-v5",
@@ -213,10 +205,6 @@
      "id": "u3-frase-nat",
      "tipo": "frase",
      "frase": "Quelle est ta nationalité ? / Quelle est votre nationalité ?",
-     "papel": {
-      "pt-BR": "Pergunta",
-      "en": null
-     },
      "forma": 0,
      "traducao": {
       "pt-BR": "Qual é a sua nacionalidade?",
@@ -239,7 +227,7 @@
       "en": null
      },
      "explicacao": {
-      "pt-BR": "<b>Ta</b> é do informal: colegas, amigos, família.",
+      "pt-BR": "<b>Ta</b> é o \"sua\" da forma <b>tu</b>, a informal: com colegas, amigos, família e jovens da sua idade.",
       "en": null
      }
     },
@@ -247,16 +235,16 @@
      "id": "u3-frase-nat-formal",
      "tipo": "frase",
      "frase": "Quelle est ta nationalité ? / Quelle est votre nationalité ?",
-     "papel": {
-      "pt-BR": "Pergunta",
-      "en": null
-     },
      "forma": 1,
      "traducao": {
       "pt-BR": "Qual é a sua nacionalidade?",
       "en": null
      },
-     "registro": "formal"
+     "registro": "formal",
+     "traducao_plural": {
+      "pt-BR": "Qual é a nacionalidade de vocês?",
+      "en": null
+     }
     },
     {
      "id": "u3-ex-nat-formal",
@@ -276,12 +264,12 @@
       "en": null
      },
      "explicacao": {
-      "pt-BR": "Com quem você não conhece, use o formal: <b>votre</b>.",
+      "pt-BR": "<b>Votre</b> é o \"sua\" da forma <b>vous</b>, a formal: com quem você não conhece ou trata por senhor ou senhora.",
       "en": null
      },
      "explicacao_erro": {
       "Quelle est ta nationalité ?": {
-       "pt-BR": "<b>Ta</b> é do informal. ",
+       "pt-BR": "<b>Ta</b> é o \"sua\" do informal. ",
        "en": null
       },
       "La nationalité ?": {
@@ -451,7 +439,7 @@
       ]
      ],
      "explicacao": {
-      "pt-BR": "<b>Ta</b> no informal; <b>votre</b> no formal.",
+      "pt-BR": "<b>Ta</b> é o \"sua\" do informal; <b>votre</b>, o \"sua\" do formal.",
       "en": null
      }
     },
@@ -505,10 +493,6 @@
      "id": "u3-frase-dou",
      "tipo": "frase",
      "frase": "Tu es d'où ? / Vous êtes d'où ?",
-     "papel": {
-      "pt-BR": "Pergunta",
-      "en": null
-     },
      "forma": 0,
      "traducao": {
       "pt-BR": "De onde você é?",
@@ -531,7 +515,7 @@
       "en": null
      },
      "explicacao": {
-      "pt-BR": "É do informal: amigos, família, colegas. Com quem você não conhece, vem a forma formal.",
+      "pt-BR": "<b>Tu es</b> é a forma informal: com colegas, amigos, família e jovens da sua idade. Com uma senhora, <b>vous êtes</b>.",
       "en": null
      }
     },
@@ -539,16 +523,16 @@
      "id": "u3-frase-dou-formal",
      "tipo": "frase",
      "frase": "Tu es d'où ? / Vous êtes d'où ?",
-     "papel": {
-      "pt-BR": "Pergunta",
-      "en": null
-     },
      "forma": 1,
      "traducao": {
       "pt-BR": "De onde o senhor (a senhora) é?",
       "en": null
      },
-     "registro": "formal"
+     "registro": "formal",
+     "traducao_plural": {
+      "pt-BR": "De onde vocês são?",
+      "en": null
+     }
     },
     {
      "id": "u3-ex-dou-formal",
@@ -624,10 +608,6 @@
      "id": "u3-frase-habites",
      "tipo": "frase",
      "frase": "Tu habites où ? / Vous habitez où ?",
-     "papel": {
-      "pt-BR": "Pergunta",
-      "en": null
-     },
      "forma": 0,
      "traducao": {
       "pt-BR": "Onde você mora?",
@@ -650,7 +630,7 @@
       "en": null
      },
      "explicacao": {
-      "pt-BR": "<b>Tu habites où ?</b> é do informal.",
+      "pt-BR": "<b>Tu habites</b> é a forma informal: com colegas, amigos, família e jovens da sua idade.",
       "en": null
      }
     },
@@ -658,16 +638,16 @@
      "id": "u3-frase-habites-formal",
      "tipo": "frase",
      "frase": "Tu habites où ? / Vous habitez où ?",
-     "papel": {
-      "pt-BR": "Pergunta",
-      "en": null
-     },
      "forma": 1,
      "traducao": {
       "pt-BR": "Onde o senhor (a senhora) mora?",
       "en": null
      },
-     "registro": "formal"
+     "registro": "formal",
+     "traducao_plural": {
+      "pt-BR": "Onde vocês moram?",
+      "en": null
+     }
     },
     {
      "id": "u3-ex-habites-formal",
@@ -923,10 +903,6 @@
      "id": "u3-frase-anglais",
      "tipo": "frase",
      "frase": "Tu parles anglais ? / Vous parlez anglais ?",
-     "papel": {
-      "pt-BR": "Pergunta",
-      "en": null
-     },
      "forma": 0,
      "traducao": {
       "pt-BR": "Você fala inglês?",
@@ -949,7 +925,7 @@
       "en": null
      },
      "explicacao": {
-      "pt-BR": "<b>Tu parles</b> é do informal: colegas, amigos, família. Com o chefe, o formal.",
+      "pt-BR": "<b>Tu parles</b> é a forma informal: com colegas, amigos, família e jovens da sua idade. Com o chefe, <b>vous parlez</b>.",
       "en": null
      }
     },
@@ -957,16 +933,16 @@
      "id": "u3-frase-anglais-formal",
      "tipo": "frase",
      "frase": "Tu parles anglais ? / Vous parlez anglais ?",
-     "papel": {
-      "pt-BR": "Pergunta",
-      "en": null
-     },
      "forma": 1,
      "traducao": {
       "pt-BR": "O senhor (a senhora) fala inglês?",
       "en": null
      },
-     "registro": "formal"
+     "registro": "formal",
+     "traducao_plural": {
+      "pt-BR": "Vocês falam inglês?",
+      "en": null
+     }
     },
     {
      "id": "u3-ex-anglais-formal",
@@ -1033,10 +1009,6 @@
      "id": "u3-frase-langues",
      "tipo": "frase",
      "frase": "Tu parles quelles langues ? / Vous parlez quelles langues ?",
-     "papel": {
-      "pt-BR": "Pergunta",
-      "en": null
-     },
      "forma": 0,
      "traducao": {
       "pt-BR": "Que línguas você fala?",
@@ -1059,7 +1031,7 @@
       "en": null
      },
      "explicacao": {
-      "pt-BR": "<b>Tu parles quelles langues ?</b> é do informal.",
+      "pt-BR": "<b>Tu parles</b> é a forma informal: com colegas, amigos, família e jovens da sua idade.",
       "en": null
      }
     },
@@ -1067,16 +1039,16 @@
      "id": "u3-frase-langues-formal",
      "tipo": "frase",
      "frase": "Tu parles quelles langues ? / Vous parlez quelles langues ?",
-     "papel": {
-      "pt-BR": "Pergunta",
-      "en": null
-     },
      "forma": 1,
      "traducao": {
       "pt-BR": "Que línguas o senhor (a senhora) fala?",
       "en": null
      },
-     "registro": "formal"
+     "registro": "formal",
+     "traducao_plural": {
+      "pt-BR": "Que línguas vocês falam?",
+      "en": null
+     }
     },
     {
      "id": "u3-ex-langues-formal",

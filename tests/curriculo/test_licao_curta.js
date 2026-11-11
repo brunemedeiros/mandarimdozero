@@ -62,6 +62,8 @@ check('montar sem distrator para uma fala', acusa(r => { delete tela(r, 'd5').di
 check('lacuna que não reconstrói a fala', acusa(r => { tela(r, 'd6').depois = ' ?'; }, 'lacuna não reconstrói'));
 check('"sua vez" com opção errada sem dica', acusa(r => { delete tela(r, 'd9').turnos[1].dicas['De rien !']; }, 'cada opção errada precisa de uma dica'));
 check('nota marcada como painel sem tela de exercício', acusa(r => { r.notas.push({ id: 'n2', destino: 'painel', paineis: ['nao-existe'], texto: pt('x') }); }, 'painel sem tela'));
+check('rótulo "Pergunta" em cartão ou frase é acusado (decisão 361)', acusa(r => { r.cartoes[0].papel_na_funcao = pt('Pergunta'); }, 'rótulo de pergunta')
+  && acusa(r => { tela(r, 'f').papel = pt('Pergunta'); }, 'rótulo de pergunta'));
 check('texto longo demais (decisão 352)', acusa(r => { tela(r, 'a').objetivo = pt('a'.repeat(121)); }, 'texto longo demais'));
 check('inclui_dialogo errado', acusa(r => { r.licoes[0].inclui_dialogo = true; }, 'inclui_dialogo não bate'));
 
@@ -80,9 +82,12 @@ console.log('== par informal / formal em duas telas e "Relacione os pares" (deci
   check('cartão em duas telas sem o registro é acusado', acusa(x => { comPar(x); delete tela(x, 'p1').registro; }, 'numa tela só ou em duas'));
   check('formas fora de ordem (formal antes do informal) são acusadas', acusa(x => { comPar(x); tela(x, 'p0').forma = 1; tela(x, 'p1').forma = 0; }, 'numa tela só ou em duas'));
   check('registro diferente de informal ou formal é acusado (decisão 361)', acusa(x => { comPar(x); tela(x, 'p1').registro = 'formel'; }, 'registro deve ser informal ou formal'));
-  check('"com quem": texto padrão pelo registro, e o da tela quando houver (decisão 361)',
-    L.comQuem({ registro: 'informal' }) === L.COM_QUEM_PADRAO.informal && L.comQuem({ registro: 'formal' }) === L.COM_QUEM_PADRAO.formal
-    && L.comQuem({ registro: 'formal', com_quem: pt('Com várias pessoas') })['pt-BR'] === 'Com várias pessoas');
+  check('"vocês" (traducao_plural) na forma informal é acusado', acusa(x => { comPar(x); tela(x, 'p0').traducao_plural = pt('vocês'); }, 'só vai na forma formal'));
+  check('tradução na tela: registro entre parênteses e, no formal, o "vocês" depois de "ou" (decisão 361)',
+    L.traducaoNaTela({ traducao: pt('Qual é a sua nacionalidade?'), registro: 'informal' }) === 'Qual é a sua nacionalidade? (informal)'
+    && L.traducaoNaTela({ traducao: pt('Qual é a sua nacionalidade?'), registro: 'formal', traducao_plural: pt('Qual é a nacionalidade de vocês?') })
+      === 'Qual é a sua nacionalidade? (formal) ou Qual é a nacionalidade de vocês?'
+    && L.traducaoNaTela({ traducao: pt('você'), registro: 'informal' }, 'en') === null);
   check('"Relacione" com 2 pares é acusado', acusa(x => { comPar(x); tela(x, 'rel').pares.pop(); }, '"Relacione" com menos de 3 pares'));
   check('"Relacione" com tradução repetida é acusado', acusa(x => { comPar(x); tela(x, 'rel').pares[1][1] = 'você (informal)'; }, 'item repetido'));
 }

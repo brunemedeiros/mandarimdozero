@@ -10,8 +10,8 @@ const pt = s => ({ 'pt-BR': s, en: null });
 const x = n => 'a'.repeat(n);
 
 console.log('== limites');
-check('limites: abertura 120, painel 110, painel com erro 150, fala final 70, nota 340, com quem 70',
-  JSON.stringify(T.LIMITES) === JSON.stringify({ abertura: 120, painel: 110, painelComErro: 150, falaFinal: 70, nota: 340, comQuem: 70 }), T.LIMITES);
+check('limites: abertura 120, painel 110, painel com erro 150, fala final 70, nota 340',
+  JSON.stringify(T.LIMITES) === JSON.stringify({ abertura: 120, painel: 110, painelComErro: 150, falaFinal: 70, nota: 340 }), T.LIMITES);
 check('tags HTML não contam', T.semTags('<b>salut</b> e <strong>coucou</strong>') === 'salut e coucou');
 
 console.log('== textosLongos (casos sintéticos)');
@@ -40,11 +40,6 @@ check('diálogo: a fala da cena conta como abertura e a da tela final do diálog
 check('"sua vez": situação conta como abertura e cada dica como painel (decisão 354)', (() => {
   const a = T.textosLongos(rascunho([{ id: 'p', tipo: 'dialogo_papel', situacao: pt(x(121)), turnos: [{ opcoes: ['a', 'b', 'c'], certa: 0, dicas: { b: pt(x(111)), c: pt(x(20)) } }] }]));
   return a.length === 2 && a.some(z => z.tipo === 'abertura') && a.some(z => z.tipo === 'painel' && z.onde.includes('dica: b'));
-})());
-
-check('"com quem" do par informal / formal acima de 70 é acusado; 70 passa (decisão 361)', (() => {
-  const a = T.textosLongos(rascunho([{ id: 'p0', tipo: 'cartao', com_quem: pt(x(70)) }, { id: 'p1', tipo: 'cartao', com_quem: pt(x(71)) }]));
-  return a.length === 1 && a[0].onde === 'p1' && a[0].tipo === 'comQuem';
 })());
 
 console.log('== rascunho real da unidade 1');
