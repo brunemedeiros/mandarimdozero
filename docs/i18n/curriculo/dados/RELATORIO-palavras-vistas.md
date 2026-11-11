@@ -1,6 +1,6 @@
 # Relatório "só palavras vistas" (gerado)
 
-Gerado por `node fr/scripts/curriculo_palavras_vistas.js --relatorio` em 2026-11-10. **Não editar à mão.**
+Gerado por `node fr/scripts/curriculo_palavras_vistas.js --relatorio` em 2026-11-11. **Não editar à mão.**
 Só informativo (decisão 233): é a lista de reescrita ao vivo do conteúdo publicado medido na posição do mapa NOVO (`mapa.json`). O site ainda
 segue a ordem antiga, então muita coisa aparece aqui sem ser erro no site de hoje. Regras e limitações: `fr/scripts/curriculo_palavras_vistas.js`
 e `docs/guia-do-desenvolvedor.md`.
@@ -19,13 +19,13 @@ e `docs/guia-do-desenvolvedor.md`.
 | Verdadeiro ou falso | 8 | 4 | 4 | 0 |
 | Frases "Na frase" (como se fossem essenciais) | 182 | 94 | 130 | 1 |
 | Gramáticas: telas | 62 | 30 | 38 | 0 |
-| Gramáticas: exercícios | 64 | 30 | 42 | 0 |
+| Gramáticas: exercícios | 64 | 30 | 41 | 0 |
 | Ditados | 21 | 7 | 8 | 0 |
 | Desafios: texto da tarefa | 123 | 46 | 84 | 0 |
 | Desafios: enunciado em francês | 30 | 30 | 187 | 0 |
-| **Total** | 657 | 270 | 525 | 1 |
+| **Total** | 657 | 270 | 524 | 1 |
 
-Palavras não vistas diferentes: 269 (165 viram cartão ou nota mais adiante no mapa; 104 não estão no mapa).
+Palavras não vistas diferentes: 268 (164 viram cartão ou nota mais adiante no mapa; 104 não estão no mapa).
 
 **As 10 palavras não vistas mais frequentes** (textos em que aparecem; onde o mapa ensina):
 
@@ -66,7 +66,7 @@ Palavras não vistas diferentes: 269 (165 viram cartão ou nota mais adiante no 
 - Desafios: enunciado em francês, `expr-a1m1-003 (expression)`: "Que veut dire « pas mal » ? / Plutôt bien / Très mauvais / Très cher / Très tard / Plutôt bien.". não vistas: *veut* (cartão em "Verbos muito usados" (A1-36)), *dire* (cartão em "Procurar emprego" (A2-20)), *mal* (nota em "Cumprimentar e se despedir" (A1-1)), *plutôt* (sem cartão no mapa), *mauvais* (sem cartão no mapa), *cher* (cartão em "Comprar roupas" (A1-10)), *tard* (cartão em "Dizer as horas e a rotina" (A1-6)).
 - Desafios: texto da tarefa, `expr-a1m1-004 (expression)`: "Ça marche ! / Un café ensemble ? — Ça marche ! / Je t'appelle ce soir. — Ça marche ! / Un café ? — Ça marche !". não vistas: *marche* (cartão em "Comprar on-line e reclamar" (A2-8)), *café* (cartão em "Gostos e pedidos no café" (A1-5)), *ensemble* (sem cartão no mapa), *appelle* (cartão em "Dizer o nome e a nacionalidade" (A1-2)), *soir* (cartão em "Dizer as horas e a rotina" (A1-6)).
 - Desafios: enunciado em francês, `expr-a1m1-004 (expression)`: "Que veut dire « Ça marche ! » ? / D'accord, c'est bon / Je ne comprends pas / J'ai faim / Au revoir / D'accord ; c'est bon.". não vistas: *veut* (cartão em "Verbos muito usados" (A1-36)), *dire* (cartão em "Procurar emprego" (A2-20)), *marche* (cartão em "Comprar on-line e reclamar" (A2-8)), *d'accord* (cartão em "Convidar, aceitar, recusar e se desculpar" (A1-27)), *c'est* (cartão em "Dizer o nome e a nacionalidade" (A1-2)), *bon* (sem cartão no mapa), *comprends* (sem cartão no mapa), *ai* (cartão em "Dizer a idade: de 1 a 29" (A1-3)), *faim* (sem cartão no mapa).
-- Desafios: texto da tarefa, `expr-a1m1-005 (expression)`: "Pas de problème ! / Pardon ! — Pas de problème ! / Tu peux m'aider ? — Pas de problème. / Pardon ! — Pas de problème !". não vistas: *problème* (cartão em "Contar um imprevisto" (A2-5)), *peux* (cartão em "Verbos muito usados" (A1-36)), *aider* (sem cartão no mapa).
+- Desafios: texto da tarefa, `expr-a1m1-005 (expression)`: "Pas de problème ! / Pardon ! — Pas de problème ! / Tu peux m'aider ? — Pas de problème. / Pardon ! — Pas de problème !". não vistas: *problème* (cartão em "Contar um imprevisto" (A2-5)), *peux* (cartão em "Dizer de onde é, onde mora e que línguas fala" (A1-9)), *aider* (sem cartão no mapa).
 - Desafios: enunciado em francês, `expr-a1m1-005 (expression)`: "Que veut dire « Pas de problème ! » ? / Ce n'est pas grave / C'est très difficile / Je suis fatigué / Je ne sais pas / Ce n'est pas grave ; d'accord.". não vistas: *veut* (cartão em "Verbos muito usados" (A1-36)), *dire* (cartão em "Procurar emprego" (A2-20)), *problème* (cartão em "Contar um imprevisto" (A2-5)), *est* (cartão em "Dizer o nome e a nacionalidade" (A1-2)), *grave* (nota em "Dizer o nome e a nacionalidade" (A1-2)), *c'est* (cartão em "Dizer o nome e a nacionalidade" (A1-2)), *difficile* (sem cartão no mapa), *suis* (cartão em "Dizer o nome e a nacionalidade" (A1-2)), *fatigué* (sem cartão no mapa), *sais* (cartão em "Falar do aprendizado de línguas" (A2-17)), *d'accord* (cartão em "Convidar, aceitar, recusar e se desculpar" (A1-27)).
 
 #### M1.2 "Dizer o nome e a nacionalidade" (A1-2)
@@ -384,7 +384,7 @@ Palavras não vistas diferentes: 269 (165 viram cartão ou nota mais adiante no 
 - Gramáticas: telas, `A1-g6 tela 3 ex. 1`: "Il faut dormir huit heures.". não vistas: *faut* (sem cartão no mapa).
 - Gramáticas: telas, `A1-g6 tela 3 ex. 2`: "Tu dois te reposer.". não vistas: *reposer* (cartão em "Corpo e dores" (A1-15)).
 - Gramáticas: exercícios, `A1-g6 exercício 3`: "Nous devons nous reposer.". não vistas: *reposer* (cartão em "Corpo e dores" (A1-15)).
-- Gramáticas: exercícios, `A1-g6 exercício 4`: "Elle sait parler trois langues.". não vistas: *sait* (cartão em "Falar do aprendizado de línguas" (A2-17)), *langues* (cartão em "Falar do aprendizado de línguas" (A2-17)).
+- Gramáticas: exercícios, `A1-g6 exercício 4`: "Elle sait parler trois langues.". não vistas: *sait* (cartão em "Falar do aprendizado de línguas" (A2-17)).
 - Gramáticas: exercícios, `A1-g6 exercício 5`: "Il faut manger des légumes tous les jours.". não vistas: *faut* (sem cartão no mapa).
 - Gramáticas: exercícios, `A1-g6 exercício 8`: "Je sais nager.". não vistas: *sais* (cartão em "Falar do aprendizado de línguas" (A2-17)), *nager* (cartão em "Hábitos saudáveis" (A2-12)).
 
