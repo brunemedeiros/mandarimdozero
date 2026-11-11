@@ -65,6 +65,8 @@ Se uma regra deste arquivo ficar específica de uma pasta, mova-a para `.claude/
 ## Processo
 
 - Fases grandes: auditoria/grilling antes de codar; não avançar de fase sem autorização da autora.
+- **A autora trabalha só em sessões na nuvem** (pelo app, 2026-11-11): não sugerir ferramenta que só enxerga sessões locais do
+  terminal (ex.: Habblaud, testado e deixado de lado). Visão das conversas: skill `escritorio-conversas` ("atualiza meu escritório").
 - Não abrir PR, mergear ou publicar sem pedido explícito. Outras conversas editam o mesmo repo em paralelo:
   em conflito, manter os dois lados (nunca descartar o trabalho da outra conversa).
 - Confirmar o estado real (`git log`, código, `list_migrations`) antes de reimplementar algo que uma instrução
@@ -96,7 +98,7 @@ Se uma regra deste arquivo ficar específica de uma pasta, mova-a para `.claude/
 - Regras por área (carregam sozinhas): `.claude/rules/` -- frontend-fr-zh, flashcards-motor, decks-review,
   supabase, i18n, conteudo-trilha, audio-tts, testes, admin-professora, painel-design-system, email, xp.
 - Skills do projeto: `migration-supabase`, `notas-de-realidade`, `criar-desafios`, `audio-tts`,
-  `teste-navegador`, `registrar-entrega`.
+  `teste-navegador`, `registrar-entrega`, `escritorio-conversas`.
 - Agentes (`.claude/agents/`, `model:` pela dificuldade): `regressao` (haiku, roda testes),
   `revisor-conteudo` (opus, revisa notas/traduções), `code-architecture-reviewer`/`principal-engineer`/
   `plan-reviewer`/`refactor-planner` (opus), `code-refactor-master`/`documentation-architect`/
