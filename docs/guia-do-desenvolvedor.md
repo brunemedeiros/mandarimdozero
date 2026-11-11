@@ -72,6 +72,8 @@ Regras de código: `.claude/rules/qualidade-de-codigo.md`. Regras por área: `.c
   `traducao`, `registro` (`informal`|`formal`) e, na formal com *vous*, `traducao_plural` ("vocês"); a tradução da tela é montada por
   `traducaoNaTela` ("... (formal) ou ...", decisão 361). Rótulo "Pergunta" não existe (o "?" já diz; `conferirTelas` acusa);
   depois de cada `cartao` ou `frase`, um exercício (`EXERCICIOS`) antes do próximo item novo, nota não conta (decisão 362; `conferirTelas` acusa);
+  ordem das peças do "Monte a frase" e das falas do "Coloque na ordem": sempre por `embaralharPecas` / `embaralharIndices` (decisão 363;
+  o app deve usar as mesmas funções, nunca a ordem do rascunho);
   o cartão conta uma vez só nas palavras vistas e na Revisão. Tela `relacionar`: `pares` = `[[fr, tradução], ...]`, 3 ou mais,
   sem repetir dos dois lados. Sem `forma`, a maquete mostra o par numa tela só, com um áudio por forma.
   Unidade nova no piloto: pasta `piloto-m1/<unidade>/` com o rascunho e um `validar.js` curto (modelo: `A1-9/validar.js`).

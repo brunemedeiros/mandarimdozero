@@ -95,7 +95,7 @@ function construirTelas(R, unidade, tolerante){
       case 'ouvir_escolher': return { ...base, type: 'ouvir', q: pt(t.pergunta), audio: t.audio, opts: t.opcoes, answer: t.resposta, why_ok: pt(t.explicacao) };
       case 'digitar': return { ...base, type: 'digitar', q: pt(t.pergunta), audio: t.audio, answer: t.resposta, why_ok: pt(t.explicacao) };
       case 'relacionar': return { ...base, type: 'relacionar', pares: t.pares, why_ok: pt(t.explicacao) };
-      case 'montar': return { ...base, type: 'montar', tr: pt(t.traducao), tiles: t.pecas, answer: t.resposta, full: t.frase_completa, why_ok: pt(t.explicacao) };
+      case 'montar': return { ...base, type: 'montar', tr: pt(t.traducao), tiles: L.embaralharPecas(t.pecas, t.resposta), answer: t.resposta, full: t.frase_completa, why_ok: pt(t.explicacao) };
       case 'fim': {
         // Lista do que foi visto (regra 17): os cartões da lição, as frases-modelo e a frase montada.
         const lista = [];
@@ -111,7 +111,7 @@ function construirTelas(R, unidade, tolerante){
       case 'dialogo_cena': return { ...base, type: 'd_cena', dlg: dialogo(t.dialogo), n: licao.ordem, total, licao: pt(licao.titulo), foco: pt(t.foco), size: pt(t.tamanho) };
       case 'dialogo_vf': return { ...base, type: 'd_vf', dlg: dialogo(t.dialogo), fala: t.fala, stmt: pt(t.afirmacao), answer: t.resposta, why_ok: pt(t.explicacao) };
       case 'dialogo_lacuna': return { ...base, type: 'd_lacuna', dlg: dialogo(t.dialogo), fala: t.fala, before: t.antes, after: t.depois, opts: t.opcoes, answer: t.resposta, why_ok: pt(t.explicacao) };
-      case 'dialogo_ordenar': return { ...base, type: 'd_ordenar', dlg: dialogo(t.dialogo), why_ok: pt(t.explicacao) };
+      case 'dialogo_ordenar': return { ...base, type: 'd_ordenar', dlg: dialogo(t.dialogo), ordem: L.embaralharIndices(dialogo(t.dialogo).lines.length, t.dialogo), why_ok: pt(t.explicacao) };
       case 'dialogo_ouvir': return { ...base, type: 'd_ouvir', dlg: dialogo(t.dialogo), q: pt(t.pergunta), opts: t.opcoes.map(pt), answer: t.resposta, why_ok: pt(t.explicacao) };
       case 'dialogo_ler': return { ...base, type: 'd_ler', dlg: dialogo(t.dialogo) };
       case 'dialogo_montar': return { ...base, type: 'd_montar', dlg: dialogo(t.dialogo), distratores: Object.fromEntries(Object.entries(t.distratores).map(([k, v]) => [k, v.texto])), why_ok: pt(t.explicacao) };

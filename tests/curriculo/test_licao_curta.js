@@ -95,6 +95,18 @@ console.log('== par informal / formal em duas telas e "Relacione os pares" (deci
   check('"Relacione" com tradução repetida é acusado', acusa(x => { comPar(x); tela(x, 'rel').pares[1][1] = 'você (informal)'; }, 'item repetido'));
 }
 
+console.log('== embaralhar peças e falas (decisão 363)');
+{
+  const naOrdem = (pecas, resposta) => { const lidas = []; for (const p of pecas) if (lidas.length < resposta.length && p === resposta[lidas.length]) lidas.push(p); return lidas.length === resposta.length; };
+  const montar = ['A1-1', 'A1-2', 'A1-9'].flatMap(u => require(path.join(ROOT, `docs/i18n/curriculo/piloto-m1/${u}/${u}.json`)).licoes.flatMap(l => l.telas || []).filter(t => t.tipo === 'montar'));
+  const ruins = montar.filter(t => naOrdem(L.embaralharPecas(t.pecas, t.resposta), t.resposta)).map(t => t.id);
+  check(`"Monte a frase" das unidades 1 a 3 (${montar.length}): as peças certas nunca aparecem na ordem da resposta`, montar.length > 0 && ruins.length === 0, ruins);
+  check('as peças embaralhadas são as mesmas (nada some nem duplica)', montar.every(t => JSON.stringify([...L.embaralharPecas(t.pecas, t.resposta)].sort()) === JSON.stringify([...t.pecas].sort())));
+  check('mesma tela, mesma ordem (determinístico)', montar.every(t => JSON.stringify(L.embaralharPecas(t.pecas, t.resposta)) === JSON.stringify(L.embaralharPecas(t.pecas, t.resposta))));
+  check('peças só da resposta, com palavra repetida, também saem fora de ordem', !naOrdem(L.embaralharPecas(['Je', 'suis', 'de', 'Rio', 'et', 'de', 'Paris'], ['Je', 'suis', 'de', 'Rio', 'et', 'de', 'Paris']), ['Je', 'suis', 'de', 'Rio', 'et', 'de', 'Paris']));
+  check('falas do "Coloque na ordem": nunca na ordem original, de 2 a 8 falas', [2, 3, 4, 5, 6, 7, 8].every(n => { const p = L.embaralharIndices(n, 'diálogo ' + n); return p.some((v, k) => v !== k) && [...p].sort((a, b) => a - b).every((v, k) => v === k); }));
+}
+
 console.log('== textosDasTelas e posição (mapa real, unidade 1)');
 {
   const mapa = M.carregarMapa();

@@ -128,7 +128,7 @@ button.lesson:hover{border-color:var(--brand)}
 .bub{display:flex;gap:8px;align-items:flex-end}
 .bub.novo{animation:entra .25s ease}
 @keyframes treme{0%,100%{transform:none}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
-.opt.treme{animation:treme .3s ease;border-color:var(--err)}
+.opt.treme{animation:treme .3s ease;border-color:var(--err)} /* vermelho só enquanto treme: tremer() tira a classe no fim */
 @keyframes entra{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 .bub .vertr{border:0;background:none;color:var(--brand-dark);font:inherit;font-size:.78rem;font-weight:700;cursor:pointer;padding:0;margin-top:2px}
 .bub .branco{border:2px dashed var(--line);background:transparent}
@@ -281,6 +281,8 @@ function pararFalas(){ fila++; try{ speechSynthesis.cancel(); }catch(e){} }
 const PLAY='<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 5v14l12-7z"/></svg>';
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const SPK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M16.5 8.5a5 5 0 0 1 0 7"/><path d="M19 6a8.5 8.5 0 0 1 0 12"/></svg>';
+// Sinal de erro sem marca que fica: a caixinha treme (borda vermelha só durante o tremor) e volta ao normal.
+const tremer=b=>{ b.classList.remove('treme'); void b.offsetWidth; b.classList.add('treme'); b.addEventListener('animationend',()=>b.classList.remove('treme'),{once:true}); };
 const audBtn=(text,label)=>`<button class="aud${label?'':' round'}" data-say="${esc(text)}" aria-label="Ouvir ${esc(text)}">${SPK}${label?`<span>${esc(label)}</span>`:''}</button>`;
 
 /* ---------- telas ---------- */
@@ -319,12 +321,12 @@ const WHY={
  "u3-ex-habites-formal": {"titulo": "O que você diz? (formal)", "texto": "<p>Decisão 360: depois da forma formal, a aluna escolhe o que dizer numa situação formal. As opções erradas são a forma informal e outra frase já vista.</p>"},
  "u3-ex-anglais-formal": {"titulo": "O que você diz? (formal)", "texto": "<p>Decisão 360: depois da forma formal, a aluna escolhe o que dizer numa situação formal. As opções erradas são a forma informal e outra frase já vista.</p>"},
  "u3-ex-langues-formal": {"titulo": "O que você diz? (formal)", "texto": "<p>Decisão 360: depois da forma formal, a aluna escolhe o que dizer numa situação formal. As opções erradas são a forma informal e outra frase já vista.</p>"},
- "l2-rel": {"titulo": "Relacione os pares", "texto": "<p>Decisão 360: um \"Relacione os pares\" por lição, perto do fim, juntando as formas informais e formais com as traduções. Toque numa frase e depois na tradução.</p>"},
- "l3-rel": {"titulo": "Relacione os pares", "texto": "<p>Decisão 360: um \"Relacione os pares\" por lição, perto do fim, juntando as formas informais e formais com as traduções. Toque numa frase e depois na tradução.</p>"},
- "u2-rel": {"titulo": "Relacione os pares", "texto": "<p>Decisão 360: um \"Relacione os pares\" por lição, perto do fim, juntando as formas informais e formais com as traduções. Toque numa frase e depois na tradução.</p>"},
- "u3-l1-rel": {"titulo": "Relacione os pares", "texto": "<p>Decisão 360: um \"Relacione os pares\" por lição, perto do fim, juntando as formas informais e formais com as traduções. Toque numa frase e depois na tradução.</p>"},
- "u3-l2-rel": {"titulo": "Relacione os pares", "texto": "<p>Decisão 360: um \"Relacione os pares\" por lição, perto do fim, juntando as formas informais e formais com as traduções. Toque numa frase e depois na tradução.</p>"},
- "u3-l3-rel": {"titulo": "Relacione os pares", "texto": "<p>Decisão 360: um \"Relacione os pares\" por lição, perto do fim, juntando as formas informais e formais com as traduções. Toque numa frase e depois na tradução.</p>"},
+ "l2-rel": {"titulo": "Relacione os pares", "texto": "<p>Decisão 360: um \"Relacione os pares\" por lição, perto do fim, juntando as formas informais e formais com as traduções. Toque numa frase e depois na tradução.</p><p>Decisão 363: o par errado só treme e a seleção sai; a aluna tenta de novo, e no fim a tela é de acerto.</p>"},
+ "l3-rel": {"titulo": "Relacione os pares", "texto": "<p>Decisão 360: um \"Relacione os pares\" por lição, perto do fim, juntando as formas informais e formais com as traduções. Toque numa frase e depois na tradução.</p><p>Decisão 363: o par errado só treme e a seleção sai; a aluna tenta de novo, e no fim a tela é de acerto.</p>"},
+ "u2-rel": {"titulo": "Relacione os pares", "texto": "<p>Decisão 360: um \"Relacione os pares\" por lição, perto do fim, juntando as formas informais e formais com as traduções. Toque numa frase e depois na tradução.</p><p>Decisão 363: o par errado só treme e a seleção sai; a aluna tenta de novo, e no fim a tela é de acerto.</p>"},
+ "u3-l1-rel": {"titulo": "Relacione os pares", "texto": "<p>Decisão 360: um \"Relacione os pares\" por lição, perto do fim, juntando as formas informais e formais com as traduções. Toque numa frase e depois na tradução.</p><p>Decisão 363: o par errado só treme e a seleção sai; a aluna tenta de novo, e no fim a tela é de acerto.</p>"},
+ "u3-l2-rel": {"titulo": "Relacione os pares", "texto": "<p>Decisão 360: um \"Relacione os pares\" por lição, perto do fim, juntando as formas informais e formais com as traduções. Toque numa frase e depois na tradução.</p><p>Decisão 363: o par errado só treme e a seleção sai; a aluna tenta de novo, e no fim a tela é de acerto.</p>"},
+ "u3-l3-rel": {"titulo": "Relacione os pares", "texto": "<p>Decisão 360: um \"Relacione os pares\" por lição, perto do fim, juntando as formas informais e formais com as traduções. Toque numa frase e depois na tradução.</p><p>Decisão 363: o par errado só treme e a seleção sai; a aluna tenta de novo, e no fim a tela é de acerto.</p>"},
  "u3-nota-fem": {"titulo": "Nota: o feminino que se ouve", "texto": "<p>Com <i>anglaise</i>, <i>espagnole</i>, <i>italienne</i> e <i>allemande</i>. <i>Portugaise</i> chega na lição 3, com a explicação no painel.</p>"},
  "u3-frase-dou": {"titulo": "Pergunta de onde é: forma informal", "texto": "<p>Decisão 360: o par vira duas telas. Primeiro só a forma informal; o exercício seguinte usa ela, e depois vem a formal.</p><p><i>Tu es d'où ?</i> ficou nesta lição (decisão 359), junto da resposta <i>Je suis de Rio</i>.</p>"},
  "u3-ex-ou": {"titulo": "A nota \"où vai para o fim\" virou painel", "texto": "<p>Decisão 359: a nota curta aparece no painel deste exercício.</p>"},
@@ -850,8 +852,7 @@ function render(){
       <div class="opts two">${s.opts.map(o=>`<button class="opt" data-o="${esc(o)}">${esc(o)}</button>`).join('')}</div></div>`;
   }
   if(s.type==='d_ordenar'){
-    const hash=t=>[...t].reduce((a,c)=>(a*31+c.charCodeAt(0))%9973,7);
-    const emb=d.lines.map((_,j)=>j).sort((x,y)=>hash(d.lines[x][1])-hash(d.lines[y][1]));
+    const emb=s.ordem; // embaralhada pelo gerador (embaralharIndices, decisão 363)
     h=`${tagDlg(d,'Coloque na ordem')}<div class="grow ex"><p class="vez">Toque nas falas na ordem da conversa.</p>
       <div class="bubbles" id="falas">${d.lines.map(([w],j)=>`<div class="bub ${w==='B'?'b':''}" data-vaga="${j}"><span class="who">${d.who[w]}</span><div class="txt branco"><b>______</b></div></div>`).join('')}</div>
       <div class="linhas" id="pecas">${emb.map(j=>`<button class="opt" data-j="${j}">${esc(d.lines[j][1])}</button>`).join('')}</div></div>`;
@@ -921,14 +922,14 @@ function bind(s){
   }
   if(s.type==='unidade') screen.querySelectorAll('[data-to]').forEach(b=>b.onclick=()=>go(b.dataset.to));
   if(s.type==='relacionar'){
-    let esq=null, feitos=0, erros=0;
+    let esq=null, feitos=0;
     screen.querySelectorAll('[data-e]').forEach(b=>b.onclick=()=>{ screen.querySelectorAll('[data-e]').forEach(x=>x.classList.remove('sel')); b.classList.add('sel'); esq=+b.dataset.e; falar(s.pares[esq][0],'f'); });
     screen.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{
       if(esq===null) return;
       const e=screen.querySelector(`[data-e="${esq}"]`);
       if(+b.dataset.d===esq){ e.classList.remove('sel'); e.classList.add('right'); b.classList.add('right'); e.disabled=true; b.disabled=true; esq=null; feitos++;
-        if(feitos===s.pares.length) setTimeout(()=>{ if(S[i]===s) painelDialogo(erros===0, s.why_ok, null, null, erros===0?'Todos os pares de primeira!':'Pares feitos! Na próxima, tente sem errar.'); },400); }
-      else { erros++; b.classList.remove('treme'); void b.offsetWidth; b.classList.add('treme'); }
+        if(feitos===s.pares.length) setTimeout(()=>{ if(S[i]===s) painelDialogo(true, s.why_ok, null, null, 'Todos os pares feitos!'); },400); }
+      else { tremer(b); tremer(e); e.classList.remove('sel'); esq=null; } // erro: só o tremor; a seleção sai e a aluna tenta de novo (decisão 363)
     });
   }
   if(s.type==='ouvir'||s.type==='digitar'){
@@ -974,7 +975,7 @@ function bind(s){
     let k=0, erros=0;
     screen.querySelectorAll('#pecas .opt').forEach(b=>b.onclick=()=>{
       const j=+b.dataset.j;
-      if(j!==k){ erros++; b.classList.remove('treme'); void b.offsetWidth; b.classList.add('treme'); return; }
+      if(j!==k){ erros++; tremer(b); return; }
       b.disabled=true; b.hidden=true;
       screen.querySelector(`[data-vaga="${j}"]`).outerHTML=bolha(d,j,{novo:true});
       falar(d.lines[j][1], d.voices[d.lines[j][0]]); // interrompe a fala anterior, se ainda estiver tocando

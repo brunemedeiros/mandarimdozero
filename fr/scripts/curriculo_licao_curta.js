@@ -9,6 +9,29 @@ const ETAPAS_DIALOGO = ['dialogo_cena', 'dialogo_ouvir', 'dialogo_ler', 'dialogo
   'dialogo_entendeu', 'dialogo_papel', 'dialogo_fim'];
 
 const licoesComTelas = R => R.licoes.filter(l => l.id !== 'checkpoint');
+// Embaralhar peças e falas (decisão 363, a dona): nunca mostrar as peças certas já na ordem da resposta. Determinístico (a mesma
+// tela sempre com a mesma ordem, para teste e revisão): sorteio com semente tirada do próprio texto. Funções puras.
+function sementeDe(texto){ let h = 7; for (const c of texto) h = (h * 31 + c.charCodeAt(0)) % 2147483647; return h || 1; }
+function permutacao(n, semente){
+  let x = semente; const idx = [...Array(n).keys()];
+  for (let k = n - 1; k > 0; k--){ x = (x * 48271) % 2147483647; const j = x % (k + 1); [idx[k], idx[j]] = [idx[j], idx[k]]; }
+  return idx;
+}
+// Índices de 0 a n-1 numa ordem diferente da original (n >= 2).
+function embaralharIndices(n, chave){
+  for (let t = 0; t < 20; t++){ const p = permutacao(n, sementeDe(chave + '#' + t)); if (p.some((v, k) => v !== k)) return p; }
+  return [...Array(n).keys()].map(k => (k + 1) % n);
+}
+// Peças do "Monte a frase" embaralhadas: lidas da esquerda para a direita, as peças da resposta não formam a resposta.
+function embaralharPecas(pecas, resposta){
+  const naOrdem = lista => { const resto = [...lista]; const lidas = []; for (const p of resto) if (lidas.length < resposta.length && p === resposta[lidas.length]) lidas.push(p); return lidas.length === resposta.length; };
+  for (let t = 0; t < 20; t++){
+    const p = permutacao(pecas.length, sementeDe(pecas.join('|') + '#' + t)).map(k => pecas[k]);
+    if (!naOrdem(p)) return p;
+  }
+  return [...pecas].reverse();
+}
+
 const EXERCICIOS = new Set(['complete', 'vf', 'funcao', 'montar', 'ouvir_escolher', 'digitar', 'relacionar']);
 
 // Par informal / formal em duas telas (decisão 360): o registro vai junto da tradução, não numa etiqueta nem num quadro
@@ -195,4 +218,4 @@ function textosDasTelas(R, M, mapa, unidadeId){
   return casos;
 }
 
-module.exports = { ETAPAS_DIALOGO, conferirTelas, traducaoNaTela, posicaoNoFimDaLicao, textosDasTelas };
+module.exports = { ETAPAS_DIALOGO, conferirTelas, embaralharIndices, embaralharPecas, traducaoNaTela, posicaoNoFimDaLicao, textosDasTelas };
