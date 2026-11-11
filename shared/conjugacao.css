@@ -338,7 +338,7 @@
 @media (prefers-reduced-motion:reduce){ #view-conjugaison .cg-choice.is-wrong{ animation:none; } }
 #view-conjugaison .cg-choice.is-dim{ opacity:.5; }
 #view-conjugaison .cg-feedback:empty{ display:none; }
-#view-conjugaison .cg-feedback{ margin-top:20px; } /* o painel da trilha (correct-feedback / wrong-feedback) vem dentro */
+#view-conjugaison .cg-feedback{ margin-top:4px; } /* o painel de resposta (shared/painel-resposta.css) já traz o espaço de cima */
 /* Jogos no painel de resposta único (shared/painel-resposta.css, 2026-11-11): a regra vem dentro da fala da Prof. Brune,
    com o desenho da linha do tempo ao lado quando existe; no "quase", o que ela escreveu com a letra errada marcada. */
 #view-conjugaison .painel-resposta .cg-timeline{ display:flex; flex-direction:row; align-items:center; gap:10px; margin:0; padding:0; background:none; border:0; text-align:left; }
@@ -391,7 +391,7 @@
 #view-conjugaison .cg-panel .cg-tr{ display:block; margin:6px 0 0; font-size:14px; color:var(--ink-soft); }
 #view-conjugaison .cg-choice{ border-radius:var(--radius); background:var(--paper); min-height:64px; }
 #view-conjugaison .cg-choice-form{ font-size:clamp(17px, 2.2vw, 20px); font-weight:800; }
-#view-conjugaison .cg-feedback{ margin-top:16px; padding-top:0; border-top:0; }
+#view-conjugaison .cg-feedback{ margin-top:4px; padding-top:0; border-top:0; }
 #view-conjugaison .cg-why{ border:1px solid var(--paper-line); border-radius:var(--radius); margin-bottom:16px; }
 #view-conjugaison .cg-result{ background:var(--paper-warm); box-shadow:none; border-radius:var(--radius); }
 @media (max-width:620px){ #view-conjugaison .cg-stage{ padding:0; } #view-conjugaison .cg-panel{ padding:22px 14px; } }

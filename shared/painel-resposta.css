@@ -2,7 +2,7 @@
    maquete da lição curta: fundo verde ou vermelho claro, título com ✓/✕ ("Isso mesmo!" / "Quase lá!"), a frase certa com a
    tradução e o 🔊, a Prof. Brune (foto, nome e a explicação na voz dela) e o "Continuar" colorido na largura toda.
    Só tokens do site (os 3 blocos de tema de cada index.html). */
-.painel-resposta{ display:flex; flex-direction:column; gap:12px; padding:18px 20px 20px; border-radius:24px; color:var(--ink); }
+.painel-resposta{ display:flex; flex-direction:column; gap:12px; margin-top:16px; padding:18px 20px 20px; border-radius:24px; color:var(--ink); text-align:left; } /* text-align: a lição centraliza a tela */
 .painel-resposta.is-ok{ background:color-mix(in srgb, var(--jade) 16%, var(--paper)); }
 .painel-resposta.is-err{ background:color-mix(in srgb, var(--error-red) 13%, var(--paper)); }
 .painel-resposta .pr-titulo{ display:flex; align-items:center; gap:10px; margin:0; font-size:20px; font-weight:900; }
@@ -10,7 +10,7 @@
 .painel-resposta.is-err .pr-titulo{ color:var(--error-red-text, var(--error-red)); }
 .painel-resposta .pr-marca{ flex:none; width:30px; height:30px; border-radius:50%; display:grid; place-items:center; font-size:16px; font-weight:900; line-height:1; }
 .painel-resposta.is-ok .pr-marca{ background:var(--success-fill); color:var(--on-success-fill); }
-.painel-resposta.is-err .pr-marca{ background:var(--error-red); color:var(--on-vivid); }
+.painel-resposta.is-err .pr-marca{ background:var(--error-red); color:var(--on-brand-fill); } /* branco nos dois temas, como o texto do Continuar */
 .painel-resposta.is-ok .pr-marca::before{ content:'\2713'; }
 .painel-resposta.is-err .pr-marca::before{ content:'\2715'; }
 .painel-resposta[data-estado="quase"] .pr-marca::before{ content:'~'; }
