@@ -46,4 +46,5 @@ e a lição sempre abre em modo foco. Ganhou a classe própria `lesson-lang-noti
 
 - 3 (link de turma do Mural) e 4 (deck público legado de português): pendências do site em português, decisão da dona em
   2026-11-11; registrados como T9 e T8 em `docs/i18n/e6-minimo-servidor-pt.md` seção 3.3.
-- 5 (sem internet logo depois de publicar): consertado por outra sessão no PR #466 (`docs/historico/33-pwa-cache-offline.md`).
+- 5 (sem internet logo depois de publicar): consertado por outra sessão no PR #466 (`docs/historico/33-pwa-cache-offline.md`); depois a
+  dona decidiu que, por enquanto, o site só funciona com internet (tela "Sem internet", PR #468, regra em `.claude/rules/frontend-fr-zh.md`).
