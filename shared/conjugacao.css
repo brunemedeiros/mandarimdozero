@@ -339,16 +339,32 @@
 #view-conjugaison .cg-choice.is-dim{ opacity:.5; }
 #view-conjugaison .cg-feedback:empty{ display:none; }
 #view-conjugaison .cg-feedback{ margin-top:20px; } /* o painel da trilha (correct-feedback / wrong-feedback) vem dentro */
-/* Por dentro do painel (crítica de design, 2026-11-11): linha da resposta, regra em destaque sem caixa, explicação. */
-#view-conjugaison .cg-fb .feedback-card-body{ gap:12px; }
-#view-conjugaison .cg-fb-answer{ margin:0 0 8px; font-size:15.5px; font-weight:700; color:var(--ink); }
-#view-conjugaison .cg-fb-form{ font-size:18px; font-weight:900; color:var(--seal-red-dark); }
-#view-conjugaison .cg-fb .typed-attempt{ margin:0; }
-#view-conjugaison .cg-fb .cg-why{ display:flex; flex-direction:column; gap:6px; background:none; border:0; padding:0; margin:2px 0 4px; }
+/* Por dentro do painel (2026-11-11, escolha da autora): respostas DENTRO DE CAIXAS, como na trilha. No erro, comparação
+   lado a lado ("✕ Você marcou" riscado x "✓ Forma certa"); depois a caixa da regra + explicação. Rótulos em letra normal. */
+#view-conjugaison .cg-fb-compare{ display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:8px; margin:2px 0 10px; }
+#view-conjugaison .cg-fb-compare.is-single{ grid-template-columns:1fr; }
+#view-conjugaison .cg-fb-cell{ display:flex; flex-direction:column; gap:4px; min-width:0; padding:10px 12px; border-radius:14px; background:var(--paper); border:1.5px solid var(--paper-line); }
+#view-conjugaison .cg-fb-cell.is-wrong{ border-color:color-mix(in srgb, var(--error-red) 45%, var(--paper-line)); }
+#view-conjugaison .cg-fb-cell.is-right{ border-color:color-mix(in srgb, var(--jade) 55%, var(--paper-line)); }
+#view-conjugaison .cg-fb-cell.is-almost{ border-color:color-mix(in srgb, var(--imperial-gold) 55%, var(--paper-line)); }
+#view-conjugaison .cg-fb-cell-label{ display:flex; align-items:center; gap:6px; font-size:12.5px; font-weight:800; color:var(--ink-soft); }
+#view-conjugaison .cg-fb-ico{ display:inline-grid; place-items:center; width:18px; height:18px; border-radius:50%; font-size:11px; font-weight:900; line-height:1; }
+#view-conjugaison .is-wrong .cg-fb-ico::before{ content:'\2715'; }
+#view-conjugaison .is-right .cg-fb-ico::before{ content:'\2713'; }
+#view-conjugaison .is-almost .cg-fb-ico::before{ content:'~'; }
+#view-conjugaison .is-wrong .cg-fb-ico{ background:var(--error-red); color:var(--on-vivid); }
+#view-conjugaison .is-right .cg-fb-ico{ background:var(--success-fill); color:var(--on-success-fill); }
+#view-conjugaison .is-almost .cg-fb-ico{ background:var(--imperial-gold); color:var(--ink); }
+#view-conjugaison .cg-fb-value{ font-size:19px; font-weight:900; line-height:1.25; color:var(--ink); overflow-wrap:anywhere; }
+#view-conjugaison .cg-fb-value.is-wrong{ color:var(--error-red-text, var(--error-red)); text-decoration:line-through; text-decoration-thickness:2px; }
+#view-conjugaison .cg-fb-value.is-right{ color:var(--jade); }
+#view-conjugaison .cg-fb-cell .typed-attempt{ font-size:18px; font-weight:800; line-height:1.5; }
+#view-conjugaison .cg-fb .feedback-card-body{ gap:10px; }
+#view-conjugaison .cg-fb .cg-why{ display:flex; flex-direction:column; gap:8px; background:none; border:0; padding:0; margin:0; }
 #view-conjugaison .cg-fb .cg-timeline{ display:flex; flex-direction:row; align-items:center; justify-content:flex-start; text-align:left; gap:12px; margin:0; padding:0; background:none; border:0; box-shadow:none; }
 #view-conjugaison .cg-fb .cg-timeline svg{ flex:none; width:96px; height:auto; color:var(--ink); }
-#view-conjugaison .cg-fb .cg-timeline figcaption, #view-conjugaison .cg-fb .cg-timeline.cg-rule figcaption{ margin:0; padding:0; background:none; border:0; font-size:17px; font-weight:800; line-height:1.4; color:var(--ink); text-align:left; }
-#view-conjugaison .cg-fb .cg-why p{ margin:0; font-size:15px; line-height:1.55; color:var(--ink); max-width:62ch; }
+#view-conjugaison .cg-fb .cg-timeline figcaption, #view-conjugaison .cg-fb .cg-timeline.cg-rule figcaption{ margin:0; padding:0; background:none; border:0; font-size:16px; font-weight:800; line-height:1.4; color:var(--ink); text-align:left; }
+#view-conjugaison .cg-fb .cg-why p{ margin:0; font-size:15px; line-height:1.55; color:var(--ink); }
 #view-conjugaison .cg-verdict{ margin:0 0 14px; font-size:17px; font-weight:900; }
 #view-conjugaison .cg-verdict.ok{ color:var(--jade); }
 #view-conjugaison .cg-verdict.no{ color:var(--error-red); }

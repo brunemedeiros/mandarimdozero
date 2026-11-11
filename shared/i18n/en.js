@@ -863,6 +863,9 @@ window.I18N_CATALOG['en'] = {
   'games.fix.intro': 'Now find the mistake: each sentence has one wrong form. Type only that form, corrected.', // ALTA
   'games.fix.ownIntro': 'Now the sentences you got wrong in this round: type the correct form.', // ALTA
   'games.fix.label': 'Type the correct form', // ALTA
+  'games.fb.youPicked': 'You picked', // ALTA
+  'games.fb.youWrote': 'You wrote', // ALTA
+  'games.fb.correct': 'Correct form', // ALTA
   'games.almost': 'Almost!', // ALTA
   'games.youAnswered': 'You answered:', // ALTA
   'games.dueTitle': 'Review mistakes ({n})', // ALTA
@@ -871,8 +874,8 @@ window.I18N_CATALOG['en'] = {
   'games.intro.shortSub': 'Starts with the sentences you haven\'t seen yet', // ALTA
   'games.intro.fullSub': 'The whole game in one go', // ALTA
   'games.intro.status': '{seen} of {total} sentences seen, {pct}% right.', // ALTA
-  'games.intro.playShort': 'Play {n} sentences', // ALTA
-  'games.intro.playFull': 'Play all {n} sentences', // ALTA
+  'games.intro.playShort': 'Short round', // ALTA
+  'games.intro.playFull': 'Full round', // ALTA
   'games.intro.fresh': 'This game has {total} sentences.', // ALTA
   'games.intro.rule': 'To complete it: go through all of them and get at least {pct}% right.', // ALTA
   'games.intro.mapAria': '{seen} of {total} sentences seen, {right} right', // ALTA

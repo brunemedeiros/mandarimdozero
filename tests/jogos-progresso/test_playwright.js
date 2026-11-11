@@ -251,7 +251,7 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
       opts: [...document.querySelectorAll('[data-cg-start]')].map(b => b.dataset.cgStart + ':' + b.classList.contains('is-current') + ':' + b.querySelector('.cg-intro-opt-title').textContent.trim()),
       total: CONJ_GAMES.find(g => g.id === 'etre-avoir').items.length, toggleOnQuestion: !!document.querySelector('.cg-round') }));
     check(L + ' cartão abre a tela do jogo (sem começar), com título, apresentação e o X', !t0.playing && /avoir/.test(t0.title) && t0.lede.length > 30 && !t0.status && t0.bar, t0);
-    check(L + ' tela do jogo: Curta (padrão, marcada) x Completa com o número de frases', t0.opts.length === 2 && /^short:true:.*10/.test(t0.opts[0]) && /^full:false:/.test(t0.opts[1]) && t0.opts[1].includes(String(t0.total)), t0.opts);
+    check(L + ' tela do jogo: Partida curta (padrão, marcada) x Partida completa, sem número', t0.opts.length === 2 && t0.opts[0] === 'short:true:' + (pt ? 'Partida curta' : 'Short round') && t0.opts[1] === 'full:false:' + (pt ? 'Partida completa' : 'Full round'), t0.opts);
     await page.click('[data-cg-start="short"]'); await page.waitForSelector('.cg-choice');
     const q0 = await page.evaluate(() => ({ n: CONJ_GAMES_UI.state.order.length, toggle: !!document.querySelector('[data-cg-start]') }));
     check(L + ' Curta: 10 frases, sem escolha em cima da frase', q0.n === 10 && !q0.toggle, q0);
@@ -313,11 +313,27 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
     check(L + ' aviso "Agora sem opções" só na 1ª frase escrita; cabeçalho continua "Jogos"', seen6[5].intro.length > 10 && by('type').filter(x => x.intro).length === 1 && /^(Jogos|Games)/.test(seen6[7].eyebrow), seen6.map(x => x.intro));
     const fixes = by('fix'), authored = fixes.filter(x => !x.own), own = fixes.filter(x => x.own);
     check(L + ' "Corrija o erro": 2 frases prontas, frase inteira com a forma errada (sem lacuna), aviso e rótulo próprios', authored.length === 2 && authored.every(x => !x.blank && x.sentence.includes(x.wrongForm) && x.label === (pt ? 'Escreva a forma certa' : 'Type the correct form')) && /(encontre o erro|find the mistake)/i.test(authored[0].intro) && !authored[1].intro, authored);
-    check(L + ' depois, a frase errada na escolha volta preenchida com a opção marcada, com aviso próprio', own.length === 1 && own[0].id === wrongChoice.id && own[0].wrongForm === wrongChoice.picked && own[0].sentence.includes(wrongChoice.picked) && /(nesta partida|in this round)/i.test(own[0].intro), { own, wrongChoice });
-    check(L + ' a partida cresceu de 12 para 13 frases quando a escolha terminou', seen6[4].len === 12 && seen6[5].len === 13, seen6.map(x => x.len));
+    check(L + ' depois, a frase errada na escolha volta com a opção marcada (com aviso) e a errada escrita volta com o que ela digitou', own.length === 2 && own[0].id === wrongChoice.id && own[0].wrongForm === wrongChoice.picked && own[0].sentence.includes(wrongChoice.picked) && /(nesta partida|in this round)/i.test(own[0].intro) && own[1].wrongForm === 'nope' && own[1].sentence.includes('nope') && !own[1].intro, { own, wrongChoice });
+    check(L + ' a partida cresce quando cada parte termina: 12 -> 13 (escolha) -> 14 (escrita)', seen6[4].len === 12 && seen6[5].len === 13 && seen6[9].len === 13 && seen6[10].len === 14, seen6.map(x => x.len));
     const r6 = await page.evaluate(() => ({ title: document.querySelector('.cg-result .cg-title').textContent, hits: CONJ_GAMES_UI.state.hits, n: CONJ_GAMES_UI.state.order.length, given: [...document.querySelectorAll('.cg-review-given')].map(x => x.textContent.trim()), again: !!document.getElementById('cg-again'), rec: STATE.conjGames['tu-vous'] }));
-    check(L + ' fim da partida: 11/13, os 2 erros com o que ela respondeu, conta como partida', r6.hits === 11 && r6.n === 13 && r6.given.length === 2 && r6.given.some(g => /nope/.test(g)) && r6.again && r6.rec.rounds === 1 && r6.title === (pt ? 'Fim da partida' : 'End of round'), r6);
+    check(L + ' fim da partida: 12/14, os 2 erros com o que ela respondeu, conta como partida', r6.hits === 12 && r6.n === 14 && r6.given.length === 2 && r6.given.some(g => /nope/.test(g)) && r6.again && r6.rec.rounds === 1 && r6.title === (pt ? 'Fim da partida' : 'End of round'), r6);
     check(L + ' frase pronta do "Corrija o erro" não entra no progresso; a frase corrigida fica certa', !Object.keys(r6.rec.items).some(k => /^fix-/.test(k)) && r6.rec.items[String(wrongChoice.id)].ok === true, r6.rec);
+    await page.click('#cg-to-list');
+    // "Não sei" na escolha volta no fim com a LACUNA vazia (não há opção marcada para pôr no lugar)
+    await page.click('.cg-play[data-game="pc-auxiliaire"]'); await page.waitForSelector('.cg-intro');
+    await page.click('[data-cg-start="short"]'); await page.waitForSelector('.cg-choice');
+    let dkOwn = null;
+    for (let i = 0; i < 20; i++){
+      if (await page.evaluate(() => !!document.querySelector('.cg-result'))) break;
+      const r = await page.evaluate(i => { const S = CONJ_GAMES_UI.state, it = S.order[S.idx];
+        const info = { own: !!it.own, wrongForm: it.wrongForm, blank: !!document.querySelector('.cg-sentence .cg-blank'), input: !!document.getElementById('cg-input') };
+        if (document.querySelector('.cg-choice')){ if (i === 0) document.getElementById('cg-dontknow').click(); else document.querySelector('.cg-choice[data-k="' + it.ans + '"]').click(); }
+        else { const inp = document.getElementById('cg-input'); inp.value = it[it.ans]; inp.dispatchEvent(new Event('input')); document.getElementById('cg-check').click(); }
+        return info; }, i);
+      if (r.own) dkOwn = r;
+      await page.waitForTimeout(380); await page.click('#cg-next');
+    }
+    check(L + ' "Não sei" volta no Corrija o erro com a lacuna vazia e o campo', dkOwn && dkOwn.wrongForm === null && dkOwn.blank && dkOwn.input, dkOwn);
     await page.click('#cg-to-list');
 
     // Recomeçar o curso lista os Jogos no que volta para o zero.

@@ -326,11 +326,13 @@ function createConjGames({ games, soon = [], speak, ids, isLocked, onLocked, lan
   const optsHint = g => `${g.opts.a.label.toLowerCase()} ou ${g.opts.b.label.toLowerCase()}`;
   // Frase do "Corrija o erro": a forma certa fica em fixForm (ans aponta para ela) e a regra mostrada é a da opção `kind`.
   const fixItem = f => ({ id: 'fix-' + f.id, before: f.before, after: f.after, ans: 'fixForm', fixForm: f.fix, wrongForm: f.wrong, optKey: f.kind, clue: f.clue, text: f.text, isFix: true });
-  // Frase que a aluna errou na escolha, de volta no "Corrija o erro" com a opção que ela marcou no lugar.
-  function appendOwnErrors(){
-    S.ownPending = false;
-    S.log.filter(x => x.stage === 'choice' && !x.ok && x.given != null && !x.typed).forEach(x => {
-      S.order.push(Object.assign({}, x.it, { wrongForm: x.it[x.given], isFix: true, own: true }));
+  // Frases que a aluna errou nesta partida, de volta no "Corrija o erro" (ideia da autora, 2026-11-11): da ESCOLHA com a
+  // opção que ela marcou, da parte ESCRITA com o que ela digitou, e "Não sei" com a lacuna vazia. Entram no fim, quando
+  // cada parte termina (stage = 'choice' ou 'type').
+  function appendOwnErrors(stage){
+    S.log.filter(x => x.stage === stage && !x.ok).forEach(x => {
+      const wrongForm = x.given == null ? null : (x.typed ? x.given : x.it[x.given]);
+      S.order.push(Object.assign({}, x.it, { wrongForm, isFix: true, own: true }));
       S.stages.push('fix');
     });
   }
@@ -349,6 +351,7 @@ function createConjGames({ games, soon = [], speak, ids, isLocked, onLocked, lan
 
   // "Corrija o erro": a frase inteira com a forma errada no lugar (sem marcar qual é: achar o erro faz parte).
   function wrongSentenceHTML(it){
+    if (it.wrongForm == null) return sentenceHTML(it, false); // "Não sei": volta com a lacuna
     return `<p class="cg-sentence" lang="${lang}">${esc(it.before)}${esc(it.wrongForm)}${esc(it.after)}</p>`.replace(/ ([?!:;])/g, '\u00a0$1');
   }
 
@@ -501,34 +504,39 @@ function createConjGames({ games, soon = [], speak, ids, isLocked, onLocked, lan
     tr.hidden = !txt.tr;
     const last = S.idx + 1 >= S.order.length;
     const fb = $('cg-feedback');
-    // Resposta no MOLDE DA TRILHA (pedido da autora, 2026-11-11): painel verde (acerto e "quase") ou vermelho (erro), título
-    // com ✅/✕ e "Continuar" verde ou vermelho na largura toda. Por dentro (crítica de design, 2026-11-11), só o que é NOVO
-    // para a aluna: a frase de cima já mostra a forma certa e os botões/campo já mostram a resposta dela, então no erro vai
-    // só a linha "Resposta: X"; no "quase", o desenho letra a letra. O destaque é a REGRA (figcaption), sem caixa em volta,
-    // seguida da explicação. Sem rótulos em maiúsculas e sem caixa dentro de caixa.
+    // Resposta no MOLDE DA TRILHA, com as respostas DENTRO DE CAIXAS (escolha da autora, 2026-11-11). No erro, no lugar das
+    // caixas "SUA RESPOSTA" / "RESPOSTA", uma comparação lado a lado: "✕ Você marcou/escreveu" (riscado) x "✓ Forma certa".
+    // "Não sei": só a forma certa. "Quase": painel verde com o que ela escreveu (desenho letra a letra) x a forma certa.
+    // Depois, uma caixa com a regra (em negrito, com o desenho da linha do tempo) e a explicação.
     const almost = !!(typedInfo && typedInfo.verdict === 'quase');
-    const formHTML = v => `<b class="cg-fb-form" lang="${lang}">${esc(v)}</b>`;
-    const answerLine = ok && !almost ? '' : `<p class="cg-fb-answer">${esc(tt('feedback.label.answer'))}: ${formHTML(it[it.ans])}</p>`;
-    const attempt = almost && typeof typedAttemptHTML === 'function' ? typedAttemptHTML(typedInfo.typed, it[it.ans]) : '';
-    const why = `
+    // o símbolo vem do CSS (::before): escrito no texto, o ✕ viraria o ícone do Fluent (shared/emoji-icons.js)
+    const cell = (cls, icon, label, inner) => `<div class="cg-fb-cell ${cls}"><span class="cg-fb-cell-label"><span class="cg-fb-ico" aria-hidden="true"></span>${esc(label)}</span>${inner}</div>`;
+    const val = (v, cls) => `<span class="cg-fb-value ${cls || ''}" lang="${lang}">${esc(v)}</span>`;
+    const rightCell = cell('is-right', '✓', tt('games.fb.correct'), val(it[it.ans], 'is-right'));
+    let mine = '';
+    if (almost) mine = cell('is-almost', '~', tt('games.fb.youWrote'), typeof typedAttemptHTML === 'function' ? typedAttemptHTML(typedInfo.typed, it[it.ans]) : val(typedInfo.typed));
+    else if (!ok && !revealed) mine = cell('is-wrong', '✕', tt(typedInfo ? 'games.fb.youWrote' : 'games.fb.youPicked'), val(typedInfo ? typedInfo.typed : it[k], 'is-wrong'));
+    const compare = ok && !almost ? '' : `<div class="cg-fb-compare${mine ? '' : ' is-single'}">${mine}${rightCell}</div>`;
+    const why = `<div class="feedback-inner-box cg-fb-why">
         <div class="cg-why">
           <figure class="cg-timeline${SKETCH[opt.sketch] ? '' : ' cg-rule'}">${SKETCH[opt.sketch] ? `<svg viewBox="0 0 134 44" role="img" aria-label="${esc(plain(L(opt.tl)))}">${SKETCH[opt.sketch]}</svg>` : ''}<figcaption>${rich(L(opt.tl))}</figcaption></figure>
           <p>${rich(txt.why || '')}</p>
-        </div>`;
+        </div>
+      </div>`;
     const okHeader = almost ? tt('games.almost') : (typeof nextCorrectFeedbackPhrase === 'function' ? nextCorrectFeedbackPhrase() : tt('games.right'));
     const btn = `<button type="button" class="btn btn-primary btn-block ${ok ? 'correct' : 'wrong'}-feedback-continue cg-next" id="cg-next">${esc(tt(last ? 'common.seeResultArrow' : 'common.continueArrow'))}</button>`;
     fb.innerHTML = ok ? `
       <div class="correct-feedback cg-fb">
         <div class="feedback-card-body">
           <div class="correct-feedback-header">✅ ${esc(okHeader)}</div>
-          ${answerLine}${attempt}${why}
+          ${compare}${why}
           ${btn}
         </div>
       </div>` : `
       <div class="wrong-feedback cg-fb">
         <div class="feedback-card-body">
           <div class="wrong-feedback-header">${esc(tt(revealed ? 'feedback.header.revealed' : 'feedback.header.notThisTime'))}</div>
-          ${answerLine}${why}
+          ${compare}${why}
           ${btn}
         </div>
       </div>`;
@@ -541,7 +549,8 @@ function createConjGames({ games, soon = [], speak, ids, isLocked, onLocked, lan
     // O mesmo toque/Enter que respondeu não pode também apertar "Próxima frase".
     if (performance.now() - S.shownAt < 350) return;
     S.idx++;
-    if (S.ownPending && S.stages[S.idx - 1] === 'choice' && S.stages[S.idx] !== 'choice') appendOwnErrors();
+    const prev = S.stages[S.idx - 1];
+    if (S.ownPending && (prev === 'choice' || prev === 'type') && S.stages[S.idx] !== prev) appendOwnErrors(prev);
     if (S.idx >= S.order.length) renderResult();
     else renderQuestion();
   }

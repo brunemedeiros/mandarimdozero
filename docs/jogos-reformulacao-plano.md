@@ -43,6 +43,11 @@ lingua.com (painel de progresso, cartões com status, Premium no fim de cada gru
    partida" (entram quando a escolha termina; "Não sei" fica de fora, não há opção marcada; erros da parte escrita ficam
    de fora por decisão a confirmar). Frase pronta não entra no progresso; a frase corrigida conta como a última
    resposta. Testes: jogos-progresso 134/134.
+   **Ajustes 2026-11-11 (3ª rodada, autora)**: botões da tela do jogo "Partida curta" / "Partida completa" (sem número).
+   No "Corrija o erro" voltam TODOS os erros da partida: escolha (opção marcada), escrita (o que ela digitou) e "Não sei"
+   (lacuna vazia). Resposta: de volta às CAIXAS da trilha (preferência da autora); no erro, comparação lado a lado
+   "✕ Você marcou/escreveu" (riscado) x "✓ Forma certa" no lugar de "SUA RESPOSTA"/"RESPOSTA"; "quase" com o desenho
+   letra a letra; caixa da regra + explicação. Símbolos ✕/✓ pelo CSS (no texto, o emoji-icons.js os trocaria). 136/136.
 8. Resultado da partida mostra os erros com a opção "Revisar erros", no espírito do Banco de Revisão (formato a confirmar).
 9. Jogos de vocabulário e de preposições não entram na Conjugação; se vierem, serão em Desafios (assunto separado).
 10. Banco de dados: sem tabela nova e sem migration; o progresso vai dentro do `progress.data` que já existe.
