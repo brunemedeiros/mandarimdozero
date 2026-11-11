@@ -4,7 +4,7 @@
 // "esperando conta no site". Grátis, dentro do plano Professora.
 
 // tab: 'open' (para revisar) | 'skipped' (pulados); sort: 'recent' | 'oldest'; shown: quantos itens aparecem (10 por vez).
-const GCAL_STATE = { status: null, review: [], bank: null, open: null, busy: false, tab: 'open', sort: 'recent', shown: 10 };
+const GCAL_STATE = { status: null, review: [], bank: null, former: null, open: null, busy: false, tab: 'open', sort: 'recent', shown: 10 };
 const GCAL_PAGE = 10;
 
 async function gcalCall(action, extra){
@@ -38,6 +38,11 @@ async function gcalLoad(){
       .select('id,name,language_app_key,linked_student_id,classroom_id').eq('status', 'ativo').order('name');
     GCAL_STATE.bank = (data || []).filter(b => !b.linked_student_id && !b.classroom_id);
   }
+  // 133: ex-alunos (sem vínculo ativo, com história com a professora), para ligar a aula só ao histórico.
+  if (!Array.isArray(GCAL_STATE.former)){
+    const { data } = await supabaseClient.rpc('notion_former_students');
+    GCAL_STATE.former = (data && Array.isArray(data.data)) ? data.data : [];
+  }
 }
 
 function gcalAgo(iso){
@@ -54,11 +59,13 @@ function gcalWhen(ev){
   return fmtDate(d, { weekday: 'short', day: 'numeric', month: 'short' }) + ' · ' + fmtDate(d, { hour: '2-digit', minute: '2-digit' });
 }
 
-// Opções do seletor "de quem é esta aula": alunos com vínculo, turmas e alunos do Banco ainda sem conta.
+// Opções do seletor "de quem é esta aula": alunos com vínculo, turmas, alunos do Banco ainda sem conta e ex-alunos
+// (só para o histórico: a aula entra no histórico dela, sem aviso no Mural).
 function gcalTargetOptionsHTML(){
   const students = (ADMIN_CLASS_LOGS_STATE._studentsCache || []);
   const rooms = (ADMIN_CLASS_LOGS_STATE._classroomsCache || []);
   const bank = GCAL_STATE.bank || [];
+  const former = GCAL_STATE.former || [];
   const lang = k => STUDENT_LANGUAGE_LABELS[k] || k;
   return `<option value="">${t('panel.gcal.pick')}</option>
     ${students.length ? `<optgroup label="${escapeHTML(t('admin.common.students'))}">${students.map(s =>
@@ -66,7 +73,9 @@ function gcalTargetOptionsHTML(){
     ${rooms.length ? `<optgroup label="${escapeHTML(t('panel.classLog.classrooms'))}">${rooms.map(c =>
       `<option value="classroom|${c.id}|${escapeHTML(c.language_app_key)}">👥 ${escapeHTML(c.name)}</option>`).join('')}</optgroup>` : ''}
     ${bank.length ? `<optgroup label="${escapeHTML(t('panel.gcal.noAccountGroup'))}">${bank.map(b =>
-      `<option value="bank_student|${escapeHTML(b.id)}|${escapeHTML(b.language_app_key)}">${escapeHTML(b.name)} · ${escapeHTML(lang(b.language_app_key))}</option>`).join('')}</optgroup>` : ''}`;
+      `<option value="bank_student|${escapeHTML(b.id)}|${escapeHTML(b.language_app_key)}">${escapeHTML(b.name)} · ${escapeHTML(lang(b.language_app_key))}</option>`).join('')}</optgroup>` : ''}
+    ${former.length ? `<optgroup label="${escapeHTML(t('panel.notion.formerGroup'))}">${former.map(f =>
+      `<option value="former|${escapeHTML(f.student_id)}|${escapeHTML(f.language_app_key)}">${escapeHTML(f.name)} · ${escapeHTML(lang(f.language_app_key))}</option>`).join('')}</optgroup>` : ''}`;
 }
 
 function gcalReviewItemHTML(ev){
@@ -87,6 +96,7 @@ function gcalReviewItemHTML(ev){
            <select data-gcal-target aria-label="${escapeHTML(t('panel.gcal.pick'))}">${gcalTargetOptionsHTML()}</select>
            <button type="button" class="p-pequeno" data-gcal-do="assign">${t('panel.gcal.assign')}</button>
          </div>
+         ${(GCAL_STATE.former || []).length ? `<small class="p-ajuda gcal-former-hint">${t('panel.gcal.formerHint')}</small>` : ''}
          <div class="gcal-review-actions">
            <button type="button" class="outline secondary p-pequeno" data-gcal-do="ignore">${t('panel.gcal.ignore')}</button>
            <button type="button" class="outline secondary p-pequeno" data-gcal-do="outside" title="${escapeHTML(t('panel.gcal.outsideTitle'))}">${t('panel.gcal.outside')}</button>

@@ -301,6 +301,10 @@ const PANEL_STUB = (who) => {
       L('aulas: grava Presença e Competências na aula do aluno', await ev(() => { const r = window.__DB.teacher_class_logs[0]; return r.student_id === 'S' && r.classroom_id === null && r.attendance_label_id === 61 && r.skills.join() === 'gramatica,escuta'; }), await ev(() => window.__DB.teacher_class_logs[0]));
       await page.waitForSelector('#admin-classlogs-list-box .att-pill');
       L('aulas: lista mostra a Presença colorida', await ev(() => document.querySelector('#admin-classlogs-list-box .att-pill').dataset.color === 'green'));
+      // Proposta 3 (2026-11-10): Alunos + Turmas viraram "Para quem"; com alguém escolhido, a caixa volta fechada e mostra o nome.
+      L('Para quem: depois de registrar fica fechado, numa linha, com o nome escolhido', await ev(() => { const d = document.querySelector('[data-classlog-who]'); return !!d && !d.open && /Sofia|S/.test(document.getElementById('admin-classlog-who-names').textContent) && !!d.querySelector('[data-classlog-classroom-checkbox]'); }), await ev(() => document.getElementById('admin-classlog-who-names').textContent));
+      L('Nova aula: Tópico e Lição de casa lado a lado; Observações e Notas em Mais campos (fechado)', await ev(() => { const c = document.querySelector('#admin-create-class-log-form .aulas-colunas'); const m = document.querySelector('#admin-create-class-log-form details.aulas-mais'); return !!c && !!c.querySelector('#admin-class-log-topic') && !!c.querySelector('#admin-class-log-homework') && !!m && !m.open && !!m.querySelector('#admin-class-log-observations') && !!m.querySelector('#admin-class-log-notes'); }));
+      await ev(() => { document.querySelector('[data-classlog-who]').open = true; });
       // só Presença (Faltou), para a turma
       await page.uncheck('[data-classlog-student-checkbox][value="S"]');
       await page.check('[data-classlog-classroom-checkbox][value="501"]');
@@ -315,13 +319,14 @@ const PANEL_STUB = (who) => {
       await page.waitForFunction(() => document.querySelectorAll('#admin-classlogs-list-box [data-edit-class-log]').length === 2);
       L('aulas: a aba Aulas lista as aulas do aluno e da turma juntas', true);
       L('painel: abas Alunos, Cartões, Mural, Aulas e Materiais; Aulas ativa', await ev(() => [...document.querySelectorAll('[data-teacher-section]')].map(b => b.dataset.teacherSection).join() === 'students,flashcards,mural,classlogs,materials' && document.querySelector('[data-teacher-section="classlogs"]').classList.contains('is-active') && document.getElementById('admin-mural-shell').style.display === 'none' && document.getElementById('admin-materials-content').style.display === 'none'));
+      await ev(() => { document.querySelector('[data-classlog-who]').open = true; });
       await page.check('[data-classlog-classroom-checkbox][value="501"]');
       L('aulas: em Todos, marcar a turma no formulário não esconde as outras aulas', await ev(() => document.querySelectorAll('#admin-classlogs-list-box [data-edit-class-log]').length === 2));
       if (SHOTS && width === 1200) await page.screenshot({ path: `${SHOTS}/${lang}-${theme}-${width}-aba-registrar-inteira.png`, fullPage: true });
       if (SHOTS) await page.addStyleTag({ content: '#toast-layer, .topbar{ visibility:hidden !important; }' });
       if (SHOTS) await page.locator('#admin-classlogs-register').screenshot({ path: `${SHOTS}/${lang}-${theme}-${width}-aulas-caixas.png` });
-      L('aulas: Alunos, Turmas, Nova aula e Aulas registradas em caixas do painel', await ev(() => document.getElementById('admin-classlogs-register').classList.contains('painel')
-        && document.querySelectorAll('#admin-classlogs-register > details.aulas-box').length === 4 && /\(2\)/.test(document.querySelector('[data-classlog-count]').textContent)));
+      L('aulas: Para quem, Nova aula e Aulas registradas em caixas do painel', await ev(() => document.getElementById('admin-classlogs-register').classList.contains('painel')
+        && document.querySelectorAll('#admin-classlogs-register > details.aulas-box').length === 3 && /\(2\)/.test(document.querySelector('[data-classlog-count]').textContent)));
       // rótulos no estilo do Notion: criar digitando, ⋯ para cor/nome/arquivar, sem perder o que já foi digitado
       await page.fill('#admin-class-log-topic', 'Texto que não pode sumir');
       await page.fill('[data-att-new="new"]', 'Remarcada');
@@ -352,6 +357,7 @@ const PANEL_STUB = (who) => {
       L('rótulos: o texto digitado sobreviveu a tudo', await ev(() => document.getElementById('admin-class-log-topic').value === 'Texto que não pode sumir'));
       // 101: horário, repetir toda semana e calendário
       await page.fill('#admin-class-log-topic', '');
+      await ev(() => { document.querySelector('[data-classlog-who]').open = true; });
       await page.check('[data-classlog-student-checkbox][value="S"]');
       await page.uncheck('[data-classlog-classroom-checkbox][value="501"]');
       const startDay = await ev(() => { const d = new Date(); d.setDate(d.getDate() + 2); return classLogLocalYMD(d); });
@@ -424,6 +430,11 @@ const PANEL_STUB = (who) => {
       L('google (119): mostrar mais traz o resto', await ev(() => document.querySelectorAll('#admin-gcal-box .gcal-review-item').length === 11 && !document.querySelector('#admin-gcal-box [data-gcal-more]')));
       await ev(() => { const sel = document.querySelector('#admin-gcal-box [data-gcal-sort]'); sel.value = 'oldest'; sel.dispatchEvent(new Event('change', { bubbles: true })); });
       L('google (119): mais antigos primeiro', await ev(() => document.querySelector('#admin-gcal-box .gcal-review-item').dataset.gcalEvent === '1'));
+      // 133 (2026-11-10): ex-alunos (só para o histórico) também no Google Agenda.
+      L('google (133): grupo Ex-alunos no seletor, com a ex-aluna e o aviso', await ev(() => { const g = [...document.querySelectorAll('#admin-gcal-box [data-gcal-target] optgroup')].find(o => o.label === t('panel.notion.formerGroup')); return !!g && [...g.querySelectorAll('option')].some(o => o.value.startsWith('former|EX1|') && o.text.includes('Carmen da Silva')) && !!document.querySelector('#admin-gcal-box .gcal-former-hint'); }));
+      await ev(() => { const li = document.querySelector('#admin-gcal-box .gcal-review-item'); const sel = li.querySelector('[data-gcal-target]'); sel.value = [...sel.options].find(o => o.value.startsWith('former|')).value; window.__gcalResolved = null; li.querySelector('[data-gcal-do="assign"]').click(); });
+      await page.waitForFunction(() => !!window.__gcalResolved);
+      L('google (133): ligar a ex-aluna manda a ação former com o idioma', await ev(() => window.__gcalResolved.p_action === 'former' && window.__gcalResolved.p_target === 'EX1' && !!window.__gcalResolved.p_language), await ev(() => window.__gcalResolved));
       L('google (119): botões Não é aula, Fora do site e Pular por agora', await ev(() => { const li = document.querySelector('#admin-gcal-box .gcal-review-item'); return !!li.querySelector('[data-gcal-do="ignore"]') && !!li.querySelector('[data-gcal-do="outside"]') && !!li.querySelector('[data-gcal-do="skip"]'); }));
       await ev(() => document.querySelector('[data-gcal-tab="skipped"]').click());
       L('google (119): aba Pulados mostra o pulado com "Voltar para a lista"', await ev(() => { const it = document.querySelectorAll('#admin-gcal-box .gcal-review-item'); return it.length === 1 && it[0].dataset.gcalEvent === '90' && !!it[0].querySelector('[data-gcal-do="unskip"]'); }));
