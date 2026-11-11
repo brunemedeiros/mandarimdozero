@@ -10,7 +10,10 @@
 // alguém lembrar de bumpar um número (ver Fase 4 da tarefa PWA/mobile).
 // Localmente (sem passar pelo Actions) o placeholder fica intacto -- ainda
 // funciona, só não muda de versão entre testes locais.
-const CACHE_NAME = 'frances-avec-prof-brune-__BUILD_ID__';
+// O fr e o zh moram no MESMO endereço (app.profbrune.com.br/fr e /zh) e por isso dividem a mesma lista de caches do
+// navegador: cada um só mexe nos caches com o próprio prefixo (antes, publicar o fr apagava o cache do zh e vice-versa).
+const CACHE_PREFIX = 'frances-avec-prof-brune-';
+const CACHE_NAME = CACHE_PREFIX + '__BUILD_ID__';
 const PRECACHE_URLS = [
   './',
   './index.html',
@@ -33,17 +36,31 @@ const PRECACHE_URLS = [
 ];
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(
+  event.waitUntil((async () => {
+    const cache = await caches.open(CACHE_NAME);
     // Pré-cache também revalidando (no-cache): sem isso, um arquivo ainda no cache HTTP (max-age do servidor) podia
     // entrar no cache da versão nova com o conteúdo da anterior.
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE_URLS.map((u) => new Request(u, { cache: 'no-cache' })))).then(() => self.skipWaiting())
-  );
+    await cache.addAll(PRECACHE_URLS.map((u) => new Request(u, { cache: 'no-cache' })));
+    // Sem internet logo depois de uma publicação (2026-11-11, tests/pwa-cache): a lista acima tem só ~18 arquivos; os
+    // outros (~200: shared/*.js, CSS, fontes, ícones) só entravam no cache novo na próxima abertura COM internet. Como o
+    // 'activate' apaga o cache antigo, quem abria o app sem internet nesse intervalo recebia a página no lugar dos
+    // scripts e o app não abria. Agora a versão nova busca de novo (no-cache: o que não mudou volta 304, sem corpo)
+    // tudo o que a versão anterior tinha guardado. Arquivo que falhar (sumiu do site, rede caiu) é pulado: não
+    // impede a instalação.
+    const antigos = (await caches.keys()).filter((n) => n.startsWith(CACHE_PREFIX) && n !== CACHE_NAME);
+    const urls = new Set();
+    for (const n of antigos) for (const req of await (await caches.open(n)).keys()) urls.add(req.url);
+    const jaTem = new Set((await cache.keys()).map((req) => req.url));
+    await Promise.all([...urls].filter((u) => !jaTem.has(u)).map((u) =>
+      fetch(u, { cache: 'no-cache' }).then((res) => (res.ok ? cache.put(u, res) : null)).catch(() => null)));
+    await self.skipWaiting();
+  })());
 });
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((names) =>
-      Promise.all(names.filter((n) => n !== CACHE_NAME).map((n) => caches.delete(n)))
+      Promise.all(names.filter((n) => n.startsWith(CACHE_PREFIX) && n !== CACHE_NAME).map((n) => caches.delete(n)))
     ).then(() => self.clients.claim())
   );
 });

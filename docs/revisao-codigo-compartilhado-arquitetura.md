@@ -318,6 +318,15 @@ abertura baixa os ~150 arquivos completos. Trocar por `cache: 'no-cache'` manté
 pergunta ao servidor) e devolve 304 sem corpo para o que não mudou. Invisível para a aluna, exceto pela abertura mais rápida.
 Validar com `teste-navegador` (SW ligado) e na publicação.
 
+Atualização de 2026-11-11 (`tests/pwa-cache/`): o teste passou a falhar 4/10 na `main` sem o site ter mudado (falhava igual no
+commit 21fd055, onde nasceu). Causa no teste: o Playwright 1.63 aplica ao service worker o `context.route()` (que desliga o cache
+HTTP) e o `setOffline`. Sem `route` (internet de fora bloqueada por `--host-resolver-rules`) e abrindo uma aba nova a cada
+abertura, a revalidação está ok: fr 233/233 arquivos com 304, zh 204/204, 0 KB de corpo. Já o item "sem internet", que antes
+passava sem testar de verdade, achou dois defeitos do site, consertados no `service-worker.js` do fr e do zh: (1) logo depois de
+uma publicação o cache novo só tinha os ~18 arquivos da lista fixa e o app não abria sem internet (agora a instalação busca de
+novo, com `no-cache`, tudo o que a versão anterior guardava: 241 arquivos no fr, 212 no zh); (2) fr e zh dividem o mesmo
+endereço e o `activate` de um apagava o cache do outro (agora cada um só apaga caches com o próprio `CACHE_PREFIX`).
+
 ## 9. Propostas em ordem de prioridade
 
 | # | Proposta | Benefício | Esforço | Risco | Muda algo visível? |
