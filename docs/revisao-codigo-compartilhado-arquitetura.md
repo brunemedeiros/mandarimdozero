@@ -326,6 +326,11 @@ passava sem testar de verdade, achou dois defeitos do site, consertados no `serv
 uma publicação o cache novo só tinha os ~18 arquivos da lista fixa e o app não abria sem internet (agora a instalação busca de
 novo, com `no-cache`, tudo o que a versão anterior guardava: 241 arquivos no fr, 212 no zh); (2) fr e zh dividem o mesmo
 endereço e o `activate` de um apagava o cache do outro (agora cada um só apaga caches com o próprio `CACHE_PREFIX`).
+Investigado em seguida: o botão "Atualizar" traz tudo novo (fr e zh, conferido). O problema estava no recarregar MANUAL
+(puxar para baixo, F5) logo depois de uma publicação: o Chromium reaproveitava da memória da aba, sem passar pelo service
+worker, os scripts carregados havia menos de 10 minutos (max-age=600 do GitHub Pages), e a página ficava com `index.html` novo e
+`content.js`/`shared/*.js` antigos até o aviso aparecer. Conserto: o SW entrega à página uma cópia com `Cache-Control: no-cache`
+(só respostas 200; o áudio em pedaços, 206, passa como veio), sem custo de internet (a busca do SW continua 304).
 
 ## 9. Propostas em ordem de prioridade
 

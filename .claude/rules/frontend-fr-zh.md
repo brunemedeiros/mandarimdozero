@@ -35,7 +35,8 @@ paths:
 - Service Worker do PWA cacheia: ao testar, bloquear SW; ao publicar, a versão é atualizada pelo `pwa.js`.
 - `service-worker.js` (fr, zh e o futuro pt): todos os sites moram no mesmo endereço, então cada SW só apaga caches com o próprio
   `CACHE_PREFIX`; a instalação busca de novo o que a versão anterior guardava (abre sem internet logo depois de publicar). No teste com
-  SW ligado, nunca usar `route()` (desliga o cache HTTP do SW). Guarda: `tests/pwa-cache/test_playwright.js`.
+  SW ligado, nunca usar `route()` (desliga o cache HTTP do SW). O SW entrega à página com `Cache-Control: no-cache` (`paraAPagina`), senão
+  recarregar a aba mistura `index.html` novo com scripts antigos. Guarda: `tests/pwa-cache/test_playwright.js`.
 - Diálogo: palavras do vocabulário da unidade em COR + negrito (`.dlg-new`, `var(--seal-red-dark)`), nunca sublinhado
   (sublinhado = pontuação faltando/bloco no lugar errado). Transcrição (pinyin) também destacada (`.dlg-new-py`,
   alinhada por busca, `dlgHighlightPinyin`). zh: pinyin acima do hanzi. Idioma novo reutiliza essas classes.

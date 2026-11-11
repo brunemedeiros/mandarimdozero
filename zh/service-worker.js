@@ -82,11 +82,25 @@ self.addEventListener('fetch', (event) => {
       .then((response) => {
         const copy = response.clone();
         caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
-        return response;
+        return paraAPagina(response);
       })
       .catch(() => caches.match(event.request).then((cached) => cached || caches.match('./index.html')))
   );
 });
+
+// Recarregar a página (puxar para baixo, F5) logo depois de uma publicação (2026-11-11, tests/pwa-cache): o Chromium
+// guarda na memória da aba os scripts e CSS já carregados e, se o servidor disse que valem por 10 minutos (max-age=600
+// do GitHub Pages), reaproveita esses arquivos SEM passar por aqui. Resultado: index.html novo com content.js e
+// shared/*.js antigos (versões misturadas) até o aviso "Atualizar" aparecer. A página recebe então uma cópia com
+// Cache-Control: no-cache, que obriga o navegador a passar por este service worker de novo ao recarregar. Não custa
+// internet: a busca acima continua respondida com 304 quando nada mudou. Só para respostas 200 (o áudio em pedaços, 206,
+// e erros passam como vieram).
+function paraAPagina(response){
+  if (response.status !== 200 || response.type !== 'basic') return response;
+  const headers = new Headers(response.headers);
+  headers.set('Cache-Control', 'no-cache');
+  return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
+}
 
 // ---------- Push (Fase 3 do sistema de notificações) ----------
 // A mensagem chega criptografada e o navegador já entrega decifrada aqui
