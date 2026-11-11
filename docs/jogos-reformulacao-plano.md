@@ -29,6 +29,11 @@ lingua.com (painel de progresso, cartões com status, Premium no fim de cada gru
    "Sua resposta", "Resposta" e "Por que ...?", "Continuar" verde ou vermelho na largura toda; no painel verde os rótulos
    são verdes. "Corrigir" na largura toda também no computador. Chaves `games.wrong` e `games.answerWas` apagadas.
    Paridade da Conjugação: o painel #cg-feedback vira só "FB:ok/no" nas duas árvores (nós movidos, não recriados).
+   **Ajuste 2026-11-11 (2ª rodada, crítica com a skill frontend-design a pedido da autora)**: mantida a casca do painel da
+   trilha; por dentro saíram as caixas "Sua resposta" e "Resposta" (repetiam a frase preenchida, os botões e o campo) e a
+   caixa dentro de caixa. Erro: só a linha "Resposta: X"; "quase": o desenho letra a letra. A REGRA vira o destaque
+   (17px, sem caixa, desenho da linha do tempo ao lado quando existe), com a explicação logo abaixo. O "Continuar" fica
+   visível sem rolar no celular.
 7. "Recomeçar o curso" zera o progresso dos jogos (como zera os Desafios).
 8. Resultado da partida mostra os erros com a opção "Revisar erros", no espírito do Banco de Revisão (formato a confirmar).
 9. Jogos de vocabulário e de preposições não entram na Conjugação; se vierem, serão em Desafios (assunto separado).

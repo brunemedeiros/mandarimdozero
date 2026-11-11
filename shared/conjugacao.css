@@ -339,12 +339,16 @@
 #view-conjugaison .cg-choice.is-dim{ opacity:.5; }
 #view-conjugaison .cg-feedback:empty{ display:none; }
 #view-conjugaison .cg-feedback{ margin-top:20px; } /* o painel da trilha (correct-feedback / wrong-feedback) vem dentro */
-#view-conjugaison .cg-fb-form{ font-size:18px; font-weight:800; color:var(--ink); }
-#view-conjugaison .cg-fb .cg-why p{ margin:0; }
-/* dentro do painel da trilha a explicação já está numa caixa: sem fundo, borda nem margem próprios */
-#view-conjugaison .cg-fb .cg-why{ background:none; border:0; padding:0; margin:0; }
-/* no painel verde (acerto e "quase") os rótulos são verdes, não o vermelho do painel de erro */
-#view-conjugaison .correct-feedback.cg-fb .wrong-feedback-why-label{ color:var(--jade); }
+/* Por dentro do painel (crítica de design, 2026-11-11): linha da resposta, regra em destaque sem caixa, explicação. */
+#view-conjugaison .cg-fb .feedback-card-body{ gap:12px; }
+#view-conjugaison .cg-fb-answer{ margin:0 0 8px; font-size:15.5px; font-weight:700; color:var(--ink); }
+#view-conjugaison .cg-fb-form{ font-size:18px; font-weight:900; color:var(--seal-red-dark); }
+#view-conjugaison .cg-fb .typed-attempt{ margin:0; }
+#view-conjugaison .cg-fb .cg-why{ display:flex; flex-direction:column; gap:6px; background:none; border:0; padding:0; margin:2px 0 4px; }
+#view-conjugaison .cg-fb .cg-timeline{ display:flex; flex-direction:row; align-items:center; justify-content:flex-start; text-align:left; gap:12px; margin:0; padding:0; background:none; border:0; box-shadow:none; }
+#view-conjugaison .cg-fb .cg-timeline svg{ flex:none; width:96px; height:auto; color:var(--ink); }
+#view-conjugaison .cg-fb .cg-timeline figcaption, #view-conjugaison .cg-fb .cg-timeline.cg-rule figcaption{ margin:0; padding:0; background:none; border:0; font-size:17px; font-weight:800; line-height:1.4; color:var(--ink); text-align:left; }
+#view-conjugaison .cg-fb .cg-why p{ margin:0; font-size:15px; line-height:1.55; color:var(--ink); max-width:62ch; }
 #view-conjugaison .cg-verdict{ margin:0 0 14px; font-size:17px; font-weight:900; }
 #view-conjugaison .cg-verdict.ok{ color:var(--jade); }
 #view-conjugaison .cg-verdict.no{ color:var(--error-red); }
