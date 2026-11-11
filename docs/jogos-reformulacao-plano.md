@@ -34,7 +34,15 @@ lingua.com (painel de progresso, cartões com status, Premium no fim de cada gru
    caixa dentro de caixa. Erro: só a linha "Resposta: X"; "quase": o desenho letra a letra. A REGRA vira o destaque
    (17px, sem caixa, desenho da linha do tempo ao lado quando existe), com a explicação logo abaixo. O "Continuar" fica
    visível sem rolar no celular.
-7. "Recomeçar o curso" zera o progresso dos jogos (como zera os Desafios).
+7. **Feita (2026-11-11, aguarda a autora ver)**: só "Corrija o erro" (decisão da autora; "Traduza" fica para jogos de
+   tradução). 16 frases aprovadas (4 por jogo, campo `fix` em fr/conj-games.js; "avoir tort" trocado por "avoir raison"
+   a pedido da autora; rascunho e revisão em `docs/jogos-corrija-o-erro-rascunho.md`). No fim da partida: 2 frases
+   prontas na Curta, 4 na Completa, com a frase inteira e a forma errada no lugar (sem marcar qual), aviso "Agora
+   encontre o erro...", rótulo "Escreva a forma certa". Depois delas (ideia da autora, 2026-11-11): as frases que a
+   aluna errou na parte de ESCOLHA, com a opção que ela marcou no lugar e o aviso "Agora as frases que você errou nesta
+   partida" (entram quando a escolha termina; "Não sei" fica de fora, não há opção marcada; erros da parte escrita ficam
+   de fora por decisão a confirmar). Frase pronta não entra no progresso; a frase corrigida conta como a última
+   resposta. Testes: jogos-progresso 134/134.
 8. Resultado da partida mostra os erros com a opção "Revisar erros", no espírito do Banco de Revisão (formato a confirmar).
 9. Jogos de vocabulário e de preposições não entram na Conjugação; se vierem, serão em Desafios (assunto separado).
 10. Banco de dados: sem tabela nova e sem migration; o progresso vai dentro do `progress.data` que já existe.

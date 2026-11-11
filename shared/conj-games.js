@@ -220,7 +220,14 @@ function createConjGames({ games, soon = [], speak, ids, isLocked, onLocked, lan
     const order = onlyIds ? shuffle(pool) : (roundSize() === 'full' ? shuffle(pool) : pickRound(g));
     const half = CONJ_GAMES_TYPED_HALF && !onlyIds ? Math.ceil(order.length / 2) : order.length;
     const stages = order.map((_, i) => (i < half ? 'choice' : 'type'));
-    Object.assign(S, { game: g, order, gameAt: [], stages, mode: 'choice', idx: 0, hits: 0, log: [], answered: false });
+    // Etapa 7 (aprovada em 2026-11-11): no fim, "Corrija o erro" com frases prontas do jogo (2 na Curta, 4 na Completa) e,
+    // depois delas, as frases que a aluna errou na parte de ESCOLHA, preenchidas com a opção que ela marcou (ownPending:
+    // entram quando a parte de escolha termina). Mesmo interruptor da metade escrita.
+    const fixOn = CONJ_GAMES_TYPED_HALF && !onlyIds;
+    if (fixOn && Array.isArray(g.fix) && g.fix.length){
+      shuffle(g.fix).slice(0, roundSize() === 'full' ? 4 : 2).forEach(f => { order.push(fixItem(f)); stages.push('fix'); });
+    }
+    Object.assign(S, { game: g, order, gameAt: [], stages, mode: 'choice', idx: 0, hits: 0, log: [], answered: false, ownPending: fixOn });
     if (typeof trackEvent === 'function') trackEvent('lesson_start', 'conj_game', { game: g.id });
     show(true);
     renderQuestion();
@@ -317,6 +324,16 @@ function createConjGames({ games, soon = [], speak, ids, isLocked, onLocked, lan
   const gOf = () => S.gameAt[S.idx] || S.game;
   // Dica entre parênteses (cartão da lista e revisão escrita): as duas opções do jogo, ou o verbo (sampleHint: 'verb').
   const optsHint = g => `${g.opts.a.label.toLowerCase()} ou ${g.opts.b.label.toLowerCase()}`;
+  // Frase do "Corrija o erro": a forma certa fica em fixForm (ans aponta para ela) e a regra mostrada é a da opção `kind`.
+  const fixItem = f => ({ id: 'fix-' + f.id, before: f.before, after: f.after, ans: 'fixForm', fixForm: f.fix, wrongForm: f.wrong, optKey: f.kind, clue: f.clue, text: f.text, isFix: true });
+  // Frase que a aluna errou na escolha, de volta no "Corrija o erro" com a opção que ela marcou no lugar.
+  function appendOwnErrors(){
+    S.ownPending = false;
+    S.log.filter(x => x.stage === 'choice' && !x.ok && x.given != null && !x.typed).forEach(x => {
+      S.order.push(Object.assign({}, x.it, { wrongForm: x.it[x.given], isFix: true, own: true }));
+      S.stages.push('fix');
+    });
+  }
 
   // Frase com a lacuna; depois de responder, a forma certa entra na lacuna e a pista fica marcada.
   function sentenceHTML(it, filled){
@@ -330,6 +347,11 @@ function createConjGames({ games, soon = [], speak, ids, isLocked, onLocked, lan
     return `<p class="cg-sentence" lang="${lang}">${mark(it.before)}${gap}${mark(it.after)}</p>`.replace(/ ([?!:;])/g, '\u00a0$1');
   }
 
+  // "Corrija o erro": a frase inteira com a forma errada no lugar (sem marcar qual é: achar o erro faz parte).
+  function wrongSentenceHTML(it){
+    return `<p class="cg-sentence" lang="${lang}">${esc(it.before)}${esc(it.wrongForm)}${esc(it.after)}</p>`.replace(/ ([?!:;])/g, '\u00a0$1');
+  }
+
   function progressHTML(){
     return `<div class="cg-progress"><span>${esc(tt('games.counter', { i: S.idx + 1, n: S.order.length }))}</span></div>`;
   }
@@ -341,7 +363,7 @@ function createConjGames({ games, soon = [], speak, ids, isLocked, onLocked, lan
 
   function renderQuestion(){
     // etapa da frase: escolha ou escrever (a revisão de erros é toda escrita)
-    if (S.mode === 'type' || S.stages[S.idx] === 'type') return renderTypeQuestion();
+    if (S.mode === 'type' || S.stages[S.idx] === 'type' || S.stages[S.idx] === 'fix') return renderTypeQuestion();
     const it = item(), g = gOf();
     S.answered = false;
     const bar = grabBar();
@@ -391,14 +413,16 @@ function createConjGames({ games, soon = [], speak, ids, isLocked, onLocked, lan
       </div>
       ${progressHTML()}
       ${S.mode !== 'type' && S.stages.indexOf('type') === S.idx ? `<p class="cg-stage-intro">${esc(tt('games.type.intro'))}</p>` : ''}
+      ${S.mode !== 'type' && it.isFix && !it.own && S.order.findIndex(x => x.isFix && !x.own) === S.idx ? `<p class="cg-stage-intro">${esc(tt('games.fix.intro'))}</p>` : ''}
+      ${S.mode !== 'type' && it.own && S.order.findIndex(x => x.own) === S.idx ? `<p class="cg-stage-intro">${esc(tt('games.fix.ownIntro'))}</p>` : ''}
       <div class="cg-stage">
         <div class="cg-panel">
           <span class="cg-verb" lang="${lang}">(${it.verb ? esc(it.verb) + ' · ' : ''}${esc(optsHint(g))})</span>
-          <div class="cg-sentence-row">${sentenceHTML(it, false)}</div>
+          <div class="cg-sentence-row">${it.isFix ? wrongSentenceHTML(it) : sentenceHTML(it, false)}</div>
           <p class="cg-tr" hidden></p>
         </div>
         <div class="cg-type">
-          <label class="cg-type-label" for="cg-input">${esc(tt('games.type.label'))}</label>
+          <label class="cg-type-label" for="cg-input">${esc(tt(it.isFix ? 'games.fix.label' : 'games.type.label'))}</label>
           <input id="cg-input" class="cg-input" type="text" lang="${lang}" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="${esc(tt('games.type.placeholder'))}">
           ${keys ? `<div class="conj-accents cg-accents">${keys}</div>` : ''}
           <button type="button" class="btn btn-primary cg-check" id="cg-check" disabled>${esc(tt('games.type.check'))}</button>
@@ -447,8 +471,9 @@ function createConjGames({ games, soon = [], speak, ids, isLocked, onLocked, lan
     const it = item(), g = gOf(), ok = k === it.ans, revealed = k == null;
     S.answered = true;
     if (ok) S.hits++;
-    S.log.push({ it, ok, given: typedInfo ? (typedInfo.revealed ? null : typedInfo.typed) : k, g, typed: !!typedInfo });
-    recordConjGameAnswer(g.id, it.id, ok);
+    S.log.push({ it, ok, given: typedInfo ? (typedInfo.revealed ? null : typedInfo.typed) : k, g, typed: !!typedInfo, stage: S.mode === 'type' ? 'review' : (S.stages[S.idx] || 'choice') });
+    // frase pronta do "Corrija o erro" não é frase do jogo: não entra no progresso (concluído, % e erros de outros dias)
+    if (!(it.isFix && !it.own)) recordConjGameAnswer(g.id, it.id, ok);
     S.dirty = true;
     const dk = $('cg-dontknow');
     if (dk) dk.classList.add('disabled');
@@ -465,7 +490,7 @@ function createConjGames({ games, soon = [], speak, ids, isLocked, onLocked, lan
       b.disabled = true;
       b.classList.add(b.dataset.k === it.ans ? 'is-right' : (b.dataset.k === k ? 'is-wrong' : 'is-dim'));
     });
-    const opt = g.opts[it.ans], txt = L(it.text) || {};
+    const opt = g.opts[it.optKey || it.ans], txt = L(it.text) || {};
     const full = it.before + it[it.ans] + it.after;
     const row = $(ids.content).querySelector('.cg-sentence-row');
     row.innerHTML = sentenceHTML(it, true)
@@ -516,6 +541,7 @@ function createConjGames({ games, soon = [], speak, ids, isLocked, onLocked, lan
     // O mesmo toque/Enter que respondeu não pode também apertar "Próxima frase".
     if (performance.now() - S.shownAt < 350) return;
     S.idx++;
+    if (S.ownPending && S.stages[S.idx - 1] === 'choice' && S.stages[S.idx] !== 'choice') appendOwnErrors();
     if (S.idx >= S.order.length) renderResult();
     else renderQuestion();
   }

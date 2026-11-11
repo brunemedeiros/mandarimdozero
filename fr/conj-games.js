@@ -34,6 +34,18 @@ const CONJ_GAMES = [
       a: { label: 'Avoir', tl: { 'pt-BR': '{avoir}: o que você tem (idade, fome, frio, medo, razão...)', en: '{avoir}: what you have (age, hunger, cold, fear, being right...)' } },
       b: { label: 'Être', tl: { 'pt-BR': '{être}: o que você é ou como está (cansado, doente, atrasado, casado...)', en: '{être}: what you are or how you are (tired, sick, late, married...)' } }
     },
+    // "Corrija o erro" (etapa 7, aprovado pela autora em 2026-11-11; rascunho e revisão em docs/jogos-corrija-o-erro-rascunho.md):
+    // a frase vem com UMA forma errada (wrong); a aluna escreve a certa (fix). kind: 'a'|'b' = a opção do jogo que está certa.
+    fix: [
+      { id: 'f1', before: "Elle ", wrong: "est", fix: "a", after: " trente ans.", kind: 'a', clue: "trente ans",
+        text: { 'pt-BR': { tr: "Ela tem trinta anos.", why: "Idade se tem, como em português: {elle a trente ans}. \"{Elle est trente ans}\" não existe." }, en: { tr: "She's thirty.", why: "Age goes with {avoir}: {elle a trente ans} (literally \"she has thirty years\"), never \"{elle est trente ans}\"." } } },
+      { id: 'f2', before: "Vous ", wrong: "êtes", fix: "avez", after: " raison, c'est fermé le lundi.", kind: 'a', clue: "raison",
+        text: { 'pt-BR': { tr: "Você tem razão, fecha às segundas.", why: "\"Ter razão\" é {avoir raison}, como em português. A armadilha é pensar \"você está certo\" e usar {être}: o certo é {vous avez raison}." }, en: { tr: "You're right, it's closed on Mondays.", why: "\"You're right\" uses \"are\", but French says you \"have reason\": {vous avez raison}. \"{Vous êtes raison}\" doesn't exist." } } },
+      { id: 'f3', before: "Mon fils ", wrong: "a", fix: "est", after: " jaloux de sa petite sœur.", kind: 'b', clue: "jaloux",
+        text: { 'pt-BR': { tr: "Meu filho tem ciúmes da irmãzinha.", why: "Em português se \"tem\" ciúmes, mas em francês ciumento é adjetivo: {être jaloux}, {il est jaloux}." }, en: { tr: "My son is jealous of his little sister.", why: "{Jaloux} is an adjective, so it takes {être}, just like \"is jealous\": {il est jaloux}." } } },
+      { id: 'f4', before: "Tu ", wrong: "as", fix: "es", after: " malade ? Tu as l'air pâle.", kind: 'b', clue: "malade",
+        text: { 'pt-BR': { tr: "Você está doente? Você está pálido.", why: "Doente é adjetivo: {tu es malade}. A doença em si se tem ({tu as la grippe}), mas \"doente\" vem com {être}." }, en: { tr: "Are you sick? You look pale.", why: "\"Sick\" is an adjective: {tu es malade}. The illness itself goes with {avoir} ({tu as la grippe}), but \"sick\" takes {être}." } } },
+    ],
     items: [
       { id: 1, before: '', after: ' vingt-cinq ans.', a: 'J\'ai', b: 'Je suis', ans: 'a', clue: 'vingt-cinq ans',
         text: {
@@ -129,6 +141,18 @@ const CONJ_GAMES = [
       a: { label: 'Avoir', tl: { 'pt-BR': '{avoir}: a grande maioria dos verbos', en: '{avoir}: the vast majority of verbs' } },
       b: { label: 'Être', tl: { 'pt-BR': '{être}: ir e vir, entrar e sair, chegar e ir embora, nascer, ficar, cair... e todo verbo com {me}/{se}', en: '{être}: come and go, in and out, arrive and leave, be born, stay, fall... and every verb with {me}/{se}' } }
     },
+    // "Corrija o erro" (etapa 7, aprovado pela autora em 2026-11-11; rascunho e revisão em docs/jogos-corrija-o-erro-rascunho.md):
+    // a frase vem com UMA forma errada (wrong); a aluna escreve a certa (fix). kind: 'a'|'b' = a opção do jogo que está certa.
+    fix: [
+      { id: 'f1', before: "Hier, il ", wrong: "a", fix: "est", after: " tombé dans la rue.", kind: 'b', clue: "tombé",
+        text: { 'pt-BR': { tr: "Ontem ele caiu na rua.", why: "{Tomber} (cair) está na lista curta de verbos que usam {être} no passé composé: {il est tombé}." }, en: { tr: "Yesterday he fell in the street.", why: "{Tomber} (to fall) is on the short list of verbs that take {être}: {il est tombé}." } } },
+      { id: 'f2', before: "", wrong: "J'ai", fix: "Je suis", after: " venu en bus.", kind: 'b', clue: "venu",
+        text: { 'pt-BR': { tr: "Eu vim de ônibus.", why: "{Venir} (vir) usa {être}: {je suis venu}. \"{J'ai venu}\" é um erro muito comum." }, en: { tr: "I came by bus.", why: "{Venir} (to come) takes {être}: {je suis venu}. \"{J'ai venu}\" is a very common mistake." } } },
+      { id: 'f3', before: "Il ", wrong: "est", fix: "a", after: " mangé une pizza.", kind: 'a', clue: "mangé",
+        text: { 'pt-BR': { tr: "Ele comeu uma pizza.", why: "{Manger} não está na lista curta do {être} (ir, vir, chegar, partir, cair, nascer...) nem tem {se}: usa {avoir}, como a grande maioria. {Il a mangé}." }, en: { tr: "He ate a pizza.", why: "{Manger} isn't on the short {être} list and isn't reflexive (no {se}): it takes {avoir}, like most verbs. {Il a mangé}." } } },
+      { id: 'f4', before: "Mon grand-père ", wrong: "a", fix: "est", after: " né en 1950.", kind: 'b', clue: "né",
+        text: { 'pt-BR': { tr: "Meu avô nasceu em 1950.", why: "{Naître} (nascer) usa {être}: {il est né}. Nascer e morrer ({naître}, {mourir}) são do grupo do {être}." }, en: { tr: "My grandfather was born in 1950.", why: "{Naître} (to be born) takes {être}: {il est né}. Being born and dying ({naître}, {mourir}) are in the {être} group." } } },
+    ],
     items: [
       { id: 1, before: 'Hier, ', after: ' allé au cinéma.', verb: 'aller', a: 'j\'ai', b: 'je suis', ans: 'b', clue: 'allé',
         text: {
@@ -244,6 +268,18 @@ const CONJ_GAMES = [
       a: { label: 'Tu', tl: { 'pt-BR': '{tu}: uma pessoa só, próxima (amigo, família, criança)', en: '{tu}: one person you\'re close to (friend, family, child)' } },
       b: { label: 'Vous', tl: { 'pt-BR': '{vous}: formal (desconhecido, cliente, chefe) ou mais de uma pessoa', en: '{vous}: formal (stranger, customer, boss) or more than one person' } }
     },
+    // "Corrija o erro" (etapa 7, aprovado pela autora em 2026-11-11; rascunho e revisão em docs/jogos-corrija-o-erro-rascunho.md):
+    // a frase vem com UMA forma errada (wrong); a aluna escreve a certa (fix). kind: 'a'|'b' = a opção do jogo que está certa.
+    fix: [
+      { id: 'f1', before: "Bonjour madame, ", wrong: "tu peux", fix: "vous pouvez", after: " m'aider, s'il vous plaît ?", kind: 'b', clue: "madame",
+        text: { 'pt-BR': { tr: "Bom dia, senhora, pode me ajudar, por favor?", why: "Com uma desconhecida, e ainda mais com \"{madame}\" e \"{s'il vous plaît}\", o certo é {vous}: {vous pouvez}." }, en: { tr: "Hello, madam, could you help me, please?", why: "With a stranger, especially with \"{madame}\" and \"{s'il vous plaît}\", use {vous}: {vous pouvez}." } } },
+      { id: 'f2', before: "Maman, papa, ", wrong: "tu veux", fix: "vous voulez", after: " un café ?", kind: 'b', clue: "Maman, papa",
+        text: { 'pt-BR': { tr: "Mãe, pai, vocês querem um café?", why: "Com pai e mãe se usa {tu}, mas aqui são duas pessoas: mais de uma pessoa é sempre {vous}. {Vous voulez}." }, en: { tr: "Mom, Dad, do you want a coffee?", why: "You use {tu} with each parent, but here there are two people: more than one person is always {vous}. {Vous voulez}." } } },
+      { id: 'f3', before: "Pardon, monsieur, ", wrong: "tu habites", fix: "vous habitez", after: " dans le quartier ?", kind: 'b', clue: "monsieur",
+        text: { 'pt-BR': { tr: "Com licença, o senhor mora no bairro?", why: "Com um desconhecido, e ainda mais com {monsieur}, o certo é {vous}: {vous habitez}." }, en: { tr: "Excuse me, sir, do you live around here?", why: "With a stranger, especially with {monsieur}, use {vous}: {vous habitez}." } } },
+      { id: 'f4', before: "Papa, ", wrong: "vous voulez", fix: "tu veux", after: " jouer avec moi ?", kind: 'a', clue: "Papa",
+        text: { 'pt-BR': { tr: "Pai, quer brincar comigo?", why: "Na França, filho fala {tu} com pai e mãe. Mesmo que em português às vezes se diga \"o senhor\" ao pai, em francês {vous} com o pai soa muito antiquado: {tu veux}." }, en: { tr: "Dad, do you want to play with me?", why: "In France, children say {tu} to their parents; {vous} with your dad sounds very old-fashioned: {tu veux}." } } },
+    ],
     items: [
       { id: 1, before: 'Salut Léa ! ', after: ' bien ?', verb: 'aller', a: 'Tu vas', b: 'Vous allez', ans: 'a', clue: 'Salut Léa',
         text: {
@@ -333,6 +369,18 @@ const CONJ_GAMES = [
       a: { label: 'Passé composé', sketch: 'point', tl: { 'pt-BR': 'um ponto: começou e terminou', en: 'a point: it started and ended' } },
       b: { label: 'Imparfait', sketch: 'line', tl: { 'pt-BR': 'uma linha: em curso, hábito ou descrição', en: 'a line: ongoing, habit or description' } }
     },
+    // "Corrija o erro" (etapa 7, aprovado pela autora em 2026-11-11; rascunho e revisão em docs/jogos-corrija-o-erro-rascunho.md):
+    // a frase vem com UMA forma errada (wrong); a aluna escreve a certa (fix). kind: 'a'|'b' = a opção do jogo que está certa.
+    fix: [
+      { id: 'f1', before: "Quand j'étais petit, ", wrong: "je suis allé", fix: "j'allais", after: " à l'école à pied tous les jours.", kind: 'b', clue: "tous les jours",
+        text: { 'pt-BR': { tr: "Quando eu era pequeno, ia a pé para a escola todos os dias.", why: "{Tous les jours} é hábito no passado: {imparfait}, {j'allais}." }, en: { tr: "When I was little, I walked to school every day.", why: "{Tous les jours} is a past habit: {imparfait}, {j'allais}." } } },
+      { id: 'f2', before: "Samedi dernier, nous ", wrong: "passions", fix: "avons passé", after: " toute la journée à la plage.", kind: 'a', clue: "Samedi dernier",
+        text: { 'pt-BR': { tr: "No sábado passado, passamos o dia todo na praia.", why: "Um dia marcado ({samedi dernier}) e uma duração fechada ({toute la journée}): {passé composé}, {nous avons passé}. O {imparfait} aqui daria ideia de hábito, que não combina com \"sábado passado\"." }, en: { tr: "Last Saturday, we spent the whole day at the beach.", why: "A set day ({samedi dernier}) and a closed span ({toute la journée}): {passé composé}, {nous avons passé}. The {imparfait} would suggest a habit, which clashes with \"last Saturday\"." } } },
+      { id: 'f3', before: "Quand je suis arrivé, il ", wrong: "a plu", fix: "pleuvait", after: " depuis une heure.", kind: 'b', clue: "depuis une heure",
+        text: { 'pt-BR': { tr: "Quando eu cheguei, já estava chovendo fazia uma hora.", why: "A chuva já estava acontecendo quando eu cheguei (e {depuis une heure} mostra isso): {imparfait}, {il pleuvait}." }, en: { tr: "When I arrived, it had been raining for an hour.", why: "The rain was already going on when I arrived ({depuis une heure} shows it): {imparfait}, {il pleuvait}." } } },
+      { id: 'f4', before: "Hier soir, le téléphone ", wrong: "sonnait", fix: "a sonné", after: " trois fois.", kind: 'a', clue: "trois fois",
+        text: { 'pt-BR': { tr: "Ontem à noite o telefone tocou três vezes.", why: "Ações contadas ({trois fois}) num momento marcado ({hier soir}): {passé composé}, {il a sonné}." }, en: { tr: "Last night the phone rang three times.", why: "Counted actions ({trois fois}) at a set time ({hier soir}): {passé composé}, {il a sonné}." } } },
+    ],
     items: [
       { id: 1, before: 'Hier, ', after: ' ma prof au supermarché.', verb: 'croiser', a: "j'ai croisé", b: 'je croisais', ans: 'a', clue: 'Hier',
         text: {

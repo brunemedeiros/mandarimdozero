@@ -7,7 +7,7 @@ Nada disto está no site: entra em `fr/conj-games.js` (campo `fix` de cada jogo)
 Formato de cada item: frase errada · forma errada → forma certa · tradução (pt-BR / en) · por quê (pt-BR / en).
 Francês dentro das explicações vai entre {chaves} (sai em azul no site).
 
-**Versão 2 (2026-11-11)**: revisada pelo agente revisor-conteudo; as frases trocadas ou ajustadas estão marcadas com
+**APROVADO pela autora (2026-11-11), com a troca da 2ª frase de être ou avoir (v3); já em `fr/conj-games.js` (campo `fix`).** Versão 2 (2026-11-11): revisada pelo agente revisor-conteudo; as frases trocadas ou ajustadas estão marcadas com
 **[v2]** e o motivo. Ainda aguarda a aprovação da autora.
 
 ## Être ou avoir? (`etre-avoir`, A1)
@@ -16,11 +16,11 @@ Francês dentro das explicações vai entre {chaves} (sai em azul no site).
    - pt-BR: Ela tem trinta anos. / en: She's thirty.
    - Por quê (pt-BR): Idade se tem, como em português: {elle a trente ans}. "{Elle est trente ans}" não existe.
    - Why (en): Age goes with {avoir}: {elle a trente ans} (literally "she has thirty years"), never "{elle est trente ans}".
-2. **[v2]** Non, tu ~~es~~ tort : le film commence à vingt heures. → **as**
-   *(trocada: a anterior, "Nous sommes faim, on mange ?", repetia a frase 3 do jogo)*
-   - pt-BR: Não, você está errado: o filme começa às oito da noite. / en: No, you're wrong: the movie starts at eight.
-   - Por quê: Em francês, estar errado se diz com {avoir}: {avoir tort}, {tu as tort} (e estar certo é {avoir raison}).
-   - Why: In French, being wrong is something you have: {avoir tort}, {tu as tort} (and being right is {avoir raison}).
+2. **[v3]** Vous ~~êtes~~ raison, c'est fermé le lundi. → **avez**
+   *(trocada a pedido da autora, 2026-11-11: "avoir tort" é difícil e avançado demais para o A1)*
+   - pt-BR: Você tem razão, fecha às segundas. / en: You're right, it's closed on Mondays.
+   - Por quê: "Ter razão" é {avoir raison}, como em português. A armadilha é pensar "você está certo" e usar {être}: o certo é {vous avez raison}.
+   - Why: "You're right" uses "are", but French says you "have reason": {vous avez raison}. "{Vous êtes raison}" doesn't exist.
 3. **[v2]** Mon fils ~~a~~ jaloux de sa petite sœur. → **est**
    *(trocada: "J'ai fatigué" repetia a frase 9 do jogo e não é um erro natural de quem fala português)*
    - pt-BR: Meu filho tem ciúmes da irmãzinha. / en: My son is jealous of his little sister.

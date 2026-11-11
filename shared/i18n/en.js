@@ -860,6 +860,9 @@ window.I18N_CATALOG['en'] = {
   'games.type.placeholder': 'Your answer', // ALTA
   'games.type.check': 'Check', // ALTA
   'games.type.intro': 'No options now: type the answer.', // ALTA
+  'games.fix.intro': 'Now find the mistake: each sentence has one wrong form. Type only that form, corrected.', // ALTA
+  'games.fix.ownIntro': 'Now the sentences you got wrong in this round: type the correct form.', // ALTA
+  'games.fix.label': 'Type the correct form', // ALTA
   'games.almost': 'Almost!', // ALTA
   'games.youAnswered': 'You answered:', // ALTA
   'games.dueTitle': 'Review mistakes ({n})', // ALTA
