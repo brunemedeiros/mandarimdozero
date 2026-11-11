@@ -117,6 +117,8 @@ function reportExerciseTextSnippet(ex){
 function captureReportContext(extra){
   const ctx = {};
   try { ctx.url = window.location.href; } catch (e) {}
+  // Idioma do site de quem envia (2026-11-11): o rascunho da resposta por e-mail (Admin > Reports) sai nessa língua.
+  try { if (typeof getUiLang === 'function') ctx.ui_language = getUiLang(); } catch (e) {}
   try { ctx.viewport = { width: window.innerWidth, height: window.innerHeight }; } catch (e) {}
   try {
     if (typeof ANALYTICS_DEVICE !== 'undefined' && ANALYTICS_DEVICE){
