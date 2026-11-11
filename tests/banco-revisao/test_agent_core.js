@@ -94,6 +94,13 @@ const DIR = path.join(__dirname, '../../supabase/functions/review-bank-agent');
   const b = r.json.summary.students[0];
   check('aluno sem conta: item entra aprovado e NÃO gera cartão', b.new_items === 1 && b.cards_created === 0 && d.items.find(i => i.question === 'traffic').status === 'aprovado' && !d.items.find(i => i.question === 'traffic').teacher_flashcard_id);
 
+  // --- aluno ligado a uma TURMA (sem conta individual): a rotina também gera os cartões (migration 135; antes era só pelo botão da tela)
+  d.students.push({ id: 'sT', teacher_id: T, name: 'Dupla', language_app_key: 'frances', reference_language: 'pt', status: 'ativo', agent_managed: true, linked_student_id: null, classroom_id: 3, agenda_names: [], lesson_dates: [] });
+  d.items.push({ id: 'iT0', teacher_id: T, bank_student_id: 'sT', import_key: 'turma-antigo', item_type: 'vocabulario', question: 'the table', answer: 'la table', status: 'aprovado', level: 0 });
+  r = await call(agent, { action: 'ingest', students: [{ student_id: 'sT', items: [{ type: 'vocabulario', q: 'the chair', a: 'la chaise' }] }] });
+  const tt = r.json.summary.students[0];
+  check('aluno de Turma: item novo limpo vira cartão e o item aprovado que estava sem cartão também', tt.new_items === 1 && tt.cards_created === 2 && !!d.items.find(i => i.question === 'the chair').teacher_flashcard_id && !!d.items.find(i => i.id === 'iT0').teacher_flashcard_id, JSON.stringify(tt));
+
   // --- fronteiras
   r = await call(agent, { action: 'ingest', students: [{ student_id: 'sC', items: [{ type: 'vocabulario', q: 'x', a: 'y' }] }, { student_id: 'nao-existe', items: [] }] });
   check('aluno que ainda é do artifact (agent_managed=false) e aluno inexistente são rejeitados', r.json.summary.rejected.length === 2 && r.json.summary.students.length === 0 && !d.items.some(i => i.bank_student_id === 'sC'));
