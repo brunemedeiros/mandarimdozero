@@ -544,19 +544,53 @@
        "Vous allez bien ?",
        "vous allez bien ?"
       ]
-     ]
+     ],
+     "forma": 0,
+     "traducao": {
+      "pt-BR": "você está bem?",
+      "en": null
+     },
+     "registro": "informal"
     },
     {
-     "id": "l2-nota-perguntar",
-     "tipo": "nota",
-     "nota": "como-perguntar-tudo-bem",
-     "rotulos": {
-      "Ça va ?": "informal",
-      "Tu vas bien ?": "informal",
-      "Comment vas-tu ?": "informal",
-      "Vous allez bien ?": "formal",
-      "Comment allez-vous ?": "formal"
+     "id": "l2-ex-tuvas-inf",
+     "tipo": "vf",
+     "fr": "Tu vas bien ?",
+     "afirmacao": {
+      "pt-BR": "Você pergunta isso a um amigo.",
+      "en": null
+     },
+     "resposta": true,
+     "frase_do_painel": "Tu vas bien ?",
+     "traducao_do_painel": {
+      "pt-BR": "Você está bem?",
+      "en": null
+     },
+     "explicacao": {
+      "pt-BR": "<b>Tu vas bien ?</b> é do informal: amigos, família, gente da mesma idade.",
+      "en": null
      }
+    },
+    {
+     "id": "l2-tuvas-formal",
+     "tipo": "cartao",
+     "cartao": "tu vas bien ? / vous allez bien ?",
+     "audios": [
+      [
+       "Tu vas bien ?",
+       "tu vas bien ?"
+      ],
+      [
+       "Vous allez bien ?",
+       "vous allez bien ?"
+      ]
+     ],
+     "forma": 1,
+     "traducao": {
+      "pt-BR": "o senhor (a senhora) está bem?",
+      "en": null
+     },
+     "registro": "formal"
     },
     {
      "id": "l2-ex-tuvas",
@@ -591,6 +625,18 @@
      }
     },
     {
+     "id": "l2-nota-perguntar",
+     "tipo": "nota",
+     "nota": "como-perguntar-tudo-bem",
+     "rotulos": {
+      "Ça va ?": "informal",
+      "Tu vas bien ?": "informal",
+      "Comment vas-tu ?": "informal",
+      "Vous allez bien ?": "formal",
+      "Comment allez-vous ?": "formal"
+     }
+    },
+    {
      "id": "l2-ettoi",
      "tipo": "cartao",
      "cartao": "et toi ? / et vous ?",
@@ -603,7 +649,85 @@
        "Et vous ?",
        "et vous ?"
       ]
-     ]
+     ],
+     "forma": 0,
+     "traducao": {
+      "pt-BR": "e você?",
+      "en": null
+     },
+     "registro": "informal"
+    },
+    {
+     "id": "l2-ex-ettoi-inf",
+     "tipo": "vf",
+     "fr": "Et toi ?",
+     "afirmacao": {
+      "pt-BR": "Você devolve a pergunta assim a um senhor que não conhece.",
+      "en": null
+     },
+     "resposta": false,
+     "frase_do_painel": "Et toi ?",
+     "traducao_do_painel": {
+      "pt-BR": "E você?",
+      "en": null
+     },
+     "explicacao": {
+      "pt-BR": "<b>Et toi ?</b> é do informal: amigos e família. Com um senhor, vem a forma formal.",
+      "en": null
+     }
+    },
+    {
+     "id": "l2-ettoi-formal",
+     "tipo": "cartao",
+     "cartao": "et toi ? / et vous ?",
+     "audios": [
+      [
+       "Et toi ?",
+       "et toi ?"
+      ],
+      [
+       "Et vous ?",
+       "et vous ?"
+      ]
+     ],
+     "forma": 1,
+     "traducao": {
+      "pt-BR": "e o senhor? e a senhora?",
+      "en": null
+     },
+     "registro": "formal"
+    },
+    {
+     "id": "l2-ex-ettoi-formal",
+     "tipo": "funcao",
+     "pergunta": {
+      "pt-BR": "A sua vizinha, uma senhora, pergunta se você está bem. Você responde e devolve a pergunta.",
+      "en": null
+     },
+     "opcoes": [
+      "Bien, et toi ?",
+      "Bien, et vous ?",
+      "Bonsoir, madame."
+     ],
+     "resposta": "Bien, et vous ?",
+     "traducao_do_painel": {
+      "pt-BR": "Bem, e a senhora?",
+      "en": null
+     },
+     "explicacao": {
+      "pt-BR": "Com a vizinha que você trata por senhora: <b>et vous ?</b>",
+      "en": null
+     },
+     "explicacao_erro": {
+      "Bien, et toi ?": {
+       "pt-BR": "<b>Et toi ?</b> é do informal. ",
+       "en": null
+      },
+      "Bonsoir, madame.": {
+       "pt-BR": "<b>Bonsoir</b> é cumprimento; aqui, devolva a pergunta. ",
+       "en": null
+      }
+     }
     },
     {
      "id": "l2-jevais",
@@ -668,6 +792,36 @@
        "pt-BR": "Você escreveu como se ouve! Em francês, <b>oi</b> se pronuncia /uá/. ",
        "en": null
       }
+     }
+    },
+    {
+     "id": "l2-rel",
+     "tipo": "relacionar",
+     "pares": [
+      [
+       "Tu vas bien ?",
+       "Você está bem? (informal)"
+      ],
+      [
+       "Vous allez bien ?",
+       "O senhor está bem? (formal)"
+      ],
+      [
+       "Et toi ?",
+       "E você? (informal)"
+      ],
+      [
+       "Et vous ?",
+       "E o senhor? (formal)"
+      ],
+      [
+       "ça va",
+       "tudo bem"
+      ]
+     ],
+     "explicacao": {
+      "pt-BR": "Repare: o informal tem <b>tu</b> e <b>toi</b>; o formal, <b>vous</b>.",
+      "en": null
      }
     },
     {
@@ -800,7 +954,75 @@
     {
      "id": "l3-svp",
      "tipo": "cartao",
-     "cartao": "s'il te plaît / s'il vous plaît"
+     "cartao": "s'il te plaît / s'il vous plaît",
+     "forma": 0,
+     "traducao": {
+      "pt-BR": "por favor",
+      "en": null
+     },
+     "registro": "informal"
+    },
+    {
+     "id": "l3-ex-svp-inf",
+     "tipo": "vf",
+     "fr": "s'il te plaît",
+     "afirmacao": {
+      "pt-BR": "Você usa com amigos e família.",
+      "en": null
+     },
+     "resposta": true,
+     "frase_do_painel": "s'il te plaît",
+     "traducao_do_painel": {
+      "pt-BR": "por favor",
+      "en": null
+     },
+     "explicacao": {
+      "pt-BR": "<b>S'il te plaît</b> é do informal: amigos e família.",
+      "en": null
+     }
+    },
+    {
+     "id": "l3-svp-formal",
+     "tipo": "cartao",
+     "cartao": "s'il te plaît / s'il vous plaît",
+     "forma": 1,
+     "traducao": {
+      "pt-BR": "por favor",
+      "en": null
+     },
+     "registro": "formal"
+    },
+    {
+     "id": "l3-ex-svp-formal",
+     "tipo": "funcao",
+     "pergunta": {
+      "pt-BR": "Você pede uma informação a um desconhecido na rua. Como termina o pedido?",
+      "en": null
+     },
+     "opcoes": [
+      "s'il te plaît",
+      "s'il vous plaît",
+      "merci"
+     ],
+     "resposta": "s'il vous plaît",
+     "traducao_do_painel": {
+      "pt-BR": "por favor",
+      "en": null
+     },
+     "explicacao": {
+      "pt-BR": "Com quem você não conhece, sempre <b>s'il vous plaît</b>.",
+      "en": null
+     },
+     "explicacao_erro": {
+      "s'il te plaît": {
+       "pt-BR": "<b>S'il te plaît</b> é do informal. ",
+       "en": null
+      },
+      "merci": {
+       "pt-BR": "<b>Merci</b> é para agradecer, depois. ",
+       "en": null
+      }
+     }
     },
     {
      "id": "l3-nota-svp",
@@ -871,7 +1093,75 @@
     {
      "id": "l3-excuse",
      "tipo": "cartao",
-     "cartao": "excuse-moi / excusez-moi"
+     "cartao": "excuse-moi / excusez-moi",
+     "forma": 0,
+     "traducao": {
+      "pt-BR": "desculpa, com licença",
+      "en": null
+     },
+     "registro": "informal"
+    },
+    {
+     "id": "l3-ex-excuse-inf",
+     "tipo": "vf",
+     "fr": "Excuse-moi !",
+     "afirmacao": {
+      "pt-BR": "Você diz isso para chamar o garçom.",
+      "en": null
+     },
+     "resposta": false,
+     "frase_do_painel": "Excuse-moi !",
+     "traducao_do_painel": {
+      "pt-BR": "Desculpa!",
+      "en": null
+     },
+     "explicacao": {
+      "pt-BR": "<b>Excuse-moi</b> é do informal: amigos e família.",
+      "en": null
+     }
+    },
+    {
+     "id": "l3-excuse-formal",
+     "tipo": "cartao",
+     "cartao": "excuse-moi / excusez-moi",
+     "forma": 1,
+     "traducao": {
+      "pt-BR": "desculpe, com licença",
+      "en": null
+     },
+     "registro": "formal"
+    },
+    {
+     "id": "l3-ex-excuse-formal",
+     "tipo": "funcao",
+     "pergunta": {
+      "pt-BR": "Você quer chamar a atenção do garçom. O que diz?",
+      "en": null
+     },
+     "opcoes": [
+      "Excuse-moi !",
+      "Excusez-moi !",
+      "Merci !"
+     ],
+     "resposta": "Excusez-moi !",
+     "traducao_do_painel": {
+      "pt-BR": "Com licença!",
+      "en": null
+     },
+     "explicacao": {
+      "pt-BR": "Com desconhecidos, <b>excusez-moi</b>.",
+      "en": null
+     },
+     "explicacao_erro": {
+      "Excuse-moi !": {
+       "pt-BR": "<b>Excuse-moi</b> é do informal. ",
+       "en": null
+      },
+      "Merci !": {
+       "pt-BR": "<b>Merci</b> é para agradecer. ",
+       "en": null
+      }
+     }
     },
     {
      "id": "l3-nota-pardon",
@@ -880,25 +1170,6 @@
      "rotulos": {
       "Excusez-moi !": "formal",
       "Excuse-moi !": "informal"
-     }
-    },
-    {
-     "id": "l3-ex-nota",
-     "tipo": "vf",
-     "fr": "Excuse-moi !",
-     "afirmacao": {
-      "pt-BR": "Dizemos isso para chamar a atenção de um desconhecido.",
-      "en": null
-     },
-     "resposta": false,
-     "frase_do_painel": "Excusez-moi, monsieur !",
-     "traducao_do_painel": {
-      "pt-BR": "Com licença, senhor!",
-      "en": null
-     },
-     "explicacao": {
-      "pt-BR": "Com desconhecidos, <b>excusez-moi</b>; com amigos e família, <b>excuse-moi</b>.",
-      "en": null
      }
     },
     {
@@ -931,6 +1202,36 @@
        "pt-BR": "O som está certo! Em francês, <b>-ez</b> final se pronuncia /ê/, como <b>é</b>. ",
        "en": null
       }
+     }
+    },
+    {
+     "id": "l3-rel",
+     "tipo": "relacionar",
+     "pares": [
+      [
+       "s'il te plaît",
+       "por favor (informal)"
+      ],
+      [
+       "s'il vous plaît",
+       "por favor (formal)"
+      ],
+      [
+       "excuse-moi",
+       "desculpa (informal)"
+      ],
+      [
+       "excusez-moi",
+       "com licença (formal)"
+      ],
+      [
+       "merci",
+       "obrigado / obrigada"
+      ]
+     ],
+     "explicacao": {
+      "pt-BR": "No formal, <b>vous</b> e <b>-ez</b>: <b>s'il vous plaît</b>, <b>excusez-moi</b>.",
+      "en": null
      }
     },
     {

@@ -216,6 +216,78 @@
      "papel": {
       "pt-BR": "Pergunta",
       "en": null
+     },
+     "forma": 0,
+     "traducao": {
+      "pt-BR": "Qual é a sua nacionalidade?",
+      "en": null
+     },
+     "registro": "informal"
+    },
+    {
+     "id": "u3-ex-nat-inf",
+     "tipo": "vf",
+     "fr": "Quelle est ta nationalité ?",
+     "afirmacao": {
+      "pt-BR": "Você pergunta isso a um colega de curso.",
+      "en": null
+     },
+     "resposta": true,
+     "frase_do_painel": "Quelle est ta nationalité ?",
+     "traducao_do_painel": {
+      "pt-BR": "Qual é a sua nacionalidade?",
+      "en": null
+     },
+     "explicacao": {
+      "pt-BR": "<b>Ta</b> é do informal: colegas, amigos, família.",
+      "en": null
+     }
+    },
+    {
+     "id": "u3-frase-nat-formal",
+     "tipo": "frase",
+     "frase": "Quelle est ta nationalité ? / Quelle est votre nationalité ?",
+     "papel": {
+      "pt-BR": "Pergunta",
+      "en": null
+     },
+     "forma": 1,
+     "traducao": {
+      "pt-BR": "Qual é a sua nacionalidade?",
+      "en": null
+     },
+     "registro": "formal"
+    },
+    {
+     "id": "u3-ex-nat-formal",
+     "tipo": "funcao",
+     "pergunta": {
+      "pt-BR": "Você trabalha num hotel e precisa saber a nacionalidade de um hóspede. O que pergunta?",
+      "en": null
+     },
+     "opcoes": [
+      "Quelle est ta nationalité ?",
+      "Quelle est votre nationalité ?",
+      "La nationalité ?"
+     ],
+     "resposta": "Quelle est votre nationalité ?",
+     "traducao_do_painel": {
+      "pt-BR": "Qual é a sua nacionalidade?",
+      "en": null
+     },
+     "explicacao": {
+      "pt-BR": "Com quem você não conhece, use o formal: <b>votre</b>.",
+      "en": null
+     },
+     "explicacao_erro": {
+      "Quelle est ta nationalité ?": {
+       "pt-BR": "<b>Ta</b> é do informal. ",
+       "en": null
+      },
+      "La nationalité ?": {
+       "pt-BR": "Assim fica seco demais: faça a pergunta inteira. ",
+       "en": null
+      }
      }
     },
     {
@@ -358,30 +430,28 @@
      }
     },
     {
-     "id": "u3-l1-montar",
-     "tipo": "montar",
-     "traducao": {
-      "pt-BR": "Qual é a sua nacionalidade? (formal)",
-      "en": null
-     },
-     "pecas": [
-      "votre",
-      "Quelle",
-      "nationalité",
-      "?",
-      "est",
-      "ta"
+     "id": "u3-l1-rel",
+     "tipo": "relacionar",
+     "pares": [
+      [
+       "Quelle est ta nationalité ?",
+       "Qual é a sua nacionalidade? (informal)"
+      ],
+      [
+       "Quelle est votre nationalité ?",
+       "Qual é a sua nacionalidade? (formal)"
+      ],
+      [
+       "la nationalité",
+       "a nacionalidade"
+      ],
+      [
+       "allemand",
+       "alemão"
+      ]
      ],
-     "resposta": [
-      "Quelle",
-      "est",
-      "votre",
-      "nationalité",
-      "?"
-     ],
-     "frase_completa": "Quelle est votre nationalité ?",
      "explicacao": {
-      "pt-BR": "No formal, <b>votre</b>: <b>Quelle est votre nationalité ?</b>",
+      "pt-BR": "<b>Ta</b> no informal; <b>votre</b> no formal.",
       "en": null
      }
     },
@@ -438,6 +508,78 @@
      "papel": {
       "pt-BR": "Pergunta",
       "en": null
+     },
+     "forma": 0,
+     "traducao": {
+      "pt-BR": "De onde você é?",
+      "en": null
+     },
+     "registro": "informal"
+    },
+    {
+     "id": "u3-ex-dou-inf",
+     "tipo": "vf",
+     "fr": "Tu es d'où ?",
+     "afirmacao": {
+      "pt-BR": "Você pergunta isso a uma senhora que não conhece.",
+      "en": null
+     },
+     "resposta": false,
+     "frase_do_painel": "Tu es d'où ?",
+     "traducao_do_painel": {
+      "pt-BR": "De onde você é?",
+      "en": null
+     },
+     "explicacao": {
+      "pt-BR": "É do informal: amigos, família, colegas. Com quem você não conhece, vem a forma formal.",
+      "en": null
+     }
+    },
+    {
+     "id": "u3-frase-dou-formal",
+     "tipo": "frase",
+     "frase": "Tu es d'où ? / Vous êtes d'où ?",
+     "papel": {
+      "pt-BR": "Pergunta",
+      "en": null
+     },
+     "forma": 1,
+     "traducao": {
+      "pt-BR": "De onde o senhor (a senhora) é?",
+      "en": null
+     },
+     "registro": "formal"
+    },
+    {
+     "id": "u3-ex-dou-formal",
+     "tipo": "funcao",
+     "pergunta": {
+      "pt-BR": "Numa recepção, você quer saber de onde é uma senhora. O que pergunta?",
+      "en": null
+     },
+     "opcoes": [
+      "Tu es d'où ?",
+      "Vous êtes d'où ?",
+      "Je suis de Rio."
+     ],
+     "resposta": "Vous êtes d'où ?",
+     "traducao_do_painel": {
+      "pt-BR": "De onde a senhora é?",
+      "en": null
+     },
+     "explicacao": {
+      "pt-BR": "Com quem você não conhece, use o formal: <b>vous êtes d'où ?</b>",
+      "en": null
+     },
+     "explicacao_erro": {
+      "Tu es d'où ?": {
+       "pt-BR": "<b>Tu</b> é do informal. ",
+       "en": null
+      },
+      "Je suis de Rio.": {
+       "pt-BR": "Isso é a resposta, não a pergunta. ",
+       "en": null
+      }
      }
     },
     {
@@ -485,6 +627,78 @@
      "papel": {
       "pt-BR": "Pergunta",
       "en": null
+     },
+     "forma": 0,
+     "traducao": {
+      "pt-BR": "Onde você mora?",
+      "en": null
+     },
+     "registro": "informal"
+    },
+    {
+     "id": "u3-ex-habites-inf",
+     "tipo": "vf",
+     "fr": "Tu habites où ?",
+     "afirmacao": {
+      "pt-BR": "Você pergunta isso a um colega.",
+      "en": null
+     },
+     "resposta": true,
+     "frase_do_painel": "Tu habites où ?",
+     "traducao_do_painel": {
+      "pt-BR": "Onde você mora?",
+      "en": null
+     },
+     "explicacao": {
+      "pt-BR": "<b>Tu habites où ?</b> é do informal.",
+      "en": null
+     }
+    },
+    {
+     "id": "u3-frase-habites-formal",
+     "tipo": "frase",
+     "frase": "Tu habites où ? / Vous habitez où ?",
+     "papel": {
+      "pt-BR": "Pergunta",
+      "en": null
+     },
+     "forma": 1,
+     "traducao": {
+      "pt-BR": "Onde o senhor (a senhora) mora?",
+      "en": null
+     },
+     "registro": "formal"
+    },
+    {
+     "id": "u3-ex-habites-formal",
+     "tipo": "funcao",
+     "pergunta": {
+      "pt-BR": "Você preenche uma ficha com um senhor e pergunta onde ele mora.",
+      "en": null
+     },
+     "opcoes": [
+      "Vous habitez où ?",
+      "Tu habites où ?",
+      "Vous êtes d'où ?"
+     ],
+     "resposta": "Vous habitez où ?",
+     "traducao_do_painel": {
+      "pt-BR": "Onde o senhor mora?",
+      "en": null
+     },
+     "explicacao": {
+      "pt-BR": "Com quem você não conhece, use o formal: <b>vous habitez où ?</b>",
+      "en": null
+     },
+     "explicacao_erro": {
+      "Tu habites où ?": {
+       "pt-BR": "<b>Tu</b> é do informal. ",
+       "en": null
+      },
+      "Vous êtes d'où ?": {
+       "pt-BR": "Essa pergunta é de onde ele é, não onde mora. ",
+       "en": null
+      }
      }
     },
     {
@@ -595,6 +809,36 @@
      }
     },
     {
+     "id": "u3-l2-rel",
+     "tipo": "relacionar",
+     "pares": [
+      [
+       "Tu es d'où ?",
+       "De onde você é? (informal)"
+      ],
+      [
+       "Vous êtes d'où ?",
+       "De onde você é? (formal)"
+      ],
+      [
+       "Tu habites où ?",
+       "Onde você mora? (informal)"
+      ],
+      [
+       "Vous habitez où ?",
+       "Onde você mora? (formal)"
+      ],
+      [
+       "la ville",
+       "a cidade"
+      ]
+     ],
+     "explicacao": {
+      "pt-BR": "No formal, <b>vous</b>: <b>vous êtes</b>, <b>vous habitez</b>.",
+      "en": null
+     }
+    },
+    {
      "id": "u3-l2-montar",
      "tipo": "montar",
      "traducao": {
@@ -682,6 +926,78 @@
      "papel": {
       "pt-BR": "Pergunta",
       "en": null
+     },
+     "forma": 0,
+     "traducao": {
+      "pt-BR": "Você fala inglês?",
+      "en": null
+     },
+     "registro": "informal"
+    },
+    {
+     "id": "u3-ex-anglais-inf",
+     "tipo": "vf",
+     "fr": "Tu parles anglais ?",
+     "afirmacao": {
+      "pt-BR": "Você pergunta isso ao seu chefe.",
+      "en": null
+     },
+     "resposta": false,
+     "frase_do_painel": "Tu parles anglais ?",
+     "traducao_do_painel": {
+      "pt-BR": "Você fala inglês?",
+      "en": null
+     },
+     "explicacao": {
+      "pt-BR": "<b>Tu parles</b> é do informal: colegas, amigos, família. Com o chefe, o formal.",
+      "en": null
+     }
+    },
+    {
+     "id": "u3-frase-anglais-formal",
+     "tipo": "frase",
+     "frase": "Tu parles anglais ? / Vous parlez anglais ?",
+     "papel": {
+      "pt-BR": "Pergunta",
+      "en": null
+     },
+     "forma": 1,
+     "traducao": {
+      "pt-BR": "O senhor (a senhora) fala inglês?",
+      "en": null
+     },
+     "registro": "formal"
+    },
+    {
+     "id": "u3-ex-anglais-formal",
+     "tipo": "funcao",
+     "pergunta": {
+      "pt-BR": "Você pergunta a um cliente do hotel se ele fala inglês.",
+      "en": null
+     },
+     "opcoes": [
+      "Tu parles anglais ?",
+      "Vous parlez anglais ?",
+      "Je parle anglais."
+     ],
+     "resposta": "Vous parlez anglais ?",
+     "traducao_do_painel": {
+      "pt-BR": "O senhor fala inglês?",
+      "en": null
+     },
+     "explicacao": {
+      "pt-BR": "Com um cliente, use o formal: <b>vous parlez</b>.",
+      "en": null
+     },
+     "explicacao_erro": {
+      "Tu parles anglais ?": {
+       "pt-BR": "<b>Tu parles</b> é do informal. ",
+       "en": null
+      },
+      "Je parle anglais.": {
+       "pt-BR": "<b>Je parle</b> é \"eu falo\". ",
+       "en": null
+      }
      }
     },
     {
@@ -720,6 +1036,78 @@
      "papel": {
       "pt-BR": "Pergunta",
       "en": null
+     },
+     "forma": 0,
+     "traducao": {
+      "pt-BR": "Que línguas você fala?",
+      "en": null
+     },
+     "registro": "informal"
+    },
+    {
+     "id": "u3-ex-langues-inf",
+     "tipo": "vf",
+     "fr": "Tu parles quelles langues ?",
+     "afirmacao": {
+      "pt-BR": "Você pergunta isso a uma amiga.",
+      "en": null
+     },
+     "resposta": true,
+     "frase_do_painel": "Tu parles quelles langues ?",
+     "traducao_do_painel": {
+      "pt-BR": "Que línguas você fala?",
+      "en": null
+     },
+     "explicacao": {
+      "pt-BR": "<b>Tu parles quelles langues ?</b> é do informal.",
+      "en": null
+     }
+    },
+    {
+     "id": "u3-frase-langues-formal",
+     "tipo": "frase",
+     "frase": "Tu parles quelles langues ? / Vous parlez quelles langues ?",
+     "papel": {
+      "pt-BR": "Pergunta",
+      "en": null
+     },
+     "forma": 1,
+     "traducao": {
+      "pt-BR": "Que línguas o senhor (a senhora) fala?",
+      "en": null
+     },
+     "registro": "formal"
+    },
+    {
+     "id": "u3-ex-langues-formal",
+     "tipo": "funcao",
+     "pergunta": {
+      "pt-BR": "Numa entrevista de emprego, o entrevistador quer saber que línguas você fala. O que ele pergunta?",
+      "en": null
+     },
+     "opcoes": [
+      "Tu parles quelles langues ?",
+      "Vous parlez quelles langues ?",
+      "Tu parles anglais ?"
+     ],
+     "resposta": "Vous parlez quelles langues ?",
+     "traducao_do_painel": {
+      "pt-BR": "Que línguas o senhor (a senhora) fala?",
+      "en": null
+     },
+     "explicacao": {
+      "pt-BR": "Numa entrevista, o formal: <b>vous parlez quelles langues ?</b>",
+      "en": null
+     },
+     "explicacao_erro": {
+      "Tu parles quelles langues ?": {
+       "pt-BR": "<b>Tu</b> é do informal. ",
+       "en": null
+      },
+      "Tu parles anglais ?": {
+       "pt-BR": "Essa pergunta é só sobre o inglês, e no informal. ",
+       "en": null
+      }
      }
     },
     {
@@ -806,6 +1194,36 @@
      "frase": "Je parle portugais et un peu français.",
      "papel": {
       "pt-BR": "Resposta",
+      "en": null
+     }
+    },
+    {
+     "id": "u3-l3-rel",
+     "tipo": "relacionar",
+     "pares": [
+      [
+       "Tu parles anglais ?",
+       "Você fala inglês? (informal)"
+      ],
+      [
+       "Vous parlez anglais ?",
+       "Você fala inglês? (formal)"
+      ],
+      [
+       "Tu parles quelles langues ?",
+       "Que línguas você fala? (informal)"
+      ],
+      [
+       "Vous parlez quelles langues ?",
+       "Que línguas você fala? (formal)"
+      ],
+      [
+       "la langue",
+       "a língua"
+      ]
+     ],
+     "explicacao": {
+      "pt-BR": "Com <b>vous</b>, o verbo termina em <b>-ez</b>: <b>vous parlez</b>.",
       "en": null
      }
     },

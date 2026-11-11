@@ -113,6 +113,7 @@ Regras de conteúdo e de sequência decididas pela dona. Cada regra vale para fr
     - **Cartão novo sozinho na tela**, só com o áudio (um por forma do par); **sem ícone dentro da lição**: só imagem de verdade, ou nada (decisão 341).
     - **Ordem cartão, exercício**, um de cada vez; exceção aceita: dois cartões que só fazem sentido juntos (*et toi ?* e *je vais bien*) seguidos, treinados na frase-modelo.
     - **Pergunta e resposta viram cartões**, com etiqueta (Pergunta, Resposta, Fala, Pedido); toda função tem uma **pergunta de função** ("O que você diz?").
+    - **Par informal / formal em duas telas** (decisão 360): forma informal, V/F de situação, forma formal, "O que você diz?" formal; um **"Relacione os pares"** por lição, perto do fim. Na Revisão o par segue um cartão só.
     - **Frase-modelo é cartão** (tela própria, com áudio) e a frase é **montada em telas seguintes**, nunca na mesma tela do cartão.
     - **Exercícios**: "Complete" com 2 opções, **alternando** erro de grafia e outra palavra já vista (ou a outra metade do par); V/F no modelo do Busuu (**frase em francês com áudio em cima, afirmação embaixo**); "O que você diz?"; "Monte a frase" com peças sobrando.
     - **Cada informação aparece uma vez só** na tela (sem caixa de contexto que repita a pergunta); explicação de grafia vai **da escrita para o som** ("*oi* se pronuncia /uá/").

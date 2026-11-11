@@ -65,6 +65,24 @@ check('nota marcada como painel sem tela de exercício', acusa(r => { r.notas.pu
 check('texto longo demais (decisão 352)', acusa(r => { tela(r, 'a').objetivo = pt('a'.repeat(121)); }, 'texto longo demais'));
 check('inclui_dialogo errado', acusa(r => { r.licoes[0].inclui_dialogo = true; }, 'inclui_dialogo não bate'));
 
+console.log('== par informal / formal em duas telas e "Relacione os pares" (decisão 360)');
+{
+  const comPar = r => {
+    r.cartoes.push({ fr: 'tu / vous', licao: 'l1' });
+    const t = r.licoes[0].telas; const fim = t.pop();
+    t.push({ id: 'p0', tipo: 'cartao', cartao: 'tu / vous', forma: 0, traducao: pt('você'), registro: 'informal' },
+      { id: 'pv', tipo: 'vf', fr: 'tu', afirmacao: pt('Para um amigo.'), resposta: true, explicacao: pt('ok') },
+      { id: 'p1', tipo: 'cartao', cartao: 'tu / vous', forma: 1, traducao: pt('o senhor'), registro: 'formal' },
+      { id: 'rel', tipo: 'relacionar', pares: [['tu', 'você (informal)'], ['vous', 'o senhor (formal)'], ['salut', 'oi']], explicacao: pt('ok') }, fim);
+  };
+  const r = copia(base); comPar(r);
+  check('cartão em duas telas (forma 0 e 1) e "Relacione" válidos: nenhum problema', problemas(r).length === 0, problemas(r));
+  check('cartão em duas telas sem o registro é acusado', acusa(x => { comPar(x); delete tela(x, 'p1').registro; }, 'numa tela só ou em duas'));
+  check('formas fora de ordem (formal antes do informal) são acusadas', acusa(x => { comPar(x); tela(x, 'p0').forma = 1; tela(x, 'p1').forma = 0; }, 'numa tela só ou em duas'));
+  check('"Relacione" com 2 pares é acusado', acusa(x => { comPar(x); tela(x, 'rel').pares.pop(); }, '"Relacione" com menos de 3 pares'));
+  check('"Relacione" com tradução repetida é acusado', acusa(x => { comPar(x); tela(x, 'rel').pares[1][1] = 'você (informal)'; }, 'item repetido'));
+}
+
 console.log('== textosDasTelas e posição (mapa real, unidade 1)');
 {
   const mapa = M.carregarMapa();

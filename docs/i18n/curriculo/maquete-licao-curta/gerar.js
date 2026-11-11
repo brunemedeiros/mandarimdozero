@@ -62,13 +62,18 @@ function construirTelas(R, unidade, tolerante){
       case 'abertura': return { ...base, type: 'intro', n: licao.ordem, total, title: pt(licao.titulo), goal: pt(t.objetivo), size: pt(t.tamanho) };
       case 'cartao': {
         const c = cartao(t.cartao);
+        if (t.forma !== undefined){ // cartão em par mostrado uma forma por tela (decisão 360)
+          const f = c.fr.split(' / ')[t.forma];
+          return { ...base, type: 'item', kind: 'Palavra nova', fr: f, tr: pt(t.traducao), role: pt(c.papel_na_funcao) || undefined, reg: t.registro, audios: [[f, f]] };
+        }
         return { ...base, type: 'item', kind: 'Palavra nova', fr: c.fr, tr: pt(c.traducao), role: pt(c.papel_na_funcao) || undefined,
           audios: t.audios || c.fr.split(' / ').map(x => [x, x]) };
       }
       case 'frase': {
         const f = frase(t.frase);
-        // Frase em par (informal / formal, decisão 359): um áudio para cada forma.
         const formas = f.fr.split(' / ');
+        if (t.forma !== undefined) return { ...base, type: 'item', kind: 'Frase nova', fr: formas[t.forma], tr: pt(t.traducao), role: pt(t.papel) || undefined, reg: t.registro, audios: [[formas[t.forma], '']] };
+        // Frase em par numa tela só (informal / formal, decisão 359): um áudio para cada forma.
         return { ...base, type: 'item', kind: 'Frase nova', fr: f.fr, tr: f['pt-BR'], role: pt(t.papel) || undefined,
           audios: formas.length > 1 ? formas.map((x, k) => [x, k ? 'formal' : 'informal']) : [[f.fr, '']] };
       }
@@ -88,11 +93,13 @@ function construirTelas(R, unidade, tolerante){
       // Unidade 2 (decisão 356): ouvir uma letra ou um nome soletrado e escolher; ouvir e digitar.
       case 'ouvir_escolher': return { ...base, type: 'ouvir', q: pt(t.pergunta), audio: t.audio, opts: t.opcoes, answer: t.resposta, why_ok: pt(t.explicacao) };
       case 'digitar': return { ...base, type: 'digitar', q: pt(t.pergunta), audio: t.audio, answer: t.resposta, why_ok: pt(t.explicacao) };
+      case 'relacionar': return { ...base, type: 'relacionar', pares: t.pares, why_ok: pt(t.explicacao) };
       case 'montar': return { ...base, type: 'montar', tr: pt(t.traducao), tiles: t.pecas, answer: t.resposta, full: t.frase_completa, why_ok: pt(t.explicacao) };
       case 'fim': {
         // Lista do que foi visto (regra 17): os cartões da lição, as frases-modelo e a frase montada.
         const lista = [];
         for (const x of telasDaLicao){
+          if (x.forma === 1) continue; // o par aparece uma vez na lista
           if (x.tipo === 'cartao'){ const c = cartao(x.cartao); lista.push([c.fr, pt(c.traducao), minusc(pt(c.papel_na_funcao)) || null]); }
           if (x.tipo === 'frase'){ const f = frase(x.frase); lista.push([f.fr, f['pt-BR'], 'frase']); }
           if (x.tipo === 'montar') lista.push([x.frase_completa, pt(x.traducao), 'frase']);

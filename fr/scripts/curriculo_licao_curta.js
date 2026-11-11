@@ -1,4 +1,4 @@
-// Lição curta (regra 17 do docs/i18n/curriculo/15-regras-do-curriculo.md; decisões 338 a 356): conferência das `telas` de um rascunho
+// Lição curta (regra 17 do docs/i18n/curriculo/15-regras-do-curriculo.md; decisões 338 a 360): conferência das `telas` de um rascunho
 // de unidade (piloto-m1/<unidade>/<unidade>.json) e lista dos textos dos exercícios para o validador "só palavras vistas".
 // Um lugar só para as regras das telas: os validar.js de cada unidade chamam estas funções (puras, sem ler arquivo).
 'use strict';
@@ -30,11 +30,25 @@ function conferirTelas(R){
     confere(telas.length > 0, `lição ${l.id} sem telas`);
     if (!telas.length) continue;
     const ids = telas.map(t => t.id);
-    const cartoesNasTelas = telas.filter(t => t.tipo === 'cartao').map(t => t.cartao);
+    // Cartão em par (informal / formal) pode vir em duas telas, uma por forma (decisão 360): forma 0 e depois forma 1.
+    const telasCartao = telas.filter(t => t.tipo === 'cartao');
+    const cartoesNasTelas = [...new Set(telasCartao.map(t => t.cartao))];
     confere(JSON.stringify(cartoesNasTelas) === JSON.stringify(R.cartoes.filter(c => c.licao === l.id).map(c => c.fr)), `lição ${l.id}: telas de cartão fora da ordem ou da lista do mapa`);
+    for (const fr of cartoesNasTelas){
+      const ts = telasCartao.filter(t => t.cartao === fr);
+      const partida = ts.length === 2 && ts[0].forma === 0 && ts[1].forma === 1 && fr.split(' / ').length === 2 && ts.every(t => t.traducao && t.registro);
+      confere((ts.length === 1 && ts[0].forma === undefined) || partida, `lição ${l.id}: cartão "${fr}" deve vir numa tela só ou em duas (forma 0 e forma 1, com tradução e registro)`);
+    }
     confere(telas[0].tipo === 'abertura' && telas[telas.length - 1].tipo === 'fim', `lição ${l.id}: começa sem abertura ou termina sem a tela final`);
     for (const t of telas){
-      if (t.tipo === 'frase') confere(R.frases_na_frase.some(f => f.fr === t.frase), `tela ${t.id}: frase fora do frases_na_frase`);
+      if (t.tipo === 'frase'){
+        confere(R.frases_na_frase.some(f => f.fr === t.frase), `tela ${t.id}: frase fora do frases_na_frase`);
+        if (t.forma !== undefined) confere([0, 1].includes(t.forma) && t.frase.split(' / ').length === 2 && t.traducao && t.registro, `tela ${t.id}: frase em par mostrada por forma sem forma 0/1, tradução ou registro`);
+      }
+      if (t.tipo === 'relacionar'){
+        const esq = t.pares.map(x => x[0]), dir = t.pares.map(x => x[1]);
+        confere(t.pares.length >= 3 && new Set(esq).size === esq.length && new Set(dir).size === dir.length, `tela ${t.id}: "Relacione" com menos de 3 pares ou com item repetido`);
+      }
       if (t.tipo === 'nota'){
         const n = R.notas.find(x => x.id === t.nota);
         confere(n && n.destino === 'nota' && n.momento.licao === l.id, `tela ${t.id}: nota inexistente, de outra lição ou marcada como painel`);
@@ -131,13 +145,14 @@ function textosDasTelas(R, M, mapa, unidadeId){
     const base = posicaoNoFimDaLicao(M, mapa, unidadeId, n - 1);
     let vistos = u.cartoes.filter(c => c.licao < n).length;
     l.telas.forEach((t, i) => {
-      if (t.tipo === 'cartao'){ vistos++; return; }
+      if (t.tipo === 'cartao'){ if (!t.forma) vistos++; return; } // cartão em duas telas conta uma vez (decisão 360)
       const ctx = { tipo: 'exercicio_licao', posicao: vistos };
       const onde = `${l.id} ${t.id}`;
       const textos = [];
       if (t.tipo === 'complete'){ textos.push(t.frase_completa); if (t.distrator !== 'grafia') textos.push(...t.opcoes); }
       if (t.tipo === 'funcao') textos.push(...t.opcoes);
       if (t.tipo === 'montar') textos.push(t.frase_completa, ...t.pecas);
+      if (t.tipo === 'relacionar') textos.push(...t.pares.map(x => x[0]));
       if (t.tipo === 'vf'){
         const depoisDeNota = l.telas[i - 1] && l.telas[i - 1].tipo === 'nota';
         add(depoisDeNota ? 'Exercícios das telas: V/F de nota (informativo)' : 'Exercícios das telas', !depoisDeNota, onde, t.fr, ctx, base.mapa);

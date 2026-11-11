@@ -273,7 +273,75 @@
     {
      "id": "u2-tuvous",
      "tipo": "cartao",
-     "cartao": "tu / vous"
+     "cartao": "tu / vous",
+     "forma": 0,
+     "traducao": {
+      "pt-BR": "você",
+      "en": null
+     },
+     "registro": "informal"
+    },
+    {
+     "id": "u2-ex-tu-inf",
+     "tipo": "vf",
+     "fr": "tu",
+     "afirmacao": {
+      "pt-BR": "Você usa com amigos e família.",
+      "en": null
+     },
+     "resposta": true,
+     "frase_do_painel": "Tu vas bien ?",
+     "traducao_do_painel": {
+      "pt-BR": "Você está bem?",
+      "en": null
+     },
+     "explicacao": {
+      "pt-BR": "<b>Tu</b> é o \"você\" informal: amigos, família, crianças.",
+      "en": null
+     }
+    },
+    {
+     "id": "u2-tuvous-formal",
+     "tipo": "cartao",
+     "cartao": "tu / vous",
+     "forma": 1,
+     "traducao": {
+      "pt-BR": "o senhor, a senhora / vocês",
+      "en": null
+     },
+     "registro": "formal"
+    },
+    {
+     "id": "u2-ex-vous",
+     "tipo": "funcao",
+     "pergunta": {
+      "pt-BR": "Você fala com dois amigos ao mesmo tempo. Como diz \"vocês\"?",
+      "en": null
+     },
+     "opcoes": [
+      "vous",
+      "tu",
+      "je"
+     ],
+     "resposta": "vous",
+     "traducao_do_painel": {
+      "pt-BR": "vocês",
+      "en": null
+     },
+     "explicacao": {
+      "pt-BR": "<b>Vous</b> também é \"vocês\": com duas pessoas ou mais, sempre <b>vous</b>.",
+      "en": null
+     },
+     "explicacao_erro": {
+      "tu": {
+       "pt-BR": "<b>Tu</b> é para uma pessoa só. ",
+       "en": null
+      },
+      "je": {
+       "pt-BR": "<b>Je</b> é \"eu\". ",
+       "en": null
+      }
+     }
     },
     {
      "id": "u2-nota-tuvous",
@@ -282,25 +350,6 @@
      "rotulos": {
       "tu": "informal",
       "vous": "formal ou plural"
-     }
-    },
-    {
-     "id": "u2-ex-nota-tuvous",
-     "tipo": "vf",
-     "fr": "Vous allez bien ?",
-     "afirmacao": {
-      "pt-BR": "Serve para perguntar a dois amigos ao mesmo tempo.",
-      "en": null
-     },
-     "resposta": true,
-     "frase_do_painel": "Vous allez bien ?",
-     "traducao_do_painel": {
-      "pt-BR": "Vocês estão bem?",
-      "en": null
-     },
-     "explicacao": {
-      "pt-BR": "<b>Vous</b> também é \"vocês\": com um amigo, <b>tu</b>; com dois ou mais, <b>vous</b>.",
-      "en": null
      }
     },
     {
@@ -468,6 +517,32 @@
        "pt-BR": "<b>Merci</b> é para agradecer. ",
        "en": null
       }
+     }
+    },
+    {
+     "id": "u2-rel",
+     "tipo": "relacionar",
+     "pares": [
+      [
+       "tu",
+       "você (informal)"
+      ],
+      [
+       "vous",
+       "o senhor, a senhora / vocês (formal)"
+      ],
+      [
+       "je",
+       "eu"
+      ],
+      [
+       "moi, c'est…",
+       "eu sou… (para dizer o nome)"
+      ]
+     ],
+     "explicacao": {
+      "pt-BR": "<b>Tu</b> é o \"você\" informal; <b>vous</b>, o formal e o \"vocês\".",
+      "en": null
      }
     },
     {

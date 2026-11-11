@@ -162,6 +162,10 @@ aside{display:grid;gap:16px;min-width:0}
 .jump button{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:99px;padding:5px 11px;font:inherit;font-size:.82rem;font-weight:700;cursor:pointer}
 .jump button[aria-current="true"]{background:var(--brand);color:var(--on-brand);border-color:var(--brand)}
 .small{font-size:.85rem;color:var(--ink-soft)}
+.pares{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.pares .col{display:grid;gap:8px;align-content:start}
+.pares .opt{font-size:.95rem;padding:12px 8px}
+.pares .opt.sel{border-color:var(--brand);background:var(--brand-tint)}
 .grade{display:grid;grid-template-columns:repeat(auto-fill,minmax(58px,1fr));gap:6px}
 .letra{border:1px solid var(--line);border-radius:12px;padding:6px 4px;background:var(--card);color:var(--ink);text-align:center;cursor:pointer;font:inherit}
 .letra:hover{border-color:var(--brand)}
@@ -285,9 +289,44 @@ const audBtn=(text,label)=>`<button class="aud${label?'':' round'}" data-say="${
 const WHY={
  "unidade-3": {"titulo": "A unidade 3", "texto": "<p>Decisão 359: 3 lições de cartões (5, 5 e 5) e 2 de diálogo. Cartões novos: <i>la langue</i>, <i>étudier</i> e <i>un peu</i>.</p>"},
  "u3-l1-intro": {"titulo": "Lição 1: a nacionalidade", "texto": "<p>Reaproveita a lição publicada <code>nacionalidades-2</code>. <i>Allemand</i> veio para cá.</p>"},
- "u3-frase-nat": {"titulo": "Pergunta em par", "texto": "<p>Decisão 359: informal e formal juntos (regra 1), com um áudio para cada forma.</p>"},
+ "u3-frase-nat": {"titulo": "Pergunta: forma informal", "texto": "<p>Decisão 360: o par vira duas telas. Primeiro só a forma informal; o exercício seguinte usa ela, e depois vem a formal.</p>"},
+ "l2-ex-tuvas-inf": {"titulo": "V/F de situação", "texto": "<p>Decisão 360: V/F de situação logo depois da forma informal. Ora a situação combina (amigo, colega), ora não (um senhor, o chefe), para a aluna pensar em quem está ouvindo.</p>"},
+ "l2-ex-ettoi-inf": {"titulo": "V/F de situação", "texto": "<p>Decisão 360: V/F de situação logo depois da forma informal. Ora a situação combina (amigo, colega), ora não (um senhor, o chefe), para a aluna pensar em quem está ouvindo.</p>"},
+ "l3-ex-svp-inf": {"titulo": "V/F de situação", "texto": "<p>Decisão 360: V/F de situação logo depois da forma informal. Ora a situação combina (amigo, colega), ora não (um senhor, o chefe), para a aluna pensar em quem está ouvindo.</p>"},
+ "l3-ex-excuse-inf": {"titulo": "V/F de situação", "texto": "<p>Decisão 360: V/F de situação logo depois da forma informal. Ora a situação combina (amigo, colega), ora não (um senhor, o chefe), para a aluna pensar em quem está ouvindo.</p>"},
+ "u2-ex-tu-inf": {"titulo": "V/F de situação", "texto": "<p>Decisão 360: V/F de situação logo depois da forma informal. Ora a situação combina (amigo, colega), ora não (um senhor, o chefe), para a aluna pensar em quem está ouvindo.</p>"},
+ "u3-ex-nat-inf": {"titulo": "V/F de situação", "texto": "<p>Decisão 360: V/F de situação logo depois da forma informal. Ora a situação combina (amigo, colega), ora não (um senhor, o chefe), para a aluna pensar em quem está ouvindo.</p>"},
+ "u3-ex-dou-inf": {"titulo": "V/F de situação", "texto": "<p>Decisão 360: V/F de situação logo depois da forma informal. Ora a situação combina (amigo, colega), ora não (um senhor, o chefe), para a aluna pensar em quem está ouvindo.</p>"},
+ "u3-ex-habites-inf": {"titulo": "V/F de situação", "texto": "<p>Decisão 360: V/F de situação logo depois da forma informal. Ora a situação combina (amigo, colega), ora não (um senhor, o chefe), para a aluna pensar em quem está ouvindo.</p>"},
+ "u3-ex-anglais-inf": {"titulo": "V/F de situação", "texto": "<p>Decisão 360: V/F de situação logo depois da forma informal. Ora a situação combina (amigo, colega), ora não (um senhor, o chefe), para a aluna pensar em quem está ouvindo.</p>"},
+ "u3-ex-langues-inf": {"titulo": "V/F de situação", "texto": "<p>Decisão 360: V/F de situação logo depois da forma informal. Ora a situação combina (amigo, colega), ora não (um senhor, o chefe), para a aluna pensar em quem está ouvindo.</p>"},
+ "l2-tuvas-formal": {"titulo": "Forma formal", "texto": "<p>Decisão 360: a forma formal em tela própria, logo depois do V/F da informal. Na Revisão o par continua um cartão só.</p>"},
+ "l2-ettoi-formal": {"titulo": "Forma formal", "texto": "<p>Decisão 360: a forma formal em tela própria, logo depois do V/F da informal. Na Revisão o par continua um cartão só.</p>"},
+ "l3-svp-formal": {"titulo": "Forma formal", "texto": "<p>Decisão 360: a forma formal em tela própria, logo depois do V/F da informal. Na Revisão o par continua um cartão só.</p>"},
+ "l3-excuse-formal": {"titulo": "Forma formal", "texto": "<p>Decisão 360: a forma formal em tela própria, logo depois do V/F da informal. Na Revisão o par continua um cartão só.</p>"},
+ "u2-tuvous-formal": {"titulo": "Forma formal", "texto": "<p>Decisão 360: a forma formal em tela própria, logo depois do V/F da informal. Na Revisão o par continua um cartão só.</p>"},
+ "u3-frase-nat-formal": {"titulo": "Forma formal", "texto": "<p>Decisão 360: a forma formal em tela própria, logo depois do V/F da informal. Na Revisão o par continua um cartão só.</p>"},
+ "u3-frase-dou-formal": {"titulo": "Forma formal", "texto": "<p>Decisão 360: a forma formal em tela própria, logo depois do V/F da informal. Na Revisão o par continua um cartão só.</p>"},
+ "u3-frase-habites-formal": {"titulo": "Forma formal", "texto": "<p>Decisão 360: a forma formal em tela própria, logo depois do V/F da informal. Na Revisão o par continua um cartão só.</p>"},
+ "u3-frase-anglais-formal": {"titulo": "Forma formal", "texto": "<p>Decisão 360: a forma formal em tela própria, logo depois do V/F da informal. Na Revisão o par continua um cartão só.</p>"},
+ "u3-frase-langues-formal": {"titulo": "Forma formal", "texto": "<p>Decisão 360: a forma formal em tela própria, logo depois do V/F da informal. Na Revisão o par continua um cartão só.</p>"},
+ "l2-ex-ettoi-formal": {"titulo": "O que você diz? (formal)", "texto": "<p>Decisão 360: depois da forma formal, a aluna escolhe o que dizer numa situação formal. As opções erradas são a forma informal e outra frase já vista.</p>"},
+ "l3-ex-svp-formal": {"titulo": "O que você diz? (formal)", "texto": "<p>Decisão 360: depois da forma formal, a aluna escolhe o que dizer numa situação formal. As opções erradas são a forma informal e outra frase já vista.</p>"},
+ "l3-ex-excuse-formal": {"titulo": "O que você diz? (formal)", "texto": "<p>Decisão 360: depois da forma formal, a aluna escolhe o que dizer numa situação formal. As opções erradas são a forma informal e outra frase já vista.</p>"},
+ "u2-ex-vous": {"titulo": "O que você diz? (vous = vocês)", "texto": "<p>Decisão 360: depois da forma <i>vous</i>, a aluna usa o outro sentido dela, o \"vocês\" para duas pessoas. Substitui o V/F que vinha depois da nota.</p>"},
+ "u3-ex-nat-formal": {"titulo": "O que você diz? (formal)", "texto": "<p>Decisão 360: depois da forma formal, a aluna escolhe o que dizer numa situação formal. As opções erradas são a forma informal e outra frase já vista.</p>"},
+ "u3-ex-dou-formal": {"titulo": "O que você diz? (formal)", "texto": "<p>Decisão 360: depois da forma formal, a aluna escolhe o que dizer numa situação formal. As opções erradas são a forma informal e outra frase já vista.</p>"},
+ "u3-ex-habites-formal": {"titulo": "O que você diz? (formal)", "texto": "<p>Decisão 360: depois da forma formal, a aluna escolhe o que dizer numa situação formal. As opções erradas são a forma informal e outra frase já vista.</p>"},
+ "u3-ex-anglais-formal": {"titulo": "O que você diz? (formal)", "texto": "<p>Decisão 360: depois da forma formal, a aluna escolhe o que dizer numa situação formal. As opções erradas são a forma informal e outra frase já vista.</p>"},
+ "u3-ex-langues-formal": {"titulo": "O que você diz? (formal)", "texto": "<p>Decisão 360: depois da forma formal, a aluna escolhe o que dizer numa situação formal. As opções erradas são a forma informal e outra frase já vista.</p>"},
+ "l2-rel": {"titulo": "Relacione os pares", "texto": "<p>Decisão 360: um \"Relacione os pares\" por lição, perto do fim, juntando as formas informais e formais com as traduções. Toque numa frase e depois na tradução.</p>"},
+ "l3-rel": {"titulo": "Relacione os pares", "texto": "<p>Decisão 360: um \"Relacione os pares\" por lição, perto do fim, juntando as formas informais e formais com as traduções. Toque numa frase e depois na tradução.</p>"},
+ "u2-rel": {"titulo": "Relacione os pares", "texto": "<p>Decisão 360: um \"Relacione os pares\" por lição, perto do fim, juntando as formas informais e formais com as traduções. Toque numa frase e depois na tradução.</p>"},
+ "u3-l1-rel": {"titulo": "Relacione os pares", "texto": "<p>Decisão 360: um \"Relacione os pares\" por lição, perto do fim, juntando as formas informais e formais com as traduções. Toque numa frase e depois na tradução.</p>"},
+ "u3-l2-rel": {"titulo": "Relacione os pares", "texto": "<p>Decisão 360: um \"Relacione os pares\" por lição, perto do fim, juntando as formas informais e formais com as traduções. Toque numa frase e depois na tradução.</p>"},
+ "u3-l3-rel": {"titulo": "Relacione os pares", "texto": "<p>Decisão 360: um \"Relacione os pares\" por lição, perto do fim, juntando as formas informais e formais com as traduções. Toque numa frase e depois na tradução.</p>"},
  "u3-nota-fem": {"titulo": "Nota: o feminino que se ouve", "texto": "<p>Com <i>anglaise</i>, <i>espagnole</i>, <i>italienne</i> e <i>allemande</i>. <i>Portugaise</i> chega na lição 3, com a explicação no painel.</p>"},
- "u3-frase-dou": {"titulo": "Pergunta em par: de onde é", "texto": "<p><i>Tu es d'où ? / Vous êtes d'où ?</i> ficou nesta lição (decisão 359), junto da resposta <i>Je suis de Rio</i>.</p>"},
+ "u3-frase-dou": {"titulo": "Pergunta de onde é: forma informal", "texto": "<p>Decisão 360: o par vira duas telas. Primeiro só a forma informal; o exercício seguinte usa ela, e depois vem a formal.</p><p><i>Tu es d'où ?</i> ficou nesta lição (decisão 359), junto da resposta <i>Je suis de Rio</i>.</p>"},
  "u3-ex-ou": {"titulo": "A nota \"où vai para o fim\" virou painel", "texto": "<p>Decisão 359: a nota curta aparece no painel deste exercício.</p>"},
  "u3-nota-paises": {"titulo": "Nota: uma fórmula por país", "texto": "<p>Sem a regra do gênero dos países, que fica na gramática Premium (decisão 331).</p>"},
  "u3-nota-estceque": {"titulo": "Nota: est-ce que", "texto": "<p>Versão grátis da gramática \"perguntar sim ou não\", com o formal (<i>Est-ce que vous parlez anglais ?</i>).</p>"},
@@ -411,9 +450,9 @@ const WHY={
   "texto": "<p>Decisão 342: aqui o distrator é <b>outra palavra já vista</b> (<i>bonsoir</i>, da lição 1), que não serve na frase. Também faz a ponte com a lição 1.</p><p>A frase é a do cartão <i>ça va</i> (pergunta e resposta).</p>"
  },
  "l2-tuvas": {
-  "chip": "tu vas bien ? / vous allez bien ?",
-  "titulo": "Cartão de pergunta",
-  "texto": "<p>Par informal e formal, um áudio para cada forma. É o gatilho da nota seguinte.</p>"
+  "chip": "tu vas bien ?",
+  "titulo": "Cartão de pergunta: forma informal",
+  "texto": "<p>Decisão 360: o par vira duas telas. Primeiro só a forma informal; o exercício seguinte usa ela, e depois vem a formal.</p><p>É o gatilho da nota de sistematização, que vem depois da forma formal.</p>"
  },
  "l2-nota-perguntar": {
   "chip": "Nota (sistematização)",
@@ -426,9 +465,9 @@ const WHY={
   "texto": "<p>O V/F da nota (senhor idoso, <i>Comment allez-vous ?</i>) vira esta pergunta de função: em vez de julgar uma frase, a aluna <b>escolhe o que dizer</b>.</p><p>As três opções foram vistas; o painel explica cada erro.</p>"
  },
  "l2-ettoi": {
-  "chip": "et toi ? / et vous ?",
-  "titulo": "Cartão de resposta: devolver a pergunta",
-  "texto": "<p>Responder inclui devolver a pergunta. Por isso <i>et toi ? / et vous ?</i> está com a etiqueta \"Resposta\".</p>"
+  "chip": "et toi ?",
+  "titulo": "Cartão de resposta: forma informal",
+  "texto": "<p>Decisão 360: o par vira duas telas. Primeiro só a forma informal; o exercício seguinte usa ela, e depois vem a formal.</p><p>Responder inclui devolver a pergunta, por isso a etiqueta \"Resposta\".</p>"
  },
  "l2-jevais": {
   "chip": "je vais bien",
@@ -491,9 +530,9 @@ const WHY={
   "texto": "<p>É o V/F de <i>De rien !</i> que já está no rascunho aprovado (Revisão da unidade), agora com a frase em francês e o áudio em cima.</p><p>O painel mostra a frase do cartão: <i>Merci ! De rien !</i></p>"
  },
  "l3-svp": {
-  "chip": "s'il te plaît / s'il vous plaît",
-  "titulo": "Cartão de pedido",
-  "texto": "<p>Par informal e formal, informal primeiro (decisão 292). É o gatilho da nota seguinte.</p>"
+  "chip": "s'il te plaît",
+  "titulo": "Cartão de pedido: forma informal",
+  "texto": "<p>Decisão 360: o par vira duas telas. Primeiro só a forma informal; o exercício seguinte usa ela, e depois vem a formal.</p>"
  },
  "l3-nota-svp": {
   "chip": "Nota (STP e SVP)",
@@ -516,9 +555,9 @@ const WHY={
   "texto": "<p>A situação fica só na pergunta, sem caixa de contexto repetindo (decisão 345). <i>Pardon, madame !</i> é uma frase essencial da unidade.</p><p>O painel usa a primeira parte da nota \"Pardon, excuse-moi ou excusez-moi?\".</p>"
  },
  "l3-excuse": {
-  "chip": "excuse-moi / excusez-moi",
-  "titulo": "Cartão novo em par",
-  "texto": "<p>Informal e formal, como <i>s'il te plaît / s'il vous plaît</i>. É o gatilho da nota seguinte.</p>"
+  "chip": "excuse-moi",
+  "titulo": "Cartão novo: forma informal",
+  "texto": "<p>Decisão 360: o par vira duas telas. Primeiro só a forma informal; o exercício seguinte usa ela, e depois vem a formal.</p>"
  },
  "l3-nota-pardon": {
   "chip": "Nota (sistematização)",
@@ -626,7 +665,7 @@ const WHY={
  "d2-papel": {"chip": "Sua vez", "titulo": "Sua vez: conversa formal nova", "texto": "<p>De manhã, com o Sr. Martin. A fala dele não chama a aluna de <i>madame</i> nem de <i>monsieur</i>, porque não sabemos quem está estudando.</p>"},
  "d2-fim": {"chip": "Fim da lição", "titulo": "Fim da lição 6", "texto": "<p>A tela padrão; depois, volta para a unidade.</p>"}
 };
-const CHIP={intro:'Início',complete:'Complete',vf:'V ou F',funcao:'O que você diz?',nota:'Nota',montar:'Monte a frase',fim:'Fim da lição',ouvir:'Ouça e escolha',digitar:'Digite',
+const CHIP={relacionar:'Relacione',intro:'Início',complete:'Complete',vf:'V ou F',funcao:'O que você diz?',nota:'Nota',montar:'Monte a frase',fim:'Fim da lição',ouvir:'Ouça e escolha',digitar:'Digite',
   d_cena:'Cena',d_ouvir:'Ouvir sem texto',d_ler:'Ouça e leia',d_vf:'V ou F',d_montar:'Monte a conversa',d_lacuna:'Complete a frase',d_ordenar:'Coloque na ordem',d_entendeu:'Você entendeu?',d_papel:'Sua vez',d_fim:'Fim da lição',unidade:'A unidade'};
 const chipPadrao=t=>t.type==='item'?t.fr:(CHIP[t.type]||t.id);
 const S=[...TELAS,...UNIDADES.map(u=>({id:'unidade-'+u.n,lesson:u.n+'.u',unit:u.n,type:'unidade'}))].map(t=>{const w=WHY[t.id]||{};return Object.assign({},t,{chip:w.chip||chipPadrao(t),why:[w.titulo||chipPadrao(t),w.texto||'']});});
@@ -721,7 +760,7 @@ function render(){
     </div><button class="btn" id="go">Começar</button>`;
   }
   if(s.type==='item'){
-    h=`<div class="tags"><span class="tag ${s.kind==='Frase nova'?'pink':''}">${s.kind}</span>${s.role?`<span class="tag pink">${esc(s.role)}</span>`:''}</div>
+    h=`<div class="tags"><span class="tag ${s.kind==='Frase nova'?'pink':''}">${s.kind}</span>${s.role?`<span class="tag pink">${esc(s.role)}</span>`:''}${s.reg?`<span class="tag note">${esc(s.reg)}</span>`:''}</div>
     <div class="grow">
       <div class="${s.fr.length>14?'fr-mid':'fr-big'}">${esc(s.fr)}</div>
       <div class="tr">${esc(s.tr)}</div>
@@ -770,6 +809,13 @@ function render(){
     h=`<span class="tag">Unidade ${u.n} · ${esc(u.titulo)}</span>
     <div class="lessons">${u.licoes.map(l=>`<button class="lesson" data-to="${l.primeira}"><span class="n">${l.n}</span><span class="t">${esc(l.titulo)}</span></button>`).join('')}
       <div class="lesson"><span class="n">★</span><span class="t">Revisão da unidade</span></div></div>`;
+  }
+  if(s.type==='relacionar'){
+    const hash=t=>[...t].reduce((a,c)=>(a*31+c.charCodeAt(0))%9973,7);
+    const dir=s.pares.map((p,k)=>k).sort((x,y)=>hash(s.pares[x][1])-hash(s.pares[y][1]));
+    h=`<span class="tag">Relacione os pares</span><div class="grow ex"><p class="vez">Toque numa frase e na tradução dela.</p>
+      <div class="pares"><div class="col">${s.pares.map((p,k)=>`<button class="opt" data-e="${k}">${esc(p[0])}</button>`).join('')}</div>
+      <div class="col">${dir.map(k=>`<button class="opt" data-d="${k}">${esc(s.pares[k][1])}</button>`).join('')}</div></div></div>`;
   }
   if(s.type==='ouvir'){
     h=`<span class="tag">Ouça e escolha</span><div class="grow ex"><p class="q">${esc(s.q)}</p>
@@ -873,6 +919,17 @@ function bind(s){
     };
   }
   if(s.type==='unidade') screen.querySelectorAll('[data-to]').forEach(b=>b.onclick=()=>go(b.dataset.to));
+  if(s.type==='relacionar'){
+    let esq=null, feitos=0, erros=0;
+    screen.querySelectorAll('[data-e]').forEach(b=>b.onclick=()=>{ screen.querySelectorAll('[data-e]').forEach(x=>x.classList.remove('sel')); b.classList.add('sel'); esq=+b.dataset.e; falar(s.pares[esq][0],'f'); });
+    screen.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{
+      if(esq===null) return;
+      const e=screen.querySelector(`[data-e="${esq}"]`);
+      if(+b.dataset.d===esq){ e.classList.remove('sel'); e.classList.add('right'); b.classList.add('right'); e.disabled=true; b.disabled=true; esq=null; feitos++;
+        if(feitos===s.pares.length) setTimeout(()=>{ if(S[i]===s) painelDialogo(erros===0, s.why_ok, null, null, erros===0?'Todos os pares de primeira!':'Pares feitos! Na próxima, tente sem errar.'); },400); }
+      else { erros++; b.classList.remove('treme'); void b.offsetWidth; b.classList.add('treme'); }
+    });
+  }
   if(s.type==='ouvir'||s.type==='digitar'){
     const toca=()=>falar(s.audio,'f'); $('ouvir').onclick=toca; setTimeout(()=>{ if(S[i]===s) toca(); },300);
   }

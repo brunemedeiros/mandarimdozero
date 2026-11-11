@@ -67,7 +67,10 @@ Regras de código: `.claude/rules/qualidade-de-codigo.md`. Regras por área: `.c
   conferida pelo `validar.js`; textos dos exercícios do diálogo validados no contexto `dialogo`, em que as notas contam; grafia errada
   de propósito não entra); notas com `destino` (`nota` = tela própria; `painel` = vira a explicação dos exercícios em `paineis`).
   Lição de diálogos: `tipo: 'dialogos'` em `licoes` do `mapa.json` (`temLicaoDeDialogos` e `conferirLicoesDaUnidade` em `fr/scripts/curriculo_mapa.js`).
-  Frase em par (informal / formal, ex.: *Tu habites où ? / Vous habitez où ?*) é uma frase só, com ` / `: a maquete toca um áudio por forma.
+  Frase ou cartão em par (informal / formal, ex.: *Tu habites où ? / Vous habitez où ?*) é um item só, com ` / `. Na lição ele aparece em duas
+  telas (decisão 360): a mesma `frase`/`cartao` com `forma: 0` (informal, id original) e `forma: 1` (formal, id + `-formal`), cada uma com
+  `traducao` e `registro`; o cartão conta uma vez só nas palavras vistas e na Revisão. Tela `relacionar`: `pares` = `[[fr, tradução], ...]`, 3 ou mais,
+  sem repetir dos dois lados. Sem `forma`, a maquete mostra o par numa tela só, com um áudio por forma.
   Unidade nova no piloto: pasta `piloto-m1/<unidade>/` com o rascunho e um `validar.js` curto (modelo: `A1-9/validar.js`).
   Maquete clicável gerada dos rascunhos (lista `RASCUNHOS` do `docs/i18n/curriculo/maquete-licao-curta/gerar.js`; unidade nova = uma linha ali; `fonte.html`
   tem só o desenho e os comentários `WHY`; tela sem comentário mostra o nome do tipo).
