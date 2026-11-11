@@ -12,8 +12,9 @@
 // funciona, só não muda de versão entre testes locais.
 // O fr e o zh moram no MESMO endereço (app.profbrune.com.br/fr e /zh) e por isso dividem a mesma lista de caches do
 // navegador: cada um só mexe nos caches com o próprio prefixo (antes, publicar o fr apagava o cache do zh e vice-versa).
+const BUILD_ID = '__BUILD_ID__';
 const CACHE_PREFIX = 'chines-com-prof-brune-';
-const CACHE_NAME = CACHE_PREFIX + '__BUILD_ID__';
+const CACHE_NAME = CACHE_PREFIX + BUILD_ID;
 const PRECACHE_URLS = [
   './',
   './index.html',
@@ -64,6 +65,15 @@ self.addEventListener('activate', (event) => {
   );
 });
 
+// shared/pwa.js pergunta a versão deste SW quando ele assume a página (controllerchange) e só mostra o aviso
+// "Nova versão disponível" se for diferente da versão que a página carregou (2026-11-11: antes aparecia em quase
+// toda visita depois de um deploy, mesmo com a página já atualizada).
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'get-build-id' && event.ports && event.ports[0]){
+    event.ports[0].postMessage({ buildId: BUILD_ID });
+  }
+});
+
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
@@ -75,7 +85,8 @@ self.addEventListener('fetch', (event) => {
   // (If-None-Match/If-Modified-Since) antes de usar o cache HTTP -- então "network-first" nunca devolve uma versão
   // antiga quando há internet -- mas o que não mudou volta como 304, sem corpo. Antes era 'no-store', que baixava os
   // ~150 arquivos inteiros (cerca de 3,7 MB no fr) a cada abertura. Versão nova: cada deploy muda este arquivo
-  // (__BUILD_ID__), o navegador instala o SW novo e shared/pwa.js oferece recarregar; e cada arquivo alterado tem
+  // (__BUILD_ID__), o navegador instala o SW novo e shared/pwa.js oferece recarregar
+  // só se a página estiver com a versão antiga; e cada arquivo alterado tem
   // ETag novo, então chega na hora (200) mesmo antes disso.
   event.respondWith(
     fetch(event.request, { cache: 'no-cache' })
