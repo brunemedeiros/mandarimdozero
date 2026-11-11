@@ -1723,6 +1723,10 @@ window.I18N_CATALOG['en'] = {
   'admin.reports.reply.err.email_not_configured': 'Email sending is not yet configured on the server (RESEND_API_KEY/RESEND_FROM_EMAIL).', // ALTA
   'admin.reports.reply.err.resend_failed': 'We couldn\'t send the email right now. Try again in a moment.', // ALTA
   'admin.reports.reply.err.missing_fields': 'Fill in the subject and message.', // ALTA
+  'admin.reports.reply.err.placeholder': 'Replace the text in brackets with your reply before sending.', // ALTA (needs_review)
+  'admin.reports.reply.langPt': 'The email goes out in Portuguese, the language of the person\'s site. Write the message in Portuguese.', // ALTA (needs_review)
+  'admin.reports.reply.langEn': 'The email goes out in English, the language of the person\'s site.', // ALTA (needs_review)
+  'admin.reports.reply.langGuess': '(Older report: the language was picked from the course.)', // ALTA (needs_review)
   'admin.reports.reply.err.generic': 'We couldn\'t send the reply right now.', // ALTA
   'admin.reports.toast.updated': '✓ Report updated.', // ALTA
   'admin.reports.reply.send': 'Send reply', // ALTA

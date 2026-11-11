@@ -89,7 +89,7 @@ Deno.serve(async (req: Request) => {
 
   const { data: report, error: reportError } = await asCaller
     .from('reports')
-    .select('id, user_id, reporter_email, language_app_key')
+    .select('id, user_id, reporter_email, language_app_key, context')
     .eq('id', reportId)
     .single();
   if (reportError || !report) {
@@ -121,7 +121,10 @@ Deno.serve(async (req: Request) => {
     return jsonResponse({ ok: false, error: 'email_not_configured' }, 500);
   }
 
-  const { html, text } = buildReplyEmail(body, report.language_app_key, accountUiLanguage);
+  // Sem preferência na conta (ou convidado): vale o idioma do site gravado no report (context.ui_language, desde 2026-11-11),
+  // o mesmo que o rascunho do Painel usou; sem nenhum dos dois, o curso decide (email.ts).
+  const reportUiLanguage = (report as { context?: { ui_language?: string } | null }).context?.ui_language || null;
+  const { html, text } = buildReplyEmail(body, report.language_app_key, accountUiLanguage || reportUiLanguage);
 
   try {
     const res = await fetch('https://api.resend.com/emails', {
