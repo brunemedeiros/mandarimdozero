@@ -76,6 +76,7 @@ function conferirTelas(R){
         confere(REGISTROS.includes(t.registro), `tela ${t.id}: registro deve ser informal ou formal`);
         confere(!t.traducao_plural || t.forma === 1, `tela ${t.id}: o "vocês" (traducao_plural) só vai na forma formal`);
       }
+      if (t.tipo === 'vf') confere(t.frase_do_painel && t.traducao_do_painel, `tela ${t.id}: V/F sem a frase e a tradução do painel`);
       if (t.tipo === 'relacionar'){
         const esq = t.pares.map(x => x[0]), dir = t.pares.map(x => x[1]);
         confere(t.pares.length >= 3 && new Set(esq).size === esq.length && new Set(dir).size === dir.length, `tela ${t.id}: "Relacione" com menos de 3 pares ou com item repetido`);

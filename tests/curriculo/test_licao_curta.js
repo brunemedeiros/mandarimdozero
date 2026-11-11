@@ -66,6 +66,7 @@ check('rótulo "Pergunta" em cartão ou frase é acusado (decisão 361)', acusa(
   && acusa(r => { tela(r, 'f').papel = pt('Pergunta'); }, 'rótulo de pergunta'));
 check('cartão seguido de outro item novo sem exercício (decisão 362)', acusa(r => { r.licoes[0].telas = r.licoes[0].telas.filter(x => !['n', 'x1'].includes(x.id)); r.notas = []; }, 'sem exercício entre eles'));
 check('nota entre dois itens novos não conta como exercício (decisão 362)', acusa(r => { r.licoes[0].telas = r.licoes[0].telas.filter(x => x.id !== 'x1'); }, 'sem exercício entre eles'));
+check('V/F sem a frase do painel (o painel toca o áudio dela)', acusa(r => { r.licoes[0].telas.splice(1, 0, { id: 'v0', tipo: 'vf', fr: 'salut', afirmacao: pt('x'), resposta: true, explicacao: pt('ok') }); }, 'V/F sem a frase e a tradução do painel'));
 check('texto longo demais (decisão 352)', acusa(r => { tela(r, 'a').objetivo = pt('a'.repeat(121)); }, 'texto longo demais'));
 check('inclui_dialogo errado', acusa(r => { r.licoes[0].inclui_dialogo = true; }, 'inclui_dialogo não bate'));
 
@@ -75,7 +76,7 @@ console.log('== par informal / formal em duas telas e "Relacione os pares" (deci
     r.cartoes.push({ fr: 'tu / vous', licao: 'l1' });
     const t = r.licoes[0].telas; const fim = t.pop();
     t.push({ id: 'p0', tipo: 'cartao', cartao: 'tu / vous', forma: 0, traducao: pt('você'), registro: 'informal' },
-      { id: 'pv', tipo: 'vf', fr: 'tu', afirmacao: pt('Para um amigo.'), resposta: true, explicacao: pt('ok') },
+      { id: 'pv', tipo: 'vf', fr: 'tu', afirmacao: pt('Para um amigo.'), resposta: true, frase_do_painel: 'tu', traducao_do_painel: pt('você'), explicacao: pt('ok') },
       { id: 'p1', tipo: 'cartao', cartao: 'tu / vous', forma: 1, traducao: pt('o senhor'), registro: 'formal' },
       { id: 'rel', tipo: 'relacionar', pares: [['tu', 'você (informal)'], ['vous', 'o senhor (formal)'], ['salut', 'oi']], explicacao: pt('ok') }, fim);
   };

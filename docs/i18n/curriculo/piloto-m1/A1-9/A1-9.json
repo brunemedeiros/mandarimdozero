@@ -722,6 +722,11 @@
       "en": null
      },
      "resposta": false,
+     "frase_do_painel": "J'habite à Rio.",
+     "traducao_do_painel": {
+      "pt-BR": "Eu moro no Rio.",
+      "en": null
+     },
      "explicacao": {
       "pt-BR": "<b>J'habite</b> é \"eu moro\", do verbo <b>habiter</b>. \"Eu sou do Rio\" é <b>Je suis de Rio</b>.",
       "en": null
@@ -909,6 +914,11 @@
       "en": null
      },
      "resposta": true,
+     "frase_do_painel": "les États-Unis",
+     "traducao_do_painel": {
+      "pt-BR": "os Estados Unidos",
+      "en": null
+     },
      "explicacao": {
       "pt-BR": "<b>Les États-Unis</b> está no plural, como \"os Estados Unidos\".",
       "en": null
@@ -1232,6 +1242,11 @@
       "en": null
      },
      "resposta": false,
+     "frase_do_painel": "la langue",
+     "traducao_do_painel": {
+      "pt-BR": "a língua",
+      "en": null
+     },
      "explicacao": {
       "pt-BR": "<b>La langue</b> é \"a língua\"; \"o país\" é <b>le pays</b>.",
       "en": null

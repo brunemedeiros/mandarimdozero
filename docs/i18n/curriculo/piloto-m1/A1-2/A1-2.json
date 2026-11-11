@@ -420,6 +420,11 @@
       "en": null
      },
      "resposta": true,
+     "frase_do_painel": "s'appeler",
+     "traducao_do_painel": {
+      "pt-BR": "chamar-se",
+      "en": null
+     },
      "explicacao": {
       "pt-BR": "<b>S'appeler</b> é \"chamar-se\": em francês, o nome se diz com esse verbo.",
       "en": null
@@ -1006,6 +1011,11 @@
       "en": null
      },
      "resposta": false,
+     "frase_do_painel": "brésilien",
+     "traducao_do_painel": {
+      "pt-BR": "brasileiro",
+      "en": null
+     },
      "explicacao": {
       "pt-BR": "<b>Brésilien</b> é \"brasileiro\". Para uma mulher, <b>brésilienne</b>, com <b>-nne</b> no fim.",
       "en": null
