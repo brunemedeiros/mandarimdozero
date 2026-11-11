@@ -647,3 +647,13 @@ Número 086 já usado por outras conversas (`086_friends_streak_milestones_and_c
 - Tela (mesmo PR): grupo "Ex-alunos (só para o histórico)" no seletor do Google Agenda. Propostas 3 ("Para quem": Alunos +
   Turmas numa caixa, fechada com os nomes quando já há alguém escolhido) e 5 (Nova aula com Tópico e Lição de casa lado a lado;
   Observações e Notas em "Mais campos").
+
+## 134 -- Google Agenda: "Lembrar" pelo e-mail vale também pelo nome do evento (2026-11-11)
+
+- Pedido da autora: "faça o Lembrar de um nome de aluno valer para os dois" (e-mail e nome). Caso real: Jakob com 28 eventos
+  com o e-mail dele e 3 só com "Jakob" no título; antes eram dois cliques.
+- `134_gcal_remember_email_and_title.sql` (só `google_calendar_resolve`): com "Lembrar" num evento com convidado, cria a regra do
+  e-mail e também a do título, se o título for só daquela pessoa (nenhum evento com o mesmo título tem outro convidado, não é
+  "agendamento", não há regra de título ativa). "Aulas de francês" com convidados diferentes continua sem regra de título.
+  "Trazer de volta" desliga as duas. Teste local `tests/aulas-presenca/test_134.sql` 6/6 (117 e 133 sem mudança).
+- Staging e produção (2026-11-11, produção versão 20261111123948). Sem mudança de tela.
