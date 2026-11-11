@@ -81,3 +81,6 @@ Tudo o que for decidido sobre XP vale para todos os sites (fr, zh, pt e futuros)
 
 ## Acentuação passa a dar XP (2026-11-10)
 - Decisão da autora ("Sim!" à pergunta se a Acentuação deveria dar XP como a trilha; vale para todos os sites): certo 2 (`EXERCISE_XP_PRODUCE`), "quase" 1 (`EXERCISE_XP_ALMOST`), errou 0; só na primeira conclusão, pago no Concluir (`accentXP`). Ouça e traduza e Complete a frase seguem sem XP (pergunta aberta à autora). Teste: `tests/desafios-conclusao/` 22/22.
+
+## Ouça e traduza e Complete a frase passam a dar XP (2026-11-11)
+- Decisão da autora ("Ouça e traduza, bem como outros Desafios, também devem dar XP"; vale para todos os sites): Ouça e traduza igual à Acentuação (certo 2, quase 1), Complete a frase 1 por acerto (escolha da forma); só na primeira conclusão, pago no Concluir (`challengeXP`). Ditados ficam de fora até a autora decidir (pergunta aberta).

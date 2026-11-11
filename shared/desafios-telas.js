@@ -187,10 +187,12 @@ function challengeCompleteButtonHTML(){
 function challengeContinueButtonHTML(outcome){
   return `<button class="btn btn-primary challenge-complete-btn${outcome === 'ok' ? ' correct-feedback-continue' : ''}" id="challenge-complete-btn" style="margin-top:16px;width:100%;">${t('common.continueArrow')}</button>`;
 }
-// XP da Acentuação (decisão da autora, 2026-11-10; mesmo padrão da trilha, constantes de shared/srs.js, ver .claude/rules/xp.md): digitar certo
-// = EXERCISE_XP_PRODUCE, "quase" = EXERCISE_XP_ALMOST, errou = 0 (nem há Concluir). Só na PRIMEIRA conclusão (refazer concluído ou "Revisar erros" = 0).
-function accentXP(c, outcome){
+// XP dos Desafios que não são Expressões (decisão da autora, 2026-11-10; mesmo padrão da trilha, constantes de shared/srs.js, ver .claude/rules/xp.md):
+// Acentuação e Ouça e traduza (digitar) certo = EXERCISE_XP_PRODUCE, "quase" = EXERCISE_XP_ALMOST; Complete a frase (escolher a forma em cada lacuna)
+// certo = EXERCISE_XP_RECOGNIZE; errou ou "Não sei" = 0 (nem há Concluir). Só na PRIMEIRA conclusão (refazer concluído ou "Revisar erros" = 0).
+function challengeXP(c, outcome){
   if (isChallengeCompleted(c.id) || challengePreviewMode) return 0;
+  if (c.type === 'cloze_grammar') return outcome === 'ok' ? EXERCISE_XP_RECOGNIZE : 0;
   return outcome === 'ok' ? EXERCISE_XP_PRODUCE : outcome === 'partial' ? EXERCISE_XP_ALMOST : 0;
 }
 // Quanto de XP o último "Concluir" pagou (a tela de conclusão mostra; 0 = nada a mostrar).
@@ -1291,7 +1293,7 @@ function checkListenTranslateAnswer(c, revealed){
   document.getElementById('lt-replay-slow-btn').addEventListener('click', (e) => {
     if (c.audioFile) playPregeneratedAudio(`challenges/${c.audioFile}`, e.currentTarget, false, SLOW_AUDIO_RATE);
   });
-  wireChallengeCompleteButton(c);
+  wireChallengeCompleteButton(c, challengeXP(c, outcome));
 }
 
 
@@ -1354,7 +1356,7 @@ function checkAccentAnswer(c, revealed){
   document.getElementById('accent-replay-slow-btn').addEventListener('click', (e) => {
     if (c.audioFile) playPregeneratedAudio(`challenges/${c.audioFile}`, e.currentTarget, false, SLOW_AUDIO_RATE);
   });
-  wireChallengeCompleteButton(c, accentXP(c, outcome));
+  wireChallengeCompleteButton(c, challengeXP(c, outcome));
 }
 
 
@@ -1449,7 +1451,7 @@ function renderClozeGrammarFeedback(c, chosen, res, revealed){
   chStepAnswered();
   if (!revealed) playFeedbackSound(isCorrect);
   recordChallengeReviewOutcome(c, res.outcome);
-  wireChallengeCompleteButton(c);
+  wireChallengeCompleteButton(c, revealed ? 0 : challengeXP(c, res.outcome));
 }
 
 
