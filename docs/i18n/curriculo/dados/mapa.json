@@ -786,71 +786,134 @@
               "origem": "publicada",
               "cartoes": [
                 {
-                  "palavra": "habiter",
-                  "chave": "nova",
-                  "origem": "novo"
+                  "palavra": "la nationalité",
+                  "chave": "A1-9-v8",
+                  "origem": "publicado",
+                  "licao": 1
                 },
                 {
                   "palavra": "anglais / anglaise",
                   "chave": "A1-9-v3",
-                  "origem": "publicado"
+                  "origem": "publicado",
+                  "licao": 1
                 },
                 {
                   "palavra": "espagnol / espagnole",
                   "chave": "A1-9-v4",
-                  "origem": "publicado"
+                  "origem": "publicado",
+                  "licao": 1
                 },
                 {
                   "palavra": "italien / italienne",
                   "chave": "A1-9-v5",
-                  "origem": "publicado"
+                  "origem": "publicado",
+                  "licao": 1
                 },
                 {
                   "palavra": "allemand / allemande",
                   "chave": "A1-9-v6",
-                  "origem": "publicado"
-                },
-                {
-                  "palavra": "portugais / portugaise",
-                  "chave": "A1-9-v7",
-                  "origem": "publicado"
-                },
-                {
-                  "palavra": "la nationalité",
-                  "chave": "A1-9-v8",
-                  "origem": "publicado"
+                  "origem": "publicado",
+                  "licao": 1
                 },
                 {
                   "palavra": "la ville",
                   "chave": "nova",
-                  "origem": "novo"
+                  "origem": "novo",
+                  "licao": 2
                 },
                 {
-                  "palavra": "parler",
+                  "palavra": "habiter",
                   "chave": "nova",
                   "origem": "novo",
-                  "observacao": "o nome da língua é a palavra da nacionalidade no masculino (Je parle anglais, français), sem cartão novo (decisão 332)"
+                  "licao": 2
                 },
                 {
                   "palavra": "la France",
                   "chave": "A1-2-v5",
                   "origem": "publicado",
-                  "decisao": 328
+                  "decisao": 328,
+                  "licao": 2
                 },
                 {
                   "palavra": "le Brésil",
                   "chave": "A1-2-v6",
                   "origem": "publicado",
-                  "decisao": 328
+                  "decisao": 328,
+                  "licao": 2
                 },
                 {
                   "palavra": "les États-Unis",
                   "chave": "nova",
                   "origem": "novo",
-                  "decisao": 331
+                  "decisao": 331,
+                  "licao": 2
+                },
+                {
+                  "palavra": "parler",
+                  "chave": "nova",
+                  "origem": "novo",
+                  "observacao": "o nome da língua é a palavra da nacionalidade no masculino (Je parle anglais, français), sem cartão novo (decisão 332)",
+                  "licao": 3
+                },
+                {
+                  "palavra": "la langue",
+                  "chave": "nova",
+                  "origem": "novo",
+                  "licao": 3,
+                  "decisao": 359
+                },
+                {
+                  "palavra": "portugais / portugaise",
+                  "chave": "A1-9-v7",
+                  "origem": "publicado",
+                  "licao": 3
+                },
+                {
+                  "palavra": "étudier",
+                  "chave": "nova",
+                  "origem": "novo",
+                  "licao": 3,
+                  "decisao": 359
+                },
+                {
+                  "palavra": "un peu",
+                  "chave": "nova",
+                  "origem": "novo",
+                  "licao": 3,
+                  "decisao": 359,
+                  "observacao": "o \"um pouco\" de grau (Je parle un peu français); un peu de, de quantidade, é outro cartão (A1-12), decisão 359"
                 }
               ],
               "notas": [
+                {
+                  "titulo": "O feminino das nacionalidades",
+                  "tipo": "Exp",
+                  "confianca": "alta",
+                  "nova": true,
+                  "momento": {
+                    "licao": 1,
+                    "depois_de": "allemand / allemande"
+                  },
+                  "exemplos": [
+                    {
+                      "fr": "anglaise",
+                      "pt-BR": "inglesa"
+                    },
+                    {
+                      "fr": "espagnole",
+                      "pt-BR": "espanhola"
+                    },
+                    {
+                      "fr": "italienne",
+                      "pt-BR": "italiana"
+                    },
+                    {
+                      "fr": "allemande",
+                      "pt-BR": "alemã"
+                    }
+                  ],
+                  "decisao": 359
+                },
                 {
                   "titulo": "Je suis brésilienne, je suis de Rio: a nacionalidade e a cidade",
                   "tipo": "Exp",
@@ -867,20 +930,30 @@
                       "fr": "Je suis de Rio.",
                       "pt-BR": "Eu sou do Rio."
                     }
-                  ]
+                  ],
+                  "momento": {
+                    "licao": 2,
+                    "depois_de": "la ville"
+                  }
                 },
                 {
                   "titulo": "où vai para o fim",
                   "tipo": "Real",
                   "confianca": "alta",
                   "id": "N18",
-                  "breve": true
-                },
-                {
-                  "titulo": "feminino das outras 5 nacionalidades",
-                  "tipo": "Exp",
-                  "confianca": "n/r",
-                  "nova": true
+                  "breve": true,
+                  "momento": {
+                    "licao": 2,
+                    "depois_de": "habiter"
+                  },
+                  "forma": "painel",
+                  "decisao": 359,
+                  "exemplos": [
+                    {
+                      "fr": "Tu habites où ?",
+                      "pt-BR": "Onde você mora?"
+                    }
+                  ]
                 },
                 {
                   "titulo": "J'habite en France, au Brésil, aux États-Unis, à Paris",
@@ -911,23 +984,97 @@
                       "fr": "J'habite à Paris.",
                       "pt-BR": "Eu moro em Paris."
                     }
-                  ]
+                  ],
+                  "momento": {
+                    "licao": 2,
+                    "depois_de": "les États-Unis"
+                  }
                 },
                 {
                   "titulo": "Est-ce que tu parles anglais ?: a mesma pergunta, com est-ce que na frente",
                   "tipo": "Exp",
-                  "confianca": "n/r",
+                  "confianca": "alta",
                   "nova": true,
                   "gancho": "Tu parles anglais ?",
                   "versao_gratis_de": [
                     "A1-g12"
+                  ],
+                  "momento": {
+                    "licao": 3,
+                    "depois_de": "parler"
+                  },
+                  "decisao": 359,
+                  "exemplos": [
+                    {
+                      "fr": "Tu parles anglais ?",
+                      "pt-BR": "Você fala inglês?"
+                    },
+                    {
+                      "fr": "Est-ce que tu parles anglais ?",
+                      "pt-BR": "Você fala inglês?"
+                    },
+                    {
+                      "fr": "Est-ce que vous parlez anglais ?",
+                      "pt-BR": "O senhor (a senhora) fala inglês?"
+                    }
                   ]
                 }
               ],
               "decisoes": [
                 328,
                 331,
-                332
+                332,
+                359
+              ],
+              "licoes": [
+                {
+                  "licao": 1,
+                  "id": "nacionalidades-2",
+                  "titulo": "Dizer a nacionalidade"
+                },
+                {
+                  "licao": 2,
+                  "id": "nacionalidade-e-origem",
+                  "titulo": "Dizer de onde é e onde mora"
+                },
+                {
+                  "licao": 3,
+                  "id": "linguas",
+                  "id_novo": true,
+                  "titulo": "Dizer que línguas fala"
+                },
+                {
+                  "licao": 4,
+                  "id": "conversar-de-onde-e",
+                  "id_novo": true,
+                  "tipo": "dialogos",
+                  "titulo": "Conversar sobre de onde você é"
+                },
+                {
+                  "licao": 5,
+                  "id": "falar-de-si-formal",
+                  "id_novo": true,
+                  "tipo": "dialogos",
+                  "titulo": "Falar de você de um jeito formal"
+                }
+              ],
+              "licoes_08": 6,
+              "licoes_motivo": "3 lições de cartões + 2 lições de diálogo + Revisão da unidade (decisão 359)",
+              "dialogos": [
+                {
+                  "titulo": "Num curso de línguas, Thomas conhece a Sofia.",
+                  "registro": "informal",
+                  "origem": "publicado (falas A1-9-d0 a d2 ficam; d3 e d4 saem: Allemagne, Portugal e maintenant não são ensinados aqui; decisão 359)",
+                  "licao": 4,
+                  "decisao": 359
+                },
+                {
+                  "titulo": "Numa entrevista de emprego, o Sr. Bernard conversa com a Sra. Lima.",
+                  "registro": "formal",
+                  "origem": "novo (decisão 359)",
+                  "licao": 5,
+                  "decisao": 359
+                }
               ]
             },
             {

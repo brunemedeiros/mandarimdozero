@@ -15,6 +15,7 @@ const fonte = fs.readFileSync(path.join(__dirname, 'fonte.html'), 'utf8');
 const RASCUNHOS = [
   { unidade: 1, caminho: 'docs/i18n/curriculo/piloto-m1/A1-1/A1-1.json' },
   { unidade: 2, caminho: 'docs/i18n/curriculo/piloto-m1/A1-2/A1-2.json' },
+  { unidade: 3, caminho: 'docs/i18n/curriculo/piloto-m1/A1-9/A1-9.json' },
 ];
 
 // `tolerante`: para a comparação com um commit antigo, tela de tipo que não existe mais é ignorada.
@@ -66,7 +67,10 @@ function construirTelas(R, unidade, tolerante){
       }
       case 'frase': {
         const f = frase(t.frase);
-        return { ...base, type: 'item', kind: 'Frase nova', fr: f.fr, tr: f['pt-BR'], role: pt(t.papel) || undefined, audios: [[f.fr, '']] };
+        // Frase em par (informal / formal, decisão 359): um áudio para cada forma.
+        const formas = f.fr.split(' / ');
+        return { ...base, type: 'item', kind: 'Frase nova', fr: f.fr, tr: f['pt-BR'], role: pt(t.papel) || undefined,
+          audios: formas.length > 1 ? formas.map((x, k) => [x, k ? 'formal' : 'informal']) : [[f.fr, '']] };
       }
       case 'complete': return { ...base, type: 'complete', before: t.antes, after: t.depois, tr: pt(t.traducao), opts: t.opcoes, answer: t.resposta,
         full: t.frase_completa, why_ok: pt(t.explicacao), why_err: erros(t) };

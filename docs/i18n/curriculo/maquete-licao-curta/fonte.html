@@ -186,7 +186,7 @@ aside{display:grid;gap:16px;min-width:0}
 <div class="wrap">
   <header class="top">
     <div class="eyebrow">Maquete · módulo "Apresentar-se"</div>
-    <h1>Lições curtas: unidades 1 e 2</h1>
+    <h1>Lições curtas: unidades 1 a 3</h1>
     <p>Clique como se fosse a aluna. Ao lado, o porquê de cada tela. Nada disso está no app ainda.</p>
     <div class="unit-tabs" id="units"></div>
     <div class="lesson-tabs" id="tabs"></div>
@@ -283,6 +283,21 @@ const audBtn=(text,label)=>`<button class="aud${label?'':' round'}" data-say="${
 /* Comentários da maquete (só para a dona; não vão para o app), por id de tela. O conteúdo das telas vem do
    rascunho piloto-m1/A1-1/A1-1.json (TELAS, injetado pelo gerar.js). */
 const WHY={
+ "unidade-3": {"titulo": "A unidade 3", "texto": "<p>Decisão 359: 3 lições de cartões (5, 5 e 5) e 2 de diálogo. Cartões novos: <i>la langue</i>, <i>étudier</i> e <i>un peu</i>.</p>"},
+ "u3-l1-intro": {"titulo": "Lição 1: a nacionalidade", "texto": "<p>Reaproveita a lição publicada <code>nacionalidades-2</code>. <i>Allemand</i> veio para cá.</p>"},
+ "u3-frase-nat": {"titulo": "Pergunta em par", "texto": "<p>Decisão 359: informal e formal juntos (regra 1), com um áudio para cada forma.</p>"},
+ "u3-nota-fem": {"titulo": "Nota: o feminino que se ouve", "texto": "<p>Com <i>anglaise</i>, <i>espagnole</i>, <i>italienne</i> e <i>allemande</i>. <i>Portugaise</i> chega na lição 3, com a explicação no painel.</p>"},
+ "u3-frase-dou": {"titulo": "Pergunta em par: de onde é", "texto": "<p><i>Tu es d'où ? / Vous êtes d'où ?</i> ficou nesta lição (decisão 359), junto da resposta <i>Je suis de Rio</i>.</p>"},
+ "u3-ex-ou": {"titulo": "A nota \"où vai para o fim\" virou painel", "texto": "<p>Decisão 359: a nota curta aparece no painel deste exercício.</p>"},
+ "u3-nota-paises": {"titulo": "Nota: uma fórmula por país", "texto": "<p>Sem a regra do gênero dos países, que fica na gramática Premium (decisão 331).</p>"},
+ "u3-nota-estceque": {"titulo": "Nota: est-ce que", "texto": "<p>Versão grátis da gramática \"perguntar sim ou não\", com o formal (<i>Est-ce que vous parlez anglais ?</i>).</p>"},
+ "u3-ex-portugais": {"titulo": "A língua é o masculino", "texto": "<p>A explicação da decisão 332 no painel: <i>je parle portugais</i>.</p>"},
+ "u3-etudier": {"titulo": "Cartão novo: étudier", "texto": "<p>Decisão 359: verbo do 1º grupo, como <i>parler</i> e <i>habiter</i>. <i>Apprendre</i> fica no A2.</p>"},
+ "u3-ex-etudie": {"titulo": "\"Complete\" de grafia e o artigo", "texto": "<p>O painel avisa a pegadinha: com <i>étudier</i>, vai artigo (<i>le français</i>); com <i>parler</i>, não.</p>"},
+ "u3-unpeu": {"titulo": "Cartão novo: un peu", "texto": "<p>O \"um pouco\" de grau, outro cartão que <i>un peu de</i> (quantidade, \"Pedir quantidades na feira\"), decisão 359.</p>"},
+ "u3-d1-cena": {"titulo": "Lição 4: o diálogo informal", "texto": "<p>Mantém as 3 primeiras falas publicadas; saem as duas com <i>Allemagne</i>, <i>Portugal</i> e <i>maintenant</i>. Ganhou <i>étudier</i> e <i>un peu</i>.</p>"},
+ "u3-d1-papel": {"titulo": "Sua vez", "texto": "<p>A aluna diz a cidade (São Paulo), onde mora e que línguas fala, sem dizer a nacionalidade (para não supor o gênero).</p>"},
+ "u3-d2-cena": {"titulo": "Lição 5: diálogo formal novo", "texto": "<p>Numa entrevista de emprego, onde perguntar nacionalidade, cidade e línguas é natural.</p>"},
  "unidade-2": {"titulo": "A unidade 2", "texto": "<p>Decisão 356: 3 lições de cartões e 2 de diálogo (uma por diálogo), antes da Revisão da unidade. Na trilha, só os títulos.</p>"},
  "u2-l1-intro": {"titulo": "Lição 1: dizer o nome", "texto": "<p>5 cartões e 3 notas: é a lição mais carregada da unidade (cerca de 3 minutos). As três notas continuam notas porque trazem formas que não são cartões ou sistematizam.</p>"},
  "u2-nota-tuvous": {"titulo": "Nota que continua nota", "texto": "<p>Sistematiza <i>tu</i> x <i>vous</i> e traz o <i>vous</i> de \"vocês\", que não é cartão. Etiquetas nos exemplos: informal, formal ou plural.</p>"},

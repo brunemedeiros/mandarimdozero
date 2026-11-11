@@ -17,13 +17,13 @@ console.log('== totais do 08 v2 (seção 1 e 3)');
 check('A1: 9 módulos', A1.modulos === 9, A1.modulos);
 check('A1: 57 unidades', A1.unidades === 57, A1.unidades);
 check('A1: 34 vocabulário + 23 gramática', A1.vocabulario === 34 && A1.gramatica === 23, [A1.vocabulario, A1.gramatica]);
-check('A1: 385 cartões (decisão 330: + enchanté / enchantée em "Dizer o nome e a nacionalidade"; decisão 331: venir de e les États-Unis trocam de unidade, sem mudar a conta; era 384)', A1.cartoes === 385, A1.cartoes);
-check('A1: 762 cartões A/B (385 × 2 − 8 de reconhecimento; decisão 330: ne… pas só de reconhecimento)', A1.ab === 762, A1.ab);
-check('A1: 195 novos + 190 publicados', A1.novos === 195 && A1.publicados === 190, [A1.novos, A1.publicados]);
-check('A1: cartões por módulo 67/40/51/52/36/29/39/41/30 (decisões 334 e 335: "Perguntar a idade dos outros: até 69", 13, desce para "Família e pessoas próximas"; era 80/27)',
-  JSON.stringify(A1.porModulo.map(m => m.cartoes)) === JSON.stringify([67, 40, 51, 52, 36, 29, 39, 41, 30]), A1.porModulo.map(m => m.cartoes));
-check('A1: ~156 lições (M1 27, M2 15, M3 19, M4 22, M5 14, M6 12, M7 18, M8 17, M9 12; decisão 335: as 5 lições de "Perguntar a idade dos outros: até 69" passam do M1 ao M2; decisões 338, 355 e 356: +2 lições de diálogo em "Cumprimentar e se despedir" e +2 em "Dizer o nome e a nacionalidade")',
-  JSON.stringify(A1.porModulo.map(m => m.licoes)) === JSON.stringify([27, 15, 19, 22, 14, 12, 18, 17, 12]), A1.porModulo.map(m => m.licoes));
+check('A1: 388 cartões (decisão 330: + enchanté / enchantée; decisão 331: venir de e les États-Unis trocam de unidade; decisão 359: + la langue, étudier e un peu em "Dizer de onde é, onde mora e que línguas fala"; era 385)', A1.cartoes === 388, A1.cartoes);
+check('A1: 768 cartões A/B (388 × 2 − 8 de reconhecimento; decisão 330: ne… pas só de reconhecimento)', A1.ab === 768, A1.ab);
+check('A1: 198 novos + 190 publicados', A1.novos === 198 && A1.publicados === 190, [A1.novos, A1.publicados]);
+check('A1: cartões por módulo 70/40/51/52/36/29/39/41/30 (decisões 334 e 335: "Perguntar a idade dos outros: até 69", 13, desce para "Família e pessoas próximas"; decisão 359: +3 em "Apresentar-se")',
+  JSON.stringify(A1.porModulo.map(m => m.cartoes)) === JSON.stringify([70, 40, 51, 52, 36, 29, 39, 41, 30]), A1.porModulo.map(m => m.cartoes));
+check('A1: ~157 lições (M1 28, M2 15, M3 19, M4 22, M5 14, M6 12, M7 18, M8 17, M9 12; decisão 335: as 5 lições de "Perguntar a idade dos outros: até 69" passam do M1 ao M2; decisões 338, 355 e 356: +2 lições de diálogo em "Cumprimentar e se despedir" e +2 em "Dizer o nome e a nacionalidade"; decisão 359: "Dizer de onde é, onde mora e que línguas fala" com 3 lições de cartões + 2 de diálogo, era 4 + Revisão)',
+  JSON.stringify(A1.porModulo.map(m => m.licoes)) === JSON.stringify([28, 15, 19, 22, 14, 12, 18, 17, 12]), A1.porModulo.map(m => m.licoes));
 check('A1: ~31h00 de trilha', A1.tempo === 31 * 60, C.formatarTempo(A1.tempo));
 check('A1: "Apresentar-se" fica com o tempo digitado ~3h55 (decisão 270; 16 cartões na A1-1 não mudam a regra, decisões 300 e 308)', A1.porModulo[0].tempo === 3 * 60 + 55, C.formatarTempo(A1.porModulo[0].tempo));
 check('A1: 131 notas (decisão 333: a nota de ida e procedência de "Países e cidades" vira duas; era 130)', A1.notas === 131, A1.notas);
@@ -96,7 +96,8 @@ console.log('== "Dizer o nome e a nacionalidade" (A1-2) e "Dizer de onde é, ond
   check('A1-9 no módulo "Apresentar-se", logo depois de A1-2', u9.modulo === 'A1-m1' && u9.ordemGlobal === idx['A1-2'].ordemGlobal + 1, [u9.modulo, u9.posicao]);
   check('"Família e pessoas próximas" começa em "Apresentar a família"', mapa.niveis[0].modulos[1].unidades[0].id === 'A1-4');
   const p9 = u9.unidade.cartoes.map(c => c.palavra);
-  check('A1-9: 12 cartões, com la France (A1-2-v5), le Brésil (A1-2-v6) e les États-Unis, sem américain e sem venir de (decisão 331)', p9.length === 12 &&
+  check('A1-9: 15 cartões, com la France (A1-2-v5), le Brésil (A1-2-v6) e les États-Unis, la langue, étudier e un peu, sem américain e sem venir de (decisões 331 e 359)', p9.length === 15 &&
+    ['la langue', 'étudier', 'un peu'].every(x => p9.includes(x)) &&
     !p9.some(p => /américain/.test(p)) && !p9.includes('venir de') && p9.includes('les États-Unis') &&
     u9.unidade.cartoes.some(c => c.palavra === 'la France' && c.chave === 'A1-2-v5') && u9.unidade.cartoes.some(c => c.palavra === 'le Brésil' && c.chave === 'A1-2-v6'), p9);
   const n9 = C.notasDaUnidade(u9.unidade);
@@ -279,6 +280,13 @@ console.log('== lição de diálogos (regra 17, decisão 338)');
     C.conferirLicoesDaUnidade(mapaCom(unidade(L, tres, [{ titulo: 'D', licao: 2 }, { titulo: 'E', licao: 1 }]))).some(p => p.problema === 'diálogo fora das lições de diálogos'));
   check('a regra das lições conta cada lição de diálogos (+1 por lição)',
     C.licoesPelaRegra({ tipo: 'vocabulario', licoes: [...L, { licao: 3, id: 'd2', tipo: 'dialogos' }], cartoes: tres }) === C.licoesPelaRegra({ tipo: 'vocabulario', licoes: [L[0]], cartoes: tres }) + 2);
+}
+
+{
+  const u = C.indicePorId(C.carregarMapa())['A1-9'].unidade;
+  check('A1-9: 3 lições de cartões (5, 5 e 5) + 2 de diálogo, um diálogo em cada (decisão 359)',
+    JSON.stringify([1, 2, 3].map(n => u.cartoes.filter(c => c.licao === n).length)) === JSON.stringify([5, 5, 5]) && C.licoesDeDialogos(u) === 2
+    && JSON.stringify(u.dialogos.map(d => [d.registro, d.licao])) === JSON.stringify([['informal', 4], ['formal', 5]]));
 }
 
 summary('curriculo mapa totais');

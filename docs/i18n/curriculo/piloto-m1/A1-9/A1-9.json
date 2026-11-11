@@ -1,0 +1,1970 @@
+{
+ "_doc": "Rascunho da unidade A1-9 \"Dizer de onde é, onde mora e que línguas fala\" (módulo \"Apresentar-se\", A1-m1), no formato da lição curta (decisão 359). Só pt-BR: os campos en ficam null até a aprovação. Nada daqui está em fr/content.js. Lições publicadas: nacionalidades-2 e nacionalidade-e-origem reaproveitadas (decisão 284); nacionalidades-1 sai (os cartões dela foram para \"Dizer o nome e a nacionalidade\").",
+ "status": "proposta (decisão 359), aguarda a dona",
+ "formato": "lição curta: regra 17 do 15-regras-do-curriculo.md (decisões 338 a 359). Cada lição tem `telas` na ordem em que aparecem; a maquete (maquete-licao-curta/gerar.js) é gerada daqui.",
+ "unidade": {
+  "id": "A1-9",
+  "modulo": "A1-m1",
+  "posicao": "M1.3",
+  "titulo": {
+   "pt-BR": "Dizer de onde é, onde mora e que línguas fala",
+   "en": null
+  },
+  "funcao": "dizer de onde é (nacionalidade e cidade, com Je suis de), onde mora (en / au / aux + país, à + cidade) e que línguas fala"
+ },
+ "cartoes": [
+  {
+   "chave": "A1-9-v8",
+   "fr": "la nationalité",
+   "traducao": {
+    "pt-BR": "a nacionalidade",
+    "en": null
+   },
+   "licao": "nacionalidades-2",
+   "origem": "publicado",
+   "papel_na_funcao": {
+    "pt-BR": "Pergunta",
+    "en": null
+   }
+  },
+  {
+   "chave": "A1-9-v3",
+   "fr": "anglais / anglaise",
+   "traducao": {
+    "pt-BR": "inglês / inglesa",
+    "en": null
+   },
+   "licao": "nacionalidades-2",
+   "origem": "publicado"
+  },
+  {
+   "chave": "A1-9-v4",
+   "fr": "espagnol / espagnole",
+   "traducao": {
+    "pt-BR": "espanhol / espanhola",
+    "en": null
+   },
+   "licao": "nacionalidades-2",
+   "origem": "publicado"
+  },
+  {
+   "chave": "A1-9-v5",
+   "fr": "italien / italienne",
+   "traducao": {
+    "pt-BR": "italiano / italiana",
+    "en": null
+   },
+   "licao": "nacionalidades-2",
+   "origem": "publicado"
+  },
+  {
+   "chave": "A1-9-v6",
+   "fr": "allemand / allemande",
+   "traducao": {
+    "pt-BR": "alemão / alemã",
+    "en": null
+   },
+   "licao": "nacionalidades-2",
+   "origem": "publicado"
+  },
+  {
+   "chave": "nova",
+   "fr": "la ville",
+   "traducao": {
+    "pt-BR": "a cidade",
+    "en": null
+   },
+   "licao": "nacionalidade-e-origem",
+   "origem": "novo"
+  },
+  {
+   "chave": "nova",
+   "fr": "habiter",
+   "traducao": {
+    "pt-BR": "morar",
+    "en": null
+   },
+   "licao": "nacionalidade-e-origem",
+   "origem": "novo",
+   "papel_na_funcao": {
+    "pt-BR": "Pergunta e resposta",
+    "en": null
+   }
+  },
+  {
+   "chave": "A1-2-v5",
+   "fr": "la France",
+   "traducao": {
+    "pt-BR": "a França",
+    "en": null
+   },
+   "licao": "nacionalidade-e-origem",
+   "origem": "publicado"
+  },
+  {
+   "chave": "A1-2-v6",
+   "fr": "le Brésil",
+   "traducao": {
+    "pt-BR": "o Brasil",
+    "en": null
+   },
+   "licao": "nacionalidade-e-origem",
+   "origem": "publicado"
+  },
+  {
+   "chave": "nova",
+   "fr": "les États-Unis",
+   "traducao": {
+    "pt-BR": "os Estados Unidos",
+    "en": null
+   },
+   "licao": "nacionalidade-e-origem",
+   "origem": "novo"
+  },
+  {
+   "chave": "nova",
+   "fr": "parler",
+   "traducao": {
+    "pt-BR": "falar",
+    "en": null
+   },
+   "licao": "linguas",
+   "origem": "novo"
+  },
+  {
+   "chave": "nova",
+   "fr": "la langue",
+   "traducao": {
+    "pt-BR": "a língua",
+    "en": null
+   },
+   "licao": "linguas",
+   "origem": "novo"
+  },
+  {
+   "chave": "A1-9-v7",
+   "fr": "portugais / portugaise",
+   "traducao": {
+    "pt-BR": "português / portuguesa",
+    "en": null
+   },
+   "licao": "linguas",
+   "origem": "publicado"
+  },
+  {
+   "chave": "nova",
+   "fr": "étudier",
+   "traducao": {
+    "pt-BR": "estudar",
+    "en": null
+   },
+   "licao": "linguas",
+   "origem": "novo"
+  },
+  {
+   "chave": "nova",
+   "fr": "un peu",
+   "traducao": {
+    "pt-BR": "um pouco",
+    "en": null
+   },
+   "licao": "linguas",
+   "origem": "novo"
+  }
+ ],
+ "licoes": [
+  {
+   "id": "nacionalidades-2",
+   "ordem": 1,
+   "id_novo": false,
+   "titulo": {
+    "publicado": null,
+    "pt-BR": "Dizer a nacionalidade",
+    "en": null,
+    "a_confirmar": false
+   },
+   "cartoes": [
+    "A1-9-v8",
+    "A1-9-v3",
+    "A1-9-v4",
+    "A1-9-v5",
+    "A1-9-v6"
+   ],
+   "inclui_dialogo": false,
+   "telas": [
+    {
+     "id": "u3-l1-intro",
+     "tipo": "abertura",
+     "objetivo": {
+      "pt-BR": "Agora vamos conhecer outras nacionalidades e perguntar a de alguém.",
+      "en": null
+     },
+     "tamanho": {
+      "pt-BR": "5 cartões · 2 frases · cerca de 3 minutos",
+      "en": null
+     }
+    },
+    {
+     "id": "u3-nationalite",
+     "tipo": "cartao",
+     "cartao": "la nationalité"
+    },
+    {
+     "id": "u3-frase-nat",
+     "tipo": "frase",
+     "frase": "Quelle est ta nationalité ? / Quelle est votre nationalité ?",
+     "papel": {
+      "pt-BR": "Pergunta",
+      "en": null
+     }
+    },
+    {
+     "id": "u3-anglais",
+     "tipo": "cartao",
+     "cartao": "anglais / anglaise"
+    },
+    {
+     "id": "u3-ex-anglaise",
+     "tipo": "complete",
+     "antes": "Elle est ",
+     "depois": ".",
+     "traducao": {
+      "pt-BR": "Ela é inglesa.",
+      "en": null
+     },
+     "opcoes": [
+      "anglais",
+      "anglaise"
+     ],
+     "resposta": "anglaise",
+     "frase_completa": "Elle est anglaise.",
+     "distrator": "par",
+     "explicacao": {
+      "pt-BR": "Para uma mulher, <b>anglaise</b>: o <b>s</b> passa a soar como \"z\".",
+      "en": null
+     },
+     "explicacao_erro": {
+      "anglais": {
+       "pt-BR": "A tradução pede \"inglesa\". ",
+       "en": null
+      }
+     }
+    },
+    {
+     "id": "u3-espagnol",
+     "tipo": "cartao",
+     "cartao": "espagnol / espagnole"
+    },
+    {
+     "id": "u3-italien",
+     "tipo": "cartao",
+     "cartao": "italien / italienne"
+    },
+    {
+     "id": "u3-frase-italienne",
+     "tipo": "frase",
+     "frase": "Je suis italienne.",
+     "papel": {
+      "pt-BR": "Resposta",
+      "en": null
+     }
+    },
+    {
+     "id": "u3-ex-italienne",
+     "tipo": "funcao",
+     "pergunta": {
+      "pt-BR": "A Sofia é da Itália. Como ela diz a nacionalidade?",
+      "en": null
+     },
+     "opcoes": [
+      "Je suis italien.",
+      "Je suis italienne.",
+      "Je suis espagnole."
+     ],
+     "resposta": "Je suis italienne.",
+     "traducao_do_painel": {
+      "pt-BR": "Eu sou italiana.",
+      "en": null
+     },
+     "explicacao": {
+      "pt-BR": "Quem fala é mulher: <b>italienne</b>, com <b>-enne</b>.",
+      "en": null
+     },
+     "explicacao_erro": {
+      "Je suis italien.": {
+       "pt-BR": "<b>Italien</b> é o masculino. ",
+       "en": null
+      },
+      "Je suis espagnole.": {
+       "pt-BR": "<b>Espagnole</b> é espanhola. ",
+       "en": null
+      }
+     }
+    },
+    {
+     "id": "u3-allemand",
+     "tipo": "cartao",
+     "cartao": "allemand / allemande"
+    },
+    {
+     "id": "u3-nota-fem",
+     "tipo": "nota",
+     "nota": "feminino-nacionalidades"
+    },
+    {
+     "id": "u3-ex-nota-fem",
+     "tipo": "vf",
+     "fr": "espagnole",
+     "afirmacao": {
+      "pt-BR": "Soa diferente de <i>espagnol</i>.",
+      "en": null
+     },
+     "resposta": false,
+     "frase_do_painel": "espagnole",
+     "traducao_do_painel": {
+      "pt-BR": "espanhola",
+      "en": null
+     },
+     "explicacao": {
+      "pt-BR": "<b>Espagnol</b> e <b>espagnole</b> soam igual: só a escrita muda.",
+      "en": null
+     }
+    },
+    {
+     "id": "u3-ex-allemand",
+     "tipo": "complete",
+     "antes": "Il est ",
+     "depois": ".",
+     "traducao": {
+      "pt-BR": "Ele é alemão.",
+      "en": null
+     },
+     "opcoes": [
+      "allemand",
+      "alemand"
+     ],
+     "resposta": "allemand",
+     "frase_completa": "Il est allemand.",
+     "distrator": "grafia",
+     "explicacao": {
+      "pt-BR": "<b>Allemand</b> tem dois <b>l</b>, que soam como um só.",
+      "en": null
+     },
+     "explicacao_erro": {
+      "alemand": {
+       "pt-BR": "Você escreveu como em português! ",
+       "en": null
+      }
+     }
+    },
+    {
+     "id": "u3-l1-montar",
+     "tipo": "montar",
+     "traducao": {
+      "pt-BR": "Qual é a sua nacionalidade? (formal)",
+      "en": null
+     },
+     "pecas": [
+      "votre",
+      "Quelle",
+      "nationalité",
+      "?",
+      "est",
+      "ta"
+     ],
+     "resposta": [
+      "Quelle",
+      "est",
+      "votre",
+      "nationalité",
+      "?"
+     ],
+     "frase_completa": "Quelle est votre nationalité ?",
+     "explicacao": {
+      "pt-BR": "No formal, <b>votre</b>: <b>Quelle est votre nationalité ?</b>",
+      "en": null
+     }
+    },
+    {
+     "id": "u3-l1-fim",
+     "tipo": "fim",
+     "fala": {
+      "pt-BR": "Muito bem! Agora você já fala de várias nacionalidades.",
+      "en": null
+     }
+    }
+   ]
+  },
+  {
+   "id": "nacionalidade-e-origem",
+   "ordem": 2,
+   "id_novo": false,
+   "titulo": {
+    "publicado": null,
+    "pt-BR": "Dizer de onde é e onde mora",
+    "en": null,
+    "a_confirmar": false
+   },
+   "cartoes": [
+    "nova: la ville",
+    "nova: habiter",
+    "A1-2-v5",
+    "A1-2-v6",
+    "nova: les États-Unis"
+   ],
+   "inclui_dialogo": false,
+   "telas": [
+    {
+     "id": "u3-l2-intro",
+     "tipo": "abertura",
+     "objetivo": {
+      "pt-BR": "Agora vou te ensinar a dizer de onde você é e onde mora, e a perguntar isso a alguém.",
+      "en": null
+     },
+     "tamanho": {
+      "pt-BR": "5 cartões · 4 frases · cerca de 4 minutos",
+      "en": null
+     }
+    },
+    {
+     "id": "u3-ville",
+     "tipo": "cartao",
+     "cartao": "la ville"
+    },
+    {
+     "id": "u3-frase-dou",
+     "tipo": "frase",
+     "frase": "Tu es d'où ? / Vous êtes d'où ?",
+     "papel": {
+      "pt-BR": "Pergunta",
+      "en": null
+     }
+    },
+    {
+     "id": "u3-frase-rio",
+     "tipo": "frase",
+     "frase": "Je suis de Rio.",
+     "papel": {
+      "pt-BR": "Resposta",
+      "en": null
+     }
+    },
+    {
+     "id": "u3-nota-cidade",
+     "tipo": "nota",
+     "nota": "nacionalidade-e-cidade"
+    },
+    {
+     "id": "u3-ex-nota-cidade",
+     "tipo": "vf",
+     "fr": "Je suis de Rio.",
+     "afirmacao": {
+      "pt-BR": "Aqui, a pessoa diz a nacionalidade dela.",
+      "en": null
+     },
+     "resposta": false,
+     "frase_do_painel": "Je suis de Rio.",
+     "traducao_do_painel": {
+      "pt-BR": "Eu sou do Rio.",
+      "en": null
+     },
+     "explicacao": {
+      "pt-BR": "<b>Je suis de</b> e a cidade dizem de onde você é; a nacionalidade é <b>je suis brésilienne</b>.",
+      "en": null
+     }
+    },
+    {
+     "id": "u3-habiter",
+     "tipo": "cartao",
+     "cartao": "habiter"
+    },
+    {
+     "id": "u3-frase-habites",
+     "tipo": "frase",
+     "frase": "Tu habites où ? / Vous habitez où ?",
+     "papel": {
+      "pt-BR": "Pergunta",
+      "en": null
+     }
+    },
+    {
+     "id": "u3-ex-ou",
+     "tipo": "complete",
+     "antes": "Tu habites ",
+     "depois": " ?",
+     "traducao": {
+      "pt-BR": "Onde você mora?",
+      "en": null
+     },
+     "opcoes": [
+      "ou",
+      "où"
+     ],
+     "resposta": "où",
+     "frase_completa": "Tu habites où ?",
+     "distrator": "grafia",
+     "explicacao": {
+      "pt-BR": "Na fala, a palavra da pergunta vai para o fim: <b>tu habites où ?</b> Sem acento, <b>ou</b> é \"ou\".",
+      "en": null
+     },
+     "explicacao_erro": {
+      "ou": {
+       "pt-BR": "Atenção ao acento! ",
+       "en": null
+      }
+     }
+    },
+    {
+     "id": "u3-france",
+     "tipo": "cartao",
+     "cartao": "la France"
+    },
+    {
+     "id": "u3-bresil",
+     "tipo": "cartao",
+     "cartao": "le Brésil"
+    },
+    {
+     "id": "u3-etatsunis",
+     "tipo": "cartao",
+     "cartao": "les États-Unis"
+    },
+    {
+     "id": "u3-frase-bresil",
+     "tipo": "frase",
+     "frase": "J'habite au Brésil.",
+     "papel": {
+      "pt-BR": "Resposta",
+      "en": null
+     }
+    },
+    {
+     "id": "u3-nota-paises",
+     "tipo": "nota",
+     "nota": "jhabite-paises"
+    },
+    {
+     "id": "u3-ex-nota-paises",
+     "tipo": "vf",
+     "fr": "J'habite à Paris.",
+     "afirmacao": {
+      "pt-BR": "Com cidade, usamos <i>en</i>.",
+      "en": null
+     },
+     "resposta": false,
+     "frase_do_painel": "J'habite à Paris.",
+     "traducao_do_painel": {
+      "pt-BR": "Eu moro em Paris.",
+      "en": null
+     },
+     "explicacao": {
+      "pt-BR": "Com cidade, sempre <b>à</b>: <b>j'habite à Paris</b>.",
+      "en": null
+     }
+    },
+    {
+     "id": "u3-ex-eua",
+     "tipo": "funcao",
+     "pergunta": {
+      "pt-BR": "A Sofia mora nos Estados Unidos. O que ela diz?",
+      "en": null
+     },
+     "opcoes": [
+      "J'habite en États-Unis.",
+      "J'habite aux États-Unis.",
+      "J'habite au États-Unis."
+     ],
+     "resposta": "J'habite aux États-Unis.",
+     "traducao_do_painel": {
+      "pt-BR": "Eu moro nos Estados Unidos.",
+      "en": null
+     },
+     "explicacao": {
+      "pt-BR": "<b>Les États-Unis</b> está no plural: <b>j'habite aux États-Unis</b>.",
+      "en": null
+     },
+     "explicacao_erro": {
+      "J'habite en États-Unis.": {
+       "pt-BR": "Com <b>les États-Unis</b>, é <b>aux</b>. ",
+       "en": null
+      },
+      "J'habite au États-Unis.": {
+       "pt-BR": "Falta o <b>x</b>: é plural. ",
+       "en": null
+      }
+     }
+    },
+    {
+     "id": "u3-l2-montar",
+     "tipo": "montar",
+     "traducao": {
+      "pt-BR": "Eu sou do Rio e moro na França.",
+      "en": null
+     },
+     "pecas": [
+      "Je",
+      "suis",
+      "de",
+      "Rio",
+      "et",
+      "j'habite",
+      "en",
+      "France.",
+      "au",
+      "à"
+     ],
+     "resposta": [
+      "Je",
+      "suis",
+      "de",
+      "Rio",
+      "et",
+      "j'habite",
+      "en",
+      "France."
+     ],
+     "frase_completa": "Je suis de Rio et j'habite en France.",
+     "explicacao": {
+      "pt-BR": "<b>Je suis de</b> para a cidade de onde você é; <b>j'habite en</b> para o país onde mora.",
+      "en": null
+     }
+    },
+    {
+     "id": "u3-l2-fim",
+     "tipo": "fim",
+     "fala": {
+      "pt-BR": "Ótimo! Agora você já diz de onde é e onde mora.",
+      "en": null
+     }
+    }
+   ]
+  },
+  {
+   "id": "linguas",
+   "ordem": 3,
+   "id_novo": true,
+   "titulo": {
+    "publicado": null,
+    "pt-BR": "Dizer que línguas fala",
+    "en": null,
+    "a_confirmar": false
+   },
+   "cartoes": [
+    "nova: parler",
+    "nova: la langue",
+    "A1-9-v7",
+    "nova: étudier",
+    "nova: un peu"
+   ],
+   "inclui_dialogo": false,
+   "telas": [
+    {
+     "id": "u3-l3-intro",
+     "tipo": "abertura",
+     "objetivo": {
+      "pt-BR": "Agora vou te ensinar a dizer que línguas você fala e que está estudando francês!",
+      "en": null
+     },
+     "tamanho": {
+      "pt-BR": "5 cartões · 3 frases · cerca de 3 minutos",
+      "en": null
+     }
+    },
+    {
+     "id": "u3-parler",
+     "tipo": "cartao",
+     "cartao": "parler"
+    },
+    {
+     "id": "u3-frase-anglais",
+     "tipo": "frase",
+     "frase": "Tu parles anglais ? / Vous parlez anglais ?",
+     "papel": {
+      "pt-BR": "Pergunta",
+      "en": null
+     }
+    },
+    {
+     "id": "u3-nota-estceque",
+     "tipo": "nota",
+     "nota": "est-ce-que"
+    },
+    {
+     "id": "u3-ex-nota-estceque",
+     "tipo": "vf",
+     "fr": "Est-ce que tu parles anglais ?",
+     "afirmacao": {
+      "pt-BR": "É uma pergunta diferente de <i>Tu parles anglais ?</i>",
+      "en": null
+     },
+     "resposta": false,
+     "frase_do_painel": "Est-ce que tu parles anglais ?",
+     "traducao_do_painel": {
+      "pt-BR": "Você fala inglês?",
+      "en": null
+     },
+     "explicacao": {
+      "pt-BR": "É a mesma pergunta: <b>est-ce que</b> só deixa claro que é uma pergunta.",
+      "en": null
+     }
+    },
+    {
+     "id": "u3-langue",
+     "tipo": "cartao",
+     "cartao": "la langue"
+    },
+    {
+     "id": "u3-frase-langues",
+     "tipo": "frase",
+     "frase": "Tu parles quelles langues ? / Vous parlez quelles langues ?",
+     "papel": {
+      "pt-BR": "Pergunta",
+      "en": null
+     }
+    },
+    {
+     "id": "u3-portugais",
+     "tipo": "cartao",
+     "cartao": "portugais / portugaise"
+    },
+    {
+     "id": "u3-ex-portugais",
+     "tipo": "complete",
+     "antes": "Je parle ",
+     "depois": ".",
+     "traducao": {
+      "pt-BR": "Eu falo português.",
+      "en": null
+     },
+     "opcoes": [
+      "portugaise",
+      "portugais"
+     ],
+     "resposta": "portugais",
+     "frase_completa": "Je parle portugais.",
+     "distrator": "par",
+     "explicacao": {
+      "pt-BR": "O nome da língua é a nacionalidade no masculino: <b>je parle portugais</b>.",
+      "en": null
+     },
+     "explicacao_erro": {
+      "portugaise": {
+       "pt-BR": "<b>Portugaise</b> é a nacionalidade de uma mulher. ",
+       "en": null
+      }
+     }
+    },
+    {
+     "id": "u3-etudier",
+     "tipo": "cartao",
+     "cartao": "étudier"
+    },
+    {
+     "id": "u3-frase-etudie",
+     "tipo": "frase",
+     "frase": "J'étudie le français.",
+     "papel": {
+      "pt-BR": "Resposta",
+      "en": null
+     }
+    },
+    {
+     "id": "u3-ex-etudie",
+     "tipo": "complete",
+     "antes": "J'",
+     "depois": " le français.",
+     "traducao": {
+      "pt-BR": "Eu estudo francês.",
+      "en": null
+     },
+     "opcoes": [
+      "étudi",
+      "étudie"
+     ],
+     "resposta": "étudie",
+     "frase_completa": "J'étudie le français.",
+     "distrator": "grafia",
+     "explicacao": {
+      "pt-BR": "O <b>e</b> final de <b>étudie</b> não se pronuncia, mas se escreve. E repare: com <b>étudier</b>, vai <b>le</b>.",
+      "en": null
+     },
+     "explicacao_erro": {
+      "étudi": {
+       "pt-BR": "Você escreveu como se ouve! ",
+       "en": null
+      }
+     }
+    },
+    {
+     "id": "u3-unpeu",
+     "tipo": "cartao",
+     "cartao": "un peu"
+    },
+    {
+     "id": "u3-frase-unpeu",
+     "tipo": "frase",
+     "frase": "Je parle portugais et un peu français.",
+     "papel": {
+      "pt-BR": "Resposta",
+      "en": null
+     }
+    },
+    {
+     "id": "u3-l3-montar",
+     "tipo": "montar",
+     "traducao": {
+      "pt-BR": "Eu falo inglês e um pouco de francês.",
+      "en": null
+     },
+     "pecas": [
+      "Je",
+      "parle",
+      "anglais",
+      "et",
+      "un",
+      "peu",
+      "français.",
+      "la",
+      "langue"
+     ],
+     "resposta": [
+      "Je",
+      "parle",
+      "anglais",
+      "et",
+      "un",
+      "peu",
+      "français."
+     ],
+     "frase_completa": "Je parle anglais et un peu français.",
+     "explicacao": {
+      "pt-BR": "Para dizer \"um pouco\": <b>un peu</b>, logo antes da língua.",
+      "en": null
+     }
+    },
+    {
+     "id": "u3-l3-fim",
+     "tipo": "fim",
+     "fala": {
+      "pt-BR": "Parabéns! Agora você já diz que línguas fala.",
+      "en": null
+     }
+    }
+   ]
+  },
+  {
+   "id": "conversar-de-onde-e",
+   "ordem": 4,
+   "id_novo": true,
+   "titulo": {
+    "publicado": null,
+    "pt-BR": "Conversar sobre de onde você é",
+    "en": null,
+    "a_confirmar": false
+   },
+   "cartoes": [],
+   "inclui_dialogo": true,
+   "telas": [
+    {
+     "id": "u3-d1-cena",
+     "tipo": "dialogo_cena",
+     "dialogo": "Num curso de línguas, Thomas conhece a Sofia.",
+     "foco": {
+      "pt-BR": "Ouça com atenção: repare em como eles perguntam de onde o outro é e onde mora.",
+      "en": null
+     },
+     "tamanho": {
+      "pt-BR": "1 conversa · cerca de 4 minutos",
+      "en": null
+     }
+    },
+    {
+     "id": "u3-d1-ouvir",
+     "tipo": "dialogo_ouvir",
+     "dialogo": "Num curso de línguas, Thomas conhece a Sofia.",
+     "pergunta": {
+      "pt-BR": "Eles se falam de um jeito formal ou informal?",
+      "en": null
+     },
+     "opcoes": [
+      {
+       "pt-BR": "Informal",
+       "en": null
+      },
+      {
+       "pt-BR": "Formal",
+       "en": null
+      }
+     ],
+     "resposta": 0,
+     "explicacao": {
+      "pt-BR": "Eles usam <b>tu</b> e <b>et toi ?</b>: é uma conversa informal.",
+      "en": null
+     }
+    },
+    {
+     "id": "u3-d1-ler",
+     "tipo": "dialogo_ler",
+     "dialogo": "Num curso de línguas, Thomas conhece a Sofia."
+    },
+    {
+     "id": "u3-d1-vf",
+     "tipo": "dialogo_vf",
+     "dialogo": "Num curso de línguas, Thomas conhece a Sofia.",
+     "fala": 5,
+     "afirmacao": {
+      "pt-BR": "Aqui, a Sofia diz que já fala francês muito bem.",
+      "en": null
+     },
+     "resposta": false,
+     "explicacao": {
+      "pt-BR": "Ela diz que <b>estuda</b> francês: <b>j'étudie le français</b>.",
+      "en": null
+     }
+    },
+    {
+     "id": "u3-d1-montar",
+     "tipo": "dialogo_montar",
+     "dialogo": "Num curso de línguas, Thomas conhece a Sofia.",
+     "distratores": {
+      "0": {
+       "texto": "Vous êtes d'où ?",
+       "tipo": "registro"
+      },
+      "1": {
+       "texto": "Je suis italiène, et toi ?",
+       "tipo": "grafia"
+      },
+      "2": {
+       "texto": "Moi, je suis alemand.",
+       "tipo": "grafia"
+      },
+      "3": {
+       "texto": "Vous habitez où ?",
+       "tipo": "registro"
+      },
+      "4": {
+       "texto": "J'habite à Pari. Et toi ?",
+       "tipo": "grafia"
+      },
+      "5": {
+       "texto": "Moi, j'habite à Lyon. J'étudi le français.",
+       "tipo": "grafia"
+      },
+      "6": {
+       "texto": "Tu parle bien français !",
+       "tipo": "grafia"
+      },
+      "7": {
+       "texto": "Merci ! Je parle italien, anglais et un peu fransais.",
+       "tipo": "grafia"
+      }
+     },
+     "explicacao": {
+      "pt-BR": "Você montou a conversa pelo ouvido. Repare na grafia de <b>tu parles</b> e <b>j'étudie</b>.",
+      "en": null
+     }
+    },
+    {
+     "id": "u3-d1-lacuna",
+     "tipo": "dialogo_lacuna",
+     "dialogo": "Num curso de línguas, Thomas conhece a Sofia.",
+     "fala": 6,
+     "antes": "Tu ",
+     "depois": " bien français !",
+     "opcoes": [
+      "parle",
+      "parles"
+     ],
+     "resposta": "parles",
+     "explicacao": {
+      "pt-BR": "Com <b>tu</b>, o verbo termina em <b>-es</b>: <b>tu parles</b>. O <b>s</b> não se pronuncia.",
+      "en": null
+     }
+    },
+    {
+     "id": "u3-d1-ordenar",
+     "tipo": "dialogo_ordenar",
+     "dialogo": "Num curso de línguas, Thomas conhece a Sofia.",
+     "explicacao": {
+      "pt-BR": "De onde é, onde mora e que línguas fala: a unidade inteira numa conversa.",
+      "en": null
+     }
+    },
+    {
+     "id": "u3-d1-entendeu",
+     "tipo": "dialogo_entendeu",
+     "dialogo": "Num curso de línguas, Thomas conhece a Sofia.",
+     "pergunta": {
+      "pt-BR": "O que a Sofia está fazendo em Lyon?",
+      "en": null
+     },
+     "opcoes": [
+      {
+       "pt-BR": "Estudando francês",
+       "en": null
+      },
+      {
+       "pt-BR": "Trabalhando",
+       "en": null
+      },
+      {
+       "pt-BR": "Visitando amigos",
+       "en": null
+      }
+     ],
+     "resposta": 0,
+     "explicacao": {
+      "pt-BR": "Ela diz <b>j'étudie le français</b>: está estudando francês.",
+      "en": null
+     }
+    },
+    {
+     "id": "u3-d1-papel",
+     "tipo": "dialogo_papel",
+     "dialogo": "Num curso de línguas, Thomas conhece a Sofia.",
+     "situacao": {
+      "pt-BR": "Agora é você: no curso de línguas, você conversa com a Sofia.",
+      "en": null
+     },
+     "outro_falante": "B",
+     "turnos": [
+      {
+       "outro": {
+        "fr": "Salut ! Tu es d'où ?",
+        "pt-BR": "Oi! De onde você é?",
+        "en": null
+       }
+      },
+      {
+       "pedido": {
+        "pt-BR": "Diga que você é de São Paulo.",
+        "en": null
+       },
+       "opcoes": [
+        "Je suis de São Paulo.",
+        "J'habite de São Paulo.",
+        "Tu es de São Paulo."
+       ],
+       "certa": 0,
+       "dicas": {
+        "J'habite de São Paulo.": {
+         "pt-BR": "<b>J'habite</b> é onde você mora. De onde você é: <b>je suis de</b>.",
+         "en": null
+        },
+        "Tu es de São Paulo.": {
+         "pt-BR": "<b>Tu es</b> é \"você é\". Para você: <b>je suis</b>.",
+         "en": null
+        }
+       }
+      },
+      {
+       "outro": {
+        "fr": "Et tu habites où ?",
+        "pt-BR": "E onde você mora?",
+        "en": null
+       }
+      },
+      {
+       "pedido": {
+        "pt-BR": "Diga que mora em Paris.",
+        "en": null
+       },
+       "opcoes": [
+        "J'habite en Paris.",
+        "J'habite à Paris.",
+        "J'habite au Paris."
+       ],
+       "certa": 1,
+       "dicas": {
+        "J'habite en Paris.": {
+         "pt-BR": "Com cidade, sempre <b>à</b>.",
+         "en": null
+        },
+        "J'habite au Paris.": {
+         "pt-BR": "Com cidade, sempre <b>à</b>; <b>au</b> é para alguns países.",
+         "en": null
+        }
+       }
+      },
+      {
+       "outro": {
+        "fr": "Tu parles quelles langues ?",
+        "pt-BR": "Que línguas você fala?",
+        "en": null
+       }
+      },
+      {
+       "pedido": {
+        "pt-BR": "Diga que fala português e um pouco de francês.",
+        "en": null
+       },
+       "opcoes": [
+        "Je parle portugaise et un peu français.",
+        "J'étudie portugais et un peu français.",
+        "Je parle portugais et un peu français."
+       ],
+       "certa": 2,
+       "dicas": {
+        "Je parle portugaise et un peu français.": {
+         "pt-BR": "A língua é o masculino: <b>portugais</b>.",
+         "en": null
+        },
+        "J'étudie portugais et un peu français.": {
+         "pt-BR": "Aqui é <b>je parle</b>, \"eu falo\".",
+         "en": null
+        }
+       }
+      }
+     ],
+     "explicacao": {
+      "pt-BR": "Você contou de onde é, onde mora e que línguas fala.",
+      "en": null
+     }
+    },
+    {
+     "id": "u3-d1-fim",
+     "tipo": "dialogo_fim",
+     "dialogo": "Num curso de línguas, Thomas conhece a Sofia.",
+     "fala": {
+      "pt-BR": "Muito bem! Agora você já fala de você em francês.",
+      "en": null
+     },
+     "frases": [
+      0,
+      3,
+      5,
+      7
+     ]
+    }
+   ],
+   "tipo": "dialogos"
+  },
+  {
+   "id": "falar-de-si-formal",
+   "ordem": 5,
+   "id_novo": true,
+   "titulo": {
+    "publicado": null,
+    "pt-BR": "Falar de você de um jeito formal",
+    "en": null,
+    "a_confirmar": false
+   },
+   "cartoes": [],
+   "inclui_dialogo": true,
+   "telas": [
+    {
+     "id": "u3-d2-cena",
+     "tipo": "dialogo_cena",
+     "dialogo": "Numa entrevista de emprego, o Sr. Bernard conversa com a Sra. Lima.",
+     "foco": {
+      "pt-BR": "Ouça com atenção: repare em como ele faz as perguntas no formal.",
+      "en": null
+     },
+     "tamanho": {
+      "pt-BR": "1 conversa · cerca de 4 minutos",
+      "en": null
+     }
+    },
+    {
+     "id": "u3-d2-ouvir",
+     "tipo": "dialogo_ouvir",
+     "dialogo": "Numa entrevista de emprego, o Sr. Bernard conversa com a Sra. Lima.",
+     "pergunta": {
+      "pt-BR": "Eles se falam de um jeito formal ou informal?",
+      "en": null
+     },
+     "opcoes": [
+      {
+       "pt-BR": "Informal",
+       "en": null
+      },
+      {
+       "pt-BR": "Formal",
+       "en": null
+      }
+     ],
+     "resposta": 1,
+     "explicacao": {
+      "pt-BR": "Eles usam <b>vous</b>, <b>madame</b> e <b>monsieur</b>: é uma conversa formal.",
+      "en": null
+     }
+    },
+    {
+     "id": "u3-d2-ler",
+     "tipo": "dialogo_ler",
+     "dialogo": "Numa entrevista de emprego, o Sr. Bernard conversa com a Sra. Lima."
+    },
+    {
+     "id": "u3-d2-vf",
+     "tipo": "dialogo_vf",
+     "dialogo": "Numa entrevista de emprego, o Sr. Bernard conversa com a Sra. Lima.",
+     "fala": 3,
+     "afirmacao": {
+      "pt-BR": "Aqui, a Sra. Lima diz o país e a cidade onde mora.",
+      "en": null
+     },
+     "resposta": true,
+     "explicacao": {
+      "pt-BR": "<b>En France</b> é o país; <b>à Lyon</b>, a cidade.",
+      "en": null
+     }
+    },
+    {
+     "id": "u3-d2-montar",
+     "tipo": "dialogo_montar",
+     "dialogo": "Numa entrevista de emprego, o Sr. Bernard conversa com a Sra. Lima.",
+     "distratores": {
+      "0": {
+       "texto": "Bonjour, madame. Tu es de quelle nationalité ?",
+       "tipo": "registro"
+      },
+      "1": {
+       "texto": "Je suis brésiliène. Je suis de Recife.",
+       "tipo": "grafia"
+      },
+      "2": {
+       "texto": "Et tu habites où ?",
+       "tipo": "registro"
+      },
+      "3": {
+       "texto": "J'habite an France, à Lyon.",
+       "tipo": "grafia"
+      },
+      "4": {
+       "texto": "Tu parles quelles langues ?",
+       "tipo": "registro"
+      },
+      "5": {
+       "texto": "Je parle portugais, français et anglais. J'étudi l'allemand.",
+       "tipo": "grafia"
+      },
+      "6": {
+       "texto": "Très bien. Mersi, madame.",
+       "tipo": "grafia"
+      },
+      "7": {
+       "texto": "Merci, monsieur. Salut !",
+       "tipo": "registro"
+      }
+     },
+     "explicacao": {
+      "pt-BR": "Você montou a conversa formal pelo ouvido: <b>vous</b> do começo ao fim.",
+      "en": null
+     }
+    },
+    {
+     "id": "u3-d2-lacuna",
+     "tipo": "dialogo_lacuna",
+     "dialogo": "Numa entrevista de emprego, o Sr. Bernard conversa com a Sra. Lima.",
+     "fala": 4,
+     "antes": "Vous ",
+     "depois": " quelles langues ?",
+     "opcoes": [
+      "parlé",
+      "parlez"
+     ],
+     "resposta": "parlez",
+     "explicacao": {
+      "pt-BR": "Com <b>vous</b>, o verbo termina em <b>-ez</b>, que soa /ê/: <b>vous parlez</b>.",
+      "en": null
+     }
+    },
+    {
+     "id": "u3-d2-ordenar",
+     "tipo": "dialogo_ordenar",
+     "dialogo": "Numa entrevista de emprego, o Sr. Bernard conversa com a Sra. Lima.",
+     "explicacao": {
+      "pt-BR": "Nacionalidade, onde mora, línguas e despedida.",
+      "en": null
+     }
+    },
+    {
+     "id": "u3-d2-entendeu",
+     "tipo": "dialogo_entendeu",
+     "dialogo": "Numa entrevista de emprego, o Sr. Bernard conversa com a Sra. Lima.",
+     "pergunta": {
+      "pt-BR": "Que língua a Sra. Lima está estudando?",
+      "en": null
+     },
+     "opcoes": [
+      {
+       "pt-BR": "Alemão",
+       "en": null
+      },
+      {
+       "pt-BR": "Inglês",
+       "en": null
+      },
+      {
+       "pt-BR": "Português",
+       "en": null
+      }
+     ],
+     "resposta": 0,
+     "explicacao": {
+      "pt-BR": "Ela diz <b>j'étudie l'allemand</b>: está estudando alemão.",
+      "en": null
+     }
+    },
+    {
+     "id": "u3-d2-papel",
+     "tipo": "dialogo_papel",
+     "dialogo": "Numa entrevista de emprego, o Sr. Bernard conversa com a Sra. Lima.",
+     "situacao": {
+      "pt-BR": "Agora é você: numa entrevista, o Sr. Bernard faz as perguntas.",
+      "en": null
+     },
+     "outro_falante": "A",
+     "turnos": [
+      {
+       "outro": {
+        "fr": "Bonjour. Vous êtes d'où ?",
+        "pt-BR": "Bom dia. De onde você é?",
+        "en": null
+       }
+      },
+      {
+       "pedido": {
+        "pt-BR": "Diga que é de Belo Horizonte.",
+        "en": null
+       },
+       "opcoes": [
+        "Vous êtes de Belo Horizonte.",
+        "Je suis de Belo Horizonte.",
+        "J'habite de Belo Horizonte."
+       ],
+       "certa": 1,
+       "dicas": {
+        "Vous êtes de Belo Horizonte.": {
+         "pt-BR": "<b>Vous êtes</b> é \"você é\". Para você: <b>je suis</b>.",
+         "en": null
+        },
+        "J'habite de Belo Horizonte.": {
+         "pt-BR": "De onde você é: <b>je suis de</b>.",
+         "en": null
+        }
+       }
+      },
+      {
+       "outro": {
+        "fr": "Vous parlez quelles langues ?",
+        "pt-BR": "Que línguas você fala?",
+        "en": null
+       }
+      },
+      {
+       "pedido": {
+        "pt-BR": "Diga que fala português e estuda francês.",
+        "en": null
+       },
+       "opcoes": [
+        "Je parle portugais et j'étudie le français.",
+        "Je parle portugais et j'étudie français.",
+        "Tu parles portugais et tu étudies le français."
+       ],
+       "certa": 0,
+       "dicas": {
+        "Je parle portugais et j'étudie français.": {
+         "pt-BR": "Com <b>étudier</b>, a língua leva artigo: <b>le français</b>.",
+         "en": null
+        },
+        "Tu parles portugais et tu étudies le français.": {
+         "pt-BR": "<b>Tu parles</b> é \"você fala\". Para você: <b>je parle</b>.",
+         "en": null
+        }
+       }
+      },
+      {
+       "outro": {
+        "fr": "Très bien. Merci !",
+        "pt-BR": "Muito bem. Obrigado!",
+        "en": null
+       }
+      },
+      {
+       "pedido": {
+        "pt-BR": "Agradeça e se despeça.",
+        "en": null
+       },
+       "opcoes": [
+        "Salut, à plus !",
+        "Merci, monsieur. Au revoir !",
+        "Bonne soirée !"
+       ],
+       "certa": 1,
+       "dicas": {
+        "Salut, à plus !": {
+         "pt-BR": "Numa entrevista, no formal: <b>au revoir</b>.",
+         "en": null
+        },
+        "Bonne soirée !": {
+         "pt-BR": "Vocês se cumprimentaram com <b>bonjour</b>: é de dia.",
+         "en": null
+        }
+       }
+      }
+     ],
+     "explicacao": {
+      "pt-BR": "Você falou de você no formal: de onde é, que línguas fala e o que estuda.",
+      "en": null
+     }
+    },
+    {
+     "id": "u3-d2-fim",
+     "tipo": "dialogo_fim",
+     "dialogo": "Numa entrevista de emprego, o Sr. Bernard conversa com a Sra. Lima.",
+     "fala": {
+      "pt-BR": "Parabéns! Você falou de você numa entrevista, no formal.",
+      "en": null
+     },
+     "frases": [
+      0,
+      2,
+      4
+     ]
+    }
+   ],
+   "tipo": "dialogos"
+  },
+  {
+   "id": "checkpoint",
+   "titulo": {
+    "pt-BR": "Revisão da unidade",
+    "en": null
+   },
+   "pendente": "itens da Revisão da unidade, V/F da unidade, ditado e Desafios: depois da aprovação das telas (como nas unidades 1 e 2)"
+  }
+ ],
+ "dialogos": [
+  {
+   "titulo": {
+    "pt-BR": "Num curso de línguas, Thomas conhece a Sofia.",
+    "en": null
+   },
+   "registro": "informal",
+   "licao": "conversar-de-onde-e",
+   "falantes": {
+    "A": {
+     "nome": "Thomas",
+     "emoji": "👨"
+    },
+    "B": {
+     "nome": "Sofia",
+     "emoji": "👩"
+    }
+   },
+   "falas": [
+    {
+     "chave": "A1-9-d0",
+     "falante": "A",
+     "fr": "Tu es d'où ?",
+     "pt-BR": "De onde você é?",
+     "en": null
+    },
+    {
+     "chave": "A1-9-d1",
+     "falante": "B",
+     "fr": "Je suis italienne, et toi ?",
+     "pt-BR": "Eu sou italiana, e você?",
+     "en": null
+    },
+    {
+     "chave": "A1-9-d2",
+     "falante": "A",
+     "fr": "Moi, je suis allemand.",
+     "pt-BR": "Eu sou alemão.",
+     "en": null
+    },
+    {
+     "chave": "nova",
+     "falante": "B",
+     "fr": "Tu habites où ?",
+     "pt-BR": "Onde você mora?",
+     "en": null
+    },
+    {
+     "chave": "nova",
+     "falante": "A",
+     "fr": "J'habite à Paris. Et toi ?",
+     "pt-BR": "Eu moro em Paris. E você?",
+     "en": null
+    },
+    {
+     "chave": "nova",
+     "falante": "B",
+     "fr": "Moi, j'habite à Lyon. J'étudie le français.",
+     "pt-BR": "Eu moro em Lyon. Estudo francês.",
+     "en": null
+    },
+    {
+     "chave": "nova",
+     "falante": "A",
+     "fr": "Tu parles bien français !",
+     "pt-BR": "Você fala bem francês!",
+     "en": null
+    },
+    {
+     "chave": "nova",
+     "falante": "B",
+     "fr": "Merci ! Je parle italien, anglais et un peu français.",
+     "pt-BR": "Obrigada! Falo italiano, inglês e um pouco de francês.",
+     "en": null
+    }
+   ],
+   "falas_publicadas_que_saem": [
+    "A1-9-d3",
+    "A1-9-d4"
+   ],
+   "muda": "publicado (d0 a d2 ficam) e reescrito para fechar a unidade (decisão 359); d3 e d4 saem (Allemagne, Portugal e maintenant não são ensinados aqui): arquivo de aposentados, progresso guardado"
+  },
+  {
+   "titulo": {
+    "pt-BR": "Numa entrevista de emprego, o Sr. Bernard conversa com a Sra. Lima.",
+    "en": null
+   },
+   "registro": "formal",
+   "licao": "falar-de-si-formal",
+   "falantes": {
+    "A": {
+     "nome": "Sr. Bernard",
+     "emoji": "👨"
+    },
+    "B": {
+     "nome": "Sra. Lima",
+     "emoji": "👩"
+    }
+   },
+   "falas": [
+    {
+     "chave": "nova",
+     "falante": "A",
+     "fr": "Bonjour, madame. Vous êtes de quelle nationalité ?",
+     "pt-BR": "Bom dia, senhora. Qual é a sua nacionalidade?",
+     "en": null
+    },
+    {
+     "chave": "nova",
+     "falante": "B",
+     "fr": "Je suis brésilienne. Je suis de Recife.",
+     "pt-BR": "Sou brasileira. Sou de Recife.",
+     "en": null
+    },
+    {
+     "chave": "nova",
+     "falante": "A",
+     "fr": "Et vous habitez où ?",
+     "pt-BR": "E onde a senhora mora?",
+     "en": null
+    },
+    {
+     "chave": "nova",
+     "falante": "B",
+     "fr": "J'habite en France, à Lyon.",
+     "pt-BR": "Moro na França, em Lyon.",
+     "en": null
+    },
+    {
+     "chave": "nova",
+     "falante": "A",
+     "fr": "Vous parlez quelles langues ?",
+     "pt-BR": "Que línguas a senhora fala?",
+     "en": null
+    },
+    {
+     "chave": "nova",
+     "falante": "B",
+     "fr": "Je parle portugais, français et anglais. J'étudie l'allemand.",
+     "pt-BR": "Falo português, francês e inglês. Estudo alemão.",
+     "en": null
+    },
+    {
+     "chave": "nova",
+     "falante": "A",
+     "fr": "Très bien. Merci, madame.",
+     "pt-BR": "Muito bem. Obrigado, senhora.",
+     "en": null
+    },
+    {
+     "chave": "nova",
+     "falante": "B",
+     "fr": "Merci, monsieur. Au revoir !",
+     "pt-BR": "Obrigada, senhor. Até logo!",
+     "en": null
+    }
+   ],
+   "muda": "novo (decisão 359)"
+  }
+ ],
+ "frases_na_frase": [
+  {
+   "chave": "nova",
+   "id_rascunho": "u3-nat",
+   "fr": "Quelle est ta nationalité ? / Quelle est votre nationalité ?",
+   "pt-BR": "Qual é a sua nacionalidade? (informal / formal)",
+   "en": null,
+   "ilustra": "la nationalité",
+   "papel": "essencial"
+  },
+  {
+   "chave": "nova",
+   "id_rascunho": "u3-italienne",
+   "fr": "Je suis italienne.",
+   "pt-BR": "Eu sou italiana.",
+   "en": null,
+   "ilustra": "italien / italienne",
+   "papel": "essencial"
+  },
+  {
+   "chave": "nova",
+   "id_rascunho": "u3-dou",
+   "fr": "Tu es d'où ? / Vous êtes d'où ?",
+   "pt-BR": "De onde você é? (informal / formal)",
+   "en": null,
+   "ilustra": "la ville",
+   "papel": "essencial"
+  },
+  {
+   "chave": "nova",
+   "id_rascunho": "u3-rio",
+   "fr": "Je suis de Rio.",
+   "pt-BR": "Eu sou do Rio.",
+   "en": null,
+   "ilustra": "la ville",
+   "papel": "essencial"
+  },
+  {
+   "chave": "nova",
+   "id_rascunho": "u3-habites",
+   "fr": "Tu habites où ? / Vous habitez où ?",
+   "pt-BR": "Onde você mora? (informal / formal)",
+   "en": null,
+   "ilustra": "habiter",
+   "papel": "essencial"
+  },
+  {
+   "chave": "nova",
+   "id_rascunho": "u3-bresil",
+   "fr": "J'habite au Brésil.",
+   "pt-BR": "Eu moro no Brasil.",
+   "en": null,
+   "ilustra": "le Brésil",
+   "papel": "essencial"
+  },
+  {
+   "chave": "nova",
+   "id_rascunho": "u3-anglais",
+   "fr": "Tu parles anglais ? / Vous parlez anglais ?",
+   "pt-BR": "Você fala inglês? (informal / formal)",
+   "en": null,
+   "ilustra": "parler",
+   "papel": "essencial"
+  },
+  {
+   "chave": "nova",
+   "id_rascunho": "u3-langues",
+   "fr": "Tu parles quelles langues ? / Vous parlez quelles langues ?",
+   "pt-BR": "Que línguas você fala? (informal / formal)",
+   "en": null,
+   "ilustra": "la langue",
+   "papel": "essencial"
+  },
+  {
+   "chave": "nova",
+   "id_rascunho": "u3-etudie",
+   "fr": "J'étudie le français.",
+   "pt-BR": "Eu estudo francês.",
+   "en": null,
+   "ilustra": "étudier",
+   "papel": "essencial"
+  },
+  {
+   "chave": "nova",
+   "id_rascunho": "u3-unpeu",
+   "fr": "Je parle portugais et un peu français.",
+   "pt-BR": "Eu falo português e um pouco de francês.",
+   "en": null,
+   "ilustra": "un peu",
+   "papel": "essencial"
+  },
+  {
+   "chave": "A1-9-p0",
+   "id_rascunho": null,
+   "fr": "Je suis {nacionalidade}.",
+   "pt-BR": "Eu sou {nacionalidade_t}.",
+   "en": null,
+   "ilustra": "la nationalité",
+   "papel": "essencial"
+  },
+  {
+   "chave": "A1-9-p1",
+   "id_rascunho": null,
+   "fr": "Il est français, elle est espagnole.",
+   "pt-BR": "Ele é francês, ela é espanhola.",
+   "en": null,
+   "ilustra": "espagnol / espagnole",
+   "papel": "so_exemplo"
+  },
+  {
+   "chave": "A1-9-p4",
+   "id_rascunho": null,
+   "fr": "La nationalité est écrite sur le passeport.",
+   "pt-BR": "A nacionalidade está escrita no passaporte.",
+   "en": null,
+   "ilustra": "la nationalité",
+   "papel": "so_exemplo"
+  }
+ ],
+ "frases_que_saem": [
+  {
+   "chave": "A1-9-p2",
+   "fr": "D'où viens-tu ?",
+   "vai_para": "A1-31",
+   "motivo": "venir de foi para \"Países e cidades\" (decisão 331)"
+  },
+  {
+   "chave": "A1-9-p3",
+   "fr": "Je viens du Portugal.",
+   "vai_para": "A1-31",
+   "motivo": "venir de e le Portugal estão em \"Países e cidades\" (decisões 331 e 359)"
+  }
+ ],
+ "notas": [
+  {
+   "id": "feminino-nacionalidades",
+   "id_mapa": null,
+   "titulo": {
+    "pt-BR": "O feminino das nacionalidades",
+    "en": null
+   },
+   "tipo": "Exp",
+   "tipo_visivel": "explicação",
+   "confianca": "alta",
+   "momento": {
+    "licao": "nacionalidades-2",
+    "depois_do_cartao": "allemand / allemande"
+   },
+   "destino": "nota",
+   "texto": {
+    "pt-BR": "Repare como o feminino aparece na voz: em <strong>anglaise</strong>, o <i>s</i> passa a soar como \"z\"; em <strong>italienne</strong>, o <i>n</i> passa a soar; em <strong>allemande</strong>, o <i>d</i> passa a soar. Já <strong>espagnol</strong> e <strong>espagnole</strong> soam igual: só a escrita muda.",
+    "en": null
+   },
+   "exemplos": [
+    {
+     "fr": "anglaise",
+     "pt-BR": "inglesa",
+     "en": null
+    },
+    {
+     "fr": "espagnole",
+     "pt-BR": "espanhola",
+     "en": null
+    },
+    {
+     "fr": "italienne",
+     "pt-BR": "italiana",
+     "en": null
+    },
+    {
+     "fr": "allemande",
+     "pt-BR": "alemã",
+     "en": null
+    }
+   ],
+   "vf": [
+    {
+     "afirmacao": {
+      "pt-BR": "<i>Espagnol</i> e <i>espagnole</i> soam diferente.",
+      "en": null
+     },
+     "resposta": false,
+     "porque": {
+      "pt-BR": "Os dois soam igual; só a escrita muda.",
+      "en": null
+     }
+    }
+   ]
+  },
+  {
+   "id": "nacionalidade-e-cidade",
+   "id_mapa": "N17",
+   "titulo": {
+    "pt-BR": "Je suis brésilienne, je suis de Rio: a nacionalidade e a cidade",
+    "en": null
+   },
+   "tipo": "Exp",
+   "tipo_visivel": "explicação",
+   "confianca": "alta",
+   "momento": {
+    "licao": "nacionalidade-e-origem",
+    "depois_do_cartao": "la ville"
+   },
+   "destino": "nota",
+   "texto": {
+    "pt-BR": "Para dizer de onde você é, use a nacionalidade: <strong>Je suis brésilienne</strong>. Para dizer a cidade, <strong>Je suis de</strong> e a cidade: <strong>Je suis de Rio</strong>. E para perguntar: <strong>Tu es d'où ?</strong> ou, no formal, <strong>Vous êtes d'où ?</strong>",
+    "en": null
+   },
+   "exemplos": [
+    {
+     "fr": "Je suis brésilienne.",
+     "pt-BR": "Eu sou brasileira.",
+     "en": null
+    },
+    {
+     "fr": "Je suis de Rio.",
+     "pt-BR": "Eu sou do Rio.",
+     "en": null
+    }
+   ],
+   "vf": [
+    {
+     "afirmacao": {
+      "pt-BR": "Para dizer \"Sou do Rio\", dizemos <i>Je suis brésilienne</i>.",
+      "en": null
+     },
+     "resposta": false,
+     "porque": {
+      "pt-BR": "<b>Je suis brésilienne</b> é a nacionalidade; a cidade é <b>Je suis de Rio</b>.",
+      "en": null
+     }
+    }
+   ]
+  },
+  {
+   "id": "ou-no-fim",
+   "id_mapa": "N18",
+   "titulo": {
+    "pt-BR": "où vai para o fim",
+    "en": null
+   },
+   "tipo": "Real",
+   "tipo_visivel": "realidade",
+   "confianca": "alta",
+   "momento": {
+    "licao": "nacionalidade-e-origem",
+    "depois_do_cartao": "habiter"
+   },
+   "destino": "painel",
+   "texto": {
+    "pt-BR": "Na fala, a palavra da pergunta vai para o fim: <strong>Tu habites où ?</strong>",
+    "en": null
+   },
+   "exemplos": [
+    {
+     "fr": "Tu habites où ?",
+     "pt-BR": "Onde você mora?",
+     "en": null
+    }
+   ],
+   "vf": [],
+   "paineis": [
+    "u3-ex-ou"
+   ]
+  },
+  {
+   "id": "jhabite-paises",
+   "id_mapa": null,
+   "titulo": {
+    "pt-BR": "J'habite en France, au Brésil, aux États-Unis, à Paris",
+    "en": null
+   },
+   "tipo": "Exp",
+   "tipo_visivel": "explicação",
+   "confianca": "alta",
+   "momento": {
+    "licao": "nacionalidade-e-origem",
+    "depois_do_cartao": "les États-Unis"
+   },
+   "destino": "nota",
+   "texto": {
+    "pt-BR": "Para dizer onde você mora, guarde uma fórmula para cada país: <strong>J'habite en France</strong>, <strong>J'habite au Brésil</strong>, <strong>J'habite aux États-Unis</strong>. Para a cidade, sempre <strong>à</strong>: <strong>J'habite à Paris</strong>. A regra completa dos países vem mais tarde.",
+    "en": null
+   },
+   "exemplos": [
+    {
+     "fr": "J'habite en France.",
+     "pt-BR": "Eu moro na França.",
+     "en": null
+    },
+    {
+     "fr": "J'habite au Brésil.",
+     "pt-BR": "Eu moro no Brasil.",
+     "en": null
+    },
+    {
+     "fr": "J'habite aux États-Unis.",
+     "pt-BR": "Eu moro nos Estados Unidos.",
+     "en": null
+    },
+    {
+     "fr": "J'habite à Paris.",
+     "pt-BR": "Eu moro em Paris.",
+     "en": null
+    }
+   ],
+   "vf": [
+    {
+     "afirmacao": {
+      "pt-BR": "Para dizer \"Moro em Paris\", dizemos <i>J'habite en Paris</i>.",
+      "en": null
+     },
+     "resposta": false,
+     "porque": {
+      "pt-BR": "Com cidade, sempre <b>à</b>: <b>J'habite à Paris</b>.",
+      "en": null
+     }
+    }
+   ]
+  },
+  {
+   "id": "est-ce-que",
+   "id_mapa": null,
+   "titulo": {
+    "pt-BR": "Est-ce que tu parles anglais ?: a mesma pergunta, com est-ce que na frente",
+    "en": null
+   },
+   "tipo": "Exp",
+   "tipo_visivel": "explicação",
+   "confianca": "alta",
+   "momento": {
+    "licao": "linguas",
+    "depois_do_cartao": "parler"
+   },
+   "destino": "nota",
+   "texto": {
+    "pt-BR": "A mesma pergunta pode ser feita de dois jeitos: <strong>Tu parles anglais ?</strong>, só com a entonação, ou com <strong>est-ce que</strong> na frente: <strong>Est-ce que tu parles anglais ?</strong> No formal, igual: <strong>Est-ce que vous parlez anglais ?</strong>",
+    "en": null
+   },
+   "exemplos": [
+    {
+     "fr": "Tu parles anglais ?",
+     "pt-BR": "Você fala inglês?",
+     "en": null
+    },
+    {
+     "fr": "Est-ce que tu parles anglais ?",
+     "pt-BR": "Você fala inglês?",
+     "en": null
+    },
+    {
+     "fr": "Est-ce que vous parlez anglais ?",
+     "pt-BR": "O senhor (a senhora) fala inglês?",
+     "en": null
+    }
+   ],
+   "vf": [
+    {
+     "afirmacao": {
+      "pt-BR": "<i>Est-ce que</i> muda o sentido da pergunta.",
+      "en": null
+     },
+     "resposta": false,
+     "porque": {
+      "pt-BR": "A pergunta é a mesma: <b>est-ce que</b> só deixa claro que é uma pergunta.",
+      "en": null
+     }
+    }
+   ]
+  }
+ ]
+}
