@@ -9,6 +9,7 @@ const ETAPAS_DIALOGO = ['dialogo_cena', 'dialogo_ouvir', 'dialogo_ler', 'dialogo
   'dialogo_entendeu', 'dialogo_papel', 'dialogo_fim'];
 
 const licoesComTelas = R => R.licoes.filter(l => l.id !== 'checkpoint');
+const EXERCICIOS = new Set(['complete', 'vf', 'funcao', 'montar', 'ouvir_escolher', 'digitar', 'relacionar']);
 
 // Par informal / formal em duas telas (decisão 360): o registro vai junto da tradução, não numa etiqueta nem num quadro
 // (decisão 361, a dona: tira o foco da palavra). A forma formal com vous pode trazer o sentido de "vocês" em `traducao_plural`.
@@ -58,6 +59,14 @@ function conferirTelas(R){
       confere((ts.length === 1 && ts[0].forma === undefined) || partida, `lição ${l.id}: cartão "${fr}" deve vir numa tela só ou em duas (forma 0 e forma 1, com tradução e registro)`);
     }
     confere(telas[0].tipo === 'abertura' && telas[telas.length - 1].tipo === 'fim', `lição ${l.id}: começa sem abertura ou termina sem a tela final`);
+    // Depois de cada palavra ou frase nova, um exercício antes do próximo item novo, ainda que fácil; nota não conta (decisão 362).
+    let semExercicio = null;
+    for (const t of telas){
+      if (t.tipo === 'cartao' || t.tipo === 'frase'){
+        confere(!semExercicio, `lição ${l.id}: "${semExercicio && (semExercicio.cartao || semExercicio.frase)}" seguido de outro item novo sem exercício entre eles`);
+        semExercicio = t;
+      } else if (EXERCICIOS.has(t.tipo)) semExercicio = null;
+    }
     for (const t of telas){
       if (t.tipo === 'frase'){
         confere(R.frases_na_frase.some(f => f.fr === t.frase), `tela ${t.id}: frase fora do frases_na_frase`);

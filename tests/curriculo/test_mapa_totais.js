@@ -101,7 +101,7 @@ console.log('== "Dizer o nome e a nacionalidade" (A1-2) e "Dizer de onde é, ond
     !p9.some(p => /américain/.test(p)) && !p9.includes('venir de') && p9.includes('les États-Unis') &&
     u9.unidade.cartoes.some(c => c.palavra === 'la France' && c.chave === 'A1-2-v5') && u9.unidade.cartoes.some(c => c.palavra === 'le Brésil' && c.chave === 'A1-2-v6'), p9);
   const n9 = C.notasDaUnidade(u9.unidade);
-  const habiter = n9.find(n => /^J'habite en France/.test(n.titulo));
+  const habiter = n9.find(n => n.titulo === 'Morar num país ou numa cidade'); // título da decisão 362
   check('A1-9: nota de en / au / aux + país e à + cidade como fórmulas, versão grátis da gramática de países (decisão 331)', habiter && habiter.versao_gratis_de.includes('A1-g4') &&
     JSON.stringify(habiter.exemplos.map(e => e.fr)) === JSON.stringify(["J'habite en France.", "J'habite au Brésil.", "J'habite aux États-Unis.", "J'habite à Paris."]));
   check('A1-9: nenhuma nota cita venir de; a origem vem com Je suis de + cidade', !n9.some(n => /venir|viens/i.test(n.titulo + JSON.stringify(n.exemplos || []))) &&

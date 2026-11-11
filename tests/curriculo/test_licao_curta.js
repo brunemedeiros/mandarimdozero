@@ -24,8 +24,8 @@ const base = {
       { id: 'n', tipo: 'nota', nota: 'n1' },
       { id: 'x1', tipo: 'complete', antes: '', depois: ' !', opcoes: ['Salut', 'Salu'], resposta: 'Salut', frase_completa: 'Salut !', distrator: 'grafia', explicacao: pt('ok') },
       { id: 'c2', tipo: 'cartao', cartao: 'merci' },
-      { id: 'f', tipo: 'frase', frase: 'Merci !' },
       { id: 'x2', tipo: 'complete', antes: '', depois: ' !', opcoes: ['Merci', 'Salut'], resposta: 'Merci', frase_completa: 'Merci !', distrator: 'outra palavra', explicacao: pt('ok') },
+      { id: 'f', tipo: 'frase', frase: 'Merci !' },
       { id: 'o', tipo: 'ouvir_escolher', audio: 'gé', opcoes: ['G', 'J'], resposta: 'G', explicacao: pt('ok') },
       { id: 'd', tipo: 'digitar', audio: 'A, N, A', resposta: 'Ana', explicacao: pt('ok') },
       { id: 'z', tipo: 'fim' } ] },
@@ -64,6 +64,8 @@ check('"sua vez" com opção errada sem dica', acusa(r => { delete tela(r, 'd9')
 check('nota marcada como painel sem tela de exercício', acusa(r => { r.notas.push({ id: 'n2', destino: 'painel', paineis: ['nao-existe'], texto: pt('x') }); }, 'painel sem tela'));
 check('rótulo "Pergunta" em cartão ou frase é acusado (decisão 361)', acusa(r => { r.cartoes[0].papel_na_funcao = pt('Pergunta'); }, 'rótulo de pergunta')
   && acusa(r => { tela(r, 'f').papel = pt('Pergunta'); }, 'rótulo de pergunta'));
+check('cartão seguido de outro item novo sem exercício (decisão 362)', acusa(r => { r.licoes[0].telas = r.licoes[0].telas.filter(x => !['n', 'x1'].includes(x.id)); r.notas = []; }, 'sem exercício entre eles'));
+check('nota entre dois itens novos não conta como exercício (decisão 362)', acusa(r => { r.licoes[0].telas = r.licoes[0].telas.filter(x => x.id !== 'x1'); }, 'sem exercício entre eles'));
 check('texto longo demais (decisão 352)', acusa(r => { tela(r, 'a').objetivo = pt('a'.repeat(121)); }, 'texto longo demais'));
 check('inclui_dialogo errado', acusa(r => { r.licoes[0].inclui_dialogo = true; }, 'inclui_dialogo não bate'));
 

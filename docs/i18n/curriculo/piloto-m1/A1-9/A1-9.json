@@ -202,6 +202,33 @@
      "cartao": "la nationalité"
     },
     {
+     "id": "u3-ex-nationalite",
+     "tipo": "complete",
+     "antes": "la ",
+     "depois": "",
+     "traducao": {
+      "pt-BR": "a nacionalidade",
+      "en": null
+     },
+     "opcoes": [
+      "nationalité",
+      "nacionalité"
+     ],
+     "resposta": "nationalité",
+     "frase_completa": "la nationalité",
+     "distrator": "grafia",
+     "explicacao": {
+      "pt-BR": "Em francês, <b>nationalité</b> se escreve com <b>t</b>.",
+      "en": null
+     },
+     "explicacao_erro": {
+      "nacionalité": {
+       "pt-BR": "Você escreveu como em português! ",
+       "en": null
+      }
+     }
+    },
+    {
      "id": "u3-frase-nat",
      "tipo": "frase",
      "frase": "Quelle est ta nationalité ? / Quelle est votre nationalité ?",
@@ -316,9 +343,63 @@
      "cartao": "espagnol / espagnole"
     },
     {
+     "id": "u3-ex-espagnol",
+     "tipo": "complete",
+     "antes": "Il est ",
+     "depois": ".",
+     "traducao": {
+      "pt-BR": "Ele é espanhol.",
+      "en": null
+     },
+     "opcoes": [
+      "espagnol",
+      "espanhol"
+     ],
+     "resposta": "espagnol",
+     "frase_completa": "Il est espagnol.",
+     "distrator": "grafia",
+     "explicacao": {
+      "pt-BR": "<b>Espagnol</b> tem <b>gn</b>, que soa como o nosso \"nh\".",
+      "en": null
+     },
+     "explicacao_erro": {
+      "espanhol": {
+       "pt-BR": "Você escreveu como em português! ",
+       "en": null
+      }
+     }
+    },
+    {
      "id": "u3-italien",
      "tipo": "cartao",
      "cartao": "italien / italienne"
+    },
+    {
+     "id": "u3-ex-italienne-elle",
+     "tipo": "complete",
+     "antes": "Elle est ",
+     "depois": ".",
+     "traducao": {
+      "pt-BR": "Ela é italiana.",
+      "en": null
+     },
+     "opcoes": [
+      "italien",
+      "italienne"
+     ],
+     "resposta": "italienne",
+     "frase_completa": "Elle est italienne.",
+     "distrator": "par",
+     "explicacao": {
+      "pt-BR": "Para uma mulher, <b>italienne</b>: o fim deixa de ser nasal e soa \"éne\".",
+      "en": null
+     },
+     "explicacao_erro": {
+      "italien": {
+       "pt-BR": "A tradução pede \"italiana\". ",
+       "en": null
+      }
+     }
     },
     {
      "id": "u3-frase-italienne",
@@ -490,6 +571,34 @@
      "cartao": "la ville"
     },
     {
+     "id": "u3-ex-ville",
+     "tipo": "funcao",
+     "pergunta": {
+      "pt-BR": "Você quer dizer que o Rio é uma cidade. Que palavra usa?",
+      "en": null
+     },
+     "opcoes": [
+      "la ville",
+      "le pays",
+      "la nationalité"
+     ],
+     "resposta": "la ville",
+     "explicacao": {
+      "pt-BR": "<b>La ville</b> é \"a cidade\"; <b>le pays</b> é \"o país\". O Rio é uma <b>ville</b>.",
+      "en": null
+     },
+     "explicacao_erro": {
+      "le pays": {
+       "pt-BR": "<b>Le pays</b> é \"o país\". ",
+       "en": null
+      },
+      "la nationalité": {
+       "pt-BR": "<b>La nationalité</b> é \"a nacionalidade\". ",
+       "en": null
+      }
+     }
+    },
+    {
      "id": "u3-frase-dou",
      "tipo": "frase",
      "frase": "Tu es d'où ? / Vous êtes d'où ?",
@@ -605,6 +714,20 @@
      "cartao": "habiter"
     },
     {
+     "id": "u3-ex-habiter",
+     "tipo": "vf",
+     "fr": "J'habite à Rio.",
+     "afirmacao": {
+      "pt-BR": "Quer dizer \"Eu sou do Rio\".",
+      "en": null
+     },
+     "resposta": false,
+     "explicacao": {
+      "pt-BR": "<b>J'habite</b> é \"eu moro\", do verbo <b>habiter</b>. \"Eu sou do Rio\" é <b>Je suis de Rio</b>.",
+      "en": null
+     }
+    },
+    {
      "id": "u3-frase-habites",
      "tipo": "frase",
      "frase": "Tu habites où ? / Vous habitez où ?",
@@ -714,14 +837,82 @@
      "cartao": "la France"
     },
     {
+     "id": "u3-ex-france",
+     "tipo": "complete",
+     "antes": "",
+     "depois": " France",
+     "traducao": {
+      "pt-BR": "a França",
+      "en": null
+     },
+     "opcoes": [
+      "la",
+      "le"
+     ],
+     "resposta": "la",
+     "frase_completa": "la France",
+     "distrator": "outra palavra",
+     "explicacao": {
+      "pt-BR": "Os países também têm artigo: <b>la France</b>, feminino, como \"a França\".",
+      "en": null
+     },
+     "explicacao_erro": {
+      "le": {
+       "pt-BR": "Quase lá! ",
+       "en": null
+      }
+     }
+    },
+    {
      "id": "u3-bresil",
      "tipo": "cartao",
      "cartao": "le Brésil"
     },
     {
+     "id": "u3-ex-bresil-grafia",
+     "tipo": "complete",
+     "antes": "le ",
+     "depois": "",
+     "traducao": {
+      "pt-BR": "o Brasil",
+      "en": null
+     },
+     "opcoes": [
+      "Brésil",
+      "Brasil"
+     ],
+     "resposta": "Brésil",
+     "frase_completa": "le Brésil",
+     "distrator": "grafia",
+     "explicacao": {
+      "pt-BR": "<b>Brésil</b> tem <b>é</b> e <b>s</b>: o <b>s</b> soa como \"z\".",
+      "en": null
+     },
+     "explicacao_erro": {
+      "Brasil": {
+       "pt-BR": "Você escreveu como em português! ",
+       "en": null
+      }
+     }
+    },
+    {
      "id": "u3-etatsunis",
      "tipo": "cartao",
      "cartao": "les États-Unis"
+    },
+    {
+     "id": "u3-ex-etatsunis",
+     "tipo": "vf",
+     "fr": "les États-Unis",
+     "afirmacao": {
+      "pt-BR": "Está no plural.",
+      "en": null
+     },
+     "resposta": true,
+     "explicacao": {
+      "pt-BR": "<b>Les États-Unis</b> está no plural, como \"os Estados Unidos\".",
+      "en": null
+     }
     },
     {
      "id": "u3-frase-bresil",
@@ -849,7 +1040,7 @@
      ],
      "frase_completa": "Je suis de Rio et j'habite en France.",
      "explicacao": {
-      "pt-BR": "<b>Je suis de</b> para a cidade de onde você é; <b>j'habite en</b> para o país onde mora.",
+      "pt-BR": "<b>Je suis de Rio</b>: a cidade de onde você é. <b>J'habite en France</b>: o país onde mora; cada país tem a sua palavrinha.",
       "en": null
      }
     },
@@ -898,6 +1089,33 @@
      "id": "u3-parler",
      "tipo": "cartao",
      "cartao": "parler"
+    },
+    {
+     "id": "u3-ex-parle",
+     "tipo": "complete",
+     "antes": "Je ",
+     "depois": " anglais.",
+     "traducao": {
+      "pt-BR": "Eu falo inglês.",
+      "en": null
+     },
+     "opcoes": [
+      "parle",
+      "parlé"
+     ],
+     "resposta": "parle",
+     "frase_completa": "Je parle anglais.",
+     "distrator": "grafia",
+     "explicacao": {
+      "pt-BR": "<b>Je parle</b>: o <b>e</b> do fim não se pronuncia.",
+      "en": null
+     },
+     "explicacao_erro": {
+      "parlé": {
+       "pt-BR": "Sem acento: o <b>e</b> do fim é mudo. ",
+       "en": null
+      }
+     }
     },
     {
      "id": "u3-frase-anglais",
@@ -1004,6 +1222,20 @@
      "id": "u3-langue",
      "tipo": "cartao",
      "cartao": "la langue"
+    },
+    {
+     "id": "u3-ex-langue",
+     "tipo": "vf",
+     "fr": "la langue",
+     "afirmacao": {
+      "pt-BR": "Quer dizer \"o país\".",
+      "en": null
+     },
+     "resposta": false,
+     "explicacao": {
+      "pt-BR": "<b>La langue</b> é \"a língua\"; \"o país\" é <b>le pays</b>.",
+      "en": null
+     }
     },
     {
      "id": "u3-frase-langues",
@@ -1120,6 +1352,34 @@
      "cartao": "étudier"
     },
     {
+     "id": "u3-ex-etudier",
+     "tipo": "funcao",
+     "pergunta": {
+      "pt-BR": "Você quer dizer \"estudar\". Que verbo usa?",
+      "en": null
+     },
+     "opcoes": [
+      "étudier",
+      "parler",
+      "habiter"
+     ],
+     "resposta": "étudier",
+     "explicacao": {
+      "pt-BR": "<b>Étudier</b> é \"estudar\"; <b>parler</b> é \"falar\" e <b>habiter</b>, \"morar\".",
+      "en": null
+     },
+     "explicacao_erro": {
+      "parler": {
+       "pt-BR": "<b>Parler</b> é \"falar\". ",
+       "en": null
+      },
+      "habiter": {
+       "pt-BR": "<b>Habiter</b> é \"morar\". ",
+       "en": null
+      }
+     }
+    },
+    {
      "id": "u3-frase-etudie",
      "tipo": "frase",
      "frase": "J'étudie le français.",
@@ -1159,6 +1419,33 @@
      "id": "u3-unpeu",
      "tipo": "cartao",
      "cartao": "un peu"
+    },
+    {
+     "id": "u3-ex-unpeu",
+     "tipo": "complete",
+     "antes": "Je parle un ",
+     "depois": " anglais.",
+     "traducao": {
+      "pt-BR": "Eu falo um pouco de inglês.",
+      "en": null
+     },
+     "opcoes": [
+      "peu",
+      "pas"
+     ],
+     "resposta": "peu",
+     "frase_completa": "Je parle un peu anglais.",
+     "distrator": "outra palavra",
+     "explicacao": {
+      "pt-BR": "<b>Un peu</b> é \"um pouco\", e vem antes da língua, sem <b>de</b>.",
+      "en": null
+     },
+     "explicacao_erro": {
+      "pas": {
+       "pt-BR": "<b>Pas</b> é do \"não\": <b>ne... pas</b>. ",
+       "en": null
+      }
+     }
     },
     {
      "id": "u3-frase-unpeu",
@@ -2255,7 +2542,7 @@
    "id": "jhabite-paises",
    "id_mapa": null,
    "titulo": {
-    "pt-BR": "J'habite en France, au Brésil, aux États-Unis, à Paris",
+    "pt-BR": "Morar num país ou numa cidade",
     "en": null
    },
    "tipo": "Exp",
@@ -2267,7 +2554,7 @@
    },
    "destino": "nota",
    "texto": {
-    "pt-BR": "Para dizer onde você mora, guarde uma fórmula para cada país: <strong>J'habite en France</strong>, <strong>J'habite au Brésil</strong>, <strong>J'habite aux États-Unis</strong>. Para a cidade, sempre <strong>à</strong>: <strong>J'habite à Paris</strong>. A regra completa dos países vem mais tarde.",
+    "pt-BR": "Antes do nome do país, o francês usa uma palavrinha que muda de país para país: <strong>en</strong>, <strong>au</strong> ou <strong>aux</strong>. Por enquanto, guarde a de cada país como nos exemplos. Antes do nome da cidade (<strong>la ville</strong>), é sempre <strong>à</strong>. A regra completa dos países eu explico mais tarde.",
     "en": null
    },
    "exemplos": [
@@ -2295,7 +2582,7 @@
    "vf": [
     {
      "afirmacao": {
-      "pt-BR": "Para dizer \"Moro em Paris\", dizemos <i>J'habite en Paris</i>.",
+      "pt-BR": "Para dizer \"Moro em Paris\", o certo é <i>J'habite en Paris</i>.",
       "en": null
      },
      "resposta": false,

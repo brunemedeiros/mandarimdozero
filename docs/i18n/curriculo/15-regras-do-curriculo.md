@@ -111,7 +111,7 @@ Regras de conteúdo e de sequência decididas pela dona. Cada regra vale para fr
 17. **Lição curta** (dona, decisões 338 a 348, 2026-11-09 e 2026-11-10; maquete em `maquete-licao-curta/`, unidade 1 inteira):
     - **Título pela função** e abertura com o objetivo e o tamanho ("4 cartões · 1 frase · cerca de 2 minutos"); 3 a 5 cartões (regra 13), uns 2 a 3 minutos.
     - **Cartão novo sozinho na tela**, só com o áudio (um por forma do par); **sem ícone dentro da lição**: só imagem de verdade, ou nada (decisão 341).
-    - **Ordem cartão, exercício**, um de cada vez; exceção aceita: dois cartões que só fazem sentido juntos (*et toi ?* e *je vais bien*) seguidos, treinados na frase-modelo.
+    - **Ordem cartão, exercício**, um de cada vez: depois de **cada palavra ou frase nova**, um exercício (ainda que muito fácil) antes do próximo item novo; nota não conta como exercício; sem exceção (decisão 362).
     - **Pergunta e resposta viram cartões**, com etiqueta (Resposta, Fala, Pedido; **pergunta não leva etiqueta**, o "?" já diz, nem palavra solta: decisão 361); toda função tem uma **pergunta de função** ("O que você diz?").
     - **Par informal / formal em duas telas** (decisão 360): forma informal, V/F de situação, forma formal, "O que você diz?" formal; um **"Relacione os pares"** por lição, perto do fim. Na Revisão o par segue um cartão só. O registro vai **na tradução**, entre parênteses, e na forma formal com *vous* o "vocês" vem depois de "ou" (decisão 361).
     - **Frase-modelo é cartão** (tela própria, com áudio) e a frase é **montada em telas seguintes**, nunca na mesma tela do cartão.

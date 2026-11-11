@@ -267,6 +267,33 @@
      "cartao": "je"
     },
     {
+     "id": "u2-ex-je-vais",
+     "tipo": "complete",
+     "antes": "",
+     "depois": " vais bien.",
+     "traducao": {
+      "pt-BR": "Eu vou bem.",
+      "en": null
+     },
+     "opcoes": [
+      "Je",
+      "Jeu"
+     ],
+     "resposta": "Je",
+     "frase_completa": "Je vais bien.",
+     "distrator": "grafia",
+     "explicacao": {
+      "pt-BR": "<b>Je</b> é o \"eu\". Você já usava: <b>je vais bien</b>, da unidade 1.",
+      "en": null
+     },
+     "explicacao_erro": {
+      "Jeu": {
+       "pt-BR": "Quase! ",
+       "en": null
+      }
+     }
+    },
+    {
      "id": "u2-tuvous",
      "tipo": "cartao",
      "cartao": "tu / vous",
@@ -383,6 +410,20 @@
      "id": "u2-sappeler",
      "tipo": "cartao",
      "cartao": "s'appeler"
+    },
+    {
+     "id": "u2-ex-sappeler",
+     "tipo": "vf",
+     "fr": "s'appeler",
+     "afirmacao": {
+      "pt-BR": "Serve para dizer o nome.",
+      "en": null
+     },
+     "resposta": true,
+     "explicacao": {
+      "pt-BR": "<b>S'appeler</b> é \"chamar-se\": em francês, o nome se diz com esse verbo.",
+      "en": null
+     }
     },
     {
      "id": "u2-frase-comment",
@@ -616,6 +657,33 @@
      "cartao": "le prénom"
     },
     {
+     "id": "u2-ex-prenom",
+     "tipo": "complete",
+     "antes": "le ",
+     "depois": "",
+     "traducao": {
+      "pt-BR": "o nome",
+      "en": null
+     },
+     "opcoes": [
+      "prénom",
+      "prenom"
+     ],
+     "resposta": "prénom",
+     "frase_completa": "le prénom",
+     "distrator": "grafia",
+     "explicacao": {
+      "pt-BR": "<b>Prénom</b> tem acento no <b>é</b>, que soa fechado, como em \"ipê\".",
+      "en": null
+     },
+     "explicacao_erro": {
+      "prenom": {
+       "pt-BR": "Faltou o acento! ",
+       "en": null
+      }
+     }
+    },
+    {
      "id": "u2-nom",
      "tipo": "cartao",
      "cartao": "le nom"
@@ -808,6 +876,33 @@
      "cartao": "être"
     },
     {
+     "id": "u2-ex-suis",
+     "tipo": "complete",
+     "antes": "Je ",
+     "depois": " Léo.",
+     "traducao": {
+      "pt-BR": "Eu sou o Léo.",
+      "en": null
+     },
+     "opcoes": [
+      "suis",
+      "sui"
+     ],
+     "resposta": "suis",
+     "frase_completa": "Je suis Léo.",
+     "distrator": "grafia",
+     "explicacao": {
+      "pt-BR": "<b>Je suis</b> é \"eu sou\", do verbo <b>être</b>. O <b>s</b> do fim não se pronuncia.",
+      "en": null
+     },
+     "explicacao_erro": {
+      "sui": {
+       "pt-BR": "Você escreveu como se ouve! ",
+       "en": null
+      }
+     }
+    },
+    {
      "id": "u2-frase-etre",
      "tipo": "frase",
      "frase": "Tu es français ?"
@@ -903,6 +998,20 @@
      "cartao": "brésilien / brésilienne"
     },
     {
+     "id": "u2-ex-bresilien",
+     "tipo": "vf",
+     "fr": "brésilien",
+     "afirmacao": {
+      "pt-BR": "Quer dizer \"brasileira\".",
+      "en": null
+     },
+     "resposta": false,
+     "explicacao": {
+      "pt-BR": "<b>Brésilien</b> é \"brasileiro\". Para uma mulher, <b>brésilienne</b>, com <b>-nne</b> no fim.",
+      "en": null
+     }
+    },
+    {
      "id": "u2-frase-bresil",
      "tipo": "frase",
      "frase": "Je suis brésilienne.",
@@ -942,6 +1051,33 @@
      "id": "u2-americain",
      "tipo": "cartao",
      "cartao": "américain / américaine"
+    },
+    {
+     "id": "u2-ex-americaine",
+     "tipo": "complete",
+     "antes": "Tu es ",
+     "depois": " ?",
+     "traducao": {
+      "pt-BR": "Você é americana?",
+      "en": null
+     },
+     "opcoes": [
+      "américain",
+      "américaine"
+     ],
+     "resposta": "américaine",
+     "frase_completa": "Tu es américaine ?",
+     "distrator": "par",
+     "explicacao": {
+      "pt-BR": "Para uma mulher, <b>américaine</b>: o fim deixa de ser nasal e soa \"éne\".",
+      "en": null
+     },
+     "explicacao_erro": {
+      "américain": {
+       "pt-BR": "A tradução pede \"americana\". ",
+       "en": null
+      }
+     }
     },
     {
      "id": "u2-nepas",
