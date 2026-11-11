@@ -331,6 +331,7 @@ Investigado em seguida: o botão "Atualizar" traz tudo novo (fr e zh, conferido)
 worker, os scripts carregados havia menos de 10 minutos (max-age=600 do GitHub Pages), e a página ficava com `index.html` novo e
 `content.js`/`shared/*.js` antigos até o aviso aparecer. Conserto: o SW entrega à página uma cópia com `Cache-Control: no-cache`
 (só respostas 200; o áudio em pedaços, 206, passa como veio), sem custo de internet (a busca do SW continua 304).
+Publicado pelo PR #466 (2026-11-11) e conferido no ar no fr e no zh: `docs/historico/33-pwa-cache-offline.md`.
 
 ## 9. Propostas em ordem de prioridade
 
