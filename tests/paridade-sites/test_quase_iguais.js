@@ -31,7 +31,7 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
 // nas duas árvores para a comparação provar que o resto não mudou: o último cartão de palavra diz "Continuar →"; o XP usa
 // ⭐ (o ⚡ ficou só no Combo); e a janela da sequência (agora depois do Continuar) limpa os avisos "+N XP" da tela, então
 // numa cena a árvore nova pode ter a lista de avisos vazia onde a antiga ainda tinha avisos.
-const ETAPA6 = (v) => etapa7(PROGRESSO_ORDEM(v)).split('Ver o que você aprendeu →').join('Continuar →').split('See what you learned →').join('Continue →')
+const ETAPA6 = (v) => etapa7(PROGRESSO_ORDEM(FAIXA_CONVIDADO(v))).split('Ver o que você aprendeu →').join('Continuar →').split('See what you learned →').join('Continue →')
   .replace(/26a1\.svg(&quot;\);\\?">)⚡/g, '2b50.svg$1⭐')
   // Recomeçar o curso (2026-10-30, migration 123): caixa nova e vazia (hidden) em Configurações > Geral, montada por shared/recomecar-curso.js.
   .replace(/<!-- Recomeçar este curso.*?-->(\\n|\n)\s*<article id=\\?"settings-restart-box\\?"[^>]*><\/article>(\\n|\n)\s*/g, '')
@@ -42,6 +42,10 @@ const ETAPA6 = (v) => etapa7(PROGRESSO_ORDEM(v)).split('Ver o que você aprendeu
   // syncReviewPrevRow cria a linha logo depois de #review-content em toda sessão da Revisão, VAZIA e escondida fora da sessão
   // da professora. Só a linha vazia e hidden sai; com o botão dentro a cena continua diferente.
   .replace(/<div id=\\?"review-prev-row\\?" class=\\?"review-prev-row\\?" hidden=\\?"\\?"><\/div>/g, '');
+// Faixa do modo convidado (conserto de 2026-11-10, pedido da dona): a frase ganhou um <span class="guest-warning-text"> em volta,
+// para o "não" em negrito não ganhar o espaço do flex; e "username" virou "nome de usuário". Na comparação, a etiqueta sai das duas árvores; o texto continua comparado.
+const FAIXA_CONVIDADO = (v) => v.replace(/<span class=\\?"guest-warning-text\\?">([\s\S]*?)<\/span>(?=(\\n|\n)\s*<button class=\\?"guest-warning-link)/g, '$1')
+  .split('perfil salvo (username, bio)').join('perfil salvo (nome de usuário, bio)'); // texto da faixa do Perfil, aprovado pela dona
 // Perfil > Progresso (decisão da dona, 2026-10-31): Conquistas saíram de cima dos números e foram para o fim da tela.
 // Na árvore antiga, o bloco (título + grade) é movido para o fim; na nova, sai o comentário que explica a ordem.
 // Assim a comparação continua provando que números, gráficos e conquistas têm o mesmo conteúdo.
