@@ -66,7 +66,7 @@ async function fingerprint(browser, root){
   // duas árvores ele vira só "FB:ok" ou "FB:no" (acerto ou erro), e o resto da tela continua comparado.
   // Os nós são MOVIDOS para fora e de volta (não recriados), para os botões não perderem a ação.
   const fbMark = () => page.evaluate(() => { const f = document.getElementById('cg-feedback'); if (!f || !f.children.length) return null;
-    const ok = !!f.querySelector('.correct-feedback, .cg-verdict.ok'); window.__fbStash = [...f.childNodes]; f.textContent = 'FB:' + (ok ? 'ok' : 'no'); return 1; });
+    const ok = !!f.querySelector('.painel-resposta.is-ok, .correct-feedback, .cg-verdict.ok'); window.__fbStash = [...f.childNodes]; f.textContent = 'FB:' + (ok ? 'ok' : 'no'); return 1; });
   const fbBack = k => (k == null ? Promise.resolve() : page.evaluate(() => { const f = document.getElementById('cg-feedback'); f.textContent = ''; f.append(...window.__fbStash); window.__fbStash = null; }));
   const view = () => fbMark().then(k => html('#view-conjugaison').then(v => fbBack(k).then(() => v)));
   // Lista dos Jogos refeita de propósito (etapa 2 da reformulação, 2026-11-06, docs/jogos-reformulacao-plano.md): nas cenas da
@@ -279,6 +279,9 @@ async function fingerprint(browser, root){
       // ("Você respondeu: ...") e o botão "Praticar só os que errei" virou "Revisar erros" (revisão escrevendo).
       [/<span class=\\"cg-review-given\\">.*?<\/span>(?=<span class=\\"cg-review-tr)/g, ''],
       [/(Praticar só os que errei|Practice only my mistakes|Revisar erros|Review mistakes)/g, 'REVISAR_ERROS'],
+      // Painel de resposta único (2026-11-11): a tradução e o 🔊 saíram do quadro de cima (foram para o painel).
+      [/<button type=\\"button\\" class=\\"audio-btn cg-listen\\"[\s\S]*?<\/button>/g, ''],
+      [/<p class=\\"cg-tr\\"[^>]*>[^<]*<\/p>/g, '<p class=\\"cg-tr\\"></p>'],
       // Etapa 7 (2026-10-31, vocabulário aprovado pela dona): textos das Missões do dia guardados no estado
       // (ver etapa7-neutro.js, aplicado em norm)
     ];

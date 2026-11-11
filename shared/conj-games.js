@@ -495,51 +495,24 @@ function createConjGames({ games, soon = [], speak, ids, isLocked, onLocked, lan
     });
     const opt = g.opts[it.optKey || it.ans], txt = L(it.text) || {};
     const full = it.before + it[it.ans] + it.after;
-    const row = $(ids.content).querySelector('.cg-sentence-row');
-    row.innerHTML = sentenceHTML(it, true)
-      + `<button type="button" class="audio-btn cg-listen" aria-label="${esc(tt('games.listen'))}" title="${esc(tt('games.listen'))}">🔊</button>`;
-    row.querySelector('.cg-listen').addEventListener('click', e => { if (speak) speak(full, e.currentTarget); });
-    const tr = $(ids.content).querySelector('.cg-tr');
-    tr.textContent = txt.tr || '';
-    tr.hidden = !txt.tr;
+    // A frase preenchida (com a pista) fica no quadro de cima; a frase com a tradução e o 🔊 vão para o painel de resposta
+    // (painel único do site, shared/core/painel-resposta.js), como na maquete da lição curta.
+    $(ids.content).querySelector('.cg-sentence-row').innerHTML = sentenceHTML(it, true);
     const last = S.idx + 1 >= S.order.length;
     const fb = $('cg-feedback');
-    // Resposta no MOLDE DA TRILHA, com as respostas DENTRO DE CAIXAS (escolha da autora, 2026-11-11). No erro, no lugar das
-    // caixas "SUA RESPOSTA" / "RESPOSTA", uma comparação lado a lado: "✕ Você marcou/escreveu" (riscado) x "✓ Forma certa".
-    // "Não sei": só a forma certa. "Quase": painel verde com o que ela escreveu (desenho letra a letra) x a forma certa.
-    // Depois, uma caixa com a regra (em negrito, com o desenho da linha do tempo) e a explicação.
+    const tidyFr = v => String(v).replace(/ ([?!:;])/g, '\u00a0$1');
+    // Painel de resposta ÚNICO do site (decisão da autora, 2026-11-11; shared/core/painel-resposta.js): título "Isso mesmo!" /
+    // "Quase lá!", a frase certa com a tradução e o 🔊, e a Prof. Brune com a regra (e o desenho, quando há) e a explicação.
+    // "Quase" (acento ou uma letra) conta como acerto: painel verde com o desenho letra a letra do que ela escreveu.
     const almost = !!(typedInfo && typedInfo.verdict === 'quase');
-    // o símbolo vem do CSS (::before): escrito no texto, o ✕ viraria o ícone do Fluent (shared/emoji-icons.js)
-    const cell = (cls, icon, label, inner) => `<div class="cg-fb-cell ${cls}"><span class="cg-fb-cell-label"><span class="cg-fb-ico" aria-hidden="true"></span>${esc(label)}</span>${inner}</div>`;
-    const val = (v, cls) => `<span class="cg-fb-value ${cls || ''}" lang="${lang}">${esc(v)}</span>`;
-    const rightCell = cell('is-right', '✓', tt('games.fb.correct'), val(it[it.ans], 'is-right'));
-    let mine = '';
-    if (almost) mine = cell('is-almost', '~', tt('games.fb.youWrote'), typeof typedAttemptHTML === 'function' ? typedAttemptHTML(typedInfo.typed, it[it.ans]) : val(typedInfo.typed));
-    else if (!ok && !revealed) mine = cell('is-wrong', '✕', tt(typedInfo ? 'games.fb.youWrote' : 'games.fb.youPicked'), val(typedInfo ? typedInfo.typed : it[k], 'is-wrong'));
-    const compare = ok && !almost ? '' : `<div class="cg-fb-compare${mine ? '' : ' is-single'}">${mine}${rightCell}</div>`;
-    const why = `<div class="feedback-inner-box cg-fb-why">
-        <div class="cg-why">
-          <figure class="cg-timeline${SKETCH[opt.sketch] ? '' : ' cg-rule'}">${SKETCH[opt.sketch] ? `<svg viewBox="0 0 134 44" role="img" aria-label="${esc(plain(L(opt.tl)))}">${SKETCH[opt.sketch]}</svg>` : ''}<figcaption>${rich(L(opt.tl))}</figcaption></figure>
-          <p>${rich(txt.why || '')}</p>
-        </div>
-      </div>`;
-    const okHeader = almost ? tt('games.almost') : (typeof nextCorrectFeedbackPhrase === 'function' ? nextCorrectFeedbackPhrase() : tt('games.right'));
-    const btn = `<button type="button" class="btn btn-primary btn-block ${ok ? 'correct' : 'wrong'}-feedback-continue cg-next" id="cg-next">${esc(tt(last ? 'common.seeResultArrow' : 'common.continueArrow'))}</button>`;
-    fb.innerHTML = ok ? `
-      <div class="correct-feedback cg-fb">
-        <div class="feedback-card-body">
-          <div class="correct-feedback-header">✅ ${esc(okHeader)}</div>
-          ${compare}${why}
-          ${btn}
-        </div>
-      </div>` : `
-      <div class="wrong-feedback cg-fb">
-        <div class="feedback-card-body">
-          <div class="wrong-feedback-header">${esc(tt(revealed ? 'feedback.header.revealed' : 'feedback.header.notThisTime'))}</div>
-          ${compare}${why}
-          ${btn}
-        </div>
-      </div>`;
+    const estado = revealed ? 'revelada' : (almost ? 'quase' : (ok ? 'certo' : 'erro'));
+    const regra = `<figure class="cg-timeline${SKETCH[opt.sketch] ? '' : ' cg-rule'}">${SKETCH[opt.sketch] ? `<svg viewBox="0 0 134 44" role="img" aria-label="${esc(plain(L(opt.tl)))}">${SKETCH[opt.sketch]}</svg>` : ''}<figcaption>${rich(L(opt.tl))}</figcaption></figure>`;
+    const extra = almost && typeof typedAttemptHTML === 'function'
+      ? `<div class="cg-pr-sua"><span class="cg-pr-sua-rot">${esc(tt('games.fb.youWrote'))}</span>${typedAttemptHTML(typedInfo.typed, it[it.ans])}</div>` : '';
+    fb.innerHTML = painelRespostaHTML({ estado, frase: tidyFr(full), traducao: txt.tr || '', lang, ouvir: true, extra, regra,
+      explicacao: rich(txt.why || ''), continuar: tt(last ? 'common.seeResultArrow' : 'common.continueArrow'), idContinuar: 'cg-next' });
+    const ouvir = fb.querySelector('[data-pr-ouvir]');
+    if (ouvir) ouvir.addEventListener('click', e => { if (speak) speak(full, e.currentTarget); });
     S.shownAt = performance.now();
     $('cg-next').addEventListener('click', next);
     setTimeout(() => { const n = $('cg-next'); if (n) n.focus(); }, 0);

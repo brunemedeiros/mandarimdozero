@@ -863,9 +863,11 @@ window.I18N_CATALOG['en'] = {
   'games.fix.intro': 'Now find the mistake: each sentence has one wrong form. Type only that form, corrected.', // ALTA
   'games.fix.ownIntro': 'Now the sentences you got wrong in this round: type the correct form.', // ALTA
   'games.fix.label': 'Type the correct form', // ALTA
-  'games.fb.youPicked': 'You picked', // ALTA
+  'answerPanel.right': "That's right!", // ALTA
+  'answerPanel.almost': 'Almost right!', // ALTA
+  'answerPanel.wrong': 'Almost there!', // ALTA
+  'answerPanel.teacher': 'Prof. Brune', // ALTA (nome próprio)
   'games.fb.youWrote': 'You wrote', // ALTA
-  'games.fb.correct': 'Correct form', // ALTA
   'games.almost': 'Almost!', // ALTA
   'games.youAnswered': 'You answered:', // ALTA
   'games.dueTitle': 'Review mistakes ({n})', // ALTA

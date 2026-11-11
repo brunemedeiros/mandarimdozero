@@ -206,12 +206,12 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
     check(L + ' revisão: dica com as duas opções', /avoir ou être/.test(r0.hint), r0.hint);
     await page.fill('#cg-input', 'xyz');
     await page.press('#cg-input', 'Enter'); // Enter no campo corrige
-    const w = await page.evaluate(() => ({ ok: CONJ_GAMES_UI.state.log[0].ok, cls: (document.querySelector('.cg-fb.correct-feedback') ? 'ok' : 'no'), chk: getComputedStyle(document.getElementById('cg-check')).display, keys: getComputedStyle(document.querySelector('.cg-accents')).display, next: !!document.getElementById('cg-next'), attempt: !!document.querySelector('.cg-feedback .typed-attempt') }));
+    const w = await page.evaluate(() => ({ ok: CONJ_GAMES_UI.state.log[0].ok, cls: (document.querySelector('.painel-resposta.is-ok') ? 'ok' : 'no'), chk: getComputedStyle(document.getElementById('cg-check')).display, keys: getComputedStyle(document.querySelector('.cg-accents')).display, next: !!document.getElementById('cg-next'), attempt: !!document.querySelector('.cg-feedback .typed-attempt') }));
     check(L + ' revisão: errou -> vermelho, some o Corrigir e o teclado, sem desenho letra a letra', !w.ok && /no/.test(w.cls) && w.chk === 'none' && w.keys === 'none' && w.next && !w.attempt, w);
     await page.waitForTimeout(380); await hideStreak(); await page.click('#cg-next'); await page.waitForSelector('#cg-input');
     const exp = await page.evaluate(() => { const it = CONJ_GAMES_UI.state.order[1]; return it[it.ans]; });
     await page.fill('#cg-input', exp.toUpperCase()); await page.click('#cg-check');
-    const c = await page.evaluate(() => ({ ok: CONJ_GAMES_UI.state.log[1].ok, cls: (document.querySelector('.cg-fb.correct-feedback') ? 'ok' : 'no') }));
+    const c = await page.evaluate(() => ({ ok: CONJ_GAMES_UI.state.log[1].ok, cls: (document.querySelector('.painel-resposta.is-ok') ? 'ok' : 'no') }));
     check(L + ' revisão: certo (maiúscula não importa)', c.ok && /ok/.test(c.cls), c);
     await page.waitForTimeout(380); await hideStreak(); await page.click('#cg-next');
     await page.waitForSelector('.cg-result');
@@ -221,7 +221,7 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
     const q = await page.evaluate(() => { const g = CONJ_GAMES.find(x => x.id === 'tu-vous'); const it = g.items.find(i => /ê/.test(i[i.ans])); CONJ_GAMES_UI.startReview([{ g, it }]); return it[it.ans]; });
     await page.waitForSelector('#cg-input');
     await page.fill('#cg-input', q.normalize('NFD').replace(/[\u0300-\u036f]/g, '')); await page.click('#cg-check');
-    const qa = await page.evaluate(() => ({ ok: CONJ_GAMES_UI.state.log[0].ok, txt: document.querySelector('.cg-fb .correct-feedback-header, .cg-fb .wrong-feedback-header').textContent, attempt: !!document.querySelector('.cg-feedback .typed-attempt') }));
+    const qa = await page.evaluate(() => ({ ok: CONJ_GAMES_UI.state.log[0].ok, txt: document.querySelector('.painel-resposta .pr-titulo').textContent, attempt: !!document.querySelector('.cg-feedback .typed-attempt') }));
     check(L + ' revisão: "quase" (sem acento) conta como acerto, com o desenho do erro', qa.ok && /Quase|Almost/.test(qa.txt) && qa.attempt, qa);
     await hideStreak(); await page.click('#conj-game-wrap .activity-exit-btn');
     // erros de outros dias: cartão no topo; erro de hoje não entra; jogo trancado não entra
