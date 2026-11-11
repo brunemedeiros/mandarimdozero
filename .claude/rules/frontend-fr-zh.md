@@ -32,7 +32,9 @@ paths:
 - `STATE.streak` só muda ao estudar: para exibir use `effectiveStreak()` (`shared/srs.js`).
 - Áudio: `speakFrench/speakChinese` = reprodução + `registerAudioPlay()` (analytics); `speakXAudioOnly`/
   `playAudioPreview` = só reprodução. Preview (`card.__isPreviewCard`) nunca conta analytics nem faz autoplay.
-- Service Worker do PWA cacheia: ao testar, bloquear SW; ao publicar, a versão é atualizada pelo `pwa.js`.
+- Service Worker do PWA cacheia: ao testar, bloquear SW; ao publicar, a versão é atualizada pelo `pwa.js`. O aviso "Nova versão
+  disponível" só aparece se a versão da página for diferente da do SW novo (o deploy grava o mesmo SHA em `shared/pwa.js` e nos
+  `service-worker.js`; arquivo novo com `__BUILD_ID__` entra no `sed` do `deploy-pages.yml`). Guarda: `tests/pwa-cache/test_aviso_versao_playwright.js`.
 - Diálogo: palavras do vocabulário da unidade em COR + negrito (`.dlg-new`, `var(--seal-red-dark)`), nunca sublinhado
   (sublinhado = pontuação faltando/bloco no lugar errado). Transcrição (pinyin) também destacada (`.dlg-new-py`,
   alinhada por busca, `dlgHighlightPinyin`). zh: pinyin acima do hanzi. Idioma novo reutiliza essas classes.
