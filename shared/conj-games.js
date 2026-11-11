@@ -476,18 +476,42 @@ function createConjGames({ games, soon = [], speak, ids, isLocked, onLocked, lan
     tr.hidden = !txt.tr;
     const last = S.idx + 1 >= S.order.length;
     const fb = $('cg-feedback');
+    // Resposta no MOLDE DA TRILHA (pedido da autora, 2026-11-11; o mesmo painel das Expressões e da lição): painel verde
+    // (acerto e "quase") ou vermelho (erro), título com ✅, caixas com rótulo ("Sua resposta", "Resposta", "Por que ...?")
+    // e "Continuar" verde ou vermelho na largura toda.
     const almost = !!(typedInfo && typedInfo.verdict === 'quase');
-    // desenho letra a letra só no "quase" (acento ou uma letra); palavra trocada não ganha nada com ele
-    const attempt = almost && typeof typedAttemptHTML === 'function' ? typedAttemptHTML(typedInfo.typed, it[it.ans]) : '';
-    fb.innerHTML = almost ? `
-      <p class="cg-verdict ok">${esc(tt('games.almost'))} <span>${esc(tt('games.answerWas', { form: it[it.ans] }))}</span></p>${attempt}` : `
-      <p class="cg-verdict ${ok ? 'ok' : 'no'}">${esc(tt(ok ? 'games.right' : (revealed ? 'feedback.header.revealed' : 'games.wrong')))}${ok ? '' : ` <span>${esc(tt('games.answerWas', { form: it[it.ans] }))}</span>`}</p>${attempt}`;
-    fb.insertAdjacentHTML('beforeend', `
-      <div class="cg-why">
-        <figure class="cg-timeline${SKETCH[opt.sketch] ? '' : ' cg-rule'}">${SKETCH[opt.sketch] ? `<svg viewBox="0 0 134 44" role="img" aria-label="${esc(plain(L(opt.tl)))}">${SKETCH[opt.sketch]}</svg>` : ''}<figcaption>${rich(L(opt.tl))}</figcaption></figure>
-        <div><h3>${rich(tt('games.whyTense', { tense: '{' + opt.label + '}' }))}</h3><p>${rich(txt.why || '')}</p></div>
-      </div>
-      <button type="button" class="btn btn-primary cg-next" id="cg-next">${esc(tt(last ? 'common.seeResultArrow' : 'common.continueArrow'))}</button>`);
+    const box = (label, inner) => `<div class="wrong-feedback-why"><div class="wrong-feedback-why-label">${label}</div><div class="feedback-inner-box">${inner}</div></div>`;
+    const formHTML = v => `<span class="cg-fb-form" lang="${lang}">${esc(v)}</span>`;
+    let given = '';
+    if (typedInfo && !typedInfo.revealed && typedInfo.verdict !== 'ok'){
+      // "quase": desenho letra a letra do erro; palavra trocada: só o que ela escreveu
+      given = box(esc(tt('feedback.label.yourAnswer')), almost && typeof typedAttemptHTML === 'function' ? typedAttemptHTML(typedInfo.typed, it[it.ans]) : formHTML(typedInfo.typed));
+    } else if (!typedInfo && !ok && !revealed){
+      given = box(esc(tt('feedback.label.yourAnswer')), formHTML(it[k]));
+    }
+    const answerBox = ok && !almost ? '' : box(esc(tt('feedback.label.answer')), formHTML(it[it.ans]));
+    const whyBox = box(rich(tt('games.whyTense', { tense: '{' + opt.label + '}' })), `
+        <div class="cg-why">
+          <figure class="cg-timeline${SKETCH[opt.sketch] ? '' : ' cg-rule'}">${SKETCH[opt.sketch] ? `<svg viewBox="0 0 134 44" role="img" aria-label="${esc(plain(L(opt.tl)))}">${SKETCH[opt.sketch]}</svg>` : ''}<figcaption>${rich(L(opt.tl))}</figcaption></figure>
+          <p>${rich(txt.why || '')}</p>
+        </div>`);
+    const okHeader = almost ? tt('games.almost') : (typeof nextCorrectFeedbackPhrase === 'function' ? nextCorrectFeedbackPhrase() : tt('games.right'));
+    const btn = `<button type="button" class="btn btn-primary btn-block ${ok ? 'correct' : 'wrong'}-feedback-continue cg-next" id="cg-next">${esc(tt(last ? 'common.seeResultArrow' : 'common.continueArrow'))}</button>`;
+    fb.innerHTML = ok ? `
+      <div class="correct-feedback cg-fb">
+        <div class="feedback-card-body">
+          <div class="correct-feedback-header">✅ ${esc(okHeader)}</div>
+          ${given}${answerBox}${whyBox}
+          ${btn}
+        </div>
+      </div>` : `
+      <div class="wrong-feedback cg-fb">
+        <div class="feedback-card-body">
+          <div class="wrong-feedback-header">${esc(tt(revealed ? 'feedback.header.revealed' : 'feedback.header.notThisTime'))}</div>
+          ${given}${answerBox}${whyBox}
+          ${btn}
+        </div>
+      </div>`;
     S.shownAt = performance.now();
     $('cg-next').addEventListener('click', next);
     setTimeout(() => { const n = $('cg-next'); if (n) n.focus(); }, 0);

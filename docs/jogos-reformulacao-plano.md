@@ -24,6 +24,11 @@ lingua.com (painel de progresso, cartões com status, Premium no fim de cada gru
    o convite "⭐ Premium: mais N jogos · Fale com a Prof. Brune" (abre `premium-games-modal`). Regra 7 continua: cadeado
    só com o bloqueio ligado. Plano futuro: criar jogos para ter sempre 1 grátis em cada nível.
 6. "Assinar" de verdade só depois do paywall: pendência 12 em `docs/historico/14-pendencias-pos-paywall-e-decks.md`.
+   **Ajuste 2026-11-11 (pedido da autora)**: a resposta dos Jogos (escolha e escrita) usa o painel da trilha e das
+   Expressões (`correct-feedback` / `wrong-feedback`): ✅ e frase variada no acerto, "Não foi dessa vez" no erro, caixas
+   "Sua resposta", "Resposta" e "Por que ...?", "Continuar" verde ou vermelho na largura toda; no painel verde os rótulos
+   são verdes. "Corrigir" na largura toda também no computador. Chaves `games.wrong` e `games.answerWas` apagadas.
+   Paridade da Conjugação: o painel #cg-feedback vira só "FB:ok/no" nas duas árvores (nós movidos, não recriados).
 7. "Recomeçar o curso" zera o progresso dos jogos (como zera os Desafios).
 8. Resultado da partida mostra os erros com a opção "Revisar erros", no espírito do Banco de Revisão (formato a confirmar).
 9. Jogos de vocabulário e de preposições não entram na Conjugação; se vierem, serão em Desafios (assunto separado).

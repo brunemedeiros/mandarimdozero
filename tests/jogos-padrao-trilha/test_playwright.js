@@ -95,8 +95,8 @@ const T = { 'pt-BR': { cont: 'Continuar →', see: 'Ver resultado →', revealed
 
     // Não sei: revela, conta como erro, esconde o botão
     await page.click('#cg-dontknow');
-    await page.waitForSelector('.cg-verdict');
-    const d = await page.evaluate(() => ({ verdict: document.querySelector('.cg-verdict').textContent, cls: document.querySelector('.cg-verdict').className,
+    await page.waitForSelector('.cg-fb');
+    const d = await page.evaluate(() => ({ verdict: document.querySelector('.cg-fb .correct-feedback-header, .cg-fb .wrong-feedback-header').textContent, cls: (document.querySelector('.cg-fb.correct-feedback') ? 'ok' : 'no'),
       right: !!document.querySelector('.cg-choice.is-right'), wrong: !!document.querySelector('.cg-choice.is-wrong'),
       dkHidden: getComputedStyle(document.getElementById('cg-dontknow')).display === 'none',
       log: CONJ_GAMES_UI.state.log.map(x => x.ok), next: document.getElementById('cg-next').textContent.trim() }));

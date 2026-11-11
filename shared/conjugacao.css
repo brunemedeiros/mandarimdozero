@@ -280,8 +280,7 @@
 #view-conjugaison .cg-input:focus{ outline:none; border-color:var(--seal-red); }
 #view-conjugaison .cg-input.is-right{ border-color:var(--jade); background:color-mix(in srgb, var(--jade) 10%, var(--paper)); }
 #view-conjugaison .cg-input.is-wrong{ border-color:var(--error-red); background:color-mix(in srgb, var(--error-red) 8%, var(--paper)); }
-#view-conjugaison .cg-check{ align-self:stretch; min-height:48px; }
-@media (min-width:760px){ #view-conjugaison .cg-check{ align-self:flex-start; min-width:160px; } }
+#view-conjugaison .cg-check{ align-self:stretch; min-height:48px; } /* largura toda, como o botão da trilha */
 #view-conjugaison .cg-review-given{ display:block; font-size:13px; font-weight:700; color:var(--ink-soft); }
 #view-conjugaison .cg-review-given s{ color:var(--error-red-text, var(--error-red)); }
 /* Tela do jogo antes da partida (2026-11-08): apresentação, quanto já fez e Curta x Completa em dois cartões grandes */
@@ -339,7 +338,13 @@
 @media (prefers-reduced-motion:reduce){ #view-conjugaison .cg-choice.is-wrong{ animation:none; } }
 #view-conjugaison .cg-choice.is-dim{ opacity:.5; }
 #view-conjugaison .cg-feedback:empty{ display:none; }
-#view-conjugaison .cg-feedback{ margin-top:20px; padding-top:18px; border-top:1px solid var(--paper-line); }
+#view-conjugaison .cg-feedback{ margin-top:20px; } /* o painel da trilha (correct-feedback / wrong-feedback) vem dentro */
+#view-conjugaison .cg-fb-form{ font-size:18px; font-weight:800; color:var(--ink); }
+#view-conjugaison .cg-fb .cg-why p{ margin:0; }
+/* dentro do painel da trilha a explicação já está numa caixa: sem fundo, borda nem margem próprios */
+#view-conjugaison .cg-fb .cg-why{ background:none; border:0; padding:0; margin:0; }
+/* no painel verde (acerto e "quase") os rótulos são verdes, não o vermelho do painel de erro */
+#view-conjugaison .correct-feedback.cg-fb .wrong-feedback-why-label{ color:var(--jade); }
 #view-conjugaison .cg-verdict{ margin:0 0 14px; font-size:17px; font-weight:900; }
 #view-conjugaison .cg-verdict.ok{ color:var(--jade); }
 #view-conjugaison .cg-verdict.no{ color:var(--error-red); }

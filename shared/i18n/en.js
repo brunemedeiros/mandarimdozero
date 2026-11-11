@@ -828,8 +828,6 @@ window.I18N_CATALOG['en'] = {
   'games.play': 'Play', // ALTA
   'games.counter': 'Sentence {i} of {n}', // ALTA
   'games.right': 'Right!', // ALTA
-  'games.wrong': 'Not this time.', // ALTA
-  'games.answerWas': 'The answer is "{form}".', // ALTA
   'games.whyTense': 'Why {tense}?', // ALTA
   'games.listen': 'Listen to the sentence', // ALTA
   'games.exit': 'Leave the game', // ALTA

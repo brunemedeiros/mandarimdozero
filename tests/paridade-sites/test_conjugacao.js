@@ -62,7 +62,13 @@ async function fingerprint(browser, root){
   const grab = async (name, fn, arg) => { out[name] = await page.evaluate(fn, arg); };
   const click = (sel) => page.evaluate((s) => { const e = document.querySelector(s); if (!e) throw new Error('sem ' + s); e.click(); }, sel);
   const html = (sel) => page.evaluate((s) => { const e = document.querySelector(s); return e ? e.innerHTML : null; }, sel);
-  const view = () => html('#view-conjugaison');
+  // Resposta dos Jogos no molde da trilha (pedido da autora, 2026-11-11): o painel #cg-feedback mudou de propósito; nas
+  // duas árvores ele vira só "FB:ok" ou "FB:no" (acerto ou erro), e o resto da tela continua comparado.
+  // Os nós são MOVIDOS para fora e de volta (não recriados), para os botões não perderem a ação.
+  const fbMark = () => page.evaluate(() => { const f = document.getElementById('cg-feedback'); if (!f || !f.children.length) return null;
+    const ok = !!f.querySelector('.correct-feedback, .cg-verdict.ok'); window.__fbStash = [...f.childNodes]; f.textContent = 'FB:' + (ok ? 'ok' : 'no'); return 1; });
+  const fbBack = k => (k == null ? Promise.resolve() : page.evaluate(() => { const f = document.getElementById('cg-feedback'); f.textContent = ''; f.append(...window.__fbStash); window.__fbStash = null; }));
+  const view = () => fbMark().then(k => html('#view-conjugaison').then(v => fbBack(k).then(() => v)));
   // Lista dos Jogos refeita de propósito (etapa 2 da reformulação, 2026-11-06, docs/jogos-reformulacao-plano.md): nas cenas da
   // lista, o conteúdo de #conj-games-list fica de fora nas duas árvores (o resto da tela continua comparado); a lista nova
   // tem teste próprio em tests/jogos-progresso e tests/conjugacao.
@@ -215,7 +221,7 @@ async function fingerprint(browser, root){
     out['j_q' + i] = await html('#conj-game-content');
     await page.evaluate((i) => { const it = CONJ_GAMES_UI.state.order[CONJ_GAMES_UI.state.idx]; const k = i % 3 === 1 ? (it.ans === 'a' ? 'b' : 'a') : it.ans; document.querySelector('.cg-choice[data-k="' + k + '"]').click(); }, i);
     await page.clock.runFor(400);
-    out['j_r' + i] = await html('#conj-game-content');
+    out['j_r' + i] = await fbMark().then(k => html('#conj-game-content').then(v => fbBack(k).then(() => v))); // painel da resposta neutralizado (2026-11-11)
     await click('#cg-next');
   }
   out.j_fim = await html('#conj-game-content');

@@ -350,7 +350,7 @@ async function fill(page, wrongIdx){
       const right = await page.evaluate(() => CONJ_GAMES_UI.state.order[0].ans);
       await page.keyboard.press(right === 'a' ? '2' : '1'); // tecla escolhe (errada, de propósito)
       await page.waitForTimeout(60);
-      const f = await page.evaluate(() => ({ verdict: document.querySelector('.cg-verdict').className, fill: document.querySelector('.cg-sentence .cg-fill').textContent,
+      const f = await page.evaluate(() => ({ verdict: (document.querySelector('.cg-fb.correct-feedback') ? 'ok' : 'no'), fill: document.querySelector('.cg-sentence .cg-fill').textContent,
         clue: !!document.querySelector('.cg-sentence .cg-clue'), why: document.querySelector('.cg-why p').textContent.length, tr: document.querySelector('.cg-panel .cg-tr').textContent,
         right: document.querySelector('.cg-choice.is-right').dataset.k, wrong: !!document.querySelector('.cg-choice.is-wrong'), svg: !!document.querySelector('.cg-timeline svg'),
         nextFocus: document.activeElement && document.activeElement.id }));
@@ -415,7 +415,7 @@ async function fill(page, wrongIdx){
       const verb = await page.evaluate(() => (document.querySelector('.cg-verb') || {}).textContent || '');
       await page.keyboard.press(it.ans === 'a' ? '1' : '2');
       await page.waitForTimeout(60);
-      const f = await page.evaluate(() => ({ verdict: document.querySelector('.cg-verdict').className, svg: !!document.querySelector('.cg-timeline svg'),
+      const f = await page.evaluate(() => ({ verdict: (document.querySelector('.cg-fb.correct-feedback') ? 'ok' : 'no'), svg: !!document.querySelector('.cg-timeline svg'),
         rule: (document.querySelector('.cg-timeline.cg-rule figcaption') || {}).textContent || '', clue: !!document.querySelector('.cg-sentence .cg-clue'),
         // 🔊 colado na frase e tradução logo abaixo dela, dentro do painel (2026-10-20)
         audioNear: !!document.querySelector('.cg-panel .cg-sentence-row .cg-listen') && !document.querySelector('.cg-feedback .cg-listen')

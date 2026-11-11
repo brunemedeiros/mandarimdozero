@@ -847,8 +847,6 @@ window.I18N_CATALOG['pt-BR'] = {
   'games.play': 'Jogar',
   'games.counter': 'Frase {i} de {n}',
   'games.right': 'Isso!',
-  'games.wrong': 'Não foi dessa vez.',
-  'games.answerWas': 'A resposta é "{form}".',
   'games.whyTense': 'Por que {tense}?',
   'games.listen': 'Ouvir a frase',
   'games.exit': 'Sair do jogo',
