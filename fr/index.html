@@ -3517,7 +3517,8 @@ body.lesson-focus .acq-phase-banner{ margin-bottom:10px; padding:4px 12px; }
    Prévia aprovada pela autora. Botões no rodapé à direita; principal na cor da marca, secundário em contorno. */
 /* Janela */
 .app-modal.painel.janela-painel{ background:var(--p-elevado); color:var(--p-tinta); border:1px solid var(--p-linha); border-radius:var(--p-raio); box-shadow:var(--p-sombra), 0 16px 48px color-mix(in srgb, var(--p-tinta) 18%, transparent); font-family:var(--font-body); }
-.janela-painel.painel .app-modal-header{ background:transparent; border-bottom:1px solid var(--p-linha); padding:1rem 1.25rem; }
+/* O cabeçalho é sticky (.app-modal-header): com fundo transparente, os campos passavam por baixo do título ao rolar (2026-11-11). */
+.janela-painel.painel .app-modal-header{ background:var(--p-elevado); border-bottom:1px solid var(--p-linha); padding:1rem 1.25rem; }
 .janela-painel.painel .app-modal-header h3{ margin:0; font-size:1.1rem; font-weight:800; color:var(--p-tinta); }
 .janela-painel.painel .app-modal-body{ padding:1.1rem 1.25rem 1.25rem; font-size:.95rem; line-height:1.55; color:var(--p-tinta); }
 .janela-painel.painel .app-modal-body p{ margin:0 0 .75rem; }
