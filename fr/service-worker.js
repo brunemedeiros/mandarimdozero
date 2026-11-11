@@ -10,8 +10,11 @@
 // alguém lembrar de bumpar um número (ver Fase 4 da tarefa PWA/mobile).
 // Localmente (sem passar pelo Actions) o placeholder fica intacto -- ainda
 // funciona, só não muda de versão entre testes locais.
+// O fr e o zh moram no MESMO endereço (app.profbrune.com.br/fr e /zh) e por isso dividem a mesma lista de caches do
+// navegador: cada um só mexe nos caches com o próprio prefixo (antes, publicar o fr apagava o cache do zh e vice-versa).
 const BUILD_ID = '__BUILD_ID__';
-const CACHE_NAME = 'frances-avec-prof-brune-' + BUILD_ID;
+const CACHE_PREFIX = 'frances-avec-prof-brune-';
+const CACHE_NAME = CACHE_PREFIX + BUILD_ID;
 const PRECACHE_URLS = [
   './',
   './index.html',
@@ -34,17 +37,31 @@ const PRECACHE_URLS = [
 ];
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(
+  event.waitUntil((async () => {
+    const cache = await caches.open(CACHE_NAME);
     // Pré-cache também revalidando (no-cache): sem isso, um arquivo ainda no cache HTTP (max-age do servidor) podia
     // entrar no cache da versão nova com o conteúdo da anterior.
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE_URLS.map((u) => new Request(u, { cache: 'no-cache' })))).then(() => self.skipWaiting())
-  );
+    await cache.addAll(PRECACHE_URLS.map((u) => new Request(u, { cache: 'no-cache' })));
+    // Sem internet logo depois de uma publicação (2026-11-11, tests/pwa-cache): a lista acima tem só ~18 arquivos; os
+    // outros (~200: shared/*.js, CSS, fontes, ícones) só entravam no cache novo na próxima abertura COM internet. Como o
+    // 'activate' apaga o cache antigo, quem abria o app sem internet nesse intervalo recebia a página no lugar dos
+    // scripts e o app não abria. Agora a versão nova busca de novo (no-cache: o que não mudou volta 304, sem corpo)
+    // tudo o que a versão anterior tinha guardado. Arquivo que falhar (sumiu do site, rede caiu) é pulado: não
+    // impede a instalação.
+    const antigos = (await caches.keys()).filter((n) => n.startsWith(CACHE_PREFIX) && n !== CACHE_NAME);
+    const urls = new Set();
+    for (const n of antigos) for (const req of await (await caches.open(n)).keys()) urls.add(req.url);
+    const jaTem = new Set((await cache.keys()).map((req) => req.url));
+    await Promise.all([...urls].filter((u) => !jaTem.has(u)).map((u) =>
+      fetch(u, { cache: 'no-cache' }).then((res) => (res.ok ? cache.put(u, res) : null)).catch(() => null)));
+    await self.skipWaiting();
+  })());
 });
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((names) =>
-      Promise.all(names.filter((n) => n !== CACHE_NAME).map((n) => caches.delete(n)))
+      Promise.all(names.filter((n) => n.startsWith(CACHE_PREFIX) && n !== CACHE_NAME).map((n) => caches.delete(n)))
     ).then(() => self.clients.claim())
   );
 });
@@ -77,11 +94,25 @@ self.addEventListener('fetch', (event) => {
       .then((response) => {
         const copy = response.clone();
         caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
-        return response;
+        return paraAPagina(response);
       })
       .catch(() => caches.match(event.request).then((cached) => cached || caches.match('./index.html')))
   );
 });
+
+// Recarregar a página (puxar para baixo, F5) logo depois de uma publicação (2026-11-11, tests/pwa-cache): o Chromium
+// guarda na memória da aba os scripts e CSS já carregados e, se o servidor disse que valem por 10 minutos (max-age=600
+// do GitHub Pages), reaproveita esses arquivos SEM passar por aqui. Resultado: index.html novo com content.js e
+// shared/*.js antigos (versões misturadas) até o aviso "Atualizar" aparecer. A página recebe então uma cópia com
+// Cache-Control: no-cache, que obriga o navegador a passar por este service worker de novo ao recarregar. Não custa
+// internet: a busca acima continua respondida com 304 quando nada mudou. Só para respostas 200 (o áudio em pedaços, 206,
+// e erros passam como vieram).
+function paraAPagina(response){
+  if (response.status !== 200 || response.type !== 'basic') return response;
+  const headers = new Headers(response.headers);
+  headers.set('Cache-Control', 'no-cache');
+  return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
+}
 
 // ---------- Push (Fase 3 do sistema de notificações) ----------
 // A mensagem chega criptografada e o navegador já entrega decifrada aqui
