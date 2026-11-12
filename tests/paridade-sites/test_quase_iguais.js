@@ -42,9 +42,9 @@ const ETAPA6 = (v) => etapa7(PROGRESSO_ORDEM(FAIXA_CONVIDADO(v))).split('Ver o q
   // syncReviewPrevRow cria a linha logo depois de #review-content em toda sessão da Revisão, VAZIA e escondida fora da sessão
   // da professora. Só a linha vazia e hidden sai; com o botão dentro a cena continua diferente.
   .replace(/<div id=\\?"review-prev-row\\?" class=\\?"review-prev-row\\?" hidden=\\?"\\?"><\/div>/g, '')
-  // Aviso "esta lição ainda não está no idioma do site" com classe própria (2026-11-11, defeito 2 da varredura de testes): o modo
-  // foco escondia o aviso junto com o objetivo da unidade. A árvore antiga passa a ter o mesmo HTML; o resto da cena continua comparado.
-  .replace(/<p class=(\\*)"lesson-unit-goal\1" id=\1"ud-lang-notice\1"( hidden=\1"\1")? style=\1"font-style:\s*italic;\s*opacity:\s*\.8\1">/g, (m, e, h) => '<p class=' + e + '"lesson-lang-notice' + e + '" id=' + e + '"ud-lang-notice' + e + '"' + (h || '') + '>')
+  // Aviso "esta lição ainda não está no idioma do site" saiu (2026-11-11, decisão da dona): unidade sem tradução nem aparece nem
+  // abre. O elemento sai da árvore antiga; o resto da cena continua comparado.
+  .replace(/(?:\\n|\n)\s*<p class=(\\*)"lesson-unit-goal\1" id=\1"ud-lang-notice\1"(?: hidden=\1"\1")? style=\1"font-style:\s*italic;\s*opacity:\s*\.8\1">[^<]*<\/p>/g, '')
   // Palavra dona do progresso no save (2026-11-11, defeito 1 da varredura; ver também quase-iguais-harness.js): só a árvore nova tem.
   .replace(/,(\\*)"variantWord\1":\1"[^"\\]*\1"/g, '');
 // Faixa do modo convidado (conserto de 2026-11-10, pedido da dona): a frase ganhou um <span class="guest-warning-text"> em volta,

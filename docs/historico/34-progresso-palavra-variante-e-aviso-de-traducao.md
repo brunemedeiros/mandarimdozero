@@ -1,4 +1,4 @@
-# 34. Progresso das palavras que trocam pelo idioma do site e aviso de lição sem tradução (2026-11-11)
+# 34. Progresso das palavras que trocam pelo idioma do site e lição sem tradução escondida (2026-11-11)
 
 Defeitos 1 e 2 da varredura de testes de 2026-11-05 (nenhum teste da `tests/` falhava por ambiente depois de
 `tests/banco-local.sh`; 21 falhavam de verdade). Consertos autorizados pela dona em 2026-11-11. Valem para fr e zh (código em
@@ -25,19 +25,30 @@ palavra). Save antigo sem o campo funciona como antes. Cartões que nunca trocar
 Produção conferida antes (2026-11-11, só leitura): das 47 contas com progresso, 2 tinham gaveta, ambas com 0 revisões. Ninguém
 perdeu progresso.
 
-## Defeito 2: aviso "This lesson isn't available in English yet" nunca aparecia
+## Defeito 2: lição sem tradução (virou regra nova)
 
-O aviso (`#ud-lang-notice`) usava a classe `lesson-unit-goal`, que o modo foco esconde (`body.lesson-focus .lesson-unit-goal`),
-e a lição sempre abre em modo foco. Ganhou a classe própria `lesson-lang-notice` (mesmo visual: itálico, cor `--ink-soft`) nos dois
-`index.html`. Conferido em fr e zh, claro e escuro, 390 px.
+O aviso "This lesson isn't available in English yet" (`#ud-lang-notice`) usava a classe `lesson-unit-goal`, que o modo foco esconde,
+então nunca aparecia. O primeiro conserto (classe própria) mostrava o aviso e abria a lição em português. A dona achou errado
+(2026-11-11): **lição sem tradução não deve aparecer nem poder ser aberta**; as unidades seguintes continuam normais.
+
+Regra nova, num ponto só (`shared/core/licao-base.js`): `isUnitAvailable(u)` (= `CONTENT_I18N.isUnitTranslated`) e
+`availableUnits(lista)`. `trailGroups()` passa a usar só as unidades disponíveis, então a liberação, o "Continuar" e a próxima lição
+pulam a escondida sozinhos. Também filtram: trilha em lista e Mapa (fr por módulos, zh por unidades e por módulos), busca do zh,
+selo de nível concluído, módulos (`moduleVisibleUnitIds`: liberação, porcentagem, módulo concluído, prova do Ponto de verificação e
+telas finais do módulo e do Teste de Nível; módulo sem nenhuma unidade disponível some). `openUnitDetail` não abre a unidade
+escondida (volta para a trilha), inclusive por link antigo. O aviso, o CSS e o código dele saíram dos dois sites; as frases
+`content.untranslatedNotice` ficaram no catálogo, sem uso.
+
+O progresso da unidade escondida continua no save (ela segue em `UNITS`); hoje nenhuma unidade está sem tradução (fr 30/30, zh 18/18
+em inglês), então nada muda para os alunos agora: a regra vale para conteúdo futuro.
 
 ## Testes
 
 - `tests/i18n/test_card_variants_browser.js` 24/24, com 8 verificações novas (troca depois do carregamento; carregar com 美 e o
   site em português; só os cartões que trocam gravam a palavra). Sem o conserto, as 8 falham.
-- `tests/i18n/test_content_en.js` 30/30; `tests/k2c/test_study_native_unit.js` 88/88 (lista do save com `variantWord`; e a
+- `tests/i18n/test_content_en.js` 32/32 e `test_content_zh_en.js` 18/18 (regra nova: não aparece na lista, no Mapa nem na busca, não abre, a seguinte libera); `tests/k2c/test_study_native_unit.js` 88/88 (lista do save com `variantWord`; e a
   regex do `serializeCardsForSave`, que estava velha desde o A2).
-- Paridade "antes x depois": a classe do aviso e o `variantWord` entraram nas neutralizações de `test_quase_iguais.js`,
+- Paridade "antes x depois": o aviso que saiu e o `variantWord` entraram nas neutralizações de `test_quase_iguais.js`,
   `quase-iguais-harness.js` e `test_atalhos.js` (com data e motivo). Com isso o resultado fica igual ao da `main` (fr 995/1000 e
   368/373, zh 999/1004 e 358/363; as 20 diferenças que sobram já estavam na `main`, de outras sessões). `test_atalhos` 92/92,
   `test_voz` 34/34, `test_correcoes_5d` 4/4, `test_m2_voz_cancelar` 16/16, `test_css_compartilhado` 5/5.

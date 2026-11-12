@@ -40,6 +40,7 @@ const APP_FUNCTIONS = [
   'deckReviewSummary', 'deckCountsForReview', 'reviewFilterQueue',
   'sessionIntensityToLimit',
   'trailGroups', 'unitsOfLevel', // Etapa 0b: applySerializedState (fr) abre a unidade nova (04, 2.10)
+  'isUnitAvailable', 'availableUnits', // 2026-11-11: trailGroups só com as unidades traduzidas para o idioma do site
   // C1 da paridade: mudanças de currículo no carregar/salvar, em shared/core/curriculo-progresso.js (fr e zh)
   'curriculumSaveFields', 'curriculumLoadPrepare', 'curriculumLoadReconcileUnits', 'curriculumLoadStampReleased',
   // Paridade B2: salvar/carregar o progresso de módulos (shared/core/modulos-niveis.js; o zh chama, o fr grava direto)

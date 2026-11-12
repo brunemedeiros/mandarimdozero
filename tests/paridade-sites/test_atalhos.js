@@ -21,8 +21,8 @@ async function rodar(browser, root, site){
     .split('Ver o que você aprendeu →').join('Continuar →')
     /* Etapa 6: XP só com ⭐ (o ⚡ ficou só no Combo); a troca vale para as duas árvores, então só iguala o ícone */
     .split('fluent/26a1.svg&quot;);">⚡').join('fluent/2b50.svg&quot;);">⭐').replace(/style="([^"]*)"/g, (m, c) => 'style="' + c.replace(/:\s+/g, ':') + '"')
-    /* Aviso de lição sem tradução com classe própria (2026-11-11): o modo foco escondia o aviso junto com o objetivo da unidade */
-    .replace(/<p class="lesson-unit-goal" id="ud-lang-notice"( hidden="")? style="font-style:italic;opacity:\.8">/g, '<p class="lesson-lang-notice" id="ud-lang-notice"$1>'),
+    /* Aviso de lição sem tradução saiu (2026-11-11, decisão da dona): unidade sem tradução nem aparece nem abre. Sai da árvore antiga. */
+    .replace(/\n\s*<p class="lesson-unit-goal" id="ud-lang-notice"( hidden="")? style="font-style:italic;opacity:\.8">[^<]*<\/p>/g, ''),
     // Etapa 6: janela da sequência aberta nesta cena (os avisos "+N XP" somem quando ela abre; ver a comparação abaixo)
     await page.evaluate(() => { const o = document.getElementById('streak-modal-overlay'); return !!o && getComputedStyle(o).display !== 'none'; })]);
   const tecla = async (k) => { await page.keyboard.press(k); await page.clock.runFor(1200); await foto('tecla ' + k); };

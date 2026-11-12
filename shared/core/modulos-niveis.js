@@ -169,16 +169,24 @@ function wireLevelSelector(){
 function modulesOfLevel(level){
   return trailModules().filter(m => m.level === level);
 }
+// Unidades do módulo que o aluno vê (sem as que faltam traduzir para o idioma do site; isUnitAvailable em licao-base.js).
+function moduleVisibleUnitIds(module){
+  return module.unitIds.filter(id => isUnitAvailable(id));
+}
 function moduleUnlocked(module){
-  return !!STATE.unitProgress[module.unitIds[0]]?.unlocked;
+  const ids = moduleVisibleUnitIds(module);
+  return !!(ids.length && STATE.unitProgress[ids[0]]?.unlocked);
 }
 
 function moduleProgressPct(module){
-  const sum = module.unitIds.reduce((acc, id) => acc + unitProgressFraction(UNITS.find(u => u.id === id)), 0);
-  return Math.round((sum / module.unitIds.length) * 100);
+  const ids = moduleVisibleUnitIds(module);
+  if (!ids.length) return 0;
+  const sum = ids.reduce((acc, id) => acc + unitProgressFraction(UNITS.find(u => u.id === id)), 0);
+  return Math.round((sum / ids.length) * 100);
 }
 function moduleCompleted(module){
-  return module.unitIds.every(id => STATE.unitProgress[id]?.completed);
+  const ids = moduleVisibleUnitIds(module);
+  return ids.length > 0 && ids.every(id => STATE.unitProgress[id]?.completed);
 }
 function levelCompleted(levelId){
   const mods = modulesOfLevel(levelId);
@@ -231,7 +239,7 @@ function renderModulesTrailMap(container, levelModules, opts){
   opts = opts || {};
   const sections = levelModules.map((module, mIdx) => {
     const nodes = [];
-    module.unitIds.forEach(id => {
+    moduleVisibleUnitIds(module).forEach(id => {
       const u = UNITS.find(x => x.id === id);
       const st = unitBlockState(u);
       nodes.push({ key: 'u:' + id, kind: 'unit', icon: UNIT_ICONS[id] || '📖', label: u.title, state: st, current: st === 'current',
@@ -359,7 +367,7 @@ function renderModuleTrailList(grid, levelModules, opts){
 
     const list = document.createElement('div');
     list.className = 'module-units-list' + (unlocked ? '' : ' locked');
-    module.unitIds.forEach(id => {
+    moduleVisibleUnitIds(module).forEach(id => {
       const u = UNITS.find(x => x.id === id);
       list.appendChild(buildUnitBlock(u));
       if (opts.afterUnit) opts.afterUnit(u, list);
@@ -558,7 +566,7 @@ function buildCheckpointQueue(module){
   // Fase 6: palavra + frase + escuta + gramática (shared/checkpoint-exam.js, puro).
   // O site diz as chaves do enunciado (LANG_HOOKS.checkpointExam.keys, obrigatório com módulos) e, se a escrita não é a
   // do campo `f` (zh), como virar palavra/frase em item da prova (checkpointExam.word/phrase; o fr não declara: usa `f`).
-  const moduleUnits = module.unitIds.map(id => UNITS.find(u => u.id === id));
+  const moduleUnits = moduleVisibleUnitIds(module).map(id => UNITS.find(u => u.id === id));
   const exam = (typeof LANG_HOOKS !== 'undefined' && LANG_HOOKS.checkpointExam) || null;
   const opts = { shuffle, canSpeak: LANG_HOOKS.canSpeak };
   if (exam) Object.assign(opts, { item: (exam.word || exam.phrase) ? exam : null, keys: exam.keys });
@@ -697,7 +705,7 @@ function renderCheckpointQuizStep(){
     CHECKPOINT_STATE.lastPct = pct;
     recordCheckpointAttempt(module, pct);
     const passed = pct >= CHECKPOINT_PASS_THRESHOLD;
-    const moduleUnits = module.unitIds.map(id => UNITS.find(u => u.id === id));
+    const moduleUnits = moduleVisibleUnitIds(module).map(id => UNITS.find(u => u.id === id));
     renderModuleCompleteScreen(contentEl, nextBtn, {
       passed,
       title: t('fr.checkpoint.moduleDone'),
@@ -807,7 +815,7 @@ function renderLevelTestQuizStep(){
     recordLevelTestAttempt(test, pct);
     const passed = pct >= LEVEL_TEST_PASS_THRESHOLD;
     const levelUnits = modulesOfLevel(test.level)
-      .flatMap(m => m.unitIds)
+      .flatMap(m => moduleVisibleUnitIds(m))
       .map(id => UNITS.find(u => u.id === id));
     renderModuleCompleteScreen(contentEl, nextBtn, {
       passed,
