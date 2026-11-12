@@ -280,6 +280,11 @@ function tocarFalas(d, idxs, aCada, noFim){
 function pararFalas(){ fila++; try{ speechSynthesis.cancel(); }catch(e){} }
 const PLAY='<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 5v14l12-7z"/></svg>';
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+// Tipografia francesa: o espaço antes de ? ! : ; não quebra a linha (o "?" nunca cai sozinho embaixo). Só no texto visível:
+// os atributos (data-o, comparados com a resposta) ficam como estão. Um lugar só, para todo texto que entra na página.
+const SEM_QUEBRA=/ ([?!:;])/g;
+const semQuebraAntesDaPontuacao=raiz=>{ const w=document.createTreeWalker(raiz,NodeFilter.SHOW_TEXT); for(let n=w.nextNode();n;n=w.nextNode()) if(SEM_QUEBRA.test(n.data)){ SEM_QUEBRA.lastIndex=0; n.data=n.data.replace(SEM_QUEBRA,'\u00a0$1'); } };
+new MutationObserver(ms=>ms.forEach(m=>m.addedNodes.forEach(n=>{ if(n.nodeType===1) semQuebraAntesDaPontuacao(n); else if(n.nodeType===3&&SEM_QUEBRA.test(n.data)){ SEM_QUEBRA.lastIndex=0; n.data=n.data.replace(SEM_QUEBRA,'\u00a0$1'); } }))).observe(document.documentElement,{childList:true,subtree:true});
 const SPK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M16.5 8.5a5 5 0 0 1 0 7"/><path d="M19 6a8.5 8.5 0 0 1 0 12"/></svg>';
 // Sinal de erro sem marca que fica: a caixinha treme (borda vermelha só durante o tremor) e volta ao normal.
 const tremer=b=>{ b.classList.remove('treme'); void b.offsetWidth; b.classList.add('treme'); b.addEventListener('animationend',()=>b.classList.remove('treme'),{once:true}); };
