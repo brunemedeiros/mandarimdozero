@@ -8,7 +8,9 @@ for (const [lang, file] of [['pt-BR', 'shared/i18n/pt-BR.js'], ['en', 'shared/i1
   const get = (k) => (src.match(new RegExp("'" + k.replace(/\./g, '\\.') + "':\\s*'([^']*)'")) || [])[1];
   check(get('toast.xpGain').replace('{amount}', '7') === '+7 XP', lang + ' toast.xpGain');
   check(get('toast.pointsGain').replace('{n}', '3') === '+3 pts', lang + ' toast.pointsGain');
-  check(!/\.one'|\.other'/.test(get('review.match.attempts') || '') && /\{n\}/.test(get('review.match.attempts')), lang + ' review.match.attempts é texto simples com {n}');
+  // Etapa 4 (2026-10-19, "plural de verdade"): virou { one, other }, as duas formas com {n}; o código usa tp().
+  const att = (src.match(/'review\.match\.attempts':\s*\{\s*one:\s*'([^']*)',\s*other:\s*'([^']*)'\s*\}/) || []).slice(1);
+  check(att.length === 2 && att.every(x => /\{n\}/.test(x)), lang + ' review.match.attempts tem singular e plural com {n}');
 }
 const core = fs.readFileSync(path.join(root, 'shared/core/quase-iguais-textos.js'), 'utf8');
 for (const [l, expect] of [['fr', ["i.f", "''"]], ['zh', ['i.c', 'lesson-recap-pinyin']]]) {

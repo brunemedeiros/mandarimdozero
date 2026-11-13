@@ -45,6 +45,14 @@ const ETAPA6 = (v) => etapa7(PROGRESSO_ORDEM(FAIXA_CONVIDADO(v))).split('Ver o q
   // Aviso "esta lição ainda não está no idioma do site" saiu (2026-11-11, decisão da dona): unidade sem tradução nem aparece nem
   // abre. O elemento sai da árvore antiga; o resto da cena continua comparado.
   .replace(/(?:\\n|\n)\s*<p class=(\\*)"lesson-unit-goal\1" id=\1"ud-lang-notice\1"(?: hidden=\1"\1")? style=\1"font-style:\s*italic;\s*opacity:\s*\.8\1">[^<]*<\/p>/g, '')
+  // Etapa D, lote 3 (2026-11-08, aprovada pela dona; docs/telas-exercicio-etapa-d-proposta.md, commit 64605f1c): a sessão da Revisão
+  // trocou a moldura "← Voltar aos modos" + ⚑ pela barra do topo (progresso, ⚑, ⌨️, ✕). Só a moldura vira um marcador nos dois lados;
+  // o cartão e o resto da cena continuam comparados.
+  .replace(/ data-review-mode=(\\*)"[a-z]+\1"/g, '')
+  .replace(/<div class=(\\*)"activity-focus-bar\1"><button data-i18n=\1"review\.backToModes\1"[\s\S]*?<\/button><\/div>/g, 'MOLDURA_REVISAO')
+  .replace(/<div class=(\\*)"lesson-focus-bar activity-lesson-bar\1">[\s\S]*?id=\1"review-back-to-modes\1"[^>]*display:none;[^>]*>[^<]*<\/button>/g, 'MOLDURA_REVISAO')
+  .replace(/MOLDURA_REVISAO(?:\\n|\n)\s*/g, 'MOLDURA_REVISAO')
+  .replace(/(review-session-wrap(\\*)" style=\2"display:block;\2">)(?:\\n|\n)\s*MOLDURA/g, '$1MOLDURA')
   // Palavra dona do progresso no save (2026-11-11, defeito 1 da varredura; ver também quase-iguais-harness.js): só a árvore nova tem.
   .replace(/,(\\*)"variantWord\1":\1"[^"\\]*\1"/g, '');
 // Faixa do modo convidado (conserto de 2026-11-10, pedido da dona): a frase ganhou um <span class="guest-warning-text"> em volta,

@@ -435,7 +435,8 @@ async function processUserLanguage(
     if (await maybeNotify(supabase, rules, prefsCache, emailCache, userId, languageAppKey, 'review_overdue', 'revisao', { dueCount }, 'review')) created++;
   }
 
-  if (accountEvents && (acct.streak || 0) > 0 && acct.lastStudyDay !== today) {
+  // Sequência em risco só na véspera (estudou ontem, ainda não hoje). Etapa 2, 2026-10-19 (v30).
+  if (accountEvents && (acct.streak || 0) > 0 && daysSince(acct.lastStudyDay) === 1) {
     if (await maybeNotify(supabase, rules, prefsCache, emailCache, userId, languageAppKey, 'streak_at_risk', 'streak', { days: acct.streak }, 'path')) created++;
   }
 

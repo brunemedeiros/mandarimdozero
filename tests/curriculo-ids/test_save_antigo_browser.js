@@ -101,7 +101,7 @@ const login = async (page) => page.evaluate(async () => { CURRENT_USER = { id: '
     check(`${lang}: save novo grava _curriculumVersion = 1`, r2.s._curriculumVersion === 1, r2.s._curriculumVersion);
     const startedId = Object.keys(oldBlock.unitProgress).find(k => oldBlock.unitProgress[k].started && !oldBlock.unitProgress[k].completed);
     check(`${lang}: save novo grava o lessonId da unidade começada (lessonIdx igual)`, typeof r2.s.unitProgress[startedId].lessonId === 'string' && r2.s.unitProgress[startedId].lessonIdx === 1, r2.s.unitProgress[startedId]);
-    const otherDiff = Object.keys(oldBlock).filter(k => !['cards', 'hanziCards', 'unitProgress', 'progressSummary', 'periodXp'].includes(k) && JSON.stringify(oldBlock[k]) !== JSON.stringify(r2.s[k]));
+    const otherDiff = Object.keys(oldBlock).filter(k => !['cards', 'hanziCards', 'unitProgress', 'progressSummary', 'periodXp', 'bestStreak' /* recorde de dias seguidos (PR #418): saveState grava, serializeState não */].includes(k) && JSON.stringify(oldBlock[k]) !== JSON.stringify(r2.s[k]));
     if (oldBlock.hanziCards){
       // hanzi (zh): só a marca fsrsMigrated pode entrar no carregamento (migrateCardToFSRS, comportamento de antes)
       const strip = arr => JSON.stringify((arr || []).map(c => { const o = Object.assign({}, c); delete o.fsrsMigrated; return o; }));

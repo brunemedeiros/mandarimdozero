@@ -35,6 +35,7 @@ function extractFunction(src, name){
 
 const APP_FUNCTIONS = [
   'buildCardsFromUnits', 'flashcardIdForRow', 'lessonIndexForVocabIdx', 'isCardLessonCompleted', 'findMatchingPhrase',
+  'isClassReviewCard', 'isActiveClassReviewCard', 'effectiveReviewOriginFilter', // 2026-10-14: cartões da professora fora da Revisão geral
   'matchesReviewOriginFilter', 'activeReviewTagFilter', 'matchesReviewTagFilter', 'eligibleReviewPool', 'eligibleDeckReviewPool', 'applySerializedState',
   'ensureCourseDecksLoaded', 'ensureDecksLoadedForReview',
   'deckReviewSummary', 'deckCountsForReview', 'reviewFilterQueue',
@@ -74,6 +75,7 @@ function loadLang(lang, overrides){
   });
   run('this.STATE = { cards: [], hanziCards: [], decks: [], courseDecksLoaded: false, unitProgress: {}, studySettings: { newCardsPerDay: 20, sessionIntensity: "normal", reviewOriginFilter: "all" } };', 'state');
   run('this.CURRENT_USER = null;', 'user');
+  run('var CLASS_ACTIVE_TEACHER_ID;', 'class'); // aba Aluno > Revisão só com a professora ativa (indefinido = não esconde)
   if (overrides) Object.assign(ctx, overrides);
   return ctx;
 }

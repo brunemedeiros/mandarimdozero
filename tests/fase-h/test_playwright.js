@@ -280,7 +280,7 @@ async function bootPage(browser, lang, port){
     });
     await page.waitForSelector('#teacher-decks-section', { timeout: 8000 });
     const sec = await ev(() => document.getElementById('teacher-decks-section').innerText);
-    L('H5/H10 aluno vê a árvore com contagens New/Aprendendo/Revisar', /novos/.test(sec) && /aprendendo/.test(sec) && /para revisar/.test(sec) && sec.includes('Cartões da professora'), sec);
+    L('H5/H10 aluno vê a árvore com contagens New/Aprendendo/Revisar', /novos/i.test(sec) && /aprendendo/i.test(sec) && /em revisão/i.test(sec) && /para hoje/i.test(sec) && sec.includes('Cartões da professora'), sec); // Etapas 4 e 7
     L('H5 aluno: seção só leitura (sem select/input/textarea; só botões "Estudar")', await ev(() => { const s = document.getElementById('teacher-decks-section'); return s.querySelectorAll('select,input,textarea').length === 0 && s.querySelectorAll('button').length === s.querySelectorAll('[data-study-deck]').length; }));
     L('H5 aluno: seção separada de Meus Decks e Course', await ev(() => { const s = document.getElementById('teacher-decks-section'); return !s.querySelector('[data-deck-new],#my-deck-name') && !s.textContent.includes('Meus Decks'); }));
     L('H5 aluno não vê Decks de outro aluno nem de outro idioma', await ev(a => document.querySelectorAll('#teacher-decks-section [data-study-deck]').length === window.__DB.decks.filter(d => d.owner_id === 'S1' && d.language_app_key === a && ['teacher_root','teacher'].includes(d.kind)).length, appKey));
