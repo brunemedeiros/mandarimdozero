@@ -92,6 +92,14 @@ async function suite(browser, lang, port){
   check(L + ' Normal revelado: números 1 a 4 nos botões', JSON.stringify(badges) === '["1","2","3","4"]', badges);
   check(L + ' Normal revelado: número visível (mouse e teclado)', await page.evaluate(() => getComputedStyle(document.querySelector('.grade-btn .kbd-hint')).display !== 'none'));
   const gl = await page.evaluate(() => [...document.querySelectorAll('.grade-btn')].map(b => { const r = b.getBoundingClientRect(), k = b.querySelector('.kbd-hint').getBoundingClientRect(); return { dentro: k.left >= r.left && k.right <= r.right, esquerda: k.left - r.left < 16, meio: Math.abs((k.top + k.bottom) / 2 - (r.top + r.bottom) / 2) < 2, posicao: getComputedStyle(b.querySelector('.kbd-hint')).position }; }));
+  const cen = await page.evaluate(() => [...document.querySelectorAll('.grade-btn')].map(b => { const r = b.getBoundingClientRect(), t = document.createRange(); t.selectNodeContents(b.childNodes[0]); const tr = t.getBoundingClientRect(); return Math.abs((tr.left + tr.right) / 2 - (r.left + r.right) / 2); }));
+  // O número tem que ser legível nos dois temas: o texto dos botões muda de cor entre temas e sites, o quadrado não.
+  for (const tema of ['light', 'dark']){
+    const cc = await page.evaluate((tm) => { document.documentElement.setAttribute('data-theme', tm); const k = document.querySelector('.grade-btn .kbd-hint'), cs = getComputedStyle(k); const lum = (c) => { const v = c.match(/\d+/g).slice(0, 3).map(n => { n /= 255; return n <= 0.03928 ? n / 12.92 : Math.pow((n + 0.055) / 1.055, 2.4); }); return 0.2126 * v[0] + 0.7152 * v[1] + 0.0722 * v[2]; }; const a = lum(cs.backgroundColor), b = lum(cs.color); return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05); }, tema);
+    check(L + ' número legível no tema ' + tema + ' (contraste >= 7)', cc >= 7, cc);
+  }
+  await page.evaluate(() => document.documentElement.removeAttribute('data-theme'));
+  check(L + ' Normal revelado: texto centralizado no botão inteiro (versão A)', cen.length === 4 && cen.every(d => d < 1), cen);
   check(L + ' Normal revelado: quadrado do número à esquerda, dentro do botão, no meio da altura', gl.length === 4 && gl.every(g => g.dentro && g.esquerda && g.meio && g.posicao === 'absolute'), gl);
   await press(page, '3');
   check(L + ' Normal: número nos primeiros 300 ms depois de revelar é ignorado', (await grades(page)).length === 0);
@@ -130,6 +138,8 @@ async function suite(browser, lang, port){
   await page.keyboard.press('Enter'); await wait(SH);
   check(L + ' Digitar certo: só Bom e Fácil', await page.evaluate(() => [...document.querySelectorAll('.typed-grade .grade-btn')].map(b => b.dataset.grade).join() === '2,3'));
   const tb = await page.evaluate(() => [...document.querySelectorAll('.typed-grade .grade-btn .kbd-hint')].map(b => b.textContent));
+  const cen2 = await page.evaluate(() => [...document.querySelectorAll('.typed-grade .grade-btn')].map(b => { const r = b.getBoundingClientRect(), t = document.createRange(); t.selectNodeContents(b.childNodes[0]); const tr = t.getBoundingClientRect(); return Math.abs((tr.left + tr.right) / 2 - (r.left + r.right) / 2); }));
+  check(L + ' Digitar certo: texto centralizado no botão inteiro', cen2.length === 2 && cen2.every(d => d < 1), cen2);
   check(L + ' Digitar certo: números 1 e 2 (pela posição)', JSON.stringify(tb) === '["1","2"]', tb);
   await press(page, '3'); await press(page, '4');
   check(L + ' Digitar certo: 3 e 4 não fazem nada', (await grades(page)).length === 0);
@@ -159,6 +169,13 @@ async function suite(browser, lang, port){
   await wait(SH);
   await press(page, 'Enter');
   check(L + ' Múltipla escolha: Enter continua (nota Errei ou Bom)', (await grades(page)).length === 1 && [0, 2].includes((await grades(page))[0]), await grades(page));
+
+  // Janela estreita COM mouse (390 px): o texto não pode passar por cima do número
+  const st = await boot(browser, lang, port, { viewport: { width: 390, height: 800 } });
+  await openCard(st.page, 'normal'); await wait(SH); await st.page.evaluate(() => document.getElementById('flashcard').click()); await wait(SH);
+  const ov = await st.page.evaluate(() => [...document.querySelectorAll('.grade-btn')].map(b => { const t = document.createRange(); t.selectNodeContents(b.childNodes[0]); const tr = t.getBoundingClientRect(), k = b.querySelector('.kbd-hint').getBoundingClientRect(); return { sobra: tr.left < k.right, cabe: b.scrollWidth <= b.clientWidth + 1 }; }));
+  check(L + ' janela estreita com mouse: texto não passa por cima do número e cabe no botão', ov.length === 4 && ov.every(o => !o.sobra && o.cabe), ov);
+  await st.ctx.close();
 
   // Celular (toque): sem números nem dica de teclado
   const m = await boot(browser, lang, port, { hasTouch: true, isMobile: true, viewport: { width: 390, height: 800 } });

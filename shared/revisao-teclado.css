@@ -9,14 +9,18 @@
 .mc-option .kbd-hint{ top:50%; left:10px; transform:translateY(-50%); width:20px; height:20px; font-size:11px; }
 .mc-option:has(.kbd-hint){ padding-left:44px; padding-right:44px; }
 
-/* Botões de nota: quadrado com a cor do texto do botão (branco no claro, escuro no escuro) e o número na cor de leitura do tema
-   (--ink: escuro no claro, claro no escuro), igual nos quatro botões; antes o número tinha a cor do botão e o "Difícil" quase sumia. */
+/* Botões de nota: quadrado branco com o número escuro, igual nos quatro botões, nos dois temas e nos dois sites (decisão da autora, 2026-11-13).
+   Cor fixa de propósito: o texto dos botões muda de cor entre temas e sites (no zh escuro continua branco), então uma cor de tema deixava o número invisível. */
 .grade-btn{ position:relative; }
 .grade-btn .kbd-hint{
   top:50%; left:9px; transform:translateY(-50%); width:20px; height:20px; border-radius:5px; font-size:11px; line-height:1;
-  background:var(--on-grade-fill); color:var(--ink);
+  background:#FFFFFF; color:#201335;
 }
 .grade-btn:has(.kbd-hint){ padding-left:34px; padding-right:12px; }
+/* Texto centralizado no botão INTEIRO (decisão da autora, 2026-11-13, versão A): padding igual dos dois lados quando a linha de botões tem
+   520 px ou mais; mais estreito (janela pequena com mouse) o texto se afasta do quadrado para não passar por cima do número. */
+.grade-buttons{ container-type:inline-size; }
+@container (min-width:520px){ .grade-btn:has(.kbd-hint){ padding-left:12px; padding-right:12px; } }
 
 .flashcard-hint .hint-kbd{ display:none; }
 .key-enter-hint{ display:none; }
