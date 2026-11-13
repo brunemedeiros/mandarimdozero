@@ -34,7 +34,10 @@ async function first(browser, port, lang){
   check(`${lang}: conta nova abre a pergunta`, (await arm(page, true)) === 'flex');
   check(`${lang}: navegador em inglês sugere English`, await page.evaluate(() => document.getElementById('ui-language-first-en').classList.contains('btn-primary') && !document.getElementById('ui-language-first-pt').classList.contains('btn-primary')));
   await page.click('#ui-language-first-en');
-  await page.waitForFunction(() => getUiLang() === 'en', null, { timeout: 10000 });
+  // getUiLang() vira 'en' na hora do clique, mas a janela só fecha (e a escolha só vai para a conta) depois que o catálogo em
+  // inglês termina de carregar (await setUiLang, shared/auth.js). Com a máquina ocupada, conferir antes disso falhava (2026-11-13):
+  // espera o estado final.
+  await page.waitForFunction(() => getUiLang() === 'en' && document.getElementById('ui-language-first-modal').style.display === 'none', null, { timeout: 15000 });
   check(`${lang}: escolher English troca e fecha`, await page.evaluate(() => document.getElementById('ui-language-first-modal').style.display === 'none' && localStorage.getItem('ui-language') === 'en'));
   check(`${lang}: a escolha vai para a conta`, await page.evaluate(() => progressAccountUiLanguage === 'en' || pendingAccountUiLanguage === 'en'));
   check(`${lang}: nunca pergunta de novo neste navegador`, (await arm(page, true)) === 'none');

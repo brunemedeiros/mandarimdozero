@@ -36,11 +36,12 @@ async function modal(browser, port, lang){
   await sel('en'); await page.click('#ui-language-confirm-close');
   check(`${lang}: X também cancela`, await page.evaluate(() => getUiLang()) === 'pt-BR' && (await vis()) === 'none');
   await sel('en'); await page.click('#ui-language-confirm-yes');
-  await page.waitForFunction(() => getUiLang() === 'en', null, { timeout: 10000 });
+  // getUiLang() vira 'en' na hora, mas o catálogo em inglês chega depois (loadCatalog, shared/i18n/i18n.js). A janela de confirmação
+  // monta o texto na hora em que o seletor muda: se o catálogo ainda não chegou, ela nasce em português. Espera o catálogo
+  // (2026-11-13; antes falhava com a máquina ocupada).
+  await page.waitForFunction(() => getUiLang() === 'en' && !!(window.I18N_CATALOG && window.I18N_CATALOG.en), null, { timeout: 15000 });
   check(`${lang}: confirmar troca para inglês`, (await vis()) === 'none');
   await sel('pt-BR');
-  // o catálogo em inglês pode chegar um instante depois de getUiLang() virar 'en' (corrida que fazia o teste falhar sob carga)
-  await page.waitForFunction(() => /Portuguese.*progress stays saved/.test(document.getElementById('ui-language-confirm-body').textContent), null, { timeout: 5000 }).catch(() => {});
   check(`${lang}: aviso de volta já em inglês`, /Portuguese.*progress stays saved/.test(await body()), await body());
   await page.click('#ui-language-confirm-yes');
   await page.waitForFunction(() => getUiLang() === 'pt-BR', null, { timeout: 10000 });

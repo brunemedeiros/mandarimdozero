@@ -85,3 +85,12 @@ carregamento termina; rodando junto com outros testes de navegador isso mudava, 
 duas árvores: a frase de "carregando" fica fixa (sem tocar no sorteio) e a semente recomeça depois de cada cena, pela posição
 da cena. O site não muda. Resultado: 2770/2770 sozinho e 3 vezes seguidas junto com `test_desafios`, `pwa-cache`, `test_atalhos` e
 `test_ditados` ao mesmo tempo.
+
+## Testes de escolha do idioma do site estáveis (2026-11-13)
+
+`tests/i18n/test_ui_language_first_access_browser.js` e `test_ui_language_confirm_browser.js` falhavam às vezes na varredura. Causa:
+ao escolher English, `getUiLang()` vira 'en' na hora, mas o catálogo em inglês (`shared/i18n/en.js`) chega depois; a janela da
+1ª escolha só fecha depois dele (`await setUiLang`, `shared/auth.js`) e a janela de confirmação monta o texto na hora em que o
+seletor muda. Os testes conferiam logo que `getUiLang()` virava 'en'. Agora esperam o estado final (janela fechada; catálogo
+carregado). Prova: com o catálogo atrasado de propósito em 1,5 s, a versão antiga falha nas mesmas verificações das varreduras
+(4 e 2 falhas) e a nova passa (20/20 e 16/16). No site isso só aconteceria trocando de idioma duas vezes em frações de segundo.
