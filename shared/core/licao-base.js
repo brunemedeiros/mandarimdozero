@@ -153,6 +153,8 @@ function renderReviewViewInner(){
   stopExerciseAudio();
   const el = document.getElementById('review-content');
   syncReviewPrevRow(false);
+  // Telas sem cartão (vazia, fim da sessão, "ver cartão anterior") não têm atalhos; cada renderer de cartão religa os seus.
+  REVIEW_KEYS.reveal = null; REVIEW_KEYS.mountEl = null; clearKeyboardOptions();
 
   if (STATE.reviewPeek != null && STATE.reviewSessionClassReview && STATE.reviewHistory && STATE.reviewHistory[STATE.reviewPeek]){
     renderReviewPeek(el);

@@ -200,7 +200,7 @@ function renderMultipleChoiceCard(mountEl, card, localState, callbacks){
         return `<button class="${cls}" data-idx="${i}"${answered ? ' disabled' : ''}>${mark}${escapeHTML(opt.text)}</button>`;
       }).join('')}
     </div>
-    ${answered ? `${reviewObservationHTML(card)}<button class="btn btn-primary btn-block mc-continue-btn" id="mc-continue-btn">${t('common.continue')}</button>` : ''}
+    ${answered ? `${reviewObservationHTML(card)}<button class="btn btn-primary btn-block mc-continue-btn" id="mc-continue-btn">${t('common.continue')}<span class="key-enter-hint" aria-hidden="true">Enter</span></button>` : ''}
   `;
 
   wireAudioButtons(mountEl, card.__isPreviewCard);
@@ -237,4 +237,5 @@ function renderMultipleChoiceCard(mountEl, card, localState, callbacks){
       callbacks.onAnswered(localState.wasCorrect, localState.wasCorrect ? 2 : 0);
     });
   }
+  wireReviewKeyboard(mountEl, card, { options: answered ? null : mountEl.querySelectorAll('.mc-option') });
 }
