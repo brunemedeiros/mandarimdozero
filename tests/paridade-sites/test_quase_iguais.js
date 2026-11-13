@@ -41,7 +41,12 @@ const ETAPA6 = (v) => etapa7(PROGRESSO_ORDEM(FAIXA_CONVIDADO(v))).split('Ver o q
   // Botão "‹ Voltar" dos cartões da professora (2026-11-04, PRs #436/#438; docs/historico/15-auditoria-banco-revisao.md):
   // syncReviewPrevRow cria a linha logo depois de #review-content em toda sessão da Revisão, VAZIA e escondida fora da sessão
   // da professora. Só a linha vazia e hidden sai; com o botão dentro a cena continua diferente.
-  .replace(/<div id=\\?"review-prev-row\\?" class=\\?"review-prev-row\\?" hidden=\\?"\\?"><\/div>/g, '');
+  .replace(/<div id=\\?"review-prev-row\\?" class=\\?"review-prev-row\\?" hidden=\\?"\\?"><\/div>/g, '')
+  // Aviso "esta lição ainda não está no idioma do site" saiu (2026-11-11, decisão da dona): unidade sem tradução nem aparece nem
+  // abre. O elemento sai da árvore antiga; o resto da cena continua comparado.
+  .replace(/(?:\\n|\n)\s*<p class=(\\*)"lesson-unit-goal\1" id=\1"ud-lang-notice\1"(?: hidden=\1"\1")? style=\1"font-style:\s*italic;\s*opacity:\s*\.8\1">[^<]*<\/p>/g, '')
+  // Palavra dona do progresso no save (2026-11-11, defeito 1 da varredura; ver também quase-iguais-harness.js): só a árvore nova tem.
+  .replace(/,(\\*)"variantWord\1":\1"[^"\\]*\1"/g, '');
 // Faixa do modo convidado (conserto de 2026-11-10, pedido da dona): a frase ganhou um <span class="guest-warning-text"> em volta,
 // para o "não" em negrito não ganhar o espaço do flex; e "username" virou "nome de usuário". Na comparação, a etiqueta sai das duas árvores; o texto continua comparado.
 const FAIXA_CONVIDADO = (v) => v.replace(/<span class=\\?"guest-warning-text\\?">([\s\S]*?)<\/span>(?=(\\n|\n)\s*<button class=\\?"guest-warning-link)/g, '$1')

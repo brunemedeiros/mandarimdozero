@@ -50,10 +50,27 @@ const snap = (page) => page.evaluate(() => JSON.stringify([UNITS, LEVELS, STORIE
   check('en: cartões (vocab e hanzi) com texto em inglês, FSRS intacto', /hello|hi/i.test(r.card.back_trans) && r.card.state === 'new' && /good/i.test(r.hc.meaning) && r.hc.radicals[0].m !== '', [r.card.back_trans, r.hc.meaning]);
   check('en: todas as 18 unidades têm overlay', r.untr.length === 0, r.untr);
   await en.page.evaluate(() => openUnitDetail(1));
-  check('en: tela da unidade em inglês, sem aviso', await en.page.evaluate(() => document.getElementById('ud-title').textContent !== 'Cumprimentar e se despedir' && document.getElementById('ud-lang-notice').hidden));
-  await en.page.evaluate(() => { delete window.CONTENT_OVERLAYS.en.units[2]; CONTENT_I18N.apply('en'); openUnitDetail(2); });
-  const n2 = await en.page.evaluate(() => { const e = document.getElementById('ud-lang-notice'); return { hidden: e.hidden, text: e.textContent }; });
-  check('en: unidade sem tradução cai em português com aviso', !n2.hidden && /isn't available in English yet/.test(n2.text), n2);
+  check('en: tela da unidade em inglês', await en.page.evaluate(() => document.getElementById('ud-title').textContent !== 'Cumprimentar e se despedir'));
+  // Unidade sem tradução (decisão da dona, 2026-11-11): não aparece, não abre, e as seguintes seguem normais.
+  const hid = await en.page.evaluate(() => {
+    exitToPath();
+    delete window.CONTENT_OVERLAYS.en.units[2]; CONTENT_I18N.apply('en');
+    const u2 = UNITS.find(u => u.id === 2);
+    renderUnitsGrid();
+    const lista = document.getElementById('units-grid').textContent.includes(u2.title);
+    const mapa = (() => { const d = document.createElement('div'); renderTrailMapView(d); return d.textContent.includes(u2.title); })();
+    const busca = buildSearchIndex().some(x => x.unitId === 2);
+    openUnitDetail(2);
+    const abriu = STATE.currentUnitId === 2;
+    STATE.unitProgress[1].completed = true; STATE.unitProgress[2].unlocked = false; STATE.unitProgress[3].unlocked = false;
+    recalculateUnlockedUnits();
+    const r = { lista, mapa, busca, abriu, u3: STATE.unitProgress[3].unlocked, u2: STATE.unitProgress[2].unlocked };
+    STATE.unitProgress[1].completed = false;
+    return r;
+  });
+  check('en: unidade sem tradução não aparece na lista, no Mapa nem na busca', !hid.lista && !hid.mapa && !hid.busca, hid);
+  check('en: unidade sem tradução não abre', !hid.abriu, hid);
+  check('en: a unidade seguinte libera ao concluir a anterior visível', hid.u3 === true && hid.u2 === false, hid);
   // persistência: texto salvo em português/inglês não volta por cima
   const saved = await en.page.evaluate(() => { CONTENT_I18N.apply('en'); const c = STATE.cards.find(x => x.id === 'u1-v0'); const data = JSON.parse(JSON.stringify(serializeState())); data.cards.find(x => x.id === 'u1-v0').back_trans = 'TEXTO ANTIGO SALVO'; applySerializedState(data); return STATE.cards.find(x => x.id === 'u1-v0').back_trans; });
   check('progresso carregado não sobrescreve o idioma atual', saved !== 'TEXTO ANTIGO SALVO' && /hello|hi/i.test(saved), saved);

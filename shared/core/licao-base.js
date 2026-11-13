@@ -523,8 +523,21 @@ function showAnswerPanel(contentEl, ex, opts = {}){
 }
 
 // Grupos da trilha na ordem de estudo (um por nível, vazios descartados).
+// Unidade sem tradução para o idioma do site (decisão da dona, 2026-11-11): não aparece na trilha, no Mapa, na busca nem no
+// "Continuar", e não abre. As seguintes seguem normais (a liberação pula a escondida, porque ela sai de trailGroups).
+// O progresso dela NÃO é apagado: a unidade continua em UNITS e no save; só some da tela enquanto faltar a tradução.
+// Aceita a unidade ou o id. Sem a camada de conteúdo (testes antigos), tudo fica disponível.
+function isUnitAvailable(u){
+  const id = (u && typeof u === 'object') ? u.id : u;
+  if (typeof CONTENT_I18N === 'undefined' || !CONTENT_I18N || typeof CONTENT_I18N.isUnitTranslated !== 'function') return true;
+  return CONTENT_I18N.isUnitTranslated(id);
+}
+function availableUnits(list){
+  return (list || []).filter(u => u && isUnitAvailable(u));
+}
+
 function trailGroups(){
-  return LEVELS.map(lvl => unitsOfLevel(lvl.id)).filter(g => g.length);
+  return LEVELS.map(lvl => availableUnits(unitsOfLevel(lvl.id))).filter(g => g.length);
 }
 
 // Resumo de progresso pro Perfil (shared/profile.js) -- NÃO usa

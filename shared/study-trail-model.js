@@ -25,6 +25,8 @@ const STUDY_PROGRESS_FIELDS = [
   'ef', 'interval', 'reps', 'due', 'lapses',
   'stability', 'difficulty', 'state', 'lastReview',
   'fsrsReps', 'fsrsLapses', 'fsrsMigrated', 'firstLearnedDate', 'released',
+  // Palavra dona do progresso, só nos cartões que trocam de palavra pelo idioma do site/país (shared/card-variants.js).
+  'variantWord',
 ];
 
 // ============================================================
