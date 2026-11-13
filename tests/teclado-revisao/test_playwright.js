@@ -196,8 +196,22 @@ async function suite(browser, lang, port){
   await press(page, '2');
   check(L + ' Revisão rápida: com a tela escondida, as teclas não respondem', await page.evaluate(() => KEYBOARD_OPTION_MAP === null || KEYBOARD_OPTION_MAP.every(e => !e.el.getClientRects().length)));
 
+  // ---------- Opções das lições, Desafios e Jogos (mesmo desenho da Revisão) ----------
+  const opc = await page.evaluate(async () => {
+    document.body.insertAdjacentHTML('beforeend', '<div id="demo-opt" style="position:fixed;inset:0;z-index:99999;background:var(--paper)"><div style="max-width:760px;margin:20px auto"><div class="exercise-options" style="display:grid;grid-template-columns:1fr 1fr;gap:10px">' + ['o açougue', 'a padaria', 'a farmácia', 'boa noite (saudação)'].map(tx => '<button class="exercise-option"><div class="opt-text">' + tx + '</div></button>').join('') + '</div><div class="cloze-options" style="margin-top:14px"><button class="cloze-option">suis</button><button class="cloze-option">es</button></div></div></div>');
+    ['#demo-opt .exercise-option', '#demo-opt .cloze-option'].forEach(sel => wireKeyboardOptions(document.querySelectorAll(sel), { mode: 'sequential' }));
+    await new Promise(r => setTimeout(r, 400)); // os botões têm transition: espera acabar antes de medir
+    const medir = (sel) => { return [...document.querySelectorAll(sel)].map(o => { const r = o.getBoundingClientRect(), k = o.querySelector('.kbd-hint').getBoundingClientRect(), t = document.createRange(); t.selectNodeContents(o.querySelector('.opt-text') || o.childNodes[0]); const tr = t.getBoundingClientRect(); return { esq: k.left - r.left < 16, meio: Math.abs((k.top + k.bottom) / 2 - (r.top + r.bottom) / 2) < 2, centro: Math.abs((tr.left + tr.right) / 2 - (r.left + r.right) / 2) < 2, baixo: r.height < 70 }; }); };
+    return { ex: medir('#demo-opt .exercise-option'), cl: medir('#demo-opt .cloze-option') };
+  });
+  check(L + ' opções das lições: número à esquerda no meio da altura, texto centralizado, sem folga extra em cima', opc.ex.length === 4 && opc.ex.every(o => o.esq && o.meio && o.centro && o.baixo), opc.ex);
+  check(L + ' completar a frase: número à esquerda e texto centralizado', opc.cl.length === 2 && opc.cl.every(o => o.esq && o.meio && o.centro), opc.cl);
+  await page.evaluate(() => document.getElementById('demo-opt').remove());
+
   // ---------- Janela de atalhos ----------
   const modal = await page.evaluate(() => document.getElementById('kbd-shortcuts-modal').textContent);
+  const gap = await page.evaluate(() => { document.getElementById('kbd-shortcuts-modal').style.display = 'flex'; return [...document.querySelectorAll('#kbd-shortcuts-modal .kbd-shortcuts-row')].map(r => { const ks = [...r.querySelectorAll('.kbd-key')], d = r.querySelector('.kbd-shortcuts-desc').getBoundingClientRect(), maxR = Math.max(...ks.map(k => k.getBoundingClientRect().right)); return Math.round(d.left - maxR); }); });
+  check(L + ' janela de atalhos: espaço entre as teclas e o texto (mínimo 8 px) em todas as linhas', gap.length >= 5 && gap.every(g => g >= 8), gap);
   check(L + ' janela de atalhos cita Espaço e a nota de 1 a 4 na Revisão', /Espaço/.test(modal) && /quatro botões/.test(modal), modal.slice(0, 200));
 
   // Janela estreita COM mouse (390 px): o texto não pode passar por cima do número

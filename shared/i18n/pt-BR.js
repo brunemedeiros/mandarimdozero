@@ -3379,7 +3379,7 @@ window.I18N_CATALOG['pt-BR'] = {
   'rb.generateReady': 'Gerar cartões',
   'rb.generated': '{n} cartões gerados.',
   'rb.generatedPartial': '{ok} gerados, {fail} com erro.',
-  'rb.keys': 'Espaço mostra · 1 Errei · 2 Difícil · 3 Bom (seta direita) · 4 Fácil',
+  'rb.keys': 'Espaço mostra · 1 Errei · 2 Difícil · 3 Bom · 4 Fácil',
   'rb.classEmpty': 'Turma sem alunos ainda',
   'rb.classMembers': '{n} na turma: {names}',
   'rb.classPick': 'Turma',

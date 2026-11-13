@@ -3360,7 +3360,7 @@ window.I18N_CATALOG['en'] = {
   'rb.generateReady': 'Create cards', // ALTA
   'rb.generated': '{n} cards created.', // ALTA
   'rb.generatedPartial': '{ok} created, {fail} failed.', // ALTA
-  'rb.keys': 'Space shows · 1 Again · 2 Hard · 3 Good (right arrow) · 4 Easy', // ALTA
+  'rb.keys': 'Space shows · 1 Again · 2 Hard · 3 Good · 4 Easy', // ALTA
   'rb.classEmpty': 'No students in the class yet', // ALTA
   'rb.classMembers': '{n} in the class: {names}', // ALTA
   'rb.classPick': 'Class', // ALTA
