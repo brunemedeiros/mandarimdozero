@@ -75,3 +75,13 @@ Continuam falhando de propósito: `tests/registro/test_registry.js` e `tests/fas
 T8, para quando o site pt abrir). Instáveis só quando rodam junto com outros (sozinhos passam; também na `main`):
 `test_ui_language_*_browser.js` e a sequência em inglês do `test_quase_iguais.js` (o sorteio das opções do exercício
 muda com a ordem de carregamento; em 2026-11-05 aconteceu no zh, agora no fr).
+
+## Paridade em inglês estável (2026-11-13)
+
+Causa achada: a frase de "carregando" (`loadingHTML`, `shared/utils.js`) sorteia com `Math.random`, o mesmo sorteio (com semente
+fixa) que embaralha as opções dos exercícios. Quantas telas de "carregando" aparecem antes da 1ª lição depende de quando cada
+carregamento termina; rodando junto com outros testes de navegador isso mudava, e o sorteio das opções da lição saía outro
+(a sequência em inglês divergia desde a 4ª tela). Conserto só no harness `tests/paridade-sites/quase-iguais-harness.js`, igual nas
+duas árvores: a frase de "carregando" fica fixa (sem tocar no sorteio) e a semente recomeça depois de cada cena, pela posição
+da cena. O site não muda. Resultado: 2770/2770 sozinho e 3 vezes seguidas junto com `test_desafios`, `pwa-cache`, `test_atalhos` e
+`test_ditados` ao mesmo tempo.
