@@ -2228,6 +2228,8 @@ window.I18N_CATALOG['pt-BR'] = {
   'ui.profileEdit.featuredBadge': 'Badge em destaque (aparece no Ranking)',
   'ui.kbd.title': '⌨️ Atalhos do teclado',
   'ui.kbd.choose': 'Escolher uma alternativa, pela posição dela na tela',
+  'ui.kbd.grade': 'Na Revisão, dar a nota ao cartão pela posição do botão (com quatro botões: Errei, Difícil, Bom, Fácil)',
+  'ui.kbd.reveal': 'Na Revisão, mostrar a resposta de um cartão',
   'ui.kbd.confirm': 'Confirmar uma resposta digitada e avançar para a próxima',
   'ui.kbd.replay': 'Tocar áudio novamente',
   'ui.kbd.note': 'Os números só aparecem quando um exercício tem alternativas para escolher, nunca durante digitação ou o exercício de ordenar frase. "r" repete o último áudio que tocou na tela.',

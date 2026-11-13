@@ -22,6 +22,11 @@
 .grade-buttons{ container-type:inline-size; }
 @container (min-width:520px){ .grade-btn:has(.kbd-hint){ padding-left:12px; padding-right:12px; } }
 
+/* Revisão rápida (4 opções com cronômetro): mesmo padrão da múltipla escolha. */
+.speed-option{ position:relative; }
+.speed-option .kbd-hint{ top:50%; left:10px; transform:translateY(-50%); width:20px; height:20px; font-size:11px; }
+.speed-option:has(.kbd-hint){ padding-left:40px; padding-right:40px; }
+
 .flashcard-hint .hint-kbd{ display:none; }
 .key-enter-hint{ display:none; }
 @media (hover:hover) and (pointer:fine){
@@ -35,5 +40,6 @@
 /* Tela de toque: sem número (o site já esconde .kbd-hint), então volta o espaçamento normal. */
 @media not all and (hover:hover) and (pointer:fine){
   .mc-option:has(.kbd-hint){ padding-left:16px; padding-right:16px; }
+  .speed-option:has(.kbd-hint){ padding-left:12px; padding-right:12px; }
   .grade-btn:has(.kbd-hint){ padding-left:6px; padding-right:6px; }
 }

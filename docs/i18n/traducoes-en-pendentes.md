@@ -7,6 +7,8 @@ Todas entram como `aprovado (2026-10-05)` até a dona aprovar.
 | Chave | PT | EN | Confiança | Status |
 |---|---|---|---|---|
 | settings.title | Configurações | Settings | alta | aprovado (2026-10-05) |
+| ui.kbd.grade | Na Revisão, dar a nota ao cartão pela posição do botão (com quatro botões: Errei, Difícil, Bom, Fácil) | In Review, grade the card by the position of the button (with four buttons: Again, Hard, Good, Easy) | alta | aprovado (2026-11-13, janela de atalhos) |
+| ui.kbd.reveal | Na Revisão, mostrar a resposta de um cartão | In Review, show the answer of a card | alta | aprovado (2026-11-13, janela de atalhos) |
 | review.pressToReveal | Espaço mostra a resposta | Space shows the answer | alta | aprovado (2026-11-05, prévia do teclado na Revisão) |
 | settings.subtitle | Suas informações e preferências de conta | Your account information and preferences | alta | aprovado (2026-10-23, aba Exportar arquivada) |
 | settings.tab.general | Geral | General | alta | aprovado (2026-10-05) |

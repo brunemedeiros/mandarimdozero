@@ -170,6 +170,36 @@ async function suite(browser, lang, port){
   await press(page, 'Enter');
   check(L + ' Múltipla escolha: Enter continua (nota Errei ou Bom)', (await grades(page)).length === 1 && [0, 2].includes((await grades(page))[0]), await grades(page));
 
+  // ---------- Revisão rápida (4 opções com cronômetro) ----------
+  await page.evaluate(() => {
+    window.__grades = [];
+    switchTab('review');
+    document.getElementById('review-mode-select-wrap').style.display = 'none';
+    document.getElementById('review-session-wrap').style.display = 'block';
+    document.getElementById('review-content').style.display = 'none';
+    document.getElementById('speed-review-content').style.display = 'block';
+    SPEED_STATE.active = true; SPEED_STATE.hearts = 3; SPEED_STATE.score = 0; SPEED_STATE.index = 0; SPEED_STATE.correctCount = 0;
+    SPEED_STATE.queue = STATE.cards.filter(hasPlainFrontBack).slice(0, 6);
+    renderSpeedReview();
+  });
+  const sb = await page.evaluate(() => [...document.querySelectorAll('.speed-option .kbd-hint')].map(b => b.textContent));
+  check(L + ' Revisão rápida: números 1 a 4 nas opções', JSON.stringify(sb) === '["1","2","3","4"]', sb);
+  const sl = await page.evaluate(() => [...document.querySelectorAll('.speed-option')].map(o => { const r = o.getBoundingClientRect(), k = o.querySelector('.kbd-hint').getBoundingClientRect(), t = document.createRange(); t.selectNodeContents(o.childNodes[0]); const tr = t.getBoundingClientRect(); return { esq: k.left - r.left < 16, centro: Math.abs((tr.left + tr.right) / 2 - (r.left + r.right) / 2) < 2, alinha: getComputedStyle(o).textAlign }; }));
+  check(L + ' Revisão rápida: quadrado à esquerda e texto centralizado', sl.length === 4 && sl.every(o => o.esq && o.centro && o.alinha === 'center'), sl);
+  await page.evaluate(() => document.dispatchEvent(new KeyboardEvent('keydown', { key: '2', repeat: true, bubbles: true })));
+  check(L + ' Revisão rápida: tecla segurada é ignorada', await page.evaluate(() => SPEED_STATE.answered === false));
+  await press(page, '3');
+  check(L + ' Revisão rápida: 3 responde a terceira opção', await page.evaluate(() => SPEED_STATE.answered === true && document.querySelectorAll('.speed-option')[2].classList.contains('correct') || document.querySelectorAll('.speed-option')[2].classList.contains('incorrect')));
+  await press(page, '1');
+  check(L + ' Revisão rápida: depois de responder, outro número não responde de novo', await page.evaluate(() => document.querySelectorAll('.speed-option.incorrect').length <= 1));
+  await page.evaluate(() => { stopSpeedSession && stopSpeedSession(); switchTab('path'); });
+  await press(page, '2');
+  check(L + ' Revisão rápida: com a tela escondida, as teclas não respondem', await page.evaluate(() => KEYBOARD_OPTION_MAP === null || KEYBOARD_OPTION_MAP.every(e => !e.el.getClientRects().length)));
+
+  // ---------- Janela de atalhos ----------
+  const modal = await page.evaluate(() => document.getElementById('kbd-shortcuts-modal').textContent);
+  check(L + ' janela de atalhos cita Espaço e a nota de 1 a 4 na Revisão', /Espaço/.test(modal) && /quatro botões/.test(modal), modal.slice(0, 200));
+
   // Janela estreita COM mouse (390 px): o texto não pode passar por cima do número
   const st = await boot(browser, lang, port, { viewport: { width: 390, height: 800 } });
   await openCard(st.page, 'normal'); await wait(SH); await st.page.evaluate(() => document.getElementById('flashcard').click()); await wait(SH);

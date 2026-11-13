@@ -2209,6 +2209,8 @@ window.I18N_CATALOG['en'] = {
   'ui.profileEdit.featuredBadge': 'Featured badge (shown in the Leaderboard)', // ALTA
   'ui.kbd.title': '⌨️ Keyboard shortcuts', // ALTA
   'ui.kbd.choose': 'Pick an option by its position on screen', // ALTA
+  'ui.kbd.grade': 'In Review, grade the card by the position of the button (with four buttons: Again, Hard, Good, Easy)', // ALTA
+  'ui.kbd.reveal': 'In Review, show the answer of a card', // ALTA
   'ui.kbd.confirm': 'Confirm a typed answer and move on to the next one', // ALTA
   'ui.kbd.replay': 'Play audio again', // ALTA
   'ui.kbd.note': 'The numbers only appear when an exercise has options to choose from, never during typing or the sentence-ordering exercise. "r" repeats the last audio that played on screen.', // ALTA

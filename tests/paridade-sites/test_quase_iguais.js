@@ -47,9 +47,10 @@ const ETAPA6 = (v) => etapa7(PROGRESSO_ORDEM(FAIXA_CONVIDADO(v))).split('Ver o q
   // Só esses acréscimos saem; o resto da cena continua igual. O nome da cena traz o texto do botão (com o número no fim).
   .replace(/(<button class=\\?"grade-btn [^>]*>(?:(?!<\/button>).)*?)<span class=\\?"kbd-hint\\?">[1-4]<\/span>/g, '$1')
   .replace(/(<button class=\\?"mc-option[^>]*>(?:(?!<\/button>).)*?)<span class=\\?"kbd-hint\\?">[1-4]<\/span>/g, '$1')
+  .replace(/(<button class=\\?"speed-option[^>]*>(?:(?!<\/button>).)*?)<span class=\\?"kbd-hint\\?">[1-4]<\/span>/g, '$1') // Revisão rápida (2026-11-13): número nas 4 opções
   .replace(/<span class=\\?"hint-touch\\?">([^<]*)<\/span><span class=\\?"hint-kbd\\?">[^<]*<\/span>/g, '$1')
   .replace(/<span class=\\?"key-enter-hint\\?" aria-hidden=\\?"true\\?">Enter<\/span>/g, '')
-  .replace(/(\.(?:grade-btn\.grade-\w+|mc-option)\[[^\]]*?)[1-4]\]/g, '$1]')
+  .replace(/(\.(?:grade-btn\.grade-\w+|mc-option|speed-option(?:\.\w+)?)\[[^\]]*?)[1-4]\]/g, '$1]')
   .replace(/(\.btn-primary\[Continu(?:ar|e))Enter\]/g, '$1]')
   // Aviso "esta lição ainda não está no idioma do site" saiu (2026-11-11, decisão da dona): unidade sem tradução nem aparece nem
   // abre. O elemento sai da árvore antiga; o resto da cena continua comparado.

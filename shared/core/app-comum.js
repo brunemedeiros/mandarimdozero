@@ -538,6 +538,7 @@ function wireLessonKeyboardShortcuts(){
     if (!entry.el.isConnected || entry.el.disabled || entry.el.classList.contains('disabled')) return;
     if (!entry.el.getClientRects().length) return; // tela escondida (ex.: saiu da Revisão): nunca clica no que não se vê
     if (KEYBOARD_OPTION_MAP.review && !reviewKeysReady()) return;
+    if (KEYBOARD_OPTION_MAP.noRepeat && e.repeat) return; // Revisão rápida: tecla segurada não responde as perguntas seguintes
     e.preventDefault();
     entry.el.click();
   });
