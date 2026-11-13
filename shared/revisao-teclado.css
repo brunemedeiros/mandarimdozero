@@ -9,16 +9,13 @@
 .mc-option .kbd-hint{ top:50%; left:10px; transform:translateY(-50%); width:20px; height:20px; font-size:11px; }
 .mc-option:has(.kbd-hint){ padding-left:44px; padding-right:44px; }
 
-/* Botões de nota: o quadrado usa a cor do texto do botão como fundo e a cor do botão no número (mesmo par do rótulo, invertido). */
+/* Botões de nota: quadrado com a cor do texto do botão (branco no claro, escuro no escuro) e o número na cor de leitura do tema
+   (--ink: escuro no claro, claro no escuro), igual nos quatro botões; antes o número tinha a cor do botão e o "Difícil" quase sumia. */
 .grade-btn{ position:relative; }
 .grade-btn .kbd-hint{
   top:50%; left:9px; transform:translateY(-50%); width:20px; height:20px; border-radius:5px; font-size:11px; line-height:1;
-  background:var(--on-grade-fill);
+  background:var(--on-grade-fill); color:var(--ink);
 }
-.grade-again .kbd-hint{ color:var(--grade-fill-again); }
-.grade-hard .kbd-hint{ color:var(--grade-fill-hard); }
-.grade-good .kbd-hint{ color:var(--grade-fill-good); }
-.grade-easy .kbd-hint{ color:var(--grade-fill-easy); }
 .grade-btn:has(.kbd-hint){ padding-left:34px; padding-right:12px; }
 
 .flashcard-hint .hint-kbd{ display:none; }
