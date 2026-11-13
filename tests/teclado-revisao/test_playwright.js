@@ -91,6 +91,8 @@ async function suite(browser, lang, port){
   const badges = await page.evaluate(() => [...document.querySelectorAll('.grade-btn .kbd-hint')].map(b => b.textContent));
   check(L + ' Normal revelado: números 1 a 4 nos botões', JSON.stringify(badges) === '["1","2","3","4"]', badges);
   check(L + ' Normal revelado: número visível (mouse e teclado)', await page.evaluate(() => getComputedStyle(document.querySelector('.grade-btn .kbd-hint')).display !== 'none'));
+  const gl = await page.evaluate(() => [...document.querySelectorAll('.grade-btn')].map(b => { const r = b.getBoundingClientRect(), k = b.querySelector('.kbd-hint').getBoundingClientRect(); return { dentro: k.left >= r.left && k.right <= r.right, esquerda: k.left - r.left < 16, meio: Math.abs((k.top + k.bottom) / 2 - (r.top + r.bottom) / 2) < 2, posicao: getComputedStyle(b.querySelector('.kbd-hint')).position }; }));
+  check(L + ' Normal revelado: quadrado do número à esquerda, dentro do botão, no meio da altura', gl.length === 4 && gl.every(g => g.dentro && g.esquerda && g.meio && g.posicao === 'absolute'), gl);
   await press(page, '3');
   check(L + ' Normal: número nos primeiros 300 ms depois de revelar é ignorado', (await grades(page)).length === 0);
   await wait(SH);
@@ -147,6 +149,8 @@ async function suite(browser, lang, port){
   await openCard(page, 'multiple_choice'); await wait(SH);
   const mb = await page.evaluate(() => [...document.querySelectorAll('.mc-option .kbd-hint')].map(b => b.textContent));
   check(L + ' Múltipla escolha: números 1 a 4 nas opções', JSON.stringify(mb) === '["1","2","3","4"]', mb);
+  const mcl = await page.evaluate(() => [...document.querySelectorAll('.mc-option')].map(o => { const r = o.getBoundingClientRect(), k = o.querySelector('.kbd-hint').getBoundingClientRect(), t = document.createRange(); t.selectNodeContents(o.childNodes[0]); const tr = t.getBoundingClientRect(); return { esquerda: k.left - r.left < 16, centro: Math.abs((tr.left + tr.right) / 2 - (r.left + r.right) / 2) < 2, alinha: getComputedStyle(o).textAlign }; }));
+  check(L + ' Múltipla escolha: texto centralizado na opção e quadrado à esquerda', mcl.length === 4 && mcl.every(m => m.esquerda && m.centro && m.alinha === 'center'), mcl);
   await press(page, '2');
   check(L + ' Múltipla escolha: 2 escolhe a segunda opção', await page.evaluate(() => STATE.reviewCardState.answered === true && STATE.reviewCardState.selectedIndex === 1));
   check(L + ' Múltipla escolha: depois de responder aparece Continuar com Enter', await page.evaluate(() => !!document.querySelector('#mc-continue-btn .key-enter-hint')));
@@ -162,6 +166,9 @@ async function suite(browser, lang, port){
   check(L + ' celular: aparece o "toque para ver" e não a dica do teclado', await m.page.evaluate(() => getComputedStyle(document.querySelector('.hint-touch')).display !== 'none' && getComputedStyle(document.querySelector('.hint-kbd')).display === 'none'));
   await wait(SH); await m.page.evaluate(() => document.getElementById('flashcard').click());
   check(L + ' celular: sem números nos botões de nota', await m.page.evaluate(() => [...document.querySelectorAll('.grade-btn .kbd-hint')].every(b => getComputedStyle(b).display === 'none')));
+  await openCard(m.page, 'multiple_choice'); await wait(SH);
+  const mcm = await m.page.evaluate(() => [...document.querySelectorAll('.mc-option')].map(o => { const r = o.getBoundingClientRect(), t = document.createRange(); t.selectNodeContents(o.childNodes[0]); const tr = t.getBoundingClientRect(); return { alinha: getComputedStyle(o).textAlign, centro: Math.abs((tr.left + tr.right) / 2 - (r.left + r.right) / 2) < 2, numero: getComputedStyle(o.querySelector('.kbd-hint')).display }; }));
+  check(L + ' celular: múltipla escolha com texto centralizado e sem número', mcm.length === 4 && mcm.every(x => x.alinha === 'center' && x.centro && x.numero === 'none'), mcm);
   check(L + ' celular: sem rolagem horizontal', await m.page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1));
   await m.ctx.close();
 

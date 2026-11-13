@@ -1,13 +1,26 @@
 /* Teclado na Revisão (shared/core/revisao-cartoes.js, wireReviewKeyboard): comum aos sites.
-   Os números 1-4 nos botões de nota e nas opções (.kbd-hint, escondido em tela de toque pelo index.html de cada site),
-   a dica "Espaço mostra a resposta" e a etiqueta "Enter" do Continuar só aparecem com mouse e teclado de verdade. */
+   Os números 1-4 (.kbd-hint, escondido em tela de toque pelo index.html de cada site) ficam num quadrado à esquerda, dentro do
+   botão de nota e da opção da múltipla escolha; a dica "Espaço mostra a resposta" e a etiqueta "Enter" do Continuar também só
+   aparecem com mouse e teclado de verdade. Decisão da autora (2026-11-13): número à esquerda e texto da múltipla escolha centralizado
+   em todos os tamanhos (docs/historico/33-teclado-na-revisao.md). */
+
+/* Opções da múltipla escolha: texto centralizado na opção inteira (padding igual dos dois lados), quadrado à esquerda. */
+.mc-options .mc-option{ position:relative; text-align:center; }
+.mc-option .kbd-hint{ top:50%; left:10px; transform:translateY(-50%); width:20px; height:20px; font-size:11px; }
+.mc-option:has(.kbd-hint){ padding-left:44px; padding-right:44px; }
+
+/* Botões de nota: o quadrado usa a cor do texto do botão como fundo e a cor do botão no número (mesmo par do rótulo, invertido). */
+.grade-btn{ position:relative; }
 .grade-btn .kbd-hint{
-  position:static; width:auto; height:auto; min-width:16px; padding:1px 5px; margin-bottom:2px;
-  background:transparent; color:inherit; border:1px solid currentColor; opacity:.9; line-height:1.2;
+  top:50%; left:9px; transform:translateY(-50%); width:20px; height:20px; border-radius:5px; font-size:11px; line-height:1;
+  background:var(--on-grade-fill);
 }
-.mc-option{ position:relative; }
-.mc-option .kbd-hint{ top:50%; transform:translateY(-50%); }
-.mc-option:has(.kbd-hint){ padding-left:40px; }
+.grade-again .kbd-hint{ color:var(--grade-fill-again); }
+.grade-hard .kbd-hint{ color:var(--grade-fill-hard); }
+.grade-good .kbd-hint{ color:var(--grade-fill-good); }
+.grade-easy .kbd-hint{ color:var(--grade-fill-easy); }
+.grade-btn:has(.kbd-hint){ padding-left:34px; padding-right:12px; }
+
 .flashcard-hint .hint-kbd{ display:none; }
 .key-enter-hint{ display:none; }
 @media (hover:hover) and (pointer:fine){
@@ -18,6 +31,8 @@
     border:1px solid currentColor; border-radius:4px; opacity:.9; line-height:1.4;
   }
 }
+/* Tela de toque: sem número (o site já esconde .kbd-hint), então volta o espaçamento normal. */
 @media not all and (hover:hover) and (pointer:fine){
-  .mc-option:has(.kbd-hint){ padding-left:16px; }
+  .mc-option:has(.kbd-hint){ padding-left:16px; padding-right:16px; }
+  .grade-btn:has(.kbd-hint){ padding-left:6px; padding-right:6px; }
 }
