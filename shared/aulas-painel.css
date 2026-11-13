@@ -1,0 +1,109 @@
+/* Aulas (Mural > Aulas e materiais): Alunos, Turmas, Nova aula e Aulas registradas em caixas iguais à do Notion
+   (shared/notion-sync.css). Peças do Design System do painel (.painel, p-*); aqui só o arranjo. HTML em shared/admin-class-logs.js. */
+.painel.aulas-painel { display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem; }
+.painel.aulas-painel[hidden] { display: none; }  /* Registrar x Calendário: o display: flex não pode vencer o hidden */
+.painel .aulas-box { margin: 0; border: 1px solid var(--p-linha); border-radius: var(--p-raio); background: var(--p-bg); padding: 0; }
+.painel .aulas-box > summary { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; padding: .85rem 1.1rem; cursor: pointer; list-style: none; margin: 0; }
+.painel .aulas-box > summary::-webkit-details-marker { display: none; }
+.painel .aulas-box > summary::after { content: '▾'; margin-left: auto; color: var(--p-tinta-suave); transition: transform .15s; background-image: none; width: auto; height: auto; float: none; transform: none; }
+.painel .aulas-box:not([open]) > summary::after { transform: rotate(-90deg); }
+.painel .aulas-titulo { font-weight: 800; font-size: 1.05rem; color: var(--p-tinta); }
+.painel .aulas-sub { font-weight: 600; color: var(--p-tinta-suave); font-size: .9em; }
+.painel .aulas-corpo { display: flex; flex-direction: column; gap: .75rem; padding: 0 1.1rem 1.1rem; }
+.painel .aulas-corpo > * { margin: 0; }
+.painel .aulas-atalhos { display: flex; gap: 1rem; font-size: .9rem; font-weight: 700; }
+.painel .aulas-lista { display: flex; flex-direction: column; max-height: 15rem; overflow-y: auto; border: 1px solid var(--p-linha); border-radius: 12px; padding: .25rem .75rem; }
+.painel .aulas-opcao { display: flex; align-items: center; gap: .6rem; margin: 0; padding: .45rem 0; cursor: pointer; border-bottom: 1px solid var(--p-linha); }
+.painel .aulas-opcao:last-child { border-bottom: 0; }
+.painel .aulas-opcao input[type=checkbox] { margin: 0; flex: 0 0 auto; }
+.painel .aulas-opcao small { font-size: .85em; }
+.painel #admin-create-class-log-form { display: flex; flex-direction: column; gap: .35rem; margin: 0; }
+.painel #admin-create-class-log-form :is(input:not([type=checkbox]):not([type=radio]), select, textarea) { margin-bottom: .5rem; }
+.painel #admin-create-class-log-btn { align-self: flex-start; width: auto; margin-top: .5rem; }
+.painel .aulas-itens .p-item { align-items: flex-start; }
+.painel .aulas-itens .p-item-titulo { font-weight: 800; }
+.painel .aulas-quem { color: var(--p-tinta-suave); font-weight: 600; }
+.painel .aulas-item.is-editando .p-item-conteudo { width: 100%; }
+@media (max-width: 600px) {
+  .painel .aulas-itens .p-item { flex-wrap: wrap; }
+  .painel .aulas-itens .p-item-acoes { width: 100%; justify-content: flex-end; }
+  .painel .aulas-itens .p-item-acoes button { min-height: 44px; min-width: 44px; }
+}
+/* Campos do formulário com a largura toda; Presença e Competências mantêm as pílulas do site (iguais à tela da aluna),
+   só com a caixinha de marcar alinhada (o Pico muda o tamanho e a margem dela). */
+.painel #admin-create-class-log-form :is(input:not([type=checkbox]):not([type=radio]), select, textarea) { width: 100%; max-width: none; }
+.painel #admin-create-class-log-form .att-new { max-width: 360px; }
+.painel #admin-create-class-log-form label:not(.att-choice):not(.skill-toggle) { font-weight: 700; font-size: .9rem; color: var(--p-tinta); margin: .25rem 0 0; }
+.painel :is(.skill-toggle, label.att-choice) input { width: 1rem; height: 1rem; margin: 0; flex: 0 0 auto; position: static; top: auto; vertical-align: middle; }
+.painel :is(.skill-toggle, label.att-choice) { display: inline-flex; align-items: center; gap: 6px; margin: 0; line-height: 1.2; }
+.painel .class-log-extras { margin: .25rem 0 0; }
+.painel .class-log-extras legend { margin-top: .5rem; font-weight: 700; font-size: .9rem; color: var(--p-tinta); }
+.painel .class-log-repeat { margin: 0; }
+.painel #admin-create-class-log-error:empty { display: none; }
+
+/* Google Agenda (117, shared/google-calendar.js): mesma caixa; topo, resumo e "para revisar" reaproveitam o arranjo do Notion
+   (notion-topo, notion-resumo, notion-revisao em shared/notion-sync.css). */
+.painel.gcal-painel { margin-top: 0; margin-bottom: 1rem; }
+.painel .gcal-actions { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; }
+.painel .gcal-actions button { width: auto; margin: 0; }
+.painel .gcal-agendas { margin: 0; }
+.painel .gcal-agendas .p-item { flex-wrap: wrap; justify-content: space-between; }
+.painel .gcal-source-name { margin: 0; cursor: pointer; }
+.painel .gcal-source-name input { margin: 0 .4rem 0 0; }
+.painel .gcal-agendas select { width: auto; max-width: 18rem; margin: 0; }
+.painel .gcal-waiting { margin: 0; }
+.painel .gcal-waiting > summary { cursor: pointer; font-weight: 700; color: var(--p-tinta); }
+.painel .gcal-waiting-lista { margin: .5rem 0 0; padding-left: 1.1rem; }
+.painel .gcal-revisao select[data-gcal-sort] { width: auto; margin: 0; }
+.painel .gcal-review .p-item { flex-direction: column; align-items: stretch; gap: .55rem; }
+.painel .gcal-review .p-item > .p-item-acoes { justify-content: flex-start; }
+.painel .gcal-ligar { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; }
+.painel .gcal-ligar select { flex: 1 1 14rem; width: auto; margin: 0; }
+.painel .gcal-ligar button, .painel .gcal-review-actions button, .painel .gcal-more { width: auto; margin: 0; }
+.painel .gcal-review-actions { display: flex; flex-wrap: wrap; gap: .5rem; }
+.painel .gcal-remember { display: flex; align-items: center; gap: .45rem; margin: 0; font-size: .85rem; color: var(--p-tinta-suave); }
+.painel .gcal-remember input { margin: 0; }
+.painel .gcal-former-hint { display: block; margin: 0; }
+.painel .gcal-more { align-self: flex-start; }
+@media (max-width: 600px) {
+  .painel :is(.gcal-ligar, .gcal-review-actions, .gcal-actions) button { min-height: 44px; }
+  .painel .gcal-agendas select { max-width: none; width: 100%; }
+}
+
+/* Abas Aulas | Calendário | Para conferir (N) | Materiais (admin-class-logs.js, 2026-11-10) */
+.class-log-check-count { display: inline-block; min-width: 1.4em; margin-left: .35rem; padding: 0 6px; border-radius: 999px; background: var(--brand-fill); color: var(--on-brand-fill); font-size: .75rem; font-weight: 800; line-height: 1.5; text-align: center; }
+.class-log-check-count[hidden] { display: none; }
+.class-log-check-hint { margin: .25rem 0 1rem; }
+#admin-classlogs-check[hidden], #admin-classlogs-calendar-wrap[hidden] { display: none; }
+@media (max-width: 600px) {
+  #admin-classlogs-content .class-log-views { max-width: 100%; overflow-x: auto; }
+  #admin-classlogs-content .class-log-views .deck-topbar-btn { padding-left: .55rem; padding-right: .55rem; white-space: nowrap; }
+}
+
+/* Aulas registradas (proposta 4, 2026-11-10): busca, um bloco por mês e "mostrar mais" de 20 em 20. */
+.painel .aulas-box input[data-class-log-search] { margin: 0; }
+.painel .aulas-lista-aulas { display: flex; flex-direction: column; gap: 1rem; }
+.painel .aulas-mes { display: flex; flex-direction: column; gap: .5rem; }
+.painel .aulas-mes-titulo { margin: 0; font-size: .95rem; font-weight: 800; color: var(--p-tinta); }
+.painel .class-log-more { align-self: flex-start; width: auto; margin: 0; }
+
+/* Link de agenda da professora (Aulas > Calendário), caixa do Design System (teacher-class-logs.js, calendarFeedBoxHTML(true)). */
+.painel.feed-painel { margin: 0 0 1rem; }
+.painel .calendar-feed-box .calendar-feed-actions { display: flex; flex-wrap: wrap; gap: .5rem; }
+.painel .calendar-feed-box .calendar-feed-actions a[role=button] { width: auto; margin: 0; text-decoration: none; }
+.painel .calendar-feed-box .calendar-feed-copy { display: flex; gap: .5rem; align-items: center; }
+.painel .calendar-feed-box .calendar-feed-copy input { flex: 1; min-width: 0; margin: 0; font-size: .85rem; }
+.painel .calendar-feed-box .calendar-feed-copy button { width: auto; margin: 0; }
+@media (max-width: 600px) {
+  .painel .calendar-feed-box .calendar-feed-actions a[role=button], .painel .calendar-feed-box .calendar-feed-copy button, .painel .class-log-more { min-height: 44px; }
+}
+
+/* Para quem (proposta 3, 2026-11-10): Alunos + Turmas numa caixa só; fechada mostra os nomes escolhidos numa linha. */
+.painel .aulas-grupo-titulo { display: flex; align-items: center; gap: .5rem; margin: .5rem 0 0; font-size: .95rem; font-weight: 800; color: var(--p-tinta); }
+.painel .aulas-para-quem summary .aulas-titulo { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* Nova aula (proposta 5): Tópico e Lição de casa lado a lado; Observações e Notas em "Mais campos". */
+.painel .aulas-colunas { display: grid; grid-template-columns: 1fr; gap: 0 1rem; }
+@media (min-width: 700px) { .painel .aulas-colunas { grid-template-columns: 1fr 1fr; } }
+.painel .aulas-mais { margin: .25rem 0 1rem; }
+.painel .aulas-mais > summary { cursor: pointer; font-weight: 700; color: var(--p-tinta-suave); font-size: .92rem; padding: .35rem 0; }
+.painel .aulas-mais[open] > summary { margin-bottom: .5rem; }

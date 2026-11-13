@@ -323,8 +323,6 @@
 .challenge-second-example{ background: var(--paper); border-left:3px solid var(--paper-line); border-radius:6px 10px 10px 6px; }
 .challenge-second-example-text{ font-size:15px; }
 .accent-feedback-correct-word{ font-family: var(--font-display); font-size:26px; font-weight:800; margin:6px 0 12px; }
-.accent-feedback{ text-align:center; }
-.accent-feedback .accent-feedback-header{ text-align:center; }
 .challenge-retry-actions .btn, .challenge-complete-btn{ min-height:50px; font-size:16px; }
 /* Devolutiva ousada (acerto / quase / erro): ícone circular, título grande, linhas em caixas */
 .challenge-feedback, .listen-translate-feedback, .accent-feedback{ --c: var(--jade); border-left-width:1px; border-radius:18px; padding:20px 18px; box-shadow: var(--shadow-lift); }
@@ -553,8 +551,15 @@ textarea.challenges-admin-edit-input{ resize:vertical; }
 .expr-final-gain{ font-size:12px; font-weight:800; color:var(--ink-soft); }
 @keyframes expr-final-pop{ 0%{ transform:scale(.3) rotate(-12deg); opacity:0; } 100%{ transform:scale(1) rotate(0); opacity:1; } }
 @media (prefers-reduced-motion: reduce){ .expr-final.is-ok .expr-final-ico{ animation:none; } }
+.expr-order-line{ display:flex; align-items:center; justify-content:flex-start; gap:10px; flex-wrap:wrap; }
+.expr-order-icons{ display:inline-flex; gap:6px; vertical-align:middle; margin-left:6px; }
+.expr-example-line{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.expr-example-line .expr-order-icons{ margin-left:0; }
+.expr-order-line .expr-order-icons{ margin-left:0; }
+/* Acentuação: palavra certa na mesma caixa da resposta do Monte a frase (à esquerda, ícones de áudio ao lado; 2026-11-06). */
+.accent-feedback-correct-box{ margin:0 0 12px; }
+.accent-feedback-correct-box .accent-feedback-correct-word{ margin:0; font-size:22px; }
 .expr-order-full-tr, .expr-turn-tr{ margin-top:8px; font-size:14.5px; font-weight:600; color:var(--ink-soft); line-height:1.4; white-space:pre-line; }
-.expr-order-full .audio-btn-row{ margin-top:10px; }
 .expr-final-sum{ list-style:none; padding:0; margin:0 0 18px; text-align:left; background:var(--paper); border:1px solid var(--paper-line); border-radius:var(--radius); }
 .expr-final-sum li{ display:flex; justify-content:space-between; gap:12px; padding:12px 16px; font-size:14.5px; border-bottom:1px solid var(--paper-line); }
 .expr-final-sum li:last-child{ border-bottom:none; }
@@ -576,3 +581,8 @@ textarea.challenges-admin-edit-input{ resize:vertical; }
 .expr-literal-label{ font-weight:800; color:var(--ink-soft); }
 .expr-literal-note{ display:block; margin-top:4px; font-size:13px; color:var(--ink-soft); }
 @media (max-width:600px){ .expr-tr-btn{ min-height:44px; } }
+
+/* Etapa D (2026-11-04): números 1-N nas opções do Complete a frase (kbd-hint da trilha; só aparece com teclado e mouse). */
+.cloze-grammar .challenge-choice-btn{ position:relative; }
+@media (hover:hover) and (pointer:fine){ .cloze-grammar .challenge-choice-btn:has(.kbd-hint){ padding-left:34px; } }
+.cloze-grammar .challenge-choice-btn .kbd-hint{ top:50%; transform:translateY(-50%); }

@@ -1,6 +1,7 @@
 #!/bin/bash
 # Testa a 065 num Postgres LOCAL com o padrão restritivo de GRANTs (como o staging). Uso: run.sh
 set -e
+bash "$(cd "$(dirname "$0")" && pwd)/../banco-local.sh" >/dev/null  # liga o Postgres local se estiver desligado
 HERE=$(cd "$(dirname "$0")" && pwd); MIG="$HERE/../../shared/supabase_migrations"
 S="psql -h /tmp/pg -p 54329 -U pguser -q"
 $S postgres -c "do \$\$ begin if not exists (select 1 from pg_roles where rolname='postgres') then create role postgres superuser login; end if; end \$\$"

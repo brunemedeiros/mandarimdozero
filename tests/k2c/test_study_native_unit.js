@@ -97,7 +97,8 @@ for (const lang of ['fr', 'zh']){
   const ser = ctx.serializeCardsForSave(ctx.STATE.cards);
   const sA = ser.find(c => c.id === idA);
   // `released` entrou na Etapa 0 do currículo (2026-10-18): marca do portão de lição, ver tests/curriculo-ids.
-  const WL = ['ef','interval','reps','due','lapses','stability','difficulty','state','lastReview','fsrsReps','fsrsLapses','fsrsMigrated','firstLearnedDate','released'];
+  const WL = ['ef','interval','reps','due','lapses','stability','difficulty','state','lastReview','fsrsReps','fsrsLapses','fsrsMigrated','firstLearnedDate','released',
+    'variantWord']; // 2026-11-11: palavra dona do progresso nos cartões que trocam de palavra (shared/card-variants.js)
   check(lang + ' whitelist exatamente a especificada', JSON.stringify(run('STUDY_PROGRESS_FIELDS')) === JSON.stringify(WL));
   const allowed = new Set(['id', ...WL]);
   check(lang + ' serialização: só id + whitelist', ser.every(c => Object.keys(c).every(k => allowed.has(k))), Object.keys(sA));
@@ -105,7 +106,7 @@ for (const lang of ['fr', 'zh']){
   check(lang + ' serialização: progresso de A presente', sA.reps === 4 && sA.due === 555555);
   check(lang + ' serialização: A e B saem como entradas separadas', ser.some(c => c.id === idB) && ser.length === ctx.STATE.cards.length);
   const src = require('../e4/app-source').withCore(read(lang + '/app.js'));
-  check(lang + ' serializeState usa serializeCardsForSave', /cards: serializeCardsForSave\(STATE\.cards\)/.test(src));
+  check(lang + ' serializeState usa serializeCardsForSave', /cards: serializeCardsForSave\(STATE\.cards[,)]/.test(src));
   // round-trip: serializar -> reconstruir -> aplicar
   const json = JSON.parse(JSON.stringify(ser));
   ctx.STATE.cards = ctx.buildCardsFromUnits(ctx.UNITS);

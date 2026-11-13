@@ -551,7 +551,7 @@ function refreshHanziCardTexts(){
 function buildSearchIndex(){
   recalculateUnlockedUnits();
   const index = [];
-  UNITS.forEach(u => {
+  availableUnits(UNITS).forEach(u => {
     (u.vocab || []).forEach(v => {
       index.push({
         pinyin: v.p, hanzi: v.c, trans: v.t,
@@ -722,11 +722,11 @@ function renderTrailMapView(container){
   // Com módulos (shared/core/modulos-niveis.js): uma seção por módulo, com Revisão do módulo e Ponto de verificação,
   // e as histórias no mesmo lugar de sempre (logo depois da unidade). Hoje o zh não tem módulos.
   if (trailHasModules()){
-    renderModulesTrailMap(container, modulesOfLevel(LEVELS[0].id), { afterUnitNodes: storyMapNodes, describeExtra: storyMapDescribe });
+    renderModulesTrailMap(container, modulesOfLevel(LEVELS[0].id).filter(m => moduleVisibleUnitIds(m).length), { afterUnitNodes: storyMapNodes, describeExtra: storyMapDescribe });
     return;
   }
   const nodes = [];
-  UNITS.forEach(u => {
+  availableUnits(UNITS).forEach(u => {
     const st = unitBlockState(u);
     nodes.push({ key: 'u:' + u.id, kind: 'unit', icon: UNIT_ICONS[u.id] || '📖', label: u.title, state: st, current: st === 'current',
       aria: `${u.title}, ${TRAIL_MAP_STATE_LABEL[st]}` });

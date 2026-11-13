@@ -37,7 +37,7 @@ const LANGUAGE_REGISTRY_DATA = {
       "tts": {
         "voice": "fr-FR",
         "baseRate": 0.9,
-        "spokenRulesVersion": 4
+        "spokenRulesVersion": 6
       },
       "modules": [
         "desafios",
@@ -153,7 +153,7 @@ const LANGUAGE_REGISTRY_DATA = {
       "tts": {
         "voice": "pt-BR",
         "baseRate": 1,
-        "spokenRulesVersion": 3
+        "spokenRulesVersion": 5
       },
       "modules": [],
       "hasLevelTest": false,
@@ -5304,12 +5304,20 @@ function rbMakeCloze(sentence, gapWord){
 }
 
 // Tipo de cartão do item: erro = digitar a forma certa; frase com lacuna (estrutura/verbo) = completar; resto = ver resposta.
-function rbCardMode(item){
+// Verbo com várias formas ("je vais, tu vas, il va, ..."): digitar tudo exato e na ordem é injusto (caso da Rachel, 2026-11-06); vira cartão Normal.
+// Só para cartão NOVO: `existingMode` = tipo do cartão já entregue, que continua como está (mudar o tipo zera o progresso do aluno).
+function rbIsMultiForm(i){
+  return i.item_type === 'verbo' && String(i.answer || '').split(',').length >= 3;
+}
+function rbCardMode(item, existingMode){
   const i = rbNormalizeItem(item);
   if (i.item_type === 'erro') return 'type_answer';
   if ((i.item_type === 'estrutura' || i.item_type === 'verbo') && i.gap_word){
     const first = i.answer.split(' / ')[0];
-    if (first.split(/\s+/).length >= 3 && rbMakeCloze(first, i.gap_word)) return 'cloze';
+    if (first.split(/\s+/).length >= 3 && rbMakeCloze(first, i.gap_word)){
+      if (rbIsMultiForm(i) && existingMode !== 'cloze') return 'normal';
+      return 'cloze';
+    }
   }
   return 'normal';
 }
@@ -5321,13 +5329,13 @@ function rbItemTags(item){
 }
 
 // Item + aluno do Banco -> colunas nativas para a RPC approve_review_bank_item. Nunca grava: só monta e valida.
-function rbBuildCard(item, student){
+function rbBuildCard(item, student, opts){
   const i = rbNormalizeItem(item);
   const issues = rbItemIssues(i);
   if (issues.length) return { ok: false, error: 'Faltam campos: ' + issues.join(', ') };
   if (student.language_app_key === 'mandarim') return { ok: false, error: 'Cartão de mandarim precisa de pinyin: crie pelo formulário de cartões.' };
   const target = RB_LANG_SHORT[student.language_app_key], ref = student.reference_language || 'pt';
-  const mode = rbCardMode(i);
+  const mode = rbCardMode(i, opts && opts.existingMode);
   const st = createNativeNoteEditorState({ cardGenerationMode: mode, languageAppKey: student.language_app_key, origin: 'teacher', tags: rbItemTags(i) });
   st.privateNote = i.explanation || null;
   const add = (value, lang, role) => addFieldToEditorState(st, { content: { value }, lang, role: role || null });

@@ -834,6 +834,7 @@ window.I18N_CATALOG['en'] = {
   'games.whyTense': 'Why {tense}?', // ALTA
   'games.listen': 'Listen to the sentence', // ALTA
   'games.exit': 'Leave the game', // ALTA
+  'activity.exit': 'Exit', // ALTA -- etapa D (needs_review)
   'games.next': 'Next sentence', // ALTA
   'games.seeResult': 'See result', // ALTA
   'games.resultTitle': 'End of round', // ALTA
@@ -1535,8 +1536,16 @@ window.I18N_CATALOG['en'] = {
   'admin.classLogs.observationsOpt': 'Observations (optional)', // ALTA
   'admin.classLogs.notesOpt': 'Your private notes, the student doesn\'t see them (optional)', // ALTA
   'admin.classLogs.noFields': '(no fields filled in)', // ALTA
+  'admin.classLogs.searchPh': 'Search by topic, student, class or date', // ALTA
+  'admin.classLogs.searchEmpty': 'No lessons match this search.', // ALTA
+  'admin.classLogs.monthCount': { one: '{n} lesson', other: '{n} lessons' }, // ALTA
+  'admin.classLogs.showMore': 'Show {n} more ({rest} left)', // ALTA
   'admin.classLogs.listTitle': 'Recorded classes ({n})', // ALTA
+  'admin.classLogs.futureHidden': 'Showing up to today. {n} upcoming classes (created from your calendar) are in the Calendar.', // ALTA
+  'admin.classLogs.showFuture': 'Show upcoming ({n})', // ALTA
+  'admin.classLogs.hideFuture': 'Hide upcoming', // ALTA
   'admin.classLogs.emptyFor': 'No class recorded yet', // ALTA
+  'admin.classLogs.deleteTitle': 'Delete this lesson?', // ALTA
   'admin.classLogs.deleteConfirm': 'Delete this class record? This action cannot be undone.', // ALTA
   'admin.classLogs.deleted': '✓ Record deleted.', // ALTA
   'admin.classLogs.updated': '✓ Class updated.', // ALTA
@@ -1715,6 +1724,10 @@ window.I18N_CATALOG['en'] = {
   'admin.reports.reply.err.email_not_configured': 'Email sending is not yet configured on the server (RESEND_API_KEY/RESEND_FROM_EMAIL).', // ALTA
   'admin.reports.reply.err.resend_failed': 'We couldn\'t send the email right now. Try again in a moment.', // ALTA
   'admin.reports.reply.err.missing_fields': 'Fill in the subject and message.', // ALTA
+  'admin.reports.reply.err.placeholder': 'Replace the text in brackets with your reply before sending.', // ALTA (needs_review)
+  'admin.reports.reply.langPt': 'The email goes out in Portuguese, the language of the person\'s site. Write the message in Portuguese.', // ALTA (needs_review)
+  'admin.reports.reply.langEn': 'The email goes out in English, the language of the person\'s site.', // ALTA (needs_review)
+  'admin.reports.reply.langGuess': '(Older report: the language was picked from the course.)', // ALTA (needs_review)
   'admin.reports.reply.err.generic': 'We couldn\'t send the reply right now.', // ALTA
   'admin.reports.toast.updated': '✓ Report updated.', // ALTA
   'admin.reports.reply.send': 'Send reply', // ALTA
@@ -2146,7 +2159,7 @@ window.I18N_CATALOG['en'] = {
   'ui.review.newPerDay.5': '5 (slower pace)', // ALTA
   'ui.review.newPerDay.15': '15 (faster pace)', // ALTA
   'ui.review.newPerDay.20': '20 (very fast pace)', // ALTA
-  'ui.review.newPerDay.unlimited': 'No limit (all pending at once)', // ALTA
+  'ui.review.newPerDay.unlimited': 'No limit (all new cards at once)', // ALTA -- Etapa 7 (needs_review)
   'ui.review.intensity': 'Session intensity', // ALTA
   'ui.review.intensity.light': 'Light (shorter sessions)', // ALTA
   'ui.review.intensity.intense': 'Intense (longer sessions)', // ALTA
@@ -3520,6 +3533,9 @@ window.I18N_CATALOG['en'] = {
   'panel.classLog.skill.escuta': 'Listening', // ALTA
   'panel.classLog.skill.pronuncia': 'Pronunciation', // ALTA
   'panel.classLog.classrooms': 'Classes', // ALTA
+  'panel.gcal.formerHint': 'Former students are at the end of the list: the lesson only goes into their history, with no Board notice.', // ALTA
+  'panel.classLog.forWhom': 'For whom', // ALTA
+  'panel.classLog.moreFields': 'More fields (Observations and Notes)', // ALTA
   'panel.classLog.classroomsHint': 'A class lesson is logged once and shows up for every student in the class.', // ALTA
   'panel.classLog.labels.name': 'Label name', // ALTA
   'panel.classLog.labels.color': 'Color', // ALTA
@@ -3544,7 +3560,10 @@ window.I18N_CATALOG['en'] = {
   'panel.classLog.repeatUntil': 'Until', // ALTA
   'panel.classLog.repeatHint': 'Creates one lesson a week, same day and time, until that date (52 at most).', // ALTA
   'panel.classLog.views': 'How to see the lessons', // ALTA
-  'panel.classLog.view.register': 'Log', // ALTA
+  'panel.classLog.view.lessons': 'Lessons', // ALTA
+  'panel.classLog.view.check': 'To check', // ALTA
+  'panel.tab.materialsShort': 'Materials', // ALTA
+  'panel.classLog.checkHint': 'Lessons that came from Notion and Google Calendar and need you: approve them, say whose they are, or discard them.', // ALTA
   'panel.classLog.view.calendar': 'Calendar', // ALTA
   'panel.classLog.cal.prev': 'Previous month', // ALTA
   'panel.classLog.cal.next': 'Next month', // ALTA
@@ -3553,6 +3572,97 @@ window.I18N_CATALOG['en'] = {
   'panel.classLog.cal.empty': 'No lessons on this day.', // ALTA
   'panel.classLog.cal.schedule': 'Schedule a lesson on this day', // ALTA
   'myClassLogs.upcoming': 'Upcoming lessons', // ALTA
+  'panel.notion.formerGroup': 'Former students (history only)', // ALTA
+  'panel.notion.formerHint': 'Former student: the lesson only goes into their history, with no Board notice.', // ALTA
+  'panel.notion.assignRow': 'Link this lesson', // ALTA
+  'panel.notion.assignHint': 'This row has no student record in Notion. Pick who this one lesson belongs to, or discard it if it isn\'t a lesson (e.g. a sales pitch).', // ALTA
+  'panel.notion.title': 'Notion', // ALTA
+  'panel.notion.more': 'More Notion options', // ALTA
+  'panel.notion.oneWayShort': 'Read-only, from Notion to the site', // ALTA
+  'panel.notion.ind.recent': 'updated in 7 days', // ALTA
+  'panel.notion.ind.linked': 'linked lessons', // ALTA
+  'panel.notion.ind.approval': 'to approve', // ALTA
+  'panel.notion.ind.review': 'to review', // ALTA
+  'panel.notion.on': 'Connected', // ALTA
+  'panel.notion.toCheck': '{n} to check', // ALTA
+  'panel.notion.oneWay': 'One-way sync: Notion → site. The site only reads your Notion; nothing is written there.', // ALTA
+  'panel.notion.howItWorks': 'Connect your Notion lesson database: every hour the site reads new or edited rows and fills in the lesson for the same student and day (or creates it). That way the board notice, the bell and the Review Bank cards go out on their own.', // ALTA
+  'panel.notion.connect': 'Connect Notion', // ALTA
+  'panel.notion.reconnect': 'Connect again', // ALTA
+  'panel.notion.loadError': 'Couldn\'t load Notion right now.', // ALTA
+  'panel.notion.connectedTo': 'Connected to {name}.', // ALTA
+  'panel.notion.nextPick': 'Now choose your lesson database and tell the site which column is which.', // ALTA
+  'panel.notion.pickDatabaseBtn': 'Choose the lesson database', // ALTA
+  'panel.notion.disconnect': 'Disconnect', // ALTA
+  'panel.notion.disconnectConfirm': 'Disconnect Notion? Lessons already on the site stay as they are.', // ALTA
+  'panel.notion.disconnected': 'Notion disconnected.', // ALTA
+  'panel.notion.sourceLine': 'Reading "{title}" ({name})', // ALTA
+  'panel.notion.errReconnect': 'Notion asked you to sign in again. Click "Connect again".', // ALTA
+  'panel.notion.errGeneric': 'Something went wrong with Notion. Try again in a moment.', // ALTA
+  'panel.notion.recent': { one: '{n} lesson updated from Notion in the last 7 days', other: '{n} lessons updated from Notion in the last 7 days' }, // ALTA
+  'panel.notion.counts': '{linked} linked lessons · {approval} to approve · {review} to review · {waiting} waiting for an account', // ALTA
+  'panel.notion.syncNow': 'Read now', // ALTA
+  'panel.notion.reading': 'Reading Notion…', // ALTA
+  'panel.notion.synced': 'Notion read.', // ALTA
+  'panel.notion.editColumns': 'Columns', // ALTA
+  'panel.notion.otherDatabase': 'Change database', // ALTA
+  'panel.notion.pickDatabase': 'Which one is your lesson database?', // ALTA
+  'panel.notion.useThis': 'Use this one', // ALTA
+  'panel.notion.noDatabases': 'No Notion database was shared with the site.', // ALTA
+  'panel.notion.noDatabasesHint': 'Can\'t find yours? Click "Connect again" and, in Notion, tick your lesson database in the list of pages the site can read.', // ALTA
+  'panel.notion.cancel': 'Cancel', // ALTA
+  'panel.notion.columnsTitle': 'Columns of "{title}"', // ALTA
+  'panel.notion.columnsHint': 'Tell the site which Notion column holds each piece of information. Only Date and Student are required; anything left blank isn\'t read.', // ALTA
+  'panel.notion.relationHint': 'A column linked to another database (a relation, like a student record) only shows up here if that other database is also shared with the site in Notion (⋯ > Connections). The site only reads each page\'s name.', // ALTA
+  'panel.notion.f.date': 'Date', // ALTA
+  'panel.notion.f.student': 'Student or class', // ALTA
+  'panel.notion.f.topic': 'Lesson topic', // ALTA
+  'panel.notion.f.homework': 'For next lesson', // ALTA
+  'panel.notion.f.attendance': 'Attendance', // ALTA
+  'panel.notion.f.skills': 'Skills', // ALTA
+  'panel.notion.f.language': 'Language', // ALTA
+  'panel.notion.pickColumn': 'Choose the column', // ALTA
+  'panel.notion.noColumn': 'Don\'t read', // ALTA
+  'panel.notion.importFrom': 'Bring lessons from', // ALTA
+  'panel.notion.importFromHint': 'Lessons from before today go to "To approve": students only see them after you approve, and there\'s no board notice.', // ALTA
+  'panel.notion.saveSource': 'Save and read', // ALTA
+  'panel.notion.needDateStudent': 'Choose at least the Date and Student columns.', // ALTA
+  'panel.notion.errSave': 'Couldn\'t save. Check the columns and the date.', // ALTA
+  'panel.notion.reviewTitle': 'From Notion to check', // ALTA
+  'panel.notion.tabApproval': 'To approve ({n})', // ALTA
+  'panel.notion.tabReview': 'To review ({n})', // ALTA
+  'panel.notion.tabWaiting': 'Waiting for an account ({n})', // ALTA
+  'panel.notion.approvalHint': 'Lessons from before you connected Notion. Approving saves them to the lesson with no board notice or bell.', // ALTA
+  'panel.notion.reviewHint': 'The site couldn\'t tell whose lesson this is. Link the name once and the next rows with that name come in on their own.', // ALTA
+  'panel.notion.waitingTabHint': 'Students who don\'t have an account on the site yet (or aren\'t linked to you). Their lessons come in once the account is linked.', // ALTA
+  'panel.notion.approveAll': 'Approve all ({n})', // ALTA
+  'panel.notion.approve': 'Approve', // ALTA
+  'panel.notion.discard': 'Discard', // ALTA
+  'panel.notion.approved': 'Lesson approved.', // ALTA
+  'panel.notion.approvedAll': 'Lessons approved.', // ALTA
+  'panel.notion.discarded': 'Row discarded. The lesson on the site didn\'t change.', // ALTA
+  'panel.notion.pick': 'Whose lesson is this?', // ALTA
+  'panel.notion.pickFirst': 'Choose the student or class.', // ALTA
+  'panel.notion.link': 'Link', // ALTA
+  'panel.notion.ignoreName': 'Ignore this name', // ALTA
+  'panel.notion.linkHint': 'Applies to every row with "{name}".', // ALTA
+  'panel.notion.linked': 'Done.', // ALTA
+  'panel.notion.waitingHint': 'Waiting for the student\'s account on the site.', // ALTA
+  'panel.notion.noName': 'No name', // ALTA
+  'panel.notion.inNotion': 'in Notion: {name}', // ALTA
+  'panel.notion.r.unknown': 'A name the site didn\'t recognize.', // ALTA
+  'panel.notion.r.many': 'More than one student with this name.', // ALTA
+  'panel.notion.r.lang': 'This student studies more than one language with you: pick which.', // ALTA
+  'panel.notion.r.noDate': 'Row without a date.', // ALTA
+  'panel.notion.r.noName': 'Row without a student.', // ALTA
+  'panel.notion.connectedToast': 'Notion connected.', // ALTA
+  'panel.notion.cancelledToast': 'Notion connection cancelled.', // ALTA
+  'panel.gcal.more': 'More Google Calendar options', // ALTA
+  'panel.gcal.on': 'Connected', // ALTA
+  'panel.gcal.toReview': '{n} to review', // ALTA
+  'panel.gcal.ind.linked': 'linked lessons', // ALTA
+  'panel.gcal.ind.review': 'to review', // ALTA
+  'panel.gcal.ind.waiting': 'waiting for an account', // ALTA
   'panel.gcal.title': 'Google Calendar', // ALTA
   'panel.gcal.oneWay': 'One-way sync: Google Calendar → site. The site only reads your calendar; nothing is written to your Google account.', // ALTA
   'panel.gcal.howItWorks': 'Connect your Google account and choose the calendars with your lessons. Every 15 minutes the site reads the events and creates or updates each lesson on the right day and time, recognizing the student by the name in the title or the guest\'s email. If you move a lesson in Google, the site follows.', // ALTA
@@ -3637,14 +3747,6 @@ window.I18N_CATALOG['en'] = {
   'myClassLogs.view.list': 'List', // ALTA
   'myClassLogs.classLabel': 'Lesson', // ALTA
   'panel.classLog.cal.count': { one: '{n} lesson', other: '{n} lessons' }, // ALTA
-  'panel.classLog.review.title': { one: 'Review from Notion ({n} lesson)', other: 'Review from Notion ({n} lessons)' }, // ALTA
-  'panel.classLog.review.hint': 'These texts came from Notion and may include notes meant only for you, so the student can\'t see them yet. Edit anything you want and choose: show to the student or keep for yourself. The original text stays in your Notes.', // ALTA
-  'panel.classLog.review.toTopic': 'Topic (the student sees it)', // ALTA
-  'panel.classLog.review.toHomework': 'For next lesson (the student sees it)', // ALTA
-  'panel.classLog.review.show': 'Show to student', // ALTA
-  'panel.classLog.review.keep': 'Keep for myself', // ALTA
-  'panel.classLog.review.shown': 'The student can see this text now.', // ALTA
-  'panel.classLog.review.kept': 'Kept only in your Notes.', // ALTA
   'panel.classLog.classroomsSelected': { one: '{n} class', other: '{n} classes' }, // ALTA
   'panel.classLog.membersCount': { one: '{n} student', other: '{n} students' }, // ALTA
   'studentPanel.menu': '🎒 Student', // ALTA
@@ -3681,7 +3783,6 @@ window.I18N_CATALOG['en'] = {
   'mural.onlyFor': '🔒 Only for {name}', // ALTA
   'mural.individualChip': 'With {name}', // ALTA
   'mural.tab.mural': 'Board', // ALTA
-  'mural.tab.aulas': 'Lessons and materials', // ALTA
   'mural.tab.people': 'People', // ALTA
   'mural.pick.label': 'Class or student:', // ALTA
   'mural.pick.all': 'Everyone', // ALTA

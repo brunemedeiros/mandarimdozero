@@ -22,6 +22,7 @@ const http = require('http'), fs = require('fs'), path = require('path'), os = r
 const ROOT = path.resolve(__dirname, '..', '..');
 const REF = process.env.PARIDADE_5C_REF || '3035549c';
 const H = require('./desafios-harness.js');
+const { etapa7 } = require('./etapa7-neutro.js'); // Etapa 7 (2026-10-31): vocabulário aprovado pela dona
 // Botão de verificar traduzido DE PROPÓSITO (2026-10-26, etapa A): antes "Vérifier" nos dois idiomas, agora "Verificar" (pt-BR) e "Check" (en).
 const VERIFICAR_RE = />(Vérifier|Verificar|Check)<\/button>/g;
 
@@ -588,7 +589,13 @@ async function fingerprintEn(browser, root){
     // E-mail de contato do Premium trocado na main (brunemed1310@gmail.com -> contato@profbrune.com.br, shared/permissions.js): o REF antigo ainda tem o e-mail velho; neutralizado nos dois lados.
     const EXPR_AUDIO = new Set();
     { const dir = path.join(ROOT, 'fr/scripts/challenges_import'); for (const f of fs.readdirSync(dir).filter(f => /^lote-.*\.json$/.test(f) && !/content/.test(f))) for (const c of JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8'))) if (c.expressionAudioFile) EXPR_AUDIO.add(c.expressionAudioFile); }
-    const norm = (v) => JSON.stringify(v).replace(/127\.0\.0\.1:\d+/g, 'HOST').replace(/ch\.verify=(Vérifier|Verificar|Check)/g, 'ch.verify=VERIFICAR').replace(/\\"(Vérifier|Verificar|Check)\\"/g, '\\"VERIFICAR\\"').replace(VERIFICAR_RE, '>VERIFICAR</button>').replace(/mailto:(?:brunemed1310@gmail\.com|contato@profbrune\.com\.br)/g, 'mailto:EMAIL')
+    // Áudio de apoio só com ícones (decisão da autora, 2026-11-06): depois da resposta do Ouça e traduza e da Acentuação os botões "Ouvir de novo"/"Devagar" viraram ícones 🔊/🐢 ao lado da frase; neutralizado nos dois lados (o resto da tela continua comparado).
+    const ICONES_AUDIO = (x) => x.replace(/(?:\\n\s*| )?<span class=\\"expr-order-icons\\">.*?<\/button><\/span>/g, '').replace(/(?:\\n\s*)?<div class=\\"audio-btn-row\\">\s*(?:\\n\s*)?<button class=\\"dictation-play-btn\\" id=\\"(?:lt|accent)-replay-btn\\">.*?<\/div>/g, '');
+    // Selo do cartão concluído das Expressões: "no álbum" virou "Concluído" (decisão da autora, 2026-11-06); neutralizado nos dois lados (aceita barras de escape em qualquer profundidade).
+    const SELO = (x) => x.replace(/(expr-card-seal(?:\\)*">)(?:no álbum|in your album|Concluído|Completed)/g, '$1SELO');
+    // Acentuação: a palavra certa foi para a caixa da resposta (feedback-inner-box + linha com ícones, 2026-11-06); volta ao desenho antigo nos dois lados.
+    const CAIXA_ACENTO = (x) => x.replace(/<div class=\\"feedback-inner-box accent-feedback-correct-box\\"><div class=\\"expr-order-line\\"><span class=\\"accent-feedback-correct-word\\">(.*?)<\/span><\/div><\/div>/g, '<div class=\\"accent-feedback-correct-word\\">$1</div>');
+    const norm = (v) => SELO(CAIXA_ACENTO(ICONES_AUDIO(JSON.stringify(v)))).replace(/127\.0\.0\.1:\d+/g, 'HOST').replace(/ch\.verify=(Vérifier|Verificar|Check)/g, 'ch.verify=VERIFICAR').replace(/\\"(Vérifier|Verificar|Check)\\"/g, '\\"VERIFICAR\\"').replace(VERIFICAR_RE, '>VERIFICAR</button>').replace(/mailto:(?:brunemed1310@gmail\.com|contato@profbrune\.com\.br)/g, 'mailto:EMAIL')
       // Expressões, ajustes de 2026-10-30 (decisão da autora; docs/historico/21-auditoria-xp.md): (1) o áudio da expressão toca sozinho ao abrir a pergunta
       // (como na trilha): tira do registro de toques os mp3 das expressões, nos dois lados; (2) XP por passo (escolha 1, montar 2, Sua vez 2/1; antes só a Sua vez):
       // o XP guardado no estado (xp e daily.xp) é neutralizado nos dois lados. O resto da comparação segue valendo.
@@ -599,6 +606,16 @@ async function fingerprintEn(browser, root){
       .replace(/,(\\*\]|\])/g, '$1')
       .replace(/(\\?)"xp(\\?)":\d+/g, '$1"xp$2":0')
       .replace(/(\\?)"periodXp\1":\{[^}]*\}/g, '$1"periodXp$1":{}');
+    // Etapa 7, lotes 1a e 2 (2026-10-31, aprovados pela dona; docs/i18n/etapa7-vocabulario-auditoria.md seção 9): no site em
+    // português o selo "Free" virou "Grátis" e "1 ditado Free" virou "1 ditado grátis" (em inglês continua "Free"). A troca é a
+    // mesma do etapa7-neutro.js, feita na árvore antiga e só do lado pt; na lista de textos, a chave tier.free.
+    // Na cena "textos" vêm várias listas por idioma ("pt-BR", "en", "fr"...): só a lista "en" fica com "Free".
+    const GRATIS1 = (x) => etapa7(x).split('tier.free=Free').join('tier.free=Grátis').replace(/(\\*)"Free\1"/g, '$1"Grátis$1"');
+    const GRATIS = (x) => { const re = /(\\*)"([a-zA-Z-]+)\1":\[/g; const marks = []; let m; while ((m = re.exec(x))) marks.push({ i: m.index, lang: m[2] });
+      if (!marks.length) return GRATIS1(x);
+      let out = GRATIS1(x.slice(0, marks[0].i));
+      marks.forEach((mk, n) => { const seg = x.slice(mk.i, n + 1 < marks.length ? marks[n + 1].i : x.length); out += mk.lang === 'en' ? seg : GRATIS1(seg); });
+      return out; };
     for (const lado of ['pt', 'en']){
       const A = antes[lado], B = depois[lado];
       check(lado + ': a sequência rodou no fr de antes', Object.keys(A).length > (lado === 'pt' ? 900 : 30), Object.keys(A).length);
@@ -613,12 +630,30 @@ async function fingerprintEn(browser, root){
         }
         total++;
         let a = norm(A[k]), b = norm(B[k]);
+        if (lado === 'pt') a = GRATIS(a);
+        // Selo do concluído das Expressões na lista de textos ("no álbum" -> "Concluído", 2026-11-06; o SELO acima cobre só o HTML).
+        a = a.replace(/ch\.album\.seal=(?:no álbum|in your album)/g, 'ch.album.seal=SELO'); b = b.replace(/ch\.album\.seal=(?:Concluído|Completed)/g, 'ch.album.seal=SELO');
+        a = a.replace(/(\\*)"no álbum\1"/g, '$1"Concluído$1"').replace(/(\\*)"in your album\1"/g, '$1"Completed$1"'); // a mesma troca na lista de textos sem variáveis
+
+        // Etapa D (2026-11-08): no fim do Ouça e traduza, da Acentuação e do Complete a frase o botão Concluir virou "Continuar →"
+        // (challengeContinueButtonHTML; verde de sucesso só no acerto, classe correct-feedback-continue). Volta ao "✅ Concluir" de antes
+        // nesse botão (mesmo id), e a classe sai; as Expressões e o resto da cena continuam comparados.
+        // Ícones de áudio em shared (PR 443, 2026-11-06): o 🐢 ganhou uma classe de tamanho opcional, e sem ela sobra um espaço no fim
+        // do class ("audio-btn audio-btn-slow "). Não muda nada na tela; o espaço sai.
+        b = b.replace(/(class=(\\*)"audio-btn[^"\\]*?) +(\2")/g, '$1$3');
+        b = b.replace(/(challenge-complete-btn(?: correct-feedback-continue)?(\\*)" id=\2"challenge-complete-btn\2"[^>]*>)Continuar →</g, '$1✅ Concluir<').replace(/ correct-feedback-continue/g, '');
         // Expressões em passos (2026-10-26, docs/historico/23-auditoria-telas-de-exercicio.md): a pergunta e a devolutiva das Expressões mudaram
         // DE PROPÓSITO (palpite + opções numeradas + passos). Cena do player de Expressão (antes: desfoque/devolutiva única; agora: expr-wrap)
         // não se compara; o resto, sim. "dep_" de Expressão compara só o estado (o tamanho do HTML leva o player junto).
         if (/challenge-hypothesis|challenge-feedback-meaning|challenge-microactivity/.test(a) && /expr-wrap|expr-panel|expr-final/.test(b)){ iguais++; passed++; continue; }
+        // Etapa D (2026-11-04, aprovada pela dona; docs/telas-exercicio-etapa-d-proposta.md): Ouça e traduza, Acentuação e Complete a frase
+        // ganharam cabeçalho, barra do topo, comando, "Não sei" e "Continuar" (ch-step-wrap). Cena com esses players não se compara; o resto, sim.
+        if (/ch-step-wrap/.test(b) && !/ch-step-wrap/.test(a)){ iguais++; passed++; continue; }
         const idDep = (k.match(/^dep_(.+)_\d+$/) || [])[1];
         if (idDep && String(A.expr_ids || '').split(',').includes(idDep)){ a = a.replace(/^"\d+/, '"'); b = b.replace(/^"\d+/, '"'); }
+        // Etapa D (2026-11-08): o player do Ouça e traduza, da Acentuação e do Complete a frase mudou (ch-step-wrap, ver acima), e o
+        // número do começo da cena dep_ é o tamanho do HTML da aba com o player junto. Nessas, compara só o estado salvo.
+        if (idDep && /^(accent|lt|cloze)-/.test(idDep)){ a = a.replace(/^"\d+/, '"'); b = b.replace(/^"\d+/, '"'); }
         if (a === b){ iguais++; passed++; continue; }
         let i = 0; while (i < a.length && a[i] === b[i]) i++;
         check('igual ao fr de antes (' + lado + '): ' + k, false, { antes: a.slice(Math.max(0, i - 200), i + 250), depois: (b || '').slice(Math.max(0, i - 200), i + 250) });

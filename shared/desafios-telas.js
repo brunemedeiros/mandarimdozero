@@ -18,8 +18,15 @@ const SLOW_AUDIO_RATE = 0.65;
 function slowAudioBtnHTML(id){
   return `<button class="dictation-play-btn dictation-play-btn-slow" id="${id}" title="${t('fr.audio.listenSlower')}">🐢 ${chT('ch.slow')}</button>`;
 }
-function slowAudioIconBtnHTML(id){
-  return `<button class="audio-btn audio-btn-slow" id="${id}" aria-label="${t('fr.audio.listenSlowly')}" title="${t('fr.audio.listenSlowly')}">🐢</button>`;
+// Áudio só com ícone (🔊 cinza, o mesmo da Revisão e da Conjugação; decisão da autora, 2026-11-06): para áudio de apoio ao lado da frase.
+function audioIconsHTML(playId, slowId){ return `<span class="expr-order-icons">${listenIconBtnHTML(playId)}${slowAudioIconBtnHTML(slowId, 'audio-btn-md')}</span>`; }
+// Rótulo do ícone de ouvir: chave do idioma estudado vinda de registerChallenges (audioListenKey), com a do fr como reserva.
+function audioListenKeyCh(){ return chCfg().audioListenKey || 'fr.audio.listen'; }
+function listenIconBtnHTML(id){
+  return `<button class="audio-btn audio-btn-md" id="${id}" aria-label="${t(audioListenKeyCh())}" title="${t(audioListenKeyCh())}">🔊</button>`;
+}
+function slowAudioIconBtnHTML(id, extraClass){
+  return `<button class="audio-btn audio-btn-slow ${extraClass || ''}" id="${id}" aria-label="${t('fr.audio.listenSlowly')}" title="${t('fr.audio.listenSlowly')}">🐢</button>`;
 }
 
 // ---------- Unidade opcional "Desafios do Módulo N" (Premium) ----------
@@ -166,7 +173,7 @@ function challengeFeedbackWrapperHTML(typeClass, isCorrect, headerText, bodyHTML
     <div class="${typeClass}-feedback ${cls}">
       <div class="${typeClass}-feedback-header"><span class="fb-ico" aria-hidden="true">${out === 'ok' ? '✓' : out === 'partial' ? '~' : '✕'}</span><span class="fb-title">${String(headerText).replace(/^[\u2705\u274C\u26A0\uFE0F\s]+/, '')}</span></div>
       ${bodyHTML}
-      ${out === 'fail' ? challengeRetryButtonsHTML() : challengeCompleteButtonHTML()}
+      ${out === 'fail' ? challengeRetryButtonsHTML() : challengeContinueButtonHTML(out)}
     </div>
   `;
 }
@@ -181,7 +188,20 @@ function challengeRetryButtonsHTML(){
 function challengeCompleteButtonHTML(){
   return `<button class="btn btn-primary challenge-complete-btn" id="challenge-complete-btn" style="margin-top:16px;width:100%;">${chT('ch.complete')}</button>`;
 }
-function wireChallengeCompleteButton(c){
+// Fim de Ouça e traduza, Acentuação e Complete a frase (etapa D): "Continuar →", verde no acerto como na trilha. Mesmo id do
+// "Concluir" (o Enter e wireChallengeCompleteButton continuam valendo); as Expressões mantêm o "Concluir" da tela final.
+function challengeContinueButtonHTML(outcome){
+  return `<button class="btn btn-primary challenge-complete-btn${outcome === 'ok' ? ' correct-feedback-continue' : ''}" id="challenge-complete-btn" style="margin-top:16px;width:100%;">${t('common.continueArrow')}</button>`;
+}
+// XP da Acentuação (decisão da autora, 2026-11-10; mesmo padrão da trilha, constantes de shared/srs.js, ver .claude/rules/xp.md): digitar certo
+// = EXERCISE_XP_PRODUCE, "quase" = EXERCISE_XP_ALMOST, errou = 0 (nem há Concluir). Só na PRIMEIRA conclusão (refazer concluído ou "Revisar erros" = 0).
+function accentXP(c, outcome){
+  if (isChallengeCompleted(c.id) || challengePreviewMode) return 0;
+  return outcome === 'ok' ? EXERCISE_XP_PRODUCE : outcome === 'partial' ? EXERCISE_XP_ALMOST : 0;
+}
+// Quanto de XP o último "Concluir" pagou (a tela de conclusão mostra; 0 = nada a mostrar).
+let challengeLastXP = 0;
+function wireChallengeCompleteButton(c, xpGain){
   const retry = document.getElementById('challenge-retry-btn');
   if (retry){
     retry.addEventListener('click', () => openChallengePlayer(c.id));
@@ -196,6 +216,8 @@ function wireChallengeCompleteButton(c){
   const btn = document.getElementById('challenge-complete-btn');
   if (!btn) return;
   btn.addEventListener('click', () => {
+    challengeLastXP = 0;
+    if (xpGain > 0 && !isChallengeCompleted(c.id)){ challengeLastXP = xpGain; addXP(xpGain); } // XP antes de marcar concluído
     markChallengeCompleted(c.id);
     if (challengeReviewQueueActive){
       const nextId = dueChallengeReviews()[0];
@@ -682,9 +704,10 @@ function openChallengePlayer(id){
   document.getElementById('challenges-list-wrap').style.display = 'none';
   document.getElementById('challenge-player-wrap').style.display = 'block';
   document.getElementById('challenge-preview-banner').style.display = 'none';
-  // Barra do topo no molde da trilha (X, ⌨️, ⚑, progresso): por enquanto só nas Expressões (shared/activity-focus.js).
+  // Barra do topo no molde da trilha (X, ⌨️, ⚑, progresso) em todos os tipos (Expressões desde 2026-10-26; Ouça e traduza,
+  // Acentuação e Complete a frase desde a etapa D, 2026-11-04; shared/activity-focus.js).
   const playerWrap = document.getElementById('challenge-player-wrap');
-  if (c.type === 'expression') playerWrap.dataset.lessonBar = '1'; else delete playerWrap.dataset.lessonBar;
+  playerWrap.dataset.lessonBar = '1';
   if (typeof syncActivityFocus === 'function') syncActivityFocus();
   // Só pra diagnóstico de report (ver captureReportContext em
   // shared/reports.js) -- não existia nenhuma referência global ao desafio
@@ -717,7 +740,37 @@ let EXPR_RUN = null; // { c, chosenIdx, isCorrect, revealed, answered, guess, tu
 
 function exprHeadHTML(c){
   return `<div class="lesson-unit-context"><div class="lesson-hint-eyebrow">${chT('ch.title')}${c.level ? ' · ' + escapeHtmlChallenge(c.level) : ''}</div>
-    <div class="lesson-unit-title">${chT('ch.cat.expression.title')}</div></div>`;
+    <div class="lesson-unit-title">${chT('ch.cat.' + (c.type || 'expression') + '.title')}</div></div>`;
+}
+
+// Etapa D (2026-11-04, aprovada pela dona): Ouça e traduza, Acentuação e Complete a frase no molde da trilha. Mesmo cabeçalho e barra
+// das Expressões; progresso por passo: pergunta = metade, devolutiva = cheia. "Não sei" revela a resposta e conta como erro.
+const CH_STEP_QUESTION_PCT = 50;
+function chStepRender(c, html){
+  const content = document.getElementById('challenge-player-content');
+  const bar = typeof activityBarGrab === 'function' ? activityBarGrab('challenge-player-wrap') : null;
+  stopExerciseAudio();
+  clearKeyboardOptions();
+  content.innerHTML = exprHeadHTML(c) + html;
+  if (typeof activityBarMount === 'function') activityBarMount('challenge-player-wrap', bar, '.lesson-unit-context');
+  if (typeof activityBarProgress === 'function') activityBarProgress('challenge-player-wrap', CH_STEP_QUESTION_PCT);
+  window.scrollTo(0, 0);
+}
+// "Resposta revelada" da trilha, sem o emoji (o invólucro dos Desafios põe o próprio ícone ✕).
+function chRevealedTitle(){ return t('feedback.header.revealed').replace(/^\S+\s+/, ''); }
+function chDontKnowHTML(){
+  return `<button class="exercise-dontknow" id="ch-dontknow-btn">${t('common.dontKnow')}</button>`;
+}
+// Depois da devolutiva: barra cheia, "Não sei" some, teclas das opções desligadas.
+function chStepAnswered(){
+  if (typeof activityBarProgress === 'function') activityBarProgress('challenge-player-wrap', 100);
+  const dk = document.getElementById('ch-dontknow-btn');
+  if (dk) dk.classList.add('disabled');
+  clearKeyboardOptions();
+  // Foco no próximo passo (Continuar, ou Tentar de novo no erro): o Enter avança mesmo vindo da caixa de texto, e o leitor de tela chega
+  // direto à devolutiva.
+  const next = document.getElementById('challenge-complete-btn') || document.getElementById('challenge-retry-btn');
+  if (next) next.focus({ preventScroll: true });
 }
 
 // A barra do topo mora dentro do conteúdo: pega antes de reescrever e recoloca logo abaixo do cabeçalho.
@@ -886,9 +939,8 @@ function exprShowExamples(c){
       ${exs.map((ex, i) => { const v = exprExampleView(c, exKeys[i]); return `
         <div class="exercise-prompt expr-example">
           <div class="expr-example-label">${chT('ch.expr.example' + (i + 1))}</div>
-          <div class="expr-example-text" lang="${chCfg().lang}">${exprHighlightHTML(ex.text, v.mark)}</div>
+          <div class="expr-example-line"><div class="expr-example-text" lang="${chCfg().lang}">${exprHighlightHTML(ex.text, v.mark)}</div>${ex.audioFile ? audioIconsHTML('expr-ex' + i + '-play', 'expr-ex' + i + '-slow') : ''}</div>
           ${v.tr ? `<button type="button" class="expr-tr-btn" id="expr-ex${i}-trbtn">${chT('ch.expr.seeTranslation')}</button><div class="expr-example-tr" id="expr-ex${i}-tr" hidden>${escapeHtmlChallenge(v.tr)}</div>` : ''}
-          ${ex.audioFile ? `<div class="audio-btn-row"><button class="dictation-play-btn" id="expr-ex${i}-play">${chT('ch.listenFr')}</button>${slowAudioBtnHTML('expr-ex' + i + '-slow')}</div>` : ''}
         </div>`; }).join('')}
       <button class="btn btn-primary btn-block" id="expr-continue-btn">${t('common.continueArrow')}</button>
     </div>`, 2);
@@ -966,10 +1018,9 @@ function exprShowOrder(c){
     }
     blocksEl.style.display = 'none';
     const dk = document.getElementById('expr-order-dontknow-btn'); if (dk) dk.classList.add('disabled');
-    // Frase montada inteira, com a expressão em destaque, áudio e tradução: é a recompensa de quem acabou de montá-la (como na trilha).
+    // Frase montada inteira, com a expressão em destaque, ícones pequenos de áudio ao lado (▶ e 🐢, sem texto) e a tradução (decisão da autora, 2026-11-05).
     const ev = exprExampleView(c, 0);
-    const full = `<div class="feedback-inner-box expr-order-full" lang="${lang}">${exprHighlightHTML(c.example.text, ev.mark)}
-      ${file ? `<div class="audio-btn-row"><button class="dictation-play-btn" id="expr-order-done-play">${chT('ch.listenFr')}</button>${slowAudioBtnHTML('expr-order-done-slow')}</div>` : ''}
+    const full = `<div class="feedback-inner-box expr-order-full" lang="${lang}"><div class="expr-order-line"><span>${exprHighlightHTML(c.example.text, ev.mark)}</span>${file ? audioIconsHTML('expr-order-done-play', 'expr-order-done-slow') : ''}</div>
       ${ev.tr ? `<div class="expr-order-full-tr">${escapeHtmlChallenge(ev.tr)}</div>` : ''}</div>`;
     const panel = document.createElement('div');
     panel.className = (ok ? 'correct-feedback' : 'wrong-feedback') + ' expr-panel';
@@ -1146,9 +1197,8 @@ function markedWordsHTML(parts){
 }
 
 function openListenTranslatePlayer(c){
-  const content = document.getElementById('challenge-player-content');
-  content.innerHTML = `
-    <div class="challenge-expression">${chT('ch.label.listen')}</div>
+  chStepRender(c, `<div class="exercise-wrap ch-step-wrap">
+    <div class="exercise-prompt-label">${chT('ch.cmd.listen')}</div>
     <div class="listen-translate-audio-wrap audio-btn-row">
       <button class="dictation-play-btn" id="lt-play-btn">${chT('ch.listenFr')}</button>
       ${slowAudioBtnHTML('lt-play-slow-btn')}
@@ -1162,8 +1212,9 @@ function openListenTranslatePlayer(c){
     <div class="listen-translate-actions">
       <button class="btn btn-primary" id="lt-verify-btn">${chT('ch.verify')}</button>
     </div>
+    ${chDontKnowHTML()}
     <div id="lt-feedback-wrap" aria-live="polite" aria-atomic="true"></div>
-  `;
+  </div>`);
 
   document.getElementById('lt-play-btn').addEventListener('click', (e) => {
     if (c.audioFile) playPregeneratedAudio(`challenges/${c.audioFile}`, e.currentTarget);
@@ -1177,6 +1228,11 @@ function openListenTranslatePlayer(c){
     e.currentTarget.style.display = 'none';
   });
   document.getElementById('lt-verify-btn').addEventListener('click', () => checkListenTranslateAnswer(c));
+  document.getElementById('ch-dontknow-btn').addEventListener('click', () => checkListenTranslateAnswer(c, true));
+  // Enter envia (como as respostas digitadas da trilha); Shift+Enter quebra a linha.
+  document.getElementById('lt-answer-input').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); checkListenTranslateAnswer(c); }
+  });
 }
 
 function translationAlertsHTML(an, outcome){
@@ -1195,16 +1251,20 @@ function translationAlertsHTML(an, outcome){
   return parts.join('');
 }
 
-function checkListenTranslateAnswer(c){
+// revealed = "Não sei": mostra a resposta e conta como erro (sem comparar o que foi digitado).
+function checkListenTranslateAnswer(c, revealed){
+  if (document.getElementById('lt-verify-btn').style.display === 'none') return;
   const input = document.getElementById('lt-answer-input');
-  const studentAnswer = input.value.trim();
+  const studentAnswer = revealed ? '' : input.value.trim();
   // Site em inglês com referências em inglês (overlay): comparador do idioma da
   // tradução (shared/translation-compare.js). Senão, a análise em português
   // completa (alertas de negação/número/mustInclude, 3 níveis).
   const lt = listenTranslateSetup(c);
   const i18nCmp = lt.lang !== 'pt-BR';
   let personMismatch, outcome, analysis = null, ptPt = null;
-  if (i18nCmp){
+  if (revealed){
+    personMismatch = null; outcome = 'fail';
+  } else if (i18nCmp){
     personMismatch = lt.cmp.personMismatch(studentAnswer);
     outcome = (!personMismatch && lt.cmp.isAcceptable(studentAnswer, lt.refs)) ? 'ok' : 'fail';
   } else {
@@ -1226,18 +1286,17 @@ function checkListenTranslateAnswer(c){
       ${ptPt ? ptVariantes().ptBrFeedbackHTML(ptPt.marks, { t: chT, keys: { line: 'ch.lt.ptpt', pair: 'ch.lt.ptpt.pair' }, esc: escapeHtmlChallenge, tag: 'p', cls: 'listen-translate-feedback-warning lt-ptpt-warning' }) : ''}${personMismatch ? `<p class="listen-translate-feedback-warning">${chT('ch.lt.agreement', { pronoun: escapeHtmlChallenge(personMismatch.pronoun), verb: escapeHtmlChallenge(personMismatch.verb) })}</p>` : ''}
       ${analysis ? translationAlertsHTML(analysis, outcome) : ''}
       <div class="fb-cmp">
-        <p class="listen-translate-feedback-row"><strong>${chT('ch.lt.yours')}</strong>${yoursHTML}</p>
+        ${revealed ? '' : `<p class="listen-translate-feedback-row"><strong>${chT('ch.lt.yours')}</strong>${yoursHTML}</p>`}
         <p class="listen-translate-feedback-row"><strong>${chT('ch.lt.expected')}</strong>${expectedHTML}</p>
       </div>
-      <p class="listen-translate-feedback-row"><strong>${chT('ch.lt.original')}</strong>${escapeHtmlChallenge(c.sentenceFr)}</p>
+      <p class="listen-translate-feedback-row"><strong>${chT('ch.lt.original')}</strong>${escapeHtmlChallenge(c.sentenceFr)} ${audioIconsHTML('lt-replay-btn', 'lt-replay-slow-btn')}</p>
       ${lt.explanation ? `<p class="listen-translate-feedback-row"><strong>${chT('ch.lt.explanation')}</strong>${escapeHtmlChallenge(lt.explanation)}</p>` : ''}
-      <div class="audio-btn-row">
-        <button class="dictation-play-btn" id="lt-replay-btn">${chT('ch.listenAgain')}</button>
-        ${slowAudioBtnHTML('lt-replay-slow-btn')}
-      </div>
   `;
-  document.getElementById('lt-feedback-wrap').innerHTML = challengeFeedbackWrapperHTML('listen-translate', isCorrect, outcome === 'ok' ? chT('ch.lt.right') : outcome === 'partial' ? chT(ptPt ? 'ch.lt.partialPtPt' : 'ch.lt.partial') : chT('ch.notQuite'), ltBodyHTML, outcome);
+  document.getElementById('lt-feedback-wrap').innerHTML = challengeFeedbackWrapperHTML('listen-translate', isCorrect, outcome === 'ok' ? chT('ch.lt.right') : outcome === 'partial' ? chT(ptPt ? 'ch.lt.partialPtPt' : 'ch.lt.partial') : revealed ? chRevealedTitle() : chT('ch.notQuite'), ltBodyHTML, outcome);
   document.getElementById('lt-verify-btn').style.display = 'none';
+  chStepAnswered();
+  input.readOnly = true;
+  if (!revealed) playFeedbackSound(outcome !== 'fail');
   recordChallengeReviewOutcome(c, outcome);
   document.getElementById('lt-replay-btn').addEventListener('click', (e) => {
     if (c.audioFile) playPregeneratedAudio(`challenges/${c.audioFile}`, e.currentTarget);
@@ -1250,9 +1309,8 @@ function checkListenTranslateAnswer(c){
 
 
 function openAccentPlayer(c){
-  const content = document.getElementById('challenge-player-content');
-  content.innerHTML = `
-    <div class="challenge-expression">${chT('ch.label.accent')}</div>
+  chStepRender(c, `<div class="exercise-wrap ch-step-wrap">
+    <div class="exercise-prompt-label">${chT('ch.cmd.accent')}</div>
     <div class="accent-audio-wrap audio-btn-row">
       <button class="dictation-play-btn" id="accent-play-btn">${chT('ch.listenFr')}</button>
       ${slowAudioBtnHTML('accent-play-slow-btn')}
@@ -1263,8 +1321,10 @@ function openAccentPlayer(c){
     <div class="listen-translate-actions">
       <button class="btn btn-primary" id="accent-verify-btn">${chT('ch.verify')}</button>
     </div>
+    ${chDontKnowHTML()}
     <div id="accent-feedback-wrap" aria-live="polite" aria-atomic="true"></div>
-  `;
+  </div>`);
+  const content = document.getElementById('challenge-player-content');
 
   chCfg().wireAccentPicker(content, document.getElementById('accent-answer-input'));
   document.getElementById('accent-play-btn').addEventListener('click', (e) => {
@@ -1274,30 +1334,32 @@ function openAccentPlayer(c){
     if (c.audioFile) playPregeneratedAudio(`challenges/${c.audioFile}`, e.currentTarget, false, SLOW_AUDIO_RATE);
   });
   document.getElementById('accent-answer-input').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') checkAccentAnswer(c);
+    // preventDefault: sem ele, o foco vai para o Continuar/Tentar de novo e o mesmo Enter clicava nele na hora.
+    if (e.key === 'Enter'){ e.preventDefault(); checkAccentAnswer(c); }
   });
   document.getElementById('accent-verify-btn').addEventListener('click', () => checkAccentAnswer(c));
+  document.getElementById('ch-dontknow-btn').addEventListener('click', () => checkAccentAnswer(c, true));
 }
 
-function checkAccentAnswer(c){
+function checkAccentAnswer(c, revealed){
+  if (document.getElementById('accent-verify-btn').style.display === 'none') return;
   const input = document.getElementById('accent-answer-input');
-  const studentAnswer = input.value.trim();
-  const outcome = accentAnswerOutcome(studentAnswer, c.targetText);
+  const studentAnswer = revealed ? '' : input.value.trim();
+  const outcome = revealed ? 'fail' : accentAnswerOutcome(studentAnswer, c.targetText);
   const isCorrect = outcome === 'ok';
   // Desafio de conteúdo continua clicável mesmo já concluído -- não dá XP
   // (mesma decisão de answerChallenge, ver auditoria do sistema de XP).
 
   const accentBodyHTML = `
-      ${!isCorrect ? `<p class="accent-feedback-answer">${chT('ch.accent.yours', { answer: escapeHtmlChallenge(studentAnswer || '—') })}</p>` : ''}
-      <div class="accent-feedback-correct-word">${escapeHtmlChallenge(c.targetText)}</div>
-      <div class="audio-btn-row">
-        <button class="dictation-play-btn" id="accent-replay-btn">${chT('ch.listenFr')}</button>
-        ${slowAudioBtnHTML('accent-replay-slow-btn')}
-      </div>
+      ${!isCorrect && !revealed ? `<p class="accent-feedback-answer">${chT('ch.accent.yours', { answer: escapeHtmlChallenge(studentAnswer || '—') })}</p>` : ''}
+      <div class="feedback-inner-box accent-feedback-correct-box"><div class="expr-order-line"><span class="accent-feedback-correct-word">${escapeHtmlChallenge(c.targetText)}</span>${audioIconsHTML('accent-replay-btn', 'accent-replay-slow-btn')}</div></div>
       ${(challengeText(c, 'explanation')) ? `<p class="accent-feedback-explanation">${escapeHtmlChallenge(challengeText(c, 'explanation'))}</p>` : ''}
   `;
-  document.getElementById('accent-feedback-wrap').innerHTML = challengeFeedbackWrapperHTML('accent', isCorrect, outcome === 'ok' ? chT('ch.accent.right') : outcome === 'partial' ? chT('ch.accent.partial') : chT('ch.accent.wrong'), accentBodyHTML, outcome);
+  document.getElementById('accent-feedback-wrap').innerHTML = challengeFeedbackWrapperHTML('accent', isCorrect, outcome === 'ok' ? chT('ch.accent.right') : outcome === 'partial' ? chT('ch.accent.partial') : revealed ? chRevealedTitle() : chT('ch.accent.wrong'), accentBodyHTML, outcome);
   document.getElementById('accent-verify-btn').style.display = 'none';
+  chStepAnswered();
+  input.readOnly = true;
+  if (!revealed) playFeedbackSound(outcome !== 'fail');
   recordChallengeReviewOutcome(c, outcome);
   document.getElementById('accent-replay-btn').addEventListener('click', (e) => {
     if (c.audioFile) playPregeneratedAudio(`challenges/${c.audioFile}`, e.currentTarget);
@@ -1305,7 +1367,7 @@ function checkAccentAnswer(c){
   document.getElementById('accent-replay-slow-btn').addEventListener('click', (e) => {
     if (c.audioFile) playPregeneratedAudio(`challenges/${c.audioFile}`, e.currentTarget, false, SLOW_AUDIO_RATE);
   });
-  wireChallengeCompleteButton(c);
+  wireChallengeCompleteButton(c, accentXP(c, outcome));
 }
 
 
@@ -1314,12 +1376,11 @@ function openClozeGrammarPlayer(c){
   const blanks = c.blanks || [];
   const chosen = blanks.map(() => null);
   const parts = clozeGrammarParts(c.sentenceFr);
-  const content = document.getElementById('challenge-player-content');
   const sentenceHTML = parts.map((p, i) => escapeHtmlChallenge(p) +
     (i < parts.length - 1 ? `<span class="cloze-grammar-slot" data-slot="${i}">${CLOZE_GRAMMAR_BLANK}</span>` : '')).join('');
-  content.innerHTML = `
-    <div class="cloze-grammar">
-      <p class="challenge-question">${chT('ch.cloze.instruction')}</p>
+  chStepRender(c, `
+    <div class="cloze-grammar exercise-wrap ch-step-wrap">
+      <div class="exercise-prompt-label">${chT('ch.cmd.cloze')}</div>
       <div class="cloze-grammar-sentence" id="cloze-grammar-sentence">${sentenceHTML}</div>
       ${blanks.map((b, i) => `
         <div class="cloze-grammar-group" data-blank="${i}">
@@ -1330,9 +1391,21 @@ function openClozeGrammarPlayer(c){
         </div>`).join('')}
       <p class="cloze-grammar-msg" id="cloze-grammar-msg"></p>
       <button class="btn btn-primary btn-block" id="cloze-grammar-verify-btn">${chT('ch.verify')}</button>
-      <div id="cloze-grammar-feedback-wrap"></div>
+      ${chDontKnowHTML()}
+      <div id="cloze-grammar-feedback-wrap" aria-live="polite" aria-atomic="true"></div>
     </div>
-  `;
+  `);
+  const content = document.getElementById('challenge-player-content');
+  // Números 1-N e teclas (molde da trilha): cada grupo ganha os números; as teclas valem para a primeira lacuna ainda vazia
+  // (ou a última, se todas já têm escolha).
+  const groupBtns = (i) => content.querySelectorAll(`.cloze-grammar-group .challenge-choice-btn[data-blank="${i}"]`);
+  const wireKeys = () => {
+    if (typeof wireKeyboardOptions !== 'function') return;
+    const first = chosen.findIndex(x => x == null);
+    const active = first < 0 ? blanks.length - 1 : first;
+    blanks.forEach((_, i) => { if (i !== active) wireKeyboardOptions(groupBtns(i), { mode: 'sequential' }); });
+    wireKeyboardOptions(groupBtns(active), { mode: 'sequential' });
+  };
   content.querySelectorAll('.cloze-grammar-group .challenge-choice-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const i = Number(btn.dataset.blank);
@@ -1341,16 +1414,24 @@ function openClozeGrammarPlayer(c){
       const slot = content.querySelector(`.cloze-grammar-slot[data-slot="${i}"]`);
       if (slot){ slot.textContent = chosen[i]; slot.classList.add('filled'); }
       document.getElementById('cloze-grammar-msg').textContent = '';
+      wireKeys();
     });
   });
+  wireKeys();
   document.getElementById('cloze-grammar-verify-btn').addEventListener('click', () => {
     const res = clozeGrammarOutcome(c, chosen);
     if (!res.complete){ document.getElementById('cloze-grammar-msg').textContent = chT('ch.cloze.chooseAll'); return; }
     renderClozeGrammarFeedback(c, chosen, res);
   });
+  // "Não sei": revela a frase certa e conta como erro.
+  document.getElementById('ch-dontknow-btn').addEventListener('click', () => {
+    renderClozeGrammarFeedback(c, blanks.map(() => null), { complete: true, outcome: 'fail', perBlank: blanks.map(() => false) }, true);
+  });
 }
 
-function renderClozeGrammarFeedback(c, chosen, res){
+function renderClozeGrammarFeedback(c, chosen, res, revealed){
+  const verifyBtn = document.getElementById('cloze-grammar-verify-btn');
+  if (verifyBtn && verifyBtn.style.display === 'none') return;
   const content = document.getElementById('challenge-player-content');
   content.querySelectorAll('.cloze-grammar-group .challenge-choice-btn').forEach(b => {
     const i = Number(b.dataset.blank);
@@ -1360,7 +1441,9 @@ function renderClozeGrammarFeedback(c, chosen, res){
   });
   content.querySelectorAll('.cloze-grammar-slot').forEach(s => {
     const i = Number(s.dataset.slot);
-    s.classList.add(res.perBlank[i] ? 'correct' : 'incorrect');
+    // "Não sei": a lacuna mostra a forma certa, marcada como a certa (igual à opção revelada na trilha).
+    s.classList.add(res.perBlank[i] || revealed ? 'correct' : 'incorrect');
+    if (revealed){ s.textContent = c.blanks[i].answer; s.classList.add('filled'); }
   });
   document.getElementById('cloze-grammar-verify-btn').style.display = 'none';
   const isCorrect = res.outcome === 'ok';
@@ -1370,12 +1453,14 @@ function renderClozeGrammarFeedback(c, chosen, res){
   const clozeTranslation = (clozeOv && clozeOv.translation) ? clozeOv.translation : c.translationPt;
   const clozeExplanation = (clozeOv && clozeOv.explanation) ? clozeOv.explanation : c.explanation;
   const bodyHTML = `
-    ${isCorrect ? '' : `<p class="challenge-feedback-chosen">${chT('ch.cloze.yourAnswer')}: ${escapeHtmlChallenge(clozeGrammarFilled(c, chosen))}<br>${chT('ch.cloze.correct')}: <strong>${escapeHtmlChallenge(clozeGrammarFilled(c))}</strong></p>`}
-    ${isCorrect ? `<p class="challenge-feedback-meaning"><strong>${escapeHtmlChallenge(clozeGrammarFilled(c))}</strong></p>` : ''}
+    ${isCorrect || revealed ? '' : `<p class="challenge-feedback-chosen">${chT('ch.cloze.yourAnswer')}: ${escapeHtmlChallenge(clozeGrammarFilled(c, chosen))}<br>${chT('ch.cloze.correct')}: <strong>${escapeHtmlChallenge(clozeGrammarFilled(c))}</strong></p>`}
+    ${isCorrect || revealed ? `<p class="challenge-feedback-meaning"><strong>${escapeHtmlChallenge(clozeGrammarFilled(c))}</strong></p>` : ''}
     ${clozeTranslation ? `<p class="challenge-feedback-meaning">${chT('ch.cloze.translation')}: ${escapeHtmlChallenge(clozeTranslation)}</p>` : ''}
     <p class="challenge-explanation">${escapeHtmlChallenge(clozeExplanation || '')}</p>
   `;
-  document.getElementById('cloze-grammar-feedback-wrap').innerHTML = challengeFeedbackWrapperHTML('challenge', isCorrect, isCorrect ? chT('ch.cloze.right') : chT('ch.notQuite'), bodyHTML, res.outcome);
+  document.getElementById('cloze-grammar-feedback-wrap').innerHTML = challengeFeedbackWrapperHTML('challenge', isCorrect, isCorrect ? chT('ch.cloze.right') : revealed ? chRevealedTitle() : chT('ch.notQuite'), bodyHTML, res.outcome);
+  chStepAnswered();
+  if (!revealed) playFeedbackSound(isCorrect);
   recordChallengeReviewOutcome(c, res.outcome);
   wireChallengeCompleteButton(c);
 }
