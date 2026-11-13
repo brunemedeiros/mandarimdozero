@@ -50,8 +50,14 @@ for (const lang of ['fr', 'zh']){
   // filtro de Review por tag enxerga a trilha
   run(`STATE.unitProgress = {}; UNITS.forEach(u => STATE.unitProgress[u.id] = {started:true, completed:true, lessonIdx:99});`);
   run(`STATE.studySettings.reviewTagFilter = ['${'unidade-' + ctx.normalizeTagSlug(u0.title)}'];`);
+  // Desde 2026-10-06 o filtro de tag não se aplica mais à SESSÃO de Revisão, só ao Painel (.claude/rules/decks-review.md).
+  // Confere as duas metades: a tag derivada unidade-* acha exatamente os cartões da unidade, e a sessão ignora o filtro salvo.
+  const tag = 'unidade-' + ctx.normalizeTagSlug(u0.title);
+  const byTag = ctx.STATE.cards.filter(c => ctx.cardMatchesTagFilter(c, [tag]));
   const pool = run('eligibleReviewPool()');
-  check(lang + ' filtro unidade-* -> só cards dessa unidade', pool.length === u0.vocab.length * 2 + ctx.STATE.cards.filter(c => c.unitId === u0.id && ctx.isStudyTrailPhraseCard(c)).length && pool.every(c => c.unitId === u0.id), pool.length);
+  run('STATE.studySettings.reviewTagFilter = [];');
+  const full = run('eligibleReviewPool()');
+  check(lang + ' filtro unidade-* -> só cards dessa unidade', byTag.length === u0.vocab.length * 2 + ctx.STATE.cards.filter(c => c.unitId === u0.id && ctx.isStudyTrailPhraseCard(c)).length && byTag.every(c => c.unitId === u0.id) && pool.length === full.length, { byTag: byTag.length, pool: pool.length, full: full.length });
   run(`STATE.studySettings.reviewTagFilter = ['${course}'];`);
   check(lang + ' filtro curso -> trilha toda', run('eligibleReviewPool()').length === ctx.STATE.cards.length);
   run(`STATE.studySettings.reviewTagFilter = [];`);

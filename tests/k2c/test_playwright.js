@@ -95,7 +95,10 @@ async function bootPage(browser, lang, port){
     // Study Trail nativa no app real
     const s = await ev(() => { const a = STATE.cards.find(c => c.id === STATE.cards[0].id); const b = STATE.cards.find(c => c.id === a.id + '-b');
       return { n: STATE.cards.length, hasB: !!b, sameNote: a.note === b.note, ciA: !!a.cardInstance, origin: a.origin + '/' + b.origin,
-        legacy: a.front !== undefined || a.back_trans !== undefined, unit: a.unitId === b.unitId && a.vocabIdx === b.vocabIdx }; });
+        // Desde 2026-10-05/06 (i18n fase 8 e "o progresso segue a palavra") o cartão guarda na MEMÓRIA uma cópia do texto
+        // exibido (back_trans; front no fr, back_hanzi no zh), usada para trocar a palavra pelo idioma do site. O que não pode
+        // é esse texto ir para o SAVE: a regra do K2-C é conferida no que serializeCardsForSave grava.
+        legacy: (() => { const sv = serializeCardsForSave([a, b]); return sv.some(x => ['front', 'back', 'back_trans', 'back_hanzi', 'front_pinyin', 'unitTitle'].some(k => k in x)); })(), unit: a.unitId === b.unitId && a.vocabIdx === b.vocabIdx }; });
     check(lang + ' boot: cards nativos A/B, mesma Note, sem campos legados', s.hasB && s.sameNote && s.ciA && !s.legacy && s.unit && s.origin === 'study/study', s);
     check(lang + ' trilha renderiza (renderUnitsGrid) sem erro', await ev(() => { renderUnitsGrid(); return document.querySelectorAll('#units-grid > *').length > 0; }));
     // Course Deck aparece (bootstrap autenticado simulado)

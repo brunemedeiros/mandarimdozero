@@ -59,3 +59,19 @@ em inglês), então nada muda para os alunos agora: a regra vale para conteúdo 
   2026-11-11; registrados como T9 e T8 em `docs/i18n/e6-minimo-servidor-pt.md` seção 3.3.
 - 5 (sem internet logo depois de publicar): consertado por outra sessão no PR #466 (`docs/historico/33-pwa-cache-offline.md`); depois a
   dona decidiu que, por enquanto, o site só funciona com internet (tela "Sem internet", PR #468, regra em `.claude/rules/frontend-fr-zh.md`).
+
+## Testes que ficaram para trás (PR seguinte, 2026-11-13)
+
+Pedido da dona: atualizar num PR separado os testes que falhavam por mudanças aprovadas (nada muda no site). Cada ajuste diz a
+data e o motivo no próprio teste: `test_desafios.js` 2333/2333 (antes 362 falhas: Grátis da Etapa 7 só no lado pt, selo
+"Concluído" na lista de textos, Etapa D no Ouça e traduza/Acentuação/Complete a frase, espaço no class do 🐢);
+`test_quase_iguais.js` 2752/2752 (moldura da sessão da Revisão da Etapa D, lote 3; "todas as novas de uma vez");
+fase-h, e4 lote 5b, painel-admin analytics, fase-public-deck (textos das Etapas 4 e 7); desafios-progresso (anel no lugar
+da barra); curriculo-ids save antigo (`bestStreak`); k2c e k2i (conferem o save, não a memória); trilha-tags (harness);
+fase-identity (escape sem DOM, `get_my_profile`); report-reply (código em `email.ts`); pt-servidor (a cópia do
+`notification-cron` para colar no painel ganhou a regra v30 da sequência em risco, igual ao `index.ts`).
+
+Continuam falhando de propósito: `tests/registro/test_registry.js` e `tests/fase-public-deck/test_legacy_parity.js` (T9 e
+T8, para quando o site pt abrir). Instáveis só quando rodam junto com outros (sozinhos passam; também na `main`):
+`test_ui_language_*_browser.js` e a sequência em inglês do `test_quase_iguais.js` (o sorteio das opções do exercício
+muda com a ordem de carregamento; em 2026-11-05 aconteceu no zh, agora no fr).
