@@ -2,11 +2,12 @@
 // de quem recebe, com `portugues` no mapa. Carrega o código REAL de supabase/functions/report-reply-send/index.ts (recorte do
 // mapa e das duas funções puras, tipos removidos pelo Node 22). Sem rede. Rodar: node tests/report-reply/test_footer.js
 const fs = require('fs'), vm = require('vm'), path = require('path'), mod = require('module');
-const src = fs.readFileSync(path.join(__dirname, '../../supabase/functions/report-reply-send/index.ts'), 'utf8');
+// Desde 2026-11-10 (padrão de e-mail Prof Brune, commit 1300c807) o mapa e as funções moram em email.ts, exportados.
+const src = fs.readFileSync(path.join(__dirname, '../../supabase/functions/report-reply-send/email.ts'), 'utf8');
 const a = src.indexOf('const COURSE_NAME_BY_UI_LANG');
-const b = src.indexOf('function jsonResponse');
+const b = src.indexOf('function esc(');
 if (a < 0 || b < 0) { console.log('FALHOU: recorte não encontrado'); process.exit(1); }
-const js = mod.stripTypeScriptTypes(src.slice(a, b));
+const js = mod.stripTypeScriptTypes(src.slice(a, b)).replace(/^export /gm, '');
 const ctx = {};
 vm.createContext(ctx);
 vm.runInContext(js + '\nthis.F = replyFooter; this.U = replyUiLanguage; this.N = COURSE_NAME_BY_UI_LANG;', ctx);

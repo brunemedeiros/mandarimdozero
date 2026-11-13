@@ -35,6 +35,10 @@ const PAGE_LIB = () => {
   // estado salvo, sem o que depende do relógio de parede de verdade (nada: o relógio é falso), resumido por hash + campos-chave
   window.__estado = () => {
     let ser = ''; try { ser = JSON.stringify(serializeState()); } catch (e) { ser = 'ERRO ' + e.message; }
+    // 2026-11-11 (defeito 1 da varredura de testes): o cartão que troca de palavra pelo idioma do site grava no save a palavra
+    // dona do progresso (`variantWord`, shared/card-variants.js). A árvore antiga não tem o campo; sem ele, o resto do save
+    // continua comparado igual.
+    ser = ser.replace(/,"variantWord":"(?:[^"\\]|\\.)*"/g, '');
     const d = STATE.daily || {};
     return { h: window.__fullState ? ser : __h(ser), toast: [...document.querySelectorAll('#toast-layer .toast')].map(e => e.textContent).join(' | '), xp: STATE.xp, daily: JSON.stringify(d), missions: JSON.stringify(STATE.dailyMissions || STATE.missions || null), cur: STATE.currentUnitId, step: STEP_STATE.currentStep, exi: STEP_STATE.exerciseIndex, exn: (STEP_STATE.exerciseList || []).length, score: STEP_STATE.exerciseScore };
   };

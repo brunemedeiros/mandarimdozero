@@ -414,7 +414,7 @@ async function newPage(browser, port, lang, { guest, session, hash, handlerSrc }
       await page.click('[data-publish-deck="7001"]');
       await page.waitForSelector('[data-publish-form="7001"]');
       const ft = await page.locator('[data-publish-form="7001"]').innerText();
-      L('formulário: avisa que subdecks não mudam junto e que a nota privada nunca é pública', /subdecks não mudam junto/.test(ft) && /nota privada/.test(ft) && /Tornar público/.test(ft));
+      L('formulário: avisa que subdecks não mudam junto e que a nota privada nunca é pública', /subdecks não mudam junto/.test(ft) && /"Observação" dos cartões nunca é público/.test(ft) /* Etapa 7: "nota privada" virou "Observação" */ && /Tornar público/.test(ft));
       L('formulário: informa Notes incompatíveis não publicadas', /não serão publicadas/.test(ft));
       await page.click('.public-deck-page-edit > summary');  // "Editar página do Deck"
       await page.fill('[data-publish-desc]', 'Minha lista');
