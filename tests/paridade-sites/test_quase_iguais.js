@@ -42,6 +42,15 @@ const ETAPA6 = (v) => etapa7(PROGRESSO_ORDEM(FAIXA_CONVIDADO(v))).split('Ver o q
   // syncReviewPrevRow cria a linha logo depois de #review-content em toda sessão da Revisão, VAZIA e escondida fora da sessão
   // da professora. Só a linha vazia e hidden sai; com o botão dentro a cena continua diferente.
   .replace(/<div id=\\?"review-prev-row\\?" class=\\?"review-prev-row\\?" hidden=\\?"\\?"><\/div>/g, '')
+  // Teclado na Revisão (2026-11-05, decisão da autora; docs/historico/33-teclado-na-revisao.md): número (.kbd-hint) nos botões de nota e nas
+  // opções da múltipla escolha, dica "Espaço mostra a resposta" ao lado do "toque para ver a resposta" e etiqueta "Enter" no Continuar.
+  // Só esses acréscimos saem; o resto da cena continua igual. O nome da cena traz o texto do botão (com o número no fim).
+  .replace(/(<button class=\\?"grade-btn [^>]*>(?:(?!<\/button>).)*?)<span class=\\?"kbd-hint\\?">[1-4]<\/span>/g, '$1')
+  .replace(/(<button class=\\?"mc-option[^>]*>(?:(?!<\/button>).)*?)<span class=\\?"kbd-hint\\?">[1-4]<\/span>/g, '$1')
+  .replace(/<span class=\\?"hint-touch\\?">([^<]*)<\/span><span class=\\?"hint-kbd\\?">[^<]*<\/span>/g, '$1')
+  .replace(/<span class=\\?"key-enter-hint\\?" aria-hidden=\\?"true\\?">Enter<\/span>/g, '')
+  .replace(/(\.(?:grade-btn\.grade-\w+|mc-option)\[[^\]]*?)[1-4]\]/g, '$1]')
+  .replace(/(\.btn-primary\[Continu(?:ar|e))Enter\]/g, '$1]')
   // Aviso "esta lição ainda não está no idioma do site" saiu (2026-11-11, decisão da dona): unidade sem tradução nem aparece nem
   // abre. O elemento sai da árvore antiga; o resto da cena continua comparado.
   .replace(/(?:\\n|\n)\s*<p class=(\\*)"lesson-unit-goal\1" id=\1"ud-lang-notice\1"(?: hidden=\1"\1")? style=\1"font-style:\s*italic;\s*opacity:\s*\.8\1">[^<]*<\/p>/g, '')

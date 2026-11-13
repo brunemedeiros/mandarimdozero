@@ -7,6 +7,7 @@ Todas entram como `aprovado (2026-10-05)` até a dona aprovar.
 | Chave | PT | EN | Confiança | Status |
 |---|---|---|---|---|
 | settings.title | Configurações | Settings | alta | aprovado (2026-10-05) |
+| review.pressToReveal | Espaço mostra a resposta | Space shows the answer | alta | aprovado (2026-11-05, prévia do teclado na Revisão) |
 | settings.subtitle | Suas informações e preferências de conta | Your account information and preferences | alta | aprovado (2026-10-23, aba Exportar arquivada) |
 | settings.tab.general | Geral | General | alta | aprovado (2026-10-05) |
 | settings.tab.notifications | 🔔 Notificações | 🔔 Notifications | alta | aprovado (2026-10-05) |

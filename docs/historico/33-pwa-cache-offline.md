@@ -80,3 +80,20 @@ branco, 48 px de altura, sem rolagem lateral, 0 erro de página.
 
 Adiados pela autora (registrados no "Estado atual" do `CLAUDE.md`): aviso/estudo sem internet para quem está logada e fixar a versão da
 biblioteca do Supabase (caminho com menos risco: CDN com versão fixa e guardada pelo SW, sem mexer nos 127 testes que interceptam o CDN).
+
+### Publicado e conferido no ar (2026-11-11)
+
+Publicado pelo PR #468 (merge `7fcc38e`, a pedido da autora), junto com a `main` do PR #458 (faixa do modo convidado, sem
+conflito; teste do cache 21/21 depois da junção). Conferido em `app.profbrune.com.br` com navegador de verdade:
+
+| | fr | zh |
+|:-|:-|:-|
+| Versão do SW | `7fcc38e` | `7fcc38e` |
+| Logada (sessão simulada), modo avião: tela "Sem internet" | em 0,1 s | em 0,1 s |
+| Erros de página | 0 | 0 |
+| Internet volta: volta sozinha para o app | sim | sim |
+
+Idioma da tela: segue o idioma guardado pelo site (navegador em pt-BR: "Você está sem internet"; navegador em inglês, site em
+inglês: "You're offline"). Na primeira visita a fonte Nunito pode ainda não estar guardada e a tela usa a fonte do aparelho
+(só aparência). Não conferido no ar: celular de verdade (teste da autora pendente).
+

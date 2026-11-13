@@ -414,6 +414,7 @@ window.I18N_CATALOG['pt-BR'] = {
   'review.cloze.placeholder': 'Digite a palavra que falta',
   'review.typeAnswer.placeholder': 'Digite a resposta',
   'review.tapToReveal': 'toque para ver a resposta',
+  'review.pressToReveal': 'Espaço mostra a resposta',
   'review.grade.again': 'Errei',
   'review.grade.hard': 'Difícil',
   'review.grade.good': 'Bom',
