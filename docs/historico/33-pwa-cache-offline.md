@@ -97,3 +97,31 @@ Idioma da tela: segue o idioma guardado pelo site (navegador em pt-BR: "Você es
 inglês: "You're offline"). Na primeira visita a fonte Nunito pode ainda não estar guardada e a tela usa a fonte do aparelho
 (só aparência). Não conferido no ar: celular de verdade (teste da autora pendente).
 
+## Internet caindo com o site já aberto: aviso por cima (2026-11-13)
+
+Teste da autora no celular: abriu com internet, ligou o modo avião no meio de uma lição. O site continuou (áudio "Não foi possível
+reproduzir", aviso "Ainda confirmando seu progresso salvo", cartão sem a palavra); só ao fechar e abrir apareceu a tela "Sem internet".
+- **Por que "Ainda confirmando":** o supabase-js avisa `SIGNED_IN` toda vez que a aba volta a ficar visível (`_onVisibilityChanged` →
+  `_recoverAndRefresh`; puxar a cortina para ligar o modo avião conta), e `onAuthStateChange` chama `onUserLoggedIn` de novo, que zera
+  `progressLoadedOk` e relê o progresso. Sem internet a releitura falha e o app fica sem poder salvar até recarregar (nada se perde).
+
+Decisão da autora (entre "aviso por cima" e "ir para a tela e recarregar", depois de comparar o esforço): **aviso por cima**.
+`shared/sem-internet.js` + `shared/sem-internet.css`, ligados no `fr/index.html` e no `zh/index.html`:
+- evento `offline`: caixa "Você está sem internet" / "Assim que a internet voltar, você continua de onde parou." (en: "You're offline" /
+  "As soon as you're back online, you'll pick up right where you left off.", chaves `ui.offline.title`/`ui.offline.body`), com o logo do
+  site; tudo o que está no `body` fica `inert` e as teclas não passam; áudio e voz param;
+- evento `online`: a caixa some, nada é recarregado (a lição continua do mesmo exercício) e, se `progressLoadedOk` ficou falso, chama
+  `loadStateAndRender()` (o mesmo do login);
+- o aviso é montado escondido na abertura, para o logo já estar baixado quando a internet cair;
+- só tokens que todo site define (`--paper`, `--paper-warm`, `--paper-line`, `--ink`, `--ink-soft`), sem cor nova.
+
+Testes: `tests/pwa-cache/test_aviso_sem_internet_playwright.js` 24/24 (fr e zh: aviso na hora em pt-BR e en, site inerte, teclas
+bloqueadas, logo, some sozinho sem recarregar, relê o progresso, 0 erro); contra a `main` sem o aviso, 12/22 (versão sem o item do logo).
+Regressão: `tests/pwa-cache/test_playwright.js` 21/21; `test_aviso_versao_playwright.js` 14/14; `tests/i18n/test_i18n_unit.js` 2338/2338
+(chaves novas na lista `NEW_KEYS`); `tests/paridade-sites/` todos verdes (quase iguais 2770, Desafios 2333, Ditados 828, Conjugação 343...);
+`tests/cores-marca/` 96/96; `tests/janelas-topo/` 276/276; `tests/teclado-revisao/` 82/82 (rodando sozinho; em lote com 6 testes ao mesmo
+tempo deu 8 falhas de tempo, iguais com e sem a mudança). Capturas fr e zh, claro e escuro, 390 px, e en: conferidas.
+
+Achado fora do escopo (sugerido como tarefa separada): `onUserLoggedIn` roda de novo a cada volta para a aba, também COM internet (relê o
+progresso e redesenha a trilha); pode atrapalhar uma lição em andamento e merece uma checagem "mesma conta, já carregada".
+
