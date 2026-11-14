@@ -63,7 +63,7 @@ Monte UM JSON (ou um por aluno se passar de uns 500 KB):
 `{"register_students":[{"name":"…","language":"frances","reference":"pt|en|fr","agenda_names":["…"],"notebook_id":"…"}],
   "students":[{"student_id":"<id>" (ou "student_key":"nome|idioma" para aluno recém-cadastrado), "lesson_dates":["AAAA-MM-DD",…], "last_entry_read":"AAAA-MM-DD", "recap_date":"<hoje, só se tem aula marcada para hoje>", "items":[…]}]}`
 Inclua TODOS os alunos do estado em `students` com pelo menos `lesson_dates` (mesmo sem itens novos). Rode a consulta 3 (dollar-quoting `$j$ ... $j$`). Guarde o id devolvido.
-O servidor valida, grava os itens, cria o Récap das aulas de hoje, gera os cartões dos alunos com conta vinculada e devolve o resultado na caixa.
+O servidor valida, grava os itens, cria o Récap das aulas de hoje, gera os cartões dos alunos com conta vinculada ou ligados a uma Turma (e os itens aprovados que ficaram sem cartão) e devolve o resultado na caixa.
 
 ## Passo 5: resultado
 Rode a consulta 4 a cada ~10 segundos, por até 2 minutos, até `status` ser `feito` ou `erro`. Se continuar `pendente`/`processando`, diga isso (a rotina de reserva reenvia a cada 5 minutos).
