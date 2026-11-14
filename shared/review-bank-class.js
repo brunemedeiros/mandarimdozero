@@ -80,7 +80,7 @@ function rbcStageHTML(s){
     ctrl = `<div class="rb-reasons"><h3 class="rb-h">${rbH(rbt('whyMissed'))}</h3><div class="chips">${(RB_REASONS_BY_TYPE[it.item_type] || RB_REASONS_BY_TYPE.vocabulario).map((r, k) => `<button data-c="reason" data-r="${r}">${k + 1} · ${rbH(rbt('reason.' + r))}</button>`).join('')}<button class="is-none" data-c="reason" data-r="">${rbH(rbt('noReason'))}</button></div></div>`;
   } else if (RBC.shown){
     const pv = rbGradePreviews(it), GB = [['again', 'is-bad'], ['hard', 'is-help'], ['good', 'is-good'], ['easy', 'is-ok']];
-    ctrl = `<div class="rb-ctrl">${GB.map((g, k) => `<button class="rb-big ${g[1]}" data-c="ans" data-g="${k}">${rbH(t('review.grade.' + g[0]))}<small>${rbH(formatReviewInterval(pv[k]))}</small></button>`).join('')}</div>`;
+    ctrl = `<div class="rb-ctrl">${GB.map((g, k) => `<button class="rb-big ${g[1]}" data-c="ans" data-g="${k}"><span class="rb-kbd" aria-hidden="true">${k + 1}</span>${rbH(t('review.grade.' + g[0]))}<small>${rbH(formatReviewInterval(pv[k]))}</small></button>`).join('')}</div>`;
   } else {
     ctrl = `<div class="rb-ctrl"><button class="rb-big is-blue" data-c="show">${rbH(rbt('showAnswer'))}</button><button class="rb-big" data-c="skip">${rbH(rbt('skip'))}</button></div>`;
   }
@@ -211,8 +211,9 @@ function rbcKey(e){
     return;
   }
   if (!RBC.shown){ if (e.key === ' ' || e.key === 'Enter'){ e.preventDefault(); RBC.shown = true; rbcRender(); } return; }
-  if (e.key === 'ArrowRight' || e.key === '3'){ e.preventDefault(); rbcRecord(2); }
-  else if (e.key === 'ArrowLeft' || e.key === '1'){ e.preventDefault(); RBC.reasonFor = RBC.slides[RBC.idx].id; rbcRender(); }
-  else if (e.key === '2' || e.key.toLowerCase() === 'h'){ e.preventDefault(); rbcRecord(1); }
+  // Só os números (decisão da autora, 2026-11-13): setas e "h" deixaram de valer, igual à Revisão da aluna.
+  if (e.key === '3'){ e.preventDefault(); rbcRecord(2); }
+  else if (e.key === '1'){ e.preventDefault(); RBC.reasonFor = RBC.slides[RBC.idx].id; rbcRender(); }
+  else if (e.key === '2'){ e.preventDefault(); rbcRecord(1); }
   else if (e.key === '4'){ e.preventDefault(); rbcRecord(3); }
 }

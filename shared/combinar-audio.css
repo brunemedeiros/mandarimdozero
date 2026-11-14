@@ -1,0 +1,16 @@
+/* Combinar com áudio (shared/core/exercicios-licao.js, shared/core/quase-iguais-textos.js): comum aos sites.
+   Opção "Com áudio" na tela de tamanho e o ícone da carta de áudio. Decisão da autora, 2026-11-14. */
+.match-audio-opt{
+  display:flex; align-items:center; gap:12px; width:100%; max-width:360px; margin:4px auto 16px; padding:12px 14px;
+  border:2px solid var(--paper-line); border-radius:14px; background:var(--paper-warm); text-align:left; cursor:pointer;
+  font-family:var(--font-body); color:var(--ink);
+}
+.match-audio-opt:focus-visible{ outline:3px solid color-mix(in srgb, var(--brand-fill) 55%, transparent); outline-offset:2px; }
+.match-audio-opt .mao-text{ flex:1; display:flex; flex-direction:column; gap:2px; }
+.match-audio-opt .mao-title{ font-weight:800; font-size:15px; color:var(--ink); }
+.match-audio-opt .mao-help{ font-size:12.5px; font-weight:500; color:var(--ink-soft); line-height:1.35; }
+.mao-switch{ position:relative; width:46px; height:26px; border-radius:999px; background:var(--paper-line); flex-shrink:0; transition:background .15s ease; }
+.mao-switch::after{ content:""; position:absolute; top:3px; left:3px; width:20px; height:20px; border-radius:50%; background:#FFFFFF; box-shadow:0 1px 3px rgba(0,0,0,.35); transition:left .15s ease; }
+.mao-switch.on{ background:var(--brand-fill); }
+.mao-switch.on::after{ left:23px; }
+.match-audio-icon{ display:inline-flex; align-items:center; justify-content:center; font-size:40px; line-height:1; }
