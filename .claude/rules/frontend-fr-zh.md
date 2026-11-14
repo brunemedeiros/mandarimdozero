@@ -41,6 +41,8 @@ paths:
   recarregar a aba mistura `index.html` novo com scripts antigos. Guarda: `tests/pwa-cache/test_playwright.js`.
 - **Por enquanto o site só funciona com internet** (decisão da autora, 2026-11-11): sem internet, abrir o site mostra a tela comum
   `shared/offline.html` (pré-cache de cada SW, `OFFLINE_URL`), em pt-BR ou en; nunca o app pela metade. Site novo põe `OFFLINE_URL` no SW.
+  Internet cai com o site JÁ aberto (2026-11-13): aviso por cima `shared/sem-internet.js` + `.css` (site inerte, sem atalhos; some sozinho ao
+  voltar, sem recarregar, e relê o progresso se `progressLoadedOk` ficou falso). Site novo liga os dois. Guarda: `tests/pwa-cache/test_aviso_sem_internet_playwright.js`.
 - Diálogo: palavras do vocabulário da unidade em COR + negrito (`.dlg-new`, `var(--seal-red-dark)`), nunca sublinhado
   (sublinhado = pontuação faltando/bloco no lugar errado). Transcrição (pinyin) também destacada (`.dlg-new-py`,
   alinhada por busca, `dlgHighlightPinyin`). zh: pinyin acima do hanzi. Idioma novo reutiliza essas classes.
