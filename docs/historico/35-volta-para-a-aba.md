@@ -1,7 +1,7 @@
 # 35. Volta para a aba: o site refaz o login inteiro e a lição recomeça (auditoria, 2026-11-14)
 
 Pedido da autora (2026-11-14): investigar a releitura do progresso a cada volta para o site, achada em
-`docs/historico/33-pwa-cache-offline.md` (seção "Internet caindo com o site já aberto"). Só investigação: nada mudou no código.
+`docs/historico/33-pwa-cache-offline.md` (seção "Internet caindo com o site já aberto"). A autora escolheu a opção A (seção final).
 
 ## O que acontece
 
@@ -20,7 +20,7 @@ Pedido da autora (2026-11-14): investigar a releitura do progresso a cada volta 
    → `openUnitDetail(id)`, que zera o andamento (`STEP_STATE.acq`). Na sessão de Revisão o endereço é `#/review/<modo>` e a rota
    chama `openReviewSession(modo)` de novo (pelo código, a sessão é montada de novo; não medido: conta de teste sem cartões para hoje).
 
-## Medido no navegador (`tests/volta-aba/auditoria_playwright.js`, stub do Supabase que guarda o que é salvo)
+## Medido no navegador (stub do Supabase que guarda o que é salvo; hoje em `tests/volta-aba/test_playwright.js`)
 
 | | fr | zh |
 |:-|:-|:-|
@@ -50,3 +50,18 @@ protege duas abas/aparelhos abertos, não a releitura a cada volta.
   por baixo durante a atividade (pequena chance de corrida com um salvamento) e as ~20 chamadas por volta continuam.
 - Vale para todos os sites (código em `shared/auth.js`). Teste a acrescentar: lição e Revisão não recomeçam ao voltar à aba;
   troca de conta na mesma aba continua recarregando tudo; aba antiga com outro aparelho mais adiantado é corrigida ao salvar.
+
+## Implementado: opção A (decisão da autora, 2026-11-14, "faça a A, mas me mostre antes de juntar")
+
+`shared/auth.js`: no `onAuthStateChange`, `SIGNED_IN` da mesma conta já aberta (`isSameLoadedAccount`) chama
+`onSameAccountSignedInAgain`: só atualiza `CURRENT_USER` e o nome no topo; se `progressLoadedOk` for falso, relê o progresso com
+`loadStateAndRender()` (uma leitura por vez), sem `applyInitialRoute`. Conta diferente e primeiro login seguem pelo `onUserLoggedIn`.
+
+Teste `tests/volta-aba/test_playwright.js` (substitui a auditoria): **24/24** em fr e zh (trilha sem releitura nem rota; lição no meio
+fica no mesmo passo depois de 2 voltas; Revisão não reabre; progresso não confirmado relê sem rota; troca de conta recarrega tudo;
+outro aparelho mais adiantado: o salvar recusa e relê; 0 erro). Na versão antes do conserto: 12/24 (os 6 itens de cada site sobre
+releitura, rota, lição e Revisão falham; a Revisão também reabria a sessão, agora medido). Regressão: `revisao-seguranca/test_a2_progresso`
+18/18, `janelas-topo` 276/276, `xp-semana` 242/242, `amigos` 210, `amigos-push` 72, `conquistas` 66, `conta-excluir` 20/20, `k2d` 30/30,
+`fase-e` 38/38, `zh-manual` 27, `pwa-cache/test_aviso_sem_internet` 24/24, `paridade-sites/test_quase_iguais` 2770. Imagens "hoje x
+conserto" mostradas à autora antes de juntar.
+
