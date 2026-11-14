@@ -65,3 +65,7 @@ releitura, rota, lição e Revisão falham; a Revisão também reabria a sessão
 `fase-e` 38/38, `zh-manual` 27, `pwa-cache/test_aviso_sem_internet` 24/24, `paridade-sites/test_quase_iguais` 2770. Imagens "hoje x
 conserto" mostradas à autora antes de juntar.
 
+Publicado pelo PR #476 (merge `f7ef58a`, 2026-11-14, a pedido da autora depois de ver as imagens "hoje x conserto"). Conferido no ar:
+`tests/volta-aba/test_playwright.js` rodado contra os arquivos de `app.profbrune.com.br` (só o Supabase simulado, aluna logada):
+24/24 em fr e zh. Falta a prova no celular da autora (lição, ir ao WhatsApp, voltar).
+
