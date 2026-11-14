@@ -7,6 +7,9 @@ Todas entram como `aprovado (2026-10-05)` até a dona aprovar.
 | Chave | PT | EN | Confiança | Status |
 |---|---|---|---|---|
 | settings.title | Configurações | Settings | alta | aprovado (2026-10-05) |
+| review.match.audio.title | 🔊 Com áudio | 🔊 With audio | alta | aprovado (2026-11-14, Combinar com áudio) |
+| review.match.audio.help | Algumas cartas tocam a palavra em vez de mostrar o texto. Desligue se estiver sem som. | Some cards play the word instead of showing the text. Turn it off if you have no sound. | alta | aprovado (2026-11-14, prévia da tela de tamanho) |
+| review.match.audio.tileLabel | Carta de áudio | Audio card | alta | aprovado (2026-11-14) |
 | ui.kbd.grade | Na Revisão, dar a nota ao cartão pela posição do botão (com quatro botões: Errei, Difícil, Bom, Fácil) | In Review, grade the card by the position of the button (with four buttons: Again, Hard, Good, Easy) | alta | aprovado (2026-11-13, janela de atalhos) |
 | ui.kbd.reveal | Na Revisão, mostrar a resposta de um cartão | In Review, show the answer of a card | alta | aprovado (2026-11-13, janela de atalhos) |
 | review.pressToReveal | Espaço mostra a resposta | Space shows the answer | alta | aprovado (2026-11-05, prévia do teclado na Revisão) |

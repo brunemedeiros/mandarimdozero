@@ -52,6 +52,8 @@ const ETAPA6 = (v) => etapa7(PROGRESSO_ORDEM(FAIXA_CONVIDADO(v))).split('Ver o q
   .replace(/<span class=\\?"key-enter-hint\\?" aria-hidden=\\?"true\\?">Enter<\/span>/g, '')
   .replace(/(\.(?:grade-btn\.grade-\w+|mc-option|speed-option(?:\.\w+)?)\[[^\]]*?)[1-4]\]/g, '$1]')
   .replace(/(\.btn-primary\[Continu(?:ar|e))Enter\]/g, '$1]')
+  // Combinar com áudio (2026-11-14): a tela de tamanho ganhou a opção "Com áudio" (só sai a caixa da opção; o resto da cena continua comparado).
+  .replace(/(?:\\n|\n)\s*<button type=\\?"button\\?" class=\\?"match-audio-opt\\?"[\s\S]*?<\/button>/g, '')
   // Aviso "esta lição ainda não está no idioma do site" saiu (2026-11-11, decisão da dona): unidade sem tradução nem aparece nem
   // abre. O elemento sai da árvore antiga; o resto da cena continua comparado.
   .replace(/(?:\\n|\n)\s*<p class=(\\*)"lesson-unit-goal\1" id=\1"ud-lang-notice\1"(?: hidden=\1"\1")? style=\1"font-style:\s*italic;\s*opacity:\s*\.8\1">[^<]*<\/p>/g, '')

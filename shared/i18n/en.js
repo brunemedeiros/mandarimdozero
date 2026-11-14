@@ -397,6 +397,9 @@ window.I18N_CATALOG['en'] = {
   'review.typeAnswer.placeholder': 'Type the answer', // ALTA
   'review.tapToReveal': 'tap to see the answer', // ALTA
   'review.pressToReveal': 'Space shows the answer', // ALTA
+  'review.match.audio.title': '🔊 With audio', // ALTA
+  'review.match.audio.help': 'Some cards play the word instead of showing the text. Turn it off if you have no sound.', // ALTA
+  'review.match.audio.tileLabel': 'Audio card', // ALTA
   'review.grade.again': 'Again', // MÉDIA -- botão de nota; PT "Errei" = "I got it wrong"; EN segue o padrão Anki
   'review.grade.hard': 'Hard', // ALTA
   'review.grade.good': 'Good', // ALTA

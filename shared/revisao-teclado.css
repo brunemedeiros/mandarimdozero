@@ -58,7 +58,7 @@
 #view-conjugaison .cg-choice:has(.kbd-hint){ padding-left:40px; padding-right:40px; }
 /* Complete a frase dos Desafios (botões em pílula, texto centralizado): folga igual dos dois lados para o texto ficar no meio. */
 .cloze-grammar-group .challenge-choice-btn{ position:relative; }
-.cloze-grammar-group .challenge-choice-btn:has(.kbd-hint){ padding-left:32px; padding-right:32px; }
+.cloze-grammar-group .challenge-choice-btn:has(.kbd-hint){ padding-left:40px; padding-right:40px; }
 @media not all and (hover:hover) and (pointer:fine){
   .exercise-option:has(.kbd-hint){ padding:16px 12px; }
   .cloze-option:has(.kbd-hint){ padding-left:16px; padding-right:16px; }
