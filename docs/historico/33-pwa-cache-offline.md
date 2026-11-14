@@ -125,3 +125,8 @@ tempo deu 8 falhas de tempo, iguais com e sem a mudança). Capturas fr e zh, cla
 Achado fora do escopo (sugerido como tarefa separada): `onUserLoggedIn` roda de novo a cada volta para a aba, também COM internet (relê o
 progresso e redesenha a trilha); pode atrapalhar uma lição em andamento e merece uma checagem "mesma conta, já carregada".
 
+Ajuste no mesmo PR (2026-11-14): a tela `shared/offline.html` tenta de novo a cada 5 s enquanto o aparelho disser que tem internet
+(`navigator.onLine`). Antes, se o evento `online` chegasse com a rede ainda subindo, a tela recarregava, caía de novo nela e não
+voltava mais sozinha (não vem outro `online`). Visto como falha intermitente de "a internet volta e a tela volta sozinha" no
+`tests/pwa-cache/test_playwright.js` (1 em 5 rodadas); depois do ajuste, 3/3 com 21/21.
+
