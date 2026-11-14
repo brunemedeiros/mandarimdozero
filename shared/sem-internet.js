@@ -88,15 +88,76 @@
     ev.preventDefault();
   }, true);
 
-  window.addEventListener('offline', mostrar);
-  window.addEventListener('online', esconder);
+  // ---------- Perceber a queda sem depender do aparelho (teste da autora no celular, 2026-11-14) ----------
+  // No celular dela, ligar o modo avião com o site aberto NÃO disparou o evento 'offline' (o aviso só apareceu ao
+  // recarregar, pela tela shared/offline.html). Por isso o site também confere sozinho, com um "toque" no servidor:
+  // HEAD de um arquivo pequeno do próprio site, sem cache (o service worker não mexe em HEAD, então vai direto à rede).
+  // Confere quando: um pedido do site falha por rede (fetch, inclusive o do Supabase: este arquivo carrega antes do
+  // supabase-client.js), um áudio não toca, a aba volta a aparecer, e a cada 20 s com a aba visível. Com o aviso aberto,
+  // confere a cada 4 s e esconde quando a rede responder, mesmo sem o evento 'online'.
+  var CFG = window.__semInternetIntervalos || {};   // só os testes mudam
+  var BATIMENTO_MS = CFG.batimento || 20000;
+  var RECHECAR_MS = CFG.rechecar || 4000;
+  var ESPERA_ENTRE_CONFERENCIAS_MS = CFG.espera != null ? CFG.espera : 2000;
+  var fetchOriginal = window.fetch ? window.fetch.bind(window) : null;
+  var conferindo = false, ultimaConferencia = 0, timerRechecar = null;
+
+  function tocarServidor(){
+    if (!fetchOriginal) return Promise.resolve(navigator.onLine !== false);
+    return fetchOriginal('./manifest.json', { method: 'HEAD', cache: 'no-store' })
+      .then(function(){ return true; }, function(){ return false; });   // qualquer resposta do servidor = tem internet
+  }
+
+  function conferir(forcar){
+    var agora = Date.now();
+    if (conferindo || (!forcar && agora - ultimaConferencia < ESPERA_ENTRE_CONFERENCIAS_MS)) return;
+    conferindo = true; ultimaConferencia = agora;
+    tocarServidor().then(function(ok){
+      conferindo = false;
+      if (ok) esconderEParar(); else mostrarERechecar();
+    });
+  }
+
+  function mostrarERechecar(){
+    mostrar();
+    if (!timerRechecar) timerRechecar = setInterval(function(){ conferir(true); }, RECHECAR_MS);
+  }
+  function esconderEParar(){
+    if (timerRechecar){ clearInterval(timerRechecar); timerRechecar = null; }
+    esconder();
+  }
+
+  window.addEventListener('offline', mostrarERechecar);
+  window.addEventListener('online', function(){ conferir(true); });
+
+  // Pedido do site que falha por rede (TypeError "Failed to fetch"); cancelamentos (AbortError) não contam.
+  if (fetchOriginal){
+    window.fetch = function(){
+      var p = fetchOriginal.apply(null, arguments);
+      p.catch(function(err){ if (err && err.name === 'TypeError') conferir(false); });
+      return p;
+    };
+  }
+  // Áudio que não toca (mp3 que não carrega sem internet).
+  try {
+    var playOriginal = HTMLMediaElement.prototype.play;
+    HTMLMediaElement.prototype.play = function(){
+      var p = playOriginal.apply(this, arguments);
+      if (p && typeof p.catch === 'function') p.catch(function(err){ if (!err || err.name !== 'AbortError') conferir(false); });
+      return p;
+    };
+  } catch (e) {}
+  // A aba volta a aparecer (ex.: depois de ligar o modo avião pela cortina do celular).
+  document.addEventListener('visibilitychange', function(){ if (document.visibilityState === 'visible') conferir(true); });
+  // Batimento leve só com a aba visível.
+  setInterval(function(){ if (document.visibilityState === 'visible' && !visivel) conferir(false); }, BATIMENTO_MS);
 
   // Monta o aviso (escondido) já na abertura, com internet: assim o logo é baixado agora, e não na hora em que a internet
   // cai. Página que já carregou sem internet (raro: sem service worker): mostra assim que der.
-  function conferirAgora(){ montar(); if (navigator.onLine === false) mostrar(); }
+  function conferirAgora(){ montar(); if (navigator.onLine === false) mostrarERechecar(); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', conferirAgora);
   else conferirAgora();
 
   // Para testes: estado atual do aviso.
-  window.semInternetAviso = { visivel: function(){ return visivel; } };
+  window.semInternetAviso = { visivel: function(){ return visivel; }, conferir: function(){ conferir(true); } };
 })();

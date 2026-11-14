@@ -7,7 +7,10 @@
 //   3. a internet volta: o aviso some sozinho, nada é recarregado (a aluna continua de onde parou) e o site volta a responder;
 //   4. progresso não confirmado (o supabase-js avisa "SIGNED_IN" ao voltar para a aba e a releitura falha sem internet):
 //      ao voltar a internet, o app lê o progresso de novo e volta a poder salvar;
-//   5. 0 erro de página. SHOTS=<pasta> salva capturas fr/zh x claro/escuro x 390 px.
+//   5. a rede cai SEM o evento 'offline' (o que aconteceu no celular da autora, 2026-11-14): o próprio site percebe pelo
+//      áudio que não toca, por um pedido que falha e pelo batimento, mostra o aviso e o esconde quando a rede volta, mesmo
+//      sem o evento 'online';
+//   6. 0 erro de página. SHOTS=<pasta> salva capturas fr/zh x claro/escuro x 390 px.
 // Rodar: node tests/pwa-cache/test_aviso_sem_internet_playwright.js
 const { chromium } = require(require.resolve('playwright', { paths: [process.env.NODE_PATH || '/opt/node22/lib/node_modules'] }));
 const http = require('http'), fs = require('fs'), path = require('path');
@@ -48,6 +51,7 @@ async function abrir(browser, base, site, o){
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: SHOTS ? 2 : 1, serviceWorkers: 'block',
     colorScheme: o.tema || 'light', locale: o.lang, hasTouch: true, isMobile: true });
   await ctx.addInitScript(({ lang, tema }) => { try { localStorage.setItem('ui-language', lang); localStorage.setItem('ui-language-gate', lang); localStorage.setItem('app_theme', tema); } catch (e) {} }, { lang: o.lang, tema: o.tema || 'light' });
+  if (o.intervalos) await ctx.addInitScript((iv) => { window.__semInternetIntervalos = iv; }, o.intervalos);
   const page = await ctx.newPage();
   const errs = []; page.on('pageerror', e => errs.push(String(e).slice(0, 160)));
   // A última rota registrada vence: primeiro o bloqueio geral, depois o stub do Supabase.
@@ -111,6 +115,28 @@ const estado = (page) => page.evaluate(() => {
       check(`${site}: o teclado volta a funcionar`, (await estado(page)).teclas >= 1, await estado(page));
       check(`${site}: 0 erro de página`, errs.length === 0, errs);
       await ctx.close();
+
+      // Rede cai SEM o evento 'offline' (navigator.onLine continua true): bloqueia todo pedido da página.
+      for (const gatilho of ['audio', 'pedido', 'batimento']){
+        const sx = await abrir(browser, base, site, { lang: 'pt-BR', intervalos: { batimento: 1500, rechecar: 700, espera: 0 } });
+        const cair = () => sx.page.route('**/*', r => r.abort('internetdisconnected'));
+        await sx.page.waitForTimeout(300);
+        check(`${site} (${gatilho}): com rede, sem aviso (o batimento não dá alarme falso)`, !(await estado(sx.page)).visivel);
+        await cair();
+        if (gatilho === 'audio') await sx.page.evaluate(() => { new Audio('./audio/nao-existe-' + Date.now() + '.mp3').play().catch(() => {}); });
+        if (gatilho === 'pedido') await sx.page.evaluate(() => { fetch('./nao-existe-' + Date.now() + '.json').catch(() => {}); });
+        await sx.page.waitForFunction(() => window.semInternetAviso && window.semInternetAviso.visivel(), null, { timeout: 8000 }).catch(() => {});
+        const ox = await estado(sx.page);
+        check(`${site} (${gatilho}): rede caiu sem o evento 'offline' e o aviso aparece`, ox.visivel && ox.appInerte && (await sx.page.evaluate(() => navigator.onLine)) === true, ox);
+        await sx.page.unrouteAll({ behavior: 'ignoreErrors' });
+        await sx.page.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, r => r.abort());
+        await sx.page.route(/cdn\.jsdelivr\.net\/npm\/@supabase/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
+        await sx.page.waitForFunction(() => window.semInternetAviso && !window.semInternetAviso.visivel(), null, { timeout: 8000 }).catch(() => {});
+        const vx = await estado(sx.page);
+        check(`${site} (${gatilho}): rede volta sem o evento 'online' e o aviso some sozinho`, !vx.visivel && !vx.appInerte, vx);
+        check(`${site} (${gatilho}): 0 erro de página`, sx.errs.length === 0, sx.errs);
+        await sx.ctx.close();
+      }
 
       // en (texto) e escuro (captura)
       const en = await abrir(browser, base, site, { lang: 'en', tema: 'dark' });
