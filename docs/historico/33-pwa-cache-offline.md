@@ -130,3 +130,19 @@ Ajuste no mesmo PR (2026-11-14): a tela `shared/offline.html` tenta de novo a ca
 voltava mais sozinha (não vem outro `online`). Visto como falha intermitente de "a internet volta e a tela volta sozinha" no
 `tests/pwa-cache/test_playwright.js` (1 em 5 rodadas); depois do ajuste, 3/3 com 21/21.
 
+## O aviso por cima não aparecia no celular da autora (2026-11-14)
+
+Teste da autora no celular, com a versão do PR #476 no ar: a volta para o site funcionou, mas ao ligar o modo avião com o site
+aberto o aviso NÃO apareceu (ela entrou na lição; o áudio não tocava); só ao recarregar apareceu a tela "Sem internet". Ou seja:
+o aparelho não disparou o evento `offline` para a página. O aviso dependia só desse evento.
+
+Conserto em `shared/sem-internet.js` (o site percebe sozinho): um "toque" no servidor (`HEAD ./manifest.json`, `cache: 'no-store'`;
+o service worker não mexe em HEAD, então vai direto à rede; qualquer resposta = tem internet) decide se mostra ou esconde.
+Confere quando: um pedido do site falha por rede (`window.fetch` embrulhado; este arquivo carrega antes do `supabase-client.js`,
+então pega também o Supabase), um áudio não toca (`HTMLMediaElement.prototype.play`), a aba volta a aparecer, e a cada 20 s com a aba
+visível. Com o aviso aberto, confere a cada 4 s e esconde quando a rede responde, mesmo sem o evento `online`.
+
+Teste `tests/pwa-cache/test_aviso_sem_internet_playwright.js`: 48/48 (itens novos: rede bloqueada SEM evento, com `navigator.onLine`
+verdadeiro, percebida pelo áudio, por um pedido e pelo batimento; some sozinho sem o evento `online`; sem alarme falso com rede). Na
+versão de antes: 42/48, os 6 "o aviso aparece" falham (o que a autora viu).
+

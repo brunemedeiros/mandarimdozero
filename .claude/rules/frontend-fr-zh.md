@@ -42,7 +42,9 @@ paths:
 - **Por enquanto o site só funciona com internet** (decisão da autora, 2026-11-11): sem internet, abrir o site mostra a tela comum
   `shared/offline.html` (pré-cache de cada SW, `OFFLINE_URL`), em pt-BR ou en; nunca o app pela metade. Site novo põe `OFFLINE_URL` no SW.
   Internet cai com o site JÁ aberto (2026-11-13): aviso por cima `shared/sem-internet.js` + `.css` (site inerte, sem atalhos; some sozinho ao
-  voltar, sem recarregar, e relê o progresso se `progressLoadedOk` ficou falso). Site novo liga os dois. Guarda: `tests/pwa-cache/test_aviso_sem_internet_playwright.js`.
+  voltar, sem recarregar, e relê o progresso se `progressLoadedOk` ficou falso). Não depende do evento `offline` (o celular da autora não o
+  dispara): `HEAD ./manifest.json` decide, conferido em pedido/áudio que falha, volta à aba e a cada 20 s. `sem-internet.js` carrega ANTES do
+  `supabase-client.js` (embrulha `fetch`). Site novo liga os dois. Guarda: `tests/pwa-cache/test_aviso_sem_internet_playwright.js`.
 - **Volta para a aba** (opção A da autora, 2026-11-14): o supabase-js avisa `SIGNED_IN` a cada volta; mesma conta já aberta nunca refaz o
   login nem reaplica a rota (`isSameLoadedAccount`/`onSameAccountSignedInAgain` em `shared/auth.js`), senão a lição recomeça. Guarda: `tests/volta-aba/`.
 - Diálogo: palavras do vocabulário da unidade em COR + negrito (`.dlg-new`, `var(--seal-red-dark)`), nunca sublinhado
