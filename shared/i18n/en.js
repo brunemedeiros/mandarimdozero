@@ -2222,6 +2222,8 @@ window.I18N_CATALOG['en'] = {
   'ui.notNow': 'Not now', // ALTA
   'ui.update.title': 'New version available', // ALTA
   'ui.update.body': 'We updated the site. Reload when it\'s convenient to see what\'s new.', // ALTA -- Etapa 7 lote 1b (needs_review)
+  'ui.offline.title': 'You\'re offline', // ALTA -- aviso por cima quando a internet cai (2026-11-13)
+  'ui.offline.body': 'As soon as you\'re back online, you\'ll pick up right where you left off.', // ALTA
   'ui.path.sub14': '14 units organized by communication goal. Complete one unit to unlock the next.', // ALTA
   'ui.zh.unitManualBtn': '📖 Unit manual', // ALTA
   'ui.zh.unitManualTitle': 'Unit manual', // ALTA

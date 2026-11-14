@@ -2241,6 +2241,8 @@ window.I18N_CATALOG['pt-BR'] = {
   'ui.notNow': 'Agora não',
   'ui.update.title': 'Nova versão disponível',
   'ui.update.body': 'Atualizamos o site. Recarregue quando for conveniente para ver as novidades.',
+  'ui.offline.title': 'Você está sem internet',
+  'ui.offline.body': 'Assim que a internet voltar, você continua de onde parou.',
   'ui.path.sub14': '14 unidades organizadas por objetivo comunicacional. Complete uma unidade para desbloquear a próxima.',
   'ui.zh.unitManualBtn': '📖 Manual da unidade',
   'ui.zh.unitManualTitle': 'Manual da unidade',

@@ -135,6 +135,12 @@ async function abrir(browser, port, site, { lang = 'pt-BR', width = 1200, theme 
   const agora = await page.evaluate(() => Date.now());
   if (agora !== Date.parse('2026-10-14T12:10:00Z')) throw new Error('relógio falso fora da hora: ' + new Date(agora).toISOString());
   await page.evaluate(PAGE_LIB);
+  // Sorteio determinístico de verdade (2026-11-13): a frase de "carregando" (loadingHTML, shared/utils.js) sorteia com Math.random,
+  // e quantas vezes ela aparece depende de quando cada carregamento termina (rodando junto com outros testes, mudava e o sorteio
+  // das opções da lição seguinte saía outro, ~5/373 cenas iguais na sequência em inglês). Aqui ela fica com a 1ª frase, sem tocar
+  // no sorteio; vale igual para as duas árvores comparadas.
+  await page.evaluate(() => { if (typeof loadingHTML === 'function' && typeof LOADING_PHRASES !== 'undefined'){
+    window.loadingHTML = function(label){ const text = label || t(LOADING_PHRASES[0]); return `<div class="profile-loading"><span class="loading-spinner"></span><p>${text}</p></div>`; }; } });
   if (theme){
     await page.evaluate((th) => document.documentElement.setAttribute('data-theme', th), theme);
     await page.addStyleTag({ content: '*{animation:none !important;transition:none !important;caret-color:transparent !important;scroll-behavior:auto !important}' });
@@ -155,6 +161,9 @@ async function sequencia(browser, root, site, lang, opts = {}){
   const cena = async (n, extra) => {
     const v = await page.evaluate(() => ({ e: __estado(), audio: window.__audio.splice(0).join(',') }));
     cenas.push({ n, v: norm(JSON.stringify(Object.assign(v, extra || {}))) });
+    // Depois de cada cena a semente recomeça num número tirado da posição da cena: um sorteio a mais em algum ponto (algo que
+    // terminou de carregar numa hora diferente) não contamina as cenas seguintes. Igual nas duas árvores.
+    await page.evaluate((i) => window.__seed(100000 + i * 7919), cenas.length);
     if (opts.onCena) await opts.onCena(n, page, cenas.length - 1);
   };
   const tick = async (ms = 1200) => { await page.clock.runFor(ms); };
