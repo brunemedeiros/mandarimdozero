@@ -146,3 +146,8 @@ Teste `tests/pwa-cache/test_aviso_sem_internet_playwright.js`: 48/48 (itens novo
 verdadeiro, percebida pelo áudio, por um pedido e pelo batimento; some sozinho sem o evento `online`; sem alarme falso com rede). Na
 versão de antes: 42/48, os 6 "o aviso aparece" falham (o que a autora viu).
 
+Publicado pelo PR #478 (merge `24eaa64`, 2026-11-14, a pedido da autora). Conferido no ar (`app.profbrune.com.br`, navegador de verdade,
+rede bloqueada SEM o evento `offline`, `navigator.onLine` verdadeiro), fr e zh: sem alarme falso em 30 s com internet; pelo áudio que
+não toca, o aviso aparece em 0,2 s; só pelo batimento, em ~9 s; a rede volta e ele some em ~4 s sem o evento `online`, mesma página,
+0 erro. Falta repetir o teste no celular da autora.
+
