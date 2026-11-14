@@ -147,8 +147,8 @@ export function createAgent({ engine, db, teacherId, now }) {
       }
     }
 
-    // cartões (só aluno vinculado; mesma regra e mesmo motor da tela "Gerar cartões")
-    if (s.linked_student_id) {
+    // cartões (aluno com conta vinculada OU ligado a uma Turma; mesma regra e mesmo motor da tela "Gerar cartões")
+    if (s.linked_student_id || s.classroom_id) {
       for (const it of all.filter((i) => engine.rbReadyToDeliver(i, s, settings))) {
         const card = engine.rbBuildCard(it, s);
         if (!card.ok) { res.card_errors.push({ item: it.id, error: card.error }); continue; }
