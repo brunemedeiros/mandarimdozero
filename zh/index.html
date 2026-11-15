@@ -80,6 +80,9 @@ try{
   --jade: #3A7359;          /* verde jade — sucesso/acerto, contraste intencional ao vermelho */
   /* Caixas de sucesso com texto/check (Continuar do acerto, ✓ de concluído): verde + branco, 5,6:1 nos dois temas (decisão da autora, 2026-10-22). */
   --success-fill: #3A7359; --on-success-fill: #FFFFFF;
+  /* Vermelho de erro como FUNDO de botão com texto (Continuar do erro), igual nos dois temas: no escuro o --error-red
+     fica claro (#FF6B5C) e não aguenta texto branco. Decisão da autora, 2026-11-15. */
+  --error-fill: #D62619; --on-error-fill: #FFFFFF;
   /* Botões de nota da Revisão e do Banco (decisão da autora, 2026-10-28): cores fixas, iguais nos dois temas e nos dois idiomas, texto branco.
      Difícil usa o amarelo exato da Revisão no escuro (#C9973A); branco sobre ele dá 2,6:1 (escolha da autora, abaixo do AA). */
   --grade-fill-again: #D62619; --grade-fill-hard: #C9973A; --grade-fill-good: #2879B3; --grade-fill-easy: #3A7359; --on-grade-fill: #FFFFFF;
@@ -90,7 +93,8 @@ try{
   --grade-again-bg: #D62619; --grade-hard-bg: #8C5F0E; --grade-good-bg: #1D5A82; --grade-easy-bg: #3A7359;
   /* Medalhas do pódio (Amigos > Disputa da semana): texto escuro fixo, legível nos dois temas. */
   --medal-gold: #F2B33D; --medal-silver: #BCC5D1; --medal-bronze: #D58A4E; --on-medal: #2A1E05;
-  --error-red: #D62619; /* faltava no zh: selo +N, opção errada, apagar Deck (mesmo valor do fr) */
+  --error-red: #D62619; /* erro: mesmo valor do fr (decisão da autora, 2026-11-15: no zh o erro deixou de usar o vermelho da marca) */
+  --error-red-text: #B81F13; /* texto de erro (mesmo valor do fr) */
   /* Selo colorido atrás do ícone de cada desafio diário -- 3 cores fixas
      por posição no card (não por desafio específico), pra manter a mesma
      assinatura visual todo dia mesmo quando o desafio sorteado muda. */
@@ -157,7 +161,8 @@ try{
     --on-vivid: #1B1512;
     --grade-again-bg: #FF6B5C; --grade-hard-bg: #C9973A; --grade-good-bg: #5FA8D3; --grade-easy-bg: #52B487;
     --medal-gold: #F5C25B; --medal-silver: #C9D2DD; --medal-bronze: #E3A06C; --on-medal: #2A1E05;
-    --error-red: #FF6B5C; /* faltava no zh: selo +N, opção errada, apagar Deck (mesmo valor do fr) */
+    --error-red: #FF6B5C; /* erro: mesmo valor do fr (decisão da autora, 2026-11-15: no zh o erro deixou de usar o vermelho da marca) */
+    --error-red-text: #FF6B5C; /* texto de erro (mesmo valor do fr) */
     --dc-slot-0: #F7B84A;
     --dc-slot-1: #9A85FF;
     --dc-slot-2: #5B9DFF;
@@ -188,7 +193,8 @@ try{
   --on-vivid: #1B1512;
   --grade-again-bg: #FF6B5C; --grade-hard-bg: #C9973A; --grade-good-bg: #5FA8D3; --grade-easy-bg: #52B487;
   --medal-gold: #F5C25B; --medal-silver: #C9D2DD; --medal-bronze: #E3A06C; --on-medal: #2A1E05;
-  --error-red: #FF6B5C; /* faltava no zh: selo +N, opção errada, apagar Deck (mesmo valor do fr) */
+  --error-red: #FF6B5C; /* erro: mesmo valor do fr (decisão da autora, 2026-11-15: no zh o erro deixou de usar o vermelho da marca) */
+  --error-red-text: #FF6B5C; /* texto de erro (mesmo valor do fr) */
   --dc-slot-0: #F7B84A;
   --dc-slot-1: #9A85FF;
   --dc-slot-2: #5B9DFF;
@@ -299,7 +305,14 @@ body{
    sobrando menos de 30px por pill pros controles de verdade (busca, tema,
    idioma, conta). Some abaixo de 480px pra devolver esse espaço ao que
    tem função (auditoria de UX/UI, 2026-09). */
-@media (max-width: 480px){ .brand-text p{ display:none; } .brand-seal{ width:34px; height:34px; } }
+@media (max-width: 480px){
+  /* Celular: no topo fica só o logo; o idioma já aparece na bandeira à direita (decisão da autora, 2026-11-15, igual em
+     todos os sites). O nome continua lá para leitor de tela, só some da vista. */
+  .brand-text{ position:absolute; width:1px; height:1px; margin:-1px; padding:0; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0; }
+  .brand-seal{ width:34px; height:34px; }
+  /* Sino e ⚑ redondos (44 px, alvo de toque mínimo), como a bandeira do idioma. */
+  .notifications-pill, .report-topbar-pill{ min-width:44px; justify-content:center; }
+}
 
 /* Em telas estreitas os pills não cabem todos, e a fileira rola
    horizontalmente -- mas antes o último pill visível (a busca) ficava
@@ -1125,7 +1138,7 @@ body.lesson-focus #pwa-update-banner{ display:none !important; }
 .dlg-avatar{ flex:0 0 auto; display:flex; flex-direction:column; align-items:center; gap:2px; width:46px; }
 .dlg-emoji{ width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:20px; background: var(--brand-fill); color: var(--on-brand-fill); font-weight:800; }
 .dlg-row.b .dlg-emoji{ background: var(--imperial-gold); color: var(--ink); }
-.dlg-name{ font-size:10.5px; font-weight:800; color: var(--ink-soft); max-width:60px; text-align:center; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.dlg-name{ font-size:10.5px; font-weight:800; color: var(--ink-soft); max-width:64px; text-align:center; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .dlg-bubble{
   border-radius:16px; padding:10px 13px; border:2px solid transparent; min-width:0;
   transition: transform .2s ease, box-shadow .2s ease;
@@ -1183,11 +1196,11 @@ body.lesson-focus #pwa-update-banner{ display:none !important; }
 }
 .dlg-opt:hover:not(.locked){ border-color: var(--imperial-gold); transform: translateY(-1px); }
 .dlg-opt.correct{ border-color: var(--jade); background: rgba(58,115,89,0.12); }
-.dlg-opt.incorrect{ border-color: var(--error-red, #D62619); background: rgba(214,38,25,0.10); animation: shakeWrong .4s ease; }
+.dlg-opt.incorrect{ border-color: var(--error-red); background: rgba(214,38,25,0.10); animation: shakeWrong .4s ease; }
 .dlg-opt.locked:not(.correct):not(.incorrect){ opacity:.55; }
 .dlg-fb{ margin-top:14px; border:2px solid var(--paper-line); border-radius:12px; padding:12px; text-align:left; }
 .dlg-fb.ok{ border-color: var(--jade); background: rgba(58,115,89,0.12); }
-.dlg-fb.no{ border-color: var(--error-red, #D62619); background: rgba(214,38,25,0.10); }
+.dlg-fb.no{ border-color: var(--error-red); background: rgba(214,38,25,0.10); }
 .dlg-fb-title{ font-weight:800; margin-bottom:4px; }
 .dlg-fb-right{ font-weight:700; margin-bottom:10px; }
 .dlg-fb .btn{ margin-top:10px; }
@@ -1198,8 +1211,6 @@ body.lesson-focus #pwa-update-banner{ display:none !important; }
 .dlg-py{ font-size:12.5px; line-height:1.35; color: var(--ink-soft); margin-bottom:1px; }
 .dlg-opt .dlg-py{ display:block; font-weight:600; }
 .dlg-opt .dlg-hz{ font-size:17px; }
-.dlg-bubble .dlg-fr{ font-size:inherit; font-weight:inherit; }
-.dlg-name{ max-width:64px; }
 
 /* ---------- Dica de uso (contraste entre estruturas parecidas, estilo Busuu) ---------- */
 .usage-note{
@@ -1226,6 +1237,7 @@ body.lesson-focus #pwa-update-banner{ display:none !important; }
 .gram-block.wrapup{ background: rgba(212,160,23,0.10); border-color: var(--imperial-gold); }
 .gram-block-title{ margin:0 0 10px; font-size:19px; color: var(--seal-red-dark); }
 .gram-block-body{ margin:0; font-size:14.5px; line-height:1.6; color: var(--ink); text-align:left; }
+/* Negrito das explicações na cor de destaque do site (azul no fr, vermelho no zh); decisão da autora, 2026-11-15. */
 .gram-block-body strong{ color: var(--seal-red-dark); }
 .gram-block-examples{
   margin-top:18px; text-align:left; background: var(--paper); border:1px solid var(--paper-line);
@@ -1267,7 +1279,7 @@ body.lesson-focus #pwa-update-banner{ display:none !important; }
 /* Fade suave de cima pra baixo + borda fina na cor do estado (visual de
    painel "clássico"), em vez de uma cor chapada. */
 .correct-feedback{ background: linear-gradient(180deg, rgba(58,115,89,0.16), rgba(58,115,89,0.05)); border:1px solid rgba(58,115,89,0.40); }
-.wrong-feedback{ background: linear-gradient(180deg, rgba(192,35,31,0.15), rgba(192,35,31,0.05)); border:1px solid rgba(192,35,31,0.42); }
+.wrong-feedback{ background: linear-gradient(180deg, rgba(214,38,25,0.15), rgba(214,38,25,0.05)); border:1px solid rgba(214,38,25,0.42); }
 .feedback-card-body{ padding: 18px 20px 20px; }
 /* A caixa neutra (fundo --paper-warm) pro conteúdo em si -- mesmo padrão
    já usado em outras caixas de exemplo do app (.vocab-phrase-example,
@@ -1300,7 +1312,7 @@ body.lesson-focus #pwa-update-banner{ display:none !important; }
   font-weight:800; font-size:13.5px; margin-right:7px; animation: comboBadgeIn .35s cubic-bezier(.34,1.56,.64,1);
 }
 @keyframes comboBadgeIn{ 0%{ transform:scale(0) rotate(-8deg); opacity:0; } 60%{ transform:scale(1.18) rotate(3deg); opacity:1; } 100%{ transform:scale(1) rotate(0); } }
-.wrong-feedback-header{ color: var(--seal-red); }
+.wrong-feedback-header{ color: var(--error-red); }
 
 /* Explicação ("por que não foi essa" / a resposta) -- SEMPRE visível,
    automática, sem depender de o aluno clicar em nada. Inclui tanto o erro
@@ -1308,7 +1320,7 @@ body.lesson-focus #pwa-update-banner{ display:none !important; }
    nota gramatical), num único bloco -- sem um "Rever conteúdo" à parte, e
    sem uma segunda caixa dentro da primeira: mesma superfície do painel pai. */
 .wrong-feedback-why{ margin-bottom:0; }
-.wrong-feedback-why-label{ font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--seal-red-dark); font-weight:800; margin-bottom:8px; }
+.wrong-feedback-why-label{ font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-soft); font-weight:800; margin-bottom:8px; }
 .wrong-feedback-why .usage-note-body{ font-size:14.5px; margin:0; text-align:left; }
 .wrong-feedback-why .usage-note-title{ text-align:left; font-size:13.5px; font-weight:800; margin:12px 0 6px; }
 .wrong-feedback-why .usage-note-title:first-child{ margin-top:0; }
@@ -1321,15 +1333,15 @@ body.lesson-focus #pwa-update-banner{ display:none !important; }
 .wrong-feedback-continue, .correct-feedback-continue{
   display:block; width:100%; margin-top:18px;
 }
-/* zh não define --on-vivid no :root (e este bloco não toca :root): fallback --paper = branco-papel no claro, escuro no escuro. */
-button.correct-feedback-continue{ background: var(--success-fill); color: var(--on-success-fill); box-shadow: 0 3px 10px rgba(58,115,89,0.28); }
-/* Continuar do painel de erro: vermelho mais escuro e menos saturado que o
-   .btn-primary padrão (par background+color revisado junto: texto branco
-   fixo sobre fundo escuro, legível nos dois temas). */
-/* zh: --seal-red É o vermelho de erro; --on-seal-red (branco no claro, escuro no escuro) é o par certo. */
-button.wrong-feedback-continue{ background: var(--brand-fill); color: var(--on-brand-fill); box-shadow: 0 3px 10px rgba(192,35,31,0.28); }
-/* Painel de erro: a palavra estudada não pode ficar "vermelha de erro" também; só o fundo/cabeçalho sinalizam o erro. */
-.wrong-feedback-why-label{ color: var(--ink-soft); }
+/* Continuar dos painéis de acerto e erro (decisão da autora, 2026-11-15, igual em todos os sites): fundo verde ou
+   vermelho fixo com texto branco nos dois temas, e o "degrau" embaixo num tom MAIS ESCURO da cor do próprio botão
+   (mesma receita do .btn-primary), nunca a cor da marca embaixo de um botão verde ou vermelho. */
+button.correct-feedback-continue{ background: var(--success-fill); color: var(--on-success-fill);
+  box-shadow: 0 var(--btn-depth) 0 color-mix(in srgb, var(--success-fill) 62%, #000); }
+button.wrong-feedback-continue{ background: var(--error-fill); color: var(--on-error-fill);
+  box-shadow: 0 var(--btn-depth) 0 color-mix(in srgb, var(--error-fill) 62%, #000); }
+button.correct-feedback-continue:active:not(:disabled){ box-shadow: 0 2px 0 color-mix(in srgb, var(--success-fill) 62%, #000); }
+button.wrong-feedback-continue:active:not(:disabled){ box-shadow: 0 2px 0 color-mix(in srgb, var(--error-fill) 62%, #000); }
 .wrong-feedback .feedback-inner-box .pinyin,
 .wrong-feedback .feedback-inner-box .audio-btn,
 .wrong-feedback .feedback-inner-box .custom-audio-btn,
@@ -1492,7 +1504,7 @@ button.wrong-feedback-continue{ background: var(--brand-fill); color: var(--on-b
 .exercise-option .opt-hanzi{ font-family: var(--font-hanzi); font-size:22px; font-weight:700; }
 .exercise-option .opt-text{ font-size:14px; font-weight:700; color: var(--ink); }
 .exercise-option.correct{ border-color: var(--jade); background: rgba(58,115,89,0.12); }
-.exercise-option.incorrect{ border-color: var(--seal-red); background: rgba(192,35,31,0.10); animation: shakeWrong .4s ease; }
+.exercise-option.incorrect{ border-color: var(--error-red); background: rgba(214,38,25,0.10); animation: shakeWrong .4s ease; }
 .exercise-option.disabled{ pointer-events:none; opacity:.6; }
 .exercise-option.disabled.correct, .exercise-option.disabled.incorrect{ opacity:1; }
 
@@ -1516,7 +1528,7 @@ button.wrong-feedback-continue{ background: var(--brand-fill); color: var(--on-b
 .tf-scene{
   background: var(--paper-warm); border:1px solid var(--paper-line); border-radius: var(--radius);
   padding:24px 20px; margin-bottom:16px; text-align:center; display:flex; flex-direction:column;
-  align-items:center; gap:8px;
+  align-items:center; gap:10px;
 }
 .tf-scene-emoji{ font-size:46px; line-height:1; }
 .tf-subject{ font-family: var(--font-hanzi); font-size:22px; font-weight:700; color: var(--ink); }
@@ -1530,7 +1542,7 @@ button.wrong-feedback-continue{ background: var(--brand-fill); color: var(--on-b
 }
 .tf-option:hover{ border-color: var(--imperial-gold); transform: translateY(-1px); }
 .tf-option.correct{ border-color: var(--jade); background: rgba(58,115,89,0.12); }
-.tf-option.incorrect{ border-color: var(--seal-red); background: rgba(192,35,31,0.10); animation: shakeWrong .4s ease; }
+.tf-option.incorrect{ border-color: var(--error-red); background: rgba(214,38,25,0.10); animation: shakeWrong .4s ease; }
 .tf-option.disabled{ pointer-events:none; opacity:.6; }
 .tf-option.disabled.correct, .tf-option.disabled.incorrect{ opacity:1; }
 
@@ -1547,7 +1559,7 @@ body.hide-pinyin .cloze-pinyin{ display:none; }
   color: var(--seal-red-dark); font-weight:800;
 }
 .cloze-blank.correct{ border-color: var(--jade); color: var(--jade); }
-.cloze-blank.incorrect{ border-color: var(--seal-red); color: var(--seal-red-dark); animation: shakeWrong .4s ease; }
+.cloze-blank.incorrect{ border-color: var(--error-red); color: var(--error-red-text); animation: shakeWrong .4s ease; }
 .cloze-trans{ text-align:center; font-size:13px; color: var(--ink-soft); margin-bottom:18px; }
 .cloze-audio-row{ display:flex; justify-content:center; margin-bottom:14px; }
 .cloze-options{ display:flex; flex-direction:column; gap:10px; }
@@ -1563,7 +1575,7 @@ body.hide-pinyin .cloze-pinyin{ display:none; }
 body.hide-pinyin .cloze-option-pinyin{ display:none; }
 .cloze-option-hanzi{ font-family: var(--font-hanzi); font-size:18px; line-height:1.3; }
 .cloze-option.correct{ border-color: var(--jade); background: rgba(58,115,89,0.12); }
-.cloze-option.incorrect{ border-color: var(--seal-red); background: rgba(192,35,31,0.10); animation: shakeWrong .4s ease; }
+.cloze-option.incorrect{ border-color: var(--error-red); background: rgba(214,38,25,0.10); animation: shakeWrong .4s ease; }
 .cloze-option.disabled{ pointer-events:none; opacity:.6; }
 .cloze-option.disabled.correct, .cloze-option.disabled.incorrect{ opacity:1; }
 .cloze-type-wrap{ text-align:center; width:100%; max-width:360px; margin:0 auto; }
@@ -1684,9 +1696,16 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
 .reorder-slot.filled .pinyin{ font-size:12px; font-weight:700; color: var(--seal-red-dark); }
 .reorder-slot.filled .hanzi{ font-family: var(--font-hanzi); font-size:15px; }
 .reorder-slot.correct{ border-color: var(--jade); background: rgba(58,115,89,0.12); }
-.reorder-slot.incorrect{ border-color: var(--seal-red); background: rgba(192,35,31,0.10); animation: shakeWrong .4s ease; }
+.reorder-slot.incorrect{ border-color: var(--error-red); background: rgba(214,38,25,0.10); animation: shakeWrong .4s ease; }
 
 .reorder-blocks{ display:flex; flex-wrap:wrap; gap:10px; justify-content:center; }
+/* "Não sei" do ordene a frase: botão secundário legível, mesma ideia do digitar (igual ao fr; decisão da autora, 2026-11-15) */
+.reorder-blocks ~ .exercise-dontknow{
+  display:block; width:100%; max-width:360px; margin:22px auto 0; min-height:48px; font-size:14px;
+  border:1px solid var(--paper-line); border-radius:10px; text-decoration:none; background: transparent; color: var(--ink-soft);
+}
+.reorder-blocks ~ .exercise-dontknow:hover{ border-color: var(--ink-soft); color: var(--ink); background: var(--paper-warm); }
+.reorder-blocks ~ .exercise-dontknow.disabled{ display:none; }
 .reorder-block{
   background: var(--paper); border:2px solid var(--paper-line); border-radius:12px; padding:10px 14px;
   cursor:pointer; font-family: var(--font-body); transition: all .12s ease; display:flex; flex-direction:column; gap:2px; align-items:center;
@@ -1887,7 +1906,7 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
   background: var(--paper); color:var(--ink); font-weight:700; font-size:12.5px; line-height:1.25;
   transform: rotateY(180deg); font-family: var(--font-hanzi);
 }
-.match-tile.wrong .match-tile-front{ border-color: var(--seal-red); background: rgba(192,35,31,0.10); }
+.match-tile.wrong .match-tile-front{ border-color: var(--error-red); background: rgba(214,38,25,0.10); }
 .match-tile.match-ok .match-tile-front{ border-color: var(--jade); background: rgba(58,115,89,0.14); }
 
 @keyframes matchShake{ 0%,100%{ transform: rotateY(180deg) translateX(0); } 25%{ transform: rotateY(180deg) translateX(-4px); } 75%{ transform: rotateY(180deg) translateX(4px); } }
@@ -2002,7 +2021,7 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
 }
 .vs-fill{ position:absolute; left:0; right:0; bottom:0; }
 .vs-fill[data-tier="none"]{ background: var(--ink-soft); opacity:.45; }
-.vs-fill[data-tier="weak"]{ background: var(--seal-red); }
+.vs-fill[data-tier="weak"]{ background: var(--error-red); }
 .vs-fill[data-tier="mid"]{ background: var(--dc-slot-0); }
 .vs-fill[data-tier="strong"]{ background: var(--jade); }
 .vs-text{ padding-bottom:1px; min-width:0; }
@@ -2022,8 +2041,8 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
 .speed-score{ font-size:15px; font-weight:800; color: var(--seal-red-dark); }
 
 .speed-timer-track{ height:8px; background: var(--paper-warm); border-radius:5px; overflow:hidden; margin-bottom:20px; }
-.speed-timer-fill{ height:100%; background: linear-gradient(90deg, var(--jade), var(--imperial-gold), var(--seal-red)); border-radius:5px; transition: width .1s linear; }
-.speed-timer-fill.urgent{ background: var(--seal-red); }
+.speed-timer-fill{ height:100%; background: linear-gradient(90deg, var(--jade), var(--imperial-gold), var(--error-red)); border-radius:5px; transition: width .1s linear; }
+.speed-timer-fill.urgent{ background: var(--error-red); }
 
 .speed-prompt{
   background: var(--paper-warm); border:1px solid var(--paper-line); border-radius: var(--radius);
@@ -2040,13 +2059,12 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
 }
 @media (hover:hover){ .speed-option:hover:not(.disabled){ border-color: var(--hover-gold); background: color-mix(in srgb, var(--hover-gold) 14%, transparent); } }
 .speed-option.correct{ border-color: var(--jade); background: rgba(58,115,89,0.14); }
-.speed-option.incorrect{ border-color: var(--seal-red); background: rgba(192,35,31,0.12); }
+.speed-option.incorrect{ border-color: var(--error-red); background: rgba(214,38,25,0.12); }
 .speed-option.disabled{ pointer-events:none; }
 
 .speed-gameover{ text-align:center; padding: 50px 20px; }
 .speed-gameover .big-emoji{ font-size:56px; margin-bottom:12px; }
 .speed-gameover .score-num{ font-size:38px; font-weight:800; color: var(--seal-red-dark); margin:14px 0; }
-.speed-streak-note{ font-size:13px; color: var(--ink-soft); margin-top:6px; }
 .review-progress-bar{ flex:1; height:8px; background:var(--paper-warm); border-radius:4px; overflow:hidden; }
 .review-progress-fill{ height:100%; background: linear-gradient(90deg, var(--seal-red), var(--imperial-gold)); border-radius:4px; transition: width .3s ease; }
 .review-progress-count{ font-size:13px; font-weight:800; color:var(--ink-soft); white-space:nowrap; }
@@ -2086,7 +2104,7 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
 .grade-buttons{ display:grid; grid-template-columns: repeat(4,1fr); gap:8px; margin-top:18px; }
 .grade-btn{
   padding: 12px 6px; border-radius:12px; border:none; cursor:pointer; font-family:var(--font-body);
-  font-weight:800; font-size:13px; color:var(--on-vivid); display:flex; flex-direction:column; gap:3px; align-items:center;
+  font-weight:800; font-size:13px; display:flex; flex-direction:column; gap:3px; align-items:center;
   transition: transform .1s ease, filter .15s;
 }
 .typed-grade{ grid-template-columns: repeat(2,1fr); }
@@ -2391,7 +2409,7 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
   color:var(--ink-soft);
 }
 .admin-badge-edit-btn:hover{ background:var(--paper-warm); color:var(--ink); }
-.admin-badge-delete-btn:hover{ background:var(--paper-warm); color:var(--seal-red-dark); }
+.admin-badge-delete-btn:hover{ background:var(--paper-warm); color:var(--error-red-text); }
 .admin-badge-row.clickable{ cursor:pointer; }
 .admin-badge-row.clickable:hover{ border-color:var(--seal-red); }
 .admin-manage-badge-hint{ font-size:12.5px; color:var(--ink-soft); margin:0 0 10px; }
@@ -2586,8 +2604,8 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
   border-radius:99px; padding:6px 14px; cursor:pointer; font-family:var(--font-body); text-align:center;
 }
 .profile-edit-avatar-btn:hover{ border-color:var(--seal-red); color:var(--ink); }
-.profile-edit-avatar-btn.remove{ color:var(--seal-red-dark); }
-.profile-edit-avatar-error{ color:var(--seal-red-dark); font-size:12.5px; min-height:14px; margin:0 0 8px; }
+.profile-edit-avatar-btn.remove{ color:var(--error-red-text); }
+.profile-edit-avatar-error{ color:var(--error-red-text); font-size:12.5px; min-height:14px; margin:0 0 8px; }
 .profile-edit-form{ display:flex; flex-direction:column; gap:4px; }
 .profile-edit-label{ font-size:12px; font-weight:700; color:var(--ink-soft); margin:12px 0 2px; }
 .profile-edit-label:first-child{ margin-top:0; }
@@ -2600,14 +2618,14 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
 .profile-edit-at{ padding-left:12px; color:var(--ink-soft); font-weight:700; }
 .profile-edit-textarea{ resize:vertical; min-height:64px; }
 .profile-edit-bio-count{ font-size:11px; color:var(--ink-soft); text-align:right; margin-top:2px; }
-.profile-edit-error{ color:var(--seal-red-dark); font-size:12.5px; min-height:16px; margin:8px 0 4px; }
+.profile-edit-error{ color:var(--error-red-text); font-size:12.5px; min-height:16px; margin:8px 0 4px; }
 .profile-edit-hint{ font-size:12px; color:var(--ink-soft); margin:4px 0 2px; line-height:1.5; }
 /* Fase 2 da reestruturação do formulário de flashcards (ver CLAUDE.md) --
    mesmo par border-color/background já usado em .mc-option.incorrect
    (validação de opção errada), reaproveitado aqui pra sinalizar um campo
    obrigatório vazio/inválido antes do submit. */
 .profile-edit-input.field-invalid{ border-color: var(--error-red); background: rgba(214,38,25,0.08); }
-.profile-edit-field-error{ color:var(--seal-red-dark); font-size:12px; margin:2px 0 6px; min-height:14px; }
+.profile-edit-field-error{ color:var(--error-red-text); font-size:12px; margin:2px 0 6px; min-height:14px; }
 /* Fase 3 da reestruturação do formulário de flashcards (ver CLAUDE.md) --
    redesenho do bloco "Alunos"/Destinatários: contador vira um .pill (já
    existente, reaproveitado do streak/XP da topbar) posicionado no TOPO do
@@ -2773,7 +2791,7 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
 .export-box p{ margin:0 0 18px; color:var(--ink-soft); font-size:13.5px; max-width:420px; margin-left:auto; margin-right:auto; }
 .export-status{ margin-top:14px; font-size:13px; font-weight:700; min-height:18px; }
 .export-status.ok{ color: var(--jade); }
-.export-status.err{ color: var(--seal-red-dark); }
+.export-status.err{ color: var(--error-red-text); }
 
 .deck-select{ display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-bottom:18px; }
 .deck-chip{ padding:7px 13px; border-radius:999px; border:1px solid var(--paper-line); background:var(--paper); font-size:12.5px; font-weight:700; cursor:pointer; color:var(--ink-soft); }
@@ -3151,12 +3169,9 @@ body.lesson-focus .acq-phase-banner{ margin-bottom:10px; padding:4px 12px; }
   max-width: 380px; width:100%; background: var(--paper); border:1px solid var(--paper-line);
   border-radius: 20px; padding: 36px 28px; text-align:center; box-shadow: var(--shadow-lift);
 }
-.login-brand{ display:flex; flex-direction:column; align-items:center; gap:8px; margin:0 0 20px; }
-.login-brand .brand-text{ text-align:center; }
-.login-brand .brand-text p{ margin-top:2px; }
 .login-desc{ margin:0 0 22px; color: var(--ink-soft); font-size:13.5px; line-height:1.5; }
 .login-note{ min-height:16px; font-size:12.5px; color: var(--ink-soft); margin: 14px 0 0; }
-.login-note.err{ color: var(--seal-red-dark); font-weight:700; }
+.login-note.err{ color: var(--error-red-text); font-weight:700; }
 
 /* Botão de login social (Google) — estilo "outline", separado do vermelho
    de ação principal, igual referência enviada pela professora. */
@@ -3243,7 +3258,7 @@ body.hide-pinyin .prompt-pinyin{
   font-family:var(--font-body); font-weight:700; font-size:13.5px; color: var(--ink);
 }
 .user-dropdown-item:hover{ background: var(--paper-warm); }
-.user-dropdown-item.danger{ color: var(--seal-red-dark); }
+.user-dropdown-item.danger{ color: var(--error-red-text); }
 .user-dropdown-sep{ height:1px; background:var(--paper-line); margin:6px 4px; }
 
 /* ---------- Sino de notificações (Fase 1) ----------
@@ -3360,11 +3375,6 @@ body.hide-pinyin .prompt-pinyin{
 }
 .lang-switcher-item svg{ width:18px; height:auto; flex-shrink:0; border-radius:2px; }
 .lang-switcher-item:hover{ background: var(--paper-warm); }
-
-/* ---------- Sync status ---------- */
-.sync-indicator{ font-size:11px; color: var(--ink-soft); display:flex; align-items:center; gap:5px; opacity:.75; }
-.sync-indicator.syncing::before{ content:''; width:6px; height:6px; border-radius:50%; background:var(--imperial-gold); animation: pulseAudio .8s ease infinite; }
-.sync-indicator.saved::before{ content:''; width:6px; height:6px; border-radius:50%; background:var(--jade); }
 
 .guest-warning{
   grid-column: 1 / -1; background: linear-gradient(120deg, rgba(212,160,23,0.14), var(--paper-warm));
@@ -3896,9 +3906,6 @@ body.hide-pinyin .prompt-pinyin{
 /* ---------- Perfil: passada de design (Visão geral, Metas, Progresso, Amigos) ----------
    Identidade como carteirinha de estudante (faixa na cor do idioma no topo);
    o resto fica quieto: títulos em tom de frase, números do Progresso num painel só. */
-/* O zh nunca definiu --error-red (selo de Amigos, opção errada, campo inválido
-   ficavam sem cor): no zh o vermelho de erro é o próprio vermelho do tema. */
-:root{ --error-red: var(--seal-red); }
 :is(#view-profile, #view-goals, #view-progress, #view-friends, #public-profile-modal, #public-profile-standalone) .section-label{
   text-transform:none; letter-spacing:0; font-size:15px; font-weight:800; color:var(--ink); margin:28px 0 12px;
 }
@@ -4471,7 +4478,7 @@ body[data-activity-focus] .activity-focus-bar{ margin-bottom:14px; }
 .stat-card[data-stat^="content-"]::before{ content:'📖'; }
 
 /* Volume nos cartões clicáveis (mesma "borda de baixo" dos botões) */
-.challenge-category-card, .review-mode-card, .unit-block{ box-shadow:0 3px 0 var(--paper-line); }
+.review-mode-card, .unit-block{ box-shadow:0 3px 0 var(--paper-line); }
 
 /* Metas */
 .study-plan-card{ border-radius:22px; box-shadow:var(--shadow-card); }
