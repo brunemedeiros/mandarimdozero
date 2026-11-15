@@ -1,6 +1,6 @@
-// Faixa de confirmação de idade (Fase P, opção A da dona, migration 136; shared/age-ack.js). Servidor e stub copiados de
+// Janela de confirmação de idade (Fase P, "A1 nova" da dona, migration 136; shared/age-ack.js). Servidor e stub copiados de
 // tests/escolher-usuario/test_playwright.js. FR + ZH, pt-BR e en, claro/escuro e celular. Supabase stubado em memória.
-// Rodar: node tests/privacidade-padrao/test_faixa_idade_playwright.js  (SHOTS_DIR=... salva prints)
+// Rodar: node tests/privacidade-padrao/test_janela_idade_playwright.js  (SHOTS_DIR=... salva prints)
 const { chromium } = require(require.resolve('playwright', { paths: [process.env.NODE_PATH || '/opt/node22/lib/node_modules'] }));
 const http = require('http'), fs = require('fs'), path = require('path');
 const ROOT = path.resolve(__dirname, '..', '..');
@@ -70,37 +70,54 @@ async function setup(page, { role = 'user', email = 'aluna@example.invalid', ack
     window.__DB.profile_private = acked ? [{ user_id: 'me', age_ack_at: '2026-11-15T10:00:00Z' }] : [{ user_id: 'outra', age_ack_at: null }];
     if (rpcFails) delete window.__RPC.ack_my_age;
     else window.__RPC.ack_my_age = () => '2026-11-15T21:00:00Z';
-    document.getElementById('age-ack-banner')?.remove();
+    document.getElementById('age-ack-modal')?.remove();
+    try { sessionStorage.removeItem('age-ack-later'); } catch (e) {}
   }, { role, email, acked, rpcFails });
 }
-const has = (page) => page.evaluate(() => !!document.querySelector('#path-list-wrap > #age-ack-banner'));
+const has = (page) => page.evaluate(() => !!document.querySelector('#age-ack-modal .tpop.age-ack-pop[role="dialog"]'));
 
 async function run(browser, port, lang){
-  // 1) conta sem a data: a faixa aparece no topo do Estudo, em pt-BR
+  // 1) conta sem a data: a janela aparece, "Confirmar" travado até marcar, grava, agradece e fecha
   {
     const { page, errors, ctx } = await boot(browser, lang, port, 'light', { width: 390, height: 844 }, 'pt-BR', { touch: true });
     await setup(page);
     await page.evaluate(() => maybeShowAgeAckBanner());
-    check(`${lang}: sem a data, a faixa aparece no topo do Estudo`, await has(page));
-    const t1 = await page.$eval('#age-ack-banner', e => e.innerText);
-    check(`${lang}: texto em pt-BR`, /Uma confirmação rápida/.test(t1) && /Tenho 18 anos ou mais, ou tenho autorização do meu responsável/.test(t1), t1);
-    check(`${lang}: nada marcado de antemão`, !(await page.$eval('#age-ack-check', e => e.checked)));
+    check(`${lang}: sem a data, a janela aparece`, await has(page));
+    const t1 = await page.$eval('#age-ack-modal', e => e.innerText);
+    check(`${lang}: textos em pt-BR`, /Uma confirmação rápida/.test(t1) && /Leva um segundo/.test(t1) && /Tenho 18 anos ou mais, ou tenho autorização do meu responsável/.test(t1) && /Agora não/.test(t1) && /Confirmar/.test(t1), t1);
+    check(`${lang}: nada marcado de antemão e Confirmar travado`, await page.evaluate(() => !document.getElementById('age-ack-check').checked && document.getElementById('age-ack-confirm').disabled));
     await page.evaluate(() => maybeShowAgeAckBanner());
-    check(`${lang}: chamar de novo não duplica a faixa`, await page.evaluate(() => document.querySelectorAll('#age-ack-banner').length === 1));
-    if (SHOTS) await page.screenshot({ path: `${SHOTS}/${lang}-ptBR-claro-celular.png`, fullPage: false });
-    await page.click('#age-ack-check');
+    check(`${lang}: chamar de novo não duplica`, await page.evaluate(() => document.querySelectorAll('#age-ack-modal').length === 1));
+    if (SHOTS) await page.screenshot({ path: `${SHOTS}/${lang}-ptBR-claro-celular.png` });
+    await page.check('#age-ack-check');
+    check(`${lang}: marcar libera o Confirmar`, await page.evaluate(() => !document.getElementById('age-ack-confirm').disabled));
+    await page.uncheck('#age-ack-check');
+    check(`${lang}: desmarcar trava de novo`, await page.evaluate(() => document.getElementById('age-ack-confirm').disabled));
+    await page.check('#age-ack-check');
+    await page.click('#age-ack-confirm');
     await page.waitForFunction(() => window.__rpc.some(r => r.name === 'ack_my_age'));
-    check(`${lang}: marcar grava pela ack_my_age`, true);
-    const thanks = await page.$eval('#age-ack-banner', e => e.innerText).catch(() => '');
+    check(`${lang}: Confirmar grava pela ack_my_age`, true);
+    const thanks = await page.$eval('#age-ack-modal', e => e.innerText).catch(() => '');
     check(`${lang}: agradece`, /Obrigada! Tudo certo\./.test(thanks), thanks);
-    await page.waitForFunction(() => !document.getElementById('age-ack-banner'), null, { timeout: 5000 });
-    check(`${lang}: a faixa some depois`, !(await has(page)));
+    await page.waitForFunction(() => !document.getElementById('age-ack-modal'), null, { timeout: 5000 });
+    check(`${lang}: a janela fecha depois`, !(await has(page)));
     check(`${lang}: sem erro de página`, errors.length === 0, errors);
     await ctx.close();
   }
-  // 2) já confirmou, professora, admin: não aparece
+  // 2) "Agora não" e Esc: fecha nesta visita e não volta até abrir o site de novo
   {
     const { page, ctx } = await boot(browser, lang, port, 'light', null, 'pt-BR');
+    await setup(page); await page.evaluate(() => maybeShowAgeAckBanner());
+    await page.click('#age-ack-later');
+    check(`${lang}: "Agora não" fecha`, !(await has(page)));
+    await page.evaluate(() => maybeShowAgeAckBanner());
+    check(`${lang}: não volta na mesma visita`, !(await has(page)));
+    check(`${lang}: nada foi gravado`, await page.evaluate(() => !window.__rpc.some(r => r.name === 'ack_my_age')));
+    await page.evaluate(() => { sessionStorage.removeItem('age-ack-later'); return maybeShowAgeAckBanner(); });
+    check(`${lang}: numa visita nova, volta`, await has(page));
+    await page.keyboard.press('Escape');
+    check(`${lang}: Esc também fecha`, !(await has(page)));
+    // já confirmou, professora, admin: não aparece
     await setup(page, { acked: true }); await page.evaluate(() => maybeShowAgeAckBanner());
     check(`${lang}: quem já confirmou não vê`, !(await has(page)));
     await setup(page, { role: 'teacher' }); await page.evaluate(() => maybeShowAgeAckBanner());
@@ -109,18 +126,18 @@ async function run(browser, port, lang){
     check(`${lang}: admin não vê`, !(await has(page)));
     await ctx.close();
   }
-  // 3) falha ao gravar: desmarca e avisa; inglês e tema escuro
+  // 3) falha ao gravar: avisa e deixa tentar de novo; inglês e tema escuro
   {
     const { page, errors, ctx } = await boot(browser, lang, port, 'dark', { width: 1280, height: 900 }, 'en');
     await page.waitForFunction(() => getUiLang() === 'en');
     await setup(page, { rpcFails: true });
     await page.evaluate(() => maybeShowAgeAckBanner());
-    const t2 = await page.$eval('#age-ack-banner', e => e.innerText);
-    check(`${lang}: texto em inglês, sem português`, /A quick check/.test(t2) && /I'm 18 or older, or I have my parent or guardian's permission/.test(t2) && !/Tenho|anos|responsável/.test(t2), t2);
-    if (SHOTS) await page.screenshot({ path: `${SHOTS}/${lang}-en-escuro-computador.png`, fullPage: false });
-    await page.click('#age-ack-check');
+    const t2 = await page.$eval('#age-ack-modal', e => e.innerText);
+    check(`${lang}: textos em inglês, sem português`, /A quick check/.test(t2) && /I'm 18 or older, or I have my parent or guardian's permission/.test(t2) && /Not now/.test(t2) && /Confirm/.test(t2) && !/Tenho|anos|responsável|Agora|Confirmar/.test(t2), t2);
+    if (SHOTS) await page.screenshot({ path: `${SHOTS}/${lang}-en-escuro-computador.png` });
+    await page.check('#age-ack-check'); await page.click('#age-ack-confirm');
     await page.waitForFunction(() => /couldn't save/.test(document.getElementById('age-ack-note').textContent));
-    check(`${lang}: falha desmarca e deixa tentar de novo`, await page.evaluate(() => !document.getElementById('age-ack-check').checked && !document.getElementById('age-ack-check').disabled));
+    check(`${lang}: falha avisa e deixa tentar de novo`, await page.evaluate(() => document.getElementById('age-ack-check').checked && !document.getElementById('age-ack-confirm').disabled && !!document.getElementById('age-ack-modal')));
     check(`${lang}: sem erro de página (en)`, errors.length === 0, errors);
     await ctx.close();
   }
@@ -132,6 +149,6 @@ async function run(browser, port, lang){
   const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || undefined });
   try { for (const lang of ['fr', 'zh']) await run(browser, port, lang); }
   finally { await browser.close(); server.close(); }
-  console.log(`faixa de idade: ${passed}/${passed + failed} ok`);
+  console.log(`janela de idade: ${passed}/${passed + failed} ok`);
   process.exit(failed ? 1 : 0);
 })();

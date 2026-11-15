@@ -4083,6 +4083,9 @@ window.I18N_CATALOG['en'] = {
   'gate.signup.methodSub': 'It\'s free. Choose how you\'d like to sign up.', // ALTA
   'gate.signup.ageAck': 'I\'m 18 or older, or I have my parent or guardian\'s permission to use the site.', // ALTA
   'ageAck.title': 'A quick check', // ALTA
+  'ageAck.sub': 'It takes a second and you only do it once.', // ALTA
+  'ageAck.later': 'Not now', // ALTA
+  'ageAck.confirm': 'Confirm', // ALTA
   'ageAck.label': 'I\'m 18 or older, or I have my parent or guardian\'s permission to use the site.', // ALTA
   'ageAck.thanks': 'Thanks, all set!', // ALTA
   'ageAck.error': 'We couldn\'t save it right now. Please try again in a moment.', // ALTA

@@ -65,10 +65,11 @@ até lá o código ainda diz "sem telemetria de terceiros".
   site." / "I'm 18 or older, or I have my parent or guardian's permission to use the site."); sem marcar, Google e e-mail
   ficam travados; a data é gravada depois do login (`afterAuthResolved`). Testes: `tests/privacidade-padrao/run.sh` 8/8,
   `tests/login-obrigatorio/test_entrada_idioma.js` 162/162, `test_playwright.js` 124/124, `tests/cores-marca/test_portao.js` 6/6.
-- Contas que já existem (e conta nova criada pelo "Entrar com Google" da tela de Entrar, que não passa pelo passo 2): **opção A
-  da dona** (2026-11-15), faixa "Uma confirmação rápida" com a mesma caixinha no topo da tela Estudo (`shared/age-ack.js` e
-  `.css`, fr e zh); não trava nada, some ao marcar; professora e admin dispensadas. Teste
-  `tests/privacidade-padrao/test_faixa_idade_playwright.js` 28/28.
+- Contas que já existem (e conta nova criada pelo "Entrar com Google" da tela de Entrar, que não passa pelo passo 2): primeiro
+  a opção A (faixa no topo do Estudo); depois a dona escolheu a **"A1 nova"** (2026-11-15): janela no estilo das janelas do
+  topo (classes `tpop-*`), ao abrir o site, com a caixinha, "Agora não" (fecha nesta visita, volta na próxima; Esc também) e
+  "Confirmar" (travado até marcar). `shared/age-ack.js` e `.css`, fr e zh; professora e admin dispensadas. Teste
+  `tests/privacidade-padrao/test_janela_idade_playwright.js` 42/42.
 
 ## Estilo do banner de cookies (pedido da dona, 2026-11-15)
 
@@ -79,6 +80,17 @@ da ANPD e o pedido do prompt). Aguarda o "ok" dela.
 
 GA4 (Fase 1): desmarcar "Alterações na página de acordo com os eventos do histórico de navegação" e deixar "Carregamentos de
 página" (o site manda as telas do app sozinho; com isso ligado, as limpezas de endereço do site contariam visitas a mais).
+
+## Escolhas de 2026-11-15 (terceira rodada)
+
+- Banner de cookies: **B1 nova** (janela no estilo das do topo, título "Cookies", botões "Recusar opcionais" e "Aceitar
+  todos" iguais). Pergunta dela: por que não tem "Personalizar/Preferências" como outros sites. Resposta: aqueles sites
+  têm várias categorias opcionais (funcionais, desempenho, anúncios); o dela tem uma só (medição), então a tela de
+  preferências repete a escolha do banner. Proposta enviada com prévia: link discreto "Preferências" no banner abrindo uma
+  janela com "Necessários (sempre ativos)" e "Medição de visitas" (chave), que é a mesma janela do "Preferências de
+  cookies" do rodapé, pedida no prompt. Aguarda o ok dela.
+- GA4: anúncios desligados em todas as regiões (conferido por ela). Vinculações: conferir que não há nada vinculado.
+  Filtros de dados: o GA4 já cria o filtro "Tráfego interno" em modo de teste, que não faz nada sem regras; deixar como está.
 
 ## Fase 1 (2026-11-15)
 
