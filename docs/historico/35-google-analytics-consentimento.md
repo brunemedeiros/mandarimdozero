@@ -36,6 +36,12 @@ até lá o código ainda diz "sem telemetria de terceiros".
   tudo de uma vez na Fase 3 (lista de telas e ações aguarda aprovação dela).
 - Privacidade por padrão + caixinha de idade no cadastro (sugestões 1 e 2): ela pediu para aplicar e, depois de aplicado,
   registrar no documento do advogado que já existem. Antes, levantamento do que muda para quem já usa.
+  Levantamento (2026-11-15): conflita com a decisão dela da migration `041_public_profile_default_true.sql` (perfil público
+  por padrão, inclusive contas antigas). Hoje: perfil nasce público; toda conta com XP entra no Ranking Geral (sem opção de
+  sair); Amigos com busca por nome, sugestões automáticas (`suggest_me`), pedidos (`accept_requests`), cutucar e missão em
+  dupla automática, tudo ligado por padrão (`friend_settings`); cadastro sem caixinha de idade, e o Google pula o passo 3.
+  Opções A (tudo protegido para todos), B (só contas novas, Ranking e Amigos desligados) e C (contas novas com perfil
+  privado, Ranking e Amigos ligados) apresentadas a ela; aguarda escolha.
 
 ## Fase extra (depois da Fase 4): página `/aulas/`
 
