@@ -43,6 +43,18 @@ até lá o código ainda diz "sem telemetria de terceiros".
   Opções A (tudo protegido para todos), B (só contas novas, Ranking e Amigos desligados) e C (contas novas com perfil
   privado, Ranking e Amigos ligados) apresentadas a ela; aguarda escolha.
 
+## Fase 0 aprovada (2026-11-15)
+
+- Banner: **G3, uma linha só** ("Este site usa cookies para melhorar a sua experiência e medir as visitas. [Política de
+  cookies]" [Recusar opcionais] [Aceitar todos]). A frase "Ao clicar em Aceitar, você concorda..." não é necessária: o
+  clique já é o consentimento.
+- Lista de medições do app (telas, ações e eventos-chave de `docs/ga4/fase0-levantamento.md`, seção 1): aprovada, vai
+  toda na Fase 3.
+- Privacidade por padrão: **opção C** (contas novas nascem com perfil privado; Ranking e Amigos continuam ligados; contas
+  antigas não mudam) + caixinha de idade. Feita nesta conversa logo depois da Fase 0, como **Fase P**.
+- Fase 6 (`/aulas/`): **moldura** com o formulário dentro, resposta marcada pelo `utm_source`, só o formulário de francês.
+- Idiomas do banner e da política: pt-BR e en (o espanhol está congelado e fora do menu de idioma).
+
 ## Fase extra (depois da Fase 4): página `/aulas/`
 
 Nova versão do prompt (2026-11-15) chama de **Fase 6**: link geral https://forms.gle/9994D2GHdwDj4RyT7 (formulário de aulas

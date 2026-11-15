@@ -130,7 +130,7 @@ Mais 3 propostas genéricas (2026-11-15), nos moldes das referências da dona:
 - **G2, barra embaixo com título** (como a Speakly):
   > pt-BR: **"Sua privacidade importa"** "Usamos cookies para melhorar a sua experiência e entender como o site é usado. Os opcionais só entram se você aceitar. [Política de cookies]" [Recusar opcionais] [Aceitar todos]
   > en: **"We value your privacy"** "We use cookies to improve your experience and understand how the site is used. Optional ones only turn on if you accept. [Cookie policy]" [Reject optional] [Accept all]
-- **G3, uma linha só** (como a terceira referência):
+- **G3, uma linha só** (como a terceira referência). **ESCOLHIDA pela dona em 2026-11-15**:
   > pt-BR: "Este site usa cookies para melhorar a sua experiência e medir as visitas. [Política de cookies]" [Recusar opcionais] [Aceitar todos]
   > en: "This site uses cookies to improve your experience and measure visits. [Cookie policy]" [Reject optional] [Accept all]
 
