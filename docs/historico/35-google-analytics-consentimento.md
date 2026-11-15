@@ -80,6 +80,21 @@ da ANPD e o pedido do prompt). Aguarda o "ok" dela.
 GA4 (Fase 1): desmarcar "Alterações na página de acordo com os eventos do histórico de navegação" e deixar "Carregamentos de
 página" (o site manda as telas do app sozinho; com isso ligado, as limpezas de endereço do site contariam visitas a mais).
 
+## Fase 1 (2026-11-15)
+
+- ID da métrica do GA4: **`G-CE3282C1FB`** (público por natureza: aparece no código de qualquer site que usa o GA4). O ID do
+  fluxo não é necessário. Falta a dona confirmar a parte B (14 meses, Sinais do Google desligados, anúncios desligados) e
+  escrever "Fase 1 aprovada".
+
+## Prévias pedidas em 2026-11-15 (aguardam escolha)
+
+- Confirmação de idade com mais destaque: A1 janela ao abrir com "Agora não" (volta na próxima visita), A2 janela
+  obrigatória (só some confirmando; "Sair da conta"), A3 faixa colorida no topo. Antes ela tinha preferido não ter janela
+  única; a janela volta agora a pedido dela.
+- Banner de cookies: B1 botões iguais, só o texto de "Aceitar" na cor da marca; B2 "Aceitar" cheio na cor da marca (azul no
+  fr, vermelho no zh); B3 "Aceitar" cheio em cor neutra (tinta escura, igual nos dois sites). Dúvida da dona: vermelho no zh
+  parecer "cancelar". Nota: no zh todos os botões principais já são vermelhos ("Começar", "Continuar").
+
 ## Fase extra (depois da Fase 4): página `/aulas/`
 
 Nova versão do prompt (2026-11-15) chama de **Fase 6**: link geral https://forms.gle/9994D2GHdwDj4RyT7 (formulário de aulas
