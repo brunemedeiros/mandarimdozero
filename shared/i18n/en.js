@@ -396,6 +396,10 @@ window.I18N_CATALOG['en'] = {
   'review.cloze.placeholder': 'Type the missing word', // ALTA
   'review.typeAnswer.placeholder': 'Type the answer', // ALTA
   'review.tapToReveal': 'tap to see the answer', // ALTA
+  'review.pressToReveal': 'Space shows the answer', // ALTA
+  'review.match.audio.title': '🔊 With audio', // ALTA
+  'review.match.audio.help': 'Some cards play the word instead of showing the text. Turn it off if you have no sound.', // ALTA
+  'review.match.audio.tileLabel': 'Audio card', // ALTA
   'review.grade.again': 'Again', // MÉDIA -- botão de nota; PT "Errei" = "I got it wrong"; EN segue o padrão Anki
   'review.grade.hard': 'Hard', // ALTA
   'review.grade.good': 'Good', // ALTA
@@ -2208,6 +2212,8 @@ window.I18N_CATALOG['en'] = {
   'ui.profileEdit.featuredBadge': 'Featured badge (shown in the Leaderboard)', // ALTA
   'ui.kbd.title': '⌨️ Keyboard shortcuts', // ALTA
   'ui.kbd.choose': 'Pick an option by its position on screen', // ALTA
+  'ui.kbd.grade': 'In Review, grade the card by the position of the button (with four buttons: Again, Hard, Good, Easy)', // ALTA
+  'ui.kbd.reveal': 'In Review, show the answer of a card', // ALTA
   'ui.kbd.confirm': 'Confirm a typed answer and move on to the next one', // ALTA
   'ui.kbd.replay': 'Play audio again', // ALTA
   'ui.kbd.note': 'The numbers only appear when an exercise has options to choose from, never during typing or the sentence-ordering exercise. "r" repeats the last audio that played on screen.', // ALTA
@@ -2216,6 +2222,8 @@ window.I18N_CATALOG['en'] = {
   'ui.notNow': 'Not now', // ALTA
   'ui.update.title': 'New version available', // ALTA
   'ui.update.body': 'We updated the site. Reload when it\'s convenient to see what\'s new.', // ALTA -- Etapa 7 lote 1b (needs_review)
+  'ui.offline.title': 'You\'re offline', // ALTA -- aviso por cima quando a internet cai (2026-11-13)
+  'ui.offline.body': 'As soon as you\'re back online, you\'ll pick up right where you left off.', // ALTA
   'ui.path.sub14': '14 units organized by communication goal. Complete one unit to unlock the next.', // ALTA
   'ui.zh.unitManualBtn': '📖 Unit manual', // ALTA
   'ui.zh.unitManualTitle': 'Unit manual', // ALTA
@@ -3357,7 +3365,7 @@ window.I18N_CATALOG['en'] = {
   'rb.generateReady': 'Create cards', // ALTA
   'rb.generated': '{n} cards created.', // ALTA
   'rb.generatedPartial': '{ok} created, {fail} failed.', // ALTA
-  'rb.keys': 'Space shows · 1 Again · 2 Hard · 3 Good (right arrow) · 4 Easy', // ALTA
+  'rb.keys': 'Space shows · 1 Again · 2 Hard · 3 Good · 4 Easy', // ALTA
   'rb.classEmpty': 'No students in the class yet', // ALTA
   'rb.classMembers': '{n} in the class: {names}', // ALTA
   'rb.classPick': 'Class', // ALTA
