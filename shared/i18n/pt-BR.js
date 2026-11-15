@@ -4101,6 +4101,7 @@ window.I18N_CATALOG['pt-BR'] = {
   'gate.signup.loginLink': 'Entrar',
   'gate.signup.methodTitle': 'Crie sua conta e comece o seu {lang}',
   'gate.signup.methodSub': 'É grátis. Escolha como prefere entrar.',
+  'gate.signup.ageAck': 'Tenho 18 anos ou mais, ou tenho autorização do meu responsável para usar o site.',
   'gate.signup.withEmail': 'Continuar com e-mail',
   'gate.signup.dataTitle': 'Seus dados',
   'gate.signup.dataSub': 'Seu nome e seu @ aparecem no seu perfil.',
