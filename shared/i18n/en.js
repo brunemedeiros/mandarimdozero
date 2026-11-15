@@ -4082,6 +4082,10 @@ window.I18N_CATALOG['en'] = {
   'gate.signup.methodTitle': 'Create your account and start learning {lang}', // ALTA
   'gate.signup.methodSub': 'It\'s free. Choose how you\'d like to sign up.', // ALTA
   'gate.signup.ageAck': 'I\'m 18 or older, or I have my parent or guardian\'s permission to use the site.', // ALTA
+  'ageAck.title': 'A quick check', // ALTA
+  'ageAck.label': 'I\'m 18 or older, or I have my parent or guardian\'s permission to use the site.', // ALTA
+  'ageAck.thanks': 'Thanks, all set!', // ALTA
+  'ageAck.error': 'We couldn\'t save it right now. Please try again in a moment.', // ALTA
   'gate.signup.withEmail': 'Continue with email', // ALTA
   'gate.signup.dataTitle': 'Your details', // ALTA
   'gate.signup.dataSub': 'Your name and your @ appear on your profile.', // ALTA

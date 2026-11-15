@@ -59,13 +59,26 @@ até lá o código ainda diz "sem telemetria de terceiros".
 
 - 2026-11-15: migration `136_privacy_default_and_age_ack` (contas novas com `public_profile = false`; contas antigas não
   mudam; `profile_private.age_ack_at` + `ack_my_age()`) aplicada no **Staging** (versão `20261115211611`; conferido: padrão
-  false, 4/4 perfis antigos continuam públicos, anon não executa). **Produção: aguarda autorização da dona.**
+  false, 4/4 perfis antigos continuam públicos, anon não executa). **Produção: aplicada em 2026-11-15 com autorização da dona**
+  (versão `20261115213809`; hash dos 39 perfis `02439bc3a9c1c1d410595cb39786fe4f` igual antes e depois, 39/39 públicos).
 - Cadastro, passo 2: caixinha obrigatória ("Tenho 18 anos ou mais, ou tenho autorização do meu responsável para usar o
   site." / "I'm 18 or older, or I have my parent or guardian's permission to use the site."); sem marcar, Google e e-mail
   ficam travados; a data é gravada depois do login (`afterAuthResolved`). Testes: `tests/privacidade-padrao/run.sh` 8/8,
   `tests/login-obrigatorio/test_entrada_idioma.js` 162/162, `test_playwright.js` 124/124, `tests/cores-marca/test_portao.js` 6/6.
-- Em aberto: contas que já existem (e conta nova criada pelo "Entrar com Google" da tela de Entrar, que não passa pelo
-  passo 2). A dona prefere uma caixinha dentro de uma tela que já existe, no lugar da janela única; opções enviadas a ela.
+- Contas que já existem (e conta nova criada pelo "Entrar com Google" da tela de Entrar, que não passa pelo passo 2): **opção A
+  da dona** (2026-11-15), faixa "Uma confirmação rápida" com a mesma caixinha no topo da tela Estudo (`shared/age-ack.js` e
+  `.css`, fr e zh); não trava nada, some ao marcar; professora e admin dispensadas. Teste
+  `tests/privacidade-padrao/test_faixa_idade_playwright.js` 28/28.
+
+## Estilo do banner de cookies (pedido da dona, 2026-11-15)
+
+"Recusar opcionais" à esquerda e "Aceitar todos" à direita, no estilo da tela do próprio Google que ela mostrou: os dois botões
+do mesmo tamanho e com borda; o texto de "Aceitar todos" na cor da marca (azul no fr, vermelho no zh) e o de "Recusar
+opcionais" em cinza. Fundo cheio colorido só no "Aceitar" foi desaconselhado (empurra a pessoa a aceitar, contra a orientação
+da ANPD e o pedido do prompt). Aguarda o "ok" dela.
+
+GA4 (Fase 1): desmarcar "Alterações na página de acordo com os eventos do histórico de navegação" e deixar "Carregamentos de
+página" (o site manda as telas do app sozinho; com isso ligado, as limpezas de endereço do site contariam visitas a mais).
 
 ## Fase extra (depois da Fase 4): página `/aulas/`
 
