@@ -94,6 +94,13 @@ página" (o site manda as telas do app sozinho; com isso ligado, as limpezas de 
 - Banner de cookies: B1 botões iguais, só o texto de "Aceitar" na cor da marca; B2 "Aceitar" cheio na cor da marca (azul no
   fr, vermelho no zh); B3 "Aceitar" cheio em cor neutra (tinta escura, igual nos dois sites). Dúvida da dona: vermelho no zh
   parecer "cancelar". Nota: no zh todos os botões principais já são vermelhos ("Começar", "Continuar").
+- 2026-11-15, segunda rodada (pedido da dona: janelas no estilo das janelas do topo 🔥 e ⭐, `shared/janelas-topo.css`,
+  classes `tpop-*`): A1 nova e A2 nova (cabeçalho na cor da marca com título grande e 🙋, caixinha num cartão, "Confirmar"
+  em pílula com borda), A3 mantida; B1 nova (cabeçalho "Cookies" com 📊, botões iguais) e B2 nova ("Aceitar todos" cheio
+  na cor da marca), B1/B2 antigas e B3 mantidas como opção. Prévias geradas na tela real do app (fr e zh, claro e escuro).
+- GA4: não clicar em "Confirmação de coleta de dados do usuário / Eu confirmo" (é para quem manda e-mail ou telefone ao
+  Google; o site não manda dado pessoal). "Coleta de dados do dispositivo e local granular" (cidade e modelo do aparelho,
+  sem guardar o IP) pode ficar ligada; a política cita. "Personalização de anúncios": desligada para todas as regiões.
 
 ## Fase extra (depois da Fase 4): página `/aulas/`
 
