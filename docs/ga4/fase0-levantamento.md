@@ -21,7 +21,22 @@ Tudo fica no mesmo endereço (`app.profbrune.com.br`), então uma escolha no ban
 
 **Dentro do app**: o comum é medir só a entrada (1 visita por carregamento, com a origem do UTM) e deixar o detalhe das telas
 com a medição própria que já existe (`usage_events`, que vê Trilha, Revisão, Desafios etc.). Medir cada tela no GA4 também é
-possível ("páginas virtuais"), mas duplica o que o Analytics do Admin já mostra. **Proposta: só a entrada.**
+possível ("páginas virtuais"), mas duplica o que o Analytics do Admin já mostra. ~~Proposta: só a entrada.~~
+
+**Decisão da dona (2026-11-15): medir mais, tudo de uma vez se der.** Dá, porque o app já avisa a medição própria nesses
+momentos (`trackEvent` em `shared/analytics.js`); o GA4 recebe uma cópia, por uma lista fechada de nomes. Proposta para aprovar:
+
+| No GA4 | Vem de | Detalhe enviado |
+|---|---|---|
+| Página virtual por aba (Estudo, Revisão, Desafios, Conjugação, Decks, Amigos, Ranking, Perfil, Configurações) | `tab_switch` (`shared/tabs.js:40`) | Só o nome da aba. Admin e Professora nunca |
+| `sign_up` (criou conta), evento-chave | cadastro concluído (ponto a localizar na Fase 3) | Curso e idioma do site |
+| `lesson_start` e `lesson_complete` | `trackEvent('lesson_start'/'lesson_complete', tipo)` | Tipo (lição, revisão, desafio, ditado, conjugação, jogo) e curso |
+| `course_restart` | `shared/recomecar-curso.js:224` | Curso |
+| Clique para o formulário de aulas ou WhatsApp, evento-chave | medição automática de links de fora | Endereço de destino |
+| Abrir teste de nivelamento, evento-chave | visita a `/teste-de-nivelamento-*` | Idioma do teste |
+
+Fica de fora: cada resposta da Revisão (`review_answer`, são centenas por dia), erros técnicos, tempo de carregamento,
+relatos de problema. Nunca: nome, e-mail, @, id da conta, texto de cartão.
 
 ## 2. O que o site já guarda no navegador
 
@@ -106,6 +121,21 @@ destaque), nada marcado de antemão, e o site funciona normalmente enquanto a pe
 >
 > en: "We use cookies to make the site work and, if you allow it, to understand how it is used. [Cookie policy]"
 > [Reject optional] [Accept all]
+
+Mais 3 propostas genéricas (2026-11-15), nos moldes das referências da dona:
+
+- **G1, cartão no canto** (como a Memrise, mas com Recusar):
+  > pt-BR: "Este site usa cookies e tecnologias parecidas para funcionar e, com a sua permissão, para medir as visitas. Para saber mais ou mudar sua escolha depois, veja a nossa [Política de cookies]." [Recusar] [Aceitar]
+  > en: "This site uses cookies and similar technologies to work and, with your permission, to measure visits. To learn more or change your choice later, see our [Cookie policy]." [Decline] [Accept]
+- **G2, barra embaixo com título** (como a Speakly):
+  > pt-BR: **"Sua privacidade importa"** "Usamos cookies para melhorar a sua experiência e entender como o site é usado. Os opcionais só entram se você aceitar. [Política de cookies]" [Recusar opcionais] [Aceitar todos]
+  > en: **"We value your privacy"** "We use cookies to improve your experience and understand how the site is used. Optional ones only turn on if you accept. [Cookie policy]" [Reject optional] [Accept all]
+- **G3, uma linha só** (como a terceira referência):
+  > pt-BR: "Este site usa cookies para melhorar a sua experiência e medir as visitas. [Política de cookies]" [Recusar opcionais] [Aceitar todos]
+  > en: "This site uses cookies to improve your experience and measure visits. [Cookie policy]" [Reject optional] [Accept all]
+
+Cuidado comum às três: "melhorar a sua experiência" sozinho é vago. As orientações da ANPD pedem que o aviso diga para que serve,
+por isso todas citam "medir as visitas" ou "entender como o site é usado".
 
 Regras para qualquer versão: os dois botões do mesmo tamanho e estilo. Não ter só "Concordo" (o modelo da Memrise não deixa
 recusar). Sem botão "Personalizar" enquanto houver uma única categoria opcional (abriria uma tela com uma chave só). Não citar

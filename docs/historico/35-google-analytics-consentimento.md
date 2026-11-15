@@ -28,7 +28,20 @@ até lá o código ainda diz "sem telemetria de terceiros".
 - **Links `?origem=` dos testes**: continuam como estão (a planilha do Apps Script depende deles). A moldura repassa todos
   os parâmetros, então os `utm_` também chegam à planilha. Pendência futura: migrar os `?origem=` para UTM.
 
+## Respostas da dona em 2026-11-15 (Fase 0)
+
+- Contrato (`/contrato/`) **fora** do GA4. Central de Ajuda (`/ajuda/`): **pendência**, ligar o GA4 quando ficar pública.
+- Painel de Admin e Painel da Professora **fora** da medição.
+- No app ela quer medir mais (telas e ações), mesmo repetindo o Analytics do Admin, para ter tudo num lugar só; se der,
+  tudo de uma vez na Fase 3 (lista de telas e ações aguarda aprovação dela).
+- Privacidade por padrão + caixinha de idade no cadastro (sugestões 1 e 2): ela pediu para aplicar e, depois de aplicado,
+  registrar no documento do advogado que já existem. Antes, levantamento do que muda para quem já usa.
+
 ## Fase extra (depois da Fase 4): página `/aulas/`
+
+Nova versão do prompt (2026-11-15) chama de **Fase 6**: link geral https://forms.gle/9994D2GHdwDj4RyT7 (formulário de aulas
+de francês); avaliar redirecionar x moldura com o formulário dentro (sugestão dela, para o banner aparecer); marcar a
+resposta pelo `utm_source` é opcional e precisa de confirmação dela.
 
 Pedido da dona (2026-11-15): `app.profbrune.com.br/aulas/` lê o `utm_source` e redireciona para o formulário de aulas do
 Google Forms com a pergunta "Como conheceu a Prof. Brune?" (campo `entry.1856921042`) já marcada: `instagram` → "Instagram
