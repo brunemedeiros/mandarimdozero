@@ -100,9 +100,19 @@ destaque), nada marcado de antemão, e o site funciona normalmente enquanto a pe
 > [Cookie policy]
 > [Decline] [Accept]
 
-Se a dona confirmar o modo avançado, a segunda frase muda, porque deixaria de ser verdade:
-> pt-BR: "Se você recusar, nenhum cookie é guardado, mas o Google ainda recebe um sinal da visita, sem cookie."
-> en: "If you decline, no cookies are stored, but Google still receives a signal of the visit, without cookies."
+**Opção genérica** (pedido da dona, 2026-11-15, nos moldes dos banners da Speakly e de outros sites de idiomas):
+> pt-BR: "Usamos cookies para o site funcionar e, se você permitir, para entender como ele é usado. [Política de cookies]"
+> [Recusar opcionais] [Aceitar todos]
+>
+> en: "We use cookies to make the site work and, if you allow it, to understand how it is used. [Cookie policy]"
+> [Reject optional] [Accept all]
+
+Regras para qualquer versão: os dois botões do mesmo tamanho e estilo. Não ter só "Concordo" (o modelo da Memrise não deixa
+recusar). Sem botão "Personalizar" enquanto houver uma única categoria opcional (abriria uma tela com uma chave só). Não citar
+anúncios (o site não usa). O banner aparece só na primeira visita; a escolha fica guardada no aparelho e só volta a ser pedida
+em navegador ou aparelho novo, depois de limpar os dados do navegador, ou se a política mudar de verdade (versão da escolha).
+
+Modo avançado: descartado pela dona em 2026-11-15 (ver histórico 35).
 
 ## 6. Plano das próximas fases (ajustado)
 
@@ -117,5 +127,20 @@ Se a dona confirmar o modo avançado, a segunda frase muda, porque deixaria de s
 - **Fase 4**: publicar e conferir ao vivo (Tempo real e link com `utm_source=teste`).
 - **Fase extra** `/aulas/`: depois da Fase 4 (ver o histórico 35).
 - **Fase 5** (opcional): eventos-chave.
+
+## 7. O que entrou além do prompt original (comparação de 2026-11-15)
+
+Já no plano e não no prompt: endereço limpo antes de enviar (convite, token), fonte local na entrada, UTM guardado na chegada,
+"Não contar este aparelho", Contrato e Central de Ajuda fora, página `/aulas/`, idade mínima (advogado).
+
+Faltava nos dois, proposto para a Fase 3:
+- **Teste automático "recusar = zero pedidos ao Google"**: o navegador de teste abre as páginas, recusa, navega e falha se houver
+  qualquer pedido a `google-analytics.com` ou `googletagmanager.com`. Outro teste confere que antes de escolher também é zero.
+- **Painel da Professora fora**, igual ao de Admin (ferramenta de trabalho, não visita).
+- **Versão da escolha**: o banner volta só se a política mudar de verdade.
+- **Medição automática do GA4** ("medição otimizada": rolagem, cliques em links de fora, buscas, downloads): proposta deixar
+  ligados só os cliques em links de fora (mostra quem vai para o formulário de aulas ou o WhatsApp) e desligar o resto.
+- **Pedidos de exclusão pela LGPD**: a política diz que, como o GA4 não guarda nome nem e-mail, a pessoa apaga os próprios
+  dados do GA4 limpando os cookies do navegador, e que os dados somem sozinhos depois de 14 meses.
 
 Grátis x Premium: não se aplica a contas (é medição do site). Banner e política valem igual para todos.

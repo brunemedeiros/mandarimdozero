@@ -11,7 +11,8 @@ até lá o código ainda diz "sem telemetria de terceiros".
 - **Onde**: só em `app.profbrune.com.br`, nas páginas abertas (início, sobre, ajuda, testes de nivelamento, contrato,
   páginas de privacidade, tela de entrar) **e dentro do app** (fr, zh e o futuro pt). Os testes e o contrato são molduras
   do Apps Script: o GA4 mede a moldura, não o formulário. `profbrune.com.br` e `agenda.profbrune.com.br` ficam de fora por enquanto.
-- **Consentimento: modo EM DECISÃO.** Em 2026-11-14 ficou o básico (o código do Google só é baixado depois do "Aceitar";
+- **Consentimento: modo BÁSICO, confirmado pela dona em 2026-11-15** depois do alerta abaixo (rever quando o site crescer).
+  Histórico da escolha: em 2026-11-14 ficou o básico (o código do Google só é baixado depois do "Aceitar";
   sem aceite, nada vai para o Google). Em 2026-11-15 a dona pediu o avançado ("quero estimativas melhores"). Alerta dado a
   ela: a estimativa do Google só liga com pelo menos 1.000 usuários por dia que aceitaram (em 7 dos últimos 28 dias) e
   1.000 eventos por dia de quem recusou (por 7 dias); o app logado teve média de 2 usuários por dia (máximo 7) nos 28 dias
@@ -42,6 +43,9 @@ então no modo básico essa visita não chega ao GA4 (a origem fica registrada n
   nem a política em rascunho falam de idade mínima. Ideia dela (2026-11-15): aceitar menores com a ciência dos responsáveis,
   sem perguntar a idade. Levar ao advogado: LGPD art. 14 e o ECA Digital (Lei 15.211/2025, em vigor desde 2026-03-17, que
   não aceita a autodeclaração como único meio de saber a idade), ainda mais porque o site tem Amigos, Ranking e perfil público.
+
+- **Levar ao advogado**: os pontos do GA4, da medição própria e da idade mínima estão na seção "Novos pontos de 15/11/2026"
+  da aba Resumo do documento do advogado (https://claude.ai/artifact/GCZFie5fbCT2rKW4nKUfuq).
 
 ## Andamento
 
