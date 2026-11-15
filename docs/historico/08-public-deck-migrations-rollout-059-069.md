@@ -631,3 +631,19 @@ Número 086 já usado por outras conversas (`086_friends_streak_milestones_and_c
 - Propostas 4 e 6 da auditoria (mesmo PR): Aulas registradas com busca, blocos por mês e "mostrar mais" de 20 em 20; link de
   agenda da professora em caixa do Design System (o do aluno fica como estava); apagar aula com `PainelUI.confirmar`; o bloco
   antigo "Revisar do Notion" (importação de 15/10, 0 aulas pendentes na produção) saiu, com as chaves `panel.classLog.review.*`.
+
+## 133 -- Ex-alunas sem linha de vínculo (Notion, Google Agenda, Banco) (2026-11-10)
+
+- Pedido da autora: "O nome da Carmen não aparece" (grupo "Ex-alunos" do Notion) e "no Google Agenda também não consigo marcar as
+  aulas de ex-alunos". Causa: a 132 só reconhecia ex-aluna por uma linha em `teacher_students`; o vínculo da Carmen foi APAGADO
+  (sem linha nenhuma), então ela não aparecia, e arquivar no Banco continuava barrado pela RLS.
+- `133_former_students_history.sql`: `_teacher_had_student` (interna) = vínculo em qualquer situação OU aluno do Banco ligado à
+  conta OU aula registrada com ela, no idioma. Usada em `notion_former_students`, `notion_link_former`, `notion_assign_page` e
+  `_notion_apply`. RLS do Banco (arquivado): vínculo em qualquer situação OU aula registrada (por extenso, sem a função).
+  Google Agenda: `history_only` em `google_calendar_rules`/`google_calendar_events`, ação `former` em `google_calendar_resolve`
+  (com "lembrar" vira regra; o laço da regra agora também reavalia eventos `no_account`), `_gcal_apply`/`_gcal_apply_target`
+  gravam a aula sem aviso no Mural. Teste local `tests/aulas-presenca/test_133.sql` 12/12 (117, 128, 130, 131, 132 sem mudança).
+- Staging e produção (2026-11-10, produção versão 20261110170116). Conferido na produção: "Carmen Margallo · francês" na lista.
+- Tela (mesmo PR): grupo "Ex-alunos (só para o histórico)" no seletor do Google Agenda. Propostas 3 ("Para quem": Alunos +
+  Turmas numa caixa, fechada com os nomes quando já há alguém escolhido) e 5 (Nova aula com Tópico e Lição de casa lado a lado;
+  Observações e Notas em "Mais campos").

@@ -20,8 +20,10 @@ function slowAudioBtnHTML(id){
 }
 // Áudio só com ícone (🔊 cinza, o mesmo da Revisão e da Conjugação; decisão da autora, 2026-11-06): para áudio de apoio ao lado da frase.
 function audioIconsHTML(playId, slowId){ return `<span class="expr-order-icons">${listenIconBtnHTML(playId)}${slowAudioIconBtnHTML(slowId, 'audio-btn-md')}</span>`; }
+// Rótulo do ícone de ouvir: chave do idioma estudado vinda de registerChallenges (audioListenKey), com a do fr como reserva.
+function audioListenKeyCh(){ return chCfg().audioListenKey || 'fr.audio.listen'; }
 function listenIconBtnHTML(id){
-  return `<button class="audio-btn audio-btn-md" id="${id}" aria-label="${t('fr.audio.listen')}" title="${t('fr.audio.listen')}">🔊</button>`;
+  return `<button class="audio-btn audio-btn-md" id="${id}" aria-label="${t(audioListenKeyCh())}" title="${t(audioListenKeyCh())}">🔊</button>`;
 }
 function slowAudioIconBtnHTML(id, extraClass){
   return `<button class="audio-btn audio-btn-slow ${extraClass || ''}" id="${id}" aria-label="${t('fr.audio.listenSlowly')}" title="${t('fr.audio.listenSlowly')}">🐢</button>`;
@@ -191,7 +193,15 @@ function challengeCompleteButtonHTML(){
 function challengeContinueButtonHTML(outcome){
   return `<button class="btn btn-primary challenge-complete-btn${outcome === 'ok' ? ' correct-feedback-continue' : ''}" id="challenge-complete-btn" style="margin-top:16px;width:100%;">${t('common.continueArrow')}</button>`;
 }
-function wireChallengeCompleteButton(c){
+// XP da Acentuação (decisão da autora, 2026-11-10; mesmo padrão da trilha, constantes de shared/srs.js, ver .claude/rules/xp.md): digitar certo
+// = EXERCISE_XP_PRODUCE, "quase" = EXERCISE_XP_ALMOST, errou = 0 (nem há Concluir). Só na PRIMEIRA conclusão (refazer concluído ou "Revisar erros" = 0).
+function accentXP(c, outcome){
+  if (isChallengeCompleted(c.id) || challengePreviewMode) return 0;
+  return outcome === 'ok' ? EXERCISE_XP_PRODUCE : outcome === 'partial' ? EXERCISE_XP_ALMOST : 0;
+}
+// Quanto de XP o último "Concluir" pagou (a tela de conclusão mostra; 0 = nada a mostrar).
+let challengeLastXP = 0;
+function wireChallengeCompleteButton(c, xpGain){
   const retry = document.getElementById('challenge-retry-btn');
   if (retry){
     retry.addEventListener('click', () => openChallengePlayer(c.id));
@@ -206,6 +216,8 @@ function wireChallengeCompleteButton(c){
   const btn = document.getElementById('challenge-complete-btn');
   if (!btn) return;
   btn.addEventListener('click', () => {
+    challengeLastXP = 0;
+    if (xpGain > 0 && !isChallengeCompleted(c.id)){ challengeLastXP = xpGain; addXP(xpGain); } // XP antes de marcar concluído
     markChallengeCompleted(c.id);
     if (challengeReviewQueueActive){
       const nextId = dueChallengeReviews()[0];
@@ -1340,7 +1352,7 @@ function checkAccentAnswer(c, revealed){
 
   const accentBodyHTML = `
       ${!isCorrect && !revealed ? `<p class="accent-feedback-answer">${chT('ch.accent.yours', { answer: escapeHtmlChallenge(studentAnswer || '—') })}</p>` : ''}
-      <div class="accent-feedback-correct-word">${escapeHtmlChallenge(c.targetText)} ${audioIconsHTML('accent-replay-btn', 'accent-replay-slow-btn')}</div>
+      <div class="feedback-inner-box accent-feedback-correct-box"><div class="expr-order-line"><span class="accent-feedback-correct-word">${escapeHtmlChallenge(c.targetText)}</span>${audioIconsHTML('accent-replay-btn', 'accent-replay-slow-btn')}</div></div>
       ${(challengeText(c, 'explanation')) ? `<p class="accent-feedback-explanation">${escapeHtmlChallenge(challengeText(c, 'explanation'))}</p>` : ''}
   `;
   document.getElementById('accent-feedback-wrap').innerHTML = challengeFeedbackWrapperHTML('accent', isCorrect, outcome === 'ok' ? chT('ch.accent.right') : outcome === 'partial' ? chT('ch.accent.partial') : revealed ? chRevealedTitle() : chT('ch.accent.wrong'), accentBodyHTML, outcome);
@@ -1355,7 +1367,7 @@ function checkAccentAnswer(c, revealed){
   document.getElementById('accent-replay-slow-btn').addEventListener('click', (e) => {
     if (c.audioFile) playPregeneratedAudio(`challenges/${c.audioFile}`, e.currentTarget, false, SLOW_AUDIO_RATE);
   });
-  wireChallengeCompleteButton(c);
+  wireChallengeCompleteButton(c, accentXP(c, outcome));
 }
 
 

@@ -3,6 +3,7 @@
 # as migrations reais 001..058 (059 fica de fora de propósito), semeia contas
 # LEGADAS (com '.'), e só então aplica a 060. Uso: build_db.sh <nome_db>
 set -e
+bash "$(cd "$(dirname "$0")" && pwd)/../banco-local.sh" >/dev/null  # liga o Postgres local se estiver desligado
 DB=${1:-ident}; P="psql -h /tmp/pg -p 54329 -U pguser -q -v ON_ERROR_STOP=0"
 HERE=$(cd "$(dirname "$0")" && pwd); MIG="$HERE/../../shared/supabase_migrations"
 $P postgres -c "drop database if exists $DB" -c "create database $DB" >/dev/null

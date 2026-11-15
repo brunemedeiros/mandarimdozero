@@ -32,7 +32,21 @@ paths:
 - `STATE.streak` só muda ao estudar: para exibir use `effectiveStreak()` (`shared/srs.js`).
 - Áudio: `speakFrench/speakChinese` = reprodução + `registerAudioPlay()` (analytics); `speakXAudioOnly`/
   `playAudioPreview` = só reprodução. Preview (`card.__isPreviewCard`) nunca conta analytics nem faz autoplay.
-- Service Worker do PWA cacheia: ao testar, bloquear SW; ao publicar, a versão é atualizada pelo `pwa.js`.
+- Service Worker do PWA cacheia: ao testar, bloquear SW; ao publicar, a versão é atualizada pelo `pwa.js`. O aviso "Nova versão
+  disponível" só aparece se a versão da página for diferente da do SW novo (o deploy grava o mesmo SHA em `shared/pwa.js` e nos
+  `service-worker.js`; arquivo novo com `__BUILD_ID__` entra no `sed` do `deploy-pages.yml`). Guarda: `tests/pwa-cache/test_aviso_versao_playwright.js`.
+- `service-worker.js` (fr, zh e o futuro pt): todos os sites moram no mesmo endereço, então cada SW só apaga caches com o próprio
+  `CACHE_PREFIX`; a instalação busca de novo o que a versão anterior guardava (abre sem internet logo depois de publicar). No teste com
+  SW ligado, nunca usar `route()` (desliga o cache HTTP do SW). O SW entrega à página com `Cache-Control: no-cache` (`paraAPagina`), senão
+  recarregar a aba mistura `index.html` novo com scripts antigos. Guarda: `tests/pwa-cache/test_playwright.js`.
+- **Por enquanto o site só funciona com internet** (decisão da autora, 2026-11-11): sem internet, abrir o site mostra a tela comum
+  `shared/offline.html` (pré-cache de cada SW, `OFFLINE_URL`), em pt-BR ou en; nunca o app pela metade. Site novo põe `OFFLINE_URL` no SW.
+  Internet cai com o site JÁ aberto (2026-11-13): aviso por cima `shared/sem-internet.js` + `.css` (site inerte, sem atalhos; some sozinho ao
+  voltar, sem recarregar, e relê o progresso se `progressLoadedOk` ficou falso). Não depende do evento `offline` (o celular da autora não o
+  dispara): `HEAD ./manifest.json` decide, conferido em pedido/áudio que falha, volta à aba e a cada 20 s. `sem-internet.js` carrega ANTES do
+  `supabase-client.js` (embrulha `fetch`). Site novo liga os dois. Guarda: `tests/pwa-cache/test_aviso_sem_internet_playwright.js`.
+- **Volta para a aba** (opção A da autora, 2026-11-14): o supabase-js avisa `SIGNED_IN` a cada volta; mesma conta já aberta nunca refaz o
+  login nem reaplica a rota (`isSameLoadedAccount`/`onSameAccountSignedInAgain` em `shared/auth.js`), senão a lição recomeça. Guarda: `tests/volta-aba/`.
 - Diálogo: palavras do vocabulário da unidade em COR + negrito (`.dlg-new`, `var(--seal-red-dark)`), nunca sublinhado
   (sublinhado = pontuação faltando/bloco no lugar errado). Transcrição (pinyin) também destacada (`.dlg-new-py`,
   alinhada por busca, `dlgHighlightPinyin`). zh: pinyin acima do hanzi. Idioma novo reutiliza essas classes.
@@ -41,6 +55,11 @@ paths:
   Use os helpers (fr: `FamiliaLatina` / `typedAnswerVerdictForExpected`; zh: `acceptedFormsTyped` + `typedVariants`), nunca
   `acceptedForms()` cru. Erro marcado em vermelho: `typedAttemptHTML` (comum, `shared/core/licao-feedback.js`; a forma de comparar de cada idioma vem de `LANG_HOOKS.typedAttemptForm`). O teclado de letras ganha uma fileira com letras que a resposta
   pede e ele não tem (`frAccentPickerHTML(resposta)`). Guarda: `tests/respostas-digitadas/`.
+- **Áudio de apoio só com ícone** (decisão da autora, 2026-11-06, PR 443; vale para todos os sites e cursos): quando o áudio acompanha uma frase já na tela
+  (exemplos das Expressões, caixa da resposta do Monte a frase, "Original" do Ouça e traduza, palavra certa da Acentuação), usar ícones redondos `.audio-btn`
+  (🔊 cinza, o da Revisão e da Conjugação) + 🐢, ambos `audio-btn-md`, ao lado da frase (`audioIconsHTML` em `shared/desafios-telas.js`; CSS em `shared/desafios.css`).
+  Botão com texto ("▶ Ouvir"/"🐢 Devagar") só onde o áudio é o exercício (botão principal do Ouça e traduza, Acentuação, Ditados) ou o cartão de cima do Monte a frase.
+  O `.audio-btn` (base, `-lg`, `-md`, `.speaking`) mora em `shared/audio-btn.css` (ligado em `fr/index.html` e `zh/index.html` no mesmo ponto da cascata de antes; site novo só liga o arquivo).
 - **Telas de exercício seguem o molde da trilha** (decisão da autora, 2026-10-23, vale para Jogos, Desafios, Revisão e futuros): o comando
   fica SEMPRE no idioma do site, em qualquer nível (rótulo pequeno `t('fr.exercise.whatMeans')`, nos Desafios `chT('ch.expr.whatMeans')` com o mesmo texto, acima do cartão com o item; nunca frase em
   francês vinda do conteúdo); saída pelo X com barra de progresso (não link "← Voltar"); ⚑ e pílula de Atalhos do teclado; respostas com
@@ -75,6 +94,9 @@ paths:
   Dados opcionais de cada expressão: `example/secondExample.{pt,mark}` (tradução e trecho exato do francês a destacar), `literal.{pt,note}` (tradução literal e nota de origem); no site em outro idioma vêm do overlay (`docs/i18n/challenges-en.json`: `example`, `secondExample`, `literal`, `literalNote`) e nunca entram em `CHALLENGE_SITE_LANG_FIELDS` (sem o campo, a parte some; o desafio não). Teste: `tests/desafios-exemplos-traducao/`. Gravar SQL no navegador troca `\n` por `\r\n`: usar `chr(10)` (`docs/i18n/lote-exemplos-expressoes/gerar.py`) e conferir por hash.
 - **Lembrete de revisão do rodapé** (`maybeShowReviewReminder`, `shared/core/revisao-decks.js`): o dia só é gravado depois de o banner ficar visível uns segundos ou ser clicado/dispensado
   (`markReviewReminderSeen`); em lição (`lesson-focus`) nem aparece nem gasta o dia; reavalia ao voltar para a aba e ao sair da lição. Guarda: `tests/lembrete-revisao/`.
+- **Teclado na Revisão da aluna** (decisão da autora, 2026-11-05; `wireReviewKeyboard`, `shared/core/revisao-cartoes.js`; CSS `shared/revisao-teclado.css`): Espaço/Enter mostram a resposta do cartão Normal;
+  1 a 4 pela POSIÇÃO do botão (4 notas: Errei, Difícil, Bom, Fácil; digitar com acerto em cheio: 1 Bom, 2 Fácil; múltipla escolha: opções); Enter aciona o "Continuar"; Espaço/Enter nunca avaliam; só números (sem setas nem `h`);
+  tecla segurada e os 300 ms de cada cartão novo são ignorados; Preview e tela escondida nunca respondem. Cartão de Revisão novo chama `wireReviewKeyboard` no fim do renderer. Guarda: `tests/teclado-revisao/`.
 - Enter dentro de campo de resposta pertence ao campo (não aciona o atalho global de "Continuar").
 - Ícones: emoji escrito no texto vira desenho do Fluent por `shared/emoji-icons.js`. Emoji novo precisa entrar no MAP de lá
   e ter o SVG em `shared/icons/fluent/` (senão aparece o emoji do aparelho). Ícone de menu = `<img class="tab-icon" ...>`.

@@ -63,6 +63,7 @@
 .painel .gcal-review-actions { display: flex; flex-wrap: wrap; gap: .5rem; }
 .painel .gcal-remember { display: flex; align-items: center; gap: .45rem; margin: 0; font-size: .85rem; color: var(--p-tinta-suave); }
 .painel .gcal-remember input { margin: 0; }
+.painel .gcal-former-hint { display: block; margin: 0; }
 .painel .gcal-more { align-self: flex-start; }
 @media (max-width: 600px) {
   .painel :is(.gcal-ligar, .gcal-review-actions, .gcal-actions) button { min-height: 44px; }
@@ -96,3 +97,13 @@
 @media (max-width: 600px) {
   .painel .calendar-feed-box .calendar-feed-actions a[role=button], .painel .calendar-feed-box .calendar-feed-copy button, .painel .class-log-more { min-height: 44px; }
 }
+
+/* Para quem (proposta 3, 2026-11-10): Alunos + Turmas numa caixa só; fechada mostra os nomes escolhidos numa linha. */
+.painel .aulas-grupo-titulo { display: flex; align-items: center; gap: .5rem; margin: .5rem 0 0; font-size: .95rem; font-weight: 800; color: var(--p-tinta); }
+.painel .aulas-para-quem summary .aulas-titulo { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* Nova aula (proposta 5): Tópico e Lição de casa lado a lado; Observações e Notas em "Mais campos". */
+.painel .aulas-colunas { display: grid; grid-template-columns: 1fr; gap: 0 1rem; }
+@media (min-width: 700px) { .painel .aulas-colunas { grid-template-columns: 1fr 1fr; } }
+.painel .aulas-mais { margin: .25rem 0 1rem; }
+.painel .aulas-mais > summary { cursor: pointer; font-weight: 700; color: var(--p-tinta-suave); font-size: .92rem; padding: .35rem 0; }
+.painel .aulas-mais[open] > summary { margin-bottom: .5rem; }

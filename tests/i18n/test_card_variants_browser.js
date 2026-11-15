@@ -44,6 +44,20 @@ async function run(browser, port, lang, cardId, textOf, ptWord, enWord, hanziId)
   await page.evaluate((s) => { STATE.cardVariants = {}; applySerializedState(s); }, saved);
   c = await page.evaluate((id) => { const c = STATE.cards.find(x => x.id === id); return { reps: c.reps, state: c.state }; }, cardId);
   check(`${lang}: carregar save salvo em inglês com o site em português troca certo`, c.reps === 4 && c.state === 'review', c);
+  // Conserto de 2026-11-11: depois desse carregamento, trocar de idioma de novo não pode gravar um progresso por cima do
+  // outro (antes: o histórico do português virava o do inglês e o do inglês voltava a zero).
+  const prog = (id) => page.evaluate((id) => { const c = STATE.cards.find(x => x.id === id); return { reps: c.reps, state: c.state }; }, id);
+  await page.evaluate(() => setUiLang('en'));
+  await page.waitForFunction(([id, fnSrc, en]) => { const c = STATE.cards.find(x => x.id === id); return c && new Function('c', fnSrc)(c) === en; }, [cardId, textOf, enWord], { timeout: 15000 });
+  c = await prog(cardId);
+  check(`${lang}: depois do carregamento, o inglês volta com o próprio histórico`, c.reps === 2 && c.state === 'learning', c);
+  await page.evaluate(() => setUiLang('pt-BR'));
+  await page.waitForFunction(([id, fnSrc, pt]) => { const c = STATE.cards.find(x => x.id === id); return c && new Function('c', fnSrc)(c) === pt; }, [cardId, textOf, ptWord], { timeout: 15000 });
+  c = await prog(cardId);
+  check(`${lang}: e o português continua com o dele`, c.reps === 4 && c.state === 'review', c);
+  // O save só ganha a palavra nos cartões que trocam de palavra (os outros ficam iguais).
+  const extra = await page.evaluate((id) => serializeState().cards.filter(x => x && x.variantWord !== undefined).map(x => x.id).filter(x => x !== id && x !== id + '-b'), cardId);
+  check(`${lang}: só os cartões que trocam de palavra gravam a palavra`, extra.length === 0, extra);
   // cartões que não trocam de palavra continuam intactos
   const other = await page.evaluate((id) => { const c = STATE.cards.find(x => x.id !== id && x.unitId); c.reps = 9; return c.id; }, cardId);
   await page.evaluate(() => setUiLang('en')); await page.waitForTimeout(800); await page.evaluate(() => setUiLang('pt-BR')); await page.waitForTimeout(800);
@@ -56,6 +70,18 @@ async function run(browser, port, lang, cardId, textOf, ptWord, enWord, hanziId)
     await page.evaluate(() => setUiLang('pt-BR'));
     await page.waitForFunction((id) => STATE.hanziCards.find(x => x.id === id).char === '巴', hanziId, { timeout: 15000 });
     check(`${lang}: hanzi 巴 volta com o histórico`, await page.evaluate((id) => { const c = STATE.hanziCards.find(x => x.id === id); return c.reps === 3 && c.state === 'review'; }, hanziId));
+    // Conserto de 2026-11-11: save feito com 美 na tela, carregado com o site em português (巴).
+    await page.evaluate(() => setUiLang('en'));
+    await page.waitForFunction((id) => STATE.hanziCards.find(x => x.id === id).char === '美', hanziId, { timeout: 15000 });
+    await page.evaluate((id) => { const c = STATE.hanziCards.find(x => x.id === id); c.reps = 1; c.state = 'learning'; }, hanziId);
+    const savedH = await page.evaluate(() => JSON.parse(JSON.stringify(serializeState())));
+    await page.evaluate(() => setUiLang('pt-BR'));
+    await page.waitForFunction((id) => STATE.hanziCards.find(x => x.id === id).char === '巴', hanziId, { timeout: 15000 });
+    await page.evaluate((s) => { STATE.cardVariants = {}; applySerializedState(s); }, savedH);
+    check(`${lang}: carregar save com 美 e o site em português devolve o histórico de 巴`, await page.evaluate((id) => { const c = STATE.hanziCards.find(x => x.id === id); return c.reps === 3 && c.state === 'review'; }, hanziId), await page.evaluate((id) => { const c = STATE.hanziCards.find(x => x.id === id); return { reps: c.reps, state: c.state, char: c.char }; }, hanziId));
+    await page.evaluate(() => setUiLang('en'));
+    await page.waitForFunction((id) => STATE.hanziCards.find(x => x.id === id).char === '美', hanziId, { timeout: 15000 });
+    check(`${lang}: e 美 volta com o próprio histórico`, await page.evaluate((id) => { const c = STATE.hanziCards.find(x => x.id === id); return c.reps === 1 && c.state === 'learning'; }, hanziId));
   }
   check(`${lang}: sem erro de página`, errors.length === 0, errors);
   await ctx.close();

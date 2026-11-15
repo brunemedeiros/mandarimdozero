@@ -2,30 +2,62 @@
 // 'service-worker.js' é relativo ao HTML que carregou este script -- cada
 // idioma continua com o seu próprio arquivo (cache list diferente por
 // conteúdo/áudio), só o código de registro em si é idêntico.
+
+// Versão do código que ESTA página carregou. O deploy (.github/workflows/
+// deploy-pages.yml) troca o marcador pelo SHA curto do commit, o mesmo que
+// vai para o service-worker.js. Localmente os dois ficam com o marcador
+// intacto, então são iguais e o aviso não aparece.
+const PWA_PAGE_BUILD_ID = '__BUILD_ID__';
+
 if ('serviceWorker' in navigator){
   // Se esta aba JÁ tinha um controller antes de registrar, um novo
-  // `controllerchange` depois é uma atualização de verdade (v1 -> v2). Se
-  // NUNCA teve controller (primeira visita, aba abriu sem SW ativo ainda),
-  // o primeiro `controllerchange` é só o SW recém-instalado assumindo pela
-  // primeira vez -- não é "atualização", é "chegada", e mostrar um aviso de
-  // "nova versão disponível" nesse momento seria falso positivo.
+  // `controllerchange` depois é uma troca de service worker de verdade. Se
+  // NUNCA teve controller (primeira visita), o primeiro `controllerchange` é
+  // só o SW recém-instalado assumindo pela primeira vez -- não é
+  // "atualização", é "chegada".
   const hadControllerAtLoad = !!navigator.serviceWorker.controller;
 
-  // Fase 4/5 (PWA-ready): a versão anterior recarregava a página sozinha
-  // assim que o novo service worker assumia (skipWaiting()+clients.claim()
-  // no service-worker.js forçam essa troca de controller em segundo plano).
-  // Isso viola a regra explícita de nunca interromper uma lição/exercício/
-  // revisão em andamento -- em vez de recarregar automaticamente, só avisa
-  // com um banner dispensável (mesmo padrão visual de
-  // #review-reminder-banner, já escondido durante body.lesson-focus) e só
-  // recarrega quando a pessoa clica em "Atualizar".
+  // Nunca recarrega sozinho (não interromper lição/exercício/revisão em
+  // andamento): só avisa com um banner dispensável e recarrega no clique em
+  // "Atualizar".
+  //
+  // Aviso só quando a página está MESMO com o código antigo (2026-11-11):
+  // como o service worker busca tudo na rede antes do cache (network-first),
+  // quem abre ou recarrega o site depois de um deploy já recebe os arquivos
+  // novos; o SW novo assume alguns segundos depois e o `controllerchange`
+  // dispara mesmo assim. Antes, isso mostrava "Nova versão disponível" em
+  // quase toda visita depois de um deploy (alarme falso). Agora a página
+  // pergunta a versão ao SW novo e só mostra o aviso se for diferente da que
+  // ela carregou (aba aberta há horas/dias, app instalado no celular).
   navigator.serviceWorker.addEventListener('controllerchange', () => {
     if (!hadControllerAtLoad) return;
-    showPwaUpdateBanner();
+    askControllerBuildId(3000).then((swBuildId) => {
+      if (swBuildId && swBuildId === PWA_PAGE_BUILD_ID) return; // já está na versão nova
+      showPwaUpdateBanner(); // versão diferente, ou SW sem resposta: avisa (comportamento antigo)
+    });
   });
 
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('service-worker.js').catch(() => { /* offline não crítico */ });
+  });
+}
+
+// Pergunta ao service worker que controla a página qual é a versão dele
+// (resposta pelo MessageChannel, ver o listener 'message' em
+// fr/service-worker.js e zh/service-worker.js). Sem resposta em
+// `timeoutMs`, devolve null.
+function askControllerBuildId(timeoutMs){
+  return new Promise((resolve) => {
+    const ctrl = navigator.serviceWorker && navigator.serviceWorker.controller;
+    if (!ctrl || typeof MessageChannel === 'undefined') return resolve(null);
+    const channel = new MessageChannel();
+    const timer = setTimeout(() => resolve(null), timeoutMs);
+    channel.port1.onmessage = (event) => {
+      clearTimeout(timer);
+      resolve((event.data && event.data.buildId) || null);
+    };
+    try { ctrl.postMessage({ type: 'get-build-id' }, [channel.port2]); }
+    catch (e) { clearTimeout(timer); resolve(null); }
   });
 }
 

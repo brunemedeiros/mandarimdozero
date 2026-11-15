@@ -468,6 +468,8 @@ async function updateClassLogsSelectionDependentUI(){
 
   const counterEl = document.getElementById('admin-classlog-selection-counter');
   if (counterEl) counterEl.textContent = selectionCountLabel;
+  const namesEl = document.getElementById('admin-classlog-who-names');
+  if (namesEl) namesEl.textContent = classLogWhoNames();
 
   const subtitleEl = document.getElementById('admin-classlog-content-subtitle');
   if (subtitleEl) subtitleEl.textContent = selectedStudents.length === 1
@@ -487,6 +489,15 @@ async function updateClassLogsSelectionDependentUI(){
   if (listBox) await refreshClassLogsListBox(listBox);
 
   return selectedStudents;
+}
+
+// "Para quem" fechado mostra numa linha quem está escolhido (proposta 3, 2026-11-10): até 3 nomes e "+N".
+function classLogWhoNames(){
+  const st = ADMIN_CLASS_LOGS_STATE;
+  const names = (st._studentsCache || []).filter(s => st.studentIds.has(s.student_id)).map(s => s.display_name || s.username || '?')
+    .concat(classLogSelectedClassrooms().map(c => c.name));
+  if (!names.length) return '';
+  return ' · ' + names.slice(0, 3).join(', ') + (names.length > 3 ? ` +${names.length - 3}` : '');
 }
 
 function applyClassLogPickerFilters(wrap){
@@ -703,33 +714,30 @@ async function renderAdminClassLogsView(){
     </div>
     <div id="admin-classlogs-calendar-wrap" hidden>${calendarFeedBoxHTML(true)}<div id="admin-classlogs-calendar"></div></div>
     <div id="admin-classlogs-register" class="painel aulas-painel">
-    <details class="aulas-box" open>
-      <summary><span class="aulas-titulo">🧑‍🎓 ${t('admin.common.students')}</span>
+    <details class="aulas-box aulas-para-quem" data-classlog-who ${selectedStudents.length || selectedRooms.length ? '' : 'open'}>
+      <summary><span class="aulas-titulo">👤 ${t('panel.classLog.forWhom')}<span id="admin-classlog-who-names" class="aulas-sub">${escapeHTML(classLogWhoNames())}</span></span>
         <span class="p-selo" id="admin-classlog-selection-counter">${selectionCountLabel}</span></summary>
       <div class="aulas-corpo">
         <p class="p-descricao">${t('admin.classLogs.pickStudentsHint')}</p>
         ${langFilterHTML}
         <input type="search" id="admin-classlog-search" placeholder="${t('admin.common.searchPlaceholder')}" autocomplete="off" aria-label="${t('admin.common.searchPlaceholder')}">
+        <h4 class="aulas-grupo-titulo">🧑‍🎓 ${t('admin.common.students')}</h4>
         <div class="aulas-atalhos">
           <a href="#" id="admin-classlog-select-all">${t('publicProfile.selectAll')}</a>
           <a href="#" id="admin-classlog-select-none">${t('publicProfile.clear')}</a>
         </div>
         <div class="aulas-lista">${studentCheckboxesHTML}</div>
-      </div>
-    </details>
-    ${rooms.length ? `
-    <details class="aulas-box" open>
-      <summary><span class="aulas-titulo">👥 ${t('panel.classLog.classrooms')}</span><span class="p-selo">${rooms.length}</span></summary>
-      <div class="aulas-corpo">
+        ${rooms.length ? `
+        <h4 class="aulas-grupo-titulo">👥 ${t('panel.classLog.classrooms')} <span class="p-selo">${rooms.length}</span></h4>
         <p class="p-descricao">${t('panel.classLog.classroomsHint')}</p>
         <div class="aulas-lista">
         ${rooms.map(c => `<label class="aulas-opcao" data-classroom-row data-lang="${c.language_app_key}">
           <input type="checkbox" data-classlog-classroom-checkbox value="${c.id}" ${ADMIN_CLASS_LOGS_STATE.classroomIds.has(String(c.id)) ? 'checked' : ''}>
           <span>${escapeHTML(c.name)} <small class="p-ajuda">· ${STUDENT_LANGUAGE_LABELS[c.language_app_key] || c.language_app_key} · ${tp('panel.classLog.membersCount', c.members.length)}</small></span>
         </label>`).join('')}
-        </div>
+        </div>` : ''}
       </div>
-    </details>` : ''}
+    </details>
 
     <details class="aulas-box" open>
       <summary><span class="aulas-titulo">✍️ ${t('admin.classLogs.newTitle')}<span id="admin-classlog-content-subtitle" class="aulas-sub">${newLogSubtitle}</span></span></summary>
@@ -745,15 +753,24 @@ async function renderAdminClassLogsView(){
           <input type="date" id="admin-class-log-repeat-until" class="profile-edit-input">
           <p class="profile-edit-hint">${t('panel.classLog.repeatHint')}</p>
         </div>
-        <label class="profile-edit-label" for="admin-class-log-topic">${t('admin.classLogs.topicOpt')}</label>
-        <input type="text" id="admin-class-log-topic" class="profile-edit-input" placeholder="${t('admin.classLogs.topicPlaceholder')}" autocomplete="off">
-        <label class="profile-edit-label" for="admin-class-log-homework">${t('admin.classLogs.homeworkOpt')}</label>
-        <input type="text" id="admin-class-log-homework" class="profile-edit-input" placeholder="${t('admin.classLogs.homeworkPlaceholder')}" autocomplete="off">
-        <label class="profile-edit-label" for="admin-class-log-observations">${t('admin.classLogs.observationsOpt')}</label>
-        <input type="text" id="admin-class-log-observations" class="profile-edit-input" placeholder="${t('admin.classLogs.observationsPlaceholder')}" autocomplete="off">
-        <label class="profile-edit-label" for="admin-class-log-notes">${t('admin.classLogs.notesOpt')}</label>
-        <textarea id="admin-class-log-notes" class="profile-edit-input" rows="3" placeholder="${t('admin.classLogs.notesPlaceholder')}"></textarea>
+        <div class="aulas-colunas">
+          <div>
+            <label class="profile-edit-label" for="admin-class-log-topic">${t('admin.classLogs.topicOpt')}</label>
+            <input type="text" id="admin-class-log-topic" class="profile-edit-input" placeholder="${t('admin.classLogs.topicPlaceholder')}" autocomplete="off">
+          </div>
+          <div>
+            <label class="profile-edit-label" for="admin-class-log-homework">${t('admin.classLogs.homeworkOpt')}</label>
+            <input type="text" id="admin-class-log-homework" class="profile-edit-input" placeholder="${t('admin.classLogs.homeworkPlaceholder')}" autocomplete="off">
+          </div>
+        </div>
         ${classLogExtrasFormHTML('new', null)}
+        <details class="aulas-mais">
+          <summary>${t('panel.classLog.moreFields')}</summary>
+          <label class="profile-edit-label" for="admin-class-log-observations">${t('admin.classLogs.observationsOpt')}</label>
+          <input type="text" id="admin-class-log-observations" class="profile-edit-input" placeholder="${t('admin.classLogs.observationsPlaceholder')}" autocomplete="off">
+          <label class="profile-edit-label" for="admin-class-log-notes">${t('admin.classLogs.notesOpt')}</label>
+          <textarea id="admin-class-log-notes" class="profile-edit-input" rows="3" placeholder="${t('admin.classLogs.notesPlaceholder')}"></textarea>
+        </details>
         <p class="profile-edit-error" id="admin-create-class-log-error"></p>
         <button type="submit" id="admin-create-class-log-btn" ${selectedStudents.length || selectedRooms.length ? '' : 'disabled'}>${t('admin.classLogs.register')}${adminForStudentsSuffix(selectedStudents.length)}${selectedRooms.length ? ` · ${tp('panel.classLog.classroomsSelected', selectedRooms.length)}` : ''}</button>
       </form>

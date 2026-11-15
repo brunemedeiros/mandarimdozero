@@ -201,6 +201,11 @@ function buildUnitBlock(u){
 }
 
 function openUnitDetail(unitId){
+  // Unidade sem tradução para o idioma do site não abre (nem por link/rota antiga): volta para a trilha.
+  if (!isUnitAvailable(unitId)){
+    if (typeof switchTab === 'function') switchTab('path');
+    return;
+  }
   STATE.currentUnitId = unitId;
   STATE.unitProgress[unitId].started = true;
   STEP_STATE.onChallengesScreen = false;
@@ -234,12 +239,6 @@ function openUnitDetail(unitId){
   document.getElementById('ud-title').textContent = u.title;
   document.getElementById('ud-goal').textContent = u.goal;
   LANG_HOOKS.afterOpenUnit(u); // zh: botão "Manual da unidade" (some na unidade de gramática)
-  const langNotice = document.getElementById('ud-lang-notice');
-  if (langNotice){
-    const untranslated = !CONTENT_I18N.isUnitTranslated(u.id);
-    langNotice.hidden = !untranslated;
-    langNotice.textContent = untranslated ? t('content.untranslatedNotice') : '';
-  }
 
   STEP_STATE.currentStep = 0;
   renderStep();
@@ -378,10 +377,11 @@ function renderUnitsGrid(){
   renderSideRankingCard();
   // Selo de nível concluído no título fixo da trilha (zh: sem seletor de nível); o fr não tem esse elemento.
   const levelBadge = document.getElementById('level-done-badge');
-  if (levelBadge) levelBadge.style.display = UNITS.every(u => STATE.unitProgress[u.id]?.completed) ? '' : 'none';
+  if (levelBadge) levelBadge.style.display = availableUnits(UNITS).every(u => STATE.unitProgress[u.id]?.completed) ? '' : 'none';
 
   const grid = document.getElementById('units-grid');
-  const levelModules = modular ? modulesOfLevel(STATE.currentLevel) : [];
+  // Módulo sem nenhuma unidade traduzida para o idioma do site some inteiro (isUnitAvailable em licao-base.js).
+  const levelModules = modular ? modulesOfLevel(STATE.currentLevel).filter(m => moduleVisibleUnitIds(m).length) : [];
 
   if (modular && !levelModules.length){
     grid.innerHTML = `
@@ -408,7 +408,7 @@ function renderUnitsGrid(){
   }
 
   if (!modular){
-    UNITS.forEach((u) => {
+    availableUnits(UNITS).forEach((u) => {
       grid.appendChild(buildUnitBlock(u));
       // Checkpoint de história (zh): aparece logo após a unidade que a desbloqueia, como um marco na trilha.
       const extra = LANG_HOOKS.trailAfterUnit(u);

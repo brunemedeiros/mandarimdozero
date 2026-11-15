@@ -68,12 +68,25 @@ const snap = (page, id) => page.evaluate((uid) => { const u = UNITS.find(x => x.
   check('en: só a unidade removida fica sem overlay', all.join() === 'A1-5:sem overlay', all);
   const same = await en.page.evaluate(() => { const bad = []; UNITS.filter(u => u.type !== 'grammar').forEach(u => u.vocab.forEach((v, i) => { if (/[ãõçáéíóúâêô]/i.test(v.t) && !/^[\x00-\x7F]*$/.test(v.t)) bad.push(u.id + ':v' + i + ':' + v.t); })); return bad; });
   check('en: vocabulário sem acentos do português (fora A1-5)', same.filter(x => !x.startsWith('A1-5')).length === 0, same.slice(0, 5));
-  await en.page.evaluate(() => openUnitDetail('A1-5'));
-  const n2 = await en.page.evaluate(() => { const e = document.getElementById('ud-lang-notice'); return { hidden: e.hidden, text: e.textContent, disp: getComputedStyle(e).display }; });
-  check('en: aviso visível em unidade de gramática', !n2.hidden && n2.text === "This lesson isn't available in English yet. Showing Portuguese." && n2.disp !== 'none', n2);
-  await en.page.evaluate(() => exitToPath());
+  // Unidade sem tradução (decisão da dona, 2026-11-11): não aparece, não abre, e as seguintes seguem normais.
+  const hid = await en.page.evaluate(() => {
+    const u5 = UNITS.find(u => u.id === 'A1-5');
+    const ids = trailGroups().flat().map(u => u.id);
+    STATE.currentLevel = 'A1'; renderUnitsGrid();
+    const lista = document.getElementById('units-grid').textContent.includes(u5.title);
+    const antes = STATE.currentUnitId; openUnitDetail('A1-5');
+    const abriu = STATE.currentUnitId === 'A1-5';
+    ['A1-1', 'A1-2', 'A1-3', 'A1-g1', 'A1-4', 'A1-g2'].forEach(id => { STATE.unitProgress[id].completed = true; });
+    STATE.unitProgress['A1-5'].unlocked = false; STATE.unitProgress['A1-6'].unlocked = false;
+    recalculateUnlockedUnits();
+    return { naTrilha: ids.includes('A1-5'), disponivel: isUnitAvailable('A1-5'), lista, abriu, antes, a16: STATE.unitProgress['A1-6'].unlocked, a15: STATE.unitProgress['A1-5'].unlocked };
+  });
+  check('en: unidade sem tradução fora da trilha e indisponível', !hid.naTrilha && hid.disponivel === false, hid);
+  check('en: unidade sem tradução não aparece na lista', !hid.lista, hid);
+  check('en: unidade sem tradução não abre', !hid.abriu, hid);
+  check('en: a unidade seguinte libera ao concluir a anterior visível', hid.a16 === true && hid.a15 === false, hid);
+  await en.page.evaluate(() => { ['A1-1', 'A1-2', 'A1-3', 'A1-g1', 'A1-4', 'A1-g2'].forEach(id => { STATE.unitProgress[id].completed = false; }); exitToPath(); });
   await en.page.evaluate(() => openUnitDetail('A1-1'));
-  check('en: sem aviso em A1-1', await en.page.evaluate(() => document.getElementById('ud-lang-notice').hidden));
   check('en: título na tela', await en.page.evaluate(() => document.getElementById('ud-title').textContent) === 'Greeting and saying goodbye');
   // Fase 9: desafios e ditados no idioma do site
   await en.page.waitForFunction(() => window.CHALLENGES_I18N && window.CHALLENGES_I18N.en, null, { timeout: 8000 });

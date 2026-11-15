@@ -102,6 +102,12 @@ const ANTES = () => {
     L('convidado sem e-mail: sem campos de resposta e com o aviso', !(await p.$('#report-resp-enviar')) && (await det.innerText()).includes('Não é possível responder')); // Etapa 4: "--" virou ponto (frase nova começa com maiúscula)
     await p.click('#dlg-report [data-fechar-dialogo] >> nth=0'); await p.waitForSelector('#dlg-report', { state: 'detached' });
     await p.click('[data-ver-report="4"]');
+    // Rascunho automático (pedido da dona, 2026-11-11): assunto e mensagem já vêm no idioma de quem recebe, com um trecho
+    // entre colchetes que trava o envio até ser trocado.
+    const rasc = await p.evaluate(() => ({ s: document.getElementById('report-resp-assunto').value, m: document.getElementById('report-resp-msg').value, nota: (document.querySelector('[data-resposta-idioma]') || {}).textContent || '' }));
+    L('rascunho: assunto, saudação, trecho do relato, colchetes e aviso do idioma', /^Sobre o seu report de \d{2}\/\d{2}$/.test(rasc.s) && /^Oi(, \S+)?!/.test(rasc.m) && /Obrigada (por avisar sobre|pela sugestão): "/.test(rasc.m) && /\[Escreva aqui/.test(rasc.m) && /português|inglês/.test(rasc.nota), rasc);
+    await p.click('#report-resp-enviar'); L('rascunho com colchetes: não confirma nem envia', (await p.textContent('#report-resp-erro')).includes('colchetes') && !(await dlg.count()) && (await p.evaluate(() => window.__fnLog.length)) === 0);
+    await p.fill('#report-resp-assunto', ''); await p.fill('#report-resp-msg', '');
     await p.click('#report-resp-enviar'); L('resposta vazia: pede assunto e mensagem, sem confirmar nem enviar', (await p.textContent('#report-resp-erro')).includes('assunto') && !(await dlg.count()) && (await p.evaluate(() => window.__fnLog.length)) === 0);
     await p.fill('#report-resp-assunto', 'Sobre a sua tradução'); await p.fill('#report-resp-msg', 'Obrigada por avisar! Corrigimos.');
     await p.click('#report-resp-enviar');
