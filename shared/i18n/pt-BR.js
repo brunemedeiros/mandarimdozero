@@ -3514,6 +3514,7 @@ window.I18N_CATALOG['pt-BR'] = {
   'rb.itemDeleteConfirm': 'Apagar este item para sempre?',
   'rb.itemDeleted': 'Item apagado.',
   'rb.itemHasCardHint': 'Já virou cartão: use Cortar.',
+  'rb.moreActions': 'Mais ações',
   'rb.selSafe': 'Marcar todos os não sensíveis',
   'rb.selNone': 'Desmarcar',
   'rb.selCount': 'Marcados: {n}',

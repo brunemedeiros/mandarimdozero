@@ -3495,6 +3495,7 @@ window.I18N_CATALOG['en'] = {
   'rb.itemDeleteConfirm': 'Delete this item forever?', // ALTA
   'rb.itemDeleted': 'Item deleted.', // ALTA
   'rb.itemHasCardHint': 'Already a card: use Cut.', // ALTA
+  'rb.moreActions': 'More actions', // ALTA
   'rb.selSafe': 'Select all non-sensitive', // ALTA
   'rb.selNone': 'Clear selection', // ALTA
   'rb.selCount': 'Selected: {n}', // ALTA

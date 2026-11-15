@@ -300,3 +300,8 @@
 .rb-pickline input{ width:18px; height:18px; }
 .rb-batchbar{ position:sticky; bottom:10px; z-index:5; display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:12px; padding:10px 14px; border-radius:14px; background:var(--brand-fill); color:var(--on-brand-fill); font-weight:800; box-shadow:var(--shadow-card); }
 .rb-batchbar[hidden]{ display:none; }
+.rb-more{ position:relative; display:inline-block; }
+.rb-more > summary{ list-style:none; text-align:center; letter-spacing:2px; }
+.rb-more > summary::-webkit-details-marker{ display:none; }
+.rb-more-menu{ display:flex; flex-direction:column; gap:6px; margin-top:6px; padding:8px; background:var(--paper); border:1px solid var(--paper-line); border-radius:12px; }
+.rb-line input[type=date]{ flex:0 0 auto; width:190px; }

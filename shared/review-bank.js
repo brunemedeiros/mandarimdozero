@@ -304,9 +304,12 @@ function rbItemHTML(i, s){
       ${i.status !== 'aprovado' ? `<button class="rb-btn rb-btn-ok" data-rb="approve" data-id="${rbH(i.id)}">${rbH(rbt('approve'))}</button>` : `<button class="rb-btn" data-rb="unapprove" data-id="${rbH(i.id)}">${rbH(rbt('backToPending'))}</button>`}
       ${i.status !== 'cortado' ? `<button class="rb-btn rb-btn-cut" data-rb="cut" data-id="${rbH(i.id)}">${rbH(rbt('cut'))}</button>` : `<button class="rb-btn" data-rb="unapprove" data-id="${rbH(i.id)}">${rbH(rbt('restore'))}</button>`}
       <button class="rb-btn" data-rb="item-edit" data-id="${rbH(i.id)}">${rbH(rbt('edit'))}</button>
-      <button class="rb-btn" data-rb="item-move" data-id="${rbH(i.id)}">${rbH(rbt('itemMove'))}</button>
-      ${i.teacher_flashcard_id ? `<span class="rb-meta">${rbH(rbt('itemHasCardHint'))}</span>` : `<button class="rb-btn rb-btn-cut" data-rb="item-delete" data-id="${rbH(i.id)}">${rbH(rbt('itemDelete'))}</button>`}
       <button class="rb-btn" data-rb="preview" data-id="${rbH(i.id)}">${rbH(rbt('preview'))}</button>
+      <details class="rb-more"${RB.moving === i.id ? ' open' : ''}><summary class="rb-btn" aria-label="${rbH(rbt('moreActions'))}" title="${rbH(rbt('moreActions'))}">⋯</summary>
+        <div class="rb-more-menu">
+          <button class="rb-btn" data-rb="item-move" data-id="${rbH(i.id)}">${rbH(rbt('itemMove'))}</button>
+          ${i.teacher_flashcard_id ? `<span class="rb-meta">${rbH(rbt('itemHasCardHint'))}</span>` : `<button class="rb-btn rb-btn-cut" data-rb="item-delete" data-id="${rbH(i.id)}">${rbH(rbt('itemDelete'))}</button>`}
+        </div></details>
     </div>${rbMovePanelHTML(i)}</article>`;
 }
 

@@ -683,6 +683,7 @@ const BANK_STUB = (who, appKey) => {
       await page.waitForSelector('.rb-item');
       await page.click('.rb-tabs [data-t=itens]');
       await page.waitForSelector('[data-item="m1"]');
+      await page.click('[data-item="m1"] .rb-more > summary');
       await page.click('[data-item="m1"] [data-rb="item-move"]');
       const moveOpts = await ev(() => [...document.querySelectorAll('#rb-move-pick option')].map(o => o.textContent.trim()));
       L('mover: só alunos ativos do mesmo idioma (sem arquivado e sem português)', moveOpts.includes('Luana Baionne') && moveOpts.includes('Bloqueada') && !moveOpts.includes('Antigo') && !moveOpts.includes('Evan') && !moveOpts.includes('Carol'), moveOpts);
@@ -690,6 +691,7 @@ const BANK_STUB = (who, appKey) => {
       await page.click('[data-rb="move-confirm"]');
       await page.waitForFunction(() => window.__DB.review_bank_items.find(i => i.id === 'm1').bank_student_id === 'rb-lb');
       L('mover: item foi para o outro aluno e saiu da lista da Carol', await ev(() => !document.querySelector('[data-item="m1"]')));
+      await page.click('[data-item="m2"] .rb-more > summary');
       await page.click('[data-item="m2"] [data-rb="item-delete"]');
       await page.waitForFunction(() => !window.__DB.review_bank_items.some(i => i.id === 'm2'));
       L('apagar item: some do banco (confirmou)', await ev(() => !document.querySelector('[data-item="m2"]')));
