@@ -313,6 +313,7 @@ function renderReviewViewInner(){
 
 function renderSpeedReview(){
   const el = document.getElementById('speed-review-content');
+  clearKeyboardOptions(); // telas sem pergunta (vazia, fim, game over) não têm atalhos; a pergunta religa os seus abaixo
 
   // Projeto "Reorganização da experiência de revisão e prática": Speed
   // Review agora usa a fila DEVIDA (ver buildSpeedQueue), então fila vazia
@@ -459,6 +460,10 @@ function renderSpeedReview(){
       answerSpeedQuestion(options[chosenIdx] === card, el, chosenIdx);
     });
   });
+
+  // Teclado: 1 a 4 escolhem a opção pela posição (número à esquerda, só com mouse e teclado); tecla segurada é ignorada.
+  wireKeyboardOptions(el.querySelectorAll('.speed-option'));
+  if (KEYBOARD_OPTION_MAP) KEYBOARD_OPTION_MAP.noRepeat = true;
 
   runSpeedTimer(el, () => answerSpeedQuestion(false, el));
 }

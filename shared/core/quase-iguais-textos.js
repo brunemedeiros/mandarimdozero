@@ -104,9 +104,15 @@ function answerSpeedQuestion(isCorrect, el, chosenIdx){
 
 function onMatchTileClick(btn){
   if (MATCH_STATE.busy) return;
-  if (btn.classList.contains('matched') || btn.classList.contains('flipped')) return;
+  if (btn.classList.contains('matched')) return;
+  if (btn.classList.contains('flipped')){
+    // Carta de áudio já virada: tocar de novo repete o som (não conta como escolha nem como tentativa).
+    if (btn.dataset.audio === '1') matchPlayAudioTile(btn);
+    return;
+  }
 
   btn.classList.add('flipped');
+  if (btn.dataset.audio === '1') matchPlayAudioTile(btn); // toca sozinha ao virar
 
   if (!MATCH_STATE.selected){
     MATCH_STATE.selected = btn;

@@ -87,6 +87,9 @@
     function voltar(){ location.reload(); }
     document.getElementById('tentar').addEventListener('click', voltar);
     window.addEventListener('online', voltar);
+    // O aparelho diz que tem internet mas a abertura não chegou ao servidor (rede ainda subindo, wi-fi sem saída):
+    // não vem outro 'online', então tenta de novo a cada 5 s enquanto o aparelho achar que está conectado.
+    setInterval(function(){ if (navigator.onLine) voltar(); }, 5000);
   })();
 </script>
 </body>
