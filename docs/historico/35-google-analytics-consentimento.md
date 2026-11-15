@@ -92,6 +92,16 @@ página" (o site manda as telas do app sozinho; com isso ligado, as limpezas de 
 - GA4: anúncios desligados em todas as regiões (conferido por ela). Vinculações: conferir que não há nada vinculado.
   Filtros de dados: o GA4 já cria o filtro "Tráfego interno" em modo de teste, que não faz nada sem regras; deixar como está.
 
+## Respostas de 2026-11-15 (quarta rodada)
+
+- **"Preferências" no banner: sim.** Link discreto embaixo dos botões do banner B1 nova, abrindo a janela "Preferências de
+  cookies" (Necessários sempre ativos + Medição de visitas com chave). A chave nasce DESLIGADA (nada marcado de antemão);
+  só aparece ligada para quem já aceitou. É a mesma janela do link "Preferências de cookies" do rodapé.
+- **Fase 1 aprovada** pela dona.
+- Ideias para o futuro (não fazer agora): vincular o **Search Console** ao GA4 (mostra o que as pessoas buscaram no Google
+  até chegar ao site); criar o **Perfil da Empresa no Google** da professora (aparece na Busca e no Maps, com avaliações de
+  alunos; dá para esconder o endereço e mostrar só a área de atendimento ou "aulas on-line"; é independente do GA4).
+
 ## Fase 1 (2026-11-15)
 
 - ID da métrica do GA4: **`G-CE3282C1FB`** (público por natureza: aparece no código de qualquer site que usa o GA4). O ID do
