@@ -124,3 +124,8 @@ Correção: migration `100_review_bank_agent_other_students` (o estado devolve `
 - Atenção Fred: o caderno tem 15 MB (alterado pela última vez em 2026-10-01); a exportação em HTML e o text/plain provavelmente falham. Avisar a dona para arquivá-lo no artifact só depois da primeira leitura bem-sucedida.
 - Regra da dona (2026-11-09): não criar caderno novo nem trocar o `notebook_id` de nenhum aluno sem aprovação explícita (ex.: o caderno do Fred, de 15 MB, foi só uma sugestão).
 - 2026-11-10 (pedido da dona): Carmen (francês) virou ex-aluna e foi ARQUIVADA no Banco (`status = 'arquivado'`; 72 itens e 63 cartões mantidos, o vínculo de aluna foi removido pela própria dona e conferido em 2026-11-10: não há mais linha dela em `teacher_students`). A rotina só lê alunos `ativo`, então ela saiu sozinha do estado (10 gerenciados).
+
+## 2026-11-14/15: Turma, faltas e botões novos do Banco
+- Migration 135 (Staging e produção, 2026-11-14) + `review-bank-agent` v16 (core fixado no commit `9612252`, PR #474): a rotina gera cartões para aluno ligado a Turma e entrega os aprovados sem cartão (caso Sandra e Eduardo, 219 itens). `review_bank_agent_state()` devolve `absent_dates` (faltas dos últimos 14 dias marcadas nas Aulas do site); o texto da tarefa ignora essas datas.
+- Decisão da dona (2026-11-15): outras professoras usando o Banco são para o FUTURO, não agora (caminhos: colar/subir caderno no site, conectar o Google de cada professora, ou rotina por professora).
+- Prévia dos botões novos (editar caderno/agenda/última leitura, aprovar em lote, juntar duplicados e mover itens, apagar de verdade): `docs/banco-revisao-previa-botoes.html`, aguardando aprovação.

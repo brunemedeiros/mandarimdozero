@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prévia: botões novos do Banco de Revisão</title>
+<style>
+:root{
+  --bg:#FBF7F0; --paper:#FFFFFF; --paper-warm:#FFF6E8; --ink:#1F2430; --muted:#5B6270; --line:#E3DCCD;
+  --brand:#1D4E89; --on-brand:#FFFFFF; --ok:#1E7A46; --on-ok:#FFFFFF; --danger:#B81F13; --on-danger:#FFFFFF; --warn-bg:#FFF1D6;
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#14171D; --paper:#1D2129; --paper-warm:#262B35; --ink:#ECEFF4; --muted:#A8B0BF; --line:#343B48;
+    --brand:#2F6DB5; --on-brand:#FFFFFF; --ok:#2E8F57; --danger:#D0382B; --warn-bg:#3A3220; }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:860px;margin:0 auto;padding:20px 16px 60px}
+h1{font-size:22px;margin:0 0 4px}
+.sub{color:var(--muted);margin:0 0 16px}
+.aviso{background:var(--warn-bg);border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin:0 0 18px;font-size:14px}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 16px}
+.tab{border:2px solid var(--brand);background:var(--paper);color:var(--brand);border-radius:999px;padding:8px 14px;font-weight:700;cursor:pointer;font-size:14px}
+.tab[aria-selected="true"]{background:var(--brand);color:var(--on-brand)}
+.panel{display:none}.panel.on{display:block}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:16px;margin:0 0 14px}
+.card h2{font-size:17px;margin:0 0 4px}
+.hint{color:var(--muted);font-size:14px;margin:0 0 12px}
+label{display:block;font-weight:700;font-size:14px;margin:12px 0 4px}
+input[type=text],input[type=date],select{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.row > *{flex:1 1 200px}
+.btn{border:0;border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer;font:inherit;font-weight:700;background:var(--brand);color:var(--on-brand)}
+.btn.ok{background:var(--ok);color:var(--on-ok)}
+.btn.danger{background:var(--danger);color:var(--on-danger)}
+.btn.ghost{background:transparent;color:var(--brand);border:2px solid var(--brand)}
+.btn.small{padding:6px 10px;font-size:13px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{background:var(--paper-warm);border:1px solid var(--line);border-radius:999px;padding:4px 10px;font-size:14px}
+.chip b{cursor:pointer;margin-left:6px;color:var(--muted)}
+.danger-zone{border:2px dashed var(--danger);border-radius:14px;padding:12px 14px;margin-top:16px}
+.danger-zone h3{margin:0 0 4px;font-size:15px;color:var(--danger)}
+.item{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--line)}
+.item:first-child{border-top:0}
+.item input[type=checkbox]{margin-top:5px;width:18px;height:18px}
+.item .q{font-weight:700}.item .a{color:var(--muted);font-size:14px}
+.tag{display:inline-block;font-size:12px;border-radius:999px;padding:1px 8px;margin-left:6px;background:var(--paper-warm);border:1px solid var(--line)}
+.tag.sens{background:var(--warn-bg)}
+.bar{position:sticky;bottom:10px;background:var(--brand);color:var(--on-brand);border-radius:14px;padding:10px 14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px}
+.bar .btn{background:var(--on-brand);color:var(--brand)}
+.bar .btn.ok{background:var(--ok);color:var(--on-ok)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:560px){.two{grid-template-columns:1fr}}
+.box{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--bg)}
+.box h4{margin:0 0 4px;font-size:15px}
+.kv{font-size:14px;color:var(--muted)}
+.menu{display:inline-block;border:1px solid var(--line);border-radius:10px;background:var(--paper);padding:4px 0;min-width:220px;box-shadow:0 4px 14px rgba(0,0,0,.12)}
+.menu div{padding:7px 14px;font-size:14px}.menu div:hover{background:var(--paper-warm)}
+.note{font-size:13px;color:var(--muted);margin-top:8px}
+.badge{display:inline-block;background:var(--ok);color:var(--on-ok);border-radius:999px;font-size:12px;font-weight:700;padding:2px 10px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Prévia: botões novos do Banco de Revisão</h1>
+  <p class="sub">Professora &gt; Cartões &gt; Banco de Revisão. Esta página é só um mostruário: nada aqui grava no site de verdade.</p>
+  <div class="aviso"><b>Grátis ou Premium?</b> Tudo grátis: são ferramentas da professora, sem nenhuma parte Premium. Os nomes e as telas são de exemplo (Sandra e Eduardo, Luana Baionne).</div>
+
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" aria-selected="true" data-p="p1">1. Editar o aluno</button>
+    <button class="tab" role="tab" aria-selected="false" data-p="p2">2. Aprovar vários itens</button>
+    <button class="tab" role="tab" aria-selected="false" data-p="p3">3. Juntar duplicados e mover itens</button>
+    <button class="tab" role="tab" aria-selected="false" data-p="p4">4. Apagar de verdade</button>
+  </div>
+
+  <!-- 1 -->
+  <section class="panel on" id="p1">
+    <div class="card">
+      <h2>Editar aluno: Sandra e Eduardo</h2>
+      <p class="hint">A ficha de hoje ganha três campos que só eram mudados comigo na conversa: caderno, nomes na agenda e data da última leitura.</p>
+      <div class="row">
+        <div><label>Nome</label><input type="text" value="Sandra e Eduardo"></div>
+        <div><label>Idioma</label><select disabled><option>Francês (travado: já tem itens)</option></select></div>
+        <div><label>Língua de referência</label><select><option>Português</option><option>English</option></select></div>
+      </div>
+
+      <label>Caderno de aula</label>
+      <div class="row">
+        <input type="text" value="https://docs.google.com/document/d/1AbC…/edit" readonly>
+        <div class="row" style="flex:0 0 auto">
+          <button class="btn ghost small">Abrir caderno</button>
+          <button class="btn ghost small">Trocar caderno</button>
+        </div>
+      </div>
+      <p class="note">"Trocar caderno" pede o link do caderno que você já tem e mostra o que muda antes de confirmar. O site nunca cria um caderno novo sozinho.</p>
+
+      <label>Nomes na agenda (o que aparece no título do evento)</label>
+      <div class="chips">
+        <span class="chip">Sandra <b>×</b></span><span class="chip">Eduardo <b>×</b></span><span class="chip">Sandra e Eduardo <b>×</b></span>
+        <button class="btn ghost small">+ adicionar nome</button>
+      </div>
+
+      <label>Última leitura do caderno</label>
+      <div class="row">
+        <input type="date" value="2026-11-10">
+        <div class="kv">A rotina da madrugada só lê entradas depois desta data. Se você mudar para uma data anterior, ela relê (itens repetidos são ignorados).</div>
+      </div>
+
+      <label><input type="checkbox" checked> Atualizar automaticamente toda madrugada</label>
+      <div class="row" style="margin-top:12px">
+        <button class="btn ok">Salvar</button>
+        <button class="btn ghost">Arquivar aluno</button>
+      </div>
+
+      <div class="danger-zone">
+        <h3>Zona de perigo</h3>
+        <p class="hint" style="margin:0 0 8px">Apagar tira o aluno do Banco de vez. Veja a aba 4.</p>
+        <button class="btn danger small">Apagar aluno…</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section class="panel" id="p2">
+    <div class="card">
+      <h2>Para conferir: Sandra e Eduardo <span class="tag">54 pendentes</span></h2>
+      <p class="hint">Marque vários e aprove ou corte de uma vez. Itens sensíveis nunca entram no "marcar todos": você decide um por um.</p>
+      <div class="row" style="margin-bottom:6px">
+        <button class="btn ghost small" id="selSafe">Marcar todos os não sensíveis</button>
+        <button class="btn ghost small" id="selNone">Desmarcar</button>
+      </div>
+      <div id="list">
+        <div class="item"><input type="checkbox" data-s="0"><div><div class="q">avoir le cafard <span class="tag">vocabulário</span></div><div class="a">estar na fossa · dúvida: "gíria, registro informal"</div></div></div>
+        <div class="item"><input type="checkbox" data-s="0"><div><div class="q">je me suis planté <span class="tag">erro</span></div><div class="a">eu me enganei · sugestão: dividir em 2 cartões</div></div></div>
+        <div class="item"><input type="checkbox" data-s="0"><div><div class="q">le chantier <span class="tag">vocabulário</span></div><div class="a">a obra · dúvida: "o aluno anotou sem artigo"</div></div></div>
+        <div class="item"><input type="checkbox" data-s="1" disabled><div><div class="q">mon ex-mari <span class="tag sens">sensível</span></div><div class="a">meu ex-marido · conteúdo pessoal: decida item por item</div><div style="margin-top:6px"><button class="btn small ok">Aprovar</button> <button class="btn small danger">Cortar</button></div></div></div>
+        <div class="item"><input type="checkbox" data-s="0"><div><div class="q">ça me saoule <span class="tag">vocabulário</span></div><div class="a">isso me enche o saco · linguagem livre</div></div></div>
+      </div>
+      <div class="bar" id="bar" hidden>
+        <span id="cnt"></span>
+        <span style="flex:1"></span>
+        <button class="btn ok">Aprovar marcados</button>
+        <button class="btn" style="color:var(--danger)">Cortar marcados</button>
+      </div>
+      <p class="note">Antes de gravar, o site mostra: "Vai aprovar 4 itens; cada um vira 1 cartão para Sandra e 1 para Eduardo". Dá para desfazer em "Desaprovar".</p>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section class="panel" id="p3">
+    <div class="card">
+      <h2>Possíveis duplicados <span class="tag">1 par</span></h2>
+      <p class="hint">O site avisa quando dois alunos parecem a mesma pessoa (mesmo caderno ou nomes parecidos).</p>
+      <div class="two">
+        <div class="box"><h4>Luana Baionne <span class="badge">ativa</span></h4><div class="kv">14 itens · 12 cartões · caderno: o mesmo</div></div>
+        <div class="box"><h4>Luana <span class="tag">arquivada</span></h4><div class="kv">3 itens · 0 cartões · caderno: o mesmo</div></div>
+      </div>
+      <div class="row" style="margin-top:12px">
+        <button class="btn ok">Juntar em um só…</button>
+        <button class="btn ghost">Não é duplicado</button>
+      </div>
+      <div class="box" style="margin-top:12px">
+        <h4>Prévia do que acontece ao juntar (você confirma depois)</h4>
+        <div class="kv">• Fica "Luana Baionne" (a ativa).<br>• 2 dos 3 itens da arquivada já existem: são ignorados. 1 item novo é trazido.<br>• Progresso de memória (FSRS) e cartões já entregues: não mudam, nada é apagado.<br>• A ficha "Luana" some da lista.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Mover item para outro aluno</h2>
+      <p class="hint">Menu ⋯ na linha de cada item.</p>
+      <div class="item" style="border:0"><div style="flex:1"><div class="q">le chantier</div><div class="a">a obra</div></div>
+        <div class="menu"><div>Editar</div><div><b>Mover para outro aluno…</b></div><div>Cortar</div><div>Apagar de verdade…</div></div>
+      </div>
+      <div class="box" style="margin-top:10px">
+        <h4>Mover 1 item para…</h4>
+        <select><option>Escolha o aluno de francês</option><option>Sandra e Eduardo</option><option>Rachel</option><option>Bea</option></select>
+        <p class="note">Se o item já tem cartão entregue, o cartão vai junto e a memória dele é mantida. Só vale entre alunos do mesmo idioma.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section class="panel" id="p4">
+    <div class="card">
+      <h2>Apagar aluno de verdade: Luana (arquivada)</h2>
+      <p class="hint">Arquivar esconde e guarda tudo. Apagar remove para sempre. O site sempre oferece o arquivar primeiro.</p>
+      <div class="box">
+        <h4>O que será apagado</h4>
+        <div class="kv">• 3 itens do Banco<br>• 0 cartões entregues a alunos<br>• 0 registros de memória (FSRS) de alunos<br>• 2 Récaps</div>
+      </div>
+      <label>Para confirmar, digite o nome do aluno: <i>Luana</i></label>
+      <input type="text" placeholder="Luana">
+      <div class="row" style="margin-top:12px">
+        <button class="btn ghost">Prefiro só arquivar</button>
+        <button class="btn danger" disabled style="opacity:.5">Apagar para sempre</button>
+      </div>
+      <p class="note">Se o aluno tiver cartões entregues ou memória guardada, o botão fica bloqueado e o site explica por quê: você precisa arquivar. Assim nunca se perde progresso de memória por engano.</p>
+    </div>
+    <div class="card">
+      <h2>Apagar um item</h2>
+      <p class="hint">Mesma ideia: item sem cartão entregue pode ser apagado; com cartão, o site sugere "Cortar" (some da revisão e guarda o histórico).</p>
+    </div>
+  </section>
+</div>
+<script>
+(function(){
+  var tabs=document.querySelectorAll('.tab'), panels=document.querySelectorAll('.panel');
+  tabs.forEach(function(t){t.addEventListener('click',function(){
+    tabs.forEach(function(x){x.setAttribute('aria-selected',x===t?'true':'false')});
+    panels.forEach(function(p){p.classList.toggle('on',p.id===t.dataset.p)});
+  })});
+  var boxes=document.querySelectorAll('#list input[type=checkbox]'), bar=document.getElementById('bar'), cnt=document.getElementById('cnt');
+  function upd(){var n=0;boxes.forEach(function(b){if(b.checked)n++});bar.hidden=!n;cnt.textContent=n+(n===1?' item marcado':' itens marcados')}
+  boxes.forEach(function(b){b.addEventListener('change',upd)});
+  document.getElementById('selSafe').addEventListener('click',function(){boxes.forEach(function(b){if(b.dataset.s==='0')b.checked=true});upd()});
+  document.getElementById('selNone').addEventListener('click',function(){boxes.forEach(function(b){b.checked=false});upd()});
+})();
+</script>
+</body>
+</html>
