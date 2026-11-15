@@ -11,9 +11,13 @@ até lá o código ainda diz "sem telemetria de terceiros".
 - **Onde**: só em `app.profbrune.com.br`, nas páginas abertas (início, sobre, ajuda, testes de nivelamento, contrato,
   páginas de privacidade, tela de entrar) **e dentro do app** (fr, zh e o futuro pt). Os testes e o contrato são molduras
   do Apps Script: o GA4 mede a moldura, não o formulário. `profbrune.com.br` e `agenda.profbrune.com.br` ficam de fora por enquanto.
-- **Consentimento, modo básico**: o código do Google só é baixado depois do "Aceitar". Sem aceite, nada vai para o Google
-  (nem os "sinais sem cookie" do modo avançado). "Aceitar" e "Recusar" com o mesmo destaque, escolha guardada e link
-  "Preferências de cookies" no rodapé.
+- **Consentimento: modo EM DECISÃO.** Em 2026-11-14 ficou o básico (o código do Google só é baixado depois do "Aceitar";
+  sem aceite, nada vai para o Google). Em 2026-11-15 a dona pediu o avançado ("quero estimativas melhores"). Alerta dado a
+  ela: a estimativa do Google só liga com pelo menos 1.000 usuários por dia que aceitaram (em 7 dos últimos 28 dias) e
+  1.000 eventos por dia de quem recusou (por 7 dias); o app logado teve média de 2 usuários por dia (máximo 7) nos 28 dias
+  até 2026-11-15 (`usage_events`, produção). Sem atingir esse volume, o avançado manda ao Google dados de quem recusou sem
+  dar estimativa nenhuma. Até ela confirmar, vale o básico. Nos dois modos: "Aceitar" e "Recusar" com o mesmo destaque,
+  escolha guardada e link "Preferências de cookies" no rodapé.
 - **Política**: opção B. Uma "Política de cookies" curta e separada, em pt-BR e en, publicada junto com o GA4. A mesma
   seção entra no rascunho da política geral (aba Privacidade do Admin e `ajuda/textos/politica.html`), que segue só em
   pt-BR até o advogado fechar; quando fechar, as duas se juntam.
@@ -23,10 +27,21 @@ até lá o código ainda diz "sem telemetria de terceiros".
 - **Links `?origem=` dos testes**: continuam como estão (a planilha do Apps Script depende deles). A moldura repassa todos
   os parâmetros, então os `utm_` também chegam à planilha. Pendência futura: migrar os `?origem=` para UTM.
 
-## Ponto em aberto
+## Fase extra (depois da Fase 4): página `/aulas/`
+
+Pedido da dona (2026-11-15): `app.profbrune.com.br/aulas/` lê o `utm_source` e redireciona para o formulário de aulas do
+Google Forms com a pergunta "Como conheceu a Prof. Brune?" (campo `entry.1856921042`) já marcada: `instagram` → "Instagram
+@prof.brune", `tiktok` → "TikTok", `indicacao` → "Indicação de amigo, familiar ou aluno", `mundolingo` → "Mundo Lingo",
+`pessoal` → "Perfil pessoal da Brune (Instagram ou outra rede)"; sem utm (ou valor desconhecido) → formulário sem opção
+marcada. O GA4 registra a visita antes de redirecionar. Atenção: quem chega por esse link é redirecionado sem ver o banner,
+então no modo básico essa visita não chega ao GA4 (a origem fica registrada na resposta do formulário).
+
+## Pontos em aberto
 
 - **Idade mínima**: a dona não tem alunos menores nas aulas, mas o cadastro do site não pergunta a idade, e nem os Termos
-  nem a política em rascunho falam de idade mínima. Levar ao advogado (LGPD, art. 14) antes de publicar a política de cookies.
+  nem a política em rascunho falam de idade mínima. Ideia dela (2026-11-15): aceitar menores com a ciência dos responsáveis,
+  sem perguntar a idade. Levar ao advogado: LGPD art. 14 e o ECA Digital (Lei 15.211/2025, em vigor desde 2026-03-17, que
+  não aceita a autodeclaração como único meio de saber a idade), ainda mais porque o site tem Amigos, Ranking e perfil público.
 
 ## Andamento
 
