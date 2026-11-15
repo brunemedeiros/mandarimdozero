@@ -3454,6 +3454,78 @@ window.I18N_CATALOG['en'] = {
   'rb.sfDateAdd': 'Add date', // ALTA
   'rb.sfDateDel': 'Remove date', // ALTA
   'rb.sfDates': 'Dates of the next classes', // ALTA
+  'rb.sfNotebook': 'Class notebook', // ALTA
+  'rb.sfNotebookNone': 'No notebook', // ALTA
+  'rb.nbOpen': 'Open notebook', // ALTA
+  'rb.nbChange': 'Change notebook', // ALTA
+  'rb.nbChangeHint': 'Paste the link of the notebook you already have (or just its id). The site never creates a new notebook.', // ALTA
+  'rb.nbUse': 'Use this notebook', // ALTA
+  'rb.nbInvalid': 'I could not find a notebook in that link. Paste the Google Docs link.', // ALTA
+  'rb.nbConfirm': 'Change the notebook of {name}? The nightly routine will start reading the new notebook. Confirm only if it is the right one.', // ALTA
+  'rb.nbPending': 'New notebook chosen. Click Save to apply it.', // ALTA
+  'rb.sfAgenda': 'Calendar names (as they appear in the event title)', // ALTA
+  'rb.sfAgendaAdd': 'Add name', // ALTA
+  'rb.sfAgendaNew': 'New name', // ALTA
+  'rb.sfAgendaDel': 'Remove this name', // ALTA
+  'rb.sfNoAgenda': 'No names yet.', // ALTA
+  'rb.sfLastRead': 'Last notebook reading', // ALTA
+  'rb.sfLastReadHint': 'The nightly routine only reads entries after this date. If you move the date back, it reads again (repeated items are ignored).', // ALTA
+  'rb.sfLastReadClear': 'Clear (read everything)', // ALTA
+  'rb.dangerTitle': 'Danger zone', // ALTA
+  'rb.deleteStudent': 'Delete student…', // ALTA
+  'rb.delTitle': 'Delete for good: {name}', // ALTA
+  'rb.delIntro': 'Archiving hides the student and keeps everything. Deleting removes it forever.', // ALTA
+  'rb.delWill': 'What will be deleted', // ALTA
+  'rb.delItems': 'Bank items: {n}', // ALTA
+  'rb.delRecaps': 'Recaps: {n}', // ALTA
+  'rb.delBlocked': 'This student has {cards} delivered cards, {mem} items with memory and {rev} saved answers. To avoid losing progress, archive instead of deleting.', // ALTA
+  'rb.delTypeName': 'To confirm, type the student name: {name}', // ALTA
+  'rb.delJustArchive': 'I would rather just archive', // ALTA
+  'rb.delForever': 'Delete forever', // ALTA
+  'rb.delDone': 'Student deleted.', // ALTA
+  'rb.archivedDone': 'Student archived.', // ALTA
+  'rb.itemMove': 'Move', // ALTA
+  'rb.moveTitle': 'Move this item to another student', // ALTA
+  'rb.movePick': 'Choose the student', // ALTA
+  'rb.moveConfirm': 'Move', // ALTA
+  'rb.moveNone': 'There is no other active student for this language.', // ALTA
+  'rb.moveDone': 'Item moved.', // ALTA
+  'rb.moveNote': 'An item that already became a card can only go to someone whose cards are delivered to the same place.', // ALTA
+  'rb.itemDelete': 'Delete', // ALTA
+  'rb.itemDeleteConfirm': 'Delete this item forever?', // ALTA
+  'rb.itemDeleted': 'Item deleted.', // ALTA
+  'rb.itemHasCardHint': 'Already a card: use Cut.', // ALTA
+  'rb.selSafe': 'Select all non-sensitive', // ALTA
+  'rb.selNone': 'Clear selection', // ALTA
+  'rb.selCount': 'Selected: {n}', // ALTA
+  'rb.batchApprove': 'Approve selected', // ALTA
+  'rb.batchCut': 'Cut selected', // ALTA
+  'rb.batchConfirmApprove': 'Approve {n} items? Each one becomes a card for the people who receive them.', // ALTA
+  'rb.batchConfirmCut': 'Cut {n} items?', // ALTA
+  'rb.batchDone': '{ok} done, {fail} failed.', // ALTA
+  'rb.batchPick': 'Select for batch', // ALTA
+  'rb.dupTitle': 'Possible duplicates', // ALTA
+  'rb.dupHint': 'These records look like the same person (same notebook or similar name).', // ALTA
+  'rb.dupMerge': 'Merge into one…', // ALTA
+  'rb.dupNot': 'Not a duplicate', // ALTA
+  'rb.dupKeep': 'Kept: {name}', // ALTA
+  'rb.dupDrop': 'Removed: {name}', // ALTA
+  'rb.dupSwap': 'Swap which one stays', // ALTA
+  'rb.dupPreview': 'What happens when merging', // ALTA
+  'rb.dupLine': 'Items moving to the record that stays: {moved}. Already there (ignored): {dup}. Recaps moving: {rm}. Already there: {rd}.', // ALTA
+  'rb.dupNoLoss': 'Memory progress and cards already delivered do not change; nothing is deleted from any student.', // ALTA
+  'rb.dupConfirm': 'Merge now', // ALTA
+  'rb.dupCancel': 'Cancel', // ALTA
+  'rb.dupDone': 'Records merged.', // ALTA
+  'rb.dupBlocked': 'Cannot merge: {why}', // ALTA
+  'rb.err.has_card_other_recipient': 'the item already became a card for another person or class.', // ALTA
+  'rb.err.duplicate_has_card': 'a repeated item already became a card. Cut one of them first.', // ALTA
+  'rb.err.duplicate_in_target': 'this item already exists for the other student.', // ALTA
+  'rb.err.language_mismatch': 'both students must have the same language.', // ALTA
+  'rb.err.has_progress': 'this student already has cards or saved memory. Archive instead of deleting.', // ALTA
+  'rb.err.has_card': 'this item already became a card. Use Cut.', // ALTA
+  'rb.err.same_student': 'pick another student.', // ALTA
+  'rb.err.not_authorized': 'not allowed.', // ALTA
   'rb.sfLang': 'Language studied', // ALTA
   'rb.sfName': 'Name', // ALTA
   'rb.sfNeedName': 'Write the student\'s name.', // ALTA

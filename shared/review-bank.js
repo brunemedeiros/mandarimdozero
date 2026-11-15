@@ -11,6 +11,7 @@ const RB = {
   summary: null, itemsBy: {}, reviewsBy: {}, recapBy: {}, reqBy: {},
   view: 'students', tab: 'aulas', cur: null, filter: 'pendente', type: '', q: '', limit: 60,
   editingId: null, adding: false, studentForm: null, manualEditing: false, importPlan: null, importOpen: false,
+  sel: {}, moving: null, deleting: null, merge: null,
   overview: { ord: { k: 'pending', dir: -1 }, f: { lg: 'todos', att: '0', aula: '0', q: '' }, data: null, loading: false, at: null },
 };
 const rbt = (k, p) => t('rb.' + k, p);
@@ -145,7 +146,8 @@ function rbStudentsHTML(){
   }).join('')}</div>`).join('');
   const s = rbStudentById(RB.cur);
   return `<nav class="rb-roster" aria-label="${rbH(rbt('studentsAria'))}">${roster}<div><button class="rb-link" data-rb="student-new">${rbH(rbt('addStudent'))}</button></div></nav>
-    ${RB.studentForm ? rbStudentFormHTML() : ''}
+    ${rbDupHTML()}
+    ${RB.studentForm ? rbStudentFormHTML() : ''}${RB.deleting ? rbDeletePanelHTML() : ''}
     <div id="rb-student">${s ? rbStudentPanelHTML(s) : ''}</div>${rbImportHTML()}`;
 }
 
@@ -243,7 +245,9 @@ function rbStudentPanelHTML(s){
         <select id="rb-type" aria-label="${rbH(rbt('typeAria'))}"><option value="">${rbH(rbt('allTypes'))}</option>${RB_ITEM_TYPES.map(k => `<option value="${k}"${RB.type === k ? ' selected' : ''}>${rbH(rbt('type.' + k))}</option>`).join('')}</select>
       </div>
       <div id="rb-newbox">${RB.adding ? rbItemFormHTML(null, s) : ''}</div>
+      ${RB.filter === 'pendente' ? `<div class="rb-toolbar"><button class="rb-btn" data-rb="sel-safe">${rbH(rbt('selSafe'))}</button><button class="rb-btn" data-rb="sel-none">${rbH(rbt('selNone'))}</button></div>` : ''}
       <div class="rb-list" id="rb-list">${rbListHTML(s)}</div>
+      ${RB.filter === 'pendente' ? rbBatchBarHTML() : ''}
     </section>`}</div>`;
 }
 
@@ -279,8 +283,10 @@ function rbListHTML(s){
 function rbItemHTML(i, s){
   if (RB.editingId === i.id) return `<article class="rb-item" data-item="${rbH(i.id)}">${rbItemFormHTML(i, s)}</article>`;
   const prop = i.proposal && typeof i.proposal === 'object' && Object.keys(i.proposal).length ? i.proposal : null;
+  const pickable = RB.filter === 'pendente' && i.status === 'pendente' && !i.sensitive && !rbRequestsOf(i).length;
   return `<article class="rb-item${i.status === 'cortado' ? ' is-cut' : ''}" data-item="${rbH(i.id)}">
     <div class="rb-body">
+      ${pickable ? `<label class="rb-pickline"><input type="checkbox" class="rb-pick" data-rb="pick" data-id="${rbH(i.id)}"${RB.sel[i.id] ? ' checked' : ''}> <span class="rb-meta">${rbH(rbt('batchPick'))}</span></label>` : ''}
       <div class="rb-tags"><span class="rb-tag">${rbH(rbt('type.' + i.item_type))}</span>
         ${i.class_date ? `<span class="rb-meta">${rbH(rbt('classOf', { d: rbDateFmt(i.class_date) }))}</span>` : ''}
         ${i.status === 'pendente' ? `<span class="rb-tag is-pend">${rbH(rbt('st.pendente'))}</span>` : i.status === 'cortado' ? `<span class="rb-tag">${rbH(rbt('st.cortado'))}</span>` : ''}
@@ -298,8 +304,10 @@ function rbItemHTML(i, s){
       ${i.status !== 'aprovado' ? `<button class="rb-btn rb-btn-ok" data-rb="approve" data-id="${rbH(i.id)}">${rbH(rbt('approve'))}</button>` : `<button class="rb-btn" data-rb="unapprove" data-id="${rbH(i.id)}">${rbH(rbt('backToPending'))}</button>`}
       ${i.status !== 'cortado' ? `<button class="rb-btn rb-btn-cut" data-rb="cut" data-id="${rbH(i.id)}">${rbH(rbt('cut'))}</button>` : `<button class="rb-btn" data-rb="unapprove" data-id="${rbH(i.id)}">${rbH(rbt('restore'))}</button>`}
       <button class="rb-btn" data-rb="item-edit" data-id="${rbH(i.id)}">${rbH(rbt('edit'))}</button>
+      <button class="rb-btn" data-rb="item-move" data-id="${rbH(i.id)}">${rbH(rbt('itemMove'))}</button>
+      ${i.teacher_flashcard_id ? `<span class="rb-meta">${rbH(rbt('itemHasCardHint'))}</span>` : `<button class="rb-btn rb-btn-cut" data-rb="item-delete" data-id="${rbH(i.id)}">${rbH(rbt('itemDelete'))}</button>`}
       <button class="rb-btn" data-rb="preview" data-id="${rbH(i.id)}">${rbH(rbt('preview'))}</button>
-    </div></article>`;
+    </div>${rbMovePanelHTML(i)}</article>`;
 }
 
 // Pedidos das alunas (114): cada um com as ações certas para o tipo. Cortar vale para todos; recusar devolve o cartão dela.
@@ -423,11 +431,123 @@ function rbStudentFormHTML(){
     <div class="rb-wide"><span class="rb-meta" style="font-weight:800;">${rbH(rbt('sfDates'))}</span>
       <div class="rb-datechips" id="rb-datechips">${rbDateChipsHTML(f.lesson_dates)}</div>
       <div style="display:flex;gap:8px;align-items:center;margin-top:6px;"><input type="date" id="rb-date-add" aria-label="${rbH(rbt('sfDateAdd'))}"><button class="rb-btn" data-rb="date-add" type="button">${rbH(rbt('sfDateAdd'))}</button></div></div>
+    ${edit ? rbStudentExtrasHTML(f) : ''}
     <div class="rb-edit-actions"><button class="rb-btn rb-btn-blue" data-rb="student-save">${rbH(rbt('save'))}</button><button class="rb-btn" data-rb="student-cancel">${rbH(rbt('cancel'))}</button><span class="rb-meta" id="rb-form-msg" role="status" aria-live="polite"></span></div></div>`;
 }
 function rbDateChipsHTML(dates){
   const d = (dates || []).slice().sort();
   return d.length ? d.map(x => `<span class="rb-datechip">${rbH(rbDateFull(x))}<button type="button" data-rb="date-del" data-d="${rbH(x)}" aria-label="${rbH(rbt('sfDateDel'))}">×</button></span>`).join('') : `<span class="rb-meta">${rbH(rbt('sfNoDates'))}</span>`;
+}
+
+// ---------- gerenciar alunos e itens (migration 136; prévia aprovada em 2026-11-15) ----------
+function rbStudentExtrasHTML(f){
+  const nb = f.notebook_id, dirty = (f.notebook_id || null) !== (f.notebook_orig || null);
+  const chips = rbAgendaChipsHTML(f.agenda_names);
+  return `<div class="rb-wide"><span class="rb-meta" style="font-weight:800;">${rbH(rbt('sfNotebook'))}</span>
+      <div class="rb-line"><code class="rb-nbid">${nb ? rbH(nb) : rbH(rbt('sfNotebookNone'))}</code>
+        ${nb ? `<button type="button" class="rb-btn" data-rb="nb-open">${rbH(rbt('nbOpen'))}</button>` : ''}
+        <button type="button" class="rb-btn" data-rb="nb-change">${rbH(rbt('nbChange'))}</button></div>
+      ${f.nbEditing ? `<div class="rb-line"><input type="text" id="rb-nb-input" placeholder="https://docs.google.com/document/d/..." aria-label="${rbH(rbt('nbChange'))}"><button type="button" class="rb-btn rb-btn-blue" data-rb="nb-use">${rbH(rbt('nbUse'))}</button></div><span class="rb-meta">${rbH(rbt('nbChangeHint'))}</span>` : ''}
+      ${dirty ? `<div class="rb-meta" role="status">${rbH(rbt('nbPending'))}</div>` : ''}</div>
+    <div class="rb-wide"><span class="rb-meta" style="font-weight:800;">${rbH(rbt('sfAgenda'))}</span>
+      <div class="rb-datechips" id="rb-agendachips">${chips}</div>
+      <div class="rb-line"><input type="text" id="rb-agenda-add" placeholder="${rbH(rbt('sfAgendaNew'))}" aria-label="${rbH(rbt('sfAgendaNew'))}"><button type="button" class="rb-btn" data-rb="agenda-add">${rbH(rbt('sfAgendaAdd'))}</button></div></div>
+    <div class="rb-wide"><span class="rb-meta" style="font-weight:800;">${rbH(rbt('sfLastRead'))}</span>
+      <div class="rb-line"><input type="date" data-f="last_entry_read" value="${rbH(f.last_entry_read || '')}" aria-label="${rbH(rbt('sfLastRead'))}"><button type="button" class="rb-btn" data-rb="lastread-clear">${rbH(rbt('sfLastReadClear'))}</button></div>
+      <span class="rb-meta">${rbH(rbt('sfLastReadHint'))}</span></div>
+    <div class="rb-wide rb-danger"><b>${rbH(rbt('dangerTitle'))}</b> <button type="button" class="rb-btn rb-btn-cut" data-rb="student-delete" data-id="${rbH(f.id)}">${rbH(rbt('deleteStudent'))}</button></div>`;
+}
+function rbAgendaChipsHTML(list){
+  return (list || []).length ? list.map((n, k) => `<span class="rb-datechip">${rbH(n)}<button type="button" data-rb="agenda-del" data-k="${k}" aria-label="${rbH(rbt('sfAgendaDel'))}">×</button></span>`).join('') : `<span class="rb-meta">${rbH(rbt('sfNoAgenda'))}</span>`;
+}
+// Guarda no estado o que já foi digitado no formulário antes de redesenhar (nome, idioma, data da última leitura...).
+function rbSyncFormFields(f){
+  const box = document.querySelector('[data-form=student]'); if (!box) return f;
+  const v = rbReadForm(box);
+  ['name', 'reference_language', 'status', 'language_app_key'].forEach(k => { if (v[k] !== undefined) f[k] = v[k]; });
+  if (v.agent_managed !== undefined) f.agent_managed = !!v.agent_managed;
+  if (v.last_entry_read !== undefined) f.last_entry_read = v.last_entry_read;
+  return f;
+}
+function rbManageErr(e){ const k = rbManageErrKey(rbErrMsg(e)); showToast(rbt('error') + ' ' + (k ? rbt(k) : rbErrMsg(e))); }
+function rbDeletePanelHTML(){
+  const d = RB.deleting; if (!d) return '';
+  const fp = d.fp;
+  if (!fp) return `<div class="rb-newbox rb-danger-box" data-form="delete"><span class="rb-meta">${rbH(rbt('delTitle', { name: d.name }))}</span></div>`;
+  const blocked = fp.delivered_cards > 0 || fp.memory_items > 0 || fp.reviews > 0;
+  return `<div class="rb-newbox rb-danger-box" data-form="delete">
+    <h3>${rbH(rbt('delTitle', { name: d.name }))}</h3><p class="rb-hint">${rbH(rbt('delIntro'))}</p>
+    <div class="rb-meta"><b>${rbH(rbt('delWill'))}</b><br>${rbH(rbt('delItems', { n: fp.items }))} · ${rbH(rbt('delRecaps', { n: fp.recaps }))}</div>
+    ${blocked ? `<p class="rb-doubt">${rbH(rbt('delBlocked', { cards: fp.delivered_cards, mem: fp.memory_items, rev: fp.reviews }))}</p>`
+      : `<label class="rb-meta" style="display:flex;flex-direction:column;gap:4px;margin-top:8px;">${rbH(rbt('delTypeName', { name: d.name }))}<input type="text" id="rb-del-name" autocomplete="off"></label>`}
+    <div class="rb-edit-actions"><button class="rb-btn rb-btn-blue" data-rb="del-archive" data-id="${rbH(d.id)}">${rbH(rbt('delJustArchive'))}</button>
+      ${blocked ? '' : `<button class="rb-btn rb-btn-cut" id="rb-del-go" data-rb="del-confirm" data-id="${rbH(d.id)}" disabled>${rbH(rbt('delForever'))}</button>`}
+      <button class="rb-btn" data-rb="del-cancel">${rbH(rbt('cancel'))}</button></div></div>`;
+}
+// Duplicados: aviso acima da lista; "Juntar" abre a prévia (RPC em modo prévia) e só junta depois de confirmar.
+function rbDismissedPairs(){ try { return JSON.parse(rbLs.get('dup-dismissed') || '[]'); } catch (e) { return []; } }
+function rbDupHTML(){
+  const m = RB.merge;
+  if (m) {
+    const keep = rbStudentById(m.keep), drop = rbStudentById(m.drop);
+    if (!keep || !drop) return '';
+    const pv = m.preview;
+    const box = (st, label) => `<div class="rb-dupbox"><b>${rbH(label)}</b><div class="rb-meta">${rbH(rbt('cItems'))}: ${(RB.summary[st.id] || {}).total || 0}</div></div>`;
+    return `<div class="rb-newbox rb-dup" data-form="merge"><h3>${rbH(rbt('dupTitle'))}</h3>
+      <div class="rb-dupgrid">${box(keep, rbt('dupKeep', { name: keep.name }))}${box(drop, rbt('dupDrop', { name: drop.name }))}</div>
+      <button class="rb-link" data-rb="dup-swap">${rbH(rbt('dupSwap'))}</button>
+      <div class="rb-dupprev"><b>${rbH(rbt('dupPreview'))}</b><br>${!pv ? '…' : pv.blocked
+        ? rbH(rbt('dupBlocked', { why: rbt('err.' + pv.blocked) }))
+        : rbH(rbt('dupLine', { moved: pv.items_moved, dup: pv.items_duplicate, rm: pv.recaps_moved, rd: pv.recaps_duplicate })) + '<br><span class="rb-meta">' + rbH(rbt('dupNoLoss')) + '</span>'}</div>
+      <div class="rb-edit-actions"><button class="rb-btn rb-btn-ok" data-rb="dup-confirm"${pv && !pv.blocked ? '' : ' disabled'}>${rbH(rbt('dupConfirm'))}</button><button class="rb-btn" data-rb="dup-cancel">${rbH(rbt('dupCancel'))}</button></div></div>`;
+  }
+  const pairs = rbDuplicatePairs(RB.students, rbDismissedPairs());
+  if (!pairs.length) return '';
+  return `<div class="rb-newbox rb-dup"><h3>${rbH(rbt('dupTitle'))} <span class="rb-pill">${pairs.length}</span></h3><p class="rb-hint">${rbH(rbt('dupHint'))}</p>
+    ${pairs.map(p => `<div class="rb-duprow"><span><b>${rbH(p.keep.name)}</b> + ${rbH(p.drop.name)}</span>
+      <span><button class="rb-btn rb-btn-blue" data-rb="dup-open" data-keep="${rbH(p.keep.id)}" data-drop="${rbH(p.drop.id)}">${rbH(rbt('dupMerge'))}</button>
+      <button class="rb-btn" data-rb="dup-dismiss" data-keep="${rbH(p.keep.id)}" data-drop="${rbH(p.drop.id)}">${rbH(rbt('dupNot'))}</button></span></div>`).join('')}</div>`;
+}
+async function rbMergePreview(){
+  const m = RB.merge; if (!m) return;
+  m.preview = null; rbRender();
+  const { data, error } = await supabaseClient.rpc('merge_review_bank_students', { p_from: m.drop, p_into: m.keep, p_dry_run: true });
+  if (error){ rbManageErr(error); RB.merge = null; rbRender(); return; }
+  m.preview = data; rbRender();
+}
+function rbMovePanelHTML(i){
+  if (RB.moving !== i.id) return '';
+  const targets = rbMoveTargets(RB.students, i);
+  return `<div class="rb-moveform" data-form="move"><b>${rbH(rbt('moveTitle'))}</b>
+    ${targets.length ? `<div class="rb-line"><select id="rb-move-pick" aria-label="${rbH(rbt('movePick'))}"><option value="">${rbH(rbt('movePick'))}</option>${targets.map(x => `<option value="${rbH(x.id)}">${rbH(x.name)}</option>`).join('')}</select>
+      <button class="rb-btn rb-btn-blue" data-rb="move-confirm" data-id="${rbH(i.id)}">${rbH(rbt('moveConfirm'))}</button><button class="rb-btn" data-rb="move-cancel">${rbH(rbt('cancel'))}</button></div>`
+      : `<div class="rb-meta">${rbH(rbt('moveNone'))}</div><button class="rb-btn" data-rb="move-cancel">${rbH(rbt('cancel'))}</button>`}
+    <span class="rb-meta">${rbH(rbt('moveNote'))}</span></div>`;
+}
+// Lote: marcar, aprovar e cortar vários pendentes. Sensíveis e itens com pedido aberto da aluna nunca entram no "marcar todos".
+function rbBatchBarHTML(){
+  const n = Object.keys(RB.sel).length;
+  return `<div class="rb-batchbar" id="rb-batchbar"${n ? '' : ' hidden'}><span id="rb-batch-count">${rbH(rbt('selCount', { n }))}</span><span style="flex:1"></span>
+    <button class="rb-btn rb-btn-ok" data-rb="batch-approve">${rbH(rbt('batchApprove'))}</button><button class="rb-btn rb-btn-cut" data-rb="batch-cut">${rbH(rbt('batchCut'))}</button></div>`;
+}
+function rbUpdateBatchBar(){
+  const bar = document.getElementById('rb-batchbar'), n = Object.keys(RB.sel).length;
+  if (!bar) return;
+  bar.hidden = !n;
+  const c = document.getElementById('rb-batch-count'); if (c) c.textContent = rbt('selCount', { n });
+}
+async function rbRunBatch(kind){
+  const ids = Object.keys(RB.sel); if (!ids.length) return;
+  if (!window.confirm(kind === 'approve' ? rbt('batchConfirmApprove', { n: ids.length }) : rbt('batchConfirmCut', { n: ids.length }))) return;
+  let ok = 0, fail = 0;
+  for (const id of ids){
+    const it = rbFindItem(id); if (!it){ fail++; continue; }
+    if (kind === 'approve'){ const r = await rbApproveItem(it); if (r.ok) ok++; else fail++; }
+    else { const { error } = await supabaseClient.rpc('set_review_bank_item_status', { p_item_id: id, p_status: 'cortado' }); if (error) fail++; else ok++; }
+  }
+  RB.sel = {};
+  await rbLoadBase(); await rbReloadCur(); rbRender();
+  showToast(rbt('batchDone', { ok, fail }));
 }
 
 // ---------- ações ----------
@@ -518,6 +638,11 @@ async function rbSaveStudent(box){
   if (!name){ if (msg) msg.textContent = rbt('sfNeedName'); return; }
   const cols = { name, reference_language: f.reference_language, agent_managed: !!f.agent_managed, lesson_dates: cur.lesson_dates || [], updated_at: new Date().toISOString() };
   let r;
+  if (cur.id){
+    cols.agenda_names = (cur.agenda_names || []).slice();
+    cols.last_entry_read = f.last_entry_read || null;
+    if ((cur.notebook_id || null) !== (cur.notebook_orig || null)) cols.notebook_id = cur.notebook_id || null; // caderno só muda se a professora trocou pela tela e confirmou
+  }
   if (cur.id){ cols.status = f.status || 'ativo'; if (!box.querySelector('[data-f=language_app_key]').disabled) cols.language_app_key = f.language_app_key; r = await supabaseClient.from('review_bank_students').update(cols).eq('id', cur.id).select().maybeSingle(); }
   else r = await supabaseClient.from('review_bank_students').insert(Object.assign({ teacher_id: CURRENT_USER.id, language_app_key: f.language_app_key }, cols)).select().maybeSingle();
   if (r.error || !r.data){ if (msg) msg.textContent = rbt('error') + ' ' + rbErrMsg(r.error); return; }
@@ -663,10 +788,10 @@ function rbWire(wrap){
     const b = e.target.closest('[data-rb]'); if (!b) return;
     const a = b.dataset.rb, id = b.dataset.id;
     try {
-      if (a === 'view'){ RB.view = b.dataset.v; rbLs.set('view', RB.view); rbRender(); }
-      else if (a === 'select'){ RB.cur = id; rbLs.set('cur', id); RB.editingId = null; RB.adding = false; RB.limit = 60; if (!RB.itemsBy[id]) await rbLoadStudentData(id); rbRender(); }
+      if (a === 'view'){ RB.sel = {}; RB.view = b.dataset.v; rbLs.set('view', RB.view); rbRender(); }
+      else if (a === 'select'){ RB.sel = {}; RB.moving = null; RB.cur = id; rbLs.set('cur', id); RB.editingId = null; RB.adding = false; RB.limit = 60; if (!RB.itemsBy[id]) await rbLoadStudentData(id); rbRender(); }
       else if (a === 'tab'){ RB.tab = b.dataset.t; rbLs.set('student-tab', RB.tab); RB.editingId = null; RB.adding = false; rbRender(); }
-      else if (a === 'filter'){ RB.filter = b.dataset.f; RB.limit = 60; rbRender(); }
+      else if (a === 'filter'){ RB.sel = {}; RB.filter = b.dataset.f; RB.limit = 60; rbRender(); }
       else if (a === 'more'){ RB.limit += 60; document.getElementById('rb-list').innerHTML = rbListHTML(rbStudentById(RB.cur)); }
       else if (a === 'item-new'){ RB.adding = true; RB.editingId = null; rbRender(); }
       else if (a === 'item-edit'){ RB.editingId = id; RB.adding = false; rbRender(); }
@@ -687,11 +812,78 @@ function rbWire(wrap){
       else if (a === 'link-class'){ const pick = document.getElementById('rb-class-pick'); if (!pick) return; const { data, error } = await supabaseClient.rpc('link_review_bank_classroom', { p_bank_student_id: id, p_classroom_id: Number(pick.value) }); if (error) { rbToastErr(error); return; } const s = rbStudentById(id); s.classroom_id = Number(pick.value); s.linked_student_id = null; await rbReloadCur(); rbRender(); showToast(rbt('linkedClassDone', { n: data || 0 })); }
       else if (a === 'unlink'){ const { error } = await supabaseClient.rpc('unlink_review_bank_student', { p_bank_student_id: id }); if (error) { rbToastErr(error); return; } const s = rbStudentById(id); s.linked_student_id = null; s.classroom_id = null; rbRender(); showToast(rbt('unlinkedDone')); }
       else if (a === 'student-new'){ RB.studentForm = { id: null, name: '', language_app_key: 'portugues', reference_language: 'en', agent_managed: false, lesson_dates: [] }; rbRender(); }
-      else if (a === 'student-edit'){ const s = rbStudentById(id); RB.studentForm = { id: s.id, name: s.name, language_app_key: s.language_app_key, reference_language: s.reference_language, status: s.status, agent_managed: !!s.agent_managed, lesson_dates: (s.lesson_dates || []).slice() }; rbRender(); }
+      else if (a === 'student-edit'){ const s = rbStudentById(id); RB.studentForm = { id: s.id, name: s.name, language_app_key: s.language_app_key, reference_language: s.reference_language, status: s.status, agent_managed: !!s.agent_managed, lesson_dates: (s.lesson_dates || []).slice(), notebook_id: s.notebook_id || null, notebook_orig: s.notebook_id || null, agenda_names: (s.agenda_names || []).slice(), last_entry_read: s.last_entry_read || '', nbEditing: false }; RB.deleting = null; rbRender(); }
       else if (a === 'student-cancel'){ RB.studentForm = null; rbRender(); }
       else if (a === 'student-save'){ b.disabled = true; await rbSaveStudent(b.closest('[data-form=student]')); }
       else if (a === 'date-add'){ const inp = document.getElementById('rb-date-add'); if (inp && inp.value && !RB.studentForm.lesson_dates.includes(inp.value)){ RB.studentForm.lesson_dates.push(inp.value); document.getElementById('rb-datechips').innerHTML = rbDateChipsHTML(RB.studentForm.lesson_dates); inp.value = ''; } }
       else if (a === 'date-del'){ RB.studentForm.lesson_dates = RB.studentForm.lesson_dates.filter(d => d !== b.dataset.d); document.getElementById('rb-datechips').innerHTML = rbDateChipsHTML(RB.studentForm.lesson_dates); }
+      else if (a === 'nb-open'){ const nb = RB.studentForm && RB.studentForm.notebook_id; if (nb) window.open(rbNotebookUrl(nb), '_blank', 'noopener'); }
+      else if (a === 'nb-change'){ RB.studentForm = Object.assign(rbSyncFormFields(RB.studentForm), { nbEditing: !RB.studentForm.nbEditing }); rbRender(); }
+      else if (a === 'nb-use'){
+        const id2 = rbNotebookIdFromInput((document.getElementById('rb-nb-input') || {}).value);
+        if (!id2){ showToast(rbt('nbInvalid')); return; }
+        if (!window.confirm(rbt('nbConfirm', { name: RB.studentForm.name || '' }))) return;
+        RB.studentForm = Object.assign(rbSyncFormFields(RB.studentForm), { notebook_id: id2, nbEditing: false }); rbRender();
+      }
+      else if (a === 'agenda-add'){
+        const inp = document.getElementById('rb-agenda-add'), v = inp ? inp.value.trim() : '';
+        if (v && !RB.studentForm.agenda_names.includes(v)){ RB.studentForm.agenda_names.push(v); document.getElementById('rb-agendachips').innerHTML = rbAgendaChipsHTML(RB.studentForm.agenda_names); }
+        if (inp) inp.value = '';
+      }
+      else if (a === 'agenda-del'){ RB.studentForm.agenda_names.splice(Number(b.dataset.k), 1); document.getElementById('rb-agendachips').innerHTML = rbAgendaChipsHTML(RB.studentForm.agenda_names); }
+      else if (a === 'lastread-clear'){ const d = document.querySelector('[data-form=student] [data-f=last_entry_read]'); if (d) d.value = ''; }
+      else if (a === 'student-delete'){
+        const st = rbStudentById(id); if (!st) return;
+        RB.deleting = { id, name: st.name, fp: null }; rbRender();
+        const { data, error } = await supabaseClient.rpc('review_bank_student_footprint', { p_bank_student_id: id });
+        if (error){ rbManageErr(error); RB.deleting = null; rbRender(); return; }
+        RB.deleting.fp = data; rbRender();
+      }
+      else if (a === 'del-cancel'){ RB.deleting = null; rbRender(); }
+      else if (a === 'del-archive'){
+        const { error } = await supabaseClient.from('review_bank_students').update({ status: 'arquivado', updated_at: new Date().toISOString() }).eq('id', id);
+        if (error){ rbManageErr(error); return; }
+        const st = rbStudentById(id); if (st) st.status = 'arquivado';
+        RB.deleting = null; RB.studentForm = null; rbRender(); showToast(rbt('archivedDone'));
+      }
+      else if (a === 'del-confirm'){
+        b.disabled = true;
+        const { error } = await supabaseClient.rpc('delete_review_bank_student', { p_bank_student_id: id });
+        if (error){ rbManageErr(error); b.disabled = false; return; }
+        delete RB.itemsBy[id]; RB.deleting = null; RB.studentForm = null;
+        await rbLoadBase(); if (RB.cur === id){ RB.cur = RB.students.length ? RB.students[0].id : null; if (RB.cur && !RB.itemsBy[RB.cur]) await rbLoadStudentData(RB.cur); }
+        rbRender(); showToast(rbt('delDone'));
+      }
+      else if (a === 'item-move'){ RB.moving = RB.moving === id ? null : id; rbRender(); }
+      else if (a === 'move-cancel'){ RB.moving = null; rbRender(); }
+      else if (a === 'move-confirm'){
+        const pick = document.getElementById('rb-move-pick'); if (!pick || !pick.value){ showToast(rbt('movePick')); return; }
+        b.disabled = true;
+        const { error } = await supabaseClient.rpc('move_review_bank_item', { p_item_id: id, p_to_bank_student: pick.value });
+        if (error){ rbManageErr(error); b.disabled = false; return; }
+        RB.moving = null; await rbLoadBase(); await rbReloadCur(); rbRender(); showToast(rbt('moveDone'));
+      }
+      else if (a === 'item-delete'){
+        if (!window.confirm(rbt('itemDeleteConfirm'))) return;
+        b.disabled = true;
+        const { error } = await supabaseClient.rpc('delete_review_bank_item', { p_item_id: id });
+        if (error){ rbManageErr(error); b.disabled = false; return; }
+        delete RB.sel[id]; await rbLoadBase(); await rbReloadCur(); rbRender(); showToast(rbt('itemDeleted'));
+      }
+      else if (a === 'sel-safe'){ const s0 = rbStudentById(RB.cur); (s0 ? rbFilteredItems(s0) : []).forEach(i => { if (rbBatchSelectable(i, rbRequestsOf(i))) RB.sel[i.id] = true; }); document.getElementById('rb-list').innerHTML = rbListHTML(s0); rbUpdateBatchBar(); }
+      else if (a === 'sel-none'){ RB.sel = {}; const s0 = rbStudentById(RB.cur); document.getElementById('rb-list').innerHTML = rbListHTML(s0); rbUpdateBatchBar(); }
+      else if (a === 'batch-approve' || a === 'batch-cut'){ b.disabled = true; await rbRunBatch(a === 'batch-approve' ? 'approve' : 'cut'); }
+      else if (a === 'dup-dismiss'){ const list = rbDismissedPairs(); list.push(b.dataset.keep + '|' + b.dataset.drop); rbLs.set('dup-dismissed', JSON.stringify(list)); rbRender(); }
+      else if (a === 'dup-open'){ RB.merge = { keep: b.dataset.keep, drop: b.dataset.drop, preview: null }; await rbMergePreview(); }
+      else if (a === 'dup-swap'){ if (RB.merge){ const k = RB.merge.keep; RB.merge.keep = RB.merge.drop; RB.merge.drop = k; await rbMergePreview(); } }
+      else if (a === 'dup-cancel'){ RB.merge = null; rbRender(); }
+      else if (a === 'dup-confirm'){
+        const m = RB.merge; if (!m) return; b.disabled = true;
+        const { data, error } = await supabaseClient.rpc('merge_review_bank_students', { p_from: m.drop, p_into: m.keep, p_dry_run: false });
+        if (error || (data && data.blocked)){ rbManageErr(error || { message: data.blocked }); b.disabled = false; return; }
+        RB.merge = null; delete RB.itemsBy[m.drop]; delete RB.itemsBy[m.keep];
+        await rbLoadBase(); RB.cur = m.keep; rbLs.set('cur', m.keep); await rbLoadStudentData(m.keep); rbRender(); showToast(rbt('dupDone'));
+      }
       else if (a === 'recap-make'){ b.disabled = true; await rbRecapMake(id); }
       else if (a === 'recap-print'){ rbPrintRecap(id, !!b.dataset.answers); }
       else if (a === 'class'){ if (typeof openReviewBankClass === 'function') openReviewBankClass(id, 'recap'); }
@@ -706,6 +898,7 @@ function rbWire(wrap){
   });
   wrap.addEventListener('input', (e) => {
     if (e.target.id === 'rb-search'){ RB.q = e.target.value; const s = rbStudentById(RB.cur); if (s) document.getElementById('rb-list').innerHTML = rbListHTML(s); }
+    else if (e.target.id === 'rb-del-name'){ const go = document.getElementById('rb-del-go'); if (go && RB.deleting) go.disabled = rbNormName(e.target.value) !== rbNormName(RB.deleting.name); }
     else if (e.target.id === 'rb-ov-q'){ RB.overview.f.q = e.target.value; rbRenderOverview(); }
   });
   wrap.addEventListener('change', async (e) => {
@@ -715,6 +908,7 @@ function rbWire(wrap){
     else if (el.id === 'rb-auto'){ const ok = await rbSaveSettings({ auto_generate: el.checked }); if (!ok) el.checked = !el.checked; else showToast(el.checked ? rbt('autoOn') : rbt('autoOff')); }
     else if (el.id === 'rb-ov-att'){ RB.overview.f.att = el.value; rbLs.set('ov-filters', JSON.stringify(RB.overview.f)); rbRenderOverview(); }
     else if (el.id === 'rb-ov-aula'){ RB.overview.f.aula = el.value; rbLs.set('ov-filters', JSON.stringify(RB.overview.f)); rbRenderOverview(); }
+    else if (el.dataset && el.dataset.rb === 'pick'){ if (el.checked) RB.sel[el.dataset.id] = true; else delete RB.sel[el.dataset.id]; rbUpdateBatchBar(); }
     else if (el.dataset && el.dataset.f === 'item_type'){ const box = el.closest('[data-form=item]'); const w = box.querySelector('[data-only=erro]'); if (w) w.hidden = el.value !== 'erro'; }
   });
   wrap.addEventListener('keydown', (e) => {
