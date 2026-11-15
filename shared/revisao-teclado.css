@@ -22,6 +22,11 @@
 .grade-buttons{ container-type:inline-size; }
 @container (min-width:520px){ .grade-btn:has(.kbd-hint){ padding-left:12px; padding-right:12px; } }
 
+/* Revisão rápida (4 opções com cronômetro): mesmo padrão da múltipla escolha. */
+.speed-option{ position:relative; }
+.speed-option .kbd-hint{ top:50%; left:10px; transform:translateY(-50%); width:20px; height:20px; font-size:11px; }
+.speed-option:has(.kbd-hint){ padding-left:40px; padding-right:40px; }
+
 .flashcard-hint .hint-kbd{ display:none; }
 .key-enter-hint{ display:none; }
 @media (hover:hover) and (pointer:fine){
@@ -35,5 +40,28 @@
 /* Tela de toque: sem número (o site já esconde .kbd-hint), então volta o espaçamento normal. */
 @media not all and (hover:hover) and (pointer:fine){
   .mc-option:has(.kbd-hint){ padding-left:16px; padding-right:16px; }
+  .speed-option:has(.kbd-hint){ padding-left:12px; padding-right:12px; }
   .grade-btn:has(.kbd-hint){ padding-left:6px; padding-right:6px; }
+}
+
+/* Janela de atalhos: a coluna das teclas é mais larga (quatro números ou Espaço + Enter não cabiam em 100 px e colavam no texto). */
+.kbd-shortcuts-row .kbd-shortcuts-keys{ width:132px; flex-wrap:wrap; }
+.kbd-shortcuts-row .kbd-shortcuts-desc{ min-width:0; }
+
+/* Opções das lições, dos Desafios e dos Jogos da Conjugação (decisão da autora, 2026-11-13): o mesmo desenho da Revisão, com o número
+   num quadrado no meio da altura, à esquerda, e o texto centralizado; sem a folga extra de 32 px em cima, que era só para o número no canto. */
+.exercise-option .kbd-hint, .cloze-option .kbd-hint, .challenge-choice-btn .kbd-hint, #view-conjugaison .cg-choice .kbd-hint{
+  top:50%; left:10px; transform:translateY(-50%); width:20px; height:20px; font-size:11px;
+}
+.exercise-option:has(.kbd-hint){ padding:16px 40px; justify-content:center; }
+.cloze-option:has(.kbd-hint){ padding-left:40px; padding-right:40px; text-align:center; align-items:center; }
+#view-conjugaison .cg-choice:has(.kbd-hint){ padding-left:40px; padding-right:40px; }
+/* Complete a frase dos Desafios (botões em pílula, texto centralizado): folga igual dos dois lados para o texto ficar no meio. */
+.cloze-grammar-group .challenge-choice-btn{ position:relative; }
+.cloze-grammar-group .challenge-choice-btn:has(.kbd-hint){ padding-left:40px; padding-right:40px; }
+@media not all and (hover:hover) and (pointer:fine){
+  .exercise-option:has(.kbd-hint){ padding:16px 12px; }
+  .cloze-option:has(.kbd-hint){ padding-left:16px; padding-right:16px; }
+  #view-conjugaison .cg-choice:has(.kbd-hint){ padding-left:12px; padding-right:12px; }
+  .cloze-grammar-group .challenge-choice-btn:has(.kbd-hint){ padding-left:22px; padding-right:22px; }
 }

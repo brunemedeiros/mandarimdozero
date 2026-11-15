@@ -357,6 +357,9 @@ const BANK_STUB = (who, appKey) => {
       await page.keyboard.press('Space');
       await page.waitForSelector('#rb-class .rb-sa');
       L('espaço mostra a resposta com os 4 botões (Errei, Difícil, Bom, Fácil) e o intervalo de cada um', await ev(() => { const b = [...document.querySelectorAll('#rb-class .rb-ctrl .rb-big')]; return b.length === 4 && b.every(x => x.querySelector('small') && x.querySelector('small').textContent.trim()) && b.map(x => x.dataset.g).join() === '0,1,2,3'; }));
+      L('Modo aula: os botões de nota mostram o número 1 a 4', await ev(() => [...document.querySelectorAll('#rb-class .rb-ctrl .rb-big .rb-kbd')].map(k => k.textContent).join('') === '1234'));
+      await page.keyboard.press('ArrowRight'); await page.keyboard.press('ArrowLeft'); await page.keyboard.press('h'); await page.waitForTimeout(250);
+      L('Modo aula: setas e h não avaliam (só os números)', await ev(() => !document.querySelector('#rb-class .rb-reasons') && !!document.querySelector('#rb-class .rb-sa') && window.__DB.review_bank_reviews.filter(r => r.id.startsWith('u')).length === 0));
       await page.click('#rb-class [data-g="0"]');
       await page.waitForSelector('#rb-class .rb-reasons');
       L('errou pede o motivo (os motivos do tipo do item + sem motivo)', await ev(() => (() => { const n = document.querySelectorAll('#rb-class .rb-reasons .chips button').length; const erro = !!document.querySelector('#rb-class .rb-sq.is-wrong'); return erro ? n === 3 : n === 5; })() && !!document.querySelector('#rb-class .chips .is-none')));
@@ -372,7 +375,7 @@ const BANK_STUB = (who, appKey) => {
       L('item errado volta ao nível 0 e amanhã', await ev((id) => { const i = window.__DB.review_bank_items.find(x => x.id === id); return i.level === 0 && i.last_result === 'errou' && i.due_date > i.last_review_date; }, firstId));
       // se sobrou slide, responde como acertou; senão já terminou
       if (await ev(() => !!document.querySelector('#rb-class .rb-end'))) L('fim da rodada com placar', true);
-      else { await page.keyboard.press('Space'); await page.keyboard.press('ArrowRight'); await page.waitForSelector('#rb-class .rb-end'); L('fim da rodada com placar', await ev(() => document.querySelector('#rb-class .rb-score').textContent.includes('/'))); }
+      else { await page.keyboard.press('Space'); await page.keyboard.press('3'); await page.waitForSelector('#rb-class .rb-end'); L('fim da rodada com placar', await ev(() => document.querySelector('#rb-class .rb-score').textContent.includes('/'))); }
       await shot('modo-aula-fim');
       await page.click('#rb-class [data-c="close"]');
       await page.click('.rb-tabs [data-t=aulas]');

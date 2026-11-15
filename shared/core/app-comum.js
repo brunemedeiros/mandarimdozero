@@ -373,6 +373,7 @@ const REVIEW_FILTER_LABELS = {
 const MATCH_SIZE_OPTIONS = [5, 8, 10]; // pares -- 10/16/20 cartas
 const MATCH_STATE = {
   pairSize: 8,     // pares por sessão, escolhido em renderMatchSizePicker
+  withAudio: null, // Combinar com áudio: null = ainda não lido da preferência (match-with-audio, padrão ligado); depois true/false
   pairs: [],       // [{cardId, front, back}]
   tiles: [],       // [{cardId, side:'front'|'back', text}]
   selected: null,  // tile element selecionado aguardando o par
@@ -538,6 +539,7 @@ function wireLessonKeyboardShortcuts(){
     if (!entry.el.isConnected || entry.el.disabled || entry.el.classList.contains('disabled')) return;
     if (!entry.el.getClientRects().length) return; // tela escondida (ex.: saiu da Revisão): nunca clica no que não se vê
     if (KEYBOARD_OPTION_MAP.review && !reviewKeysReady()) return;
+    if (KEYBOARD_OPTION_MAP.noRepeat && e.repeat) return; // Revisão rápida: tecla segurada não responde as perguntas seguintes
     e.preventDefault();
     entry.el.click();
   });

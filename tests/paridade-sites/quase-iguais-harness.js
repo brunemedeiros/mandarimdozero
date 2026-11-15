@@ -111,7 +111,7 @@ async function abrir(browser, port, site, { lang = 'pt-BR', width = 1200, theme 
   await page.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, r => r.abort());
   await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
   await page.addInitScript(([lang, theme]) => {
-    try { sessionStorage.setItem('guest_mode', '1'); localStorage.setItem('ui-language', lang); if (theme) localStorage.setItem('theme', theme); } catch (e) {}
+    try { sessionStorage.setItem('guest_mode', '1'); localStorage.setItem('ui-language', lang); localStorage.setItem('match-with-audio', '0'); /* Combinar com áudio (2026-11-14): a comparação antes x depois roda sem as cartas de áudio, que são novas */ if (theme) localStorage.setItem('theme', theme); } catch (e) {}
     let s = 12345; Math.random = () => (s = (s * 16807) % 2147483647) / 2147483647;
     window.__seed = (n) => { s = n; };
     let u = 0; if (window.crypto) { try { crypto.randomUUID = () => '00000000-0000-4000-8000-' + String(++u).padStart(12, '0'); } catch (e) {} }
