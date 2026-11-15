@@ -55,6 +55,18 @@ até lá o código ainda diz "sem telemetria de terceiros".
 - Fase 6 (`/aulas/`): **moldura** com o formulário dentro, resposta marcada pelo `utm_source`, só o formulário de francês.
 - Idiomas do banner e da política: pt-BR e en (o espanhol está congelado e fora do menu de idioma).
 
+## Fase P (privacidade por padrão, opção C)
+
+- 2026-11-15: migration `136_privacy_default_and_age_ack` (contas novas com `public_profile = false`; contas antigas não
+  mudam; `profile_private.age_ack_at` + `ack_my_age()`) aplicada no **Staging** (versão `20261115211611`; conferido: padrão
+  false, 4/4 perfis antigos continuam públicos, anon não executa). **Produção: aguarda autorização da dona.**
+- Cadastro, passo 2: caixinha obrigatória ("Tenho 18 anos ou mais, ou tenho autorização do meu responsável para usar o
+  site." / "I'm 18 or older, or I have my parent or guardian's permission to use the site."); sem marcar, Google e e-mail
+  ficam travados; a data é gravada depois do login (`afterAuthResolved`). Testes: `tests/privacidade-padrao/run.sh` 8/8,
+  `tests/login-obrigatorio/test_entrada_idioma.js` 162/162, `test_playwright.js` 124/124, `tests/cores-marca/test_portao.js` 6/6.
+- Em aberto: contas que já existem (e conta nova criada pelo "Entrar com Google" da tela de Entrar, que não passa pelo
+  passo 2). A dona prefere uma caixinha dentro de uma tela que já existe, no lugar da janela única; opções enviadas a ela.
+
 ## Fase extra (depois da Fase 4): página `/aulas/`
 
 Nova versão do prompt (2026-11-15) chama de **Fase 6**: link geral https://forms.gle/9994D2GHdwDj4RyT7 (formulário de aulas
