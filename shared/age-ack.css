@@ -1,0 +1,19 @@
+/* Janela de confirmação de idade (shared/age-ack.js, Fase P, migration 136; "A1 nova" da dona, 2026-11-15).
+   Reaproveita as peças das janelas do topo (shared/janelas-topo.css: .tpop, .tpop-head, .tpop-card, .tpop-link);
+   aqui só a posição no centro, o fundo escurecido e a caixinha. Só tokens do próprio site (fr e zh têm os mesmos nomes). */
+.age-ack-overlay{ position:fixed; inset:0; z-index:9000; background:rgba(20,16,30,.5); display:flex; align-items:center; justify-content:center; padding:16px; }
+.tpop.age-ack-pop{ position:relative; width:360px; max-width:100%; }
+.tpop.age-ack-pop::before{ display:none; }
+.age-ack-label{ display:flex; align-items:flex-start; gap:10px; font-size:14px; font-weight:700; line-height:1.4; cursor:pointer; }
+.age-ack-label input{ width:20px; height:20px; margin:1px 0 0; flex:0 0 auto; accent-color:var(--brand-fill); cursor:pointer; }
+.age-ack-actions{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
+.age-ack-later{ background:none; border:0; padding:6px 2px; font:inherit; font-size:13.5px; font-weight:800; color:var(--ink-soft); text-decoration:underline; cursor:pointer; }
+.age-ack-confirm{ font-size:14px; padding:8px 16px; }
+.age-ack-confirm:disabled{ opacity:.45; cursor:not-allowed; }
+.age-ack-note{ margin:0; font-size:13px; color:var(--ink-soft); }
+.age-ack-note:empty{ display:none; }
+.age-ack-note.err{ color:var(--error-red); }
+.age-ack-thanks{ margin:0; font-weight:800; font-size:15px; color:var(--ink); text-align:center; padding:8px 0; }
+@media (max-width: 600px){
+  .age-ack-later, .age-ack-confirm{ min-height:44px; }
+}
