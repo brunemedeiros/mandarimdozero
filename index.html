@@ -423,6 +423,28 @@ button.jp-bloco:hover{ background:color-mix(in srgb, var(--tom, var(--accent)) 1
 <!-- Esqueceu a senha (2026-11-16, pedido da dona): tela de "Confira seu e-mail" depois do envio, no estilo da do código do
      cadastro. Antes só aparecia uma linha pequena embaixo do botão; a pessoa clicava de novo, o Supabase recusava (espera de
      60 s) e o erro apagava o "Enviamos um link". -->
+<!-- Esqueceu a senha, passo 1 (pedido da dona, 2026-11-16): tela própria só com o e-mail, como nos outros sites. -->
+<div class="wrap" id="gate-forgot" style="display:none;">
+  <div class="gate-card">
+    <div class="cad-topo">
+      <button type="button" class="cad-voltar" id="gate-forgot-cancel"><span aria-hidden="true">‹</span> <span data-i18n="gate.signup.back">Voltar</span></button>
+    </div>
+    <div class="er-head">
+      <span class="jp-icone jp-icone--grande" aria-hidden="true">🔒</span>
+      <h1 data-i18n="gate.forgotAsk.title">Esqueceu sua senha?</h1>
+      <p class="sub" data-i18n="gate.forgotAsk.sub">Digite o e-mail da sua conta. Vamos mandar um link para você criar uma senha nova.</p>
+    </div>
+    <form id="gate-forgot-form" novalidate>
+      <div class="cad-campo">
+        <label for="gate-forgot-email" data-i18n="gate.login.emailLabel">E-mail</label>
+        <input type="email" id="gate-forgot-email" class="gate-input" placeholder="seu@email.com" data-i18n-attr="placeholder:gate.login.emailPh" autocomplete="email" required>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block" id="gate-forgot-send-btn" style="margin-top:14px" data-i18n="gate.forgotAsk.submit">Enviar link</button>
+    </form>
+    <p class="gate-note" id="gate-forgot-note" role="status"></p>
+  </div>
+</div>
+
 <div class="wrap" id="gate-forgot-sent" style="display:none;">
   <div class="gate-card">
     <div class="er-head">
@@ -530,7 +552,7 @@ function gateSiteLang(){ return getUiLang() === 'en' ? 'en' : 'pt-BR'; }
 const GUEST_MODE_FLAG = 'guest_mode'; // mesma chave usada por shared/auth.js dentro de cada idioma
 
 function showOnly(id){
-  ['gate-loading', 'gate-login', 'gate-signup-course', 'gate-signup-method', 'gate-signup-data', 'gate-signup-retry', 'gate-verify', 'gate-forgot-sent',
+  ['gate-loading', 'gate-login', 'gate-signup-course', 'gate-signup-method', 'gate-signup-data', 'gate-signup-retry', 'gate-verify', 'gate-forgot', 'gate-forgot-sent',
    'gate-confirm-link', 'gate-new-password', 'gate-choose-language', 'gate-choose-experience'].forEach(x => {
     document.getElementById(x).style.display = (x === id) ? '' : 'none';
   });
@@ -847,16 +869,32 @@ async function sendForgotEmail(email){
     return { error };
   } finally { gateForgotBusy = false; }
 }
-document.getElementById('gate-forgot-btn').addEventListener('click', async () => {
-  const btn = document.getElementById('gate-forgot-btn');
+// "Esqueceu sua senha?" abre a tela só com o e-mail (já preenchido com o que estiver no login).
+function showForgotRequest(){
   const email = document.getElementById('gate-email').value.trim();
-  const note = document.getElementById('gate-login-note');
-  if (!email){ note.textContent = t('gate.forgot.needEmail'); note.className = 'gate-note'; return; }
+  const input = document.getElementById('gate-forgot-email');
+  if (email && !input.value) input.value = email;
+  const n = document.getElementById('gate-forgot-note'); n.textContent = ''; n.className = 'gate-note';
+  showOnly('gate-forgot');
+  input.focus();
+}
+document.getElementById('gate-forgot-btn').addEventListener('click', showForgotRequest);
+document.getElementById('gate-forgot-cancel').addEventListener('click', () => {
+  const email = document.getElementById('gate-forgot-email').value.trim();
+  if (email && !document.getElementById('gate-email').value) document.getElementById('gate-email').value = email;
+  showLoginScreen();
+});
+document.getElementById('gate-forgot-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('gate-forgot-send-btn');
+  const email = document.getElementById('gate-forgot-email').value.trim();
+  const note = document.getElementById('gate-forgot-note');
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ note.textContent = t('gate.forgotAsk.needEmail'); note.className = 'gate-note err'; return; }
   if (gateForgotBusy) return;
   btn.disabled = true; btn.textContent = t('gate.forgot.sending');
   note.textContent = ''; note.className = 'gate-note';
   const { error, busy } = await sendForgotEmail(email);
-  btn.disabled = false; btn.textContent = t('gate.login.forgot');
+  btn.disabled = false; btn.textContent = t('gate.forgotAsk.submit');
   if (busy) return;
   const wait = error ? gateForgotWaitSeconds(error) : 60;
   if (!error || wait){ showForgotSent(email, wait); return; }
@@ -875,6 +913,7 @@ document.getElementById('gate-forgot-resend-btn').addEventListener('click', asyn
 });
 document.getElementById('gate-forgot-back-btn').addEventListener('click', () => {
   clearInterval(gateForgotTimer); gateForgotLeft = 0;
+  if (gateForgotEmail) document.getElementById('gate-email').value = gateForgotEmail;
   showLoginScreen();
 });
 

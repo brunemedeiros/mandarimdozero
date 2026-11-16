@@ -4093,6 +4093,10 @@ window.I18N_CATALOG['en'] = {
   'gate.forgot.failed': 'Couldn\'t send the email right now.', // ALTA
   'gate.forgot.sent': 'We sent you a link to reset your password.', // ALTA
   'gate.forgot.sending': 'Sending...', // ALTA (needs_review)
+  'gate.forgotAsk.title': 'Forgot your password?', // ALTA (needs_review)
+  'gate.forgotAsk.sub': "Type your account's email. We'll send you a link to create a new password.", // ALTA (needs_review)
+  'gate.forgotAsk.submit': 'Send link', // ALTA (needs_review)
+  'gate.forgotAsk.needEmail': 'Type a valid email.', // ALTA (needs_review)
   'gate.forgotSent.title': 'Check your email', // ALTA (needs_review)
   'gate.forgotSent.subBefore': 'We sent a link to ', // ALTA (needs_review)
   'gate.forgotSent.subAfter': '. Tap "Create new password" in the email to choose your new password.', // ALTA (needs_review)
