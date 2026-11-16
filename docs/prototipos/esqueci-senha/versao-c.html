@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Esqueceu a senha (versão C)</title>
+<!-- Protótipo da VERSÃO C (2026-11-16): a estrutura e o envelope da versão B, no visual do PRÓPRIO portão do site (tokens,
+     Nunito, janela com sombra, ícone em quadrado tingido, botão pílula azul). A faixa de correio aéreo usa o azul do francês e o
+     vermelho do chinês (as cores dos dois sites). ?passo=2 abre no envelope; ?tema=escuro força o escuro. -->
+<link rel="stylesheet" href="../../../shared/fonts/nunito.css">
+<style>
+:root{
+  --ink:#201A2C; --ink-soft:#6B6478; --paper:#FAF7F2; --paper-warm:#F1ECE2; --paper-line:#E3DCCE;
+  --accent:#3498D6; --accent-dark:#2678AC; --brand-fill:#2879B3; --on-brand-fill:#FFFFFF; --vermelho:#C0231F; --danger:#C0231F;
+  --shadow-card:0 2px 10px rgba(32,26,44,0.07), 0 1px 3px rgba(32,26,44,0.06); --shadow-lift:0 14px 34px rgba(32,26,44,0.14);
+  --elevado:color-mix(in srgb, var(--paper-warm), white 45%); --borda-campo:color-mix(in srgb, var(--paper-line), var(--ink-soft) 60%);
+  --carta:#FFFDF8; --marca-texto:var(--accent-dark);
+}
+:root[data-theme="dark"]{
+  --ink:#EEE9F5; --ink-soft:#ADA5BE; --paper:#17141F; --paper-warm:#201C2B; --paper-line:#362F44;
+  --shadow-card:0 2px 10px rgba(0,0,0,0.35); --shadow-lift:0 14px 34px rgba(0,0,0,0.45); --danger:#FF8A80;
+  --elevado:color-mix(in srgb, var(--paper-warm), white 8%); --carta:#262131; --marca-texto:var(--accent);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ink:#EEE9F5; --ink-soft:#ADA5BE; --paper:#17141F; --paper-warm:#201C2B; --paper-line:#362F44;
+    --shadow-card:0 2px 10px rgba(0,0,0,0.35); --shadow-lift:0 14px 34px rgba(0,0,0,0.45); --danger:#FF8A80;
+    --elevado:color-mix(in srgb, var(--paper-warm), white 8%); --carta:#262131; --marca-texto:var(--accent);
+  }
+}
+*{ box-sizing:border-box; }
+html,body{ margin:0; padding:0; }
+body{ min-height:100vh; background:var(--paper); color:var(--ink); font-family:'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
+  background-image:radial-gradient(circle at 10% 8%, rgba(52,152,214,0.08) 0%, transparent 40%), radial-gradient(circle at 90% 92%, rgba(192,35,31,0.07) 0%, transparent 42%);
+  display:flex; flex-direction:column; align-items:center; -webkit-font-smoothing:antialiased; }
+.wrap{ max-width:460px; width:100%; padding:88px 20px 48px; }
+.gate-card{ position:relative; width:100%; background:var(--paper); border:1px solid var(--paper-line); border-radius:24px;
+  padding:30px 26px 24px; box-shadow:var(--shadow-lift); display:grid; gap:14px; overflow:hidden; }
+/* faixa de correio aéreo no alto da janela: azul do francês e vermelho do chinês */
+.correio::before{ content:''; position:absolute; left:0; right:0; top:0; height:8px;
+  background:repeating-linear-gradient(135deg, var(--accent) 0 14px, transparent 14px 22px, var(--vermelho) 22px 36px, transparent 36px 44px); }
+.topo{ display:flex; align-items:center; justify-content:space-between; }
+.voltar{ appearance:none; background:none; border:0; font:inherit; font-weight:800; font-size:14px; color:var(--ink-soft); padding:6px 0; cursor:pointer;
+  display:inline-flex; align-items:center; gap:6px; min-height:36px; }
+.voltar:hover{ color:var(--ink); }
+.marca{ display:flex; align-items:center; gap:8px; font-weight:800; font-size:13px; color:var(--ink-soft); }
+.marca img{ width:18px; height:21px; }
+.cabeca{ display:grid; justify-items:center; text-align:center; gap:8px; margin:2px 0 4px; }
+.icone{ width:56px; height:56px; border-radius:16px; display:grid; place-items:center; font-size:27px; background:color-mix(in srgb, var(--accent) 16%, var(--elevado)); }
+h1{ font-weight:900; font-size:clamp(1.45rem, 5vw, 1.7rem); letter-spacing:-.01em; line-height:1.2; margin:4px 0 0; text-wrap:balance; }
+h1:focus{ outline:none; }
+.sub{ color:var(--ink-soft); font-size:15px; line-height:1.55; margin:0; text-wrap:balance; }
+label{ display:block; font-weight:800; font-size:14px; margin:0 0 6px; }
+.campo{ position:relative; }
+.campo span{ position:absolute; left:14px; top:50%; transform:translateY(-50%); font-size:18px; pointer-events:none; }
+input{ width:100%; font:inherit; font-size:16px; color:var(--ink); background:var(--elevado); border:1px solid var(--borda-campo);
+  border-radius:14px; min-height:52px; padding:0 14px 0 44px; outline:none; }
+input:focus{ border-color:var(--accent); box-shadow:0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent); }
+.erro{ color:var(--danger); font-weight:700; font-size:14px; margin:0; }
+.erro:empty{ display:none; }
+.btn{ border:none; border-radius:999px; min-height:50px; padding:0 20px; font:inherit; font-weight:800; font-size:16px; cursor:pointer; width:100%;
+  background:var(--brand-fill); color:var(--on-brand-fill); transition:transform .1s ease, filter .15s ease; }
+.btn:hover{ filter:brightness(1.06); }
+.btn:active{ transform:scale(.98); }
+.btn:disabled{ opacity:.7; cursor:default; }
+.btn:focus-visible, .link:focus-visible, .voltar:focus-visible{ outline:3px solid var(--accent); outline-offset:3px; }
+.link{ appearance:none; background:none; border:0; font:inherit; font-weight:800; font-size:14px; color:var(--marca-texto); padding:8px 0;
+  cursor:pointer; text-decoration:underline; text-underline-offset:3px; }
+.link:disabled{ color:var(--ink-soft); text-decoration:none; cursor:default; }
+.acoes{ display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; padding-top:10px; border-top:1px solid var(--paper-line); }
+.nota{ font-size:14px; color:var(--ink-soft); line-height:1.55; margin:0; text-align:center; }
+.passos{ display:flex; gap:6px; justify-content:center; }
+.passos i{ width:22px; height:5px; border-radius:99px; background:var(--paper-line); }
+.passos i.on{ background:var(--accent); }
+
+/* ---------- O envelope (único destaque) ---------- */
+.envelope{ position:relative; background:var(--carta); border:1px solid var(--paper-line); border-radius:14px; padding:22px 18px 18px;
+  box-shadow:var(--shadow-card); overflow:hidden; }
+.envelope::before{ content:''; position:absolute; left:0; right:0; top:0; height:7px;
+  background:repeating-linear-gradient(135deg, var(--accent) 0 12px, transparent 12px 19px, var(--vermelho) 19px 31px, transparent 31px 38px); }
+.selo{ position:absolute; right:16px; top:20px; width:58px; height:66px; border-radius:6px; display:grid; place-items:center;
+  background:var(--elevado); border:1px solid var(--paper-line); outline:3px dotted var(--carta); outline-offset:-3px; box-shadow:var(--shadow-card); }
+.selo img{ width:28px; height:32px; }
+.carimbo{ position:absolute; z-index:2; right:62px; top:24px; width:70px; height:70px; border:2.5px solid var(--accent); border-radius:50%;
+  color:var(--accent); display:grid; place-items:center; text-align:center; transform:rotate(-14deg); font-weight:900; font-size:11px;
+  letter-spacing:.06em; line-height:1.15; text-transform:uppercase; background:color-mix(in srgb, var(--carta) 50%, transparent); }
+.carimbo::after{ content:''; position:absolute; inset:5px; border:1px solid currentColor; border-radius:50%; opacity:.6; }
+.carimbo.cai{ animation:cai .5s cubic-bezier(.2,.9,.3,1.3) .15s both; }
+@keyframes cai{ 0%{ opacity:0; transform:rotate(-30deg) scale(1.8); } 70%{ opacity:1; } 100%{ opacity:1; transform:rotate(-14deg) scale(1); } }
+@media (prefers-reduced-motion: reduce){ .carimbo.cai{ animation:none; } .btn{ transition:none; } }
+.envelope .de{ font-size:13px; color:var(--ink-soft); font-weight:700; margin:4px 0 0; line-height:1.4; }
+.envelope .de b{ display:block; color:var(--ink); font-size:15px; font-weight:800; }
+.envelope .para{ font-size:13px; color:var(--ink-soft); font-weight:800; margin:38px 0 2px; }
+.envelope .endereco{ font-size:18px; font-weight:900; overflow-wrap:anywhere; line-height:1.3; margin:0; }
+.envelope .linhas{ margin-top:12px; height:22px; background:repeating-linear-gradient(to bottom, transparent 0 10px, var(--paper-line) 10px 11px); }
+[hidden]{ display:none !important; }
+@media (max-width:400px){ .wrap{ padding-top:64px; } .gate-card{ padding:28px 20px 22px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <!-- Passo 1 -->
+  <section class="gate-card correio" id="passo1" aria-labelledby="t1">
+    <div class="topo">
+      <button type="button" class="voltar" id="voltar1"><span aria-hidden="true">‹</span> Voltar</button>
+      <span class="marca"><img src="../../../shared/brand/logo-mark.svg" alt="">Idiomas com Prof. Brune</span>
+    </div>
+    <div class="cabeca">
+      <span class="icone" aria-hidden="true">✉️</span>
+      <h1 id="t1">Esqueceu a senha?</h1>
+      <p class="sub">Sem problema. Digite o e-mail da sua conta e eu mando um link para você criar uma senha nova.</p>
+    </div>
+    <form id="form" novalidate style="display:grid; gap:12px">
+      <div>
+        <label for="email">E-mail</label>
+        <div class="campo"><span aria-hidden="true">✉️</span><input id="email" type="email" autocomplete="email" placeholder="seu@email.com" value="aluna@exemplo.com"></div>
+      </div>
+      <p class="erro" id="erro" role="alert"></p>
+      <button type="submit" class="btn" id="enviar">Enviar link</button>
+    </form>
+    <div class="passos" aria-hidden="true"><i class="on"></i><i></i></div>
+  </section>
+
+  <!-- Passo 2 -->
+  <section class="gate-card" id="passo2" aria-labelledby="t2" hidden>
+    <div class="topo">
+      <span></span>
+      <span class="marca"><img src="../../../shared/brand/logo-mark.svg" alt="">Idiomas com Prof. Brune</span>
+    </div>
+    <div class="cabeca">
+      <h1 id="t2" tabindex="-1">Link a caminho!</h1>
+    </div>
+    <div class="envelope" aria-label="E-mail enviado">
+      <span class="selo" aria-hidden="true"><img src="../../../shared/brand/logo-mark.svg" alt=""></span>
+      <span class="carimbo" id="carimbo" aria-hidden="true">Enviado<br>agora</span>
+      <p class="de">De<b>Prof. Brune</b></p>
+      <p class="para">Para</p>
+      <p class="endereco" id="endereco">aluna@exemplo.com</p>
+      <div class="linhas" aria-hidden="true"></div>
+    </div>
+    <p class="sub" style="text-align:center; text-wrap:pretty">Abra o e-mail e toque em <b style="color:var(--ink); white-space:nowrap">Criar nova senha</b>. O link vale por 1 hora.</p>
+    <p class="nota">Não chegou em alguns minutos? Olhe a caixa de spam ou peça outro link.</p>
+    <div class="acoes">
+      <button type="button" class="link" id="reenviar" disabled>Reenviar link em 60 s</button>
+      <button type="button" class="link" id="voltar2">Voltar para entrar</button>
+    </div>
+    <div class="passos" aria-hidden="true"><i class="on"></i><i class="on"></i></div>
+  </section>
+</div>
+<script>
+(function(){
+  const q = new URLSearchParams(location.search);
+  if (q.get('tema') === 'escuro') document.documentElement.dataset.theme = 'dark';
+  if (q.get('tema') === 'claro') document.documentElement.dataset.theme = 'light';
+  const $ = id => document.getElementById(id);
+  let falta = 0, timer = null;
+  function contagem(s){
+    falta = s; clearInterval(timer);
+    const pinta = () => { $('reenviar').disabled = falta > 0; $('reenviar').textContent = falta > 0 ? `Reenviar link em ${falta} s` : 'Reenviar link'; };
+    pinta(); timer = setInterval(() => { falta--; if (falta <= 0){ falta = 0; clearInterval(timer); } pinta(); }, 1000);
+  }
+  function carimbar(){ const c = $('carimbo'); c.classList.remove('cai'); void c.offsetWidth; c.classList.add('cai'); }
+  function passo2(email){ $('endereco').textContent = email; $('passo1').hidden = true; $('passo2').hidden = false; carimbar(); $('t2').focus(); contagem(60); }
+  $('form').addEventListener('submit', e => {
+    e.preventDefault();
+    const v = $('email').value.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)){ $('erro').textContent = 'Digite o e-mail completo, como seu@email.com.'; $('email').focus(); return; }
+    $('erro').textContent = '';
+    const b = $('enviar'); b.disabled = true; b.textContent = 'Enviando...';
+    setTimeout(() => { b.disabled = false; b.textContent = 'Enviar link'; passo2(v); }, 900);
+  });
+  $('reenviar').addEventListener('click', () => { carimbar(); contagem(60); });
+  $('voltar2').addEventListener('click', () => { $('passo2').hidden = true; $('passo1').hidden = false; $('email').focus(); });
+  if (q.get('passo') === '2') passo2($('email').value);
+})();
+</script>
+</body>
+</html>
