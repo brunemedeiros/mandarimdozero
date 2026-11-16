@@ -2,7 +2,8 @@
 // Decisões da dona (docs/historico/35-google-analytics-consentimento.md):
 // - GA4 `G-CE3282C1FB`, só em app.profbrune.com.br, MODO BÁSICO: o código do Google só é baixado depois de "Aceitar todos"
 //   (ou da chave "Medição de visitas" ligada em Preferências). Sem aceite, nenhum pedido vai ao Google.
-// - Aviso "B1 nova": janela no estilo das janelas do topo (🔥/⭐), título "Cookies", "Recusar opcionais" e "Aceitar todos" do
+// - Aviso "B1 nova" em formato compacto ("C2", 2026-11-16): sem título, ícone pequeno ao lado do texto, fundo claro; no
+//   computador vira faixa larga e baixa. Botões "Recusar opcionais" e "Aceitar todos" do
 //   mesmo tamanho e destaque, link "Política de cookies" e link discreto "Preferências" (janela com "Necessários, sempre
 //   ativos" e a chave "Medição de visitas", que nasce DESLIGADA). A mesma janela abre pelo link "Preferências de cookies"
 //   do rodapé e das Configurações (qualquer elemento com [data-consent-open]).
@@ -215,9 +216,9 @@
   var banner = null, prefs = null;
 
   function bannerHTML(){
-    return '<div class="cc-pop cc-banner" role="region" aria-labelledby="cc-banner-title">'
-      + '<div class="cc-head"><p class="cc-title" id="cc-banner-title">' + esc(tx('title')) + '</p>'
-      + '<p class="cc-sub">' + esc(tx('text')) + '</p><span class="cc-art" aria-hidden="true">📊</span></div>'
+    // "C2" da dona (2026-11-16): sem o título, ícone pequeno ao lado do texto, fundo claro; no computador, faixa larga e baixa.
+    return '<div class="cc-pop cc-banner" role="region" aria-label="' + esc(tx('title')) + '">'
+      + '<div class="cc-head"><span class="cc-art" aria-hidden="true">📊</span><p class="cc-sub">' + esc(tx('text')) + '</p></div>'
       + '<div class="cc-body">'
       + '<p class="cc-policy"><a href="' + esc(POLICY_URL + (lang() === 'en' ? '#en' : '')) + '">' + esc(tx('policy')) + '</a></p>'
       + '<div class="cc-row"><button type="button" class="cc-btn" data-cc="reject">' + esc(tx('reject')) + '</button>'

@@ -93,9 +93,11 @@ async function run(browser, port){
     const { ctx, page, errors, google } = await openPage(browser, port, 'index.html', { gate: true });
     await page.waitForSelector('#cc-banner', { timeout: 8000 });
     const txt = await page.$eval('#cc-banner', e => e.innerText);
-    check('entrada: aviso em pt-BR (G3, B1 nova)', /Cookies/.test(txt) && /Este site usa cookies para melhorar a sua experiência e medir as visitas\./.test(txt) && /Recusar opcionais/.test(txt) && /Aceitar todos/.test(txt) && /Preferências/.test(txt) && /Política de cookies/.test(txt), txt);
+    check('entrada: aviso em pt-BR (G3, B1 nova, compacto C2 sem título)', !/^\s*Cookies\s*$/m.test(txt) && /Este site usa cookies para melhorar a sua experiência e medir as visitas\./.test(txt) && /Recusar opcionais/.test(txt) && /Aceitar todos/.test(txt) && /Preferências/.test(txt) && /Política de cookies/.test(txt), txt);
     const sizes = await page.$$eval('#cc-banner .cc-row .cc-btn', bs => bs.map(b => [Math.round(b.getBoundingClientRect().width), Math.round(b.getBoundingClientRect().height)]));
     check('entrada: Recusar e Aceitar do mesmo tamanho', sizes.length === 2 && Math.abs(sizes[0][0] - sizes[1][0]) <= 1 && sizes[0][1] === sizes[1][1], sizes);
+    const hgt = await page.$eval('#cc-banner .cc-pop', e => Math.round(e.getBoundingClientRect().height));
+    check('entrada: aviso compacto no celular (até 215 px)', hgt <= 215, hgt);
     check('entrada: Recusar à esquerda', await page.$eval('#cc-banner .cc-row .cc-btn', b => b.dataset.cc === 'reject'));
     check('entrada: sem a fonte do Google', await page.evaluate(() => ![...document.querySelectorAll('link')].some(l => /fonts\.googleapis/.test(l.href))));
     if (SHOTS) await page.screenshot({ path: `${SHOTS}/entrada-ptBR-claro-celular.png` });
@@ -175,6 +177,8 @@ async function run(browser, port){
     await page.waitForSelector('#cc-banner');
     const txt = await page.$eval('#cc-banner', e => e.innerText);
     check('sobre (en): aviso em inglês, sem português', /This site uses cookies to improve your experience and measure visits\./.test(txt) && /Reject optional/.test(txt) && /Accept all/.test(txt) && /Preferences/.test(txt) && /Cookie policy/.test(txt) && !/Recusar|Aceitar|Política|Preferências|cookies para/.test(txt), txt);
+    const hgtD = await page.$eval('#cc-banner .cc-pop', e => Math.round(e.getBoundingClientRect().height));
+    check('sobre (en): no computador, faixa larga e baixa (até 90 px)', hgtD <= 90, hgtD);
     check('sobre (en): link da política vai para #en', await page.$eval('#cc-banner .cc-policy a', a => /privacidade-cookies\.html#en$/.test(a.href)));
     if (SHOTS) await page.screenshot({ path: `${SHOTS}/sobre-en-escuro-computador.png` });
     await page.click('footer [data-consent-open]');

@@ -58,3 +58,18 @@ label.cc-cat{ cursor:pointer; }
   .cc-art{ font-size:46px; }
 }
 @media (prefers-reduced-motion: reduce){ .cc-switch span, .cc-switch span::after{ transition:none; } }
+
+/* ---- Aviso compacto "C2" (escolha da dona, 2026-11-16): sem título e sem faixa colorida, ícone pequeno ao lado do texto.
+   No computador (900 px ou mais) vira uma faixa larga e baixa, com tudo numa linha. A janela de Preferências não muda. ---- */
+.cc-banner .cc-head{ display:flex; align-items:flex-start; gap:10px; min-height:0; padding:14px 16px 0; background:transparent; color:var(--ink, #201A2C); }
+.cc-banner .cc-art{ position:static; transform:rotate(-6deg); font-size:28px; flex:0 0 auto; }
+.cc-banner .cc-sub{ margin:2px 0 0; font-size:14.5px; font-weight:600; line-height:1.4; color:var(--ink, #201A2C); }
+.cc-banner .cc-body{ padding:12px 16px 12px; gap:10px; }
+@media (min-width: 900px){
+  .cc-banner-wrap .cc-banner{ width:min(980px, 100%); display:flex; align-items:center; }
+  .cc-banner .cc-head{ flex:1 1 auto; align-items:center; padding:12px 8px 12px 16px; }
+  .cc-banner .cc-body{ flex:0 0 auto; flex-direction:row; align-items:center; gap:14px; padding:10px 16px 10px 8px; }
+  .cc-banner .cc-row > .cc-btn{ flex:0 0 auto; padding:8px 18px; }
+  .cc-banner .cc-more{ margin:0; }
+}
+

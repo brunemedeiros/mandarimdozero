@@ -126,7 +126,9 @@ página" (o site manda as telas do app sozinho; com isso ligado, as limpezas de 
 
 - A dona achou o aviso grande. Prévias enviadas (tela real, celular e computador): **C1** sem o título "Cookies", ícone
   menor, faixa colorida (celular 208 px em vez de 255); **C2** sem faixa colorida (198 px); no computador as duas viram uma
-  faixa larga e baixa (67 px em vez de 260). Aguarda a escolha dela antes de publicar.
+  faixa larga e baixa (67 px em vez de 260). **Escolhida: C2** (2026-11-16), aplicada em `shared/consent.js`/`.css`;
+  `tests/consentimento/test_playwright.js` 59/59 (inclui altura no celular e no computador). Fase 3 aprovada e publicação
+  autorizada pela dona no mesmo dia.
 - Documento do advogado: seção "Como o aviso de cookies e o Google Analytics funcionam (16/11/2026)" na aba Resumo, com a
   tabela do comportamento e 3 perguntas (UTM guardado na aba antes da escolha, medição própria fora do aviso, texto curto).
 
