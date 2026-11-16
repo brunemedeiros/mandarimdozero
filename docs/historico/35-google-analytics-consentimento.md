@@ -92,6 +92,19 @@ página" (o site manda as telas do app sozinho; com isso ligado, as limpezas de 
 - GA4: anúncios desligados em todas as regiões (conferido por ela). Vinculações: conferir que não há nada vinculado.
   Filtros de dados: o GA4 já cria o filtro "Tráfego interno" em modo de teste, que não faz nada sem regras; deixar como está.
 
+## Fase 2 (2026-11-16): política de cookies
+
+- Página nova `privacidade-cookies.html` (pt-BR e en na mesma página, molde das outras de privacidade): o que fica no
+  aparelho sem pedir, a medição com o GA4 (para quê, o que não é enviado, sem anúncios, 14 meses no Google), tabela dos
+  cookies `_ga` e `_ga_CE3282C1FB` com **13 meses** (a Fase 3 tem de configurar o GA4 com essa duração, `cookie_expires`),
+  Google LLC e dados fora do Brasil, outros serviços (formulários do Google nos testes e no contrato, jsDelivr, cdnjs,
+  Supabase), a medição própria sem cookies, como aceitar/recusar/mudar (recusar depois de aceitar APAGA os cookies do GA4:
+  a Fase 3 tem de fazer isso), direitos da LGPD e ANPD, contato. O formulário de aulas entra na página quando a Fase 6 sair.
+- Links: rodapé do `sobre.html` e rodapé novo nas três páginas de privacidade. Teste `tests/privacidade-padrao/test_pagina_cookies.js` 32/32.
+- Recomendação: publicar junto com a Fase 3, porque a página cita o aviso e o "Preferências de cookies", que só existem nela.
+- A seção curta de cookies na política geral (aba Privacidade do Admin, `ajuda/textos/politica.html` e documento do
+  advogado) entra depois que a dona aprovar o texto desta página.
+
 ## Fase P publicada (2026-11-16)
 
 - PR #481 mesclado na `main` com autorização da dona (2026-11-16) e conferido no ar (o cadastro tem a caixinha e
