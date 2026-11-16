@@ -4092,6 +4092,15 @@ window.I18N_CATALOG['en'] = {
   'gate.forgot.needEmail': 'Type your email in the field above first.', // ALTA
   'gate.forgot.failed': 'Couldn\'t send the email right now.', // ALTA
   'gate.forgot.sent': 'We sent you a link to reset your password.', // ALTA
+  'gate.forgot.sending': 'Sending...', // ALTA (needs_review)
+  'gate.forgotSent.title': 'Check your email', // ALTA (needs_review)
+  'gate.forgotSent.subBefore': 'We sent a link to ', // ALTA (needs_review)
+  'gate.forgotSent.subAfter': '. Tap "Create new password" in the email to choose your new password.', // ALTA (needs_review)
+  'gate.forgotSent.note': "Didn't get it? Check your spam folder. The link is valid for 1 hour.", // ALTA (needs_review)
+  'gate.forgotSent.resend': 'Resend link', // ALTA (needs_review)
+  'gate.forgotSent.resendIn': 'Resend link ({s}s)', // ALTA (needs_review)
+  'gate.forgotSent.back': 'Back to sign in', // ALTA (needs_review)
+  'gate.forgotSent.resent': 'We sent a new link. Use the most recent email.', // ALTA (needs_review)
   'gate.verify.title': 'Confirm your email', // ALTA
   'gate.verify.subBefore': 'We sent a code to ', // ALTA
   'gate.verify.subAfter': '. Enter it here to activate your account.', // ALTA
