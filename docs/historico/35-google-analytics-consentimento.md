@@ -122,6 +122,17 @@ página" (o site manda as telas do app sozinho; com isso ligado, as limpezas de 
   igual nos dois idiomas; 2338/2338). Política geral em rascunho (aba Privacidade do Admin, `ajuda/textos/politica.html` e
   documento do advogado): item novo "Medição de visitas" na seção 5 e Google Fonts retirado da lista de terceiros.
 
+## Fase 4 (2026-11-16): publicação
+
+- PR #483 (Fases 2 e 3, com o aviso C2) mesclado na `main` com autorização da dona. Conferido no ar com navegador
+  automático (2026-11-16): aviso aparece; recusar não faz nenhum pedido ao Google; aceitar pede o `gtag.js` do
+  `G-CE3282C1FB` e o `page_view` sai como `https://app.profbrune.com.br/?utm_source=teste&utm_medium=teste` (o `convite=`
+  foi tirado); teste de nivelamento fr com aviso e `?origem=` chegando ao Apps Script; sem Google Fonts. O envio ao Google
+  foi bloqueado na conferência para não criar visita falsa.
+- Falta (com a dona): ver a visita no "Tempo real" do GA4 com o link de teste numa janela anônima (os aparelhos onde ela
+  entra como admin ficam marcados para não contar) e marcar os eventos-chave (`sign_up`, cliques de saída e o evento
+  criado para abertura dos testes de nivelamento).
+
 ## Ajustes pedidos depois da Fase 3 (2026-11-16)
 
 - A dona achou o aviso grande. Prévias enviadas (tela real, celular e computador): **C1** sem o título "Cookies", ícone
