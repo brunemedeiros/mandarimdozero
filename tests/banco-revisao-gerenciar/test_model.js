@@ -1,4 +1,4 @@
-// Banco de Revisão, gerenciar alunos e itens (migration 136): funções puras do modelo.
+// Banco de Revisão, gerenciar alunos e itens (migration 137): funções puras do modelo.
 // Rodar: node tests/banco-revisao-gerenciar/test_model.js
 const vm = require('vm');
 const { load, check, summary, read } = require('../fase-h/harness');

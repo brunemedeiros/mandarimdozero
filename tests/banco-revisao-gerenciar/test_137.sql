@@ -1,4 +1,4 @@
--- 136 (gerenciar alunos e itens do Banco). Transação + ROLLBACK, Postgres local (tests/banco-revisao-gerenciar/run.sh).
+-- 137 (gerenciar alunos e itens do Banco). Transação + ROLLBACK, Postgres local (tests/banco-revisao-gerenciar/run.sh).
 begin;
 create temp table r(ok boolean, name text) on commit drop;
 grant all on r to public;
@@ -122,5 +122,5 @@ insert into r select pg_temp.sq(format($q$select (agenda_names @> array['Lu','Lu
 insert into r select pg_temp.sq(format('select count(*)::text from teacher_flashcards where bank_item_id = %L', pg_temp.g('x1'))) = '1', 'juntar: cartão entregue continua (nada de progresso apagado)';
 
 select (case when ok then 'ok|' else 'FALHA|' end) || name from r;
-select 'RESULTADO 136 ' || count(*) filter (where ok) || '/' || count(*) from r;
+select 'RESULTADO 137 ' || count(*) filter (where ok) || '/' || count(*) from r;
 rollback;

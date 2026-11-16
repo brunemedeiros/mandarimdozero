@@ -1,4 +1,4 @@
--- 136: Banco de Revisão, botões novos da professora (prévia aprovada em 2026-11-15, docs/banco-revisao-previa-botoes.html):
+-- 137: Banco de Revisão, botões novos da professora (prévia aprovada em 2026-11-15, docs/banco-revisao-previa-botoes.html):
 --   * review_bank_student_footprint: o que apagar um aluno do Banco levaria junto (itens, cartões entregues, memória, respostas, Récaps);
 --   * delete_review_bank_item: apaga um item SÓ se nunca virou cartão (com cartão: cortar);
 --   * delete_review_bank_student: apaga um aluno SÓ se não tem cartão entregue, memória (FSRS) nem respostas guardadas (senão: arquivar);

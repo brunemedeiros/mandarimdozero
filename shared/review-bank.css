@@ -281,7 +281,7 @@
 /* Celular/tablet: nas duas caixas da linha, o botão fica numa linha própria, embaixo do texto */
 @media (max-width: 899px){ .trail-continue-row .trail-continue .tc-info{ flex:1 1 100%; } }
 
-/* ---- gerenciar alunos e itens (migration 136) ---- */
+/* ---- gerenciar alunos e itens (migration 137) ---- */
 .rb-line{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:6px; }
 .rb-line input[type=text], .rb-line input[type=date], .rb-line select{ flex:1 1 220px; min-width:0; }
 .rb-nbid{ font-size:12px; background:var(--paper); border:1px solid var(--paper-line); border-radius:8px; padding:4px 8px; word-break:break-all; }

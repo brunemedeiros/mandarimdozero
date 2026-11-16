@@ -296,7 +296,7 @@ function rbMarkdownToHTML(md){
   return out.join('\n');
 }
 
-// ---------- gerenciar alunos e itens (migration 136; prévia aprovada em 2026-11-15) ----------
+// ---------- gerenciar alunos e itens (migration 137; prévia aprovada em 2026-11-15) ----------
 // Id do Google Doc a partir do link colado (".../document/d/<id>/edit") ou do próprio id. null se não parecer um id.
 function rbNotebookIdFromInput(text){
   const s = String(text == null ? '' : text).trim();

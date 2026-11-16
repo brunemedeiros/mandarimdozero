@@ -442,7 +442,7 @@ function rbDateChipsHTML(dates){
   return d.length ? d.map(x => `<span class="rb-datechip">${rbH(rbDateFull(x))}<button type="button" data-rb="date-del" data-d="${rbH(x)}" aria-label="${rbH(rbt('sfDateDel'))}">×</button></span>`).join('') : `<span class="rb-meta">${rbH(rbt('sfNoDates'))}</span>`;
 }
 
-// ---------- gerenciar alunos e itens (migration 136; prévia aprovada em 2026-11-15) ----------
+// ---------- gerenciar alunos e itens (migration 137; prévia aprovada em 2026-11-15) ----------
 function rbStudentExtrasHTML(f){
   const nb = f.notebook_id, dirty = (f.notebook_id || null) !== (f.notebook_orig || null);
   const chips = rbAgendaChipsHTML(f.agenda_names);
