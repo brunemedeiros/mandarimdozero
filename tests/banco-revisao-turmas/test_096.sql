@@ -233,6 +233,41 @@ reset role;
 insert into r select pg_temp.sq('select count(*)::text from (select bank_item_id, student_id from teacher_flashcards where bank_item_id is not null group by 1, 2 having count(*) > 1) d') = '0', 'nunca 2 cartões do mesmo item para o mesmo aluno';
 insert into r select pg_temp.sq('select count(*)::text from pg_indexes where indexname = ''teacher_flashcards_bank_item_uidx''') = '0', 'índice antigo (1 cartão por item) removido';
 
+-- ===== 135: a rotina da madrugada (service role) entrega cartões a uma Turma + datas de falta =====
+reset role;
+select pg_temp.as_user(null);
+insert into v values ('i7','cccccccc-0000-0000-0000-000000000007'), ('i8','cccccccc-0000-0000-0000-000000000008');
+insert into review_bank_items(id, teacher_id, bank_student_id, language_app_key, item_type, question, answer) values
+ (pg_temp.g('i7')::uuid, pg_temp.g('T')::uuid, pg_temp.g('S1')::uuid, 'frances', 'vocabulario', 'cadeira', 'la chaise'),
+ (pg_temp.g('i8')::uuid, pg_temp.g('T')::uuid, pg_temp.g('S3')::uuid, 'frances', 'vocabulario', 'mesa', 'la table');
+set local role service_role;
+insert into v select 'c7', agent_approve_review_bank_item(pg_temp.g('T')::uuid, pg_temp.g('i7')::uuid, 'cadeira', 'la chaise', '[{"id":"f1"}]'::jsonb, 'normal', array['aula-x'], 'n')::text;
+insert into v select 'c7b', agent_approve_review_bank_item(pg_temp.g('T')::uuid, pg_temp.g('i7')::uuid, 'cadeira', 'la chaise', '[{"id":"f1"}]'::jsonb, 'normal', array['aula-x'], 'n')::text;
+reset role;
+insert into r select pg_temp.cards(pg_temp.g('i7')) = pg_temp.cards(pg_temp.g('i5')) and pg_temp.cards(pg_temp.g('i7')) <> '', 'agente: item de Turma vira cartão para cada membro atual da turma (mesmos destinatários da tela)';
+insert into r select pg_temp.g('c7') = pg_temp.g('c7b'), 'agente: aprovar 2x não duplica';
+insert into r select pg_temp.sq(format('select (status = ''aprovado'' and teacher_flashcard_id is not null and student_id is null)::text from review_bank_items where id = %L', pg_temp.g('i7'))) = 'true', 'agente: item de Turma fica aprovado, com cartão de referência';
+set local role service_role;
+insert into r select pg_temp.try(format('select agent_approve_review_bank_item(%L, %L, ''mesa'', ''la table'', ''[]''::jsonb, ''normal'', ''{}'', null)', pg_temp.g('T'), pg_temp.g('i8'))) = 'no_recipients', 'agente: turma sem ninguém recusa (no_recipients)';
+insert into r select pg_temp.try(format('select agent_approve_review_bank_item(%L, %L, ''x'', ''y'', ''[]''::jsonb, ''normal'', ''{}'', null)', pg_temp.g('T2'), pg_temp.g('i7'))) = 'not_authorized', 'agente: outra professora não aprova item alheio';
+reset role;
+set local role authenticated;
+insert into r select pg_temp.try(format('select agent_approve_review_bank_item(%L, %L, ''x'', ''y'', ''[]''::jsonb, ''normal'', ''{}'', null)', pg_temp.g('T'), pg_temp.g('i7'))) <> 'ok', 'agente: usuário comum não executa';
+reset role;
+-- datas de falta
+insert into class_attendance_labels(teacher_id, name, color, counts_as) values (pg_temp.g('T')::uuid, 'Faltou135', 'gray', 'absent'), (pg_temp.g('T')::uuid, 'Presente135', 'green', 'present');
+insert into teacher_class_logs(teacher_id, student_id, language_app_key, class_date, attendance_label_id)
+  values (pg_temp.g('T')::uuid, pg_temp.g('C')::uuid, 'frances', current_date - 1, (select id from class_attendance_labels where name='Faltou135')),
+         (pg_temp.g('T')::uuid, pg_temp.g('C')::uuid, 'frances', current_date - 2, (select id from class_attendance_labels where name='Presente135'));
+insert into teacher_class_logs(teacher_id, classroom_id, language_app_key, class_date, attendance_label_id)
+  values (pg_temp.g('T')::uuid, pg_temp.g('K')::bigint, 'frances', current_date - 3, (select id from class_attendance_labels where name='Faltou135'));
+insert into r select pg_temp.sq(format('select _rb_absent_dates(%L)::text', pg_temp.g('S2'))) = jsonb_build_array((current_date - 1)::text)::text, 'faltas: aluno ligado a conta traz só a data de falta (Presente não entra)';
+insert into r select pg_temp.sq(format('select _rb_absent_dates(%L)::text', pg_temp.g('S1'))) = jsonb_build_array((current_date - 3)::text)::text, 'faltas: turma traz a falta da turma';
+insert into r select pg_temp.try(format('select _rb_absent_dates(%L)', pg_temp.g('S2'))) = 'ok', 'faltas: roda como dono do banco';
+set local role authenticated;
+insert into r select pg_temp.try(format('select _rb_absent_dates(%L)', pg_temp.g('S2'))) <> 'ok', 'faltas: função interna fechada ao usuário';
+reset role;
+
 select (case when ok then 'ok|' else 'FALHA|' end) || name from r;
 select 'RESULTADO 096 ' || count(*) filter (where ok) || '/' || count(*) from r;
 rollback;

@@ -1082,7 +1082,7 @@ function renderProgressView(){
 
   const guestWarning = !CURRENT_USER ? `
     <div class="guest-warning">
-      ${t('zh.progress.guestWarning')}
+      <span class="guest-warning-text">${t('zh.progress.guestWarning')}</span>
       <button class="guest-warning-link" id="guest-login-prompt">${t('zh.progress.guestLogin')}</button>
     </div>
   ` : '';

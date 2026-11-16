@@ -99,7 +99,7 @@ function typedResultActionsHTML(card, localState){
     return `<div class="grade-buttons typed-grade">${[[2, 'good'], [3, 'easy']].map(([g, k]) =>
       `<button class="grade-btn grade-${k}" data-grade="${g}">${escapeHTML(t('review.grade.' + k))}<small>${escapeHTML(formatReviewInterval(previewNextIntervalDays(card, g, now)))}</small></button>`).join('')}</div>`;
   }
-  return `<button class="btn btn-primary btn-block mc-continue-btn" id="cloze-continue-btn">${escapeHTML(t('common.continue'))}</button>`;
+  return `<button class="btn btn-primary btn-block mc-continue-btn" id="cloze-continue-btn">${escapeHTML(t('common.continue'))}<span class="key-enter-hint" aria-hidden="true">Enter</span></button>`;
 }
 // autoGrade = nota do Continuar (Errei ou Difícil). Bom/Fácil vêm do botão clicado.
 function wireTypedResultActions(mountEl, callbacks, localState, autoGrade){

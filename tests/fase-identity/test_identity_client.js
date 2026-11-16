@@ -11,6 +11,9 @@ const J = (ctx, e) => JSON.parse(JSON.stringify(vm.runInContext(e, ctx)));
 const { ctx } = g.load('frances', 'u-1');
 const run = f => vm.runInContext(read(f), ctx, { filename: f });
 ['shared/profile.js', 'shared/flashcard-tags-editor.js', 'shared/tag-manager.js'].forEach(run);
+// shared/profile.js traz o escapeHTML real, que usa o DOM (document.createElement + innerHTML) e o DOM falso do harness não
+// tem innerHTML (desde o escape de aspas de 2026-10-06). Aqui volta um escape em texto puro, com as mesmas trocas.
+ctx.escapeHTML = (s) => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 const calls = [];
 ctx.supabaseClient = {
   rpc: async (n, a) => { calls.push(['rpc', n, a]); return { data: { user_id: 'u-1', username: 'u0123456789', display_name: null }, error: null }; },

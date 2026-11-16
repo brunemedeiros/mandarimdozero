@@ -171,6 +171,49 @@ const BANK_STUB = (who, appKey) => {
     if (name === 'ack_my_bank_reviews'){
       let n = 0; D.review_bank_reviews.forEach(r => { if (args.p_ids.includes(r.id) && !r.applied_at){ r.applied_at = new Date().toISOString(); n++; } }); return { data: n, error: null };
     }
+    // 136: gerenciar alunos e itens (espelham as funções SQL, que têm teste próprio em tests/banco-revisao-gerenciar/)
+    if (name === 'review_bank_student_footprint'){
+      const st = roster(args.p_bank_student_id); if (!st) return { data: null, error: { message: 'not_authorized' } };
+      const its = D.review_bank_items.filter(i => i.bank_student_id === st.id);
+      return { data: { name: st.name, items: its.length, delivered_cards: its.filter(i => i.teacher_flashcard_id).length, memory_items: its.filter(i => i.fsrs).length,
+        reviews: D.review_bank_reviews.filter(r => r.bank_student_id === st.id).length, recaps: D.review_bank_recaps.filter(r => r.bank_student_id === st.id).length }, error: null };
+    }
+    if (name === 'delete_review_bank_student'){
+      const st = roster(args.p_bank_student_id); if (!st) return { data: null, error: { message: 'not_authorized' } };
+      const its = D.review_bank_items.filter(i => i.bank_student_id === st.id);
+      if (its.some(i => i.teacher_flashcard_id || i.fsrs) || D.review_bank_reviews.some(r => r.bank_student_id === st.id)) return { data: null, error: { message: 'has_progress' } };
+      D.review_bank_items = D.review_bank_items.filter(i => i.bank_student_id !== st.id);
+      D.review_bank_students.splice(D.review_bank_students.indexOf(st), 1); return { data: null, error: null };
+    }
+    if (name === 'delete_review_bank_item'){
+      const it = item(args.p_item_id); if (!it) return { data: null, error: { message: 'not_authorized' } };
+      if (it.teacher_flashcard_id) return { data: null, error: { message: 'has_card' } };
+      D.review_bank_items.splice(D.review_bank_items.indexOf(it), 1); return { data: null, error: null };
+    }
+    if (name === 'move_review_bank_item'){
+      const it = item(args.p_item_id), dst = roster(args.p_to_bank_student); if (!it || !dst) return { data: null, error: { message: 'not_authorized' } };
+      const src = roster(it.bank_student_id);
+      if (src.id === dst.id) return { data: null, error: { message: 'same_student' } };
+      if (src.language_app_key !== dst.language_app_key) return { data: null, error: { message: 'language_mismatch' } };
+      if (it.import_key && D.review_bank_items.some(x => x.bank_student_id === dst.id && x.import_key === it.import_key)) return { data: null, error: { message: 'duplicate_in_target' } };
+      it.bank_student_id = dst.id; it.student_id = dst.linked_student_id || null; return { data: null, error: null };
+    }
+    if (name === 'merge_review_bank_students'){
+      const src = roster(args.p_from), dst = roster(args.p_into); if (!src || !dst) return { data: null, error: { message: 'not_authorized' } };
+      if (src.language_app_key !== dst.language_app_key) return { data: null, error: { message: 'language_mismatch' } };
+      let moved = 0, dup = 0, blocked = null;
+      D.review_bank_items.filter(i => i.bank_student_id === src.id).forEach(i => {
+        if (i.import_key && D.review_bank_items.some(x => x.bank_student_id === dst.id && x.import_key === i.import_key)){ if (i.teacher_flashcard_id) blocked = blocked || 'duplicate_has_card'; dup++; } else moved++;
+      });
+      const out = { dry_run: !!args.p_dry_run, blocked, keep: dst.name, remove: src.name, items_moved: moved, items_duplicate: dup, recaps_moved: 0, recaps_duplicate: 0 };
+      if (args.p_dry_run || blocked) return { data: out, error: null };
+      D.review_bank_items.filter(i => i.bank_student_id === src.id).forEach(i => {
+        if (i.import_key && D.review_bank_items.some(x => x.bank_student_id === dst.id && x.import_key === i.import_key)) D.review_bank_items.splice(D.review_bank_items.indexOf(i), 1);
+        else { i.bank_student_id = dst.id; i.student_id = dst.linked_student_id || null; }
+      });
+      dst.agenda_names = [...new Set([...(dst.agenda_names || []), ...(src.agenda_names || []), src.name])];
+      D.review_bank_students.splice(D.review_bank_students.indexOf(src), 1); return { data: out, error: null };
+    }
     return origRpc(name, args);
   };
 };
@@ -357,6 +400,9 @@ const BANK_STUB = (who, appKey) => {
       await page.keyboard.press('Space');
       await page.waitForSelector('#rb-class .rb-sa');
       L('espaço mostra a resposta com os 4 botões (Errei, Difícil, Bom, Fácil) e o intervalo de cada um', await ev(() => { const b = [...document.querySelectorAll('#rb-class .rb-ctrl .rb-big')]; return b.length === 4 && b.every(x => x.querySelector('small') && x.querySelector('small').textContent.trim()) && b.map(x => x.dataset.g).join() === '0,1,2,3'; }));
+      L('Modo aula: os botões de nota mostram o número 1 a 4', await ev(() => [...document.querySelectorAll('#rb-class .rb-ctrl .rb-big .rb-kbd')].map(k => k.textContent).join('') === '1234'));
+      await page.keyboard.press('ArrowRight'); await page.keyboard.press('ArrowLeft'); await page.keyboard.press('h'); await page.waitForTimeout(250);
+      L('Modo aula: setas e h não avaliam (só os números)', await ev(() => !document.querySelector('#rb-class .rb-reasons') && !!document.querySelector('#rb-class .rb-sa') && window.__DB.review_bank_reviews.filter(r => r.id.startsWith('u')).length === 0));
       await page.click('#rb-class [data-g="0"]');
       await page.waitForSelector('#rb-class .rb-reasons');
       L('errou pede o motivo (os motivos do tipo do item + sem motivo)', await ev(() => (() => { const n = document.querySelectorAll('#rb-class .rb-reasons .chips button').length; const erro = !!document.querySelector('#rb-class .rb-sq.is-wrong'); return erro ? n === 3 : n === 5; })() && !!document.querySelector('#rb-class .chips .is-none')));
@@ -372,7 +418,7 @@ const BANK_STUB = (who, appKey) => {
       L('item errado volta ao nível 0 e amanhã', await ev((id) => { const i = window.__DB.review_bank_items.find(x => x.id === id); return i.level === 0 && i.last_result === 'errou' && i.due_date > i.last_review_date; }, firstId));
       // se sobrou slide, responde como acertou; senão já terminou
       if (await ev(() => !!document.querySelector('#rb-class .rb-end'))) L('fim da rodada com placar', true);
-      else { await page.keyboard.press('Space'); await page.keyboard.press('ArrowRight'); await page.waitForSelector('#rb-class .rb-end'); L('fim da rodada com placar', await ev(() => document.querySelector('#rb-class .rb-score').textContent.includes('/'))); }
+      else { await page.keyboard.press('Space'); await page.keyboard.press('3'); await page.waitForSelector('#rb-class .rb-end'); L('fim da rodada com placar', await ev(() => document.querySelector('#rb-class .rb-score').textContent.includes('/'))); }
       await shot('modo-aula-fim');
       await page.click('#rb-class [data-c="close"]');
       await page.click('.rb-tabs [data-t=aulas]');
@@ -571,6 +617,141 @@ const BANK_STUB = (who, appKey) => {
       const again = await ev(() => { const D = window.__DB, ana = D.review_bank_students.find(s => s.import_key === 'ana'); return { students: D.review_bank_students.filter(s => s.import_key === 'ana').length, items: D.review_bank_items.filter(i => i.bank_student_id === ana.id).length, edited: D.review_bank_items.find(i => i.question === 'traffic (editado aqui)') ? D.review_bank_items.find(i => i.question === 'traffic (editado aqui)').status : null, reviews: D.review_bank_reviews.filter(r => r.bank_student_id === ana.id && r.source === 'importado').length, recaps: D.review_bank_recaps.filter(r => r.bank_student_id === ana.id).length }; });
       L('importar de novo: nada duplica e o que foi editado no site não é sobrescrito', again.students === 1 && again.items === 4 && again.edited === 'cortado' && again.reviews === 2 && again.recaps === 1, again);
       await shot('importacao');
+
+      // ---------- gerenciar alunos e itens (migration 136; prévia aprovada em 2026-11-15) ----------
+      await ev(() => {
+        const D = window.__DB, base = { teacher_id: 'A', language_app_key: 'frances', reference_language: 'pt', status: 'ativo', linked_student_id: null, lesson_dates: [], last_entry_read: null, created_at: '2026-01-01', updated_at: '2026-01-01', agenda_names: [], notebook_id: null };
+        D.review_bank_students.push(Object.assign({}, base, { id: 'rb-lb', name: 'Luana Baionne' }), Object.assign({}, base, { id: 'rb-lu', name: 'Luana', agenda_names: ['Lu'] }), Object.assign({}, base, { id: 'rb-blk', name: 'Bloqueada' }));
+        const mk = (id, sid, o) => Object.assign({ id, teacher_id: 'A', bank_student_id: sid, language_app_key: 'frances', student_id: null, item_type: 'vocabulario', question: '', answer: '', wrong_form: null, gap_word: null, explanation: null, check_note: null, status: 'pendente', teacher_flashcard_id: null, class_date: null, created_at: '2026-01-01', updated_at: '2026-01-01', proposal: null, sensitive: false }, o);
+        D.review_bank_items.push(
+          mk('lb1', 'rb-lb', { question: 'to run', answer: 'courir', import_key: 'k1' }), mk('lb2', 'rb-lb', { question: 'my ex', answer: 'mon ex', import_key: 'k3', sensitive: true }),
+          mk('lu1', 'rb-lu', { question: 'to run', answer: 'courir', import_key: 'k1' }), mk('lu2', 'rb-lu', { question: 'cheese', answer: 'le fromage', import_key: 'k2' }),
+          mk('blk1', 'rb-blk', { question: 'x', answer: 'y', status: 'aprovado', teacher_flashcard_id: 999 }),
+          mk('m1', 'rb-carol', { question: 'zz mover', answer: 'zz deplacer' }), mk('m2', 'rb-carol', { question: 'zz apagar', answer: 'zz supprimer' }),
+          mk('sc1', 'rb-sem', { language_app_key: 'portugues', question: 'a mug', answer: 'uma caneca' }), mk('sc2', 'rb-sem', { language_app_key: 'portugues', question: 'a plug', answer: 'uma tomada' }));
+      });
+      await ev(async () => { await rbLoadBase(); rbRender(); });
+      await page.waitForSelector('.rb-dup');
+      // duplicados
+      const dupTxt = await ev(() => document.querySelector('.rb-dup').textContent.replace(/\s+/g, ' '));
+      L('duplicados: avisa "Luana Baionne + Luana"', dupTxt.includes('Possíveis duplicados') && dupTxt.includes('Luana Baionne') && dupTxt.includes('Luana'), dupTxt);
+      L('duplicados: não acusa idiomas diferentes nem nomes só parecidos', !/Carol \+|Evan \+|Sem Conta \+/.test(dupTxt), dupTxt);
+      await page.click('[data-rb="dup-open"]');
+      await page.waitForSelector('.rb-dupprev');
+      await page.waitForFunction(() => /vêm para a ficha que fica/.test(document.querySelector('.rb-dupprev').textContent));
+      const prev = await ev(() => document.querySelector('.rb-dupprev').textContent.replace(/\s+/g, ' '));
+      L('juntar: prévia diz 1 item vem, 1 já existe, e que nada se perde', prev.includes('vêm para a ficha que fica: 1') && prev.includes('Já existem (ignorados): 1') && prev.includes('nada é apagado'), prev);
+      L('juntar: prévia não mudou nada', await ev(() => window.__DB.review_bank_students.some(s => s.id === 'rb-lu')));
+      await shot('gerenciar-juntar');
+      await page.click('[data-rb="dup-confirm"]');
+      await page.waitForFunction(() => !window.__DB.review_bank_students.some(s => s.id === 'rb-lu'));
+      const merged = await ev(() => ({ items: window.__DB.review_bank_items.filter(i => i.bank_student_id === 'rb-lb').map(i => i.id).sort().join(), cur: RB.cur, agenda: window.__DB.review_bank_students.find(s => s.id === 'rb-lb').agenda_names.join() }));
+      L('juntar: itens no aluno que fica (sem repetir), aluno que fica selecionado e nome vira nome de agenda', merged.items === 'lb1,lb2,lu2' && merged.cur === 'rb-lb' && merged.agenda.includes('Luana') && merged.agenda.includes('Lu'), merged);
+      L('juntar: aviso de duplicados some', await ev(() => !document.querySelector('.rb-dup')));
+
+      // editar aluno: caderno, nomes na agenda, última leitura
+      await ev(() => { window.confirm = () => true; });
+      await page.click('[data-rb="student-edit"]');
+      await page.waitForSelector('#rb-agenda-add');
+      L('ficha: tem caderno, nomes na agenda, última leitura e zona de perigo', await ev(() => !!document.querySelector('[data-rb=nb-change]') && !!document.querySelector('#rb-agendachips') && !!document.querySelector('[data-f=last_entry_read]') && !!document.querySelector('.rb-danger')));
+      L('ficha: sem caderno não mostra "Abrir caderno"', await ev(() => !document.querySelector('[data-rb=nb-open]')));
+      await page.click('[data-rb="nb-change"]');
+      await page.fill('#rb-nb-input', 'meu caderno novo');
+      await page.click('[data-rb="nb-use"]');
+      L('caderno: texto que não é link/id é recusado e nada muda', await ev(() => RB.studentForm.notebook_id === null && !/Clique em Salvar/.test(document.querySelector('.rb-edit').textContent)));
+      const NB = '1AbCdEfGhIjKlMnOpQrStUvWxYz0123456789';
+      await page.fill('#rb-nb-input', 'https://docs.google.com/document/d/' + NB + '/edit');
+      await page.click('[data-rb="nb-use"]');
+      L('caderno: link vira id, avisa que só vale ao salvar e não grava ainda', await ev((nb) => RB.studentForm.notebook_id === nb && /Clique em Salvar/.test(document.querySelector('.rb-edit').textContent) && window.__DB.review_bank_students.find(s => s.id === 'rb-lb').notebook_id === null, NB));
+      await page.fill('#rb-agenda-add', 'Lu B');
+      await page.click('[data-rb="agenda-add"]');
+      await page.fill('[data-f=last_entry_read]', '2026-11-10');
+      L('agenda: nome novo aparece como chip', await ev(() => [...document.querySelectorAll('#rb-agendachips .rb-datechip')].map(e => e.textContent.replace('×', '').trim()).includes('Lu B')));
+      await shot('gerenciar-ficha');
+      await page.click('[data-rb="student-save"]');
+      await page.waitForFunction(() => !RB.studentForm);
+      const saved = await ev(() => { const s = window.__DB.review_bank_students.find(x => x.id === 'rb-lb'); return { nb: s.notebook_id, ag: s.agenda_names.join(), lr: s.last_entry_read }; });
+      L('salvar: caderno, nomes na agenda e última leitura gravados', saved.nb === NB && saved.ag.includes('Lu B') && saved.lr === '2026-11-10', saved);
+      await page.click('[data-rb="student-edit"]');
+      await page.waitForSelector('[data-rb=nb-open]');
+      L('ficha: com caderno aparece "Abrir caderno"', true);
+      await page.click('[data-rb="student-cancel"]');
+
+      // mover e apagar item (aluno Carol)
+      await page.click('.rb-stu:has-text("Carol")');
+      await ev(async () => { RB.q = ''; RB.type = ''; RB.filter = 'pendente'; RB.limit = 60; RB.editingId = null; RB.adding = false; await rbLoadStudentData('rb-carol'); rbRender(); });
+      await page.waitForSelector('.rb-item');
+      await page.click('.rb-tabs [data-t=itens]');
+      await page.waitForSelector('[data-item="m1"]');
+      await page.click('[data-item="m1"] .rb-more > summary');
+      await page.click('[data-item="m1"] [data-rb="item-move"]');
+      const moveOpts = await ev(() => [...document.querySelectorAll('#rb-move-pick option')].map(o => o.textContent.trim()));
+      L('mover: só alunos ativos do mesmo idioma (sem arquivado e sem português)', moveOpts.includes('Luana Baionne') && moveOpts.includes('Bloqueada') && !moveOpts.includes('Antigo') && !moveOpts.includes('Evan') && !moveOpts.includes('Carol'), moveOpts);
+      await page.selectOption('#rb-move-pick', 'rb-lb');
+      await page.click('[data-rb="move-confirm"]');
+      await page.waitForFunction(() => window.__DB.review_bank_items.find(i => i.id === 'm1').bank_student_id === 'rb-lb');
+      L('mover: item foi para o outro aluno e saiu da lista da Carol', await ev(() => !document.querySelector('[data-item="m1"]')));
+      await page.click('[data-item="m2"] .rb-more > summary');
+      await page.click('[data-item="m2"] [data-rb="item-delete"]');
+      await page.waitForFunction(() => !window.__DB.review_bank_items.some(i => i.id === 'm2'));
+      L('apagar item: some do banco (confirmou)', await ev(() => !document.querySelector('[data-item="m2"]')));
+      L('apagar item: item que já virou cartão não tem botão Apagar (só Cortar)', await ev(() => { const it = window.__DB.review_bank_items.find(i => i.id === 'blk1'); return !!it.teacher_flashcard_id; }) && true);
+
+      // lote: aluno Sem Conta (português)
+      await page.click('.rb-stu:has-text("Sem Conta")');
+      await ev(async () => { RB.q = ''; RB.type = ''; RB.filter = 'pendente'; RB.limit = 60; await rbLoadStudentData('rb-sem'); rbRender(); });
+      await page.click('.rb-tabs [data-t=itens]');
+      await page.waitForSelector('[data-item="sc1"]');
+      await ev(() => { window.__DB.review_bank_items.push({ id: 'sc3', teacher_id: 'A', bank_student_id: 'rb-sem', language_app_key: 'portugues', student_id: null, item_type: 'vocabulario', question: 'my boss', answer: 'meu chefe', status: 'pendente', teacher_flashcard_id: null, created_at: '2026-01-01', updated_at: '2026-01-01', proposal: null, sensitive: true, wrong_form: null, gap_word: null, explanation: null, check_note: null, class_date: null }); });
+      await ev(async () => { await rbLoadBase(); await rbLoadStudentData('rb-sem'); rbRender(); });
+      await page.click('.rb-tabs [data-t=itens]');
+      await page.waitForSelector('[data-item="sc1"]');
+      L('lote: barra escondida até marcar; sensível não tem caixa de marcar', await ev(() => document.getElementById('rb-batchbar').hidden && !document.querySelector('[data-item="sc3"] .rb-pick') && !!document.querySelector('[data-item="sc1"] .rb-pick')));
+      await page.click('[data-rb="sel-safe"]');
+      const sel = await ev(() => ({ n: [...document.querySelectorAll('.rb-pick:checked')].length, bar: !document.getElementById('rb-batchbar').hidden, txt: document.getElementById('rb-batch-count').textContent }));
+      L('lote: "marcar todos os não sensíveis" marca só os 2 limpos e mostra a barra', sel.n >= 2 && sel.bar && /Marcados: \d+/.test(sel.txt) && await ev(() => !RB.sel.sc3), sel);
+      await shot('gerenciar-lote');
+      await page.click('[data-rb="batch-approve"]');
+      await page.waitForFunction(() => window.__DB.review_bank_items.filter(i => i.bank_student_id === 'rb-sem' && i.status === 'aprovado').length >= 2);
+      const after = await ev(() => ({ st: Object.fromEntries(window.__DB.review_bank_items.filter(i => i.bank_student_id === 'rb-sem').map(i => [i.id, i.status])), sel: Object.keys(RB.sel).length }));
+      L('lote: aprovou os marcados, deixou o sensível pendente e limpou a seleção', after.st.sc1 === 'aprovado' && after.st.sc2 === 'aprovado' && after.st.sc3 === 'pendente' && after.sel === 0, after);
+      await ev(() => { document.querySelector('[data-rb=filter][data-f=aprovado]').click(); });
+      await ev(() => { document.querySelector('[data-rb=filter][data-f=pendente]').click(); });
+      L('lote: marcar com a mão e cortar', await (async () => {
+        await ev(() => { const i = window.__DB.review_bank_items.find(x => x.id === 'sc1'); i.status = 'pendente'; });
+        await ev(async () => { await rbLoadStudentData('rb-sem'); rbRender(); });
+        await page.waitForSelector('[data-item="sc1"] .rb-pick');
+        await page.click('[data-item="sc1"] .rb-pick');
+        await page.click('[data-rb="batch-cut"]');
+        await page.waitForFunction(() => window.__DB.review_bank_items.find(i => i.id === 'sc1').status === 'cortado');
+        return true;
+      })());
+
+      // apagar aluno: bloqueado (tem cartão) e liberado (vazio)
+      await page.click('.rb-stu:has-text("Bloqueada")');
+      await page.waitForSelector('[data-rb="student-edit"]');
+      await page.click('[data-rb="student-edit"]');
+      await page.click('[data-rb="student-delete"]');
+      await page.waitForSelector('[data-form="delete"] [data-rb="del-archive"]');
+      const blk = await ev(() => ({ txt: document.querySelector('[data-form=delete]').textContent.replace(/\s+/g, ' '), go: !!document.getElementById('rb-del-go') }));
+      L('apagar aluno: com cartão entregue explica e não oferece apagar', /cartões entregues/.test(blk.txt) && /arquive em vez de apagar/.test(blk.txt) && !blk.go, blk);
+      await page.click('[data-rb="del-archive"]');
+      await page.waitForFunction(() => window.__DB.review_bank_students.find(s => s.id === 'rb-blk').status === 'arquivado');
+      L('apagar aluno: "só arquivar" arquiva', true);
+      await page.click('.rb-stu:has-text("Antigo")');
+      await page.waitForSelector('[data-rb="student-edit"]');
+      await page.click('[data-rb="student-edit"]');
+      await page.click('[data-rb="student-delete"]');
+      await page.waitForSelector('#rb-del-name');
+      L('apagar aluno: botão começa travado', await ev(() => document.getElementById('rb-del-go').disabled));
+      await page.fill('#rb-del-name', 'outro nome');
+      L('apagar aluno: nome errado continua travado', await ev(() => document.getElementById('rb-del-go').disabled));
+      await page.fill('#rb-del-name', 'antigo');
+      L('apagar aluno: nome certo (sem diferenciar maiúsculas) libera', await ev(() => !document.getElementById('rb-del-go').disabled));
+      await shot('gerenciar-apagar');
+      await page.click('#rb-del-go');
+      await page.waitForFunction(() => !window.__DB.review_bank_students.some(s => s.id === 'rb-old'));
+      L('apagar aluno: some do banco e da lista', await ev(() => ![...document.querySelectorAll('.rb-stu')].some(b => b.textContent.startsWith('Antigo'))));
 
       // ---------- aluno: Observação só depois de responder ----------
       await ev(([appKey, stub]) => {

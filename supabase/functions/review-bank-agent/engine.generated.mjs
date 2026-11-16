@@ -5508,6 +5508,55 @@ function rbMarkdownToHTML(md){
   return out.join('\n');
 }
 
+// ---------- gerenciar alunos e itens (migration 137; prévia aprovada em 2026-11-15) ----------
+// Id do Google Doc a partir do link colado (".../document/d/<id>/edit") ou do próprio id. null se não parecer um id.
+function rbNotebookIdFromInput(text){
+  const s = String(text == null ? '' : text).trim();
+  if (!s) return null;
+  const m = s.match(/\/d\/([A-Za-z0-9_-]{20,})/);
+  if (m) return m[1];
+  return /^[A-Za-z0-9_-]{20,}$/.test(s) ? s : null;
+}
+function rbNotebookUrl(id){ return id ? 'https://docs.google.com/document/d/' + encodeURIComponent(id) + '/edit' : ''; }
+const rbNormName = n => String(n == null ? '' : n).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9 ]+/g, ' ').replace(/\s+/g, ' ').trim();
+// Pares de fichas do mesmo idioma que parecem a mesma pessoa: mesmo caderno, ou um nome começando pelo outro (palavras inteiras, ex. "Luana" e "Luana Baionne").
+// `dismissed` = lista de "idA|idB" que a professora marcou "Não é duplicado". Quem fica: a que tem conta/turma, depois a ativa, depois a de nome mais completo.
+function rbDuplicatePairs(students, dismissed){
+  const list = (students || []).slice(), skip = new Set(dismissed || []), out = [];
+  for (let a = 0; a < list.length; a++){
+    for (let b = a + 1; b < list.length; b++){
+      const x = list[a], y = list[b];
+      if (x.language_app_key !== y.language_app_key) continue;
+      if (skip.has(x.id + '|' + y.id) || skip.has(y.id + '|' + x.id)) continue;
+      const nx = rbNormName(x.name), ny = rbNormName(y.name);
+      const sameNotebook = !!(x.notebook_id && x.notebook_id === y.notebook_id);
+      const prefix = !!(nx && ny && (nx === ny || (nx + ' ').startsWith(ny + ' ') || (ny + ' ').startsWith(nx + ' ')));
+      if (!sameNotebook && !prefix) continue;
+      const score = s => (rbHasTarget(s) ? 2 : 0) + (s.status === 'arquivado' ? 0 : 1);
+      const sx = score(x), sy = score(y);
+      const yWins = sy > sx || (sy === sx && ny.length > nx.length); // empate: fica a ficha de nome mais completo
+      out.push(yWins ? { keep: y, drop: x } : { keep: x, drop: y });
+    }
+  }
+  return out;
+}
+// Item que entra no "marcar todos" do lote: pendente, não sensível e sem pedido aberto da aluna.
+function rbBatchSelectable(item, openRequests){
+  return !!(item && item.status === 'pendente' && !item.sensitive && !(openRequests && openRequests.length));
+}
+// Outros alunos (mesmo idioma, ativos) para onde um item pode ser movido.
+function rbMoveTargets(students, item){
+  return (students || []).filter(s => s.id !== item.bank_student_id && s.language_app_key === item.language_app_key && s.status !== 'arquivado');
+}
+// Mensagem (chave i18n sem o prefixo "rb.") para os erros das RPCs de gerenciamento.
+function rbManageErrKey(message){
+  const m = String(message || '');
+  for (const k of ['has_card_other_recipient', 'duplicate_has_card', 'duplicate_in_target', 'language_mismatch', 'has_progress', 'has_card', 'same_student', 'not_authorized']){
+    if (m.indexOf(k) >= 0) return 'err.' + k;
+  }
+  return null;
+}
+
 // ===== shared/review-bank-import.js =====
 // Importação dos dados do Banco de Revisão antigo (artifact) para o banco do site. A professora escolhe um arquivo
 // .json (formato abaixo) em Banco de Revisão > Alunos > "Importar dados do Banco antigo". Grava como ela mesma (RLS):

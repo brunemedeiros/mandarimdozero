@@ -116,6 +116,14 @@ O que é grátis e o que é Premium: tudo desta etapa é grátis (avisos, painel
 T8 (cartão legado em deck público), T9 (link de turma), E1, E2 (com o conteúdo), E3 (E5), E5 (fuso), E6, E7,
 E8 (Q-06, regra aberta, Dv-4), E9 (Desafios do `pt`). Q5, T3, T10 e T11 ficam com a outra sessão.
 
+**T8 e T9: pendências do site em português (decisão da dona, 2026-11-11).** A varredura de testes de 2026-11-05 achou os dois de
+novo, como defeitos 4 e 3. Ficam para a etapa do `pt`: consertar só quando o site de português for abrir, não antes. Até lá dois
+testes falham por causa deles, e isso é esperado:
+- `tests/registro/test_registry.js`: "literais de appKey fora do registro" (T9, `MURAL_LANG_DIR` em `shared/mural.js`);
+- `tests/fase-public-deck/test_legacy_parity.js`: "paridade SQL×JS: portugues normal sem mídia" (T8).
+Conserto: T9 tira o endereço de cada idioma do registro (`languages/registry.*`); T8 é uma migration nova que mapeia
+`portugues → 'pt'` em `public_note_native`, sem DROP, primeiro no Staging, e depois roda `tests/fase-public-deck/run.sh`.
+
 ## 4. Ordem segura
 
 1. **Só leitura ao vivo** (antes de escrever qualquer SQL): `get_project` e `list_migrations` no Staging e na produção;

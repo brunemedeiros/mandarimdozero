@@ -21,6 +21,7 @@ const dyn = [];
 [0, 1, 2, 3, 4].forEach(n => dyn.push('oAttOpt' + n)); [0, 1, 2].forEach(n => dyn.push('oLessonOpt' + n));
 ['tabStudents', 'tabOverview', 'tabManual', 'cItems', 'cApproved', 'cToCheck', 'cCut', 'oStudents', 'oPending', 'oStale', 'oAccuracy', 'colName', 'colNext', 'colPending', 'colApproved', 'colEntry', 'colRecap', 'colAccuracy', 'colErrors', 'colReason', 'sub.cards', 'sub.bank', 'reqKind.cortar', 'reqKind.corrigir', 'reqKind.errado', 'reqApproveCut', 'reqDecline', 'reqKeep', 'reqApplySug', 'reqEditApprove'].forEach(k => dyn.push(k));
 ['json', 'format', 'empty'].forEach(k => dyn.push('imp.err.' + k));
+['has_card_other_recipient', 'duplicate_has_card', 'duplicate_in_target', 'language_mismatch', 'has_progress', 'has_card', 'same_student', 'not_authorized'].forEach(k => dyn.push('err.' + k)); // erros das RPCs 136 (rbManageErrKey)
 ['cStudents', 'cItems', 'cPending', 'cRecaps', 'cReviews'].forEach(k => dyn.push('imp.' + k));
 const all = [...new Set([...used, ...dyn])];
 const missPt = all.filter(k => !pt['rb.' + k]), missEn = all.filter(k => !en['rb.' + k]);
