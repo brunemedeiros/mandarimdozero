@@ -10,7 +10,9 @@ um print. Leva uns 10 minutos.
 3. **Conta**: nome `Prof. Brune`. Em "Configurações de compartilhamento de dados", desmarque todas as caixas. Avançar.
 4. **Propriedade**: nome `app.profbrune.com.br`, fuso **Brasil, horário de São Paulo**, moeda **Real brasileiro (R$)**. Avançar.
 5. **Detalhes da empresa**: setor **Educação** (ou o mais próximo), tamanho **Pequeno**. Avançar.
-6. **Objetivos**: marque **Examinar o comportamento dos usuários** e **Gerar leads**. Clique em **Criar**.
+6. **Objetivos**: marque **Gerar leads**, **Entender o tráfego da Web e/ou do app** e **Ver o engajamento e a retenção de
+   usuários** (os nomes que apareceram para a dona em 2026-11-15). Os objetivos só escolhem quais relatórios aparecem no menu;
+   dá para mudar depois. Clique em **Criar**.
 7. Aceite os Termos de Serviço (país **Brasil**) e os termos de processamento de dados.
 8. Em "Coleta de dados", escolha **Web**.
    - URL do site: `app.profbrune.com.br` (com `https://` já escolhido).

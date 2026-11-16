@@ -55,6 +55,75 @@ até lá o código ainda diz "sem telemetria de terceiros".
 - Fase 6 (`/aulas/`): **moldura** com o formulário dentro, resposta marcada pelo `utm_source`, só o formulário de francês.
 - Idiomas do banner e da política: pt-BR e en (o espanhol está congelado e fora do menu de idioma).
 
+## Fase P (privacidade por padrão, opção C)
+
+- 2026-11-15: migration `136_privacy_default_and_age_ack` (contas novas com `public_profile = false`; contas antigas não
+  mudam; `profile_private.age_ack_at` + `ack_my_age()`) aplicada no **Staging** (versão `20261115211611`; conferido: padrão
+  false, 4/4 perfis antigos continuam públicos, anon não executa). **Produção: aplicada em 2026-11-15 com autorização da dona**
+  (versão `20261115213809`; hash dos 39 perfis `02439bc3a9c1c1d410595cb39786fe4f` igual antes e depois, 39/39 públicos).
+- Cadastro, passo 2: caixinha obrigatória ("Tenho 18 anos ou mais, ou tenho autorização do meu responsável para usar o
+  site." / "I'm 18 or older, or I have my parent or guardian's permission to use the site."); sem marcar, Google e e-mail
+  ficam travados; a data é gravada depois do login (`afterAuthResolved`). Testes: `tests/privacidade-padrao/run.sh` 8/8,
+  `tests/login-obrigatorio/test_entrada_idioma.js` 162/162, `test_playwright.js` 124/124, `tests/cores-marca/test_portao.js` 6/6.
+- Contas que já existem (e conta nova criada pelo "Entrar com Google" da tela de Entrar, que não passa pelo passo 2): primeiro
+  a opção A (faixa no topo do Estudo); depois a dona escolheu a **"A1 nova"** (2026-11-15): janela no estilo das janelas do
+  topo (classes `tpop-*`), ao abrir o site, com a caixinha, "Agora não" (fecha nesta visita, volta na próxima; Esc também) e
+  "Confirmar" (travado até marcar). `shared/age-ack.js` e `.css`, fr e zh; professora e admin dispensadas. Teste
+  `tests/privacidade-padrao/test_janela_idade_playwright.js` 42/42.
+
+## Estilo do banner de cookies (pedido da dona, 2026-11-15)
+
+"Recusar opcionais" à esquerda e "Aceitar todos" à direita, no estilo da tela do próprio Google que ela mostrou: os dois botões
+do mesmo tamanho e com borda; o texto de "Aceitar todos" na cor da marca (azul no fr, vermelho no zh) e o de "Recusar
+opcionais" em cinza. Fundo cheio colorido só no "Aceitar" foi desaconselhado (empurra a pessoa a aceitar, contra a orientação
+da ANPD e o pedido do prompt). Aguarda o "ok" dela.
+
+GA4 (Fase 1): desmarcar "Alterações na página de acordo com os eventos do histórico de navegação" e deixar "Carregamentos de
+página" (o site manda as telas do app sozinho; com isso ligado, as limpezas de endereço do site contariam visitas a mais).
+
+## Escolhas de 2026-11-15 (terceira rodada)
+
+- Banner de cookies: **B1 nova** (janela no estilo das do topo, título "Cookies", botões "Recusar opcionais" e "Aceitar
+  todos" iguais). Pergunta dela: por que não tem "Personalizar/Preferências" como outros sites. Resposta: aqueles sites
+  têm várias categorias opcionais (funcionais, desempenho, anúncios); o dela tem uma só (medição), então a tela de
+  preferências repete a escolha do banner. Proposta enviada com prévia: link discreto "Preferências" no banner abrindo uma
+  janela com "Necessários (sempre ativos)" e "Medição de visitas" (chave), que é a mesma janela do "Preferências de
+  cookies" do rodapé, pedida no prompt. Aguarda o ok dela.
+- GA4: anúncios desligados em todas as regiões (conferido por ela). Vinculações: conferir que não há nada vinculado.
+  Filtros de dados: o GA4 já cria o filtro "Tráfego interno" em modo de teste, que não faz nada sem regras; deixar como está.
+
+## Respostas de 2026-11-15 (quarta rodada)
+
+- **"Preferências" no banner: sim.** Link discreto embaixo dos botões do banner B1 nova, abrindo a janela "Preferências de
+  cookies" (Necessários sempre ativos + Medição de visitas com chave). A chave nasce DESLIGADA (nada marcado de antemão);
+  só aparece ligada para quem já aceitou. É a mesma janela do link "Preferências de cookies" do rodapé.
+- **Fase 1 aprovada** pela dona.
+- Ideias para o futuro (não fazer agora): vincular o **Search Console** ao GA4 (mostra o que as pessoas buscaram no Google
+  até chegar ao site); criar o **Perfil da Empresa no Google** da professora (aparece na Busca e no Maps, com avaliações de
+  alunos; dá para esconder o endereço e mostrar só a área de atendimento ou "aulas on-line"; é independente do GA4).
+
+## Fase 1 (2026-11-15)
+
+- ID da métrica do GA4: **`G-CE3282C1FB`** (público por natureza: aparece no código de qualquer site que usa o GA4). O ID do
+  fluxo não é necessário. Falta a dona confirmar a parte B (14 meses, Sinais do Google desligados, anúncios desligados) e
+  escrever "Fase 1 aprovada".
+
+## Prévias pedidas em 2026-11-15 (aguardam escolha)
+
+- Confirmação de idade com mais destaque: A1 janela ao abrir com "Agora não" (volta na próxima visita), A2 janela
+  obrigatória (só some confirmando; "Sair da conta"), A3 faixa colorida no topo. Antes ela tinha preferido não ter janela
+  única; a janela volta agora a pedido dela.
+- Banner de cookies: B1 botões iguais, só o texto de "Aceitar" na cor da marca; B2 "Aceitar" cheio na cor da marca (azul no
+  fr, vermelho no zh); B3 "Aceitar" cheio em cor neutra (tinta escura, igual nos dois sites). Dúvida da dona: vermelho no zh
+  parecer "cancelar". Nota: no zh todos os botões principais já são vermelhos ("Começar", "Continuar").
+- 2026-11-15, segunda rodada (pedido da dona: janelas no estilo das janelas do topo 🔥 e ⭐, `shared/janelas-topo.css`,
+  classes `tpop-*`): A1 nova e A2 nova (cabeçalho na cor da marca com título grande e 🙋, caixinha num cartão, "Confirmar"
+  em pílula com borda), A3 mantida; B1 nova (cabeçalho "Cookies" com 📊, botões iguais) e B2 nova ("Aceitar todos" cheio
+  na cor da marca), B1/B2 antigas e B3 mantidas como opção. Prévias geradas na tela real do app (fr e zh, claro e escuro).
+- GA4: não clicar em "Confirmação de coleta de dados do usuário / Eu confirmo" (é para quem manda e-mail ou telefone ao
+  Google; o site não manda dado pessoal). "Coleta de dados do dispositivo e local granular" (cidade e modelo do aparelho,
+  sem guardar o IP) pode ficar ligada; a política cita. "Personalização de anúncios": desligada para todas as regiões.
+
 ## Fase extra (depois da Fase 4): página `/aulas/`
 
 Nova versão do prompt (2026-11-15) chama de **Fase 6**: link geral https://forms.gle/9994D2GHdwDj4RyT7 (formulário de aulas
