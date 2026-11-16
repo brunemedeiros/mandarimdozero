@@ -122,6 +122,14 @@ página" (o site manda as telas do app sozinho; com isso ligado, as limpezas de 
   igual nos dois idiomas; 2338/2338). Política geral em rascunho (aba Privacidade do Admin, `ajuda/textos/politica.html` e
   documento do advogado): item novo "Medição de visitas" na seção 5 e Google Fonts retirado da lista de terceiros.
 
+## Ajustes pedidos depois da Fase 3 (2026-11-16)
+
+- A dona achou o aviso grande. Prévias enviadas (tela real, celular e computador): **C1** sem o título "Cookies", ícone
+  menor, faixa colorida (celular 208 px em vez de 255); **C2** sem faixa colorida (198 px); no computador as duas viram uma
+  faixa larga e baixa (67 px em vez de 260). Aguarda a escolha dela antes de publicar.
+- Documento do advogado: seção "Como o aviso de cookies e o Google Analytics funcionam (16/11/2026)" na aba Resumo, com a
+  tabela do comportamento e 3 perguntas (UTM guardado na aba antes da escolha, medição própria fora do aviso, texto curto).
+
 ## Fase 2 (2026-11-16): política de cookies
 
 - Página nova `privacidade-cookies.html` (pt-BR e en na mesma página, molde das outras de privacidade): o que fica no
