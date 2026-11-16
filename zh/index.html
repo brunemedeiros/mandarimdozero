@@ -61,6 +61,7 @@ try{
 <link rel="stylesheet" href="../shared/combinar-audio.css">
 <link rel="stylesheet" href="../shared/gramatica-cenario.css">
 <link rel="stylesheet" href="../shared/age-ack.css">
+<link rel="stylesheet" href="../shared/consent.css">
 <style>
 :root{
   --brand-purple: #3D167B; /* roxo da unidade de gramática (trilha comum, paridade 5d); igual ao fr. O zh ainda não tem unidade de gramática */
@@ -5069,6 +5070,12 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
         </article>
         <!-- Recomeçar este curso (migration 123; conteúdo montado por shared/recomecar-curso.js). -->
         <article id="settings-restart-box" class="rc-caixa" hidden></article>
+        <!-- Privacidade e cookies (Fase 3 do GA4): abre a janela de Preferências (shared/consent.js, [data-consent-open]). -->
+        <article id="settings-cookies-box">
+          <header><h3 data-i18n="consent.settings.title">Privacidade e cookies</h3></header>
+          <p class="pref-row-sub" data-i18n="consent.settings.sub">Escolha se o site pode medir as visitas com o Google Analytics. Dá para mudar quando quiser.</p>
+          <footer><button type="button" class="outline" data-consent-open data-i18n="consent.footer.prefs">Preferências de cookies</button> <a href="../privacidade-cookies.html" data-i18n="consent.footer.policy">Política de cookies</a></footer>
+        </article>
         <article id="settings-delete-box" hidden>
           <header><h3 data-i18n="accountDelete.title">Excluir minha conta</h3></header>
           <p class="pref-row-sub" data-i18n="accountDelete.hint">Apaga a sua conta e tudo o que está ligado a ela: progresso, cartões, conquistas, amizades, fotos e arquivos. Não dá para desfazer.</p>
@@ -5856,6 +5863,7 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
 <script src="../shared/topbar-stats.js"></script>
 <script src="../shared/janelas-topo.js"></script>
 <script src="../shared/xp-semana.js"></script>
+<script src="../shared/consent.js" data-page="app"></script>
 <script src="../shared/analytics.js"></script>
 <script src="../shared/tabs.js"></script>
 <script src="../shared/activity-focus.js"></script>

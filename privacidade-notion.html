@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-consent-lang="auto">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -32,7 +32,10 @@ a { color: var(--link); }
 ul { padding-left: 22px; }
 li { margin: 4px 0; }
 hr { border: none; border-top: 1px solid var(--paper-line); margin: 48px 0; }
+footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--paper-line); color: var(--ink-soft); font-size: 15px; }
 </style>
+<link rel="stylesheet" href="shared/consent.css">
+<script src="shared/consent.js" data-page="public" defer></script>
 </head>
 <body>
 <main>
@@ -125,6 +128,12 @@ reads new or edited rows and fills in (or creates) the student's lesson on the s
 <h2>Changes</h2>
 <p>If this page changes, the date at the top is updated. Changes to what is read or stored are announced on the site before they apply.</p>
 </section>
+
+<footer>
+  <a href="sobre.html">Sobre / About</a> ·
+  <a href="privacidade-cookies.html">Cookies e medição de visitas / Cookies and visit measurement</a> ·
+  <a href="#" data-consent-open>Preferências de cookies / Cookie preferences</a>
+</footer>
 </main>
 </body>
 </html>

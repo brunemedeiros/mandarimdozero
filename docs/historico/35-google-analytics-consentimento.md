@@ -92,6 +92,67 @@ página" (o site manda as telas do app sozinho; com isso ligado, as limpezas de 
 - GA4: anúncios desligados em todas as regiões (conferido por ela). Vinculações: conferir que não há nada vinculado.
   Filtros de dados: o GA4 já cria o filtro "Tráfego interno" em modo de teste, que não faz nada sem regras; deixar como está.
 
+## Fase 3 (2026-11-16): aviso de cookies + GA4
+
+- `shared/consent.js` + `shared/consent.css` (um só arquivo para todas as páginas e sites; `data-page="app"` no fr/zh,
+  `"public"` no resto). Aviso "B1 nova" (G3, botões iguais, "Recusar opcionais" à esquerda, link "Política de cookies" e
+  "Preferências"); janela de Preferências (Necessários sempre ativos + chave "Medição de visitas", desligada até aceitar).
+  Escolha em `localStorage['cookie-consent']` (`{v:1, analytics, at}`; subir `STORE_VERSION` quando a política mudar de
+  verdade). Links "Preferências de cookies" (`[data-consent-open]`): rodapé do Sobre e das páginas de privacidade, pé da
+  entrada e Configurações > Geral > "Privacidade e cookies" (fr e zh).
+- GA4 `G-CE3282C1FB` modo básico: o `gtag.js` só é pedido depois do aceite; `cookie_expires` 13 meses (34128000 s), sem
+  Sinais do Google nem anúncios, sem `user_id`, `send_page_view:false` e `page_view` manual com endereço limpo (caminho +
+  `utm_*`; convite, token, e-mail e `#...` nunca saem; referência sem parâmetros). UTM da chegada guardado na aba
+  (`sessionStorage['consent-utm']`) até a escolha. Recusar depois de aceitar apaga `_ga`/`_ga_*` e liga `ga-disable`.
+- App: só mede depois de `setContext` (chamado em `shared/auth.js` com o perfil carregado); professora/admin não são
+  medidas e o aparelho fica marcado (`localStorage['ga-ignore-device']='1'`, vale também nas páginas abertas). Telas viram
+  páginas virtuais (`/fr/<aba>`; abas com "admin"/"teacher" nunca), `lesson_start`/`lesson_complete` (tipo + curso),
+  `course_restart`; tudo espelhado de `trackEvent` (`shared/analytics.js`). Entrada: `sign_up` (método + curso).
+- Entrada sem Google Fonts (usa `shared/fonts/nunito.css`). "Sem telemetria de terceiros" atualizado em `shared/analytics.js`
+  e em `admin.analytics.dev.osNote` (pt-BR e en).
+- Navegador automático (`navigator.webdriver`) não vê o aviso sozinho (cobriria os botões dos outros testes); o teste do aviso
+  liga com `window.__CONSENT_TEST__ = true`.
+- Testes: `tests/consentimento/test_playwright.js` 57/57 (nada ao Google antes da escolha nem depois de recusar; aceitar pede
+  o gtag com o ID; config; endereço limpo com utm; revogar apaga cookies; UTM guardado; en sem português; `?origem=` dos testes
+  intacto; app fr e zh com telas, eventos, admin/professora fora; Configurações; posição acima do menu de baixo).
+- Fora desta fase: Contrato e Central de Ajuda sem GA4 (decisão da dona); `/aulas/` é a Fase 6.
+- Regressão (subagente `regressao`, 2026-11-16): tudo passando, exceto dois testes que precisavam registrar a mudança
+  aprovada: `tests/paridade-sites/test_quase_iguais.js` (neutralização da caixa "Privacidade e cookies" das Configurações,
+  agora 2770/2770) e `tests/i18n/test_i18n_unit.js` (chaves `consent.*` e `ageAck.*` na lista de textos novos, "Cookies"
+  igual nos dois idiomas; 2338/2338). Política geral em rascunho (aba Privacidade do Admin, `ajuda/textos/politica.html` e
+  documento do advogado): item novo "Medição de visitas" na seção 5 e Google Fonts retirado da lista de terceiros.
+
+## Ajustes pedidos depois da Fase 3 (2026-11-16)
+
+- A dona achou o aviso grande. Prévias enviadas (tela real, celular e computador): **C1** sem o título "Cookies", ícone
+  menor, faixa colorida (celular 208 px em vez de 255); **C2** sem faixa colorida (198 px); no computador as duas viram uma
+  faixa larga e baixa (67 px em vez de 260). **Escolhida: C2** (2026-11-16), aplicada em `shared/consent.js`/`.css`;
+  `tests/consentimento/test_playwright.js` 59/59 (inclui altura no celular e no computador). Fase 3 aprovada e publicação
+  autorizada pela dona no mesmo dia.
+- Documento do advogado: seção "Como o aviso de cookies e o Google Analytics funcionam (16/11/2026)" na aba Resumo, com a
+  tabela do comportamento e 3 perguntas (UTM guardado na aba antes da escolha, medição própria fora do aviso, texto curto).
+
+## Fase 2 (2026-11-16): política de cookies
+
+- Página nova `privacidade-cookies.html` (pt-BR e en na mesma página, molde das outras de privacidade): o que fica no
+  aparelho sem pedir, a medição com o GA4 (para quê, o que não é enviado, sem anúncios, 14 meses no Google), tabela dos
+  cookies `_ga` e `_ga_CE3282C1FB` com **13 meses** (a Fase 3 tem de configurar o GA4 com essa duração, `cookie_expires`),
+  Google LLC e dados fora do Brasil, outros serviços (formulários do Google nos testes e no contrato, jsDelivr, cdnjs,
+  Supabase), a medição própria sem cookies, como aceitar/recusar/mudar (recusar depois de aceitar APAGA os cookies do GA4:
+  a Fase 3 tem de fazer isso), direitos da LGPD e ANPD, contato. O formulário de aulas entra na página quando a Fase 6 sair.
+- Links: rodapé do `sobre.html` e rodapé novo nas três páginas de privacidade. Teste `tests/privacidade-padrao/test_pagina_cookies.js` 32/32.
+- Recomendação: publicar junto com a Fase 3, porque a página cita o aviso e o "Preferências de cookies", que só existem nela.
+- A seção curta de cookies na política geral (aba Privacidade do Admin, `ajuda/textos/politica.html` e documento do
+  advogado) entra depois que a dona aprovar o texto desta página.
+
+## Fase P publicada (2026-11-16)
+
+- PR #481 mesclado na `main` com autorização da dona (2026-11-16) e conferido no ar (o cadastro tem a caixinha e
+  `shared/age-ack.js` publicado). Regressão: todas as áreas vizinhas passando; o teste das janelas do topo
+  (`tests/janelas-topo/test_playwright.js`) passou a marcar "Agora não" na janela de idade antes de clicar no 🔥/⭐ (276/276).
+- Documento do advogado atualizado: seção "Já aplicado no site em 16/11/2026" na aba Resumo, com a pergunta se a
+  autodeclaração + perfil privado por padrão bastam para o ECA Digital.
+
 ## Respostas de 2026-11-15 (quarta rodada)
 
 - **"Preferências" no banner: sim.** Link discreto embaixo dos botões do banner B1 nova, abrindo a janela "Preferências de

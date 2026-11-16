@@ -1961,7 +1961,7 @@ window.I18N_CATALOG['en'] = {
   'admin.analytics.dev.type': 'Device type', // ALTA
   'admin.analytics.dev.browser': 'Browser', // ALTA
   'admin.analytics.dev.os': 'Operating system', // ALTA
-  'admin.analytics.dev.osNote': 'Classification by navigator.userAgent (simple heuristic, no library). It is not 100% accurate, but it is the acceptable standard without third-party telemetry.', // ALTA
+  'admin.analytics.dev.osNote': 'Classification by navigator.userAgent (simple heuristic, no library). It is not 100% accurate, but it is enough for the site\'s own measurement (Google Analytics, with consent, is separate).', // ALTA
   'admin.analytics.eng.perSession': 'Exercises/session', // ALTA
   'admin.analytics.eng.reviewsDone': 'Reviews completed', // ALTA
   'admin.analytics.eng.challengesDone': 'Challenges completed', // ALTA
@@ -4155,6 +4155,25 @@ window.I18N_CATALOG['en'] = {
   'gate.signup.methodTitle': 'Create your account and start learning {lang}', // ALTA
   'gate.signup.methodSub': 'It\'s free. Choose how you\'d like to sign up.', // ALTA
   'gate.signup.ageAck': 'I\'m 18 or older, or I have my parent or guardian\'s permission to use the site.', // ALTA
+  'consent.title': 'Cookies', // ALTA
+  'consent.text': 'This site uses cookies to improve your experience and measure visits.', // ALTA
+  'consent.policy': 'Cookie policy', // ALTA
+  'consent.reject': 'Reject optional', // ALTA
+  'consent.accept': 'Accept all', // ALTA
+  'consent.prefs': 'Preferences', // ALTA
+  'consent.prefsTitle': 'Cookie preferences', // ALTA
+  'consent.prefsSub': 'Choose what the site can use. You can change it any time.', // ALTA
+  'consent.necTitle': 'Necessary', // ALTA
+  'consent.necText': 'Sign-in, language, theme and the offline screen. The site doesn\'t work without them.', // ALTA
+  'consent.necAlways': 'Always on', // ALTA
+  'consent.anaTitle': 'Visit measurement', // ALTA
+  'consent.anaText': 'Google Analytics: how many people visit and where they come from. No name or email.', // ALTA
+  'consent.save': 'Save choice', // ALTA
+  'consent.close': 'Close', // ALTA
+  'consent.footer.policy': 'Cookie policy', // ALTA
+  'consent.footer.prefs': 'Cookie preferences', // ALTA
+  'consent.settings.title': 'Privacy and cookies', // ALTA
+  'consent.settings.sub': 'Choose whether the site can measure visits with Google Analytics. You can change it any time.', // ALTA
   'ageAck.title': 'A quick check', // ALTA
   'ageAck.sub': 'It takes a second and you only do it once.', // ALTA
   'ageAck.later': 'Not now', // ALTA
