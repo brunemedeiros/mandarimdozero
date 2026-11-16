@@ -92,6 +92,14 @@ página" (o site manda as telas do app sozinho; com isso ligado, as limpezas de 
 - GA4: anúncios desligados em todas as regiões (conferido por ela). Vinculações: conferir que não há nada vinculado.
   Filtros de dados: o GA4 já cria o filtro "Tráfego interno" em modo de teste, que não faz nada sem regras; deixar como está.
 
+## Fase P publicada (2026-11-16)
+
+- PR #481 mesclado na `main` com autorização da dona (2026-11-16) e conferido no ar (o cadastro tem a caixinha e
+  `shared/age-ack.js` publicado). Regressão: todas as áreas vizinhas passando; o teste das janelas do topo
+  (`tests/janelas-topo/test_playwright.js`) passou a marcar "Agora não" na janela de idade antes de clicar no 🔥/⭐ (276/276).
+- Documento do advogado atualizado: seção "Já aplicado no site em 16/11/2026" na aba Resumo, com a pergunta se a
+  autodeclaração + perfil privado por padrão bastam para o ECA Digital.
+
 ## Respostas de 2026-11-15 (quarta rodada)
 
 - **"Preferências" no banner: sim.** Link discreto embaixo dos botões do banner B1 nova, abrindo a janela "Preferências de
