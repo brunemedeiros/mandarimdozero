@@ -50,8 +50,8 @@ const STUB = `window.supabase = { createClient: () => {
     await page.goto(`http://127.0.0.1:${port}/index.html`);
     await page.waitForSelector('#gate-login', { state: 'visible' });
     const L = (n, c, x) => check(`${lang}-${theme}-${width} ${n}`, c, x);
-    const T = lang === 'en' ? { ask: 'Forgot your password?', send: 'Send link', sending: 'Sending...', title: 'Check your email', back: 'Back to sign in', resendIn: /Resend link \(\d+s\)/, sub: 'We sent a link to ' }
-                            : { ask: 'Esqueceu sua senha?', send: 'Enviar link', sending: 'Enviando...', title: 'Confira seu e-mail', back: 'Voltar para entrar', resendIn: /Reenviar link \(\d+s\)/, sub: 'Enviamos um link para ' };
+    const T = lang === 'en' ? { ask: 'Forgot your password?', send: 'Send link', sending: 'Sending...', title: 'Link on its way!', back: 'Back to sign in', resendIn: /Resend link in \d+ s/, sub: 'Open the email and tap Create new password.', stamp: 'Sent now' }
+                            : { ask: 'Esqueceu a senha?', send: 'Enviar link', sending: 'Enviando...', title: 'Link a caminho!', back: 'Voltar para entrar', resendIn: /Reenviar link em \d+ s/, sub: 'Abra o e-mail e toque em Criar nova senha.', stamp: 'Enviado agora' };
     // "Esqueceu sua senha?" abre a tela só com o e-mail (pedido da dona, 2026-11-16), já preenchido com o do login
     await page.fill('#gate-email', 'aluna@x.com');
     await page.click('#gate-forgot-btn');
@@ -69,7 +69,9 @@ const STUB = `window.supabase = { createClient: () => {
     await page.evaluate(() => document.getElementById('gate-forgot-send-btn').click()); // clique repetido no meio do envio
     await page.waitForSelector('#gate-forgot-sent', { state: 'visible' });
     L('clique repetido durante o envio não manda outro pedido', await page.evaluate(() => window.__calls.length === 1), await page.evaluate(() => window.__calls));
-    L('tela "' + T.title + '" com o e-mail', (await page.textContent('#gate-forgot-sent h1')).trim() === T.title && (await page.textContent('#gate-forgot-sent-email')) === 'aluna@x.com' && (await page.textContent('#gate-forgot-sent .sub')).startsWith(T.sub));
+    L('tela "' + T.title + '" com o e-mail', (await page.textContent('#gate-forgot-sent h1')).trim() === T.title && (await page.textContent('#gate-forgot-sent-email')) === 'aluna@x.com' && (await page.textContent('#gate-forgot-sent .fp-texto')).startsWith(T.sub));
+    L('carta: carimbo no idioma do site, que cai uma vez, e o envelope sem rolagem lateral', (await page.textContent('#gate-forgot-carimbo')).trim() === T.stamp && await page.evaluate(() => document.getElementById('gate-forgot-carimbo').classList.contains('cai')));
+    L('ícone do passo 1 é o envelope simples do Fluent (sem @)', await page.evaluate(() => { const e = document.querySelector('#gate-forgot .jp-icone .emo'); return !!e && /fluent\/2709\.svg/.test(getComputedStyle(e).getPropertyValue('--emo') + e.getAttribute('style')); }));
     L('sem mensagem de erro na tela', await page.evaluate(() => !document.querySelector('#gate-forgot-sent .gate-note.err')));
     L('reenviar travado com contagem', await page.evaluate(re => { const b = document.getElementById('gate-forgot-resend-btn'); return b.disabled && new RegExp(re).test(b.textContent); }, T.resendIn.source));
     L('sem rolagem lateral', await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1));
@@ -83,7 +85,7 @@ const STUB = `window.supabase = { createClient: () => {
     await page.click('#gate-forgot-send-btn');
     await page.waitForSelector('#gate-forgot-sent', { state: 'visible' });
     L('pedido recusado por pressa (429) também mostra a tela, sem erro', await page.evaluate(() => !document.querySelector('#gate-forgot-sent .gate-note.err') && !document.getElementById('gate-login-note').classList.contains('err')));
-    L('contagem usa a espera que o Supabase mandou (51 s)', await page.evaluate(() => /\((5[01])s\)/.test(document.getElementById('gate-forgot-resend-btn').textContent)), await page.textContent('#gate-forgot-resend-btn'));
+    L('contagem usa a espera que o Supabase mandou (51 s)', await page.evaluate(() => / (5[01]) s/.test(document.getElementById('gate-forgot-resend-btn').textContent)), await page.textContent('#gate-forgot-resend-btn'));
     // erro de verdade (sem rede): continua no login, com o aviso de erro
     await page.click('#gate-forgot-back-btn'); await page.waitForSelector('#gate-login', { state: 'visible' });
     await page.evaluate(() => { window.__fail = true; });
