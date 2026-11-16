@@ -116,6 +116,11 @@ página" (o site manda as telas do app sozinho; com isso ligado, as limpezas de 
   o gtag com o ID; config; endereço limpo com utm; revogar apaga cookies; UTM guardado; en sem português; `?origem=` dos testes
   intacto; app fr e zh com telas, eventos, admin/professora fora; Configurações; posição acima do menu de baixo).
 - Fora desta fase: Contrato e Central de Ajuda sem GA4 (decisão da dona); `/aulas/` é a Fase 6.
+- Regressão (subagente `regressao`, 2026-11-16): tudo passando, exceto dois testes que precisavam registrar a mudança
+  aprovada: `tests/paridade-sites/test_quase_iguais.js` (neutralização da caixa "Privacidade e cookies" das Configurações,
+  agora 2770/2770) e `tests/i18n/test_i18n_unit.js` (chaves `consent.*` e `ageAck.*` na lista de textos novos, "Cookies"
+  igual nos dois idiomas; 2338/2338). Política geral em rascunho (aba Privacidade do Admin, `ajuda/textos/politica.html` e
+  documento do advogado): item novo "Medição de visitas" na seção 5 e Google Fonts retirado da lista de terceiros.
 
 ## Fase 2 (2026-11-16): política de cookies
 
