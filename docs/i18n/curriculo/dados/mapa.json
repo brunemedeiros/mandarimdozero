@@ -1079,7 +1079,7 @@
             },
             {
               "id": "A1-g12",
-              "nome": "Gramática: perguntar sim ou não",
+              "nome": "Gramática: perguntas de sim ou não",
               "ordem": 4,
               "tipo": "gramatica",
               "id_funcao": "gramatica-perguntar-sim-ou-nao",

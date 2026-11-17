@@ -190,7 +190,7 @@ aside{display:grid;gap:16px;min-width:0}
 <div class="wrap">
   <header class="top">
     <div class="eyebrow">Maquete · módulo "Apresentar-se"</div>
-    <h1>Lições curtas: unidades 1 a 3</h1>
+    <h1>Lições curtas: unidades 1 a 4</h1>
     <p>Clique como se fosse a aluna. Ao lado, o porquê de cada tela. Nada disso está no app ainda.</p>
     <div class="unit-tabs" id="units"></div>
     <div class="lesson-tabs" id="tabs"></div>
@@ -227,7 +227,7 @@ aside{display:grid;gap:16px;min-width:0}
         <li><b>Distratores</b>: em cada "Complete", ou um erro de grafia, ou outra palavra já vista que não serve ali (decisão 342).</li>
         <li><b>Áudio</b>: <i>salut</i>, <i>bonjour</i>, <i>bonsoir</i>, <i>ça va</i>, <i>merci</i>, <i>de rien</i>, <i>s'il te plaît</i>, <i>s'il vous plaît</i>, <i>pardon</i>, <i>au revoir</i> e <i>à bientôt</i> são áudios reais do site. O resto usa a voz do navegador, só na maquete.</li>
         <li><b>Erro</b>: no app, a tela errada volta no fim da lição. Aqui ela só segue.</li>
-        <li><b>Grátis x Premium</b>: as lições inteiras são grátis.</li>
+        <li><b>Grátis x Premium</b>: as lições das unidades de vocabulário (1 a 3) são grátis. A gramática (unidade 4) é Premium; a versão grátis dela já está nas unidades 1 e 3 (<i>Vous allez bien ?</i> e a nota do <i>est-ce que</i>).</li>
       </ul>
     </div>
   </aside>
@@ -332,6 +332,14 @@ const WHY={
  "u3-l1-rel": {"titulo": "Relacione os pares", "texto": "<p>Decisão 360: um \"Relacione os pares\" por lição, perto do fim, juntando as formas informais e formais com as traduções. Toque numa frase e depois na tradução.</p><p>Decisão 363: o par errado só treme e a seleção sai; a aluna tenta de novo, e no fim a tela é de acerto.</p>"},
  "u3-l2-rel": {"titulo": "Relacione os pares", "texto": "<p>Decisão 360: um \"Relacione os pares\" por lição, perto do fim, juntando as formas informais e formais com as traduções. Toque numa frase e depois na tradução.</p><p>Decisão 363: o par errado só treme e a seleção sai; a aluna tenta de novo, e no fim a tela é de acerto.</p>"},
  "u3-l3-rel": {"titulo": "Relacione os pares", "texto": "<p>Decisão 360: um \"Relacione os pares\" por lição, perto do fim, juntando as formas informais e formais com as traduções. Toque numa frase e depois na tradução.</p><p>Decisão 363: o par errado só treme e a seleção sai; a aluna tenta de novo, e no fim a tela é de acerto.</p>"},
+ "g4-intro": {"titulo": "Gramática numa lição só", "texto": "<p>Decisão 365: a gramática tem objetivo gramatical, não comunicativo, por isso o nome é <i>Gramática: perguntas de sim ou não</i>. Cabe numa lição só: na trilha ela abre direto, sem lista de lições e sem Revisão da unidade. Sem cartões e sem diálogo.</p>"},
+ "g4-nota-entonacao": {"titulo": "Explicação: perguntas com entonação", "texto": "<p>Decisão 365: cada estrutura vem numa explicação da Prof. Brune (como uma nota, com exemplos e áudio) e logo depois em exercícios. Termos dos manuais: <i>intonation montante</i> (Grammaire Progressive A1, cap. 5).</p><p>O áudio ajuda, mas o exercício se apoia no <b>?</b> escrito: o teste da voz do site está em outra página.</p>"},
+ "g4-nota-estceque": {"titulo": "Explicação: perguntas com est-ce que", "texto": "<p>Retoma a nota grátis da unidade 3 e acrescenta <i>est-ce qu'</i> antes de vogal (Grammaire en Dialogues, cap. 3).</p>"},
+ "g4-nota-inversao": {"titulo": "Explicação: perguntas com inversão", "texto": "<p>Só reconhecer, como diz o mapa. Os exercícios são V ou F e \"Monte a frase\" a partir da pergunta com inversão (sem digitar), como a dona pediu.</p>"},
+ "g4-ex-sem-inversao": {"titulo": "Monte a frase a partir de outra frase", "texto": "<p>Decisão 365: a pergunta com inversão aparece em cima, com áudio, e a aluna monta a mesma pergunta sem inversão. Peças sempre embaralhadas (decisão 363).</p>"},
+ "g4-nota-tres": {"titulo": "Recapitulação", "texto": "<p>Os três jeitos lado a lado, com a etiqueta de cada um (GP cap. 52: formel, courant, familier). Lembra que <i>tu</i> x <i>vous</i> é outra escolha.</p>"},
+ "g4-ex-qual-1": {"titulo": "Qual é a estrutura?", "texto": "<p>Tipo de exercício novo (decisão 365): a frase em francês em cima e as opções em português. Reconhecer qual das três estruturas a pergunta usa.</p>"},
+ "g4-fim": {"titulo": "Fim da gramática", "texto": "<p>O resumo mostra os três jeitos. Não aparece \"Esses cartões já entram na sua Revisão\": a gramática não gera cartão.</p>"},
  "u3-nota-fem": {"titulo": "Nota: o feminino que se ouve", "texto": "<p>Com <i>anglaise</i>, <i>espagnole</i>, <i>italienne</i> e <i>allemande</i>. <i>Portugaise</i> chega na lição 3, com a explicação no painel.</p>"},
  "u3-frase-dou": {"titulo": "Pergunta de onde é: forma informal", "texto": "<p>Decisão 360: o par vira duas telas. Primeiro só a forma informal; o exercício seguinte usa ela, e depois vem a formal.</p><p><i>Tu es d'où ?</i> ficou nesta lição (decisão 359), junto da resposta <i>Je suis de Rio</i>.</p>"},
  "u3-ex-ou": {"titulo": "A nota \"où vai para o fim\" virou painel", "texto": "<p>Decisão 359: a nota curta aparece no painel deste exercício.</p>"},
@@ -674,7 +682,7 @@ const WHY={
  "d2-papel": {"chip": "Sua vez", "titulo": "Sua vez: conversa formal nova", "texto": "<p>De manhã, com o Sr. Martin. A fala dele não chama a aluna de <i>madame</i> nem de <i>monsieur</i>, porque não sabemos quem está estudando.</p>"},
  "d2-fim": {"chip": "Fim da lição", "titulo": "Fim da lição 6", "texto": "<p>A tela padrão; depois, volta para a unidade.</p>"}
 };
-const CHIP={relacionar:'Relacione',intro:'Início',complete:'Complete',vf:'V ou F',funcao:'O que você diz?',nota:'Nota',montar:'Monte a frase',fim:'Fim da lição',ouvir:'Ouça e escolha',digitar:'Digite',
+const CHIP={classificar:'Qual estrutura?',relacionar:'Relacione',intro:'Início',complete:'Complete',vf:'V ou F',funcao:'O que você diz?',nota:'Nota',montar:'Monte a frase',fim:'Fim da lição',ouvir:'Ouça e escolha',digitar:'Digite',
   d_cena:'Cena',d_ouvir:'Ouvir sem texto',d_ler:'Ouça e leia',d_vf:'V ou F',d_montar:'Monte a conversa',d_lacuna:'Complete a frase',d_ordenar:'Coloque na ordem',d_entendeu:'Você entendeu?',d_papel:'Sua vez',d_fim:'Fim da lição',unidade:'A unidade'};
 const chipPadrao=t=>t.type==='item'?t.fr:(CHIP[t.type]||t.id);
 const S=[...TELAS,...UNIDADES.map(u=>({id:'unidade-'+u.n,lesson:u.n+'.u',unit:u.n,type:'unidade'}))].map(t=>{const w=WHY[t.id]||{};return Object.assign({},t,{chip:w.chip||chipPadrao(t),why:[w.titulo||chipPadrao(t),w.texto||'']});});
@@ -689,8 +697,10 @@ const idx=id=>S.findIndex(s=>s.id===id);
 function desenhaAbas(s){
   $('units').innerHTML=UNIDADES.map(u=>`<button data-u="${u.n}" aria-pressed="${u.n===s.unit}">Unidade ${u.n}</button>`).join('');
   const u=UNIDADES.find(x=>x.n===s.unit);
-  $('tabs').innerHTML=u.licoes.map(l=>`<button data-to="${l.primeira}" aria-pressed="${l.key===s.lesson}">Lição ${l.n}</button>`).join('')
-    +`<button data-to="unidade-${u.n}" aria-pressed="${s.type==='unidade'}">A unidade</button>`;
+  $('tabs').innerHTML=(u.gramatica
+      ? `<button data-to="${u.licoes[0].primeira}" aria-pressed="${s.type!=='unidade'}">A lição</button>`
+      : u.licoes.map(l=>`<button data-to="${l.primeira}" aria-pressed="${l.key===s.lesson}">Lição ${l.n}</button>`).join(''))
+    +`<button data-to="unidade-${u.n}" aria-pressed="${s.type==='unidade'}">${u.gramatica?'Na trilha':'A unidade'}</button>`;
 }
 
 function setProgress(){
@@ -787,6 +797,11 @@ function render(){
       <p class="q">${s.stmt}</p>
       <div class="opts two"><button class="opt" data-o="true">Verdadeiro</button><button class="opt" data-o="false">Falso</button></div></div>`;
   }
+  if(s.type==='classificar'){
+    h=`<span class="tag">Qual é a estrutura?</span><div class="grow ex">${frBox(s)}
+      <p class="q">${esc(s.q)}</p>
+      <div class="opts">${s.opts.map(o=>`<button class="opt" data-o="${esc(o)}">${esc(o)}</button>`).join('')}</div></div>`;
+  }
   if(s.type==='funcao'){
     h=`<span class="tag">O que você diz?</span><div class="grow ex">
       <p class="q">${esc(s.q)}</p>
@@ -801,7 +816,7 @@ function render(){
   }
   if(s.type==='montar'){
     h=`<span class="tag">Monte a frase</span><div class="grow ex">
-      <div class="tr" style="font-weight:700;color:var(--ink)">${esc(s.tr)}</div>
+      ${s.pedido?`<p class="q">${esc(s.pedido)}</p>${frBox(s)}`:`<div class="tr" style="font-weight:700;color:var(--ink)">${esc(s.tr)}</div>`}
       <div class="answer-line" id="line"></div>
       <div class="tiles">${s.tiles.map((t,k)=>`<button class="tile" data-k="${k}">${esc(t)}</button>`).join('')}</div>
     </div><button class="btn" id="check" disabled>Verificar</button>`;
@@ -810,12 +825,17 @@ function render(){
     h=`<div class="done-hero"><h2>Lição concluída!</h2></div>
       ${s.say?`<div class="prof intro-fala"><img src="${FOTO}" alt="Prof. Brune"><div class="fala"><span class="nome">Prof. Brune</span><span>${esc(s.say)}</span></div></div>`:'<p class="small" style="margin:0;text-align:center">Você viu nesta lição:</p>'}
       <div class="ex-list">${s.list.map(([f,t,l])=>`<div class="ex-row">${audBtn(f,'')}<div class="t"><b>${esc(f)}${l?`<span class="lbl">${esc(l)}</span>`:''}</b><span>${esc(t)}</span></div></div>`).join('')}</div>
-      <p class="small" style="margin:0;text-align:center">Esses cartões já entram na sua Revisão.</p>
+      ${s.gramatica?'':'<p class="small" style="margin:0;text-align:center">Esses cartões já entram na sua Revisão.</p>'}
       <button class="btn" id="go">Continuar</button>`;
   }
   if(s.type==='unidade'){
     const u=UNIDADES.find(x=>x.n===s.unit);
-    h=`<span class="tag">Unidade ${u.n} · ${esc(u.titulo)}</span>
+    h=u.gramatica
+      // Gramática (decisão 365): na trilha, uma lição só, sem a setinha das lições e sem Revisão da unidade.
+      ? `<span class="tag">Unidade ${u.n} · Gramática</span>
+    <div class="lessons"><button class="lesson" data-to="${u.licoes[0].primeira}"><span class="n">G</span><span class="t">${esc(u.titulo)}</span></button></div>
+    <p class="small" style="margin:0">Lição única: abre direto, sem lista de lições e sem Revisão da unidade.</p>`
+      : `<span class="tag">Unidade ${u.n} · ${esc(u.titulo)}</span>
     <div class="lessons">${u.licoes.map(l=>`<button class="lesson" data-to="${l.primeira}"><span class="n">${l.n}</span><span class="t">${esc(l.titulo)}</span></button>`).join('')}
       <div class="lesson"><span class="n">★</span><span class="t">Revisão da unidade</span></div></div>`;
   }
@@ -899,7 +919,7 @@ function render(){
 
 function bind(s){
   const g=$('go'); if(g) g.onclick=next;
-  if(s.type==='complete'||s.type==='funcao'||s.type==='vf'){
+  if(s.type==='complete'||s.type==='funcao'||s.type==='vf'||s.type==='classificar'){
     screen.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{
       const v=b.dataset.o; const ans=String(s.answer); const ok=v===ans;
       screen.querySelectorAll('.opt').forEach(x=>{

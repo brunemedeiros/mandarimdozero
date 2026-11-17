@@ -1,0 +1,763 @@
+{
+ "_doc": "Rascunho da unidade 4 do módulo \"Apresentar-se\", a primeira gramática no formato da lição curta (decisão 365): uma lição só, sem cartões, sem diálogo e sem Revisão da unidade; três estruturas (entonação, est-ce que, inversão), cada uma com a explicação da Prof. Brune (nota com exemplos e áudio) seguida de exercícios; depois a recapitulação e exercícios de reconhecer, relacionar e transformar. Referências: Grammaire Progressive A1, cap. 5 (L'interrogation simple: intonation montante, est-ce que) e cap. 52 (formel, courant, familier); Grammaire en Dialogues, cap. 3 (est-ce qu'elle; a entonação como forma familiar). Validar com node docs/i18n/curriculo/piloto-m1/A1-g12/validar.js.",
+ "status": "rascunho (aguarda a dona)",
+ "formato": "licao-curta-gramatica",
+ "unidade": {
+  "id": "A1-g12",
+  "modulo": "A1-m1",
+  "posicao": "M1.4",
+  "tipo": "gramatica",
+  "titulo": {
+   "pt-BR": "Gramática: perguntas de sim ou não",
+   "en": null
+  },
+  "funcao": "fazer perguntas de sim ou não: com entonação, com est-ce que e com inversão (só reconhecer); sem negação"
+ },
+ "cartoes": [],
+ "dialogos": [],
+ "frases_na_frase": [],
+ "notas": [
+  {
+   "id": "entonacao",
+   "id_mapa": null,
+   "titulo": {
+    "pt-BR": "Perguntas com entonação",
+    "en": null
+   },
+   "tipo": "Gram",
+   "tipo_visivel": "gramática",
+   "confianca": "alta",
+   "momento": {
+    "licao": "perguntas-sim-ou-nao"
+   },
+   "destino": "nota",
+   "texto": {
+    "pt-BR": "A frase é a mesma da afirmação: só a entonação muda. Na afirmação, a voz desce no fim; na pergunta, a voz sobe, e na escrita vem o <strong>?</strong>. Repare: em francês, tem um espaço antes do <strong>?</strong>. É o jeito mais comum no dia a dia. Você já usou: <strong>Vous allez bien ?</strong>",
+    "en": null
+   },
+   "exemplos": [
+    {
+     "fr": "Tu parles anglais.",
+     "pt-BR": "Você fala inglês.",
+     "en": null
+    },
+    {
+     "fr": "Tu parles anglais ?",
+     "pt-BR": "Você fala inglês?",
+     "en": null
+    },
+    {
+     "fr": "Vous habitez à Paris ?",
+     "pt-BR": "O senhor (a senhora) mora em Paris?",
+     "en": null
+    }
+   ]
+  },
+  {
+   "id": "est-ce-que",
+   "id_mapa": null,
+   "titulo": {
+    "pt-BR": "Perguntas com est-ce que",
+    "en": null
+   },
+   "tipo": "Gram",
+   "tipo_visivel": "gramática",
+   "confianca": "alta",
+   "momento": {
+    "licao": "perguntas-sim-ou-nao"
+   },
+   "destino": "nota",
+   "texto": {
+    "pt-BR": "Coloque <strong>est-ce que</strong> no começo da frase, e o resto não muda. Ele não se traduz: só avisa que vem uma pergunta. Antes de vogal, vira <strong>est-ce qu'</strong>: <strong>est-ce qu'il</strong>, <strong>est-ce qu'elle</strong>. É um jeito neutro: serve na conversa e na escrita, com qualquer pessoa.",
+    "en": null
+   },
+   "exemplos": [
+    {
+     "fr": "Est-ce que tu parles anglais ?",
+     "pt-BR": "Você fala inglês?",
+     "en": null
+    },
+    {
+     "fr": "Est-ce que vous habitez à Paris ?",
+     "pt-BR": "O senhor (a senhora) mora em Paris?",
+     "en": null
+    },
+    {
+     "fr": "Est-ce qu'il est français ?",
+     "pt-BR": "Ele é francês?",
+     "en": null
+    },
+    {
+     "fr": "Est-ce qu'elle habite au Brésil ?",
+     "pt-BR": "Ela mora no Brasil?",
+     "en": null
+    }
+   ]
+  },
+  {
+   "id": "inversao",
+   "id_mapa": null,
+   "titulo": {
+    "pt-BR": "Perguntas com inversão",
+    "en": null
+   },
+   "tipo": "Gram",
+   "tipo_visivel": "gramática",
+   "confianca": "alta",
+   "momento": {
+    "licao": "perguntas-sim-ou-nao"
+   },
+   "destino": "nota",
+   "texto": {
+    "pt-BR": "O sujeito vai para depois do verbo, ligado por um hífen: <strong>Vous parlez anglais ?</strong> vira <strong>Parlez-vous anglais ?</strong> É o jeito formal, mais comum na escrita. Por enquanto, basta reconhecer. Você já viu um: <strong>Comment allez-vous ?</strong>",
+    "en": null
+   },
+   "exemplos": [
+    {
+     "fr": "Parlez-vous anglais ?",
+     "pt-BR": "O senhor (a senhora) fala inglês?",
+     "en": null
+    },
+    {
+     "fr": "Habitez-vous à Paris ?",
+     "pt-BR": "O senhor (a senhora) mora em Paris?",
+     "en": null
+    },
+    {
+     "fr": "Êtes-vous française ?",
+     "pt-BR": "A senhora é francesa?",
+     "en": null
+    },
+    {
+     "fr": "Comment allez-vous ?",
+     "pt-BR": "Como o senhor (a senhora) está?",
+     "en": null
+    }
+   ]
+  },
+  {
+   "id": "tres-jeitos",
+   "id_mapa": null,
+   "titulo": {
+    "pt-BR": "Os três jeitos, lado a lado",
+    "en": null
+   },
+   "tipo": "Gram",
+   "tipo_visivel": "gramática",
+   "confianca": "alta",
+   "momento": {
+    "licao": "perguntas-sim-ou-nao"
+   },
+   "destino": "nota",
+   "texto": {
+    "pt-BR": "A mesma pergunta, de três jeitos. Com <strong>entonação</strong>, o do dia a dia. Com <strong>est-ce que</strong>, o neutro, que serve sempre. Com <strong>inversão</strong>, o formal, mais da escrita. O sentido não muda. Repare: o <strong>vous</strong> aparece nos três; escolher <strong>tu</strong> ou <strong>vous</strong> é outra decisão.",
+    "en": null
+   },
+   "exemplos": [
+    {
+     "fr": "Vous parlez anglais ?",
+     "pt-BR": "O senhor (a senhora) fala inglês?",
+     "en": null
+    },
+    {
+     "fr": "Est-ce que vous parlez anglais ?",
+     "pt-BR": "O senhor (a senhora) fala inglês?",
+     "en": null
+    },
+    {
+     "fr": "Parlez-vous anglais ?",
+     "pt-BR": "O senhor (a senhora) fala inglês?",
+     "en": null
+    }
+   ]
+  }
+ ],
+ "licoes": [
+  {
+   "id": "perguntas-sim-ou-nao",
+   "ordem": 1,
+   "tipo": "gramatica",
+   "id_novo": true,
+   "titulo": {
+    "publicado": null,
+    "pt-BR": "Perguntas de sim ou não",
+    "en": null,
+    "a_confirmar": false
+   },
+   "cartoes": [],
+   "inclui_dialogo": false,
+   "telas": [
+    {
+     "id": "g4-intro",
+     "tipo": "abertura",
+     "objetivo": {
+      "pt-BR": "Vou te mostrar os três jeitos de fazer uma pergunta de sim ou não em francês. Vamos lá?",
+      "en": null
+     },
+     "tamanho": {
+      "pt-BR": "3 estruturas · cerca de 5 minutos",
+      "en": null
+     }
+    },
+    {
+     "id": "g4-nota-entonacao",
+     "tipo": "nota",
+     "nota": "entonacao",
+     "rotulos": {
+      "Tu parles anglais.": "afirmação",
+      "Tu parles anglais ?": "pergunta",
+      "Vous habitez à Paris ?": "pergunta"
+     }
+    },
+    {
+     "id": "g4-ex-qual-pergunta",
+     "tipo": "funcao",
+     "pergunta": {
+      "pt-BR": "Qual destas frases é uma pergunta?",
+      "en": null
+     },
+     "opcoes": [
+      "Tu habites à Rio.",
+      "Tu habites à Rio ?",
+      "J'habite à Rio."
+     ],
+     "resposta": "Tu habites à Rio ?",
+     "traducao_do_painel": {
+      "pt-BR": "Você mora no Rio?",
+      "en": null
+     },
+     "explicacao": {
+      "pt-BR": "O <b>?</b> no fim mostra a pergunta; na fala, a voz sobe.",
+      "en": null
+     },
+     "explicacao_erro": {
+      "Tu habites à Rio.": {
+       "pt-BR": "Com ponto final, é uma afirmação. ",
+       "en": null
+      },
+      "J'habite à Rio.": {
+       "pt-BR": "Essa é uma resposta: <b>j'habite</b> é \"eu moro\". ",
+       "en": null
+      }
+     }
+    },
+    {
+     "id": "g4-ex-vf-entonacao",
+     "tipo": "vf",
+     "fr": "Elle est brésilienne ?",
+     "afirmacao": {
+      "pt-BR": "É uma pergunta.",
+      "en": null
+     },
+     "resposta": true,
+     "frase_do_painel": "Elle est brésilienne ?",
+     "traducao_do_painel": {
+      "pt-BR": "Ela é brasileira?",
+      "en": null
+     },
+     "explicacao": {
+      "pt-BR": "Com <b>?</b> no fim, é pergunta, e a voz sobe. Sem ele, seria uma afirmação.",
+      "en": null
+     }
+    },
+    {
+     "id": "g4-ex-montar-entonacao",
+     "tipo": "montar",
+     "traducao": {
+      "pt-BR": "Você fala francês?",
+      "en": null
+     },
+     "pecas": [
+      "Tu",
+      "parles",
+      "français",
+      "?",
+      "Je",
+      "."
+     ],
+     "resposta": [
+      "Tu",
+      "parles",
+      "français",
+      "?"
+     ],
+     "frase_completa": "Tu parles français ?",
+     "explicacao": {
+      "pt-BR": "A mesma frase da afirmação, com <b>?</b> no fim e um espaço antes dele.",
+      "en": null
+     }
+    },
+    {
+     "id": "g4-nota-estceque",
+     "tipo": "nota",
+     "nota": "est-ce-que"
+    },
+    {
+     "id": "g4-ex-estceque",
+     "tipo": "complete",
+     "antes": "",
+     "depois": " tu étudies le français ?",
+     "traducao": {
+      "pt-BR": "Você estuda francês?",
+      "en": null
+     },
+     "opcoes": [
+      "Est-ce que",
+      "Est-ce qu'"
+     ],
+     "resposta": "Est-ce que",
+     "frase_completa": "Est-ce que tu étudies le français ?",
+     "distrator": "par",
+     "explicacao": {
+      "pt-BR": "Antes de <b>tu</b>, que começa com consoante, fica <b>est-ce que</b>.",
+      "en": null
+     },
+     "explicacao_erro": {
+      "Est-ce qu'": {
+       "pt-BR": "<b>Qu'</b> só antes de vogal. ",
+       "en": null
+      }
+     }
+    },
+    {
+     "id": "g4-ex-estcequelle",
+     "tipo": "complete",
+     "antes": "Est-ce ",
+     "depois": "elle parle anglais ?",
+     "traducao": {
+      "pt-BR": "Ela fala inglês?",
+      "en": null
+     },
+     "opcoes": [
+      "qu'",
+      "que "
+     ],
+     "resposta": "qu'",
+     "frase_completa": "Est-ce qu'elle parle anglais ?",
+     "distrator": "grafia",
+     "explicacao": {
+      "pt-BR": "Antes de vogal, <b>que</b> perde o <b>e</b>: <b>est-ce qu'elle</b>.",
+      "en": null
+     },
+     "explicacao_erro": {
+      "que ": {
+       "pt-BR": "Quase lá! Antes de vogal, o <b>e</b> cai. ",
+       "en": null
+      }
+     }
+    },
+    {
+     "id": "g4-ex-montar-estceque",
+     "tipo": "montar",
+     "traducao": {
+      "pt-BR": "Ele mora em Paris?",
+      "en": null
+     },
+     "pecas": [
+      "Est-ce",
+      "qu'il",
+      "habite",
+      "à",
+      "Paris",
+      "?",
+      "que",
+      "au"
+     ],
+     "resposta": [
+      "Est-ce",
+      "qu'il",
+      "habite",
+      "à",
+      "Paris",
+      "?"
+     ],
+     "frase_completa": "Est-ce qu'il habite à Paris ?",
+     "explicacao": {
+      "pt-BR": "<b>Est-ce qu'il</b> no começo; o resto fica como na afirmação.",
+      "en": null
+     }
+    },
+    {
+     "id": "g4-nota-inversao",
+     "tipo": "nota",
+     "nota": "inversao"
+    },
+    {
+     "id": "g4-ex-vf-inversao",
+     "tipo": "vf",
+     "fr": "Habitez-vous à Paris ?",
+     "afirmacao": {
+      "pt-BR": "É a mesma pergunta que <i>Vous habitez à Paris ?</i>",
+      "en": null
+     },
+     "resposta": true,
+     "frase_do_painel": "Habitez-vous à Paris ?",
+     "traducao_do_painel": {
+      "pt-BR": "O senhor (a senhora) mora em Paris?",
+      "en": null
+     },
+     "explicacao": {
+      "pt-BR": "O sentido é o mesmo; com a inversão, a pergunta fica mais formal.",
+      "en": null
+     }
+    },
+    {
+     "id": "g4-ex-sem-inversao",
+     "tipo": "montar",
+     "fr": "Parlez-vous français ?",
+     "pedido": {
+      "pt-BR": "Escreva a mesma pergunta sem inversão.",
+      "en": null
+     },
+     "traducao": {
+      "pt-BR": "O senhor (a senhora) fala francês?",
+      "en": null
+     },
+     "pecas": [
+      "Vous",
+      "parlez",
+      "français",
+      "?",
+      "Parlez",
+      "êtes"
+     ],
+     "resposta": [
+      "Vous",
+      "parlez",
+      "français",
+      "?"
+     ],
+     "frase_completa": "Vous parlez français ?",
+     "explicacao": {
+      "pt-BR": "Sem inversão, o <b>vous</b> volta para antes do verbo, e o hífen some.",
+      "en": null
+     }
+    },
+    {
+     "id": "g4-ex-inversao-estceque",
+     "tipo": "montar",
+     "fr": "Habitez-vous au Brésil ?",
+     "pedido": {
+      "pt-BR": "Agora a mesma pergunta com est-ce que.",
+      "en": null
+     },
+     "traducao": {
+      "pt-BR": "O senhor (a senhora) mora no Brasil?",
+      "en": null
+     },
+     "pecas": [
+      "Est-ce",
+      "que",
+      "vous",
+      "habitez",
+      "au",
+      "Brésil",
+      "?",
+      "qu'",
+      "Habitez"
+     ],
+     "resposta": [
+      "Est-ce",
+      "que",
+      "vous",
+      "habitez",
+      "au",
+      "Brésil",
+      "?"
+     ],
+     "frase_completa": "Est-ce que vous habitez au Brésil ?",
+     "explicacao": {
+      "pt-BR": "<b>Est-ce que</b> no começo e <b>vous habitez</b> na ordem normal.",
+      "en": null
+     }
+    },
+    {
+     "id": "g4-nota-tres",
+     "tipo": "nota",
+     "nota": "tres-jeitos",
+     "rotulos": {
+      "Vous parlez anglais ?": "entonação · dia a dia",
+      "Est-ce que vous parlez anglais ?": "est-ce que · neutro",
+      "Parlez-vous anglais ?": "inversão · formal"
+     }
+    },
+    {
+     "id": "g4-ex-qual-1",
+     "tipo": "classificar",
+     "fr": "Est-ce que tu habites à Rio ?",
+     "pergunta": {
+      "pt-BR": "Qual estrutura essa pergunta usa?",
+      "en": null
+     },
+     "opcoes": [
+      "Entonação",
+      "Est-ce que",
+      "Inversão"
+     ],
+     "resposta": "Est-ce que",
+     "traducao_do_painel": {
+      "pt-BR": "Você mora no Rio?",
+      "en": null
+     },
+     "explicacao": {
+      "pt-BR": "Ela começa com <b>est-ce que</b>; o resto fica igual à afirmação.",
+      "en": null
+     },
+     "explicacao_erro": {
+      "Entonação": {
+       "pt-BR": "A voz sobe, mas o que marca aqui é o <b>est-ce que</b>. ",
+       "en": null
+      },
+      "Inversão": {
+       "pt-BR": "Não há inversão: <b>tu habites</b> está na ordem normal. ",
+       "en": null
+      }
+     }
+    },
+    {
+     "id": "g4-ex-qual-2",
+     "tipo": "classificar",
+     "fr": "Parlez-vous portugais ?",
+     "pergunta": {
+      "pt-BR": "Qual estrutura essa pergunta usa?",
+      "en": null
+     },
+     "opcoes": [
+      "Entonação",
+      "Est-ce que",
+      "Inversão"
+     ],
+     "resposta": "Inversão",
+     "traducao_do_painel": {
+      "pt-BR": "O senhor (a senhora) fala português?",
+      "en": null
+     },
+     "explicacao": {
+      "pt-BR": "O verbo vem antes do sujeito, com hífen: <b>parlez-vous</b>.",
+      "en": null
+     },
+     "explicacao_erro": {
+      "Entonação": {
+       "pt-BR": "Com entonação, seria <b>Vous parlez portugais ?</b> ",
+       "en": null
+      },
+      "Est-ce que": {
+       "pt-BR": "Não tem <b>est-ce que</b> no começo. ",
+       "en": null
+      }
+     }
+    },
+    {
+     "id": "g4-ex-qual-3",
+     "tipo": "classificar",
+     "fr": "Elle est italienne ?",
+     "pergunta": {
+      "pt-BR": "Qual estrutura essa pergunta usa?",
+      "en": null
+     },
+     "opcoes": [
+      "Entonação",
+      "Est-ce que",
+      "Inversão"
+     ],
+     "resposta": "Entonação",
+     "traducao_do_painel": {
+      "pt-BR": "Ela é italiana?",
+      "en": null
+     },
+     "explicacao": {
+      "pt-BR": "É a frase da afirmação com <b>?</b>: só a voz sobe.",
+      "en": null
+     },
+     "explicacao_erro": {
+      "Est-ce que": {
+       "pt-BR": "Não tem <b>est-ce que</b> no começo. ",
+       "en": null
+      },
+      "Inversão": {
+       "pt-BR": "O sujeito <b>elle</b> continua antes do verbo. ",
+       "en": null
+      }
+     }
+    },
+    {
+     "id": "g4-rel",
+     "tipo": "relacionar",
+     "pares": [
+      [
+       "Vous êtes français ?",
+       "entonação"
+      ],
+      [
+       "Est-ce que vous êtes français ?",
+       "est-ce que"
+      ],
+      [
+       "Êtes-vous français ?",
+       "inversão"
+      ]
+     ],
+     "explicacao": {
+      "pt-BR": "Nos pares, a mesma pergunta: só com <b>?</b>, com <b>est-ce que</b> na frente ou com o verbo antes do sujeito.",
+      "en": null
+     }
+    },
+    {
+     "id": "g4-ex-colega",
+     "tipo": "funcao",
+     "pergunta": {
+      "pt-BR": "Num café, você pergunta a um colega de curso se ele fala inglês. O que é mais natural?",
+      "en": null
+     },
+     "opcoes": [
+      "Tu parles anglais ?",
+      "Parlez-vous anglais ?",
+      "Vous parlez anglais."
+     ],
+     "resposta": "Tu parles anglais ?",
+     "traducao_do_painel": {
+      "pt-BR": "Você fala inglês?",
+      "en": null
+     },
+     "explicacao": {
+      "pt-BR": "Entre colegas, o mais natural é <b>tu</b> e a pergunta com entonação.",
+      "en": null
+     },
+     "explicacao_erro": {
+      "Parlez-vous anglais ?": {
+       "pt-BR": "A inversão com <b>vous</b> é formal demais para um colega. ",
+       "en": null
+      },
+      "Vous parlez anglais.": {
+       "pt-BR": "Com ponto final, é afirmação, não pergunta. ",
+       "en": null
+      }
+     }
+    },
+    {
+     "id": "g4-ex-hotel",
+     "tipo": "funcao",
+     "pergunta": {
+      "pt-BR": "Você escreve um e-mail a um hotel para saber se falam português. Qual pergunta combina mais?",
+      "en": null
+     },
+     "opcoes": [
+      "Tu parles portugais ?",
+      "Parlez-vous portugais ?",
+      "Est-ce que tu parles portugais ?"
+     ],
+     "resposta": "Parlez-vous portugais ?",
+     "traducao_do_painel": {
+      "pt-BR": "Vocês falam português?",
+      "en": null
+     },
+     "explicacao": {
+      "pt-BR": "Num e-mail formal, a inversão combina bem: <b>Parlez-vous portugais ?</b>",
+      "en": null
+     },
+     "explicacao_erro": {
+      "Tu parles portugais ?": {
+       "pt-BR": "Com <b>tu</b> e só entonação, fica informal demais para um hotel. ",
+       "en": null
+      },
+      "Est-ce que tu parles portugais ?": {
+       "pt-BR": "O <b>est-ce que</b> serve, mas com o hotel é <b>vous</b>. ",
+       "en": null
+      }
+     }
+    },
+    {
+     "id": "g4-ex-responder",
+     "tipo": "funcao",
+     "pergunta": {
+      "pt-BR": "Responda que sim: Est-ce que vous parlez français ?",
+      "en": null
+     },
+     "opcoes": [
+      "Oui, je parle français.",
+      "Oui, vous parlez français.",
+      "Oui, je parles français."
+     ],
+     "resposta": "Oui, je parle français.",
+     "traducao_do_painel": {
+      "pt-BR": "Sim, eu falo francês.",
+      "en": null
+     },
+     "explicacao": {
+      "pt-BR": "Na resposta, você fala de você: <b>je parle</b>.",
+      "en": null
+     },
+     "explicacao_erro": {
+      "Oui, vous parlez français.": {
+       "pt-BR": "Assim você repete a pergunta; na resposta, é <b>je</b>. ",
+       "en": null
+      },
+      "Oui, je parles français.": {
+       "pt-BR": "Com <b>je</b>, é <b>parle</b>, sem <b>s</b>. ",
+       "en": null
+      }
+     }
+    },
+    {
+     "id": "g4-ex-para-entonacao",
+     "tipo": "montar",
+     "fr": "Est-ce que tu étudies le français ?",
+     "pedido": {
+      "pt-BR": "Escreva a mesma pergunta só com entonação.",
+      "en": null
+     },
+     "traducao": {
+      "pt-BR": "Você estuda francês?",
+      "en": null
+     },
+     "pecas": [
+      "Tu",
+      "étudies",
+      "le",
+      "français",
+      "?",
+      "Est-ce",
+      "que"
+     ],
+     "resposta": [
+      "Tu",
+      "étudies",
+      "le",
+      "français",
+      "?"
+     ],
+     "frase_completa": "Tu étudies le français ?",
+     "explicacao": {
+      "pt-BR": "Sem <b>est-ce que</b>, fica a frase da afirmação com <b>?</b>.",
+      "en": null
+     }
+    },
+    {
+     "id": "g4-fim",
+     "tipo": "fim",
+     "fala": {
+      "pt-BR": "Parabéns! Agora você conhece os três jeitos de perguntar.",
+      "en": null
+     },
+     "resumo": [
+      {
+       "fr": "Vous parlez anglais ?",
+       "pt-BR": "O senhor (a senhora) fala inglês?",
+       "rotulo": "entonação"
+      },
+      {
+       "fr": "Est-ce que vous parlez anglais ?",
+       "pt-BR": "O senhor (a senhora) fala inglês?",
+       "rotulo": "est-ce que"
+      },
+      {
+       "fr": "Parlez-vous anglais ?",
+       "pt-BR": "O senhor (a senhora) fala inglês?",
+       "rotulo": "inversão"
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

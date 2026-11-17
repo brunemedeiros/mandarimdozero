@@ -17,6 +17,7 @@ const RASCUNHOS = [
   { unidade: 1, caminho: 'docs/i18n/curriculo/piloto-m1/A1-1/A1-1.json' },
   { unidade: 2, caminho: 'docs/i18n/curriculo/piloto-m1/A1-2/A1-2.json' },
   { unidade: 3, caminho: 'docs/i18n/curriculo/piloto-m1/A1-9/A1-9.json' },
+  { unidade: 4, caminho: 'docs/i18n/curriculo/piloto-m1/A1-g12/A1-g12.json' }, // gramática (decisão 365)
 ];
 
 // `tolerante`: para a comparação com um commit antigo, tela de tipo que não existe mais é ignorada.
@@ -95,8 +96,13 @@ function construirTelas(R, unidade, tolerante){
       case 'ouvir_escolher': return { ...base, type: 'ouvir', q: pt(t.pergunta), audio: t.audio, opts: t.opcoes, answer: t.resposta, why_ok: pt(t.explicacao) };
       case 'digitar': return { ...base, type: 'digitar', q: pt(t.pergunta), audio: t.audio, answer: t.resposta, why_ok: pt(t.explicacao) };
       case 'relacionar': return { ...base, type: 'relacionar', pares: t.pares, why_ok: pt(t.explicacao) };
-      case 'montar': return { ...base, type: 'montar', tr: pt(t.traducao), tiles: L.embaralharPecas(t.pecas, t.resposta), answer: t.resposta, full: t.frase_completa, why_ok: pt(t.explicacao) };
+      // "Monte a frase" pode partir de outra frase (fr + pedido): ex.: a mesma pergunta sem inversão (decisão 365).
+      case 'montar': return { ...base, type: 'montar', tr: pt(t.traducao), fr: t.fr, pedido: pt(t.pedido) || undefined, tiles: L.embaralharPecas(t.pecas, t.resposta), answer: t.resposta, full: t.frase_completa, why_ok: pt(t.explicacao) };
+      case 'classificar': return { ...base, type: 'classificar', fr: t.fr, q: pt(t.pergunta), opts: t.opcoes, answer: t.resposta, full: t.fr, fullTr: pt(t.traducao_do_painel),
+        why_ok: pt(t.explicacao), why_err: erros(t) };
       case 'fim': {
+        // Gramática (decisão 365): o resumo do que foi visto vem do rascunho; não há cartões para a Revisão.
+        if (licao.tipo === 'gramatica') return { ...base, type: 'fim', say: pt(t.fala), gramatica: true, list: t.resumo.map(x => [x.fr, x['pt-BR'], x.rotulo || null]) };
         // Lista do que foi visto (regra 17): os cartões da lição, as frases-modelo e a frase montada.
         const lista = [];
         for (const x of telasDaLicao){
@@ -135,7 +141,7 @@ const TELAS = RASCUNHOS.flatMap(r => construirTelas(lerRascunho(r.caminho), r.un
 // Unidades e lições para as abas e a tela "A unidade" da maquete.
 const UNIDADES = RASCUNHOS.map(r => {
   const R = lerRascunho(r.caminho);
-  return { n: r.unidade, titulo: R.unidade.titulo['pt-BR'],
+  return { n: r.unidade, titulo: R.unidade.titulo['pt-BR'], gramatica: R.unidade.tipo === 'gramatica',
     licoes: R.licoes.filter(l => l.telas).map(l => ({ key: `${r.unidade}.${l.ordem}`, n: l.ordem, titulo: l.titulo['pt-BR'], primeira: l.telas[0].id })) };
 });
 

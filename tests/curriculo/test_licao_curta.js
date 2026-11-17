@@ -95,6 +95,29 @@ console.log('== par informal / formal em duas telas e "Relacione os pares" (deci
   check('"Relacione" com tradução repetida é acusado', acusa(x => { comPar(x); tela(x, 'rel').pares[1][1] = 'você (informal)'; }, 'item repetido'));
 }
 
+console.log('== lição de gramática (decisão 365)');
+{
+  const gram = () => ({ cartoes: [], dialogos: [], frases_na_frase: [],
+    notas: [{ id: 'g1', destino: 'nota', momento: { licao: 'lg' }, texto: pt('Explicação curta.'), exemplos: [] }],
+    licoes: [{ id: 'lg', tipo: 'gramatica', inclui_dialogo: false, telas: [
+      { id: 'a', tipo: 'abertura', objetivo: pt('Vamos lá?') },
+      { id: 'n', tipo: 'nota', nota: 'g1' },
+      { id: 'c', tipo: 'classificar', fr: 'Tu parles anglais ?', pergunta: pt('Qual estrutura?'), opcoes: ['Entonação', 'Inversão'], resposta: 'Entonação', traducao_do_painel: pt('Você fala inglês?'), explicacao: pt('ok') },
+      { id: 'z', tipo: 'fim', resumo: [{ fr: 'Tu parles anglais ?', 'pt-BR': 'Você fala inglês?' }] } ] }] });
+  const acusaG = (mudar, trecho) => { const r = gram(); mudar(r); return problemas(r).some(p => p.includes(trecho)); };
+  check('gramática mínima válida: nota sem gatilho, "classificar" e fim com resumo', problemas(gram()).length === 0, problemas(gram()));
+  check('explicação de gramática sem exercício logo depois é acusada', acusaG(r => { r.licoes[0].telas.splice(2, 1); }, 'precisa de um exercício logo depois'));
+  check('nota sem gatilho fora de uma lição de gramática é acusada', acusaG(r => { delete r.licoes[0].tipo; }, 'nota sem gatilho fora de uma lição de gramática'));
+  check('"classificar" com resposta fora das opções é acusado', acusaG(r => { r.licoes[0].telas[2].resposta = 'Est-ce que'; }, '"classificar"'));
+  check('fim da gramática sem resumo é acusado', acusaG(r => { delete r.licoes[0].telas[3].resumo; }, 'sem o resumo'));
+  check('gramática com cartão é acusada', acusaG(r => { r.cartoes.push({ fr: 'oui', licao: 'lg' }); r.licoes[0].telas.splice(1, 0, { id: 'k', tipo: 'cartao', cartao: 'oui' }); }, 'gramática não tem cartão'));
+  const RG = require(path.join(ROOT, 'docs/i18n/curriculo/piloto-m1/A1-g12/A1-g12.json'));
+  check('rascunho real da unidade 4 (A1-g12): nenhum problema nas telas', L.conferirTelas(RG).length === 0, L.conferirTelas(RG));
+  const casosG = L.textosDasTelas(RG, M, M.carregarMapa(), 'A1-g12');
+  check('textos da gramática no fim da posição (vale tudo o que veio antes) e com a frase do "classificar"',
+    casosG.every(c => c.contexto.posicao === 'fim') && casosG.some(c => c.fr === 'Parlez-vous portugais ?') && casosG.some(c => c.fr === 'Parlez-vous français ?'));
+}
+
 console.log('== embaralhar peças e falas (decisão 363)');
 {
   const naOrdem = (pecas, resposta) => { const lidas = []; for (const p of pecas) if (lidas.length < resposta.length && p === resposta[lidas.length]) lidas.push(p); return lidas.length === resposta.length; };

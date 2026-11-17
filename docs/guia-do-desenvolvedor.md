@@ -72,6 +72,9 @@ Regras de código: `.claude/rules/qualidade-de-codigo.md`. Regras por área: `.c
   `traducao`, `registro` (`informal`|`formal`) e, na formal com *vous*, `traducao_plural` ("vocês"); a tradução da tela é montada por
   `traducaoNaTela` ("... (formal) ou ...", decisão 361). Rótulo "Pergunta" não existe (o "?" já diz; `conferirTelas` acusa);
   depois de cada `cartao` ou `frase`, um exercício (`EXERCICIOS`) antes do próximo item novo, nota não conta (decisão 362; `conferirTelas` acusa);
+  gramática (decisão 365): lição com `tipo: 'gramatica'` (rascunho `piloto-m1/A1-g12/`, validador próprio): sem cartões nem diálogo, notas sem
+  gatilho (`momento: {licao}`) seguidas de exercício, `fim` com `resumo`, tela `classificar` (frase fr + opções pt) e `montar` com `fr` + `pedido`
+  (montar a partir de outra frase); "só palavras vistas" na posição do fim da unidade; na maquete, `UNIDADES[].gramatica` tira as abas de lição e a Revisão;
   ordem das peças do "Monte a frase" e das falas do "Coloque na ordem": sempre por `embaralharPecas` / `embaralharIndices` (decisão 363;
   o app deve usar as mesmas funções, nunca a ordem do rascunho);
   o cartão conta uma vez só nas palavras vistas e na Revisão. Tela `relacionar`: `pares` = `[[fr, tradução], ...]`, 3 ou mais,

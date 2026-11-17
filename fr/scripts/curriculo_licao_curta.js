@@ -32,7 +32,10 @@ function embaralharPecas(pecas, resposta){
   return [...pecas].reverse();
 }
 
-const EXERCICIOS = new Set(['complete', 'vf', 'funcao', 'montar', 'ouvir_escolher', 'digitar', 'relacionar']);
+const EXERCICIOS = new Set(['complete', 'vf', 'funcao', 'montar', 'ouvir_escolher', 'digitar', 'relacionar', 'classificar']);
+// Lição de gramática (decisão 365): sem cartões, sem diálogo e sem Revisão da unidade; as explicações são notas sem gatilho de cartão,
+// cada uma seguida de exercícios antes da próxima. "classificar" = frase em francês e opções em português (ex.: qual estrutura).
+const ehGramatica = l => l.tipo === 'gramatica';
 
 // Par informal / formal em duas telas (decisão 360): o registro vai junto da tradução, não numa etiqueta nem num quadro
 // (decisão 361, a dona: tira o foco da palavra). A forma formal com vous pode trazer o sentido de "vocês" em `traducao_plural`.
@@ -107,14 +110,24 @@ function conferirTelas(R){
       if (t.tipo === 'nota'){
         const n = R.notas.find(x => x.id === t.nota);
         confere(n && n.destino === 'nota' && n.momento.licao === l.id, `tela ${t.id}: nota inexistente, de outra lição ou marcada como painel`);
-        const alvo = n && telas.find(x => (x.tipo === 'cartao' && x.cartao === n.momento.depois_do_cartao) || (x.tipo === 'frase' && x.frase === n.momento.depois_da_frase));
-        confere(alvo && ids.indexOf(alvo.id) < ids.indexOf(t.id), `tela ${t.id}: nota antes do gatilho (regra 4)`);
+        const temGatilho = n && (n.momento.depois_do_cartao || n.momento.depois_da_frase);
+        if (temGatilho){
+          const alvo = telas.find(x => (x.tipo === 'cartao' && x.cartao === n.momento.depois_do_cartao) || (x.tipo === 'frase' && x.frase === n.momento.depois_da_frase));
+          confere(alvo && ids.indexOf(alvo.id) < ids.indexOf(t.id), `tela ${t.id}: nota antes do gatilho (regra 4)`);
+        } else confere(ehGramatica(l), `tela ${t.id}: nota sem gatilho fora de uma lição de gramática`);
       }
+      if (t.tipo === 'classificar') confere(t.fr && t.traducao_do_painel && t.opcoes.length >= 2 && t.opcoes.includes(t.resposta), `tela ${t.id}: "classificar" sem frase, sem tradução do painel ou com resposta fora das opções`);
+      if (t.tipo === 'fim' && ehGramatica(l)) confere((t.resumo || []).length > 0, `tela ${t.id}: fim da gramática sem o resumo do que foi visto`);
       if (['complete', 'funcao', 'ouvir_escolher'].includes(t.tipo)) confere(t.opcoes.includes(t.resposta), `tela ${t.id}: resposta fora das opções`);
       if (t.tipo === 'vf') confere(typeof t.resposta === 'boolean', `tela ${t.id}: V/F sem resposta verdadeiro/falso`);
       if (t.tipo === 'complete') confere(t.opcoes.length === 2 && t.antes + t.resposta + t.depois === t.frase_completa, `tela ${t.id}: "Complete" sem 2 opções ou com frase completa diferente das partes`);
       if (t.tipo === 'montar') confere(t.resposta.join(' ') === t.frase_completa && t.resposta.every(p => t.pecas.includes(p)) && t.pecas.length > t.resposta.length, `tela ${t.id}: peças, resposta e frase não batem (ou não sobra peça)`);
       if (t.tipo === 'digitar') confere(typeof t.audio === 'string' && typeof t.resposta === 'string' && t.resposta.length > 0, `tela ${t.id}: "digitar" sem áudio ou sem resposta`);
+    }
+    // Gramática: cada explicação seguida de exercício antes da próxima explicação ou do fim (decisão 365).
+    if (ehGramatica(l)){
+      confere(!telas.some(t => t.tipo === 'cartao' || t.tipo === 'frase'), `lição ${l.id}: gramática não tem cartão nem frase nova`);
+      telas.forEach((t, k) => { if (t.tipo === 'nota') confere(EXERCICIOS.has((telas[k + 1] || {}).tipo), `lição ${l.id}: a explicação ${t.id} precisa de um exercício logo depois`); });
     }
     const completes = telas.filter(t => t.tipo === 'complete').map(t => t.distrator === 'grafia' ? 'grafia' : 'palavra');
     if (completes.length >= 2) confere(new Set(completes).size === 2, `lição ${l.id}: os "Complete" não alternam grafia e outra palavra (decisão 342)`);
@@ -178,7 +191,7 @@ function posicaoNoFimDaLicao(M, mapaReal, unidadeId, n){
 // - lições de diálogo: as falas e os textos dos exercícios, no contexto dialogo (notas contam, decisão 253).
 function textosDasTelas(R, M, mapa, unidadeId){
   const u = M.indicePorId(mapa)[unidadeId].unidade;
-  const numLicao = Object.fromEntries(u.licoes.map(l => [l.id, l.licao]));
+  const numLicao = Object.fromEntries((u.licoes || []).map(l => [l.id, l.licao]));
   const casos = [];
   const add = (grupo, obrigatorio, onde, fr, contexto, mapaDoCaso) => casos.push({ grupo, obrigatorio, onde, fr, contexto, mapa: mapaDoCaso });
   for (const l of licoesComTelas(R)){
@@ -197,8 +210,9 @@ function textosDasTelas(R, M, mapa, unidadeId){
       }
       continue;
     }
-    const base = posicaoNoFimDaLicao(M, mapa, unidadeId, n - 1);
-    let vistos = u.cartoes.filter(c => c.licao < n).length;
+    // Gramática: não tem cartões; vale tudo o que veio antes da unidade (decisão 365).
+    const base = ehGramatica(l) ? { mapa, posicao: 'fim' } : posicaoNoFimDaLicao(M, mapa, unidadeId, n - 1);
+    let vistos = ehGramatica(l) ? 'fim' : u.cartoes.filter(c => c.licao < n).length;
     l.telas.forEach((t, i) => {
       if (t.tipo === 'cartao'){ if (!t.forma) vistos++; return; } // cartão em duas telas conta uma vez (decisão 360)
       const ctx = { tipo: 'exercicio_licao', posicao: vistos };
@@ -206,10 +220,11 @@ function textosDasTelas(R, M, mapa, unidadeId){
       const textos = [];
       if (t.tipo === 'complete'){ textos.push(t.frase_completa); if (t.distrator !== 'grafia') textos.push(...t.opcoes); }
       if (t.tipo === 'funcao') textos.push(...t.opcoes);
-      if (t.tipo === 'montar') textos.push(t.frase_completa, ...t.pecas);
+      if (t.tipo === 'montar') textos.push(t.frase_completa, ...t.pecas, ...(t.fr ? [t.fr] : []));
+      if (t.tipo === 'classificar') textos.push(t.fr);
       if (t.tipo === 'relacionar') textos.push(...t.pares.map(x => x[0]));
       if (t.tipo === 'vf'){
-        const depoisDeNota = l.telas[i - 1] && l.telas[i - 1].tipo === 'nota';
+        const depoisDeNota = !ehGramatica(l) && l.telas[i - 1] && l.telas[i - 1].tipo === 'nota';
         add(depoisDeNota ? 'Exercícios das telas: V/F de nota (informativo)' : 'Exercícios das telas', !depoisDeNota, onde, t.fr, ctx, base.mapa);
       }
       for (const x of textos) add('Exercícios das telas', true, onde, x, ctx, base.mapa);

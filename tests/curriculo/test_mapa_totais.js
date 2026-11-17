@@ -130,7 +130,7 @@ console.log('== ordem dos módulos "Apresentar-se" e "Família e pessoas próxim
   check('ordem do módulo "Família e pessoas próximas" (decisão 335)', JSON.stringify(m2.unidades.map(x => x.id)) ===
     JSON.stringify(['A1-4', 'A1-g17', 'A1-21', 'A1-g2', 'A1-16', 'A1-g22']), m2.unidades.map(x => x.id));
   check('"ordem" de cada unidade = posição na lista (1..n), sem buraco', [m1, m2].every(m => m.unidades.every((u, i) => u.ordem === i + 1)));
-  check('"Gramática: perguntar sim ou não" logo depois de "Dizer de onde é, onde mora e que línguas fala" (gatilho Tu parles anglais ?)',
+  check('"Gramática: perguntas de sim ou não" logo depois de "Dizer de onde é, onde mora e que línguas fala" (gatilho Tu parles anglais ?)',
     idx['A1-g12'].ordemGlobal === idx['A1-9'].ordemGlobal + 1 && idx['A1-g12'].posicao === 'M1.4', idx['A1-g12'].posicao);
   check('"Perguntar a idade dos outros: até 69" logo depois da "Gramática: artigos e plural" (M2.3)',
     idx['A1-21'].modulo === 'A1-m7' && idx['A1-21'].ordemGlobal === idx['A1-g17'].ordemGlobal + 1 && idx['A1-21'].posicao === 'M2.3', idx['A1-21'].posicao);
