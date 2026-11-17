@@ -9,6 +9,8 @@ Uso (precisa de GCP_TTS_KEY, exceto com --dry-run):
     python3 fr/scripts/audio_lab.py --dry-run     # mostra o plano e o custo, sem rede
     python3 fr/scripts/audio_lab.py               # gera e abre fr/scripts/lab_output/index.html
 
+Entonação do francês (--modo entonacao): a mesma frase como afirmação e como pergunta.
+
 Português do Brasil (--lang pt):
     --modo regras   variantes de escrita das regras de texto falado (hora, moeda,
                     abreviações, gênero, barra, ordinais, títulos), voz Achernar
@@ -53,6 +55,13 @@ CASES = {
     "français / française": [
         "français / française", "français, française", "français. française",
     ],
+}
+
+# Entonação (--modo entonacao): a mesma frase como afirmação e como pergunta, para ouvir se a voz do site
+# desce na afirmação e sobe na pergunta (pendência do CLAUDE.md; unidade "Gramática: perguntas de sim ou não").
+CASES_ENTONACAO = {
+    "Tu parles anglais: afirmação x pergunta": ["Tu parles anglais.", "Tu parles anglais ?"],
+    "Vous habitez à Paris: afirmação x pergunta": ["Vous habitez à Paris.", "Vous habitez à Paris ?"],
 }
 
 # ---------------------------------------------------------------------------
@@ -191,8 +200,8 @@ def _tem_chave():
     return True
 
 
-def _modo_regras(lang, dry):
-    rows = plan(CASES_PT_REGRAS if lang == "pt" else CASES, lang)
+def _modo_regras(lang, dry, cases=None):
+    rows = plan(cases or (CASES_PT_REGRAS if lang == "pt" else CASES), lang)
     total_variants = sum(len(v) for _, v in rows)
     total_chars = sum(len(t) for _, vs in rows for t, _ in vs)
     print(f"{len(rows)} casos, {total_variants} variantes, {total_chars} caracteres no total.")
@@ -301,13 +310,17 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description="Laboratório de escuta do TTS.")
     ap.add_argument("--dry-run", action="store_true", help="mostra o plano e o custo, sem rede e sem chave")
     ap.add_argument("--lang", choices=["fr", "pt"], default="fr")
-    ap.add_argument("--modo", choices=["regras", "vozes"], default="regras")
+    ap.add_argument("--modo", choices=["regras", "vozes", "entonacao"], default="regras")
     ap.add_argument("--vozes-todas", action="store_true", help="(pt, modo vozes) inclui as 30 vozes Chirp3-HD")
     args = ap.parse_args(argv)
     if args.modo == "vozes":
         if args.lang != "pt":
             ap.error("--modo vozes só existe para --lang pt")
         return _modo_vozes(args.vozes_todas, args.dry_run)
+    if args.modo == "entonacao":
+        if args.lang != "fr":
+            ap.error("--modo entonacao só existe para --lang fr")
+        return _modo_regras("fr", args.dry_run, CASES_ENTONACAO)
     return _modo_regras(args.lang, args.dry_run)
 
 
