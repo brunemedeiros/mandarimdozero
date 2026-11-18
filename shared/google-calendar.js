@@ -4,7 +4,7 @@
 // "esperando conta no site". Grátis, dentro do plano Professora.
 
 // tab: 'open' (para revisar) | 'skipped' (pulados); sort: 'recent' | 'oldest'; shown: quantos itens aparecem (10 por vez).
-const GCAL_STATE = { status: null, review: [], bank: null, former: null, open: null, busy: false, tab: 'open', sort: 'recent', shown: 10 };
+const GCAL_STATE = { status: null, review: [], bank: null, former: null, formerBank: null, open: null, busy: false, tab: 'open', sort: 'recent', shown: 10 };
 const GCAL_PAGE = 10;
 
 async function gcalCall(action, extra){
@@ -39,6 +39,12 @@ async function gcalLoad(){
     GCAL_STATE.bank = (data || []).filter(b => !b.linked_student_id && !b.classroom_id);
   }
   // 133: ex-alunos (sem vínculo ativo, com história com a professora), para ligar a aula só ao histórico.
+  // 135: ex-alunos sem conta = alunos do Banco arquivados, sem conta e sem turma (a aula fica ligada ao Banco).
+  if (!Array.isArray(GCAL_STATE.formerBank)){
+    const { data } = await supabaseClient.from('review_bank_students')
+      .select('id,name,language_app_key,linked_student_id,classroom_id').eq('status', 'arquivado').order('name');
+    GCAL_STATE.formerBank = (data || []).filter(b => !b.linked_student_id && !b.classroom_id);
+  }
   if (!Array.isArray(GCAL_STATE.former)){
     const { data } = await supabaseClient.rpc('notion_former_students');
     GCAL_STATE.former = (data && Array.isArray(data.data)) ? data.data : [];
@@ -66,6 +72,7 @@ function gcalTargetOptionsHTML(){
   const rooms = (ADMIN_CLASS_LOGS_STATE._classroomsCache || []);
   const bank = GCAL_STATE.bank || [];
   const former = GCAL_STATE.former || [];
+  const formerBank = GCAL_STATE.formerBank || [];
   const lang = k => STUDENT_LANGUAGE_LABELS[k] || k;
   return `<option value="">${t('panel.gcal.pick')}</option>
     ${students.length ? `<optgroup label="${escapeHTML(t('admin.common.students'))}">${students.map(s =>
@@ -75,7 +82,9 @@ function gcalTargetOptionsHTML(){
     ${bank.length ? `<optgroup label="${escapeHTML(t('panel.gcal.noAccountGroup'))}">${bank.map(b =>
       `<option value="bank_student|${escapeHTML(b.id)}|${escapeHTML(b.language_app_key)}">${escapeHTML(b.name)} · ${escapeHTML(lang(b.language_app_key))}</option>`).join('')}</optgroup>` : ''}
     ${former.length ? `<optgroup label="${escapeHTML(t('panel.notion.formerGroup'))}">${former.map(f =>
-      `<option value="former|${escapeHTML(f.student_id)}|${escapeHTML(f.language_app_key)}">${escapeHTML(f.name)} · ${escapeHTML(lang(f.language_app_key))}</option>`).join('')}</optgroup>` : ''}`;
+      `<option value="former|${escapeHTML(f.student_id)}|${escapeHTML(f.language_app_key)}">${escapeHTML(f.name)} · ${escapeHTML(lang(f.language_app_key))}</option>`).join('')}</optgroup>` : ''}
+    ${formerBank.length ? `<optgroup label="${escapeHTML(t('panel.gcal.formerBankGroup'))}">${formerBank.map(b =>
+      `<option value="former_bank|${escapeHTML(b.id)}|${escapeHTML(b.language_app_key)}">${escapeHTML(b.name)} · ${escapeHTML(lang(b.language_app_key))}</option>`).join('')}</optgroup>` : ''}`;
 }
 
 function gcalReviewItemHTML(ev){
@@ -96,7 +105,7 @@ function gcalReviewItemHTML(ev){
            <select data-gcal-target aria-label="${escapeHTML(t('panel.gcal.pick'))}">${gcalTargetOptionsHTML()}</select>
            <button type="button" class="p-pequeno" data-gcal-do="assign">${t('panel.gcal.assign')}</button>
          </div>
-         ${(GCAL_STATE.former || []).length ? `<small class="p-ajuda gcal-former-hint">${t('panel.gcal.formerHint')}</small>` : ''}
+         ${((GCAL_STATE.former || []).length || (GCAL_STATE.formerBank || []).length) ? `<small class="p-ajuda gcal-former-hint">${t('panel.gcal.formerHint')}</small>` : ''}
          <div class="gcal-review-actions">
            <button type="button" class="outline secondary p-pequeno" data-gcal-do="ignore">${t('panel.gcal.ignore')}</button>
            <button type="button" class="outline secondary p-pequeno" data-gcal-do="outside" title="${escapeHTML(t('panel.gcal.outsideTitle'))}">${t('panel.gcal.outside')}</button>

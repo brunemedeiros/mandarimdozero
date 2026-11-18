@@ -3548,6 +3548,8 @@ window.I18N_CATALOG['pt-BR'] = {
   'panel.classLog.skill.pronuncia': 'Pronúncia',
   'panel.classLog.classrooms': 'Turmas',
   'panel.gcal.formerHint': 'Ex-alunos ficam no fim da lista: a aula entra só no histórico, sem aviso no Mural.',
+  'panel.gcal.formerBankGroup': 'Ex-alunos sem conta (só para o histórico)',
+  'panel.classLog.formerTag': 'ex-aluno',
   'panel.classLog.forWhom': 'Para quem',
   'panel.classLog.moreFields': 'Mais campos (Observações e Notas)',
   'panel.classLog.classroomsHint': 'Aula de turma fica registrada uma vez só e aparece para todos os alunos da turma.',

@@ -72,3 +72,8 @@ $P aulas94 -f "$MIG/134_gcal_remember_email_and_title.sql" >/dev/null
 $P aulas94 -f "$MIG/134_gcal_remember_email_and_title.sql" >/dev/null
 psql -h /tmp/pg -p 54329 -U pguser aulas94 -q -At -f "$HERE/test_134.sql" 2>&1 | grep -v '^\s*$'
 for t in 117 133; do psql -h /tmp/pg -p 54329 -U pguser aulas94 -q -At -f "$HERE/test_$t.sql" 2>&1 | grep -E 'verificações|FALHOU|ERRO|ERROR'; done
+# 135: aulas de ex-aluno sem conta ligadas ao aluno do Banco (parte do SQL Editor + parte do MCP).
+$P aulas94 -f "$MIG/135_bank_former_lessons.sql" >/dev/null
+$P aulas94 -f "$MIG/135_bank_former_lessons.sql" >/dev/null
+psql -h /tmp/pg -p 54329 -U pguser aulas94 -q -At -f "$HERE/test_135.sql" 2>&1 | grep -v '^\s*$' | grep -E 'ok   |FALHOU|verificações|ERROR'
+for t in 117 128 132 133 134; do psql -h /tmp/pg -p 54329 -U pguser aulas94 -q -At -f "$HERE/test_$t.sql" 2>&1 | grep -E 'verificações|FALHOU|ERRO|ERROR'; done

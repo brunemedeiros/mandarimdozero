@@ -519,6 +519,14 @@ const PANEL_STUB = (who) => {
       await page.locator('dialog.p-dialogo--alerta[open] .p-perigo').click();
       await page.waitForFunction(() => !window.__DB.teacher_class_logs.some(l => l.id === 9901));
       L('apagar aula: confirmar apaga', true);
+      // 135 (2026-11-16): aulas de ex-alunos na lista (com conta: nome da lista de ex-alunos; sem conta: aluno do Banco).
+      await ev(() => { window.__DB.review_bank_students = (window.__DB.review_bank_students || []).concat([{ id: 'BJ', teacher_id: 'P', name: 'Jakob', language_app_key: window.__appKey, status: 'arquivado', linked_student_id: null, classroom_id: null }]);
+        window.__DB.teacher_class_logs.push({ id: 9911, teacher_id: 'P', student_id: null, classroom_id: null, bank_student_id: 'BJ', language_app_key: window.__appKey, class_date: '2026-09-15', topic: 'Pretérito do Jakob', created_at: new Date().toISOString() },
+          { id: 9912, teacher_id: 'P', student_id: 'EX1', classroom_id: null, language_app_key: window.__appKey, class_date: '2026-09-16', topic: 'Aula da Carmen', created_at: new Date().toISOString() });
+        ADMIN_CLASS_LOGS_STATE.listShown = 200; return refreshClassLogsListBox(document.getElementById('admin-classlogs-list-box')); });
+      L('aulas (135): ex-aluno sem conta e ex-aluna com conta aparecem com o nome e "(ex-aluno)"', await ev(() => { const box = document.getElementById('admin-classlogs-list-box'); const li = (id) => box.querySelector(`[data-edit-class-log="${id}"]`)?.closest('.aulas-item'); return !!li(9911) && li(9911).textContent.includes('Jakob') && li(9911).textContent.includes(t('panel.classLog.formerTag')) && !!li(9912) && li(9912).textContent.includes('Carmen da Silva'); }));
+      L('google (135): grupo Ex-alunos sem conta com o aluno do Banco arquivado', await ev(async () => { GCAL_STATE.formerBank = null; await gcalLoad(); const h = gcalTargetOptionsHTML(); return h.includes(`value="former_bank|BJ|`) && h.includes(t('panel.gcal.formerBankGroup')); }));
+      await ev(() => { window.__DB.teacher_class_logs = window.__DB.teacher_class_logs.filter(l => l.id !== 9911 && l.id !== 9912); });
       await ev(() => document.querySelector('[data-classlog-view="check"]').click());
       // 128: caixa do Notion acima de Registrar | Calendário
       await ev(() => { window.notionCall = async (action, extra) => { (window.__notionCalls = window.__notionCalls || []).push([action, extra]);
