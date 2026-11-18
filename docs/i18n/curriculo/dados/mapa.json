@@ -1109,74 +1109,88 @@
               "origem": "publicada",
               "cartoes": [
                 {
-                  "palavra": "un / une",
-                  "chave": "A1-3-v1",
-                  "origem": "publicado"
-                },
-                {
-                  "palavra": "deux",
-                  "chave": "A1-3-v2",
-                  "origem": "publicado"
-                },
-                {
-                  "palavra": "trois",
-                  "chave": "A1-3-v3",
-                  "origem": "publicado"
-                },
-                {
-                  "palavra": "quatre",
-                  "chave": "nova",
-                  "origem": "novo"
-                },
-                {
-                  "palavra": "cinq",
-                  "chave": "nova",
-                  "origem": "novo"
-                },
-                {
-                  "palavra": "six",
-                  "chave": "nova",
-                  "origem": "novo"
-                },
-                {
-                  "palavra": "sept",
-                  "chave": "nova",
-                  "origem": "novo"
-                },
-                {
-                  "palavra": "huit",
-                  "chave": "nova",
-                  "origem": "novo"
-                },
-                {
-                  "palavra": "neuf",
-                  "chave": "nova",
-                  "origem": "novo"
-                },
-                {
-                  "palavra": "dix",
-                  "chave": "A1-3-v4",
-                  "origem": "publicado"
-                },
-                {
-                  "palavra": "vingt",
-                  "chave": "A1-3-v5",
-                  "origem": "publicado"
-                },
-                {
                   "palavra": "l'âge",
                   "chave": "A1-3-v6",
-                  "origem": "publicado"
+                  "origem": "publicado",
+                  "licao": 1
                 },
                 {
                   "palavra": "avoir",
                   "chave": "A1-3-v7",
-                  "origem": "publicado"
+                  "origem": "publicado",
+                  "licao": 1
+                },
+                {
+                  "palavra": "vingt",
+                  "chave": "A1-3-v5",
+                  "origem": "publicado",
+                  "licao": 1
                 },
                 {
                   "palavra": "ans",
                   "chave": "A1-3-v8",
-                  "origem": "publicado"
+                  "origem": "publicado",
+                  "licao": 1
+                },
+                {
+                  "palavra": "un / une",
+                  "chave": "A1-3-v1",
+                  "origem": "publicado",
+                  "licao": 2
+                },
+                {
+                  "palavra": "deux",
+                  "chave": "A1-3-v2",
+                  "origem": "publicado",
+                  "licao": 2
+                },
+                {
+                  "palavra": "trois",
+                  "chave": "A1-3-v3",
+                  "origem": "publicado",
+                  "licao": 2
+                },
+                {
+                  "palavra": "quatre",
+                  "chave": "nova",
+                  "origem": "novo",
+                  "licao": 2
+                },
+                {
+                  "palavra": "cinq",
+                  "chave": "nova",
+                  "origem": "novo",
+                  "licao": 3
+                },
+                {
+                  "palavra": "six",
+                  "chave": "nova",
+                  "origem": "novo",
+                  "licao": 3
+                },
+                {
+                  "palavra": "sept",
+                  "chave": "nova",
+                  "origem": "novo",
+                  "licao": 3
+                },
+                {
+                  "palavra": "huit",
+                  "chave": "nova",
+                  "origem": "novo",
+                  "licao": 4
+                },
+                {
+                  "palavra": "neuf",
+                  "chave": "nova",
+                  "origem": "novo",
+                  "licao": 4
+                },
+                {
+                  "palavra": "dix",
+                  "chave": "A1-3-v4",
+                  "origem": "publicado",
+                  "licao": 4
                 }
               ],
               "notas": [
@@ -1184,27 +1198,149 @@
                   "titulo": "J'ai vingt ans: por que ai",
                   "tipo": "Exp",
                   "confianca": "n/r",
-                  "id": "N08"
+                  "id": "N08",
+                  "forma": "painel",
+                  "momento": {
+                    "licao": 1,
+                    "depois_de": "ans"
+                  },
+                  "exemplos": [
+                    {
+                      "fr": "J'ai vingt ans.",
+                      "pt-BR": "Eu tenho vinte anos."
+                    }
+                  ],
+                  "decisao": 368
                 },
                 {
                   "titulo": "T'as quel âge ?",
                   "tipo": "Real",
                   "confianca": "alta",
                   "id": "N10",
-                  "breve": true
+                  "breve": true,
+                  "momento": {
+                    "licao": 1,
+                    "depois_de": "ans"
+                  },
+                  "exemplos": [
+                    {
+                      "fr": "Tu as quel âge ?",
+                      "pt-BR": "Quantos anos você tem?"
+                    },
+                    {
+                      "fr": "T'as quel âge ?",
+                      "pt-BR": "Quantos anos você tem? (na fala)"
+                    }
+                  ],
+                  "decisao": 368
                 },
                 {
                   "titulo": "Deux‿ans, trois‿ans: a letra muda acorda",
                   "tipo": "Pron",
                   "confianca": "alta",
-                  "nova": true
+                  "nova": true,
+                  "momento": {
+                    "licao": 2,
+                    "depois_de": "trois"
+                  },
+                  "exemplos": [
+                    {
+                      "fr": "deux ans",
+                      "pt-BR": "dois anos"
+                    },
+                    {
+                      "fr": "trois ans",
+                      "pt-BR": "três anos"
+                    }
+                  ],
+                  "decisao": 368
                 },
                 {
                   "titulo": "De 21 a 29 + vingt et un",
                   "tipo": "Exp",
                   "confianca": "alta",
-                  "nova": true
+                  "nova": true,
+                  "momento": {
+                    "licao": 2,
+                    "depois_de": "quatre"
+                  },
+                  "exemplos": [
+                    {
+                      "fr": "vingt et un",
+                      "pt-BR": "vinte e um"
+                    },
+                    {
+                      "fr": "vingt-deux",
+                      "pt-BR": "vinte e dois"
+                    },
+                    {
+                      "fr": "vingt-quatre",
+                      "pt-BR": "vinte e quatro"
+                    }
+                  ],
+                  "decisao": 368
                 }
+              ],
+              "licoes": [
+                {
+                  "licao": 1,
+                  "id": "idade",
+                  "titulo": "Dizer a sua idade"
+                },
+                {
+                  "licao": 2,
+                  "id": "primeiros-numeros",
+                  "titulo": "Contar de um a quatro"
+                },
+                {
+                  "licao": 3,
+                  "id": "cinco-a-sete",
+                  "id_novo": true,
+                  "titulo": "Contar de cinco a sete"
+                },
+                {
+                  "licao": 4,
+                  "id": "oito-a-dez",
+                  "id_novo": true,
+                  "titulo": "Contar de oito a dez"
+                },
+                {
+                  "licao": 5,
+                  "id": "conversar-sobre-idade",
+                  "id_novo": true,
+                  "tipo": "dialogos",
+                  "titulo": "Conversar sobre a idade"
+                },
+                {
+                  "licao": 6,
+                  "id": "idade-formal",
+                  "id_novo": true,
+                  "tipo": "dialogos",
+                  "titulo": "Dizer a idade de um jeito formal"
+                }
+              ],
+              "licoes_08": 7,
+              "licoes_motivo": "4 lições de cartões + 2 lições de diálogo + Revisão da unidade (decisão 368); a lição publicada \"contar-ate-vinte\" sai (dix e vingt foram para as lições 4 e 1)",
+              "dialogos": [
+                {
+                  "titulo": "Numa festa, a Camille conversa com o Rafael.",
+                  "registro": "informal",
+                  "origem": "novo (decisão 368); o diálogo publicado \"No parque\" vai para \"Perguntar a idade dos outros\" (decisão 336)",
+                  "licao": 5,
+                  "decisao": 368,
+                  "falas": []
+                },
+                {
+                  "titulo": "Num consultório, o Sr. Martin preenche a ficha da Sra. Alves.",
+                  "registro": "formal",
+                  "origem": "novo (decisão 368)",
+                  "licao": 6,
+                  "decisao": 368,
+                  "falas": []
+                }
+              ],
+              "decisoes": [
+                368
               ]
             },
             {

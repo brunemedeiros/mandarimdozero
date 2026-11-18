@@ -129,6 +129,12 @@ console.log('== destaque do que ficou diferente no "Monte a frase" (decisão 366
   check('a função não depende de nada de fora (a maquete embute o código dela)', (() => { const f = new Function('return ' + L.diferencasDaResposta.toString())(); return JSON.stringify(f(['a', 'b'], ['a'])) === '[false,true]'; })());
 }
 
+console.log('== todos os rascunhos do piloto sem problema nas telas');
+for (const u of ['A1-1', 'A1-2', 'A1-9', 'A1-g12', 'A1-3']){
+  const R = require(path.join(ROOT, `docs/i18n/curriculo/piloto-m1/${u}/${u}.json`));
+  check(`rascunho ${u}: nenhum problema nas telas`, L.conferirTelas(R).length === 0, L.conferirTelas(R));
+}
+
 console.log('== embaralhar peças e falas (decisão 363)');
 {
   const naOrdem = (pecas, resposta) => { const lidas = []; for (const p of pecas) if (lidas.length < resposta.length && p === resposta[lidas.length]) lidas.push(p); return lidas.length === resposta.length; };
