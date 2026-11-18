@@ -10,6 +10,7 @@ Uso (precisa de GCP_TTS_KEY, exceto com --dry-run):
     python3 fr/scripts/audio_lab.py               # gera e abre fr/scripts/lab_output/index.html
 
 Entonação do francês (--modo entonacao): a mesma frase como afirmação e como pergunta.
+Ligação do francês (--modo ligacao): os números antes de "ans" (deux‿ans, neuf ans...).
 
 Português do Brasil (--lang pt):
     --modo regras   variantes de escrita das regras de texto falado (hora, moeda,
@@ -62,6 +63,13 @@ CASES = {
 CASES_ENTONACAO = {
     "Tu parles anglais: afirmação x pergunta": ["Tu parles anglais.", "Tu parles anglais ?"],
     "Vous habitez à Paris: afirmação x pergunta": ["Vous habitez à Paris.", "Vous habitez à Paris ?"],
+}
+
+# Ligação (--modo ligacao): a letra muda do fim do número acorda antes de "ans" (deux‿ans, six‿ans, vingt‿ans, neuf ans
+# soa "neuv ans"); unidade "Dizer a idade: de 1 a 29" (decisão 368). Ouvir se a voz do site faz a ligação.
+CASES_LIGACAO = {
+    "x e s soam como z": ["deux ans", "trois ans", "six ans", "dix ans"],
+    "t de vingt e f de neuf": ["vingt ans", "vingt et un ans", "vingt-deux ans", "neuf ans"],
 }
 
 # ---------------------------------------------------------------------------
@@ -310,17 +318,17 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description="Laboratório de escuta do TTS.")
     ap.add_argument("--dry-run", action="store_true", help="mostra o plano e o custo, sem rede e sem chave")
     ap.add_argument("--lang", choices=["fr", "pt"], default="fr")
-    ap.add_argument("--modo", choices=["regras", "vozes", "entonacao"], default="regras")
+    ap.add_argument("--modo", choices=["regras", "vozes", "entonacao", "ligacao"], default="regras")
     ap.add_argument("--vozes-todas", action="store_true", help="(pt, modo vozes) inclui as 30 vozes Chirp3-HD")
     args = ap.parse_args(argv)
     if args.modo == "vozes":
         if args.lang != "pt":
             ap.error("--modo vozes só existe para --lang pt")
         return _modo_vozes(args.vozes_todas, args.dry_run)
-    if args.modo == "entonacao":
+    if args.modo in ("entonacao", "ligacao"):
         if args.lang != "fr":
-            ap.error("--modo entonacao só existe para --lang fr")
-        return _modo_regras("fr", args.dry_run, CASES_ENTONACAO)
+            ap.error(f"--modo {args.modo} só existe para --lang fr")
+        return _modo_regras("fr", args.dry_run, CASES_ENTONACAO if args.modo == "entonacao" else CASES_LIGACAO)
     return _modo_regras(args.lang, args.dry_run)
 
 
