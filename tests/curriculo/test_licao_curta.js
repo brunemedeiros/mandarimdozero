@@ -67,6 +67,9 @@ check('rótulo "Pergunta" em cartão ou frase é acusado (decisão 361)', acusa(
 check('cartão seguido de outro item novo sem exercício (decisão 362)', acusa(r => { r.licoes[0].telas = r.licoes[0].telas.filter(x => !['n', 'x1'].includes(x.id)); r.notas = []; }, 'sem exercício entre eles'));
 check('nota entre dois itens novos não conta como exercício (decisão 362)', acusa(r => { r.licoes[0].telas = r.licoes[0].telas.filter(x => x.id !== 'x1'); }, 'sem exercício entre eles'));
 check('V/F sem a frase do painel (o painel toca o áudio dela)', acusa(r => { r.licoes[0].telas.splice(1, 0, { id: 'v0', tipo: 'vf', fr: 'salut', afirmacao: pt('x'), resposta: true, explicacao: pt('ok') }); }, 'V/F sem a frase e a tradução do painel'));
+check('resposta certa sempre na mesma posição é acusada (decisão 368)', acusa(r => {
+  const t = r.licoes[0].telas; t.splice(t.length - 1, 0, { id: 'f1', tipo: 'funcao', pergunta: pt('?'), opcoes: ['Salut !', 'Merci !'], resposta: 'Salut !', explicacao: pt('ok') });
+  tela(r, 'x2').opcoes = ['Merci', 'Salut']; tela(r, 'o').opcoes = ['G', 'J']; tela(r, 'x1').opcoes = ['Salut', 'Salu']; }, 'sempre na posição'));
 check('texto longo demais (decisão 352)', acusa(r => { tela(r, 'a').objetivo = pt('a'.repeat(121)); }, 'texto longo demais'));
 check('inclui_dialogo errado', acusa(r => { r.licoes[0].inclui_dialogo = true; }, 'inclui_dialogo não bate'));
 

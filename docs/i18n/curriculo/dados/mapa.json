@@ -1251,12 +1251,16 @@
                     {
                       "fr": "trois ans",
                       "pt-BR": "três anos"
+                    },
+                    {
+                      "fr": "vingt ans",
+                      "pt-BR": "vinte anos"
                     }
                   ],
                   "decisao": 368
                 },
                 {
-                  "titulo": "De 21 a 29 + vingt et un",
+                  "titulo": "De 21 a 29: vingt et un, vingt-deux",
                   "tipo": "Exp",
                   "confianca": "alta",
                   "nova": true,

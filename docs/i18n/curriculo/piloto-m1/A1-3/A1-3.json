@@ -180,14 +180,6 @@
    "en": null,
    "ilustra": "deux",
    "papel": "essencial"
-  },
-  {
-   "chave": "A1-3-p2",
-   "fr": "Il a dix ans.",
-   "pt-BR": "Ele tem dez anos.",
-   "en": null,
-   "ilustra": "dix",
-   "papel": "essencial"
   }
  ],
  "frases_que_saem": [
@@ -196,6 +188,12 @@
    "fr": "Nous sommes dix.",
    "vai_para": "a decidir",
    "motivo": "contar pessoas não é a função da unidade (decisão 368); decidir no restaurante ou em \"Perguntar a idade dos outros\""
+  },
+  {
+   "chave": "A1-3-p2",
+   "fr": "Il a dix ans.",
+   "vai_para": "A1-21",
+   "motivo": "il a / elle a é de \"Perguntar a idade dos outros\" (08, M2.3; decisão 335); esta unidade é a da própria idade"
   },
   {
    "chave": "A1-3-p4",
@@ -314,7 +312,7 @@
    },
    "destino": "nota",
    "texto": {
-    "pt-BR": "O <strong>x</strong> de <strong>deux</strong> e o <strong>s</strong> de <strong>trois</strong> não soam sozinhos.<ul><li>Antes de vogal, eles acordam e soam como <b>z</b>: <strong>deux‿ans</strong>, <strong>trois‿ans</strong>.</li></ul>",
+    "pt-BR": "O <strong>x</strong> de <strong>deux</strong> e o <strong>s</strong> de <strong>trois</strong> não soam sozinhos.<ul><li>Antes de vogal, eles acordam e soam como <b>z</b>: <strong>deux‿ans</strong>, <strong>trois‿ans</strong>.</li><li>O mesmo acontece com o <strong>t</strong> de <strong>vingt</strong>: <strong>vingt‿ans</strong>.</li></ul>",
     "en": null
    },
    "exemplos": [
@@ -326,6 +324,11 @@
     {
      "fr": "trois ans",
      "pt-BR": "três anos",
+     "en": null
+    },
+    {
+     "fr": "vingt ans",
+     "pt-BR": "vinte anos",
      "en": null
     }
    ],
@@ -347,7 +350,7 @@
    "id": "de-21-a-29",
    "id_mapa": null,
    "titulo": {
-    "pt-BR": "De 21 a 29 + vingt et un",
+    "pt-BR": "De 21 a 29: vingt et un, vingt-deux",
     "en": null
    },
    "tipo": "Exp",
@@ -575,8 +578,8 @@
       "en": null
      },
      "opcoes": [
-      "âge",
-      "age"
+      "age",
+      "âge"
      ],
      "resposta": "âge",
      "frase_completa": "l'âge",
@@ -638,12 +641,12 @@
      "frase_completa": "vingt",
      "distrator": "grafia",
      "explicacao": {
-      "pt-BR": "Em <b>vingt</b>, o <b>g</b> e o <b>t</b> do fim são mudos.",
+      "pt-BR": "Sozinho, em <b>vingt</b> o <b>g</b> e o <b>t</b> são mudos.",
       "en": null
      },
      "explicacao_erro": {
       "vint": {
-       "pt-BR": "Quase lá! O <b>g</b> não soa, mas se escreve. ",
+       "pt-BR": "O <b>g</b> não soa, mas se escreve. ",
        "en": null
       }
      }
@@ -670,7 +673,7 @@
      "frase_completa": "vingt ans",
      "distrator": "outra palavra",
      "explicacao": {
-      "pt-BR": "Vinte anos: <b>vingt ans</b>. E aqui o <b>t</b> de <b>vingt</b> soa: <b>vingt‿ans</b>.",
+      "pt-BR": "<b>Ans</b> é \"anos\": <b>vingt ans</b>.",
       "en": null
      },
      "explicacao_erro": {
@@ -693,8 +696,8 @@
       "en": null
      },
      "opcoes": [
-      "J'ai vingt ans.",
       "Je suis vingt ans.",
+      "J'ai vingt ans.",
       "J'ai vingt."
      ],
      "resposta": "J'ai vingt ans.",
@@ -703,16 +706,16 @@
       "en": null
      },
      "explicacao": {
-      "pt-BR": "Em francês, a idade vem com <b>avoir</b>: <b>j'ai vingt ans</b>, \"eu tenho vinte anos\".",
+      "pt-BR": "Em francês, a idade vem com <b>avoir</b>, como o nosso \"ter\": <b>j'ai vingt ans</b>.",
       "en": null
      },
      "explicacao_erro": {
       "Je suis vingt ans.": {
-       "pt-BR": "Cuidado com a tradução ao pé da letra: idade não usa <b>être</b>. ",
+       "pt-BR": "Não confunda com o <b>je suis</b> de <b>je suis brésilienne</b>: idade é com <b>avoir</b>. ",
        "en": null
       },
       "J'ai vingt.": {
-       "pt-BR": "Falta <b>ans</b>: em francês, ele não cai. ",
+       "pt-BR": "Faltou o <b>ans</b>: em francês, ele sempre vem depois do número. ",
        "en": null
       }
      }
@@ -743,7 +746,7 @@
       "en": null
      },
      "explicacao": {
-      "pt-BR": "<b>As-tu</b> vem de <b>tu</b>, a forma informal: com colegas, amigos, família e jovens da sua idade.",
+      "pt-BR": "<b>As-tu</b> é \"você tem\", com <b>tu</b>: a forma informal, com colegas, amigos, família e jovens da sua idade.",
       "en": null
      }
     },
@@ -766,13 +769,13 @@
      "id": "u5-ex-age-formal",
      "tipo": "funcao",
      "pergunta": {
-      "pt-BR": "Num consultório, o recepcionista precisa saber a idade de uma paciente. O que ele pergunta?",
+      "pt-BR": "Você trabalha na recepção de um consultório e precisa saber a idade de uma paciente. O que você diz?",
       "en": null
      },
      "opcoes": [
-      "Quel âge avez-vous ?",
       "Quel âge as-tu ?",
-      "Vous avez vingt ans."
+      "Vous avez vingt ans.",
+      "Quel âge avez-vous ?"
      ],
      "resposta": "Quel âge avez-vous ?",
      "traducao_do_painel": {
@@ -934,8 +937,8 @@
       "en": null
      },
      "opcoes": [
-      "une",
-      "un"
+      "un",
+      "une"
      ],
      "resposta": "une",
      "frase_completa": "J'étudie une langue.",
@@ -973,12 +976,12 @@
      "frase_completa": "Je parle deux langues.",
      "distrator": "grafia",
      "explicacao": {
-      "pt-BR": "<b>Deux</b> termina em <b>x</b>, que não soa sozinho.",
+      "pt-BR": "Em <b>deux</b>, o <b>x</b> do fim é mudo.",
       "en": null
      },
      "explicacao_erro": {
       "deus": {
-       "pt-BR": "Você escreveu como em português! ",
+       "pt-BR": "Quase lá! O fim é <b>x</b>, não <b>s</b>. ",
        "en": null
       }
      }
@@ -996,9 +999,9 @@
       "en": null
      },
      "opcoes": [
-      "Je parle trois langues.",
       "Je parle deux langues.",
-      "Je parle un peu français."
+      "Je parle un peu français.",
+      "Je parle trois langues."
      ],
      "resposta": "Je parle trois langues.",
      "traducao_do_painel": {
@@ -1052,26 +1055,26 @@
     {
      "id": "u5-ex-quatre",
      "tipo": "complete",
-     "antes": "Il a ",
-     "depois": " ans.",
+     "antes": "Je parle ",
+     "depois": " langues.",
      "traducao": {
-      "pt-BR": "Ele tem quatro anos.",
+      "pt-BR": "Eu falo quatro línguas.",
       "en": null
      },
      "opcoes": [
-      "quatre",
-      "catre"
+      "trois",
+      "quatre"
      ],
      "resposta": "quatre",
-     "frase_completa": "Il a quatre ans.",
-     "distrator": "grafia",
+     "frase_completa": "Je parle quatre langues.",
+     "distrator": "outra palavra",
      "explicacao": {
       "pt-BR": "Em francês, <b>qu</b> soa como \"k\": <b>quatre</b>.",
       "en": null
      },
      "explicacao_erro": {
-      "catre": {
-       "pt-BR": "Você escreveu como se ouve! ",
+      "trois": {
+       "pt-BR": "<b>Trois</b> é três. ",
        "en": null
       }
      }
@@ -1106,33 +1109,33 @@
      "frase": "J'ai vingt-deux ans."
     },
     {
-     "id": "u5-ex-21",
+     "id": "u5-ex-22",
      "tipo": "funcao",
      "pergunta": {
-      "pt-BR": "Você tem 21 anos. O que diz?",
+      "pt-BR": "Você tem 22 anos. O que diz?",
       "en": null
      },
      "opcoes": [
-      "J'ai vingt et un ans.",
-      "J'ai vingt-un ans.",
-      "J'ai vingt et deux ans."
+      "J'ai vingt et deux ans.",
+      "Je suis vingt-deux ans.",
+      "J'ai vingt-deux ans."
      ],
-     "resposta": "J'ai vingt et un ans.",
+     "resposta": "J'ai vingt-deux ans.",
      "traducao_do_painel": {
-      "pt-BR": "Eu tenho vinte e um anos.",
+      "pt-BR": "Eu tenho vinte e dois anos.",
       "en": null
      },
      "explicacao": {
-      "pt-BR": "O 21 leva <b>et</b>: <b>vingt et un</b>.",
+      "pt-BR": "De 22 a 29, com hífen: <b>vingt-deux</b>.",
       "en": null
      },
      "explicacao_erro": {
-      "J'ai vingt-un ans.": {
-       "pt-BR": "Quase lá! O 21 leva <b>et</b>, sem hífen. ",
-       "en": null
-      },
       "J'ai vingt et deux ans.": {
        "pt-BR": "O <b>et</b> é só do 21. ",
+       "en": null
+      },
+      "Je suis vingt-deux ans.": {
+       "pt-BR": "Idade é com <b>avoir</b>: <b>j'ai</b>. ",
        "en": null
       }
      }
@@ -1247,8 +1250,8 @@
       "en": null
      },
      "opcoes": [
-      "cinq",
-      "cinque"
+      "cinque",
+      "cinq"
      ],
      "resposta": "cinq",
      "frase_completa": "J'ai vingt-cinq ans.",
@@ -1259,7 +1262,7 @@
      },
      "explicacao_erro": {
       "cinque": {
-       "pt-BR": "Quase lá! ",
+       "pt-BR": "Sem <b>e</b> no fim: <b>cinq</b>. ",
        "en": null
       }
      }
@@ -1272,10 +1275,10 @@
     {
      "id": "u5-ex-six",
      "tipo": "complete",
-     "antes": "Il a ",
+     "antes": "J'ai vingt-",
      "depois": " ans.",
      "traducao": {
-      "pt-BR": "Ele tem seis anos.",
+      "pt-BR": "Eu tenho vinte e seis anos.",
       "en": null
      },
      "opcoes": [
@@ -1283,10 +1286,10 @@
       "cinq"
      ],
      "resposta": "six",
-     "frase_completa": "Il a six ans.",
+     "frase_completa": "J'ai vingt-six ans.",
      "distrator": "outra palavra",
      "explicacao": {
-      "pt-BR": "Antes de vogal, o <b>x</b> de <b>six</b> soa como <b>z</b>: <b>six‿ans</b>.",
+      "pt-BR": "Antes de vogal, o <b>x</b> de <b>six</b> soa como <b>z</b>: <b>vingt-six‿ans</b>.",
       "en": null
      },
      "explicacao_erro": {
@@ -1328,9 +1331,9 @@
       "en": null
      },
      "opcoes": [
-      "J'ai vingt-sept ans.",
       "J'ai vingt-six ans.",
-      "J'ai vingt et sept ans."
+      "J'ai vingt et sept ans.",
+      "J'ai vingt-sept ans."
      ],
      "resposta": "J'ai vingt-sept ans.",
      "traducao_do_painel": {
@@ -1382,26 +1385,28 @@
      "id": "u5-l3-montar",
      "tipo": "montar",
      "traducao": {
-      "pt-BR": "Ela tem vinte e seis anos.",
+      "pt-BR": "Você tem vinte e seis anos?",
       "en": null
      },
      "pecas": [
-      "Elle",
-      "a",
+      "Tu",
+      "as",
       "vingt-six",
-      "ans.",
-      "est",
-      "vingt-sept"
+      "ans",
+      "?",
+      "es",
+      "a"
      ],
      "resposta": [
-      "Elle",
-      "a",
+      "Tu",
+      "as",
       "vingt-six",
-      "ans."
+      "ans",
+      "?"
      ],
-     "frase_completa": "Elle a vingt-six ans.",
+     "frase_completa": "Tu as vingt-six ans ?",
      "explicacao": {
-      "pt-BR": "Para ela, <b>avoir</b> fica <b>elle a</b>.",
+      "pt-BR": "Com <b>tu</b>, <b>avoir</b> fica <b>tu as</b>, e o <b>?</b> faz a pergunta.",
       "en": null
      }
     },
@@ -1436,11 +1441,11 @@
      "id": "u5-l4-intro",
      "tipo": "abertura",
      "objetivo": {
-      "pt-BR": "Para fechar, os números de oito a dez.",
+      "pt-BR": "Agora os números de oito a dez.",
       "en": null
      },
      "tamanho": {
-      "pt-BR": "3 cartões · 1 frase · cerca de 2 minutos",
+      "pt-BR": "3 cartões · cerca de 2 minutos",
       "en": null
      }
     },
@@ -1452,26 +1457,26 @@
     {
      "id": "u5-ex-huit",
      "tipo": "complete",
-     "antes": "Il a ",
+     "antes": "J'ai vingt-",
      "depois": " ans.",
      "traducao": {
-      "pt-BR": "Ele tem oito anos.",
+      "pt-BR": "Eu tenho vinte e oito anos.",
       "en": null
      },
      "opcoes": [
-      "huit",
-      "uit"
+      "uit",
+      "huit"
      ],
      "resposta": "huit",
-     "frase_completa": "Il a huit ans.",
+     "frase_completa": "J'ai vingt-huit ans.",
      "distrator": "grafia",
      "explicacao": {
-      "pt-BR": "O <b>h</b> de <b>huit</b> é mudo; o <b>t</b> do fim soa.",
+      "pt-BR": "O <b>h</b> de <b>huit</b> não se pronuncia, mas se escreve; o <b>t</b> do fim soa.",
       "en": null
      },
      "explicacao_erro": {
       "uit": {
-       "pt-BR": "Quase lá! O <b>h</b> não soa, mas se escreve. ",
+       "pt-BR": "O <b>h</b> não soa, mas se escreve. ",
        "en": null
       }
      }
@@ -1509,7 +1514,7 @@
      "id": "u5-ex-dix",
      "tipo": "funcao",
      "pergunta": {
-      "pt-BR": "O Léo tem 10 anos. O que ele diz?",
+      "pt-BR": "Uma criança de 10 anos ouve \"Quel âge as-tu ?\". O que ela responde?",
       "en": null
      },
      "opcoes": [
@@ -1523,7 +1528,7 @@
       "en": null
      },
      "explicacao": {
-      "pt-BR": "<b>Dix ans</b>: antes de vogal, o <b>x</b> soa como <b>z</b>.",
+      "pt-BR": "Dez anos: <b>j'ai dix ans</b>. Antes de vogal, o <b>x</b> soa como <b>z</b>.",
       "en": null
      },
      "explicacao_erro": {
@@ -1533,38 +1538,6 @@
       },
       "Je suis dix ans.": {
        "pt-BR": "Idade é com <b>avoir</b>: <b>j'ai</b>. ",
-       "en": null
-      }
-     }
-    },
-    {
-     "id": "u5-frase-dix",
-     "tipo": "frase",
-     "frase": "Il a dix ans."
-    },
-    {
-     "id": "u5-ex-ila",
-     "tipo": "complete",
-     "antes": "Il ",
-     "depois": " dix ans.",
-     "traducao": {
-      "pt-BR": "Ele tem dez anos.",
-      "en": null
-     },
-     "opcoes": [
-      "a",
-      "est"
-     ],
-     "resposta": "a",
-     "frase_completa": "Il a dix ans.",
-     "distrator": "outra palavra",
-     "explicacao": {
-      "pt-BR": "Para ele, <b>avoir</b> fica <b>il a</b>: <b>il a dix ans</b>.",
-      "en": null
-     },
-     "explicacao_erro": {
-      "est": {
-       "pt-BR": "<b>Est</b> é de <b>être</b>; idade usa <b>avoir</b>. ",
        "en": null
       }
      }
@@ -1603,30 +1576,26 @@
      "id": "u5-l4-montar",
      "tipo": "montar",
      "traducao": {
-      "pt-BR": "Eu tenho vinte e nove anos, e você?",
+      "pt-BR": "Quantos anos o senhor (a senhora) tem?",
       "en": null
      },
      "pecas": [
-      "J'ai",
-      "vingt-neuf",
-      "ans,",
-      "et",
-      "toi",
+      "Quel",
+      "âge",
+      "avez-vous",
       "?",
-      "vingt-dix",
-      "vous"
+      "as-tu",
+      "Vous"
      ],
      "resposta": [
-      "J'ai",
-      "vingt-neuf",
-      "ans,",
-      "et",
-      "toi",
+      "Quel",
+      "âge",
+      "avez-vous",
       "?"
      ],
-     "frase_completa": "J'ai vingt-neuf ans, et toi ?",
+     "frase_completa": "Quel âge avez-vous ?",
      "explicacao": {
-      "pt-BR": "<b>Vingt-neuf</b>, com hífen, e <b>et toi ?</b> para devolver a pergunta.",
+      "pt-BR": "No formal, <b>avez-vous</b>, de <b>avoir</b> com <b>vous</b>.",
       "en": null
      }
     },
@@ -1751,15 +1720,15 @@
      "tipo": "dialogo_lacuna",
      "dialogo": "Numa festa, a Camille conversa com o Rafael.",
      "fala": 3,
-     "antes": "J'ai ",
-     "depois": " ans. Et toi ?",
+     "antes": "J'ai vingt-trois ",
+     "depois": ". Et toi ?",
      "opcoes": [
-      "vingt-trois",
-      "vingt et trois"
+      "an",
+      "ans"
      ],
-     "resposta": "vingt-trois",
+     "resposta": "ans",
      "explicacao": {
-      "pt-BR": "Só o 21 leva <b>et</b>; o 23 é com hífen: <b>vingt-trois</b>.",
+      "pt-BR": "<b>Ans</b> leva <b>s</b>; o z que você ouve vem do <b>s</b> de <b>trois</b>.",
       "en": null
      }
     },
@@ -1823,11 +1792,11 @@
         "en": null
        },
        "opcoes": [
-        "J'ai vingt-quatre ans. Et toi ?",
         "Je suis vingt-quatre ans. Et toi ?",
+        "J'ai vingt-quatre ans. Et toi ?",
         "J'ai vingt-quatre ans. Et vous ?"
        ],
-       "certa": 0,
+       "certa": 1,
        "dicas": {
         "Je suis vingt-quatre ans. Et toi ?": {
          "pt-BR": "Idade é com <b>avoir</b>: <b>j'ai</b>.",
@@ -1841,8 +1810,8 @@
       },
       {
        "outro": {
-        "fr": "J'ai vingt-deux ans. Tu es d'où ?",
-        "pt-BR": "Tenho vinte e dois anos. De onde você é?",
+        "fr": "J'ai vingt et un ans. Tu es d'où ?",
+        "pt-BR": "Tenho vinte e um anos. De onde você é?",
         "en": null
        }
       },
@@ -2004,16 +1973,16 @@
      "id": "u5-d2-lacuna",
      "tipo": "dialogo_lacuna",
      "dialogo": "Num consultório, o Sr. Martin preenche a ficha da Sra. Alves.",
-     "fala": 4,
-     "antes": "Merci. Quel âge ",
+     "fala": 0,
+     "antes": "Bonjour, madame. Comment vous ",
      "depois": " ?",
      "opcoes": [
-      "avez-vous",
-      "as-tu"
+      "appelez-vous",
+      "appelé-vous"
      ],
-     "resposta": "avez-vous",
+     "resposta": "appelez-vous",
      "explicacao": {
-      "pt-BR": "Com <b>vous</b>, no formal: <b>Quel âge avez-vous ?</b>",
+      "pt-BR": "Com <b>vous</b>, o verbo termina em <b>-ez</b>, que soa /ê/.",
       "en": null
      }
     },
@@ -2073,22 +2042,22 @@
       },
       {
        "pedido": {
-        "pt-BR": "Diga o seu nome: Ana Dubois.",
+        "pt-BR": "Diga o seu nome. No exercício, você é Sam Dubois.",
         "en": null
        },
        "opcoes": [
-        "Je m'appelle Ana Dubois.",
-        "Tu t'appelles Ana Dubois.",
-        "Je suis Ana Dubois ans."
+        "Moi, c'est Sam Dubois. Et toi ?",
+        "Je m'appelle Sam Dubois.",
+        "Tu t'appelles Sam Dubois."
        ],
-       "certa": 0,
+       "certa": 1,
        "dicas": {
-        "Tu t'appelles Ana Dubois.": {
-         "pt-BR": "<b>Tu t'appelles</b> é \"você se chama\". Para você: <b>je m'appelle</b>.",
+        "Moi, c'est Sam Dubois. Et toi ?": {
+         "pt-BR": "Na recepção, no formal: <b>je m'appelle</b>, sem <b>et toi ?</b>.",
          "en": null
         },
-        "Je suis Ana Dubois ans.": {
-         "pt-BR": "<b>Ans</b> é da idade, não do nome.",
+        "Tu t'appelles Sam Dubois.": {
+         "pt-BR": "<b>Tu t'appelles</b> é \"você se chama\". Para você: <b>je m'appelle</b>.",
          "en": null
         }
        }
@@ -2135,11 +2104,11 @@
         "en": null
        },
        "opcoes": [
-        "Merci, monsieur. Au revoir !",
         "Salut, à plus !",
-        "Bonne soirée !"
+        "Bonne soirée !",
+        "Merci, monsieur. Au revoir !"
        ],
-       "certa": 0,
+       "certa": 2,
        "dicas": {
         "Salut, à plus !": {
          "pt-BR": "Na recepção, no formal: <b>au revoir</b>.",

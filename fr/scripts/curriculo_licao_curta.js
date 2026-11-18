@@ -145,6 +145,10 @@ function conferirTelas(R){
       confere(!telas.some(t => t.tipo === 'cartao' || t.tipo === 'frase'), `lição ${l.id}: gramática não tem cartão nem frase nova`);
       telas.forEach((t, k) => { if (t.tipo === 'nota') confere(EXERCICIOS.has((telas[k + 1] || {}).tipo), `lição ${l.id}: a explicação ${t.id} precisa de um exercício logo depois`); });
     }
+    // A resposta certa não fica sempre na mesma posição (decisão 368: dava para acertar tudo marcando a primeira opção).
+    const posicoes = telas.flatMap(t => ['complete', 'funcao', 'classificar'].includes(t.tipo) ? [t.opcoes.indexOf(t.resposta)]
+      : t.tipo === 'dialogo_papel' ? t.turnos.filter(x => x.opcoes).map(x => x.certa) : []);
+    if (posicoes.length >= 3) confere(new Set(posicoes).size > 1, `lição ${l.id}: a resposta certa está sempre na posição ${posicoes[0] + 1}`);
     const completes = telas.filter(t => t.tipo === 'complete').map(t => t.distrator === 'grafia' ? 'grafia' : 'palavra');
     if (completes.length >= 2) confere(new Set(completes).size === 2, `lição ${l.id}: os "Complete" não alternam grafia e outra palavra (decisão 342)`);
   }
