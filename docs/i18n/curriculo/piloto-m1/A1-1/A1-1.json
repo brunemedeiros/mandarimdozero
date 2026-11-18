@@ -2625,7 +2625,7 @@
    },
    "destino": "nota",
    "texto": {
-    "pt-BR": "Vou separar em dois grupos. <strong>Informal</strong> (família, amigos, gente da mesma idade, mesmo sem se conhecer): <strong>Ça va ?</strong>, o mais comum, <strong>Tu vas bien ?</strong> e <strong>Comment vas-tu ?</strong>, um pouco mais cuidado. <strong>Formal</strong> (desconhecidos, chefes, pessoas idosas, quem presta um serviço): <strong>Vous allez bien ?</strong> e <strong>Comment allez-vous ?</strong>. Na dúvida, use o formal.",
+    "pt-BR": "Vou separar em dois grupos. <b>Informal</b> (família, amigos, gente da mesma idade, mesmo sem se conhecer): <strong>Ça va ?</strong>, o mais comum, <strong>Tu vas bien ?</strong> e <strong>Comment vas-tu ?</strong>, um pouco mais cuidado. <b>Formal</b> (desconhecidos, chefes, pessoas idosas, quem presta um serviço): <strong>Vous allez bien ?</strong> e <strong>Comment allez-vous ?</strong>. Na dúvida, use o formal.",
     "en": null
    },
    "exemplos": [

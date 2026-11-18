@@ -124,8 +124,8 @@ Se uma regra deste arquivo ficar específica de uma pasta, mova-a para `.claude/
 - Currículo fr, Etapa 0a e 0b parte 1 (mapa gerado do cron, unidade nova aberta, deck de unidade que saiu): `docs/historico/21-*`,
   `22-*`. Deploy do `notification-cron` com o `STUDY_ITEM_GATE` feito: v29 em produção (2026-10-19, pela dona, painel); repetir quando o mapa do cron mudar.
 - Currículo fr (decisões de 2026-10-18 em `docs/i18n/curriculo/12-*`): défi de fim de módulo ARQUIVADO (retomar ligado ao DELF, sem sobrepor Ponto de
-  verificação e Desafios; `07` + maquete preservados); explorar gravação de apresentação/diálogo/habilidade como recurso geral; testar entonação
-  pergunta x afirmação no TTS fr antes da lição de som; corretor de pronúncia (API) no futuro.
+  verificação e Desafios; `07` + maquete preservados); explorar gravação de apresentação/diálogo/habilidade como recurso geral;
+  corretor de pronúncia (API) no futuro. Entonação pergunta x afirmação no TTS fr: testada e aprovada (decisão 366).
 - Pendência (decisão 291): curso de **Pronúncia do Francês** (futuro; letras mudas e exceções, nasais, ligação, *oi* = "uá"); comparação com a Duolingo em `docs/i18n/curriculo/dados/comparacao-duolingo-x-regras-fr.md`.
 - Voz da professora em todo o site (`docs/voz-da-professora.md`, tabela de áreas): trilha feita só nos rascunhos das unidades 1 a 4 do fr (`piloto-m1/A1-1`, `A1-2`, `A1-9` e a gramática `A1-g12`, lição curta, nada publicado); pendentes: microtextos da interface, Revisão, Desafios, Ditados, Conjugação, avisos/push, texto dos e-mails, zh e pt.
 - Pendências da autora: layout do áudio nas opções do checkpoint do zh; módulos/aba de Desafios do chinês;

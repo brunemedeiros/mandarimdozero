@@ -32,7 +32,7 @@
    },
    "destino": "nota",
    "texto": {
-    "pt-BR": "A frase é a mesma da afirmação: só a entonação muda. Na afirmação, a voz desce no fim; na pergunta, a voz sobe, e na escrita vem o <strong>?</strong>. Repare: em francês, tem um espaço antes do <strong>?</strong>. É o jeito mais comum no dia a dia. Você já usou: <strong>Vous allez bien ?</strong>",
+    "pt-BR": "A frase é a mesma da afirmação: só a entonação muda.<ul><li><b>Afirmação</b>: a voz desce no fim.</li><li><b>Pergunta</b>: a voz sobe no fim, e na escrita vem o <strong>?</strong>.</li></ul>",
     "en": null
    },
    "exemplos": [
@@ -44,11 +44,6 @@
     {
      "fr": "Tu parles anglais ?",
      "pt-BR": "Você fala inglês?",
-     "en": null
-    },
-    {
-     "fr": "Vous habitez à Paris ?",
-     "pt-BR": "O senhor (a senhora) mora em Paris?",
      "en": null
     }
    ]
@@ -68,7 +63,7 @@
    },
    "destino": "nota",
    "texto": {
-    "pt-BR": "Coloque <strong>est-ce que</strong> no começo da frase, e o resto não muda. Ele não se traduz: só avisa que vem uma pergunta. Antes de vogal, vira <strong>est-ce qu'</strong>: <strong>est-ce qu'il</strong>, <strong>est-ce qu'elle</strong>. É um jeito neutro: serve na conversa e na escrita, com qualquer pessoa.",
+    "pt-BR": "Coloque <strong>est-ce que</strong> no começo da frase; o resto não muda.<ul><li>Não se traduz: só avisa que vem uma pergunta.</li><li>Antes de sujeito com vogal: <strong>est-ce qu'</strong>.</li><li>É neutro: serve na conversa e na escrita.</li></ul>",
     "en": null
    },
    "exemplos": [
@@ -78,18 +73,13 @@
      "en": null
     },
     {
-     "fr": "Est-ce que vous habitez à Paris ?",
-     "pt-BR": "O senhor (a senhora) mora em Paris?",
+     "fr": "Est-ce que vous parlez anglais ?",
+     "pt-BR": "O senhor (a senhora) fala inglês?",
      "en": null
     },
     {
-     "fr": "Est-ce qu'il est français ?",
-     "pt-BR": "Ele é francês?",
-     "en": null
-    },
-    {
-     "fr": "Est-ce qu'elle habite au Brésil ?",
-     "pt-BR": "Ela mora no Brasil?",
+     "fr": "Est-ce qu'elle parle anglais ?",
+     "pt-BR": "Ela fala inglês?",
      "en": null
     }
    ]
@@ -109,23 +99,18 @@
    },
    "destino": "nota",
    "texto": {
-    "pt-BR": "O sujeito vai para depois do verbo, ligado por um hífen: <strong>Vous parlez anglais ?</strong> vira <strong>Parlez-vous anglais ?</strong> É o jeito formal, mais comum na escrita. Por enquanto, basta reconhecer. Você já viu um: <strong>Comment allez-vous ?</strong>",
+    "pt-BR": "O sujeito vai para depois do verbo, ligado por um hífen.<ul><li>É o jeito formal, mais da escrita.</li><li>Por enquanto, basta reconhecer.</li></ul>",
     "en": null
    },
    "exemplos": [
     {
-     "fr": "Parlez-vous anglais ?",
+     "fr": "Vous parlez anglais ?",
      "pt-BR": "O senhor (a senhora) fala inglês?",
      "en": null
     },
     {
-     "fr": "Habitez-vous à Paris ?",
-     "pt-BR": "O senhor (a senhora) mora em Paris?",
-     "en": null
-    },
-    {
-     "fr": "Êtes-vous française ?",
-     "pt-BR": "A senhora é francesa?",
+     "fr": "Parlez-vous anglais ?",
+     "pt-BR": "O senhor (a senhora) fala inglês?",
      "en": null
     },
     {
@@ -150,7 +135,7 @@
    },
    "destino": "nota",
    "texto": {
-    "pt-BR": "A mesma pergunta, de três jeitos. Com <strong>entonação</strong>, o do dia a dia. Com <strong>est-ce que</strong>, o neutro, que serve sempre. Com <strong>inversão</strong>, o formal, mais da escrita. O sentido não muda. Repare: o <strong>vous</strong> aparece nos três; escolher <strong>tu</strong> ou <strong>vous</strong> é outra decisão.",
+    "pt-BR": "A mesma pergunta, de três jeitos. O sentido não muda; muda o registro:<ul><li><b>Entonação</b>: o do dia a dia.</li><li><strong>Est-ce que</strong>: o neutro, que serve sempre.</li><li><b>Inversão</b>: o formal, mais da escrita.</li></ul>",
     "en": null
    },
    "exemplos": [
@@ -205,8 +190,7 @@
      "nota": "entonacao",
      "rotulos": {
       "Tu parles anglais.": "afirmação",
-      "Tu parles anglais ?": "pergunta",
-      "Vous habitez à Paris ?": "pergunta"
+      "Tu parles anglais ?": "pergunta"
      }
     },
     {
@@ -227,7 +211,7 @@
       "en": null
      },
      "explicacao": {
-      "pt-BR": "O <b>?</b> no fim mostra a pergunta; na fala, a voz sobe.",
+      "pt-BR": "O <b>?</b> mostra a pergunta; na fala, a voz sobe. Repare: em francês, tem um espaço antes do <b>?</b>.",
       "en": null
      },
      "explicacao_erro": {
@@ -336,7 +320,7 @@
      "frase_completa": "Est-ce qu'elle parle anglais ?",
      "distrator": "grafia",
      "explicacao": {
-      "pt-BR": "Antes de vogal, <b>que</b> perde o <b>e</b>: <b>est-ce qu'elle</b>.",
+      "pt-BR": "<b>Est-ce qu'</b> + sujeito com vogal: <b>est-ce qu'elle</b>.",
       "en": null
      },
      "explicacao_erro": {
@@ -380,7 +364,12 @@
     {
      "id": "g4-nota-inversao",
      "tipo": "nota",
-     "nota": "inversao"
+     "nota": "inversao",
+     "rotulos": {
+      "Vous parlez anglais ?": "entonação",
+      "Parlez-vous anglais ?": "inversão",
+      "Comment allez-vous ?": "inversão"
+     }
     },
     {
      "id": "g4-ex-vf-inversao",
@@ -479,6 +468,34 @@
       "Vous parlez anglais ?": "entonação · dia a dia",
       "Est-ce que vous parlez anglais ?": "est-ce que · neutro",
       "Parlez-vous anglais ?": "inversão · formal"
+     }
+    },
+    {
+     "id": "g4-ex-inversao-tu",
+     "tipo": "classificar",
+     "fr": "Parles-tu anglais ?",
+     "pergunta": {
+      "pt-BR": "Para quem é essa pergunta?",
+      "en": null
+     },
+     "opcoes": [
+      "Um amigo",
+      "Um senhor que você não conhece"
+     ],
+     "resposta": "Um amigo",
+     "traducao_do_painel": {
+      "pt-BR": "Você fala inglês?",
+      "en": null
+     },
+     "explicacao": {
+      "pt-BR": "O <b>tu</b> mostra que é com um amigo. A inversão deixa a pergunta mais cuidada, mas não troca o <b>tu</b> pelo <b>vous</b>.",
+      "en": null
+     },
+     "explicacao_erro": {
+      "Um senhor que você não conhece": {
+       "pt-BR": "Para um senhor, seria com <b>vous</b>. ",
+       "en": null
+      }
      }
     },
     {

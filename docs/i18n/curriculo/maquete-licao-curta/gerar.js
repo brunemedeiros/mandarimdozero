@@ -177,7 +177,8 @@ for (const f of comAudioReal) {
   AUD[f] = 'data:audio/mpeg;base64,' + fs.readFileSync(path.join(raiz, 'fr/audio', m[1])).toString('base64');
 }
 
-const saida = fonte.replace('/*__ASSETS__*/', 'const AUD=' + JSON.stringify(AUD) + ';\nconst UNIDADES=' + JSON.stringify(UNIDADES) + ';\nconst TELAS=' + JSON.stringify(TELAS) + ';\nconst ANTES=' + JSON.stringify(ANTES) + ';\nconst FOTO=' + JSON.stringify(FOTO) + ';');
+// A regra do destaque do erro vem do módulo (um lugar só): o código da função entra na página.
+const saida = fonte.replace('/*__ASSETS__*/', 'const diferencasDaResposta=' + L.diferencasDaResposta.toString() + ';\nconst AUD=' + JSON.stringify(AUD) + ';\nconst UNIDADES=' + JSON.stringify(UNIDADES) + ';\nconst TELAS=' + JSON.stringify(TELAS) + ';\nconst ANTES=' + JSON.stringify(ANTES) + ';\nconst FOTO=' + JSON.stringify(FOTO) + ';');
 if (saida === fonte) throw new Error('marcador /*__ASSETS__*/ não encontrado');
 fs.writeFileSync(path.join(__dirname, 'index.html'), saida);
 console.log('index.html:', TELAS.length, 'telas,', Object.keys(ANTES).length, 'com texto anterior,', Object.keys(AUD).length, 'áudios,', Math.round(saida.length / 1024), 'KB');

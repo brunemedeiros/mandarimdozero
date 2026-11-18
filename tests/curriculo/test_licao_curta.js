@@ -118,6 +118,17 @@ console.log('== lição de gramática (decisão 365)');
     casosG.every(c => c.contexto.posicao === 'fim') && casosG.some(c => c.fr === 'Parlez-vous portugais ?') && casosG.some(c => c.fr === 'Parlez-vous français ?'));
 }
 
+console.log('== destaque do que ficou diferente no "Monte a frase" (decisão 366)');
+{
+  const certa = ['Est-ce', 'que', 'vous', 'habitez', 'au', 'Brésil', '?'];
+  const marcadas = montada => L.diferencasDaResposta(certa, montada).map((x, k) => x ? certa[k] : null).filter(Boolean);
+  check('esqueceu o "?": só o "?" fica em destaque', JSON.stringify(marcadas(certa.slice(0, 6))) === JSON.stringify(['?']), marcadas(certa.slice(0, 6)));
+  check('resposta certa: nada em destaque', marcadas(certa).length === 0);
+  check('duas peças trocadas de lugar: uma delas em destaque', marcadas(['Est-ce', 'que', 'habitez', 'vous', 'au', 'Brésil', '?']).length === 1);
+  check('peça errada no lugar da certa: a certa em destaque', JSON.stringify(marcadas(['Est-ce', 'que', 'vous', 'habitez', 'en', 'Brésil', '?'])) === JSON.stringify(['au']));
+  check('a função não depende de nada de fora (a maquete embute o código dela)', (() => { const f = new Function('return ' + L.diferencasDaResposta.toString())(); return JSON.stringify(f(['a', 'b'], ['a'])) === '[false,true]'; })());
+}
+
 console.log('== embaralhar peças e falas (decisão 363)');
 {
   const naOrdem = (pecas, resposta) => { const lidas = []; for (const p of pecas) if (lidas.length < resposta.length && p === resposta[lidas.length]) lidas.push(p); return lidas.length === resposta.length; };

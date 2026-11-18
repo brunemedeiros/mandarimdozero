@@ -32,6 +32,22 @@ function embaralharPecas(pecas, resposta){
   return [...pecas].reverse();
 }
 
+// Painel de erro do "Monte a frase" (decisão 366, a dona): na frase certa, destacar as peças que faltaram ou ficaram fora do lugar
+// (ex.: o "?" esquecido), para a aluna não precisar reler procurando o erro. Peça marcada = fora da maior sequência em comum
+// (LCS) entre a resposta certa e a montada. Função pura e sem referência externa: a maquete embute o próprio código dela.
+function diferencasDaResposta(certa, montada){
+  const n = certa.length, m = montada.length;
+  const dp = Array.from({ length: n + 1 }, () => new Array(m + 1).fill(0));
+  for (let i = n - 1; i >= 0; i--) for (let j = m - 1; j >= 0; j--)
+    dp[i][j] = certa[i] === montada[j] ? 1 + dp[i + 1][j + 1] : Math.max(dp[i + 1][j], dp[i][j + 1]);
+  const marcada = new Array(n).fill(true);
+  for (let i = 0, j = 0; i < n && j < m;){
+    if (certa[i] === montada[j]){ marcada[i] = false; i++; j++; }
+    else if (dp[i + 1][j] >= dp[i][j + 1]) i++; else j++;
+  }
+  return marcada;
+}
+
 const EXERCICIOS = new Set(['complete', 'vf', 'funcao', 'montar', 'ouvir_escolher', 'digitar', 'relacionar', 'classificar']);
 // Lição de gramática (decisão 365): sem cartões, sem diálogo e sem Revisão da unidade; as explicações são notas sem gatilho de cartão,
 // cada uma seguida de exercícios antes da próxima. "classificar" = frase em francês e opções em português (ex.: qual estrutura).
@@ -233,4 +249,4 @@ function textosDasTelas(R, M, mapa, unidadeId){
   return casos;
 }
 
-module.exports = { ETAPAS_DIALOGO, conferirTelas, embaralharIndices, embaralharPecas, traducaoNaTela, posicaoNoFimDaLicao, textosDasTelas };
+module.exports = { ETAPAS_DIALOGO, conferirTelas, diferencasDaResposta, embaralharIndices, embaralharPecas, traducaoNaTela, posicaoNoFimDaLicao, textosDasTelas };
