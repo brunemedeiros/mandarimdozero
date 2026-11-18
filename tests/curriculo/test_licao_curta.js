@@ -138,6 +138,22 @@ for (const u of ['A1-1', 'A1-2', 'A1-9', 'A1-g12', 'A1-3']){
   check(`rascunho ${u}: nenhum problema nas telas`, L.conferirTelas(R).length === 0, L.conferirTelas(R));
 }
 
+console.log('== "Relacione": nenhuma tradução na linha da sua frase (decisão 369)');
+{
+  const rels = ['A1-1', 'A1-2', 'A1-9', 'A1-g12', 'A1-3'].flatMap(u => require(path.join(ROOT, `docs/i18n/curriculo/piloto-m1/${u}/${u}.json`)).licoes.flatMap(l => l.telas || []).filter(t => t.tipo === 'relacionar'));
+  const lado = rels.filter(t => L.ordemDaDireita(t.pares).some((v, k) => v === k)).map(t => t.id);
+  check(`"Relacione" das unidades 1 a 5 (${rels.length}): nenhum par na mesma linha`, rels.length > 0 && lado.length === 0, lado);
+  check('a ordem da direita tem todos os pares, uma vez cada', rels.every(t => JSON.stringify([...L.ordemDaDireita(t.pares)].sort((a, b) => a - b)) === JSON.stringify(t.pares.map((_, k) => k))));
+  check('2 pares: trocados de lugar', JSON.stringify(L.ordemDaDireita([['a', '1'], ['b', '2']])) === '[1,0]');
+}
+check('nota com gatilho num cartão de lição anterior passa (decisão 369)', (() => {
+  const r = copia(base); r.licoes.splice(1, 0, { id: 'lp', tipo: 'pratica', inclui_dialogo: false, telas: [
+    { id: 'pa', tipo: 'abertura', objetivo: pt('Vamos?') }, { id: 'pn', tipo: 'nota', nota: 'n9' },
+    { id: 'pv', tipo: 'vf', fr: 'salut', afirmacao: pt('x'), resposta: true, frase_do_painel: 'salut', traducao_do_painel: pt('oi'), explicacao: pt('ok') }, { id: 'pz', tipo: 'fim' } ] });
+  r.notas.push({ id: 'n9', destino: 'nota', momento: { licao: 'lp', depois_do_cartao: 'merci' }, texto: pt('Nota.') });
+  return !problemas(r).some(p => p.includes('nota antes do gatilho'));
+})());
+
 console.log('== embaralhar peças e falas (decisão 363)');
 {
   const naOrdem = (pecas, resposta) => { const lidas = []; for (const p of pecas) if (lidas.length < resposta.length && p === resposta[lidas.length]) lidas.push(p); return lidas.length === resposta.length; };

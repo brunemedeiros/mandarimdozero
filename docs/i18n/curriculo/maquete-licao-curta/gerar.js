@@ -69,8 +69,10 @@ function construirTelas(R, unidade, tolerante){
           const f = c.fr.split(' / ')[t.forma];
           return { ...base, type: 'item', kind: 'Palavra nova', fr: f, tr: L.traducaoNaTela(t), role: pt(c.papel_na_funcao) || undefined, audios: [[f, f]] };
         }
+        // Par numa tela só (un / une): um áudio com as duas formas juntas e um para cada forma (decisão 369).
+        const formasDoPar = c.fr.split(' / ');
         return { ...base, type: 'item', kind: 'Palavra nova', fr: c.fr, tr: pt(c.traducao), role: pt(c.papel_na_funcao) || undefined,
-          audios: t.audios || c.fr.split(' / ').map(x => [x, x]) };
+          audios: t.audios || (formasDoPar.length > 1 ? [[formasDoPar.join(', '), c.fr], ...formasDoPar.map(x => [x, x])] : [[c.fr, c.fr]]) };
       }
       case 'frase': {
         const f = frase(t.frase);
@@ -96,7 +98,7 @@ function construirTelas(R, unidade, tolerante){
       // Unidade 2 (decisão 356): ouvir uma letra ou um nome soletrado e escolher; ouvir e digitar.
       case 'ouvir_escolher': return { ...base, type: 'ouvir', q: pt(t.pergunta), audio: t.audio, opts: t.opcoes, answer: t.resposta, why_ok: pt(t.explicacao) };
       case 'digitar': return { ...base, type: 'digitar', q: pt(t.pergunta), audio: t.audio, answer: t.resposta, why_ok: pt(t.explicacao) };
-      case 'relacionar': return { ...base, type: 'relacionar', pares: t.pares, why_ok: pt(t.explicacao) };
+      case 'relacionar': return { ...base, type: 'relacionar', pares: t.pares, dir: L.ordemDaDireita(t.pares), why_ok: pt(t.explicacao) };
       // "Monte a frase" pode partir de outra frase (fr + pedido): ex.: a mesma pergunta sem inversão (decisão 365).
       case 'montar': return { ...base, type: 'montar', tr: pt(t.traducao), fr: t.fr, pedido: pt(t.pedido) || undefined, tiles: L.embaralharPecas(t.pecas, t.resposta), answer: t.resposta, full: t.frase_completa, why_ok: pt(t.explicacao) };
       case 'classificar': return { ...base, type: 'classificar', fr: t.fr, q: pt(t.pergunta), opts: t.opcoes, answer: t.resposta, full: t.fr, fullTr: pt(t.traducao_do_painel),

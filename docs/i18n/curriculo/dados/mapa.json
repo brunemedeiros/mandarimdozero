@@ -1160,37 +1160,37 @@
                   "palavra": "cinq",
                   "chave": "nova",
                   "origem": "novo",
-                  "licao": 3
+                  "licao": 2
                 },
                 {
                   "palavra": "six",
                   "chave": "nova",
                   "origem": "novo",
-                  "licao": 3
+                  "licao": 2
                 },
                 {
                   "palavra": "sept",
                   "chave": "nova",
                   "origem": "novo",
-                  "licao": 3
+                  "licao": 2
                 },
                 {
                   "palavra": "huit",
                   "chave": "nova",
                   "origem": "novo",
-                  "licao": 4
+                  "licao": 2
                 },
                 {
                   "palavra": "neuf",
                   "chave": "nova",
                   "origem": "novo",
-                  "licao": 4
+                  "licao": 2
                 },
                 {
                   "palavra": "dix",
                   "chave": "A1-3-v4",
                   "origem": "publicado",
-                  "licao": 4
+                  "licao": 2
                 }
               ],
               "notas": [
@@ -1224,8 +1224,12 @@
                   },
                   "exemplos": [
                     {
-                      "fr": "Tu as quel âge ?",
+                      "fr": "Quel âge as-tu ?",
                       "pt-BR": "Quantos anos você tem?"
+                    },
+                    {
+                      "fr": "Tu as quel âge ?",
+                      "pt-BR": "Quantos anos você tem? (na conversa)"
                     },
                     {
                       "fr": "T'as quel âge ?",
@@ -1265,8 +1269,8 @@
                   "confianca": "alta",
                   "nova": true,
                   "momento": {
-                    "licao": 2,
-                    "depois_de": "quatre"
+                    "licao": 3,
+                    "depois_de": "dix"
                   },
                   "exemplos": [
                     {
@@ -1294,43 +1298,40 @@
                 {
                   "licao": 2,
                   "id": "primeiros-numeros",
-                  "titulo": "Contar de um a quatro"
+                  "cartoes_aceitos": 10,
+                  "decisao": 369,
+                  "titulo": "Contar de um a dez"
                 },
                 {
                   "licao": 3,
-                  "id": "cinco-a-sete",
+                  "id": "vinte-e-um-a-vinte-e-nove",
                   "id_novo": true,
-                  "titulo": "Contar de cinco a sete"
+                  "tipo": "pratica",
+                  "titulo": "Dizer idades de 21 a 29"
                 },
                 {
                   "licao": 4,
-                  "id": "oito-a-dez",
-                  "id_novo": true,
-                  "titulo": "Contar de oito a dez"
-                },
-                {
-                  "licao": 5,
                   "id": "conversar-sobre-idade",
                   "id_novo": true,
                   "tipo": "dialogos",
                   "titulo": "Conversar sobre a idade"
                 },
                 {
-                  "licao": 6,
+                  "licao": 5,
                   "id": "idade-formal",
                   "id_novo": true,
                   "tipo": "dialogos",
                   "titulo": "Dizer a idade de um jeito formal"
                 }
               ],
-              "licoes_08": 7,
-              "licoes_motivo": "4 lições de cartões + 2 lições de diálogo + Revisão da unidade (decisão 368); a lição publicada \"contar-ate-vinte\" sai (dix e vingt foram para as lições 4 e 1)",
+              "licoes_08": 6,
+              "licoes_motivo": "3 lições (idade; de 1 a 10; de 21 a 29) + 2 lições de diálogo + Revisão da unidade (decisões 368 e 369); a lição publicada \"contar-ate-vinte\" sai",
               "dialogos": [
                 {
                   "titulo": "Numa festa, a Camille conversa com o Rafael.",
                   "registro": "informal",
                   "origem": "novo (decisão 368); o diálogo publicado \"No parque\" vai para \"Perguntar a idade dos outros\" (decisão 336)",
-                  "licao": 5,
+                  "licao": 4,
                   "decisao": 368,
                   "falas": []
                 },
@@ -1338,13 +1339,14 @@
                   "titulo": "Num consultório, o Sr. Martin preenche a ficha da Sra. Alves.",
                   "registro": "formal",
                   "origem": "novo (decisão 368)",
-                  "licao": 6,
+                  "licao": 5,
                   "decisao": 368,
                   "falas": []
                 }
               ],
               "decisoes": [
-                368
+                368,
+                369
               ]
             },
             {

@@ -75,6 +75,8 @@ Regras de código: `.claude/rules/qualidade-de-codigo.md`. Regras por área: `.c
   texto das notas: `<strong>` = francês (azul na tela, sem quebrar), `<b>` = português em destaque; pode ter `<ul>` (decisão 366);
   painel de erro do "Monte a frase": `diferencasDaResposta(certa, montada)` diz o que destacar (a maquete embute o código da função);
   a resposta certa dos exercícios de escolha muda de posição dentro da lição (`conferirTelas` acusa se ficar sempre na mesma; decisão 368);
+  "Relacione": ordem da coluna da direita por `ordemDaDireita` (nenhum par na mesma linha); lição `tipo: 'pratica'` (sem cartão; nota com gatilho
+  em cartão de lição anterior) aceita por `conferirLicoesDaUnidade` (`fr/scripts/curriculo_mapa.js`) e `conferirTelas` (decisão 369);
   gramática (decisão 365): lição com `tipo: 'gramatica'` (rascunho `piloto-m1/A1-g12/`, validador próprio): sem cartões nem diálogo, notas sem
   gatilho (`momento: {licao}`) seguidas de exercício, `fim` com `resumo`, tela `classificar` (frase fr + opções pt) e `montar` com `fr` + `pedido`
   (montar a partir de outra frase); "só palavras vistas" na posição do fim da unidade; na maquete, `UNIDADES[].gramatica` tira as abas de lição e a Revisão;

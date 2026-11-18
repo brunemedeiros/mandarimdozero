@@ -280,7 +280,15 @@ function conferirLicoesDaUnidade(mapa){
     const comLicao = (u.cartoes || []).filter(c => typeof c.licao === 'number');
     for (const c of comLicao) if (!nums.includes(c.licao)) problemas.push({ unidade: u.id, problema: 'cartão numa lição não declarada', palavra: c.palavra, licao: c.licao });
     const deDialogos = u.licoes.filter(l => l.tipo === 'dialogos').map(l => l.licao);
-    for (const n of nums) if (!deDialogos.includes(n) && !comLicao.some(c => c.licao === n)) problemas.push({ unidade: u.id, problema: 'lição sem cartão', licao: n });
+    // Lição de prática (decisão 369): sem cartão novo; pratica uma nota cujo gatilho é um cartão de uma lição anterior
+    // (ex.: "Dizer idades de 21 a 29", depois de "Contar de um a dez").
+    const dePratica = u.licoes.filter(l => l.tipo === 'pratica').map(l => l.licao);
+    for (const n of nums) if (!deDialogos.includes(n) && !dePratica.includes(n) && !comLicao.some(c => c.licao === n)) problemas.push({ unidade: u.id, problema: 'lição sem cartão', licao: n });
+    for (const n of dePratica){
+      if (comLicao.some(c => c.licao === n)) problemas.push({ unidade: u.id, problema: 'lição de prática com cartão', licao: n });
+      if (!comLicao.some(c => c.licao < n)) problemas.push({ unidade: u.id, problema: 'lição de prática antes de qualquer lição de cartões', licao: n });
+      if (!(u.notas || []).some(x => x.momento && x.momento.licao === n)) problemas.push({ unidade: u.id, problema: 'lição de prática sem nota', licao: n });
+    }
     for (const n of deDialogos){
       if (comLicao.some(c => c.licao === n)) problemas.push({ unidade: u.id, problema: 'lição de diálogos com cartão', licao: n });
       if (nums.some(m => m > n && !deDialogos.includes(m))) problemas.push({ unidade: u.id, problema: 'lição de diálogos antes de uma lição de cartões', licao: n });
@@ -291,7 +299,8 @@ function conferirLicoesDaUnidade(mapa){
     for (const nota of u.notas || []){
       if (!nota.momento) continue;
       const alvo = (u.cartoes || []).find(c => c.palavra === nota.momento.depois_de);
-      if (!alvo || alvo.licao !== nota.momento.licao) problemas.push({ unidade: u.id, problema: 'momento da nota não aponta para um cartão da lição', nota: nota.titulo, momento: nota.momento });
+      const naPratica = dePratica.includes(nota.momento.licao) && alvo && alvo.licao < nota.momento.licao;
+      if (!alvo || (alvo.licao !== nota.momento.licao && !naPratica)) problemas.push({ unidade: u.id, problema: 'momento da nota não aponta para um cartão da lição', nota: nota.titulo, momento: nota.momento });
     }
   }
   return problemas;

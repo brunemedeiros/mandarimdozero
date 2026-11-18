@@ -100,7 +100,7 @@
     "pt-BR": "cinco",
     "en": null
    },
-   "licao": "cinco-a-sete",
+   "licao": "primeiros-numeros",
    "origem": "novo"
   },
   {
@@ -110,7 +110,7 @@
     "pt-BR": "seis",
     "en": null
    },
-   "licao": "cinco-a-sete",
+   "licao": "primeiros-numeros",
    "origem": "novo"
   },
   {
@@ -120,7 +120,7 @@
     "pt-BR": "sete",
     "en": null
    },
-   "licao": "cinco-a-sete",
+   "licao": "primeiros-numeros",
    "origem": "novo"
   },
   {
@@ -130,7 +130,7 @@
     "pt-BR": "oito",
     "en": null
    },
-   "licao": "oito-a-dez",
+   "licao": "primeiros-numeros",
    "origem": "novo"
   },
   {
@@ -140,7 +140,7 @@
     "pt-BR": "nove",
     "en": null
    },
-   "licao": "oito-a-dez",
+   "licao": "primeiros-numeros",
    "origem": "novo"
   },
   {
@@ -150,7 +150,7 @@
     "pt-BR": "dez",
     "en": null
    },
-   "licao": "oito-a-dez",
+   "licao": "primeiros-numeros",
    "origem": "publicado"
   }
  ],
@@ -186,8 +186,8 @@
   {
    "chave": "A1-3-p3",
    "fr": "Nous sommes dix.",
-   "vai_para": "a decidir",
-   "motivo": "contar pessoas não é a função da unidade (decisão 368); decidir no restaurante ou em \"Perguntar a idade dos outros\""
+   "vai_para": "A1-25",
+   "motivo": "quantas pessoas no grupo: Vous êtes combien ? Nous sommes dix. É do restaurante (\"Pedir no restaurante\"), não da idade (a dona, decisão 369)"
   },
   {
    "chave": "A1-3-p2",
@@ -272,8 +272,13 @@
    },
    "exemplos": [
     {
-     "fr": "Tu as quel âge ?",
+     "fr": "Quel âge as-tu ?",
      "pt-BR": "Quantos anos você tem?",
+     "en": null
+    },
+    {
+     "fr": "Tu as quel âge ?",
+     "pt-BR": "Quantos anos você tem? (na conversa)",
      "en": null
     },
     {
@@ -357,8 +362,8 @@
    "tipo_visivel": "explicação",
    "confianca": "alta",
    "momento": {
-    "licao": "primeiros-numeros",
-    "depois_do_cartao": "quatre"
+    "licao": "vinte-e-um-a-vinte-e-nove",
+    "depois_do_cartao": "dix"
    },
    "destino": "nota",
    "texto": {
@@ -800,7 +805,12 @@
     {
      "id": "u5-nota-tas",
      "tipo": "nota",
-     "nota": "tas-quel-age"
+     "nota": "tas-quel-age",
+     "rotulos": {
+      "Quel âge as-tu ?": "inversão",
+      "Tu as quel âge ?": "entonação",
+      "T'as quel âge ?": "fala"
+     }
     },
     {
      "id": "u5-ex-nota-tas",
@@ -898,7 +908,7 @@
    "id_novo": false,
    "titulo": {
     "publicado": null,
-    "pt-BR": "Contar de um a quatro",
+    "pt-BR": "Contar de um a dez",
     "en": null,
     "a_confirmar": false
    },
@@ -906,7 +916,13 @@
     "A1-3-v1",
     "A1-3-v2",
     "A1-3-v3",
-    "nova"
+    "nova",
+    "nova",
+    "nova",
+    "nova",
+    "nova",
+    "nova",
+    "A1-3-v4"
    ],
    "inclui_dialogo": false,
    "telas": [
@@ -914,11 +930,11 @@
      "id": "u5-l2-intro",
      "tipo": "abertura",
      "objetivo": {
-      "pt-BR": "Agora os números de um a quatro, e as idades de 21 a 24.",
+      "pt-BR": "Agora os números de um a dez.",
       "en": null
      },
      "tamanho": {
-      "pt-BR": "4 cartões · 1 frase · cerca de 3 minutos",
+      "pt-BR": "10 cartões · cerca de 5 minutos",
       "en": null
      }
     },
@@ -1080,162 +1096,6 @@
      }
     },
     {
-     "id": "u5-nota-21",
-     "tipo": "nota",
-     "nota": "de-21-a-29"
-    },
-    {
-     "id": "u5-ex-nota-21",
-     "tipo": "vf",
-     "fr": "vingt-trois",
-     "afirmacao": {
-      "pt-BR": "Leva et, como vingt et un.",
-      "en": null
-     },
-     "resposta": false,
-     "frase_do_painel": "vingt-trois",
-     "traducao_do_painel": {
-      "pt-BR": "vinte e três",
-      "en": null
-     },
-     "explicacao": {
-      "pt-BR": "Só o 21 leva <b>et</b>; de 22 a 29, com hífen: <b>vingt-trois</b>.",
-      "en": null
-     }
-    },
-    {
-     "id": "u5-frase-vingtdeux",
-     "tipo": "frase",
-     "frase": "J'ai vingt-deux ans."
-    },
-    {
-     "id": "u5-ex-22",
-     "tipo": "funcao",
-     "pergunta": {
-      "pt-BR": "Você tem 22 anos. O que diz?",
-      "en": null
-     },
-     "opcoes": [
-      "J'ai vingt et deux ans.",
-      "Je suis vingt-deux ans.",
-      "J'ai vingt-deux ans."
-     ],
-     "resposta": "J'ai vingt-deux ans.",
-     "traducao_do_painel": {
-      "pt-BR": "Eu tenho vinte e dois anos.",
-      "en": null
-     },
-     "explicacao": {
-      "pt-BR": "De 22 a 29, com hífen: <b>vingt-deux</b>.",
-      "en": null
-     },
-     "explicacao_erro": {
-      "J'ai vingt et deux ans.": {
-       "pt-BR": "O <b>et</b> é só do 21. ",
-       "en": null
-      },
-      "Je suis vingt-deux ans.": {
-       "pt-BR": "Idade é com <b>avoir</b>: <b>j'ai</b>. ",
-       "en": null
-      }
-     }
-    },
-    {
-     "id": "u5-l2-rel",
-     "tipo": "relacionar",
-     "pares": [
-      [
-       "un / une",
-       "um / uma"
-      ],
-      [
-       "deux",
-       "dois"
-      ],
-      [
-       "trois",
-       "três"
-      ],
-      [
-       "quatre",
-       "quatro"
-      ],
-      [
-       "vingt et un",
-       "vinte e um"
-      ]
-     ],
-     "explicacao": {
-      "pt-BR": "Nos pares, os números de um a quatro e o 21, com <b>et</b>.",
-      "en": null
-     }
-    },
-    {
-     "id": "u5-l2-montar",
-     "tipo": "montar",
-     "traducao": {
-      "pt-BR": "Eu tenho vinte e quatro anos.",
-      "en": null
-     },
-     "pecas": [
-      "J'ai",
-      "vingt-quatre",
-      "ans.",
-      "Je",
-      "suis",
-      "vingt-trois"
-     ],
-     "resposta": [
-      "J'ai",
-      "vingt-quatre",
-      "ans."
-     ],
-     "frase_completa": "J'ai vingt-quatre ans.",
-     "explicacao": {
-      "pt-BR": "A idade com <b>avoir</b>: <b>j'ai</b> e o número.",
-      "en": null
-     }
-    },
-    {
-     "id": "u5-l2-fim",
-     "tipo": "fim",
-     "fala": {
-      "pt-BR": "Parabéns! Você já conta até quatro e diz idades de 21 a 24.",
-      "en": null
-     }
-    }
-   ]
-  },
-  {
-   "id": "cinco-a-sete",
-   "ordem": 3,
-   "id_novo": true,
-   "titulo": {
-    "publicado": null,
-    "pt-BR": "Contar de cinco a sete",
-    "en": null,
-    "a_confirmar": false
-   },
-   "cartoes": [
-    "nova",
-    "nova",
-    "nova"
-   ],
-   "inclui_dialogo": false,
-   "telas": [
-    {
-     "id": "u5-l3-intro",
-     "tipo": "abertura",
-     "objetivo": {
-      "pt-BR": "Agora os números de cinco a sete. Repare no som do fim de cada um.",
-      "en": null
-     },
-     "tamanho": {
-      "pt-BR": "3 cartões · cerca de 2 minutos",
-      "en": null
-     }
-    },
-    {
      "id": "u5-cinq",
      "tipo": "cartao",
      "cartao": "cinq"
@@ -1243,10 +1103,10 @@
     {
      "id": "u5-ex-cinq",
      "tipo": "complete",
-     "antes": "J'ai vingt-",
+     "antes": "J'ai ",
      "depois": " ans.",
      "traducao": {
-      "pt-BR": "Eu tenho vinte e cinco anos.",
+      "pt-BR": "Eu tenho cinco anos.",
       "en": null
      },
      "opcoes": [
@@ -1254,7 +1114,7 @@
       "cinq"
      ],
      "resposta": "cinq",
-     "frase_completa": "J'ai vingt-cinq ans.",
+     "frase_completa": "J'ai cinq ans.",
      "distrator": "grafia",
      "explicacao": {
       "pt-BR": "<b>Cinq</b> termina em <b>q</b>, que soa como \"k\".",
@@ -1275,26 +1135,26 @@
     {
      "id": "u5-ex-six",
      "tipo": "complete",
-     "antes": "J'ai vingt-",
+     "antes": "J'ai ",
      "depois": " ans.",
      "traducao": {
-      "pt-BR": "Eu tenho vinte e seis anos.",
+      "pt-BR": "Eu tenho seis anos.",
       "en": null
      },
      "opcoes": [
       "six",
-      "cinq"
+      "siz"
      ],
      "resposta": "six",
-     "frase_completa": "J'ai vingt-six ans.",
-     "distrator": "outra palavra",
+     "frase_completa": "J'ai six ans.",
+     "distrator": "grafia",
      "explicacao": {
-      "pt-BR": "Antes de vogal, o <b>x</b> de <b>six</b> soa como <b>z</b>: <b>vingt-six‿ans</b>.",
+      "pt-BR": "Antes de vogal, o <b>x</b> de <b>six</b> soa como <b>z</b>: <b>six‿ans</b>. Mas se escreve com <b>x</b>.",
       "en": null
      },
      "explicacao_erro": {
-      "cinq": {
-       "pt-BR": "<b>Cinq</b> é cinco. ",
+      "siz": {
+       "pt-BR": "Soa como <b>z</b>, mas se escreve com <b>x</b>. ",
        "en": null
       }
      }
@@ -1324,132 +1184,6 @@
      }
     },
     {
-     "id": "u5-ex-27",
-     "tipo": "funcao",
-     "pergunta": {
-      "pt-BR": "Você tem 27 anos. O que diz?",
-      "en": null
-     },
-     "opcoes": [
-      "J'ai vingt-six ans.",
-      "J'ai vingt et sept ans.",
-      "J'ai vingt-sept ans."
-     ],
-     "resposta": "J'ai vingt-sept ans.",
-     "traducao_do_painel": {
-      "pt-BR": "Eu tenho vinte e sete anos.",
-      "en": null
-     },
-     "explicacao": {
-      "pt-BR": "De 22 a 29, <b>vingt</b>, hífen e o número: <b>vingt-sept</b>.",
-      "en": null
-     },
-     "explicacao_erro": {
-      "J'ai vingt-six ans.": {
-       "pt-BR": "<b>Six</b> é seis. ",
-       "en": null
-      },
-      "J'ai vingt et sept ans.": {
-       "pt-BR": "Só o 21 leva <b>et</b>. ",
-       "en": null
-      }
-     }
-    },
-    {
-     "id": "u5-l3-rel",
-     "tipo": "relacionar",
-     "pares": [
-      [
-       "cinq",
-       "cinco"
-      ],
-      [
-       "six",
-       "seis"
-      ],
-      [
-       "sept",
-       "sete"
-      ],
-      [
-       "vingt-cinq",
-       "vinte e cinco"
-      ]
-     ],
-     "explicacao": {
-      "pt-BR": "Nos pares, de cinco a sete e o 25, com hífen.",
-      "en": null
-     }
-    },
-    {
-     "id": "u5-l3-montar",
-     "tipo": "montar",
-     "traducao": {
-      "pt-BR": "Você tem vinte e seis anos?",
-      "en": null
-     },
-     "pecas": [
-      "Tu",
-      "as",
-      "vingt-six",
-      "ans",
-      "?",
-      "es",
-      "a"
-     ],
-     "resposta": [
-      "Tu",
-      "as",
-      "vingt-six",
-      "ans",
-      "?"
-     ],
-     "frase_completa": "Tu as vingt-six ans ?",
-     "explicacao": {
-      "pt-BR": "Com <b>tu</b>, <b>avoir</b> fica <b>tu as</b>, e o <b>?</b> faz a pergunta.",
-      "en": null
-     }
-    },
-    {
-     "id": "u5-l3-fim",
-     "tipo": "fim",
-     "fala": {
-      "pt-BR": "Muito bem! Agora você conta até sete.",
-      "en": null
-     }
-    }
-   ]
-  },
-  {
-   "id": "oito-a-dez",
-   "ordem": 4,
-   "id_novo": true,
-   "titulo": {
-    "publicado": null,
-    "pt-BR": "Contar de oito a dez",
-    "en": null,
-    "a_confirmar": false
-   },
-   "cartoes": [
-    "nova",
-    "nova",
-    "A1-3-v4"
-   ],
-   "inclui_dialogo": false,
-   "telas": [
-    {
-     "id": "u5-l4-intro",
-     "tipo": "abertura",
-     "objetivo": {
-      "pt-BR": "Agora os números de oito a dez.",
-      "en": null
-     },
-     "tamanho": {
-      "pt-BR": "3 cartões · cerca de 2 minutos",
-      "en": null
-     }
-    },
-    {
      "id": "u5-huit",
      "tipo": "cartao",
      "cartao": "huit"
@@ -1457,18 +1191,18 @@
     {
      "id": "u5-ex-huit",
      "tipo": "complete",
-     "antes": "J'ai vingt-",
+     "antes": "J'ai ",
      "depois": " ans.",
      "traducao": {
-      "pt-BR": "Eu tenho vinte e oito anos.",
+      "pt-BR": "Eu tenho oito anos.",
       "en": null
      },
      "opcoes": [
-      "uit",
-      "huit"
+      "huit",
+      "uit"
      ],
      "resposta": "huit",
-     "frase_completa": "J'ai vingt-huit ans.",
+     "frase_completa": "J'ai huit ans.",
      "distrator": "grafia",
      "explicacao": {
       "pt-BR": "O <b>h</b> de <b>huit</b> não se pronuncia, mas se escreve; o <b>t</b> do fim soa.",
@@ -1543,20 +1277,291 @@
      }
     },
     {
-     "id": "u5-l4-rel",
+     "id": "u5-l2-rel",
      "tipo": "relacionar",
      "pares": [
+      [
+       "deux",
+       "dois"
+      ],
+      [
+       "quatre",
+       "quatro"
+      ],
+      [
+       "six",
+       "seis"
+      ],
       [
        "huit",
        "oito"
       ],
       [
-       "neuf",
-       "nove"
-      ],
-      [
        "dix",
        "dez"
+      ]
+     ],
+     "explicacao": {
+      "pt-BR": "Nos pares, alguns números de um a dez.",
+      "en": null
+     }
+    },
+    {
+     "id": "u5-l2-montar",
+     "tipo": "montar",
+     "traducao": {
+      "pt-BR": "Eu falo três línguas.",
+      "en": null
+     },
+     "pecas": [
+      "Je",
+      "parle",
+      "trois",
+      "langues.",
+      "deux",
+      "ans"
+     ],
+     "resposta": [
+      "Je",
+      "parle",
+      "trois",
+      "langues."
+     ],
+     "frase_completa": "Je parle trois langues.",
+     "explicacao": {
+      "pt-BR": "<b>Trois langues</b>: o <b>s</b> de <b>trois</b> soa como <b>z</b> antes de vogal.",
+      "en": null
+     }
+    },
+    {
+     "id": "u5-l2-fim",
+     "tipo": "fim",
+     "fala": {
+      "pt-BR": "Parabéns! Agora você conta de um a dez em francês.",
+      "en": null
+     }
+    }
+   ]
+  },
+  {
+   "id": "vinte-e-um-a-vinte-e-nove",
+   "ordem": 3,
+   "id_novo": true,
+   "titulo": {
+    "publicado": null,
+    "pt-BR": "Dizer idades de 21 a 29",
+    "en": null,
+    "a_confirmar": false
+   },
+   "cartoes": [],
+   "inclui_dialogo": false,
+   "telas": [
+    {
+     "id": "u5-l3-intro",
+     "tipo": "abertura",
+     "objetivo": {
+      "pt-BR": "Agora você junta o vingt com os números de um a nove para dizer idades de 21 a 29.",
+      "en": null
+     },
+     "tamanho": {
+      "pt-BR": "1 nota · 1 frase · cerca de 3 minutos",
+      "en": null
+     }
+    },
+    {
+     "id": "u5-nota-21",
+     "tipo": "nota",
+     "nota": "de-21-a-29"
+    },
+    {
+     "id": "u5-ex-nota-21",
+     "tipo": "vf",
+     "fr": "vingt-trois",
+     "afirmacao": {
+      "pt-BR": "Leva et, como vingt et un.",
+      "en": null
+     },
+     "resposta": false,
+     "frase_do_painel": "vingt-trois",
+     "traducao_do_painel": {
+      "pt-BR": "vinte e três",
+      "en": null
+     },
+     "explicacao": {
+      "pt-BR": "Só o 21 leva <b>et</b>; de 22 a 29, com hífen: <b>vingt-trois</b>.",
+      "en": null
+     }
+    },
+    {
+     "id": "u5-frase-vingtdeux",
+     "tipo": "frase",
+     "frase": "J'ai vingt-deux ans."
+    },
+    {
+     "id": "u5-ex-22",
+     "tipo": "funcao",
+     "pergunta": {
+      "pt-BR": "Você tem 22 anos. O que diz?",
+      "en": null
+     },
+     "opcoes": [
+      "J'ai vingt et deux ans.",
+      "Je suis vingt-deux ans.",
+      "J'ai vingt-deux ans."
+     ],
+     "resposta": "J'ai vingt-deux ans.",
+     "traducao_do_painel": {
+      "pt-BR": "Eu tenho vinte e dois anos.",
+      "en": null
+     },
+     "explicacao": {
+      "pt-BR": "De 22 a 29, com hífen: <b>vingt-deux</b>.",
+      "en": null
+     },
+     "explicacao_erro": {
+      "J'ai vingt et deux ans.": {
+       "pt-BR": "O <b>et</b> é só do 21. ",
+       "en": null
+      },
+      "Je suis vingt-deux ans.": {
+       "pt-BR": "Idade é com <b>avoir</b>: <b>j'ai</b>. ",
+       "en": null
+      }
+     }
+    },
+    {
+     "id": "u5-ex-21",
+     "tipo": "funcao",
+     "pergunta": {
+      "pt-BR": "Você tem 21 anos. O que diz?",
+      "en": null
+     },
+     "opcoes": [
+      "J'ai vingt-un ans.",
+      "J'ai vingt et un ans.",
+      "J'ai vingt et deux ans."
+     ],
+     "resposta": "J'ai vingt et un ans.",
+     "traducao_do_painel": {
+      "pt-BR": "Eu tenho vinte e um anos.",
+      "en": null
+     },
+     "explicacao": {
+      "pt-BR": "O 21 leva <b>et</b>: <b>vingt et un</b>.",
+      "en": null
+     },
+     "explicacao_erro": {
+      "J'ai vingt-un ans.": {
+       "pt-BR": "Faltou o <b>et</b>. ",
+       "en": null
+      },
+      "J'ai vingt et deux ans.": {
+       "pt-BR": "O <b>et</b> é só do 21. ",
+       "en": null
+      }
+     }
+    },
+    {
+     "id": "u5-ex-29",
+     "tipo": "complete",
+     "antes": "J'ai vingt-",
+     "depois": " ans.",
+     "traducao": {
+      "pt-BR": "Eu tenho vinte e nove anos.",
+      "en": null
+     },
+     "opcoes": [
+      "nove",
+      "neuf"
+     ],
+     "resposta": "neuf",
+     "frase_completa": "J'ai vingt-neuf ans.",
+     "distrator": "grafia",
+     "explicacao": {
+      "pt-BR": "De 22 a 29, <b>vingt</b>, hífen e o número: <b>vingt-neuf</b>.",
+      "en": null
+     },
+     "explicacao_erro": {
+      "nove": {
+       "pt-BR": "Você escreveu como em português! ",
+       "en": null
+      }
+     }
+    },
+    {
+     "id": "u5-ex-27",
+     "tipo": "funcao",
+     "pergunta": {
+      "pt-BR": "Você tem 27 anos. O que diz?",
+      "en": null
+     },
+     "opcoes": [
+      "J'ai vingt-six ans.",
+      "J'ai vingt et sept ans.",
+      "J'ai vingt-sept ans."
+     ],
+     "resposta": "J'ai vingt-sept ans.",
+     "traducao_do_painel": {
+      "pt-BR": "Eu tenho vinte e sete anos.",
+      "en": null
+     },
+     "explicacao": {
+      "pt-BR": "De 22 a 29, <b>vingt</b>, hífen e o número: <b>vingt-sept</b>.",
+      "en": null
+     },
+     "explicacao_erro": {
+      "J'ai vingt-six ans.": {
+       "pt-BR": "<b>Six</b> é seis. ",
+       "en": null
+      },
+      "J'ai vingt et sept ans.": {
+       "pt-BR": "Só o 21 leva <b>et</b>. ",
+       "en": null
+      }
+     }
+    },
+    {
+     "id": "u5-ex-et",
+     "tipo": "complete",
+     "antes": "J'ai vingt ",
+     "depois": " un ans.",
+     "traducao": {
+      "pt-BR": "Eu tenho vinte e um anos.",
+      "en": null
+     },
+     "opcoes": [
+      "et",
+      "est"
+     ],
+     "resposta": "et",
+     "frase_completa": "J'ai vingt et un ans.",
+     "distrator": "outra palavra",
+     "explicacao": {
+      "pt-BR": "No 21, o \"e\" é <b>et</b>, sem <b>s</b> e sem <b>t</b> no som.",
+      "en": null
+     },
+     "explicacao_erro": {
+      "est": {
+       "pt-BR": "<b>Est</b> é de <b>être</b>. ",
+       "en": null
+      }
+     }
+    },
+    {
+     "id": "u5-l3-rel",
+     "tipo": "relacionar",
+     "pares": [
+      [
+       "vingt et un",
+       "vinte e um"
+      ],
+      [
+       "vingt-deux",
+       "vinte e dois"
+      ],
+      [
+       "vingt-cinq",
+       "vinte e cinco"
       ],
       [
        "vingt-huit",
@@ -1568,50 +1573,55 @@
       ]
      ],
      "explicacao": {
-      "pt-BR": "Nos pares, de oito a dez e as idades de 28 e 29.",
+      "pt-BR": "Nos pares, o 21 com <b>et</b> e os outros com hífen.",
       "en": null
      }
     },
     {
-     "id": "u5-l4-montar",
+     "id": "u5-l3-montar",
      "tipo": "montar",
      "traducao": {
-      "pt-BR": "Quantos anos o senhor (a senhora) tem?",
+      "pt-BR": "Eu tenho vinte e seis anos, e você?",
       "en": null
      },
      "pecas": [
-      "Quel",
-      "âge",
-      "avez-vous",
+      "J'ai",
+      "vingt-six",
+      "ans,",
+      "et",
+      "toi",
       "?",
-      "as-tu",
-      "Vous"
+      "vingt",
+      "six"
      ],
      "resposta": [
-      "Quel",
-      "âge",
-      "avez-vous",
+      "J'ai",
+      "vingt-six",
+      "ans,",
+      "et",
+      "toi",
       "?"
      ],
-     "frase_completa": "Quel âge avez-vous ?",
+     "frase_completa": "J'ai vingt-six ans, et toi ?",
      "explicacao": {
-      "pt-BR": "No formal, <b>avez-vous</b>, de <b>avoir</b> com <b>vous</b>.",
+      "pt-BR": "<b>Vingt-six</b> com hífen, e <b>et toi ?</b> para devolver a pergunta.",
       "en": null
      }
     },
     {
-     "id": "u5-l4-fim",
+     "id": "u5-l3-fim",
      "tipo": "fim",
      "fala": {
-      "pt-BR": "Parabéns! Você já diz a sua idade em francês.",
+      "pt-BR": "Parabéns! Agora você diz idades de 21 a 29.",
       "en": null
      }
     }
-   ]
+   ],
+   "tipo": "pratica"
   },
   {
    "id": "conversar-sobre-idade",
-   "ordem": 5,
+   "ordem": 4,
    "id_novo": true,
    "tipo": "dialogos",
    "titulo": {
@@ -1861,7 +1871,7 @@
   },
   {
    "id": "idade-formal",
-   "ordem": 6,
+   "ordem": 5,
    "id_novo": true,
    "tipo": "dialogos",
    "titulo": {

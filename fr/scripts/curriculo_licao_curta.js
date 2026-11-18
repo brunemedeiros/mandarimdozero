@@ -22,6 +22,15 @@ function embaralharIndices(n, chave){
   for (let t = 0; t < 20; t++){ const p = permutacao(n, sementeDe(chave + '#' + t)); if (p.some((v, k) => v !== k)) return p; }
   return [...Array(n).keys()].map(k => (k + 1) % n);
 }
+// Coluna da direita do "Relacione os pares" (decisão 369, a dona): nenhuma tradução na mesma linha da sua frase, para a aluna
+// procurar em cima e embaixo, não só ao lado. Índices dos pares na ordem em que aparecem à direita; com 1 par não há como.
+function ordemDaDireita(pares){
+  const n = pares.length;
+  if (n < 2) return [...Array(n).keys()];
+  const chave = pares.map(p => p.join('=')).join('|');
+  for (let t = 0; t < 50; t++){ const p = permutacao(n, sementeDe(chave + '#' + t)); if (p.every((v, k) => v !== k)) return p; }
+  return [...Array(n).keys()].map(k => (k + 1) % n);
+}
 // Peças do "Monte a frase" embaralhadas: lidas da esquerda para a direita, as peças da resposta não formam a resposta.
 function embaralharPecas(pecas, resposta){
   const naOrdem = lista => { const resto = [...lista]; const lidas = []; for (const p of resto) if (lidas.length < resposta.length && p === resposta[lidas.length]) lidas.push(p); return lidas.length === resposta.length; };
@@ -129,7 +138,11 @@ function conferirTelas(R){
         const temGatilho = n && (n.momento.depois_do_cartao || n.momento.depois_da_frase);
         if (temGatilho){
           const alvo = telas.find(x => (x.tipo === 'cartao' && x.cartao === n.momento.depois_do_cartao) || (x.tipo === 'frase' && x.frase === n.momento.depois_da_frase));
-          confere(alvo && ids.indexOf(alvo.id) < ids.indexOf(t.id), `tela ${t.id}: nota antes do gatilho (regra 4)`);
+          // Gatilho numa lição anterior também vale (decisão 369: a lição de 21 a 29 não tem cartão novo; o gatilho é o dix).
+          const ordemDe = id => comTelas.findIndex(x => x.id === id);
+          const cartaoAntes = R.cartoes.find(c => c.fr === n.momento.depois_do_cartao);
+          const deLicaoAnterior = !alvo && cartaoAntes && ordemDe(cartaoAntes.licao) >= 0 && ordemDe(cartaoAntes.licao) < ordemDe(l.id);
+          confere(deLicaoAnterior || (alvo && ids.indexOf(alvo.id) < ids.indexOf(t.id)), `tela ${t.id}: nota antes do gatilho (regra 4)`);
         } else confere(ehGramatica(l), `tela ${t.id}: nota sem gatilho fora de uma lição de gramática`);
       }
       if (t.tipo === 'classificar') confere(t.fr && t.traducao_do_painel && t.opcoes.length >= 2 && t.opcoes.includes(t.resposta), `tela ${t.id}: "classificar" sem frase, sem tradução do painel ou com resposta fora das opções`);
@@ -253,4 +266,4 @@ function textosDasTelas(R, M, mapa, unidadeId){
   return casos;
 }
 
-module.exports = { ETAPAS_DIALOGO, conferirTelas, diferencasDaResposta, embaralharIndices, embaralharPecas, traducaoNaTela, posicaoNoFimDaLicao, textosDasTelas };
+module.exports = { ETAPAS_DIALOGO, conferirTelas, diferencasDaResposta, embaralharIndices, embaralharPecas, ordemDaDireita, traducaoNaTela, posicaoNoFimDaLicao, textosDasTelas };
