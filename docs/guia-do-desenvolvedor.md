@@ -82,6 +82,7 @@ Regras de código: `.claude/rules/qualidade-de-codigo.md`. Regras por área: `.c
   o cartão conta uma vez só nas palavras vistas e na Revisão. Tela `relacionar`: `pares` = `[[fr, tradução], ...]`, 3 ou mais,
   sem repetir dos dois lados. Sem `forma`, a maquete mostra o par numa tela só, com um áudio por forma.
   Unidade nova no piloto: pasta `piloto-m1/<unidade>/` com o rascunho e um `validar.js` curto (modelo: `A1-9/validar.js`).
+  Laboratório de áudio para ouvir a voz do site antes de decidir: Action "Áudio TTS" (`fr/scripts/audio_lab.py`, modos `entonacao` e `ligacao`; artefato `laboratorio-audio`).
   Maquete clicável gerada dos rascunhos (lista `RASCUNHOS` do `docs/i18n/curriculo/maquete-licao-curta/gerar.js`; unidade nova = uma linha ali; `fonte.html`
   tem só o desenho e os comentários `WHY`; tela sem comentário mostra o nome do tipo).
   Voz da professora (todo texto que fala com o aluno): `docs/voz-da-professora.md`.
