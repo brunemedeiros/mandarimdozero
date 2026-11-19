@@ -32,7 +32,7 @@
    },
    "destino": "nota",
    "texto": {
-    "pt-BR": "Você já usou <strong>être</strong> (ser, estar) para dizer a nacionalidade. No singular:<ul><li><strong>je suis</strong>, <strong>tu es</strong>, <strong>il est</strong>, <strong>elle est</strong></li><li><strong>tu es</strong> e <strong>il est</strong> soam igual: \"é\".</li></ul>",
+    "pt-BR": "Você já usou <strong>être</strong> (ser, estar) para dizer a nacionalidade. No singular:<ul><li><strong>je suis</strong>, <strong>tu es</strong>, <strong>il est</strong>, <strong>elle est</strong></li><li><strong>es</strong> e <strong>est</strong> soam igual: \"é\".</li></ul>",
     "en": null
    },
    "exemplos": [
@@ -63,7 +63,7 @@
    },
    "destino": "nota",
    "texto": {
-    "pt-BR": "No plural:<ul><li><strong>nous sommes</strong>, <strong>vous êtes</strong>, <strong>ils sont</strong>, <strong>elles sont</strong></li><li><strong>ils</strong> é \"eles\" (ou um grupo misto); <strong>elles</strong> é \"elas\", só mulheres.</li></ul>",
+    "pt-BR": "No plural:<ul><li><strong>nous sommes</strong>, <strong>vous êtes</strong>, <strong>ils sont</strong>, <strong>elles sont</strong></li><li><strong>ils</strong> é \"eles\" (homens ou grupo misto); <strong>elles</strong> é \"elas\", só mulheres.</li></ul>",
     "en": null
    },
    "exemplos": [
@@ -202,7 +202,7 @@
      "id": "g6-intro",
      "tipo": "abertura",
      "objetivo": {
-      "pt-BR": "Vou te mostrar completos os dois verbos que você mais usou até aqui: être e avoir. Vamos lá?",
+      "pt-BR": "Agora vou te mostrar a conjugação completa dos dois verbos que você mais usou até aqui: être e avoir. Vamos lá?",
       "en": null
      }
     },
@@ -215,9 +215,9 @@
      "id": "g6-ex-suis",
      "tipo": "complete",
      "antes": "Je ",
-     "depois": " brésilienne.",
+     "depois": " de Rio.",
      "traducao": {
-      "pt-BR": "Eu sou brasileira.",
+      "pt-BR": "Eu sou do Rio.",
       "en": null
      },
      "opcoes": [
@@ -225,7 +225,7 @@
       "suis"
      ],
      "resposta": "suis",
-     "frase_completa": "Je suis brésilienne.",
+     "frase_completa": "Je suis de Rio.",
      "distrator": "outra palavra",
      "explicacao": {
       "pt-BR": "Com <b>je</b>, <b>être</b> fica <b>suis</b>.",
@@ -246,8 +246,8 @@
       "en": null
      },
      "opcoes": [
-      "Elle suis italienne.",
       "Elle est italienne.",
+      "Elle suis italienne.",
       "Elle es italienne."
      ],
      "resposta": "Elle est italienne.",
@@ -256,7 +256,7 @@
       "en": null
      },
      "explicacao": {
-      "pt-BR": "Com <b>elle</b>, <b>être</b> fica <b>est</b>: o <b>s</b> e o <b>t</b> não soam.",
+      "pt-BR": "Com <b>elle</b>, <b>être</b> fica <b>est</b>, que soa como \"é\".",
       "en": null
      },
      "explicacao_erro": {
@@ -285,8 +285,8 @@
       "en": null
      },
      "opcoes": [
-      "etes",
-      "êtes"
+      "êtes",
+      "etes"
      ],
      "resposta": "êtes",
      "frase_completa": "Vous êtes de Paris ?",
@@ -311,8 +311,8 @@
      },
      "opcoes": [
       "Ils sont de Rio.",
-      "Elles sommes de Rio.",
-      "Elles sont de Rio."
+      "Elles sont de Rio.",
+      "Elles sommes de Rio."
      ],
      "resposta": "Elles sont de Rio.",
      "traducao_do_painel": {
@@ -361,7 +361,7 @@
      },
      "explicacao_erro": {
       "a": {
-       "pt-BR": "<b>A</b> é com <b>il</b> e <b>elle</b>. ",
+       "pt-BR": "<b>A</b> é com <b>il</b> e <b>elle</b>; <b>as</b> e <b>a</b> soam igual, só a escrita muda. ",
        "en": null
       }
      }
@@ -376,8 +376,8 @@
       "en": null
      },
      "opcoes": [
-      "Je ai",
-      "J'ai"
+      "J'ai",
+      "Je ai"
      ],
      "resposta": "J'ai",
      "frase_completa": "J'ai vingt-cinq ans.",
@@ -401,19 +401,19 @@
     {
      "id": "g6-ex-ils-ont",
      "tipo": "vf",
-     "fr": "Ils ont dix ans.",
+     "fr": "Ils ont seize ans.",
      "afirmacao": {
-      "pt-BR": "Quer dizer \"Eles são dez\".",
+      "pt-BR": "Quer dizer \"Eles têm dezesseis anos\".",
       "en": null
      },
-     "resposta": false,
-     "frase_do_painel": "Ils ont dix ans.",
+     "resposta": true,
+     "frase_do_painel": "Ils ont seize ans.",
      "traducao_do_painel": {
-      "pt-BR": "Eles têm dez anos.",
+      "pt-BR": "Eles têm dezesseis anos.",
       "en": null
      },
      "explicacao": {
-      "pt-BR": "<b>Ils ont</b>, com som de <b>z</b>, é \"eles têm\"; \"eles são\" é <b>ils sont</b>.",
+      "pt-BR": "<b>Ils ont</b>, com som de <b>z</b>, é \"eles têm\"; <b>ils sont</b>, com som de <b>s</b>, é \"eles são\".",
       "en": null
      }
     },
@@ -421,13 +421,13 @@
      "id": "g6-ex-avons",
      "tipo": "funcao",
      "pergunta": {
-      "pt-BR": "Você e o seu irmão têm 20 anos. Como você diz \"nós temos vinte anos\"?",
+      "pt-BR": "Você e um colega de turma têm 20 anos. O que você diz?",
       "en": null
      },
      "opcoes": [
       "Nous sommes vingt ans.",
-      "Nous avez vingt ans.",
-      "Nous avons vingt ans."
+      "Nous avons vingt ans.",
+      "Nous avez vingt ans."
      ],
      "resposta": "Nous avons vingt ans.",
      "traducao_do_painel": {
@@ -465,28 +465,28 @@
      "tipo": "relacionar",
      "pares": [
       [
-       "je",
-       "suis"
+       "tu",
+       "as"
       ],
       [
-       "tu",
-       "es"
+       "vous",
+       "avez"
       ],
       [
        "nous",
        "sommes"
       ],
       [
-       "vous",
-       "êtes"
+       "ils",
+       "ont"
       ],
       [
-       "ils",
-       "sont"
+       "je",
+       "suis"
       ]
      ],
      "explicacao": {
-      "pt-BR": "Nos pares, cada pessoa com a sua forma de <b>être</b>.",
+      "pt-BR": "Nos pares, cada pessoa com a sua forma de <b>être</b> ou <b>avoir</b>.",
       "en": null
      }
     },
@@ -495,12 +495,12 @@
      "tipo": "classificar",
      "fr": "Ils ont vingt ans.",
      "pergunta": {
-      "pt-BR": "De que verbo é essa forma?",
+      "pt-BR": "Que verbo essa frase usa?",
       "en": null
      },
      "opcoes": [
-      "être",
-      "avoir"
+      "avoir",
+      "être"
      ],
      "resposta": "avoir",
      "traducao_do_painel": {
@@ -521,27 +521,27 @@
     {
      "id": "g6-ex-qual-2",
      "tipo": "classificar",
-     "fr": "Vous êtes de Paris ?",
+     "fr": "Vous avez quel âge ?",
      "pergunta": {
-      "pt-BR": "De que verbo é essa forma?",
+      "pt-BR": "Que verbo essa frase usa?",
       "en": null
      },
      "opcoes": [
       "être",
       "avoir"
      ],
-     "resposta": "être",
+     "resposta": "avoir",
      "traducao_do_painel": {
-      "pt-BR": "Vocês são de Paris?",
+      "pt-BR": "Quantos anos vocês têm?",
       "en": null
      },
      "explicacao": {
-      "pt-BR": "<b>Êtes</b> é de <b>être</b>: \"vocês são\".",
+      "pt-BR": "<b>Avez</b> é de <b>avoir</b>: \"vocês têm\".",
       "en": null
      },
      "explicacao_erro": {
-      "avoir": {
-       "pt-BR": "<b>Avoir</b> com <b>vous</b> é <b>avez</b>. ",
+      "être": {
+       "pt-BR": "<b>Être</b> com <b>vous</b> é <b>êtes</b>. ",
        "en": null
       }
      }
@@ -549,32 +549,32 @@
     {
      "id": "g6-ex-nous",
      "tipo": "montar",
-     "fr": "J'ai vingt ans.",
+     "fr": "Elle a dix-huit ans.",
      "pedido": {
-      "pt-BR": "Agora com nous: nós temos vinte anos.",
+      "pt-BR": "Agora com elles.",
       "en": null
      },
      "traducao": {
-      "pt-BR": "Nós temos vinte anos.",
+      "pt-BR": "Elas têm dezoito anos.",
       "en": null
      },
      "pecas": [
-      "Nous",
-      "avons",
-      "vingt",
+      "Elles",
+      "ont",
+      "dix-huit",
       "ans.",
-      "sommes",
-      "avez"
+      "sont",
+      "a"
      ],
      "resposta": [
-      "Nous",
-      "avons",
-      "vingt",
+      "Elles",
+      "ont",
+      "dix-huit",
       "ans."
      ],
-     "frase_completa": "Nous avons vingt ans.",
+     "frase_completa": "Elles ont dix-huit ans.",
      "explicacao": {
-      "pt-BR": "Com <b>nous</b>, <b>avoir</b> fica <b>avons</b>.",
+      "pt-BR": "Com <b>elles</b>, <b>avoir</b> fica <b>ont</b>, com som de <b>z</b>.",
       "en": null
      }
     },
@@ -608,7 +608,7 @@
      ],
      "frase_completa": "Vous êtes de Paris ?",
      "explicacao": {
-      "pt-BR": "No formal, <b>vous êtes</b>.",
+      "pt-BR": "No formal, com uma pessoa só, também é <b>vous êtes</b>, como no plural.",
       "en": null
      }
     },
