@@ -62,7 +62,7 @@ function construirTelas(R, unidade, tolerante){
   function telaDaMaquete(t, licao, telasDaLicao){
     const base = { id: t.id, lesson: `${unidade}.${licao.ordem}`, unit: unidade };
     switch (t.tipo){
-      case 'abertura': return { ...base, type: 'intro', n: licao.ordem, total, title: pt(licao.titulo), goal: pt(t.objetivo), size: pt(t.tamanho) };
+      case 'abertura': return { ...base, type: 'intro', n: licao.ordem, total, title: pt(licao.titulo), goal: pt(t.objetivo) };
       case 'cartao': {
         const c = cartao(t.cartao);
         if (t.forma !== undefined){ // cartão em par mostrado uma forma por tela (decisão 360)
@@ -117,7 +117,7 @@ function construirTelas(R, unidade, tolerante){
         return { ...base, type: 'fim', say: pt(t.fala), list: lista };
       }
       // Lição de diálogos em 6 etapas (decisão 353). Os dados do diálogo vão juntos em `dlg`.
-      case 'dialogo_cena': return { ...base, type: 'd_cena', dlg: dialogo(t.dialogo), n: licao.ordem, total, licao: pt(licao.titulo), foco: pt(t.foco), size: pt(t.tamanho) };
+      case 'dialogo_cena': return { ...base, type: 'd_cena', dlg: dialogo(t.dialogo), n: licao.ordem, total, licao: pt(licao.titulo), foco: pt(t.foco) };
       case 'dialogo_vf': return { ...base, type: 'd_vf', dlg: dialogo(t.dialogo), fala: t.fala, stmt: pt(t.afirmacao), answer: t.resposta, why_ok: pt(t.explicacao) };
       case 'dialogo_lacuna': return { ...base, type: 'd_lacuna', dlg: dialogo(t.dialogo), fala: t.fala, before: t.antes, after: t.depois, opts: t.opcoes, answer: t.resposta, why_ok: pt(t.explicacao) };
       case 'dialogo_ordenar': return { ...base, type: 'd_ordenar', dlg: dialogo(t.dialogo), ordem: L.embaralharIndices(dialogo(t.dialogo).lines.length, t.dialogo), why_ok: pt(t.explicacao) };

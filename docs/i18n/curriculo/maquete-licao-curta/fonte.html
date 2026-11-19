@@ -792,7 +792,6 @@ function render(){
       <span class="tag">Lição ${s.n} de ${s.total}</span>
       <div class="fr-mid" style="text-align:left">${esc(s.title)}</div>
       <div class="prof intro-fala"><img src="${FOTO}" alt="Prof. Brune"><div class="fala"><span class="nome">Prof. Brune</span><span>${esc(s.goal)}</span></div></div>
-      <p class="small" style="margin:0">${esc(s.size)}</p>
     </div><button class="btn" id="go">Começar</button>`;
   }
   if(s.type==='item'){
@@ -877,7 +876,6 @@ function render(){
     h=`<div class="tags"><span class="tag">Lição ${s.n} de ${s.total}</span><span class="tag pink">${esc(s.licao)}</span></div><div class="grow">
       <div class="fr-mid" style="text-align:left">${esc(d.title)}</div>${elenco(d)}
       <div class="prof intro-fala"><img src="${FOTO}" alt="Prof. Brune"><div class="fala"><span class="nome">Prof. Brune</span><span>${esc(s.foco)}</span></div></div>
-      <p class="small" style="margin:0">${esc(s.size)}</p>
     </div><button class="btn" id="go">Ouvir a conversa</button>`;
   }
   if(s.type==='d_vf'){

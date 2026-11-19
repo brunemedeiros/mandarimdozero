@@ -110,6 +110,7 @@ function conferirTelas(R){
       confere((ts.length === 1 && ts[0].forma === undefined) || partida, `lição ${l.id}: cartão "${fr}" deve vir numa tela só ou em duas (forma 0 e forma 1, com tradução e registro)`);
     }
     confere(telas[0].tipo === 'abertura' && telas[telas.length - 1].tipo === 'fim', `lição ${l.id}: começa sem abertura ou termina sem a tela final`);
+    confere(!telas.some(t => 'tamanho' in t), `lição ${l.id}: a abertura não mostra o tamanho da lição (decisão 370)`);
     // Depois de cada palavra ou frase nova, um exercício antes do próximo item novo, ainda que fácil; nota não conta (decisão 362).
     let semExercicio = null;
     for (const t of telas){
@@ -172,6 +173,7 @@ function conferirTelas(R){
     confere(seus.length === 1, `lição ${l.id}: precisa de exatamente um diálogo`);
     for (const d of seus){
       const nome = d.titulo['pt-BR'];
+      confere(!l.telas.some(t => 'tamanho' in t), `lição ${l.id}: a cena não mostra o tamanho da lição (decisão 370)`);
       confere(JSON.stringify(l.telas.map(t => t.tipo)) === JSON.stringify(ETAPAS_DIALOGO) && l.telas.every(t => t.dialogo === nome),
         `lição ${l.id}: telas fora da ordem ${ETAPAS_DIALOGO.join(' > ')} (${l.telas.map(t => t.tipo).join(' > ')})`);
       const falaOk = i => Number.isInteger(i) && i >= 0 && i < d.falas.length;

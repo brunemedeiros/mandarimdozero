@@ -255,10 +255,6 @@
      "objetivo": {
       "pt-BR": "Agora você vai se apresentar! Vou te ensinar a dizer o seu nome e a perguntar o nome de alguém.",
       "en": null
-     },
-     "tamanho": {
-      "pt-BR": "5 cartões · 2 frases · cerca de 3 minutos",
-      "en": null
      }
     },
     {
@@ -650,10 +646,6 @@
      "objetivo": {
       "pt-BR": "Agora vamos soletrar! Vou te mostrar o alfabeto em francês e como pedir que alguém soletre o nome.",
       "en": null
-     },
-     "tamanho": {
-      "pt-BR": "4 cartões · 1 frase · cerca de 3 minutos",
-      "en": null
      }
     },
     {
@@ -868,10 +860,6 @@
      "tipo": "abertura",
      "objetivo": {
       "pt-BR": "Agora vou te ensinar a dizer a sua nacionalidade e a perguntar a de alguém.",
-      "en": null
-     },
-     "tamanho": {
-      "pt-BR": "6 cartões · 2 frases · cerca de 4 minutos",
       "en": null
      }
     },
@@ -1206,10 +1194,6 @@
      "foco": {
       "pt-BR": "Ouça com atenção: repare em como eles perguntam o nome e a nacionalidade.",
       "en": null
-     },
-     "tamanho": {
-      "pt-BR": "1 conversa · cerca de 3 minutos",
-      "en": null
      }
     },
     {
@@ -1489,10 +1473,6 @@
      "dialogo": "No hotel, a recepcionista Claire atende o Sr. Costa.",
      "foco": {
       "pt-BR": "Ouça com atenção: repare em como eles se tratam e em como ele soletra o sobrenome.",
-      "en": null
-     },
-     "tamanho": {
-      "pt-BR": "1 conversa · cerca de 4 minutos",
       "en": null
      }
     },

@@ -70,6 +70,7 @@ check('V/F sem a frase do painel (o painel toca o áudio dela)', acusa(r => { r.
 check('resposta certa sempre na mesma posição é acusada (decisão 368)', acusa(r => {
   const t = r.licoes[0].telas; t.splice(t.length - 1, 0, { id: 'f1', tipo: 'funcao', pergunta: pt('?'), opcoes: ['Salut !', 'Merci !'], resposta: 'Salut !', explicacao: pt('ok') });
   tela(r, 'x2').opcoes = ['Merci', 'Salut']; tela(r, 'o').opcoes = ['G', 'J']; tela(r, 'x1').opcoes = ['Salut', 'Salu']; }, 'sempre na posição'));
+check('abertura com a linha do tamanho é acusada (decisão 370)', acusa(r => { tela(r, 'a').tamanho = pt('4 cartões · cerca de 3 minutos'); }, 'não mostra o tamanho'));
 check('texto longo demais (decisão 352)', acusa(r => { tela(r, 'a').objetivo = pt('a'.repeat(121)); }, 'texto longo demais'));
 check('inclui_dialogo errado', acusa(r => { r.licoes[0].inclui_dialogo = true; }, 'inclui_dialogo não bate'));
 
