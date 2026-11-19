@@ -246,7 +246,8 @@ Confiança do autor da proposta quando registrada. "Gatilho" com frase = ainda n
 | M1.2 | *Français, française*: o feminino que se ouve | E | L2 | `09` opção C | alta |
 | M1.3 (`A1-3`) | *Deux ans, trois ans*: a letra muda acorda | E (S) | L2 | `09` | alta (texto com erro, pergunta 20) |
 | M1.3 | De 21 a 29 + *vingt‿et un* (2 blocos) | E (S) | L4 | `08`, `09` | alta |
-| M1.4 (`A1-21`) | 17, 18, 19 e as dezenas | E | L3 | `08`, `09` | alta |
+| M2.3 (`A1-21`) | As dezenas: trente, quarante, cinquante, soixante (era "17, 18, 19 e as dezenas"; decisão 371) | E | L3 | `08`, `09` | alta |
+| M1.5 (`A1-3`) | De 17 a 19: dix e o número (decisão 371) | E | L3 | `08` | alta |
 | M1.4 | *Et lui ? Et elle ?* (tônicos 2) | E | depois do diálogo | `09` | alta |
 | M1.6 (`A1-22`) | *Je suis professeur*: sem artigo | E | 1º item, L1 | `08`, `09` | alta |
 | M1.6 | *Tu fais quoi dans la vie ?* | R gram. coloquial | depois do diálogo | `09` | alta |

@@ -1384,11 +1384,11 @@
                 },
                 {
                   "licao": 3,
-                  "id": "onze-a-vinte",
-                  "id_novo": true,
+                  "id": "contar-ate-vinte",
                   "cartoes_aceitos": 9,
                   "decisao": 371,
-                  "titulo": "Contar de 11 a 20"
+                  "titulo": "Contar de 11 a 20",
+                  "observacao": "reaproveita o id da lição publicada \"Contar até vinte\" (decisão 284): a função voltou (decisão 371)"
                 },
                 {
                   "licao": 4,
@@ -1757,7 +1757,21 @@
                   "tipo": "Exp",
                   "confianca": "alta",
                   "nova": true,
-                  "observacao": "17, 18 e 19 foram para \"Dizer a idade: de 1 a 29\", com os cartões de 11 a 19 (decisão 371)"
+                  "observacao": "17, 18 e 19 foram para \"Dizer a idade: de 1 a 29\", com os cartões de 11 a 19 (decisão 371)",
+                  "exemplos": [
+                    {
+                      "fr": "trente et un",
+                      "pt-BR": "trinta e um"
+                    },
+                    {
+                      "fr": "quarante-cinq",
+                      "pt-BR": "quarenta e cinco"
+                    },
+                    {
+                      "fr": "soixante-neuf",
+                      "pt-BR": "sessenta e nove"
+                    }
+                  ]
                 },
                 {
                   "titulo": "Et lui ? Et elle ?: tônicos",
@@ -1771,8 +1785,8 @@
                 335,
                 371
               ],
-              "progresso_modulo_concluido": "quem já concluiu o módulo \"Família e pessoas próximas\" continua com ele concluído e com o Ponto de verificação aprovado; a unidade que entra aparece aberta (regra da decisão 330, item 4, estendida às mudanças de módulo das decisões 334 e 335); quem tinha concluído \"Apresentar-se\" com esta unidade não perde nada (a unidade é nova, ainda sem chave publicada)",
-              "dialogo_a_decidir": "o diálogo publicado \"No parque\" (Quel âge a ta fille ? ...), hoje em \"Dizer a idade: de 1 a 29\", pode vir para esta unidade (decisão 335; a decidir no desenho dela)"
+              "progresso_modulo_concluido": "quem já concluiu o módulo \"Família e pessoas próximas\" continua com ele concluído e com o Ponto de verificação aprovado; a unidade que entra aparece aberta (regra da decisão 330, item 4, estendida às mudanças de módulo das decisões 334 e 335); quem tinha concluído \"Apresentar-se\" com esta unidade não perde nada; os 4 cartões que ficam (trente a soixante) são os publicados A1-10-v6 a v9, de \"Compras\", e guardam o progresso de cada aluno (decisão 371)",
+              "dialogo_a_decidir": "o diálogo publicado \"No parque\" (Quel âge a ta fille ? ...) vem para esta unidade (decisão 336), com as frases Il a dix ans. e Quel est l'âge de ton père ? (decisões 336 e 368)"
             },
             {
               "id": "A1-g2",

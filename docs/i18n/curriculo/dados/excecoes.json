@@ -338,16 +338,10 @@
     },
     {
       "unidade": "A1-3",
-      "motivo": "conjunto fechado (números de 1 a 29)",
+      "motivo": "conjunto fechado (números de 1 a 29; 23 cartões com o 11 a 19, decisão 371)",
       "decisoes": [
-        231
-      ]
-    },
-    {
-      "unidade": "A1-21",
-      "motivo": "conjunto fechado (dezenas até 69; de 11 a 19 estão em Dizer a idade: de 1 a 29, decisão 371)",
-      "decisoes": [
-        231
+        231,
+        371
       ]
     },
     {

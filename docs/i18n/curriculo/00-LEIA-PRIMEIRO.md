@@ -300,3 +300,7 @@ Objetivo: melhorar o currículo pedagógico do francês (A1 revisado e A2 novo) 
   "Apresentar-se" com 67 cartões e "Família e pessoas próximas" com 40. Auditoria: `auditoria/2026-11-09-ordem-modulos-1-e-2.md`.
 
 > **Como falar com a dona** (2026-10-23): em toda mensagem a ela, citar o NOME do módulo e da unidade (não só M6.1 ou `A1-15`), explicar termos internos e dar o contexto completo de cada decisão. Vale para o chat e para qualquer agente.
+
+## Atualização: decisões 368 a 371 (2026-11-18 e 2026-11-19)
+
+Unidade 5 "Dizer a idade: de 1 a 29" no formato da lição curta (rascunho `piloto-m1/A1-3/`): lições idade, 1 a 10, 11 a 20 (cartões de *onze* a *dix-neuf* vindos de "Perguntar a idade dos outros"), prática de 21 a 29 e 2 diálogos. Totais do A1: 388 cartões, ~158 lições, 132 notas ("Apresentar-se" 79 cartões, "Família e pessoas próximas" 31). Decisões no `12`, achados no `dados/ACHADOS.md`.

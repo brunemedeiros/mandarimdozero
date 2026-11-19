@@ -154,3 +154,10 @@ decisão estão marcados **(para a dona)**.
     - **Tempo digitado** (`tempo_08_min`) de "Apresentar-se" (3h55) e de "Família e pessoas próximas" (3h45) **não foi recalculado** (regra 16 suspensa, decisão 325):
       com 13 cartões a menos, "Apresentar-se" continua com o mesmo número; a dona decide na nova medição.
 
+## Decisão 371 (2026-11-19): 11 a 19 na unidade "Dizer a idade: de 1 a 29"
+
+- Os 9 cartões de *onze* a *dix-neuf* saíram de "Perguntar a idade dos outros: até 69" (A1-21) e foram para "Dizer a idade: de 1 a 29" (A1-3), lição "Contar de 11 a 20" (id reaproveitado `contar-ate-vinte`, decisão 284). Totais: A1 com 388 cartões, ~158 lições, 132 notas; "Apresentar-se" 79 cartões / 30 lições / 30 notas; "Família e pessoas próximas" 31 / 14 / 11.
+- A A1-3 tem 23 cartões e passa do aviso de ~18: fica fora do aviso por ser conjunto fechado registrado em `excecoes.json` (`sinaisUnidadeGrande(mapa, excecoes)`). A A1-21 (4 cartões) saiu dessa lista.
+- **Tempo não recalculado** (regra 16 suspensa, decisão 325): "Apresentar-se" ganhou 9 cartões e 1 lição e segue com ~3h55 digitado; "Família e pessoas próximas" perdeu 9 cartões e 1 lição e segue com ~3h45. A dona decide na nova medição.
+- A A1-21 ficou fina (4 cartões); sugestões do auditor para quando ela for desenhada: lição de prática "Dizer idades de 30 a 69" e a pergunta e a resposta de idade de terceiros como cartões (*Il a quel âge ? / Elle a quel âge ?*). A nota "As dezenas" ganhou exemplos (*trente et un, quarante-cinq, soixante-neuf*).
+- Corrige a frase da seção 1: hoje uma unidade passa de ~18 cartões (A1-3, conjunto fechado registrado).

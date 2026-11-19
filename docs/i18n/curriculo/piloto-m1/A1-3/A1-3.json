@@ -1,5 +1,5 @@
 {
- "_doc": "Rascunho da unidade 5 do módulo \"Apresentar-se\", \"Dizer a idade: de 1 a 29\" (A1-3), no formato da lição curta (decisão 368), com as decisões 338 a 366 como modelo: um exercício depois de cada palavra ou frase nova (362), par informal/formal em duas telas com \"Relacione\" (360, 361), sem rótulo \"Pergunta\" (361), peças embaralhadas (363), notas em tópicos e uma informação por tela (366). 4 lições de cartões + 2 lições de diálogo; o diálogo publicado \"No parque\" vai para \"Perguntar a idade dos outros\" (decisão 336). Validar com node docs/i18n/curriculo/piloto-m1/A1-3/validar.js.",
+ "_doc": "Rascunho da unidade 5 do módulo \"Apresentar-se\", \"Dizer a idade: de 1 a 29\" (A1-3), no formato da lição curta (decisão 368), com as decisões 338 a 366 como modelo: um exercício depois de cada palavra ou frase nova (362), par informal/formal em duas telas com \"Relacione\" (360, 361), sem rótulo \"Pergunta\" (361), peças embaralhadas (363), notas em tópicos e uma informação por tela (366). 3 lições de cartões (idade; 1 a 10; 11 a 20) + 1 lição de prática (21 a 29) + 2 lições de diálogo (decisões 368, 369 e 371); o diálogo publicado \"No parque\" vai para \"Perguntar a idade dos outros\" (decisão 336). Validar com node docs/i18n/curriculo/piloto-m1/A1-3/validar.js.",
  "status": "rascunho (aguarda a dona)",
  "formato": "licao-curta",
  "unidade": {
@@ -10,7 +10,7 @@
    "pt-BR": "Dizer a idade: de 1 a 29",
    "en": null
   },
-  "funcao": "dizer a própria idade (avoir: j'ai vingt ans), perguntar a idade no informal e no formal, contar de 1 a 10 e de 20 a 29"
+  "funcao": "dizer a própria idade (avoir: j'ai vingt ans), perguntar a idade no informal e no formal, contar de 1 a 29 (de 1 a 10, de 11 a 20 e de 21 a 29)"
  },
  "cartoes": [
   {
@@ -160,7 +160,7 @@
     "pt-BR": "onze",
     "en": null
    },
-   "licao": "onze-a-vinte",
+   "licao": "contar-ate-vinte",
    "origem": "novo",
    "veio_de": "A1-21 (decisão 371)"
   },
@@ -171,7 +171,7 @@
     "pt-BR": "doze",
     "en": null
    },
-   "licao": "onze-a-vinte",
+   "licao": "contar-ate-vinte",
    "origem": "novo",
    "veio_de": "A1-21 (decisão 371)"
   },
@@ -182,7 +182,7 @@
     "pt-BR": "treze",
     "en": null
    },
-   "licao": "onze-a-vinte",
+   "licao": "contar-ate-vinte",
    "origem": "novo",
    "veio_de": "A1-21 (decisão 371)"
   },
@@ -193,7 +193,7 @@
     "pt-BR": "catorze",
     "en": null
    },
-   "licao": "onze-a-vinte",
+   "licao": "contar-ate-vinte",
    "origem": "novo",
    "veio_de": "A1-21 (decisão 371)"
   },
@@ -204,7 +204,7 @@
     "pt-BR": "quinze",
     "en": null
    },
-   "licao": "onze-a-vinte",
+   "licao": "contar-ate-vinte",
    "origem": "novo",
    "veio_de": "A1-21 (decisão 371)"
   },
@@ -215,7 +215,7 @@
     "pt-BR": "dezesseis",
     "en": null
    },
-   "licao": "onze-a-vinte",
+   "licao": "contar-ate-vinte",
    "origem": "novo",
    "veio_de": "A1-21 (decisão 371)"
   },
@@ -226,7 +226,7 @@
     "pt-BR": "dezessete",
     "en": null
    },
-   "licao": "onze-a-vinte",
+   "licao": "contar-ate-vinte",
    "origem": "novo",
    "veio_de": "A1-21 (decisão 371)"
   },
@@ -237,7 +237,7 @@
     "pt-BR": "dezoito",
     "en": null
    },
-   "licao": "onze-a-vinte",
+   "licao": "contar-ate-vinte",
    "origem": "novo",
    "veio_de": "A1-21 (decisão 371)"
   },
@@ -248,7 +248,7 @@
     "pt-BR": "dezenove",
     "en": null
    },
-   "licao": "onze-a-vinte",
+   "licao": "contar-ate-vinte",
    "origem": "novo",
    "veio_de": "A1-21 (decisão 371)"
   }
@@ -461,7 +461,7 @@
    "tipo_visivel": "explicação",
    "confianca": "alta",
    "momento": {
-    "licao": "onze-a-vinte",
+    "licao": "contar-ate-vinte",
     "depois_do_cartao": "dix-sept"
    },
    "destino": "nota",
@@ -1485,9 +1485,9 @@
    ]
   },
   {
-   "id": "onze-a-vinte",
+   "id": "contar-ate-vinte",
    "ordem": 3,
-   "id_novo": true,
+   "id_novo": false,
    "titulo": {
     "publicado": null,
     "pt-BR": "Contar de 11 a 20",
