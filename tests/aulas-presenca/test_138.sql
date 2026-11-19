@@ -1,4 +1,4 @@
--- 135 (aulas de ex-aluno sem conta, ligadas ao aluno do Banco). Transação + ROLLBACK, Postgres local.
+-- 138 (aulas de ex-aluno sem conta, ligadas ao aluno do Banco). Transação + ROLLBACK, Postgres local.
 begin;
 create temp table r(ok boolean, name text) on commit drop;
 grant all on r to public;
@@ -108,5 +108,5 @@ insert into r select pg_temp.g('RX') = 'linked' and (select match_state from goo
   'só este evento: vira aula dele e continua depois de reler';
 
 select case when ok then 'ok   ' else 'FALHOU ' end || name from r;
-select (select count(*) from r where ok) || '/' || (select count(*) from r) || ' verificações (135)';
+select (select count(*) from r where ok) || '/' || (select count(*) from r) || ' verificações (138)';
 rollback;

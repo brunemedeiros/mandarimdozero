@@ -307,7 +307,7 @@ async function buildClassLogsListBoxHTML(selectedStudents, selectedClassrooms){
   const roomLists = await Promise.all(selectedClassrooms.map(c => fetchClassroomLogs(c.id)));
   const logs = logLists.flatMap((list, i) => list.map(log => ({ ...log, __studentUsername: selectedStudents[i].username })))
     .concat(roomLists.flatMap((list, i) => list.map(log => ({ ...log, __classroomName: selectedClassrooms[i].name }))));
-  // 135: na aba Aulas (todos), as aulas de ex-alunos (com conta ou só no Banco) entram também, com o nome e "(ex-aluno)".
+  // 138: na aba Aulas (todos), as aulas de ex-alunos (com conta ou só no Banco) entram também, com o nome e "(ex-aluno)".
   if (ADMIN_CLASS_LOGS_STATE.listAll && typeof fetchTeacherFormerLogs === 'function'){
     const active = new Set((ADMIN_CLASS_LOGS_STATE._studentsCache || []).map(s => `${s.student_id}|${s.language_app_key}`));
     const others = await fetchTeacherFormerLogs(active);
@@ -535,7 +535,7 @@ function classLogRepeatDates(from, until){
   return out;
 }
 
-// 135: nomes de ex-alunos (com conta: pela lista de ex-alunos; sem conta: pelo aluno do Banco). Cache por sessão.
+// 138: nomes de ex-alunos (com conta: pela lista de ex-alunos; sem conta: pelo aluno do Banco). Cache por sessão.
 async function classLogLoadFormerNames(logs){
   const st = ADMIN_CLASS_LOGS_STATE;
   st._formerNames = st._formerNames || {};

@@ -39,7 +39,7 @@ async function gcalLoad(){
     GCAL_STATE.bank = (data || []).filter(b => !b.linked_student_id && !b.classroom_id);
   }
   // 133: ex-alunos (sem vínculo ativo, com história com a professora), para ligar a aula só ao histórico.
-  // 135: ex-alunos sem conta = alunos do Banco arquivados, sem conta e sem turma (a aula fica ligada ao Banco).
+  // 138: ex-alunos sem conta = alunos do Banco arquivados, sem conta e sem turma (a aula fica ligada ao Banco).
   if (!Array.isArray(GCAL_STATE.formerBank)){
     const { data } = await supabaseClient.from('review_bank_students')
       .select('id,name,language_app_key,linked_student_id,classroom_id').eq('status', 'arquivado').order('name');

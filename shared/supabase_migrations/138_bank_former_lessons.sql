@@ -1,5 +1,7 @@
--- 135: aulas de ex-alunos SEM conta, ligadas ao aluno do Banco (pedido da autora, 2026-11-16: "sim, faça as aulas ligadas ao
+-- 138: aulas de ex-alunos SEM conta, ligadas ao aluno do Banco (pedido da autora, 2026-11-16: "sim, faça as aulas ligadas ao
 -- aluno do Banco"; caso real: Jakob, português, só no Banco, arquivado, 31 eventos no Google Agenda).
+-- Aplicada no Staging e na produção com os nomes 135a_class_logs_bank_target_check e 135_bank_former_lessons (2026-11-16/19);
+-- no repo virou 138 porque outra conversa já tinha a 135 (135_agent_turma_cards_and_absences).
 -- Ex-aluno sem conta = aluno do Banco ARQUIVADO e sem conta ligada (`_teacher_bank_former`).
 -- 1) teacher_class_logs.bank_student_id (aula de ninguém com conta: sem aluno, sem turma, com aluno do Banco).
 --    A checagem teacher_class_logs_target_check ganha esse terceiro caso (DROP + ADD da checagem, só ela; nenhum dado
@@ -48,7 +50,7 @@ create or replace function public._mural_lesson_trigger()
 returns trigger language plpgsql security definer set search_path = public as $$
 begin
   if coalesce(current_setting('app.mural_skip', true), '') = 'on' then return new; end if;
-  if new.student_id is null and new.classroom_id is null then return new; end if;  -- 135: ex-aluno sem conta
+  if new.student_id is null and new.classroom_id is null then return new; end if;  -- 138: ex-aluno sem conta
   if coalesce(btrim(new.topic), '') = '' and coalesce(btrim(new.homework), '') = '' then return new; end if;
   if tg_op = 'UPDATE' and new.topic is not distinct from old.topic and new.homework is not distinct from old.homework then
     return new;
@@ -238,7 +240,7 @@ begin
     return 'unmatched';
   end if;
 
-  -- 135: ex-aluno sem conta (aluno do Banco arquivado, regra "só histórico"): grava a aula ligada ao aluno do Banco.
+  -- 138: ex-aluno sem conta (aluno do Banco arquivado, regra "só histórico"): grava a aula ligada ao aluno do Banco.
   if v_history and v_student is null and v_classroom is null and public._teacher_bank_former(e.user_id, v_bank) then
     update public.google_calendar_events
        set match_state = 'linked', student_id = null, classroom_id = null, bank_student_id = v_bank, history_only = true,
@@ -383,7 +385,7 @@ begin
   v_key := case when v_key_type = 'email' then v_email else public._gcal_key(e.title) end;
 
   if p_action = 'former_bank' then
-    -- 135: ex-aluno sem conta = aluno do Banco ARQUIVADO e sem conta ligada; a aula fica ligada a ele, só para o histórico.
+    -- 138: ex-aluno sem conta = aluno do Banco ARQUIVADO e sem conta ligada; a aula fica ligada a ele, só para o histórico.
     v_bank := p_target::uuid;
     if not public._teacher_bank_former(v_me, v_bank) then raise exception 'not_your_student'; end if;
   elsif p_action = 'former' then

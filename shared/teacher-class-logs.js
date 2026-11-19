@@ -108,7 +108,7 @@ async function fetchTeacherClassLogsRange(fromDate, toDate){
   return (data || []).filter(l => l.class_date >= fromDate && l.class_date <= toDate);
 }
 
-// 135: aulas que não são de aluno ativo nem de turma (ex-alunos com conta e ex-alunos sem conta, ligados ao Banco).
+// 138: aulas que não são de aluno ativo nem de turma (ex-alunos com conta e ex-alunos sem conta, ligados ao Banco).
 // activeKeys: Set de "aluno|idioma" com vínculo ativo (essas já vêm por fetchClassLogs).
 async function fetchTeacherFormerLogs(activeKeys){
   if (!CURRENT_USER) return [];
