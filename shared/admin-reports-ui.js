@@ -68,9 +68,13 @@ function trpReplyHTML(r){
   const history = r.admin_reply_sent_at
     ? `<div class="p-alerta p-alerta--info"><span><em>${trpEsc(r.reporter_email ? t('admin.reports.reply.lastSentTo', { date: trpDate(r.admin_reply_sent_at), email: r.reporter_email }) : t('admin.reports.reply.lastSent', { date: trpDate(r.admin_reply_sent_at) }))}</em><br>"${trpEsc(r.admin_reply_subject || '')}" ${trpEsc(r.admin_reply || '')}</span></div>` : '';
   if (!trpCanReply(r)) return `<h4>${trpEsc(t('admin.modal.report.replyByEmail'))}</h4>${history}<div class="p-alerta p-alerta--aviso"><span>${trpEsc(t('admin.modal.report.noEmail'))}</span></div>`;
-  return `<h4>${trpEsc(t('admin.modal.report.replyByEmail'))}</h4>${history}
-    <label>${trpEsc(t('admin.modal.report.subject'))}<input id="report-resp-assunto" maxlength="150" autocomplete="off"></label>
-    <label>${trpEsc(t('admin.modal.report.message'))}<textarea id="report-resp-msg" rows="5" placeholder="${trpEsc(t('admin.modal.report.replyPh'))}"></textarea></label>
+  // Rascunho no idioma de quem recebe (reportReplyDraft, shared/admin-reports.js); a admin troca o trecho entre colchetes.
+  const draft = typeof reportReplyDraft === 'function' ? reportReplyDraft(r) : null;
+  const langInfo = typeof reportReplyLang === 'function' ? reportReplyLang(r) : null;
+  const langNote = langInfo ? `<p class="p-subtitulo" style="margin:0" data-resposta-idioma="${trpEsc(langInfo.lang)}">${trpEsc(t(langInfo.lang === 'en' ? 'admin.reports.reply.langEn' : 'admin.reports.reply.langPt'))}${langInfo.fromReport ? '' : ' ' + trpEsc(t('admin.reports.reply.langGuess'))}</p>` : '';
+  return `<h4>${trpEsc(t('admin.modal.report.replyByEmail'))}</h4>${history}${langNote}
+    <label>${trpEsc(t('admin.modal.report.subject'))}<input id="report-resp-assunto" maxlength="150" autocomplete="off" value="${trpEsc(draft ? draft.subject : '')}"></label>
+    <label>${trpEsc(t('admin.modal.report.message'))}<textarea id="report-resp-msg" rows="7" placeholder="${trpEsc(t('admin.modal.report.replyPh'))}">${trpEsc(draft ? draft.body : '')}</textarea></label>
     <p class="profile-edit-error" id="report-resp-erro" role="alert"></p>
     <div class="p-acoes" style="justify-content:flex-end"><button type="button" id="report-resp-enviar" data-enviar-resposta="${trpEsc(r.id)}">${trpEsc(t('admin.reports.reply.send'))}</button></div>`;
 }

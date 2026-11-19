@@ -178,6 +178,10 @@
 .rb-big.is-ok{ background:var(--grade-fill-easy); border-color:var(--grade-fill-easy); color:var(--on-grade-fill); }
 .rb-big.is-help{ background:var(--grade-fill-hard); border-color:var(--grade-fill-hard); color:var(--on-grade-fill); }
 .rb-big.is-good{ background:var(--grade-fill-good); border-color:var(--grade-fill-good); color:var(--on-grade-fill); }
+.rb-big{ position:relative; }
+/* Número da tecla nas notas do Modo aula (só com mouse e teclado): círculo branco com número escuro, à esquerda, igual nos quatro botões. */
+.rb-kbd{ display:none; position:absolute; left:10px; top:50%; transform:translateY(-50%); width:22px; height:22px; border-radius:50%; background:#FFFFFF; color:#201335; font-size:12px; font-weight:800; line-height:1; align-items:center; justify-content:center; }
+@media (hover:hover) and (pointer:fine){ .rb-big:has(.rb-kbd){ padding-left:42px; padding-right:28px; } .rb-big .rb-kbd{ display:inline-flex; } }
 .rb-big small{ display:block; font-weight:600; font-size:11px; opacity:.85; }
 .rb-big.is-bad{ background:var(--grade-fill-again); border-color:var(--grade-fill-again); color:var(--on-grade-fill); }
 .rb-keys{ font-size:12.5px; color:var(--ink-soft); }
@@ -276,3 +280,28 @@
 @media (min-width: 900px){ .trail-continue-row.tc-sticky{ position:sticky; top:8px; z-index:5; } }
 /* Celular/tablet: nas duas caixas da linha, o botão fica numa linha própria, embaixo do texto */
 @media (max-width: 899px){ .trail-continue-row .trail-continue .tc-info{ flex:1 1 100%; } }
+
+/* ---- gerenciar alunos e itens (migration 137) ---- */
+.rb-line{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:6px; }
+.rb-line input[type=text], .rb-line input[type=date], .rb-line select{ flex:1 1 220px; min-width:0; }
+.rb-nbid{ font-size:12px; background:var(--paper); border:1px solid var(--paper-line); border-radius:8px; padding:4px 8px; word-break:break-all; }
+.rb-danger{ border:2px dashed var(--rb-bad); border-radius:12px; padding:10px 12px; display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+.rb-danger-box{ border-color:var(--rb-bad); }
+.rb-dup{ margin:12px 0; }
+.rb-dup h3{ margin:0 0 6px; }
+.rb-duprow{ display:flex; gap:8px; align-items:center; justify-content:space-between; flex-wrap:wrap; padding:8px 0; border-top:1px solid var(--paper-line); }
+.rb-duprow:first-of-type{ border-top:0; }
+.rb-dupgrid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:8px 0; }
+@media (max-width:560px){ .rb-dupgrid{ grid-template-columns:1fr; } }
+.rb-dupbox{ border:1px solid var(--paper-line); border-radius:12px; padding:8px 12px; background:var(--paper); }
+.rb-dupprev{ margin:10px 0; font-size:14px; }
+.rb-moveform{ grid-column:1 / -1; border-top:1px dashed var(--paper-line); padding-top:8px; display:flex; flex-direction:column; gap:6px; }
+.rb-pickline{ display:inline-flex; gap:6px; align-items:center; cursor:pointer; margin-bottom:4px; }
+.rb-pickline input{ width:18px; height:18px; }
+.rb-batchbar{ position:sticky; bottom:10px; z-index:5; display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:12px; padding:10px 14px; border-radius:14px; background:var(--brand-fill); color:var(--on-brand-fill); font-weight:800; box-shadow:var(--shadow-card); }
+.rb-batchbar[hidden]{ display:none; }
+.rb-more{ position:relative; display:inline-block; }
+.rb-more > summary{ list-style:none; text-align:center; letter-spacing:2px; }
+.rb-more > summary::-webkit-details-marker{ display:none; }
+.rb-more-menu{ display:flex; flex-direction:column; gap:6px; margin-top:6px; padding:8px; background:var(--paper); border:1px solid var(--paper-line); border-radius:12px; }
+.rb-line input[type=date]{ flex:0 0 auto; width:190px; }

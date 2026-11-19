@@ -537,7 +537,7 @@ function renderProfileBody(wrap, { profile, langs, earnedBadges, specialBadges, 
 
   const guestNote = isGuest ? `
     <div class="guest-warning">
-      ${t('profile.guestNote')}
+      <span class="guest-warning-text">${t('profile.guestNote')}</span>
       <button class="guest-warning-link" id="profile-guest-login-prompt">${t('profile.guestLogin')}</button>
     </div>
   ` : '';

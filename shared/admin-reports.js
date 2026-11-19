@@ -113,6 +113,44 @@ function reporterLabel(report){
   return report.reporter_email || t('admin.reports.reporter.guest');
 }
 
+// ---------- Rascunho da resposta por e-mail (pedido da dona, 2026-11-11) ----------
+// Assunto e mensagem já vêm preenchidos no idioma do site de QUEM RECEBE (não no da admin): o e-mail inteiro sai nessa
+// língua (supabase/functions/report-reply-send/email.ts). Idioma: o gravado no report (context.ui_language, desde
+// 2026-11-11); report antigo cai na mesma regra da função: curso de português em inglês, francês e chinês em português.
+// O trecho entre colchetes é para a admin trocar; reportsSendReply não envia enquanto ele estiver na mensagem.
+const REPORT_REPLY_DRAFT = {
+  'pt-BR': {
+    subject: 'Sobre o seu report de {date}', hi: 'Oi, {name}!', hiNoName: 'Oi!',
+    problem: 'Obrigada por avisar sobre: "{snippet}"', suggestion: 'Obrigada pela sugestão: "{snippet}"',
+    todoProblem: '[Escreva aqui o que foi feito.]', todoSuggestion: '[Escreva aqui o que vai acontecer com ela.]',
+  },
+  en: {
+    subject: 'About your report from {date}', hi: 'Hi, {name}!', hiNoName: 'Hi!',
+    problem: 'Thanks for letting me know about: "{snippet}"', suggestion: 'Thanks for your suggestion: "{snippet}"',
+    todoProblem: '[Write here what was done.]', todoSuggestion: '[Write here what will happen with it.]',
+  },
+};
+const REPORT_REPLY_TODO_RE = /\[(Escreva aqui|Write here)[^\]]*\]/;
+function reportReplyLang(r){
+  const ctxLang = r && r.context && r.context.ui_language;
+  if (ctxLang === 'en' || ctxLang === 'pt-BR') return { lang: ctxLang, fromReport: true };
+  return { lang: r && r.language_app_key === 'portugues' ? 'en' : 'pt-BR', fromReport: false };
+}
+function reportReplyDraft(r){
+  const { lang } = reportReplyLang(r);
+  const T = REPORT_REPLY_DRAFT[lang];
+  const fill = (s, v) => s.replace(/\{(\w+)\}/g, (m, k) => (v[k] != null ? v[k] : m));
+  const p = r.user_id ? ADMIN_REPORTS_PROFILES[r.user_id] : null;
+  const name = p ? String(p.display_name || p.username || '').trim().split(/\s+/)[0] : '';
+  const d = r.created_at ? new Date(r.created_at) : null;
+  const date = d && !isNaN(d) ? d.toLocaleDateString(lang === 'en' ? 'en-US' : 'pt-BR', lang === 'en' ? { month: 'short', day: 'numeric' } : { day: '2-digit', month: '2-digit' }) : '';
+  let snippet = String(r.description || '').replace(/\s+/g, ' ').trim();
+  if (snippet.length > 120) snippet = snippet.slice(0, 117).replace(/\s+\S*$/, '') + '...';
+  const sug = r.kind === 'sugestao';
+  const body = [name ? fill(T.hi, { name }) : T.hiNoName, fill(sug ? T.suggestion : T.problem, { snippet }), sug ? T.todoSuggestion : T.todoProblem].join('\n\n');
+  return { lang, subject: fill(T.subject, { date }).replace(/\s+$/, ''), body };
+}
+
 async function updateReportAdminFields(id, fields){
   const { error } = await supabaseClient.from('reports').update(fields).eq('id', id);
   if (error){ console.error('Erro ao atualizar report:', error); return { ok: false }; }
@@ -240,6 +278,7 @@ async function reportsSendReply(id){
   errorEl.textContent = '';
   const subject = document.getElementById('report-resp-assunto').value.trim(), body = document.getElementById('report-resp-msg').value.trim();
   if (!subject || !body){ errorEl.textContent = t('admin.reports.reply.err.missing_fields'); return; }
+  if (REPORT_REPLY_TODO_RE.test(body)){ errorEl.textContent = t('admin.reports.reply.err.placeholder'); return; }
   const opts = { titulo: t('reports.reply.confirm.title', { who: reporterLabel(r) }), descricao: t('reports.reply.confirm.text', { subject }), confirmar: t('reports.reply.confirm.ok'), cancelar: t('reports.reply.confirm.cancel'), perigo: false };
   const ok = (window.PainelUI && PainelUI.confirmar) ? await PainelUI.confirmar(opts) : confirm(opts.descricao);
   if (!ok) return;
