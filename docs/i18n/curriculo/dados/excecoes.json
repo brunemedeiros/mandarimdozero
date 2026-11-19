@@ -345,7 +345,7 @@
     },
     {
       "unidade": "A1-21",
-      "motivo": "conjunto fechado (números até 69)",
+      "motivo": "conjunto fechado (dezenas até 69; de 11 a 19 estão em Dizer a idade: de 1 a 29, decisão 371)",
       "decisoes": [
         231
       ]
@@ -359,5 +359,5 @@
     }
   ],
   "regra14_repeticoes_aceitas": [],
-  "_doc_unidades_acima_do_limite": "Histórico: a regra 13 deixou de ser limite por unidade (decisão 319); a lista não é mais conferida como liberação, só registra os conjuntos grandes. A revisão dos cortes (decisão 323) devolveu 23 palavras a cartão sem precisar de entrada nova aqui: nenhuma unidade passa do aviso de ~18 cartões."
+  "_doc_unidades_acima_do_limite": "A regra 13 deixou de ser limite por unidade (decisão 319); a lista registra os conjuntos fechados grandes, que não entram no aviso de ~18 cartões (sinaisUnidadeGrande, decisão 371: Dizer a idade, de 1 a 29, com 23). A revisão dos cortes (decisão 323) devolveu 23 palavras a cartão sem precisar de entrada nova aqui: nenhuma unidade passa do aviso de ~18 cartões."
 }

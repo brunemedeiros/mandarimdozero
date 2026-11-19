@@ -20,15 +20,15 @@ check('A1: 34 vocabulário + 23 gramática', A1.vocabulario === 34 && A1.gramati
 check('A1: 388 cartões (decisão 330: + enchanté / enchantée; decisão 331: venir de e les États-Unis trocam de unidade; decisão 359: + la langue, étudier e un peu em "Dizer de onde é, onde mora e que línguas fala"; era 385)', A1.cartoes === 388, A1.cartoes);
 check('A1: 768 cartões A/B (388 × 2 − 8 de reconhecimento; decisão 330: ne… pas só de reconhecimento)', A1.ab === 768, A1.ab);
 check('A1: 198 novos + 190 publicados', A1.novos === 198 && A1.publicados === 190, [A1.novos, A1.publicados]);
-check('A1: cartões por módulo 70/40/51/52/36/29/39/41/30 (decisões 334 e 335: "Perguntar a idade dos outros: até 69", 13, desce para "Família e pessoas próximas"; decisão 359: +3 em "Apresentar-se")',
-  JSON.stringify(A1.porModulo.map(m => m.cartoes)) === JSON.stringify([70, 40, 51, 52, 36, 29, 39, 41, 30]), A1.porModulo.map(m => m.cartoes));
-check('A1: ~158 lições (M1 29, M2 15, M3 19, M4 22, M5 14, M6 12, M7 18, M8 17, M9 12; decisão 335: as 5 lições de "Perguntar a idade dos outros: até 69" passam do M1 ao M2; decisões 338, 355 e 356: +2 lições de diálogo em "Cumprimentar e se despedir" e +2 em "Dizer o nome e a nacionalidade"; decisão 359: "Dizer de onde é, onde mora e que línguas fala" com 3 lições de cartões + 2 de diálogo, era 4 + Revisão; decisão 368 e 369: "Dizer a idade: de 1 a 29" com 3 lições (idade, 1 a 10, 21 a 29) + 2 de diálogo, era 4 + Ponto de verificação)',
-  JSON.stringify(A1.porModulo.map(m => m.licoes)) === JSON.stringify([29, 15, 19, 22, 14, 12, 18, 17, 12]), A1.porModulo.map(m => m.licoes));
+check('A1: cartões por módulo 79/31/51/52/36/29/39/41/30 (decisões 334 e 335: "Perguntar a idade dos outros: até 69", 13, desce para "Família e pessoas próximas"; decisão 359: +3 em "Apresentar-se"; decisão 371: 11 a 19 (9) passam de "Perguntar a idade dos outros" para "Dizer a idade: de 1 a 29")',
+  JSON.stringify(A1.porModulo.map(m => m.cartoes)) === JSON.stringify([79, 31, 51, 52, 36, 29, 39, 41, 30]), A1.porModulo.map(m => m.cartoes));
+check('A1: ~158 lições (M1 30, M2 14, M3 19, M4 22, M5 14, M6 12, M7 18, M8 17, M9 12; decisão 335: as 5 lições de "Perguntar a idade dos outros: até 69" passam do M1 ao M2; decisões 338, 355 e 356: +2 lições de diálogo em "Cumprimentar e se despedir" e +2 em "Dizer o nome e a nacionalidade"; decisão 359: "Dizer de onde é, onde mora e que línguas fala" com 3 lições de cartões + 2 de diálogo, era 4 + Revisão; decisões 368, 369 e 371: "Dizer a idade: de 1 a 29" com 4 lições (idade, 1 a 10, 11 a 20, 21 a 29) + 2 de diálogo, era 4 + Ponto de verificação; "Perguntar a idade dos outros" fica com 4 cartões, 1 lição a menos)',
+  JSON.stringify(A1.porModulo.map(m => m.licoes)) === JSON.stringify([30, 14, 19, 22, 14, 12, 18, 17, 12]), A1.porModulo.map(m => m.licoes));
 check('A1: ~31h00 de trilha', A1.tempo === 31 * 60, C.formatarTempo(A1.tempo));
 check('A1: "Apresentar-se" fica com o tempo digitado ~3h55 (decisão 270; 16 cartões na A1-1 não mudam a regra, decisões 300 e 308)', A1.porModulo[0].tempo === 3 * 60 + 55, C.formatarTempo(A1.porModulo[0].tempo));
-check('A1: 131 notas (decisão 333: a nota de ida e procedência de "Países e cidades" vira duas; era 130)', A1.notas === 131, A1.notas);
-check('A1: notas por módulo 29/11/15/14/16/11/11/10/14 (decisão 335: as 2 notas de "Perguntar a idade dos outros" passam ao M2; decisão 333: +1 no M8)',
-  JSON.stringify(A1.porModulo.map(m => m.notas)) === JSON.stringify([29, 11, 15, 14, 16, 11, 11, 10, 14]), A1.porModulo.map(m => m.notas));
+check('A1: 132 notas (decisão 333: a nota de ida e procedência de "Países e cidades" vira duas; era 130; decisão 371: + a nota de 17 a 19 na A1-3)', A1.notas === 132, A1.notas);
+check('A1: notas por módulo 30/11/15/14/16/11/11/10/14 (decisão 335: as 2 notas de "Perguntar a idade dos outros" passam ao M2; decisão 333: +1 no M8; decisão 371: +1 no M1, a nota de 17 a 19)',
+  JSON.stringify(A1.porModulo.map(m => m.notas)) === JSON.stringify([30, 11, 15, 14, 16, 11, 11, 10, 14]), A1.porModulo.map(m => m.notas));
 check('A2: 10 módulos', A2.modulos === 10, A2.modulos);
 check('A2: 58 unidades (36 vocabulário + 22 gramática)', A2.unidades === 58 && A2.vocabulario === 36 && A2.gramatica === 22, [A2.unidades, A2.vocabulario, A2.gramatica]);
 check('A2: 433 cartões (decisão 323: +7 que voltam, −2 que passam ao A1; era 428)', A2.cartoes === 433, A2.cartoes);
@@ -166,7 +166,8 @@ console.log('== revisão dos cortes (decisões 323 e 324)');
   check('"Outras palavras de caráter" com a lista de origem, sem bavard e paresseux', carater && JSON.stringify(carater.n.palavras) === '["sociable","égoïste","ambitieux"]');
   const paises = vocab.find(({ u, n }) => u === 'A1-31' && n.titulo === 'Outras palavras de países');
   check('"Outras palavras de países" fechada (decisão 324)', paises && JSON.stringify(paises.n.palavras) === JSON.stringify(['la Chine', "l'Argentine", 'le Japon', 'le Mexique', 'les Pays-Bas']));
-  check('nenhuma unidade passa do aviso de ~18 cartões', C.sinaisUnidadeGrande(mapa).length === 0, C.sinaisUnidadeGrande(mapa));
+  check('nenhuma unidade passa do aviso de ~18 cartões, fora os conjuntos fechados registrados (decisão 371: a A1-3 tem 23, de 1 a 29)', C.sinaisUnidadeGrande(mapa, C.carregarExcecoes()).length === 0, C.sinaisUnidadeGrande(mapa, C.carregarExcecoes()));
+  check('sem a lista de exceções, a A1-3 aparece no aviso', C.sinaisUnidadeGrande(mapa).some(x => x.unidade === 'A1-3'));
 }
 
 console.log('== reconhecimento só (decisões 218 e 255; regra 12)');

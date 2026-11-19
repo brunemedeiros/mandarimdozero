@@ -146,9 +146,12 @@ function conferirCartoesPorLicao(mapa){
   return problemas;
 }
 // Regra 13: aviso (não é erro) para unidade grande, que pode ter duas funções comunicativas.
-function sinaisUnidadeGrande(mapa){
+// Aviso (não regra) de unidade grande. Conjunto fechado registrado em excecoes.json (`unidades_acima_do_limite`, ex.: os números
+// de 1 a 29, decisões 231 e 371) não entra no aviso.
+function sinaisUnidadeGrande(mapa, excecoes){
+  const registradas = new Set(((excecoes && excecoes.unidades_acima_do_limite) || []).map(e => e.unidade));
   return unidadesEmOrdem(mapa).map(it => it.unidade)
-    .filter(u => u.tipo === 'vocabulario' && palavrasDaUnidade(u).length > REGRAS.sinalUnidadeGrande)
+    .filter(u => u.tipo === 'vocabulario' && !registradas.has(u.id) && palavrasDaUnidade(u).length > REGRAS.sinalUnidadeGrande)
     .map(u => ({ unidade: u.id, nome: u.nome, palavras: palavrasDaUnidade(u).length }));
 }
 

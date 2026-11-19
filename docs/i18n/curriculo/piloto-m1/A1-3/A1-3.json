@@ -152,6 +152,105 @@
    },
    "licao": "primeiros-numeros",
    "origem": "publicado"
+  },
+  {
+   "chave": "nova",
+   "fr": "onze",
+   "traducao": {
+    "pt-BR": "onze",
+    "en": null
+   },
+   "licao": "onze-a-vinte",
+   "origem": "novo",
+   "veio_de": "A1-21 (decisão 371)"
+  },
+  {
+   "chave": "nova",
+   "fr": "douze",
+   "traducao": {
+    "pt-BR": "doze",
+    "en": null
+   },
+   "licao": "onze-a-vinte",
+   "origem": "novo",
+   "veio_de": "A1-21 (decisão 371)"
+  },
+  {
+   "chave": "nova",
+   "fr": "treize",
+   "traducao": {
+    "pt-BR": "treze",
+    "en": null
+   },
+   "licao": "onze-a-vinte",
+   "origem": "novo",
+   "veio_de": "A1-21 (decisão 371)"
+  },
+  {
+   "chave": "nova",
+   "fr": "quatorze",
+   "traducao": {
+    "pt-BR": "catorze",
+    "en": null
+   },
+   "licao": "onze-a-vinte",
+   "origem": "novo",
+   "veio_de": "A1-21 (decisão 371)"
+  },
+  {
+   "chave": "nova",
+   "fr": "quinze",
+   "traducao": {
+    "pt-BR": "quinze",
+    "en": null
+   },
+   "licao": "onze-a-vinte",
+   "origem": "novo",
+   "veio_de": "A1-21 (decisão 371)"
+  },
+  {
+   "chave": "nova",
+   "fr": "seize",
+   "traducao": {
+    "pt-BR": "dezesseis",
+    "en": null
+   },
+   "licao": "onze-a-vinte",
+   "origem": "novo",
+   "veio_de": "A1-21 (decisão 371)"
+  },
+  {
+   "chave": "nova",
+   "fr": "dix-sept",
+   "traducao": {
+    "pt-BR": "dezessete",
+    "en": null
+   },
+   "licao": "onze-a-vinte",
+   "origem": "novo",
+   "veio_de": "A1-21 (decisão 371)"
+  },
+  {
+   "chave": "nova",
+   "fr": "dix-huit",
+   "traducao": {
+    "pt-BR": "dezoito",
+    "en": null
+   },
+   "licao": "onze-a-vinte",
+   "origem": "novo",
+   "veio_de": "A1-21 (decisão 371)"
+  },
+  {
+   "chave": "nova",
+   "fr": "dix-neuf",
+   "traducao": {
+    "pt-BR": "dezenove",
+    "en": null
+   },
+   "licao": "onze-a-vinte",
+   "origem": "novo",
+   "veio_de": "A1-21 (decisão 371)"
   }
  ],
  "frases_na_frase": [
@@ -352,6 +451,56 @@
    ]
   },
   {
+   "id": "de-17-a-19",
+   "id_mapa": null,
+   "titulo": {
+    "pt-BR": "De 17 a 19: dix e o número",
+    "en": null
+   },
+   "tipo": "Exp",
+   "tipo_visivel": "explicação",
+   "confianca": "alta",
+   "momento": {
+    "licao": "onze-a-vinte",
+    "depois_do_cartao": "dix-sept"
+   },
+   "destino": "nota",
+   "texto": {
+    "pt-BR": "De 17 a 19, o francês junta <strong>dix</strong> e o número, com hífen:<ul><li><strong>dix-sept</strong>, <strong>dix-huit</strong>, <strong>dix-neuf</strong>.</li><li>No som, o <strong>x</strong> de <strong>dix</strong> soa como <b>s</b> em <strong>dix-sept</strong> e como <b>z</b> em <strong>dix-huit</strong> e <strong>dix-neuf</strong>.</li></ul>",
+    "en": null
+   },
+   "exemplos": [
+    {
+     "fr": "dix-sept",
+     "pt-BR": "dezessete",
+     "en": null
+    },
+    {
+     "fr": "dix-huit",
+     "pt-BR": "dezoito",
+     "en": null
+    },
+    {
+     "fr": "dix-neuf",
+     "pt-BR": "dezenove",
+     "en": null
+    }
+   ],
+   "vf": [
+    {
+     "afirmacao": {
+      "pt-BR": "Em <i>dix-huit</i>, o <i>x</i> de <i>dix</i> soa como <i>z</i>.",
+      "en": null
+     },
+     "resposta": true,
+     "porque": {
+      "pt-BR": "Antes de vogal, o <b>x</b> soa como <b>z</b>.",
+      "en": null
+     }
+    }
+   ]
+  },
+  {
    "id": "de-21-a-29",
    "id_mapa": null,
    "titulo": {
@@ -363,7 +512,7 @@
    "confianca": "alta",
    "momento": {
     "licao": "vinte-e-um-a-vinte-e-nove",
-    "depois_do_cartao": "dix"
+    "depois_do_cartao": "dix-neuf"
    },
    "destino": "nota",
    "texto": {
@@ -1336,8 +1485,384 @@
    ]
   },
   {
-   "id": "vinte-e-um-a-vinte-e-nove",
+   "id": "onze-a-vinte",
    "ordem": 3,
+   "id_novo": true,
+   "titulo": {
+    "publicado": null,
+    "pt-BR": "Contar de 11 a 20",
+    "en": null,
+    "a_confirmar": false
+   },
+   "cartoes": [
+    "nova",
+    "nova",
+    "nova",
+    "nova",
+    "nova",
+    "nova",
+    "nova",
+    "nova",
+    "nova"
+   ],
+   "inclui_dialogo": false,
+   "telas": [
+    {
+     "id": "u5-l3b-intro",
+     "tipo": "abertura",
+     "objetivo": {
+      "pt-BR": "Agora os números de 11 a 20. Do 17 em diante, você monta com o dix.",
+      "en": null
+     }
+    },
+    {
+     "id": "u5-onze",
+     "tipo": "cartao",
+     "cartao": "onze"
+    },
+    {
+     "id": "u5-ex-onze",
+     "tipo": "complete",
+     "antes": "J'ai ",
+     "depois": " ans.",
+     "traducao": {
+      "pt-BR": "Eu tenho onze anos.",
+      "en": null
+     },
+     "opcoes": [
+      "onse",
+      "onze"
+     ],
+     "resposta": "onze",
+     "frase_completa": "J'ai onze ans.",
+     "distrator": "grafia",
+     "explicacao": {
+      "pt-BR": "<b>Onze</b> se escreve como em português, mas o <b>e</b> do fim não soa.",
+      "en": null
+     },
+     "explicacao_erro": {
+      "onse": {
+       "pt-BR": "Quase lá! É com <b>z</b>. ",
+       "en": null
+      }
+     }
+    },
+    {
+     "id": "u5-douze",
+     "tipo": "cartao",
+     "cartao": "douze"
+    },
+    {
+     "id": "u5-ex-douze",
+     "tipo": "vf",
+     "fr": "douze",
+     "afirmacao": {
+      "pt-BR": "Quer dizer \"dois\".",
+      "en": null
+     },
+     "resposta": false,
+     "frase_do_painel": "douze",
+     "traducao_do_painel": {
+      "pt-BR": "doze",
+      "en": null
+     },
+     "explicacao": {
+      "pt-BR": "<b>Douze</b> é doze; \"dois\" é <b>deux</b>.",
+      "en": null
+     }
+    },
+    {
+     "id": "u5-treize",
+     "tipo": "cartao",
+     "cartao": "treize"
+    },
+    {
+     "id": "u5-ex-treize",
+     "tipo": "complete",
+     "antes": "J'ai ",
+     "depois": " ans.",
+     "traducao": {
+      "pt-BR": "Eu tenho treze anos.",
+      "en": null
+     },
+     "opcoes": [
+      "treize",
+      "trois"
+     ],
+     "resposta": "treize",
+     "frase_completa": "J'ai treize ans.",
+     "distrator": "outra palavra",
+     "explicacao": {
+      "pt-BR": "<b>Treize</b> é treze; o <b>z</b> soa como em português.",
+      "en": null
+     },
+     "explicacao_erro": {
+      "trois": {
+       "pt-BR": "<b>Trois</b> é três. ",
+       "en": null
+      }
+     }
+    },
+    {
+     "id": "u5-quatorze",
+     "tipo": "cartao",
+     "cartao": "quatorze"
+    },
+    {
+     "id": "u5-ex-quatorze",
+     "tipo": "complete",
+     "antes": "J'ai ",
+     "depois": " ans.",
+     "traducao": {
+      "pt-BR": "Eu tenho catorze anos.",
+      "en": null
+     },
+     "opcoes": [
+      "catorze",
+      "quatorze"
+     ],
+     "resposta": "quatorze",
+     "frase_completa": "J'ai quatorze ans.",
+     "distrator": "grafia",
+     "explicacao": {
+      "pt-BR": "Em francês, <b>qu</b> soa como \"k\": <b>quatorze</b>.",
+      "en": null
+     },
+     "explicacao_erro": {
+      "catorze": {
+       "pt-BR": "Você escreveu como em português! ",
+       "en": null
+      }
+     }
+    },
+    {
+     "id": "u5-quinze",
+     "tipo": "cartao",
+     "cartao": "quinze"
+    },
+    {
+     "id": "u5-ex-quinze",
+     "tipo": "vf",
+     "fr": "quinze",
+     "afirmacao": {
+      "pt-BR": "Se escreve igual ao português.",
+      "en": null
+     },
+     "resposta": true,
+     "frase_do_painel": "quinze",
+     "traducao_do_painel": {
+      "pt-BR": "quinze",
+      "en": null
+     },
+     "explicacao": {
+      "pt-BR": "A escrita é a mesma; no som, o <b>qu</b> soa como \"k\" e o <b>e</b> do fim não soa.",
+      "en": null
+     }
+    },
+    {
+     "id": "u5-seize",
+     "tipo": "cartao",
+     "cartao": "seize"
+    },
+    {
+     "id": "u5-ex-seize",
+     "tipo": "complete",
+     "antes": "J'ai ",
+     "depois": " ans.",
+     "traducao": {
+      "pt-BR": "Eu tenho dezesseis anos.",
+      "en": null
+     },
+     "opcoes": [
+      "seize",
+      "seise"
+     ],
+     "resposta": "seize",
+     "frase_completa": "J'ai seize ans.",
+     "distrator": "grafia",
+     "explicacao": {
+      "pt-BR": "<b>Seize</b> é dezesseis, com <b>z</b>.",
+      "en": null
+     },
+     "explicacao_erro": {
+      "seise": {
+       "pt-BR": "Quase lá! É com <b>z</b>. ",
+       "en": null
+      }
+     }
+    },
+    {
+     "id": "u5-dixsept",
+     "tipo": "cartao",
+     "cartao": "dix-sept"
+    },
+    {
+     "id": "u5-nota-17",
+     "tipo": "nota",
+     "nota": "de-17-a-19"
+    },
+    {
+     "id": "u5-ex-nota-17",
+     "tipo": "vf",
+     "fr": "dix-huit",
+     "afirmacao": {
+      "pt-BR": "O x de dix soa como z.",
+      "en": null
+     },
+     "resposta": true,
+     "frase_do_painel": "dix-huit",
+     "traducao_do_painel": {
+      "pt-BR": "dezoito",
+      "en": null
+     },
+     "explicacao": {
+      "pt-BR": "Em <b>dix-huit</b> e <b>dix-neuf</b>, o <b>x</b> soa como <b>z</b>; em <b>dix-sept</b>, como <b>s</b>.",
+      "en": null
+     }
+    },
+    {
+     "id": "u5-dixhuit",
+     "tipo": "cartao",
+     "cartao": "dix-huit"
+    },
+    {
+     "id": "u5-ex-18",
+     "tipo": "funcao",
+     "pergunta": {
+      "pt-BR": "Você tem 18 anos. O que diz?",
+      "en": null
+     },
+     "opcoes": [
+      "J'ai huit-dix ans.",
+      "Je suis dix-huit ans.",
+      "J'ai dix-huit ans."
+     ],
+     "resposta": "J'ai dix-huit ans.",
+     "traducao_do_painel": {
+      "pt-BR": "Eu tenho dezoito anos.",
+      "en": null
+     },
+     "explicacao": {
+      "pt-BR": "<b>Dix-huit</b>: primeiro o <b>dix</b>, depois o <b>huit</b>.",
+      "en": null
+     },
+     "explicacao_erro": {
+      "J'ai huit-dix ans.": {
+       "pt-BR": "A ordem é <b>dix</b> e depois o número. ",
+       "en": null
+      },
+      "Je suis dix-huit ans.": {
+       "pt-BR": "Idade é com <b>avoir</b>: <b>j'ai</b>. ",
+       "en": null
+      }
+     }
+    },
+    {
+     "id": "u5-dixneuf",
+     "tipo": "cartao",
+     "cartao": "dix-neuf"
+    },
+    {
+     "id": "u5-ex-dixneuf",
+     "tipo": "complete",
+     "antes": "J'ai dix-",
+     "depois": " ans.",
+     "traducao": {
+      "pt-BR": "Eu tenho dezenove anos.",
+      "en": null
+     },
+     "opcoes": [
+      "nove",
+      "neuf"
+     ],
+     "resposta": "neuf",
+     "frase_completa": "J'ai dix-neuf ans.",
+     "distrator": "grafia",
+     "explicacao": {
+      "pt-BR": "<b>Dix-neuf</b>: aqui o <b>x</b> de <b>dix</b> soa como <b>z</b>.",
+      "en": null
+     },
+     "explicacao_erro": {
+      "nove": {
+       "pt-BR": "Você escreveu como em português! ",
+       "en": null
+      }
+     }
+    },
+    {
+     "id": "u5-l3b-rel",
+     "tipo": "relacionar",
+     "pares": [
+      [
+       "douze",
+       "doze"
+      ],
+      [
+       "quatorze",
+       "catorze"
+      ],
+      [
+       "seize",
+       "dezesseis"
+      ],
+      [
+       "dix-sept",
+       "dezessete"
+      ],
+      [
+       "vingt",
+       "vinte"
+      ]
+     ],
+     "explicacao": {
+      "pt-BR": "Nos pares, de 11 a 16 com nome próprio, 17 a 19 com <b>dix</b>, e o <b>vingt</b>.",
+      "en": null
+     }
+    },
+    {
+     "id": "u5-l3b-montar",
+     "tipo": "montar",
+     "traducao": {
+      "pt-BR": "Eu tenho dezessete anos, e você?",
+      "en": null
+     },
+     "pecas": [
+      "J'ai",
+      "dix-sept",
+      "ans,",
+      "et",
+      "toi",
+      "?",
+      "seize",
+      "Je"
+     ],
+     "resposta": [
+      "J'ai",
+      "dix-sept",
+      "ans,",
+      "et",
+      "toi",
+      "?"
+     ],
+     "frase_completa": "J'ai dix-sept ans, et toi ?",
+     "explicacao": {
+      "pt-BR": "<b>Dix-sept</b> com hífen, e <b>et toi ?</b> para devolver a pergunta.",
+      "en": null
+     }
+    },
+    {
+     "id": "u5-l3b-fim",
+     "tipo": "fim",
+     "fala": {
+      "pt-BR": "Parabéns! Agora você conta até vinte em francês.",
+      "en": null
+     }
+    }
+   ]
+  },
+  {
+   "id": "vinte-e-um-a-vinte-e-nove",
+   "ordem": 4,
    "id_novo": true,
    "titulo": {
     "publicado": null,
@@ -1609,7 +2134,7 @@
   },
   {
    "id": "conversar-sobre-idade",
-   "ordem": 4,
+   "ordem": 5,
    "id_novo": true,
    "tipo": "dialogos",
    "titulo": {
@@ -1855,7 +2380,7 @@
   },
   {
    "id": "idade-formal",
-   "ordem": 5,
+   "ordem": 6,
    "id_novo": true,
    "tipo": "dialogos",
    "titulo": {

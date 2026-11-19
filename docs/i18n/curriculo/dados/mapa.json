@@ -1191,6 +1191,60 @@
                   "chave": "A1-3-v4",
                   "origem": "publicado",
                   "licao": 2
+                },
+                {
+                  "palavra": "onze",
+                  "chave": "nova",
+                  "origem": "novo",
+                  "licao": 3
+                },
+                {
+                  "palavra": "douze",
+                  "chave": "nova",
+                  "origem": "novo",
+                  "licao": 3
+                },
+                {
+                  "palavra": "treize",
+                  "chave": "nova",
+                  "origem": "novo",
+                  "licao": 3
+                },
+                {
+                  "palavra": "quatorze",
+                  "chave": "nova",
+                  "origem": "novo",
+                  "licao": 3
+                },
+                {
+                  "palavra": "quinze",
+                  "chave": "nova",
+                  "origem": "novo",
+                  "licao": 3
+                },
+                {
+                  "palavra": "seize",
+                  "chave": "nova",
+                  "origem": "novo",
+                  "licao": 3
+                },
+                {
+                  "palavra": "dix-sept",
+                  "chave": "nova",
+                  "origem": "novo",
+                  "licao": 3
+                },
+                {
+                  "palavra": "dix-huit",
+                  "chave": "nova",
+                  "origem": "novo",
+                  "licao": 3
+                },
+                {
+                  "palavra": "dix-neuf",
+                  "chave": "nova",
+                  "origem": "novo",
+                  "licao": 3
                 }
               ],
               "notas": [
@@ -1264,13 +1318,39 @@
                   "decisao": 368
                 },
                 {
+                  "titulo": "De 17 a 19: dix e o número",
+                  "tipo": "Exp",
+                  "confianca": "alta",
+                  "nova": true,
+                  "decisao": 371,
+                  "momento": {
+                    "licao": 3,
+                    "depois_de": "dix-sept"
+                  },
+                  "exemplos": [
+                    {
+                      "fr": "dix-sept",
+                      "pt-BR": "dezessete"
+                    },
+                    {
+                      "fr": "dix-huit",
+                      "pt-BR": "dezoito"
+                    },
+                    {
+                      "fr": "dix-neuf",
+                      "pt-BR": "dezenove"
+                    }
+                  ],
+                  "observacao": "a parte de 17 a 19 da nota \"17, 18, 19 e as dezenas\" de \"Perguntar a idade dos outros\" (decisão 371)"
+                },
+                {
                   "titulo": "De 21 a 29: vingt et un, vingt-deux",
                   "tipo": "Exp",
                   "confianca": "alta",
                   "nova": true,
                   "momento": {
-                    "licao": 3,
-                    "depois_de": "dix"
+                    "licao": 4,
+                    "depois_de": "dix-neuf"
                   },
                   "exemplos": [
                     {
@@ -1304,34 +1384,42 @@
                 },
                 {
                   "licao": 3,
+                  "id": "onze-a-vinte",
+                  "id_novo": true,
+                  "cartoes_aceitos": 9,
+                  "decisao": 371,
+                  "titulo": "Contar de 11 a 20"
+                },
+                {
+                  "licao": 4,
                   "id": "vinte-e-um-a-vinte-e-nove",
                   "id_novo": true,
                   "tipo": "pratica",
                   "titulo": "Dizer idades de 21 a 29"
                 },
                 {
-                  "licao": 4,
+                  "licao": 5,
                   "id": "conversar-sobre-idade",
                   "id_novo": true,
                   "tipo": "dialogos",
                   "titulo": "Conversar sobre a idade"
                 },
                 {
-                  "licao": 5,
+                  "licao": 6,
                   "id": "idade-formal",
                   "id_novo": true,
                   "tipo": "dialogos",
                   "titulo": "Dizer a idade de um jeito formal"
                 }
               ],
-              "licoes_08": 6,
-              "licoes_motivo": "3 lições (idade; de 1 a 10; de 21 a 29) + 2 lições de diálogo + Revisão da unidade (decisões 368 e 369); a lição publicada \"contar-ate-vinte\" sai",
+              "licoes_08": 7,
+              "licoes_motivo": "4 lições (idade; 1 a 10; 11 a 20; 21 a 29) + 2 lições de diálogo + Revisão da unidade (decisões 368, 369 e 371)",
               "dialogos": [
                 {
                   "titulo": "Numa festa, a Camille conversa com o Rafael.",
                   "registro": "informal",
                   "origem": "novo (decisão 368); o diálogo publicado \"No parque\" vai para \"Perguntar a idade dos outros\" (decisão 336)",
-                  "licao": 4,
+                  "licao": 5,
                   "decisao": 368,
                   "falas": []
                 },
@@ -1339,14 +1427,15 @@
                   "titulo": "Num consultório, o Sr. Martin preenche a ficha da Sra. Alves.",
                   "registro": "formal",
                   "origem": "novo (decisão 368)",
-                  "licao": 5,
+                  "licao": 6,
                   "decisao": 368,
                   "falas": []
                 }
               ],
               "decisoes": [
                 368,
-                369
+                369,
+                371
               ]
             },
             {
@@ -1642,51 +1731,6 @@
               "origem": "nova",
               "cartoes": [
                 {
-                  "palavra": "onze",
-                  "chave": "nova",
-                  "origem": "novo"
-                },
-                {
-                  "palavra": "douze",
-                  "chave": "nova",
-                  "origem": "novo"
-                },
-                {
-                  "palavra": "treize",
-                  "chave": "nova",
-                  "origem": "novo"
-                },
-                {
-                  "palavra": "quatorze",
-                  "chave": "nova",
-                  "origem": "novo"
-                },
-                {
-                  "palavra": "quinze",
-                  "chave": "nova",
-                  "origem": "novo"
-                },
-                {
-                  "palavra": "seize",
-                  "chave": "nova",
-                  "origem": "novo"
-                },
-                {
-                  "palavra": "dix-sept",
-                  "chave": "nova",
-                  "origem": "novo"
-                },
-                {
-                  "palavra": "dix-huit",
-                  "chave": "nova",
-                  "origem": "novo"
-                },
-                {
-                  "palavra": "dix-neuf",
-                  "chave": "nova",
-                  "origem": "novo"
-                },
-                {
                   "palavra": "trente",
                   "chave": "A1-10-v6",
                   "origem": "publicado"
@@ -1709,10 +1753,11 @@
               ],
               "notas": [
                 {
-                  "titulo": "17, 18, 19 e as dezenas",
+                  "titulo": "As dezenas: trente, quarante, cinquante, soixante",
                   "tipo": "Exp",
                   "confianca": "alta",
-                  "nova": true
+                  "nova": true,
+                  "observacao": "17, 18 e 19 foram para \"Dizer a idade: de 1 a 29\", com os cartões de 11 a 19 (decisão 371)"
                 },
                 {
                   "titulo": "Et lui ? Et elle ?: tônicos",
@@ -1723,7 +1768,8 @@
               ],
               "decisoes": [
                 334,
-                335
+                335,
+                371
               ],
               "progresso_modulo_concluido": "quem já concluiu o módulo \"Família e pessoas próximas\" continua com ele concluído e com o Ponto de verificação aprovado; a unidade que entra aparece aberta (regra da decisão 330, item 4, estendida às mudanças de módulo das decisões 334 e 335); quem tinha concluído \"Apresentar-se\" com esta unidade não perde nada (a unidade é nova, ainda sem chave publicada)",
               "dialogo_a_decidir": "o diálogo publicado \"No parque\" (Quel âge a ta fille ? ...), hoje em \"Dizer a idade: de 1 a 29\", pode vir para esta unidade (decisão 335; a decidir no desenho dela)"
