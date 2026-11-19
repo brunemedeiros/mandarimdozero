@@ -1,0 +1,648 @@
+{
+ "_doc": "Rascunho da unidade 6 do módulo \"Apresentar-se\", \"Gramática: être e avoir\" (A1-g1), a segunda gramática no formato da lição curta (decisão 373), no molde da unidade 4 (decisões 365 e 366): uma lição só; cada parte da conjugação numa explicação da Prof. Brune (nota em tópicos, poucos exemplos com áudio), seguida de exercícios; recapitulação com as conjugações completas para ouvir; exercícios de reconhecer, relacionar e transformar. Sem plural de adjetivo (ainda não ensinado) e sem on (fica para depois). Validar com node docs/i18n/curriculo/piloto-m1/A1-g1/validar.js.",
+ "status": "rascunho (aguarda a dona)",
+ "formato": "licao-curta-gramatica",
+ "unidade": {
+  "id": "A1-g1",
+  "modulo": "A1-m1",
+  "posicao": "M1.6",
+  "tipo": "gramatica",
+  "titulo": {
+   "pt-BR": "Gramática: être e avoir",
+   "en": null
+  },
+  "funcao": "conjugar être e avoir no presente: je suis, tu es, il / elle est, nous sommes, vous êtes, ils / elles sont; j'ai, tu as, il / elle a, nous avons, vous avez, ils / elles ont"
+ },
+ "cartoes": [],
+ "dialogos": [],
+ "frases_na_frase": [],
+ "notas": [
+  {
+   "id": "etre-singular",
+   "id_mapa": null,
+   "titulo": {
+    "pt-BR": "Être no singular: eu, você, ele e ela",
+    "en": null
+   },
+   "tipo": "Gram",
+   "tipo_visivel": "gramática",
+   "confianca": "alta",
+   "momento": {
+    "licao": "etre-e-avoir"
+   },
+   "destino": "nota",
+   "texto": {
+    "pt-BR": "Você já usou <strong>être</strong> (ser, estar) para dizer a nacionalidade. No singular:<ul><li><strong>je suis</strong>, <strong>tu es</strong>, <strong>il est</strong>, <strong>elle est</strong></li><li><strong>tu es</strong> e <strong>il est</strong> soam igual: \"é\".</li></ul>",
+    "en": null
+   },
+   "exemplos": [
+    {
+     "fr": "Je suis brésilienne.",
+     "pt-BR": "Eu sou brasileira.",
+     "en": null
+    },
+    {
+     "fr": "Il est français.",
+     "pt-BR": "Ele é francês.",
+     "en": null
+    }
+   ]
+  },
+  {
+   "id": "etre-plural",
+   "id_mapa": null,
+   "titulo": {
+    "pt-BR": "Être no plural: nós, vocês, eles e elas",
+    "en": null
+   },
+   "tipo": "Gram",
+   "tipo_visivel": "gramática",
+   "confianca": "alta",
+   "momento": {
+    "licao": "etre-e-avoir"
+   },
+   "destino": "nota",
+   "texto": {
+    "pt-BR": "No plural:<ul><li><strong>nous sommes</strong>, <strong>vous êtes</strong>, <strong>ils sont</strong>, <strong>elles sont</strong></li><li><strong>ils</strong> é \"eles\" (ou um grupo misto); <strong>elles</strong> é \"elas\", só mulheres.</li></ul>",
+    "en": null
+   },
+   "exemplos": [
+    {
+     "fr": "Nous sommes de Rio.",
+     "pt-BR": "Nós somos do Rio.",
+     "en": null
+    },
+    {
+     "fr": "Ils sont de Paris.",
+     "pt-BR": "Eles são de Paris.",
+     "en": null
+    }
+   ]
+  },
+  {
+   "id": "avoir-singular",
+   "id_mapa": null,
+   "titulo": {
+    "pt-BR": "Avoir no singular: eu, você, ele e ela",
+    "en": null
+   },
+   "tipo": "Gram",
+   "tipo_visivel": "gramática",
+   "confianca": "alta",
+   "momento": {
+    "licao": "etre-e-avoir"
+   },
+   "destino": "nota",
+   "texto": {
+    "pt-BR": "Você já usou <strong>avoir</strong> (ter) para dizer a idade. No singular:<ul><li><strong>j'ai</strong>, <strong>tu as</strong>, <strong>il a</strong>, <strong>elle a</strong></li><li><strong>je</strong> vira <strong>j'</strong> antes de vogal: <strong>j'ai</strong>.</li></ul>",
+    "en": null
+   },
+   "exemplos": [
+    {
+     "fr": "J'ai vingt ans.",
+     "pt-BR": "Eu tenho vinte anos.",
+     "en": null
+    },
+    {
+     "fr": "Elle a dix-huit ans.",
+     "pt-BR": "Ela tem dezoito anos.",
+     "en": null
+    }
+   ]
+  },
+  {
+   "id": "avoir-plural",
+   "id_mapa": null,
+   "titulo": {
+    "pt-BR": "Avoir no plural: nós, vocês, eles e elas",
+    "en": null
+   },
+   "tipo": "Gram",
+   "tipo_visivel": "gramática",
+   "confianca": "alta",
+   "momento": {
+    "licao": "etre-e-avoir"
+   },
+   "destino": "nota",
+   "texto": {
+    "pt-BR": "No plural:<ul><li><strong>nous avons</strong>, <strong>vous avez</strong>, <strong>ils ont</strong>, <strong>elles ont</strong></li><li>Cuidado: em <strong>ils ont</strong> (eles têm) o som é de <b>z</b>; em <strong>ils sont</strong> (eles são), de <b>s</b>.</li></ul>",
+    "en": null
+   },
+   "exemplos": [
+    {
+     "fr": "Ils ont dix ans.",
+     "pt-BR": "Eles têm dez anos.",
+     "en": null
+    },
+    {
+     "fr": "Ils sont de Paris.",
+     "pt-BR": "Eles são de Paris.",
+     "en": null
+    }
+   ]
+  },
+  {
+   "id": "etre-avoir-lado-a-lado",
+   "id_mapa": null,
+   "titulo": {
+    "pt-BR": "Être e avoir, lado a lado",
+    "en": null
+   },
+   "tipo": "Gram",
+   "tipo_visivel": "gramática",
+   "confianca": "alta",
+   "momento": {
+    "licao": "etre-e-avoir"
+   },
+   "destino": "nota",
+   "texto": {
+    "pt-BR": "As duas conjugações completas: toque em cada linha para ouvir.<ul><li><strong>Être</strong> (ser, estar): a nacionalidade, de onde você é.</li><li><strong>Avoir</strong> (ter): a idade.</li></ul>",
+    "en": null
+   },
+   "exemplos": [
+    {
+     "fr": "je suis, tu es, il est, elle est",
+     "pt-BR": "eu sou, você é, ele é, ela é",
+     "en": null
+    },
+    {
+     "fr": "nous sommes, vous êtes, ils sont, elles sont",
+     "pt-BR": "nós somos, vocês são, eles são, elas são",
+     "en": null
+    },
+    {
+     "fr": "j'ai, tu as, il a, elle a",
+     "pt-BR": "eu tenho, você tem, ele tem, ela tem",
+     "en": null
+    },
+    {
+     "fr": "nous avons, vous avez, ils ont, elles ont",
+     "pt-BR": "nós temos, vocês têm, eles têm, elas têm",
+     "en": null
+    }
+   ]
+  }
+ ],
+ "licoes": [
+  {
+   "id": "etre-e-avoir",
+   "ordem": 1,
+   "tipo": "gramatica",
+   "id_novo": true,
+   "titulo": {
+    "publicado": "Verbos avoir e être",
+    "pt-BR": "Être e avoir no presente",
+    "en": null,
+    "a_confirmar": false
+   },
+   "cartoes": [],
+   "inclui_dialogo": false,
+   "telas": [
+    {
+     "id": "g6-intro",
+     "tipo": "abertura",
+     "objetivo": {
+      "pt-BR": "Vou te mostrar completos os dois verbos que você mais usou até aqui: être e avoir. Vamos lá?",
+      "en": null
+     }
+    },
+    {
+     "id": "g6-nota-etre-sg",
+     "tipo": "nota",
+     "nota": "etre-singular"
+    },
+    {
+     "id": "g6-ex-suis",
+     "tipo": "complete",
+     "antes": "Je ",
+     "depois": " brésilienne.",
+     "traducao": {
+      "pt-BR": "Eu sou brasileira.",
+      "en": null
+     },
+     "opcoes": [
+      "es",
+      "suis"
+     ],
+     "resposta": "suis",
+     "frase_completa": "Je suis brésilienne.",
+     "distrator": "outra palavra",
+     "explicacao": {
+      "pt-BR": "Com <b>je</b>, <b>être</b> fica <b>suis</b>.",
+      "en": null
+     },
+     "explicacao_erro": {
+      "es": {
+       "pt-BR": "<b>Es</b> é com <b>tu</b>: <b>tu es</b>. ",
+       "en": null
+      }
+     }
+    },
+    {
+     "id": "g6-ex-est",
+     "tipo": "funcao",
+     "pergunta": {
+      "pt-BR": "Você conta que a Sofia é italiana. O que diz?",
+      "en": null
+     },
+     "opcoes": [
+      "Elle suis italienne.",
+      "Elle est italienne.",
+      "Elle es italienne."
+     ],
+     "resposta": "Elle est italienne.",
+     "traducao_do_painel": {
+      "pt-BR": "Ela é italiana.",
+      "en": null
+     },
+     "explicacao": {
+      "pt-BR": "Com <b>elle</b>, <b>être</b> fica <b>est</b>: o <b>s</b> e o <b>t</b> não soam.",
+      "en": null
+     },
+     "explicacao_erro": {
+      "Elle suis italienne.": {
+       "pt-BR": "<b>Suis</b> é com <b>je</b>. ",
+       "en": null
+      },
+      "Elle es italienne.": {
+       "pt-BR": "<b>Es</b> é com <b>tu</b>. ",
+       "en": null
+      }
+     }
+    },
+    {
+     "id": "g6-nota-etre-pl",
+     "tipo": "nota",
+     "nota": "etre-plural"
+    },
+    {
+     "id": "g6-ex-etes",
+     "tipo": "complete",
+     "antes": "Vous ",
+     "depois": " de Paris ?",
+     "traducao": {
+      "pt-BR": "Vocês são de Paris?",
+      "en": null
+     },
+     "opcoes": [
+      "etes",
+      "êtes"
+     ],
+     "resposta": "êtes",
+     "frase_completa": "Vous êtes de Paris ?",
+     "distrator": "grafia",
+     "explicacao": {
+      "pt-BR": "<b>Êtes</b> leva acento circunflexo no <b>ê</b>.",
+      "en": null
+     },
+     "explicacao_erro": {
+      "etes": {
+       "pt-BR": "Faltou o acento! ",
+       "en": null
+      }
+     }
+    },
+    {
+     "id": "g6-ex-elles",
+     "tipo": "funcao",
+     "pergunta": {
+      "pt-BR": "A Ana e a Sofia são do Rio. O que você diz?",
+      "en": null
+     },
+     "opcoes": [
+      "Ils sont de Rio.",
+      "Elles sommes de Rio.",
+      "Elles sont de Rio."
+     ],
+     "resposta": "Elles sont de Rio.",
+     "traducao_do_painel": {
+      "pt-BR": "Elas são do Rio.",
+      "en": null
+     },
+     "explicacao": {
+      "pt-BR": "Duas mulheres: <b>elles</b>, com <b>sont</b>.",
+      "en": null
+     },
+     "explicacao_erro": {
+      "Ils sont de Rio.": {
+       "pt-BR": "<b>Ils</b> é para homens ou grupo misto. ",
+       "en": null
+      },
+      "Elles sommes de Rio.": {
+       "pt-BR": "<b>Sommes</b> é com <b>nous</b>. ",
+       "en": null
+      }
+     }
+    },
+    {
+     "id": "g6-nota-avoir-sg",
+     "tipo": "nota",
+     "nota": "avoir-singular"
+    },
+    {
+     "id": "g6-ex-as",
+     "tipo": "complete",
+     "antes": "Tu ",
+     "depois": " quel âge ?",
+     "traducao": {
+      "pt-BR": "Quantos anos você tem?",
+      "en": null
+     },
+     "opcoes": [
+      "as",
+      "a"
+     ],
+     "resposta": "as",
+     "frase_completa": "Tu as quel âge ?",
+     "distrator": "outra palavra",
+     "explicacao": {
+      "pt-BR": "Com <b>tu</b>, <b>avoir</b> fica <b>as</b>.",
+      "en": null
+     },
+     "explicacao_erro": {
+      "a": {
+       "pt-BR": "<b>A</b> é com <b>il</b> e <b>elle</b>. ",
+       "en": null
+      }
+     }
+    },
+    {
+     "id": "g6-ex-jai",
+     "tipo": "complete",
+     "antes": "",
+     "depois": " vingt-cinq ans.",
+     "traducao": {
+      "pt-BR": "Eu tenho vinte e cinco anos.",
+      "en": null
+     },
+     "opcoes": [
+      "Je ai",
+      "J'ai"
+     ],
+     "resposta": "J'ai",
+     "frase_completa": "J'ai vingt-cinq ans.",
+     "distrator": "grafia",
+     "explicacao": {
+      "pt-BR": "<b>Je</b> vira <b>j'</b> antes de vogal: <b>j'ai</b>.",
+      "en": null
+     },
+     "explicacao_erro": {
+      "Je ai": {
+       "pt-BR": "Quase lá! Antes de vogal, o <b>e</b> cai. ",
+       "en": null
+      }
+     }
+    },
+    {
+     "id": "g6-nota-avoir-pl",
+     "tipo": "nota",
+     "nota": "avoir-plural"
+    },
+    {
+     "id": "g6-ex-ils-ont",
+     "tipo": "vf",
+     "fr": "Ils ont dix ans.",
+     "afirmacao": {
+      "pt-BR": "Quer dizer \"Eles são dez\".",
+      "en": null
+     },
+     "resposta": false,
+     "frase_do_painel": "Ils ont dix ans.",
+     "traducao_do_painel": {
+      "pt-BR": "Eles têm dez anos.",
+      "en": null
+     },
+     "explicacao": {
+      "pt-BR": "<b>Ils ont</b>, com som de <b>z</b>, é \"eles têm\"; \"eles são\" é <b>ils sont</b>.",
+      "en": null
+     }
+    },
+    {
+     "id": "g6-ex-avons",
+     "tipo": "funcao",
+     "pergunta": {
+      "pt-BR": "Você e o seu irmão têm 20 anos. Como você diz \"nós temos vinte anos\"?",
+      "en": null
+     },
+     "opcoes": [
+      "Nous sommes vingt ans.",
+      "Nous avez vingt ans.",
+      "Nous avons vingt ans."
+     ],
+     "resposta": "Nous avons vingt ans.",
+     "traducao_do_painel": {
+      "pt-BR": "Nós temos vinte anos.",
+      "en": null
+     },
+     "explicacao": {
+      "pt-BR": "Idade é com <b>avoir</b>: <b>nous avons</b>.",
+      "en": null
+     },
+     "explicacao_erro": {
+      "Nous sommes vingt ans.": {
+       "pt-BR": "Idade não usa <b>être</b>. ",
+       "en": null
+      },
+      "Nous avez vingt ans.": {
+       "pt-BR": "<b>Avez</b> é com <b>vous</b>. ",
+       "en": null
+      }
+     }
+    },
+    {
+     "id": "g6-nota-quadro",
+     "tipo": "nota",
+     "nota": "etre-avoir-lado-a-lado",
+     "rotulos": {
+      "je suis, tu es, il est, elle est": "être",
+      "nous sommes, vous êtes, ils sont, elles sont": "être",
+      "j'ai, tu as, il a, elle a": "avoir",
+      "nous avons, vous avez, ils ont, elles ont": "avoir"
+     }
+    },
+    {
+     "id": "g6-rel",
+     "tipo": "relacionar",
+     "pares": [
+      [
+       "je",
+       "suis"
+      ],
+      [
+       "tu",
+       "es"
+      ],
+      [
+       "nous",
+       "sommes"
+      ],
+      [
+       "vous",
+       "êtes"
+      ],
+      [
+       "ils",
+       "sont"
+      ]
+     ],
+     "explicacao": {
+      "pt-BR": "Nos pares, cada pessoa com a sua forma de <b>être</b>.",
+      "en": null
+     }
+    },
+    {
+     "id": "g6-ex-qual-1",
+     "tipo": "classificar",
+     "fr": "Ils ont vingt ans.",
+     "pergunta": {
+      "pt-BR": "De que verbo é essa forma?",
+      "en": null
+     },
+     "opcoes": [
+      "être",
+      "avoir"
+     ],
+     "resposta": "avoir",
+     "traducao_do_painel": {
+      "pt-BR": "Eles têm vinte anos.",
+      "en": null
+     },
+     "explicacao": {
+      "pt-BR": "<b>Ont</b> é de <b>avoir</b>: \"eles têm\".",
+      "en": null
+     },
+     "explicacao_erro": {
+      "être": {
+       "pt-BR": "<b>Être</b> com <b>ils</b> é <b>sont</b>. ",
+       "en": null
+      }
+     }
+    },
+    {
+     "id": "g6-ex-qual-2",
+     "tipo": "classificar",
+     "fr": "Vous êtes de Paris ?",
+     "pergunta": {
+      "pt-BR": "De que verbo é essa forma?",
+      "en": null
+     },
+     "opcoes": [
+      "être",
+      "avoir"
+     ],
+     "resposta": "être",
+     "traducao_do_painel": {
+      "pt-BR": "Vocês são de Paris?",
+      "en": null
+     },
+     "explicacao": {
+      "pt-BR": "<b>Êtes</b> é de <b>être</b>: \"vocês são\".",
+      "en": null
+     },
+     "explicacao_erro": {
+      "avoir": {
+       "pt-BR": "<b>Avoir</b> com <b>vous</b> é <b>avez</b>. ",
+       "en": null
+      }
+     }
+    },
+    {
+     "id": "g6-ex-nous",
+     "tipo": "montar",
+     "fr": "J'ai vingt ans.",
+     "pedido": {
+      "pt-BR": "Agora com nous: nós temos vinte anos.",
+      "en": null
+     },
+     "traducao": {
+      "pt-BR": "Nós temos vinte anos.",
+      "en": null
+     },
+     "pecas": [
+      "Nous",
+      "avons",
+      "vingt",
+      "ans.",
+      "sommes",
+      "avez"
+     ],
+     "resposta": [
+      "Nous",
+      "avons",
+      "vingt",
+      "ans."
+     ],
+     "frase_completa": "Nous avons vingt ans.",
+     "explicacao": {
+      "pt-BR": "Com <b>nous</b>, <b>avoir</b> fica <b>avons</b>.",
+      "en": null
+     }
+    },
+    {
+     "id": "g6-ex-vous",
+     "tipo": "montar",
+     "fr": "Tu es de Paris ?",
+     "pedido": {
+      "pt-BR": "Agora a mesma pergunta no formal.",
+      "en": null
+     },
+     "traducao": {
+      "pt-BR": "O senhor (a senhora) é de Paris?",
+      "en": null
+     },
+     "pecas": [
+      "Vous",
+      "êtes",
+      "de",
+      "Paris",
+      "?",
+      "es",
+      "avez"
+     ],
+     "resposta": [
+      "Vous",
+      "êtes",
+      "de",
+      "Paris",
+      "?"
+     ],
+     "frase_completa": "Vous êtes de Paris ?",
+     "explicacao": {
+      "pt-BR": "No formal, <b>vous êtes</b>.",
+      "en": null
+     }
+    },
+    {
+     "id": "g6-fim",
+     "tipo": "fim",
+     "fala": {
+      "pt-BR": "Parabéns! Agora você conjuga être e avoir no presente.",
+      "en": null
+     },
+     "resumo": [
+      {
+       "fr": "je suis, tu es, il est, elle est",
+       "pt-BR": "eu sou, você é, ele é, ela é",
+       "rotulo": "être"
+      },
+      {
+       "fr": "nous sommes, vous êtes, ils sont, elles sont",
+       "pt-BR": "nós somos, vocês são, eles são, elas são",
+       "rotulo": "être"
+      },
+      {
+       "fr": "j'ai, tu as, il a, elle a",
+       "pt-BR": "eu tenho, você tem, ele tem, ela tem",
+       "rotulo": "avoir"
+      },
+      {
+       "fr": "nous avons, vous avez, ils ont, elles ont",
+       "pt-BR": "nós temos, vocês têm, eles têm, elas têm",
+       "rotulo": "avoir"
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

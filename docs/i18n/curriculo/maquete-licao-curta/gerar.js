@@ -19,6 +19,7 @@ const RASCUNHOS = [
   { unidade: 3, caminho: 'docs/i18n/curriculo/piloto-m1/A1-9/A1-9.json' },
   { unidade: 4, caminho: 'docs/i18n/curriculo/piloto-m1/A1-g12/A1-g12.json' }, // gramática (decisão 365)
   { unidade: 5, caminho: 'docs/i18n/curriculo/piloto-m1/A1-3/A1-3.json' }, // decisão 368
+  { unidade: 6, caminho: 'docs/i18n/curriculo/piloto-m1/A1-g1/A1-g1.json' }, // gramática (decisão 373)
 ];
 
 // `tolerante`: para a comparação com um commit antigo, tela de tipo que não existe mais é ignorada.

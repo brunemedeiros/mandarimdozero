@@ -134,7 +134,7 @@ console.log('== destaque do que ficou diferente no "Monte a frase" (decisão 366
 }
 
 console.log('== todos os rascunhos do piloto sem problema nas telas');
-for (const u of ['A1-1', 'A1-2', 'A1-9', 'A1-g12', 'A1-3']){
+for (const u of ['A1-1', 'A1-2', 'A1-9', 'A1-g12', 'A1-3', 'A1-g1']){
   const R = require(path.join(ROOT, `docs/i18n/curriculo/piloto-m1/${u}/${u}.json`));
   check(`rascunho ${u}: nenhum problema nas telas`, L.conferirTelas(R).length === 0, L.conferirTelas(R));
 }

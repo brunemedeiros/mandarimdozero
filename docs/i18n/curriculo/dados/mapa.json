@@ -1451,11 +1451,13 @@
                 "A1-3"
               ],
               "versao_gratis_texto": "parcial e suficiente: M1.2 je suis, tu es (fórmula); M1.5 N08 J'ai vingt ans; a tabela completa está na Conjugação (grátis). Decisão 335: il a / elle a sai da versão grátis, porque \"Perguntar a idade dos outros: até 69\" passa a vir depois desta gramática (M2.3), onde retoma a forma",
-              "telas": 4,
-              "exercicios": 6,
+              "telas": 5,
+              "exercicios": 13,
               "decisoes": [
-                335
-              ]
+                335,
+                373
+              ],
+              "telas_licao_curta": "5 explicações + 13 exercícios numa lição só (decisão 373)"
             },
             {
               "id": "A1-22",
