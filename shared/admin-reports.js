@@ -254,6 +254,20 @@ function reportsOpenDetail(id){
   const d = document.getElementById('dlg-report');
   d.addEventListener('close', () => d.remove());
   d.showModal();
+  reportsSignScreenshot(d);
+}
+
+// Pasta de prints privada (migration 139): só a admin lê. Troca o endereço antigo
+// por um link temporário (10 min) assim que a janela abre, antes do clique, para
+// o navegador não bloquear a aba nova.
+async function reportsSignScreenshot(dialog){
+  const a = dialog && dialog.querySelector('a[data-report-shot]');
+  const path = a && a.dataset.reportShot;
+  if (!path || typeof supabaseClient === 'undefined') return;
+  try {
+    const { data, error } = await supabaseClient.storage.from('report-screenshots').createSignedUrl(path, 600);
+    if (!error && data && data.signedUrl) a.href = data.signedUrl;
+  } catch (e) {}
 }
 
 async function reportsSaveFields(form){
