@@ -3614,6 +3614,8 @@ window.I18N_CATALOG['en'] = {
   'panel.classLog.skill.pronuncia': 'Pronunciation', // ALTA
   'panel.classLog.classrooms': 'Classes', // ALTA
   'panel.gcal.formerHint': 'Former students are at the end of the list: the lesson only goes into their history, with no Board notice.', // ALTA
+  'panel.gcal.formerBankGroup': 'Former students without an account (history only)', // ALTA
+  'panel.classLog.formerTag': 'former student', // ALTA
   'panel.classLog.forWhom': 'For whom', // ALTA
   'panel.classLog.moreFields': 'More fields (Observations and Notes)', // ALTA
   'panel.classLog.classroomsHint': 'A class lesson is logged once and shows up for every student in the class.', // ALTA
