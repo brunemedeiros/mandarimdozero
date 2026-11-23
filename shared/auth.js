@@ -126,6 +126,15 @@ async function initAuth(){
 
   supabaseClient.auth.onAuthStateChange(async (event, session) => {
     if (event === 'SIGNED_IN' && session?.user){
+      // O supabase-js avisa SIGNED_IN toda vez que a aba volta a ficar visível com a sessão válida (_onVisibilityChanged ->
+      // _recoverAndRefresh). Tratar isso como login novo relia tudo do servidor e reaplicava a rota: no meio de uma lição
+      // (#/unit/<id>) a lição voltava ao 1º passo (auditoria e decisão da autora, opção A, 2026-11-14:
+      // docs/historico/35-volta-para-a-aba.md). Mesma conta já aberta: só atualiza os dados do login; tela, lição e Revisão
+      // ficam como estão. Outro aparelho que salvou no meio-tempo é tratado pelo guarda do saveState() (recusa e relê).
+      if (isSameLoadedAccount(session.user)){
+        onSameAccountSignedInAgain(session.user);
+        return;
+      }
       await onUserLoggedIn(session.user);
     } else if (event === 'SIGNED_OUT'){
       CURRENT_USER = null;
@@ -210,6 +219,26 @@ function enterGuestMode(){
   });
 }
 
+// Volta para a aba (SIGNED_IN repetido pelo supabase-js) com a mesma conta que esta página já abriu. Conta diferente
+// (troca de conta na mesma aba) e o primeiro login continuam pelo onUserLoggedIn completo.
+function isSameLoadedAccount(user){
+  return !!(CURRENT_USER && user && CURRENT_USER.id && CURRENT_USER.id === user.id);
+}
+
+let progressReloadAfterReturnInFlight = false;
+function onSameAccountSignedInAgain(user){
+  CURRENT_USER = user; // dados do login mais novos (nome, metadados); o id é o mesmo
+  const label = user.user_metadata?.full_name || user.email || t('auth.myAccount');
+  const labelEl = document.getElementById('user-label');
+  if (labelEl) labelEl.textContent = label;
+  // Progresso ainda não confirmado (a leitura do login falhou, ex.: sem internet): lê de novo, SEM reaplicar a rota (a tela
+  // aberta continua). Uma leitura por vez.
+  if (!progressLoadedOk && !progressReloadAfterReturnInFlight && typeof loadStateAndRender === 'function'){
+    progressReloadAfterReturnInFlight = true;
+    Promise.resolve(loadStateAndRender()).catch(() => {}).then(() => { progressReloadAfterReturnInFlight = false; });
+  }
+}
+
 async function onUserLoggedIn(user){
   CURRENT_USER = user;
   // Recomeça travado a cada login -- mesmo numa troca de conta dentro da
@@ -257,6 +286,15 @@ async function onUserLoggedIn(user){
   askUiLanguageOnFirstAccess();
   // Escolher o @ uma vez (111): só para quem tem o @ aleatório e ainda não escolheu; espera outras janelas.
   if (typeof maybeAskUsernameChoice === 'function') maybeAskUsernameChoice().catch(() => {});
+  // Confirmação de idade de quem já tinha conta (136, opção A da dona): faixa no topo do Estudo, não trava nada.
+  if (typeof maybeShowAgeAckBanner === 'function') maybeShowAgeAckBanner().catch(() => {});
+  // GA4 (shared/consent.js): só mede depois de saber quem está logado; professora/admin não são medidas.
+  if (window.ProfBruneConsent && typeof ensureProfileLoaded === 'function'){
+    ensureProfileLoaded().catch(() => null).then(() => {
+      const staff = (typeof isTeacherOrAdmin === 'function' && isTeacherOrAdmin()) || (typeof isAdminUser === 'function' && isAdminUser());
+      window.ProfBruneConsent.setContext({ staff: !!staff });
+    });
+  }
   // Depois do render padrão (ver comentário equivalente em enterGuestMode)
   // -- só assim a navegação forçada por uma notificação clicada vence a
   // aba default do carregamento normal.

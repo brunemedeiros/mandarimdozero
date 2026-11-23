@@ -58,7 +58,10 @@ try{
 <link rel="stylesheet" href="../shared/review-bank.css">
 <link rel="stylesheet" href="../shared/licao-feedback.css">
 <link rel="stylesheet" href="../shared/revisao-teclado.css">
+<link rel="stylesheet" href="../shared/combinar-audio.css">
 <link rel="stylesheet" href="../shared/gramatica-cenario.css">
+<link rel="stylesheet" href="../shared/age-ack.css">
+<link rel="stylesheet" href="../shared/consent.css">
 <style>
 :root{
   --brand-purple: #3D167B; /* roxo da unidade de gramática (trilha comum, paridade 5d); igual ao fr. O zh ainda não tem unidade de gramática */
@@ -1338,6 +1341,7 @@ button.wrong-feedback-continue{ background: var(--brand-fill); color: var(--on-b
 </style>
 <!-- Botão redondo de áudio (🔊): peça comum em shared/audio-btn.css, ligada aqui para manter a ordem da cascata. -->
 <link rel="stylesheet" href="../shared/audio-btn.css">
+<link rel="stylesheet" href="../shared/sem-internet.css">
 <style>
 
 /* ---------- Fase 8a: imagem/múltipla escolha no flashcard (ver CLAUDE.md) ---------- */
@@ -5066,6 +5070,12 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
         </article>
         <!-- Recomeçar este curso (migration 123; conteúdo montado por shared/recomecar-curso.js). -->
         <article id="settings-restart-box" class="rc-caixa" hidden></article>
+        <!-- Privacidade e cookies (Fase 3 do GA4): abre a janela de Preferências (shared/consent.js, [data-consent-open]). -->
+        <article id="settings-cookies-box">
+          <header><h3 data-i18n="consent.settings.title">Privacidade e cookies</h3></header>
+          <p class="pref-row-sub" data-i18n="consent.settings.sub">Escolha se o site pode medir as visitas com o Google Analytics. Dá para mudar quando quiser.</p>
+          <footer><button type="button" class="outline" data-consent-open data-i18n="consent.footer.prefs">Preferências de cookies</button> <a href="../privacidade-cookies.html" data-i18n="consent.footer.policy">Política de cookies</a></footer>
+        </article>
         <article id="settings-delete-box" hidden>
           <header><h3 data-i18n="accountDelete.title">Excluir minha conta</h3></header>
           <p class="pref-row-sub" data-i18n="accountDelete.hint">Apaga a sua conta e tudo o que está ligado a ela: progresso, cartões, conquistas, amizades, fotos e arquivos. Não dá para desfazer.</p>
@@ -5440,6 +5450,16 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
           <span class="kbd-key">1</span><span class="kbd-key">2</span><span class="kbd-key">3</span><span class="kbd-key">4</span>
         </div>
         <div data-i18n="ui.kbd.choose" class="kbd-shortcuts-desc">Escolher uma alternativa, pela posição dela na tela</div>
+      </div>
+      <div class="kbd-shortcuts-row">
+        <div class="kbd-shortcuts-keys">
+          <span class="kbd-key">1</span><span class="kbd-key">2</span><span class="kbd-key">3</span><span class="kbd-key">4</span>
+        </div>
+        <div data-i18n="ui.kbd.grade" class="kbd-shortcuts-desc">Na Revisão, dar a nota ao cartão pela posição do botão (com quatro botões: Errei, Difícil, Bom, Fácil)</div>
+      </div>
+      <div class="kbd-shortcuts-row">
+        <div class="kbd-shortcuts-keys"><span class="kbd-key">Espaço</span><span class="kbd-key">Enter</span></div>
+        <div data-i18n="ui.kbd.reveal" class="kbd-shortcuts-desc">Na Revisão, mostrar a resposta de um cartão</div>
       </div>
       <div class="kbd-shortcuts-row">
         <div class="kbd-shortcuts-keys"><span class="kbd-key">Enter</span></div>
@@ -5820,6 +5840,7 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
 <script src="../shared/painel/painel-ui.js"></script>
 <script src="../shared/teacher-invites.js"></script>
 <script src="../shared/username-choice.js"></script>
+<script src="../shared/age-ack.js"></script>
 <script src="../shared/mural.js"></script>
 <script src="../shared/own-flashcards.js"></script>
 <script src="../shared/deck-data.js"></script>
@@ -5842,12 +5863,14 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
 <script src="../shared/topbar-stats.js"></script>
 <script src="../shared/janelas-topo.js"></script>
 <script src="../shared/xp-semana.js"></script>
+<script src="../shared/consent.js" data-page="app"></script>
 <script src="../shared/analytics.js"></script>
 <script src="../shared/tabs.js"></script>
 <script src="../shared/activity-focus.js"></script>
 <script src="../shared/router.js"></script>
 <script src="../shared/anki-export.js"></script>
 <script src="../shared/pwa.js"></script>
+<script src="../shared/sem-internet.js"></script>
 <script src="../shared/toast.js"></script>
 <script src="../shared/modal-a11y.js"></script>
 <script src="../shared/supabase-client.js"></script>
