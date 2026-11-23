@@ -36,7 +36,10 @@ Os 38 reports da produção são todos de contas logadas (nenhum convidado), por
 - Testes: `tests/painel-admin/test_reports_ui_unit.js` 32/32, `test_reports_playwright.js` 182/182.
 - Aplicação: Staging pela autora no SQL Editor (2026-11-22), conferido: regras e limites certos; visitante
   sem conta lista 0 arquivos nas 4 pastas e o envio sem login dá 403. Staging não tem arquivo nenhum, então o
-  link direto público e o envio logado ficam para conferir na produção. Produção: __ (preencher).
+  link direto público e o envio logado ficam para conferir na produção. Produção pela autora no SQL Editor
+  (2026-11-23), conferido: regras iguais ao Staging, os 16 prints continuam guardados; visitante lista 0 arquivos
+  (inclusive dentro da subpasta de uma conta), envio sem login = 403, link antigo do print = 400, link direto da
+  foto de perfil e do áudio de cartão = 200. O link "Ver print" do Painel só volta quando a branch for mesclada.
 
 ## Conserto 4 (senha no robô de avisos, migration 140)
 
@@ -51,4 +54,8 @@ Os 38 reports da produção são todos de contas logadas (nenhum convidado), por
   senha; anon/authenticated sem permissão), zero resíduo. Staging não tem o robô nem o cron.
 - Ordem na produção: 1) senha no Vault (gerada no próprio banco) e secret da função com o mesmo valor;
   2) migration 140; 3) deploy da função; 4) teste sem senha = 401 e conferir a rodada das 22h UTC.
-- Aplicação: __ (preencher).
+- Aplicação na produção (2026-11-23, autorizada): Vault `notif_cron_url`, `notif_cron_anon` (cópia de `rb_agent_anon`)
+  e `notif_cron_token` (48 caracteres, gerado no banco, ninguém viu o valor no chat); secret `NOTIFICATION_CRON_TOKEN`
+  colado pela autora no painel (a tela de secrets do MCP estava desligada pelo Supabase); migration 140 gravada como
+  `20261123141933`; `notification-cron` **v36** (conteúdo baixado de volta e idêntico ao repositório). Teste: sem senha
+  e com senha errada = 401 (não 503, logo o secret existe). Falta conferir a rodada das 22h UTC (senha igual nos dois lados).
