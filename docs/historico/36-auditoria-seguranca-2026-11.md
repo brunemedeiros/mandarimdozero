@@ -72,3 +72,13 @@ Os 38 reports da produção são todos de contas logadas (nenhum convidado), por
   (`test_i18n_unit`, `test_playwright`, `test_badges_i18n`, `test_translation_compare`) quebram igual na `main`
   (pedem um commit antigo que não está nesta cópia do repositório).
 
+## 1ª rodada do robô de avisos com senha (2026-11-23, 22h UTC)
+
+- Cron `notification-cron-diario` = succeeded; resposta da função **200 ok:true**: 44 combinações conta/idioma lidas,
+  36 avisos criados, 62 eventos de cron no dia (59 no dia anterior, sem senha). Senha do Vault e secret batem.
+- 10 erros na rodada, **anteriores a esta mudança** (código igual ao da v34): `Cannot read properties of undefined
+  (reading 'split')` em 10 contas do francês. Causa: a missão do dia "Ganhe 50 XP hoje" (`xp50`, no site desde
+  ~2026-10-23, substituiu `stars40`) não está em `MISSION_FIELD_BY_ID` do `notification-cron`; o erro acontece no
+  último passo (lembrete de missões), então só esse lembrete deixa de sair para essas contas. Conserto proposto à
+  autora (mapear `xp50` e tolerar missão desconhecida + novo deploy), aguardando aprovação.
+
