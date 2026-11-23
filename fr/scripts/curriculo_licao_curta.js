@@ -197,6 +197,15 @@ function conferirTelas(R){
     }
   }
 
+  // Nota que ensina formas (ex.: uma conjugação) declara `formas` (decisão 374, a dona): cada forma tem uma frase de exemplo e cada
+  // exemplo usa uma das formas da nota (nada de exemplo de outro verbo, como "Ils sont de Paris" na nota de avoir).
+  const minusculo = x => String(x).toLowerCase().replace(/’/g, "'");
+  for (const n of R.notas.filter(n => Array.isArray(n.formas))){
+    const exemplos = (n.exemplos || []).map(e => minusculo(e.fr));
+    for (const f of n.formas) confere(exemplos.some(e => e.includes(minusculo(f))), `nota "${n.id}": a forma "${f}" não tem frase de exemplo`);
+    for (const e of n.exemplos || []) confere(n.formas.some(f => minusculo(e.fr).includes(minusculo(f))), `nota "${n.id}": o exemplo "${e.fr}" não usa nenhuma forma da nota`);
+  }
+
   // Nota em tela própria ou como painel de exercício (decisão 339).
   const telaComId = id => comTelas.some(l => (l.telas || []).some(t => t.id === id && t.explicacao));
   for (const n of R.notas){

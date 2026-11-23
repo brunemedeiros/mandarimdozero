@@ -42,10 +42,20 @@
      "en": null
     },
     {
+     "fr": "Tu es français ?",
+     "pt-BR": "Você é francês?",
+     "en": null
+    },
+    {
      "fr": "Il est français.",
      "pt-BR": "Ele é francês.",
      "en": null
     }
+   ],
+   "formas": [
+    "je suis",
+    "tu es",
+    "il est"
    ]
   },
   {
@@ -73,10 +83,20 @@
      "en": null
     },
     {
-     "fr": "Ils sont de Paris.",
-     "pt-BR": "Eles são de Paris.",
+     "fr": "Vous êtes de Lyon ?",
+     "pt-BR": "Vocês são de Lyon?",
+     "en": null
+    },
+    {
+     "fr": "Ils sont de Recife.",
+     "pt-BR": "Eles são de Recife.",
      "en": null
     }
+   ],
+   "formas": [
+    "nous sommes",
+    "vous êtes",
+    "ils sont"
    ]
   },
   {
@@ -104,10 +124,20 @@
      "en": null
     },
     {
+     "fr": "Tu as dix-neuf ans ?",
+     "pt-BR": "Você tem dezenove anos?",
+     "en": null
+    },
+    {
      "fr": "Elle a dix-huit ans.",
      "pt-BR": "Ela tem dezoito anos.",
      "en": null
     }
+   ],
+   "formas": [
+    "j'ai",
+    "tu as",
+    "elle a"
    ]
   },
   {
@@ -130,15 +160,25 @@
    },
    "exemplos": [
     {
-     "fr": "Ils ont dix ans.",
-     "pt-BR": "Eles têm dez anos.",
+     "fr": "Nous avons dix-neuf ans.",
+     "pt-BR": "Nós temos dezenove anos.",
      "en": null
     },
     {
-     "fr": "Ils sont de Paris.",
-     "pt-BR": "Eles são de Paris.",
+     "fr": "Vous avez vingt-deux ans ?",
+     "pt-BR": "Vocês têm vinte e dois anos?",
+     "en": null
+    },
+    {
+     "fr": "Ils ont dix ans.",
+     "pt-BR": "Eles têm dez anos.",
      "en": null
     }
+   ],
+   "formas": [
+    "nous avons",
+    "vous avez",
+    "ils ont"
    ]
   },
   {
@@ -228,7 +268,7 @@
      "frase_completa": "Je suis de Rio.",
      "distrator": "outra palavra",
      "explicacao": {
-      "pt-BR": "Com <b>je</b>, <b>être</b> fica <b>suis</b>.",
+      "pt-BR": "Com <b>je</b>, <b>être</b> fica <b>suis</b>. E <b>je suis</b> é \"eu sou\" e também \"eu estou\": <b>être</b> é ser e estar.",
       "en": null
      },
      "explicacao_erro": {

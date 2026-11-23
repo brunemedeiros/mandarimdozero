@@ -155,6 +155,14 @@ check('nota com gatilho num cartão de lição anterior passa (decisão 369)', (
   return !problemas(r).some(p => p.includes('nota antes do gatilho'));
 })());
 
+console.log('== nota com formas: exemplo para cada forma e nenhum exemplo de fora (decisão 374)');
+{
+  const comFormas = (formas, exemplos) => { const r = copia(base); Object.assign(r.notas[0], { formas, exemplos: exemplos.map(fr => ({ fr, 'pt-BR': 'x' })) }); return problemas(r); };
+  check('formas todas com exemplo: nada acusado', comFormas(['nous avons', 'ils ont'], ['Nous avons vingt ans.', 'Ils ont dix ans.']).length === 0);
+  check('forma sem frase de exemplo é acusada', comFormas(['nous avons', 'vous avez', 'ils ont'], ['Nous avons vingt ans.', 'Ils ont dix ans.']).some(p => p.includes('"vous avez" não tem frase de exemplo')));
+  check('exemplo de outro verbo é acusado (Ils sont na nota de avoir)', comFormas(['nous avons', 'ils ont'], ['Nous avons vingt ans.', 'Ils ont dix ans.', 'Ils sont de Paris.']).some(p => p.includes('"Ils sont de Paris." não usa nenhuma forma')));
+}
+
 console.log('== embaralhar peças e falas (decisão 363)');
 {
   const naOrdem = (pecas, resposta) => { const lidas = []; for (const p of pecas) if (lidas.length < resposta.length && p === resposta[lidas.length]) lidas.push(p); return lidas.length === resposta.length; };
