@@ -75,7 +75,8 @@ const PAGE_LIB = () => {
     });
     return out;
   };
-  window.__desc = (el) => (el.id ? '#' + el.id : '') + '.' + String(el.className || '').split(/\s+/).slice(0, 2).join('.') + '[' + (el.textContent || '').trim().slice(0, 30) + ']';
+  window.__desc = (el) => (el.id ? '#' + el.id : '') + '.' + String(el.className || '').split(/\s+/).slice(0, 2).join('.') + '[' + (el.textContent || '').trim().replace(/^(Praticar mais|Practice more|Continuar revisando|Keep reviewing)$/, 'CONTINUAR_REVISANDO').slice(0, 30) + ']'; // "Praticar mais" virou "Continuar revisando" de propósito (2026-11-10); o nome da cena não muda
+
   // uma ação: devolve a descrição (ou null se não há o que fazer)
   window.__acao = (rootSel, r) => {
     const root = document.querySelector(rootSel);
