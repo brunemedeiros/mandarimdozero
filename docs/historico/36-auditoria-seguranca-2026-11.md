@@ -59,3 +59,16 @@ Os 38 reports da produção são todos de contas logadas (nenhum convidado), por
   colado pela autora no painel (a tela de secrets do MCP estava desligada pelo Supabase); migration 140 gravada como
   `20261123141933`; `notification-cron` **v36** (conteúdo baixado de volta e idêntico ao repositório). Teste: sem senha
   e com senha errada = 401 (não 503, logo o secret existe). Falta conferir a rodada das 22h UTC (senha igual nos dois lados).
+
+## Ajuste do link da captura (2026-11-23)
+
+- A autora clicou em "Ver captura de tela anexada" muito depois de abrir a janela do report e recebeu
+  `"exp" claim timestamp check failed`: o link de 10 min era criado ao ABRIR a janela e tinha vencido.
+- Agora o link é criado na hora do clique (`reportsOpenScreenshot` em `shared/admin-reports.js`): a aba nova abre no
+  próprio clique e recebe o endereço logo depois; cada clique cria um link novo; se falhar, aviso
+  `admin.reports.detail.screenshotError` (pt-BR e en).
+- Testes: `tests/painel-admin/test_reports_playwright.js` 192/192 (10 novos: abrir não cria link, clique cria o link
+  certo, segundo clique cria outro, falha avisa), `test_reports_ui_unit.js` 32/32. Testes de `tests/i18n/` que quebram
+  (`test_i18n_unit`, `test_playwright`, `test_badges_i18n`, `test_translation_compare`) quebram igual na `main`
+  (pedem um commit antigo que não está nesta cópia do repositório).
+

@@ -1737,6 +1737,7 @@ window.I18N_CATALOG['pt-BR'] = {
   'admin.reports.detail.problem': '⚑ Problema',
   'admin.reports.detail.notInformed': '(não informado)',
   'admin.reports.detail.screenshotView': '📎 Ver captura de tela anexada',
+  'admin.reports.detail.screenshotError': 'Não foi possível abrir a captura de tela. Tente de novo em instantes.',
   'admin.reports.detail.screenshotNone': '(sem captura anexada)',
   'admin.reports.reply.lastSentTo': 'Última resposta enviada em {date} para {email}:',
   'admin.reports.reply.lastSent': 'Última resposta enviada em {date}:',

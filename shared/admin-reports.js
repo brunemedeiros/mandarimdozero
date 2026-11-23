@@ -257,17 +257,28 @@ function reportsOpenDetail(id){
   reportsSignScreenshot(d);
 }
 
-// Pasta de prints privada (migration 139): só a admin lê. Troca o endereço antigo
-// por um link temporário (10 min) assim que a janela abre, antes do clique, para
-// o navegador não bloquear a aba nova.
-async function reportsSignScreenshot(dialog){
+// Pasta de prints privada (migration 139): só a admin lê. O link temporário (10 min) é
+// criado NA HORA DO CLIQUE: criado ao abrir a janela, ele vencia se a admin demorasse
+// para clicar ("exp claim timestamp check failed", 2026-11-23). A aba nova abre já no
+// clique (o navegador só deixa abrir aba direto do clique) e recebe o endereço depois.
+function reportsSignScreenshot(dialog){
   const a = dialog && dialog.querySelector('a[data-report-shot]');
-  const path = a && a.dataset.reportShot;
-  if (!path || typeof supabaseClient === 'undefined') return;
+  if (!a || !a.dataset.reportShot) return;
+  a.addEventListener('click', (e) => { e.preventDefault(); reportsOpenScreenshot(a.dataset.reportShot); });
+}
+
+async function reportsOpenScreenshot(path){
+  const w = window.open('', '_blank');
+  if (w) { try { w.opener = null; } catch (e) {} }
+  let url = null;
   try {
     const { data, error } = await supabaseClient.storage.from('report-screenshots').createSignedUrl(path, 600);
-    if (!error && data && data.signedUrl) a.href = data.signedUrl;
+    if (!error && data && data.signedUrl) url = data.signedUrl;
   } catch (e) {}
+  if (url && w) { w.location.href = url; return; }
+  if (url) { window.location.href = url; return; }
+  if (w) w.close();
+  alert(t('admin.reports.detail.screenshotError'));
 }
 
 async function reportsSaveFields(form){
