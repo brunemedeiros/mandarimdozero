@@ -56,7 +56,11 @@ try{
 <link rel="stylesheet" href="../shared/painel/painel-componentes.css">
 <link rel="stylesheet" href="../shared/review-bank.css">
 <link rel="stylesheet" href="../shared/licao-feedback.css">
+<link rel="stylesheet" href="../shared/revisao-teclado.css">
+<link rel="stylesheet" href="../shared/combinar-audio.css">
 <link rel="stylesheet" href="../shared/gramatica-cenario.css">
+<link rel="stylesheet" href="../shared/age-ack.css">
+<link rel="stylesheet" href="../shared/consent.css">
 <style>
 :root{
   /* Design tokens — paleta própria do Francês do Zero (azul como cor
@@ -1139,6 +1143,7 @@ button.correct-feedback-continue{ background: var(--success-fill); color: var(--
 </style>
 <!-- Botão redondo de áudio (🔊): peça comum em shared/audio-btn.css, ligada aqui para manter a ordem da cascata. -->
 <link rel="stylesheet" href="../shared/audio-btn.css">
+<link rel="stylesheet" href="../shared/sem-internet.css">
 <style>
 
 /* ---------- Fase 8a: imagem/múltipla escolha no flashcard (ver CLAUDE.md) ---------- */
@@ -2739,7 +2744,7 @@ button.correct-feedback-continue{ background: var(--success-fill); color: var(--
    lesson-focus) e reaproveitar em vez de inventar outro reduz a chance de
    um dos dois ficar inconsistente depois. Nunca aparece sozinho: só quando
    shared/pwa.js detecta uma troca de controller de verdade (não na
-   primeira visita) -- nunca recarrega a página sozinho, só no clique em
+   primeira visita) e com a página na versão antiga -- nunca recarrega a página sozinho, só no clique em
    "Atualizar". */
 .pwa-update-banner{
   position:fixed; left:0; right:0; bottom:0; z-index:var(--z-bottom-sheet); background: var(--paper);
@@ -3094,10 +3099,12 @@ body.lesson-focus .acq-phase-banner{ margin-bottom:10px; padding:4px 12px; }
   color: var(--ink); display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin-bottom:4px;
 }
 .guest-warning-link{
-  background: var(--ink); color: var(--gold-bright); border:none; border-radius:8px; padding:6px 12px;
+  background: var(--brand-fill); color: var(--on-brand-fill); border:none; border-radius:8px; padding:6px 12px;
   font-family:var(--font-body); font-weight:800; font-size:12px; cursor:pointer;
 }
-.guest-warning-link:hover{ filter:brightness(1.15); }
+.guest-warning-link:hover{ background: var(--brand-fill-hover); }
+/* A frase é um bloco só: sem isso, o texto e o <strong> viram itens do flex e ganham o gap entre eles (2026-11-10). */
+.guest-warning-text{ flex:1 1 220px; min-width:0; }
 
 /* Conjugação (.conj-*): shared/conjugacao.css, comum aos sites que têm a tela (etapa 5a da paridade). */
 
@@ -4599,7 +4606,6 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
         <div class="lesson-hint-eyebrow" id="ud-eyebrow"></div>
         <div class="lesson-unit-title" id="ud-title"></div>
         <p class="lesson-unit-goal" id="ud-goal"></p>
-        <p class="lesson-unit-goal" id="ud-lang-notice" hidden style="font-style:italic;opacity:.8"></p>
       </div>
 
       <div class="lesson-focus-bar">
@@ -4842,6 +4848,12 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
         </article>
         <!-- Recomeçar este curso (migration 123; conteúdo montado por shared/recomecar-curso.js). -->
         <article id="settings-restart-box" class="rc-caixa" hidden></article>
+        <!-- Privacidade e cookies (Fase 3 do GA4): abre a janela de Preferências (shared/consent.js, [data-consent-open]). -->
+        <article id="settings-cookies-box">
+          <header><h3 data-i18n="consent.settings.title">Privacidade e cookies</h3></header>
+          <p class="pref-row-sub" data-i18n="consent.settings.sub">Escolha se o site pode medir as visitas com o Google Analytics. Dá para mudar quando quiser.</p>
+          <footer><button type="button" class="outline" data-consent-open data-i18n="consent.footer.prefs">Preferências de cookies</button> <a href="../privacidade-cookies.html" data-i18n="consent.footer.policy">Política de cookies</a></footer>
+        </article>
         <article id="settings-delete-box" hidden>
           <header><h3 data-i18n="accountDelete.title">Excluir minha conta</h3></header>
           <p class="pref-row-sub" data-i18n="accountDelete.hint">Apaga a sua conta e tudo o que está ligado a ela: progresso, cartões, conquistas, amizades, fotos e arquivos. Não dá para desfazer.</p>
@@ -5231,6 +5243,16 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
           <span class="kbd-key">1</span><span class="kbd-key">2</span><span class="kbd-key">3</span><span class="kbd-key">4</span>
         </div>
         <div data-i18n="ui.kbd.choose" class="kbd-shortcuts-desc">Escolher uma alternativa, pela posição dela na tela</div>
+      </div>
+      <div class="kbd-shortcuts-row">
+        <div class="kbd-shortcuts-keys">
+          <span class="kbd-key">1</span><span class="kbd-key">2</span><span class="kbd-key">3</span><span class="kbd-key">4</span>
+        </div>
+        <div data-i18n="ui.kbd.grade" class="kbd-shortcuts-desc">Na Revisão, dar a nota ao cartão pela posição do botão (com quatro botões: Errei, Difícil, Bom, Fácil)</div>
+      </div>
+      <div class="kbd-shortcuts-row">
+        <div class="kbd-shortcuts-keys"><span class="kbd-key">Espaço</span><span class="kbd-key">Enter</span></div>
+        <div data-i18n="ui.kbd.reveal" class="kbd-shortcuts-desc">Na Revisão, mostrar a resposta de um cartão</div>
       </div>
       <div class="kbd-shortcuts-row">
         <div class="kbd-shortcuts-keys"><span class="kbd-key">Enter</span></div>
@@ -5651,6 +5673,7 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
 <script src="../shared/painel/painel-ui.js"></script>
 <script src="../shared/teacher-invites.js"></script>
 <script src="../shared/username-choice.js"></script>
+<script src="../shared/age-ack.js"></script>
 <script src="../shared/mural.js"></script>
 <script src="../shared/own-flashcards.js"></script>
 <script src="../shared/deck-data.js"></script>
@@ -5673,6 +5696,7 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
 <script src="../shared/topbar-stats.js"></script>
 <script src="../shared/janelas-topo.js"></script>
 <script src="../shared/xp-semana.js"></script>
+<script src="../shared/consent.js" data-page="app"></script>
 <script src="../shared/analytics.js"></script>
 <script src="../shared/tabs.js"></script>
 <script src="../shared/activity-focus.js"></script>
@@ -5688,6 +5712,7 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
 <script src="../shared/router.js"></script>
 <script src="../shared/anki-export.js"></script>
 <script src="../shared/pwa.js"></script>
+<script src="../shared/sem-internet.js"></script>
 <script src="../shared/toast.js"></script>
 <script src="../shared/modal-a11y.js"></script>
 <script src="../shared/supabase-client.js"></script>

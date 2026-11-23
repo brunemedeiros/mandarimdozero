@@ -37,8 +37,14 @@
   // Troca o progresso do cartão de `oldWord` para `newWord`.
   // stash: STATE.cardVariants (objeto {id: {palavra: progresso}}); é mutado.
   // Devolve true se houve troca de palavra.
+  // `card.variantWord` (conserto de 2026-11-11): palavra DONA do progresso que está no cartão, gravada no save junto com
+  // o progresso (STUDY_PROGRESS_FIELDS). Sem ela, ao carregar um save feito com outra palavra na tela (salvou no site em
+  // inglês, abriu em português), o progresso de uma palavra ficava na outra e a troca seguinte gravava esse progresso
+  // errado por cima do verdadeiro na gaveta. Só vale se este cartão já tem gaveta (já trocou de palavra antes): um
+  // progresso que veio de outro id (fusão do currículo) nunca é guardado com o nome de uma palavra de outro cartão.
   function swapCardWordProgress(card, oldWord, newWord, stash){
     if (!card || !stash) return false;
+    if (typeof card.variantWord === 'string' && card.variantWord !== '' && stash[card.id]) oldWord = card.variantWord;
     if (typeof oldWord !== 'string' || typeof newWord !== 'string') return false;
     if (oldWord === '' || newWord === '' || oldWord === newWord) return false;
     var slot = stash[card.id] || (stash[card.id] = {});
@@ -46,6 +52,7 @@
     CARD_PROGRESS_FIELDS.forEach(function(k){ delete card[k]; });
     Object.assign(card, FRESH_CARD_PROGRESS, slot[newWord] || {});
     delete slot[newWord]; // o progresso ativo vive no próprio cartão
+    card.variantWord = newWord;
     return true;
   }
 
