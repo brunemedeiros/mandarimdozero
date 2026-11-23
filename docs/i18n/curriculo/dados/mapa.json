@@ -592,12 +592,20 @@
                       "pt-BR": "E você?"
                     },
                     {
+                      "fr": "Et vous ?",
+                      "pt-BR": "E o senhor (a senhora)?"
+                    },
+                    {
                       "fr": "Moi, c'est Ana.",
                       "pt-BR": "Eu sou a Ana."
                     },
                     {
                       "fr": "Moi, je m'appelle Léo.",
                       "pt-BR": "Eu me chamo Léo."
+                    },
+                    {
+                      "fr": "Et moi ?",
+                      "pt-BR": "E eu?"
                     }
                   ]
                 },
@@ -896,20 +904,20 @@
                   },
                   "exemplos": [
                     {
-                      "fr": "anglaise",
-                      "pt-BR": "inglesa"
+                      "fr": "anglais / anglaise",
+                      "pt-BR": "inglês / inglesa"
                     },
                     {
-                      "fr": "espagnole",
-                      "pt-BR": "espanhola"
+                      "fr": "espagnol / espagnole",
+                      "pt-BR": "espanhol / espanhola"
                     },
                     {
-                      "fr": "italienne",
-                      "pt-BR": "italiana"
+                      "fr": "italien / italienne",
+                      "pt-BR": "italiano / italiana"
                     },
                     {
-                      "fr": "allemande",
-                      "pt-BR": "alemã"
+                      "fr": "allemand / allemande",
+                      "pt-BR": "alemão / alemã"
                     }
                   ],
                   "decisao": 359

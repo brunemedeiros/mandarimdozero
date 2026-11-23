@@ -2423,23 +2423,23 @@
    },
    "exemplos": [
     {
-     "fr": "anglaise",
-     "pt-BR": "inglesa",
+     "fr": "anglais / anglaise",
+     "pt-BR": "inglês / inglesa",
      "en": null
     },
     {
-     "fr": "espagnole",
-     "pt-BR": "espanhola",
+     "fr": "espagnol / espagnole",
+     "pt-BR": "espanhol / espanhola",
      "en": null
     },
     {
-     "fr": "italienne",
-     "pt-BR": "italiana",
+     "fr": "italien / italienne",
+     "pt-BR": "italiano / italiana",
      "en": null
     },
     {
-     "fr": "allemande",
-     "pt-BR": "alemã",
+     "fr": "allemand / allemande",
+     "pt-BR": "alemão / alemã",
      "en": null
     }
    ],
@@ -2473,7 +2473,7 @@
    },
    "destino": "nota",
    "texto": {
-    "pt-BR": "Para dizer de onde você é, use a nacionalidade: <strong>Je suis brésilienne</strong>. Para dizer a cidade, <strong>Je suis de</strong> e a cidade: <strong>Je suis de Rio</strong>. E para perguntar: <strong>Tu es d'où ?</strong> ou, no formal, <strong>Vous êtes d'où ?</strong>",
+    "pt-BR": "Para dizer a nacionalidade: <strong>Je suis brésilienne</strong>. Para dizer a cidade de onde você é, <strong>Je suis de</strong> e a cidade: <strong>Je suis de Rio</strong>. E para perguntar: <strong>Tu es d'où ?</strong> ou, no formal, <strong>Vous êtes d'où ?</strong>",
     "en": null
    },
    "exemplos": [

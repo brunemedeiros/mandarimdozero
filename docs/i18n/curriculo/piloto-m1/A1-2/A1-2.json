@@ -2246,6 +2246,11 @@
      "en": null
     },
     {
+     "fr": "Et vous ?",
+     "pt-BR": "E o senhor (a senhora)?",
+     "en": null
+    },
+    {
      "fr": "Moi, c'est Ana.",
      "pt-BR": "Eu sou a Ana.",
      "en": null
@@ -2254,13 +2259,20 @@
      "fr": "Moi, je m'appelle Léo.",
      "pt-BR": "Eu me chamo Léo.",
      "en": null
+    },
+    {
+     "fr": "Et moi ?",
+     "pt-BR": "E eu?",
+     "en": null
     }
    ],
    "exemplos_fonte": "dados/mapa.json (um lugar só; o validar.js confere que são iguais)",
    "audios_previstos": [
     "Et toi ?",
+    "Et vous ?",
     "Moi, c'est Ana.",
-    "Moi, je m'appelle Léo."
+    "Moi, je m'appelle Léo.",
+    "Et moi ?"
    ],
    "vf": [
     {

@@ -73,7 +73,7 @@
    },
    "destino": "nota",
    "texto": {
-    "pt-BR": "No plural:<ul><li><strong>nous sommes</strong>, <strong>vous êtes</strong>, <strong>ils sont</strong>, <strong>elles sont</strong></li><li><strong>ils</strong> é \"eles\" (homens ou grupo misto); <strong>elles</strong> é \"elas\", só mulheres.</li></ul>",
+    "pt-BR": "No plural:<ul><li><strong>nous sommes</strong>, <strong>vous êtes</strong>, <strong>ils sont</strong>, <strong>elles sont</strong></li><li><strong>ils</strong> é \"eles\" (homens ou grupo misto); <strong>elles</strong> é \"elas\", só mulheres.</li><li>Em <strong>vous‿êtes</strong>, o <strong>s</strong> de <strong>vous</strong> soa como <b>z</b>.</li></ul>",
     "en": null
    },
    "exemplos": [
@@ -155,7 +155,7 @@
    },
    "destino": "nota",
    "texto": {
-    "pt-BR": "No plural:<ul><li><strong>nous avons</strong>, <strong>vous avez</strong>, <strong>ils ont</strong>, <strong>elles ont</strong></li><li>Cuidado: em <strong>ils ont</strong> (eles têm) o som é de <b>z</b>; em <strong>ils sont</strong> (eles são), de <b>s</b>.</li></ul>",
+    "pt-BR": "No plural:<ul><li><strong>nous avons</strong>, <strong>vous avez</strong>, <strong>ils ont</strong>, <strong>elles ont</strong></li><li>Cuidado: em <strong>ils ont</strong> (eles têm) o som é de <b>z</b>; em <strong>ils sont</strong> (eles são), de <b>s</b>.</li><li>O mesmo <b>z</b> em <strong>nous‿avons</strong> e <strong>vous‿avez</strong>.</li></ul>",
     "en": null
    },
    "exemplos": [
@@ -319,9 +319,9 @@
      "id": "g6-ex-etes",
      "tipo": "complete",
      "antes": "Vous ",
-     "depois": " de Paris ?",
+     "depois": " d'où ?",
      "traducao": {
-      "pt-BR": "Vocês são de Paris?",
+      "pt-BR": "Vocês são de onde?",
       "en": null
      },
      "opcoes": [
@@ -329,7 +329,7 @@
       "etes"
      ],
      "resposta": "êtes",
-     "frase_completa": "Vous êtes de Paris ?",
+     "frase_completa": "Vous êtes d'où ?",
      "distrator": "grafia",
      "explicacao": {
       "pt-BR": "<b>Êtes</b> leva acento circunflexo no <b>ê</b>.",

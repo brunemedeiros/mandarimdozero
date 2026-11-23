@@ -416,7 +416,7 @@
    },
    "destino": "nota",
    "texto": {
-    "pt-BR": "O <strong>x</strong> de <strong>deux</strong> e o <strong>s</strong> de <strong>trois</strong> não soam sozinhos.<ul><li>Antes de vogal, eles acordam e soam como <b>z</b>: <strong>deux‿ans</strong>, <strong>trois‿ans</strong>.</li><li>O mesmo acontece com o <strong>t</strong> de <strong>vingt</strong>: <strong>vingt‿ans</strong>.</li></ul>",
+    "pt-BR": "O <strong>x</strong> de <strong>deux</strong> e o <strong>s</strong> de <strong>trois</strong> não soam sozinhos.<ul><li>Antes de vogal, eles acordam e soam como <b>z</b>: <strong>deux‿ans</strong>, <strong>trois‿ans</strong>.</li><li>O <strong>t</strong> de <strong>vingt</strong> também acorda, mas soa como <b>t</b>: <strong>vingt‿ans</strong>.</li></ul>",
     "en": null
    },
    "exemplos": [
@@ -516,7 +516,7 @@
    },
    "destino": "nota",
    "texto": {
-    "pt-BR": "De 21 a 29, comece com <strong>vingt</strong>:<ul><li>21 leva <strong>et</strong>: <strong>vingt et un</strong>.</li><li>De 22 a 29, com hífen: <strong>vingt-deux</strong>, <strong>vingt-trois</strong>.</li><li>Nesses números, o <strong>t</strong> de <strong>vingt</strong> soa.</li></ul>",
+    "pt-BR": "De 21 a 29, comece com <strong>vingt</strong>:<ul><li>21 leva <strong>et</strong>: <strong>vingt et un</strong>.</li><li>De 22 a 29, com hífen: <strong>vingt-deux</strong>, <strong>vingt-quatre</strong>.</li><li>Nesses números, o <strong>t</strong> de <strong>vingt</strong> soa.</li></ul>",
     "en": null
    },
    "exemplos": [
@@ -1470,7 +1470,7 @@
      ],
      "frase_completa": "Je parle trois langues.",
      "explicacao": {
-      "pt-BR": "<b>Trois langues</b>: o <b>s</b> de <b>trois</b> soa como <b>z</b> antes de vogal.",
+      "pt-BR": "<b>Trois langues</b>: antes de consoante, o <b>s</b> de <b>trois</b> continua mudo.",
       "en": null
      }
     },
