@@ -84,3 +84,6 @@ Tudo o que for decidido sobre XP vale para todos os sites (fr, zh, pt e futuros)
 
 ## Ouça e traduza e Complete a frase passam a dar XP (2026-11-11)
 - Decisão da autora ("Ouça e traduza, bem como outros Desafios, também devem dar XP"; vale para todos os sites): Ouça e traduza igual à Acentuação (certo 2, quase 1), Complete a frase 1 por acerto (escolha da forma); só na primeira conclusão, pago no Concluir (`challengeXP`). Ditados ficam de fora até a autora decidir (pergunta aberta).
+
+## Ditados passam a dar XP (2026-11-23)
+- Decisão da autora ("Ditados também dão XP", em PR separado; vale para todos os sites). Valores propostos pelo Claude (a autora não definiu): primeira tentativa de cada ditado, nota >= 90 = 4 (`LESSON_CLOSE_XP`), 60 a 89 = 2 (`EXERCISE_XP_PRODUCE`), < 60 = 0; refazer = 0. `dictationXP` em `shared/ditados.js`; o resultado mostra "XP ganho". Teste: `tests/ditado/` 64/64.

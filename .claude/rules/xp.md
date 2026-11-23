@@ -24,10 +24,12 @@ site novo parte do molde da família (ver `docs/i18n/e4-plano-de-extracao.md`) e
   resposta certa `EXERCISE_XP_RECOGNIZE` 1, montar a frase certa `EXERCISE_XP_PRODUCE` 2, "Sua vez" digitar certo `EXERCISE_XP_PRODUCE` 2, "quase" `EXERCISE_XP_ALMOST` 1, errou ou
   "Não sei" 0 (teto 5). Só na PRIMEIRA conclusão do desafio, pago ao tocar em Concluir (`exprXPBreakdown`, `shared/desafios-telas.js`); refazer desafio concluído ou "Revisar erros" = 0, para
   não virar fonte infinita. Errou a escolha: não há Concluir (Tentar de novo), então nada é pago. Teste: `tests/desafios-expressoes-passos/`.
-- **Desafios, Acentuação, Ouça e traduza e Complete a frase** (decisão da autora, 2026-11-10: Acentuação, depois "Ouça e traduza, bem como outros Desafios também devem dar XP"; Ditados NÃO entram até ela decidir):
+- **Desafios, Acentuação, Ouça e traduza e Complete a frase** (decisão da autora, 2026-11-10: Acentuação, depois "Ouça e traduza, bem como outros Desafios também devem dar XP"; Ditados têm regra própria, abaixo):
   digitar certo (Acentuação, Ouça e traduza) `EXERCISE_XP_PRODUCE` 2, "quase" `EXERCISE_XP_ALMOST` 1, escolher a forma em cada lacuna (Complete a frase) `EXERCISE_XP_RECOGNIZE` 1,
   errou ou "Não sei" 0 (sem Concluir). Só na PRIMEIRA conclusão, pago ao tocar em Concluir (`challengeXP`, `shared/desafios-telas.js`; a tela de conclusão mostra o cartão "XP ganho");
   refazer concluído ou "Revisar erros" = 0. Teste: `tests/desafios-conclusao/`.
+- **Ditados** (decisão da autora, 2026-11-23: "Ditados também dão XP"; os valores abaixo são a proposta do Claude, a autora pode trocar): só na PRIMEIRA tentativa de cada ditado (refazer = 0), nota 90 ou mais `LESSON_CLOSE_XP` 4
+  (um ditado inteiro vale como fechar uma lição), de 60 a 89 `EXERCISE_XP_PRODUCE` 2, abaixo de 60 = 0 (`dictationXP`, `shared/ditados.js`); o resultado mostra "XP ganho". Teste: `tests/ditado/`.
 - **Topo** (decisão da dona, 2026-10-29): ⭐ N XP = XP DA SEMANA, mesma semana (segunda a domingo) e mesma soma do Ranking "Geral" (`weekly_xp`
   de todos os idiomas); janela com 4 semanas, frase "+N XP a mais" só quando a semana é maior e "Ver ranking" (`shared/xp-semana.js`, desenho e controle comuns
   com a janela da sequência em `shared/janelas-topo.js`; recorde de dias seguidos = `bestStreak` da conta). Teste: `tests/janelas-topo/`. Aviso "+N XP" não aparece em tela de conclusão (`COMPLETION_SCREEN_SELECTOR`,
