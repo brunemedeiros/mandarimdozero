@@ -61,7 +61,7 @@ check('resumo: taxa nula mostra "—"', run('tanResumoHTML(s, null)', { s: Objec
 const at = run('tanAtividadeHTML(s)', { s: stats });
 check('atividade: 4 seções; sem sessões por dia mostra vazio; frequência com dados', (at.match(/<article>/g) || []).length === 4 && at.includes('2026-10-05') && at.includes('1 dia'));
 const nv = run('tanNavegacaoHTML(s)', { s: stats });
-check('navegação: área com rótulo, nome desconhecido escapado, funcionalidade com rótulo', nv.includes('Trilha') && !nv.includes('<x>') && nv.includes('&lt;x&gt;') && nv.includes('Sessão de flashcards'));
+check('navegação: área com rótulo, nome desconhecido escapado, funcionalidade com rótulo', nv.includes('Trilha') && !nv.includes('<x>') && nv.includes('&lt;x&gt;') && nv.includes('Sessão de cartões'));
 const ex = run('tanExerciciosHTML(s)', { s: stats });
 check('exercícios: tabela com 3 linhas, "—" onde não há início, nota de 85%', (ex.match(/<tr><td>/g) || []).length === 3 && ex.includes('<td>—</td>') && ex.includes('85%'));
 check('funil: só tipos com início (2); o ditado com média 85% mostra "nota boa" e a revisão (sem nota) mostra "nota média"', (ex.match(/p-funil-linha/g) || []).length === 2 && ex.includes(run('t("admin.analytics.funnel.goodScore")')) && ex.includes(run('t("admin.analytics.funnel.avgScore")')));

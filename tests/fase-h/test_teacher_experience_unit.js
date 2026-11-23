@@ -92,7 +92,7 @@ const cardsOf = (ctx, rows) => rows.flatMap(r => ctx.buildEngineCardsFromRow(r, 
     ctx.STATE.cards = all;
     ctx.eligibleReviewPool = () => all;
     const html = ctx.teacherDecksReadOnlyHTML(db.decks);
-    L('H5 aluno vê a árvore com contagens New/Aprendendo/Revisar', /novos/.test(html) && /aprendendo/.test(html) && /para revisar/.test(html) && html.includes('data-study-deck'));
+    L('H5 aluno vê a árvore com contagens New/Aprendendo/Revisar', /novos/i.test(html) && /aprendendo/i.test(html) && /em revisão/i.test(html) && /para hoje/i.test(html) && html.includes('data-study-deck')); // Etapas 4 e 7: "Novos:", "Em revisão", "Para hoje"
     L('H5 aluno: HTML sem controles de escrita', !/data-dest|data-move|data-tree-delete|<select|<input|Apagar|Excluir|Renomear|Mover/.test(html));
     const cRoot = ctx.getDeckCounts(db.decks, root1.id, all);
     L('H10 contagem do teacher_root = CardInstances da subárvore (não Notes)', cRoot.new === all.length && all.length > db.teacher_flashcards.filter(r => r.student_id === S1).length, cRoot);

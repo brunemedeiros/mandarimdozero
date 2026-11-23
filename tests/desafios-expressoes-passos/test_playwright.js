@@ -230,9 +230,9 @@ const state = page => page.evaluate(() => ({ xp: STATE.xp, done: !!STATE.complet
   check('sem registro no dado: não aparece o "Quando usar"', await page.evaluate(() => !document.querySelector('.expr-when')));
   await page.click('#expr-continue-btn'); await page.waitForSelector('#expr-turn-input');
   check('exemplo de menos de 3 palavras: pula o "Monte a frase" e vai direto à "Sua vez"', await page.evaluate(() => !document.querySelector('.reorder-blocks') && !!document.getElementById('expr-turn-input')));
-  // os outros tipos de desafio seguem com o link de voltar (sem barra da lição)
+  // etapa D (2026-11-04): os outros tipos de desafio também têm a barra da lição (sem o link de voltar)
   await page.evaluate(() => openChallengePlayer('ch-a1')); await page.waitForSelector('#accent-verify-btn');
-  check('Acentuação segue com o link de voltar e sem a barra da lição', await page.evaluate(() => { const vis = el => !!el && el.offsetParent !== null; return vis(document.getElementById('challenge-back-to-list')) && !document.querySelector('#challenge-player-wrap .activity-lesson-bar'); }));
+  check('Acentuação também com a barra da lição e sem o link de voltar', await page.evaluate(() => { const vis = el => !!el && el.offsetParent !== null; return !vis(document.getElementById('challenge-back-to-list')) && !!document.querySelector('#challenge-player-wrap .activity-lesson-bar'); }));
   await page.evaluate(() => openChallengePlayer('ch-e1')); await page.waitForSelector('#expr-see-options-btn');
   check('voltando às Expressões a barra da lição volta e o link some', await page.evaluate(() => { const vis = el => !!el && el.offsetParent !== null; return !vis(document.getElementById('challenge-back-to-list')) && !!document.querySelector('#challenge-player-wrap .activity-lesson-bar'); }));
   check('casos de borda: zero pageerror', errors.length === 0, errors);

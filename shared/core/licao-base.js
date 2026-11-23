@@ -141,11 +141,20 @@ function finishCurrentLesson(u){
   renderUnitCompleteScreen(u, unitXpEarned);
 }
 
+// Etapa D, lote 3 (2026-11-04): o progresso da sessão vai para a barra do topo (shared/activity-focus.js); a linha "N / total" do
+// cartão continua (é onde fica o ⋯ dos pedidos do Banco), sem a barrinha própria (CSS em fr/zh index.html).
+function reviewTopBarProgress(done, total){
+  if (typeof activityBarProgress !== 'function') return;
+  activityBarProgress('review-session-wrap', total ? Math.round(100 * Math.min(done, total) / total) : 0);
+}
 function renderReviewViewInner(){
   syncReviewBackLink();
+  reviewTopBarProgress(STATE.reviewIndex, STATE.reviewQueue.length);
   stopExerciseAudio();
   const el = document.getElementById('review-content');
   syncReviewPrevRow(false);
+  // Telas sem cartão (vazia, fim da sessão, "ver cartão anterior") não têm atalhos; cada renderer de cartão religa os seus.
+  REVIEW_KEYS.reveal = null; REVIEW_KEYS.mountEl = null; clearKeyboardOptions();
 
   if (STATE.reviewPeek != null && STATE.reviewSessionClassReview && STATE.reviewHistory && STATE.reviewHistory[STATE.reviewPeek]){
     renderReviewPeek(el);
@@ -304,6 +313,7 @@ function renderReviewViewInner(){
 
 function renderSpeedReview(){
   const el = document.getElementById('speed-review-content');
+  clearKeyboardOptions(); // telas sem pergunta (vazia, fim, game over) não têm atalhos; a pergunta religa os seus abaixo
 
   // Projeto "Reorganização da experiência de revisão e prática": Speed
   // Review agora usa a fila DEVIDA (ver buildSpeedQueue), então fila vazia
@@ -378,6 +388,7 @@ function renderSpeedReview(){
     return;
   }
 
+  reviewTopBarProgress(SPEED_STATE.index, SPEED_STATE.queue.length);
   if (SPEED_STATE.index >= SPEED_STATE.queue.length){
     stopSpeedTimer();
     if (!SPEED_STATE.dailyCounted){
@@ -450,6 +461,10 @@ function renderSpeedReview(){
     });
   });
 
+  // Teclado: 1 a 4 escolhem a opção pela posição (número à esquerda, só com mouse e teclado); tecla segurada é ignorada.
+  wireKeyboardOptions(el.querySelectorAll('.speed-option'));
+  if (KEYBOARD_OPTION_MAP) KEYBOARD_OPTION_MAP.noRepeat = true;
+
   runSpeedTimer(el, () => answerSpeedQuestion(false, el));
 }
 
@@ -515,8 +530,21 @@ function showAnswerPanel(contentEl, ex, opts = {}){
 }
 
 // Grupos da trilha na ordem de estudo (um por nível, vazios descartados).
+// Unidade sem tradução para o idioma do site (decisão da dona, 2026-11-11): não aparece na trilha, no Mapa, na busca nem no
+// "Continuar", e não abre. As seguintes seguem normais (a liberação pula a escondida, porque ela sai de trailGroups).
+// O progresso dela NÃO é apagado: a unidade continua em UNITS e no save; só some da tela enquanto faltar a tradução.
+// Aceita a unidade ou o id. Sem a camada de conteúdo (testes antigos), tudo fica disponível.
+function isUnitAvailable(u){
+  const id = (u && typeof u === 'object') ? u.id : u;
+  if (typeof CONTENT_I18N === 'undefined' || !CONTENT_I18N || typeof CONTENT_I18N.isUnitTranslated !== 'function') return true;
+  return CONTENT_I18N.isUnitTranslated(id);
+}
+function availableUnits(list){
+  return (list || []).filter(u => u && isUnitAvailable(u));
+}
+
 function trailGroups(){
-  return LEVELS.map(lvl => unitsOfLevel(lvl.id)).filter(g => g.length);
+  return LEVELS.map(lvl => availableUnits(unitsOfLevel(lvl.id))).filter(g => g.length);
 }
 
 // Resumo de progresso pro Perfil (shared/profile.js) -- NÃO usa

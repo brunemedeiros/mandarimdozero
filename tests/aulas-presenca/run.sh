@@ -45,3 +45,35 @@ psql -h /tmp/pg -p 54329 -U pguser aulas94 -q -At -f "$HERE/test_122.sql" 2>&1 |
 $P aulas94 -f "$MIG/124_classroom_ranking.sql" >/dev/null
 $P aulas94 -f "$MIG/124_classroom_ranking.sql" >/dev/null
 psql -h /tmp/pg -p 54329 -U pguser aulas94 -q -At -f "$HERE/test_124.sql" 2>&1 | grep -v '^\s*$'
+# 128: Conectar Notion.
+$P aulas94 -f "$MIG/128_notion_sync.sql" >/dev/null
+$P aulas94 -f "$MIG/128_notion_sync.sql" >/dev/null
+psql -h /tmp/pg -p 54329 -U pguser aulas94 -q -At -f "$HERE/test_128.sql" 2>&1 | grep -v '^\s*$'
+# 130: trocar coluna/banco/data relê todas as linhas do Notion.
+$P aulas94 -f "$MIG/130_notion_remap.sql" >/dev/null
+$P aulas94 -f "$MIG/130_notion_remap.sql" >/dev/null
+psql -h /tmp/pg -p 54329 -U pguser aulas94 -q -At -f "$HERE/test_130.sql" 2>&1 | grep -v '^\s*$'
+psql -h /tmp/pg -p 54329 -U pguser aulas94 -q -At -f "$HERE/test_128.sql" 2>&1 | grep -E 'verificações|FALHOU'
+# 131: descartar vale para sempre.
+$P aulas94 -f "$MIG/131_notion_discard_sticks.sql" >/dev/null
+$P aulas94 -f "$MIG/131_notion_discard_sticks.sql" >/dev/null
+psql -h /tmp/pg -p 54329 -U pguser aulas94 -q -At -f "$HERE/test_131.sql" 2>&1 | grep -v '^\s*$'
+# 132: ex-aluna no histórico, linha ligada à mão, Banco arquiva ex-aluna.
+$P aulas94 -f "$MIG/132_notion_former_and_manual.sql" >/dev/null
+$P aulas94 -f "$MIG/132_notion_former_and_manual.sql" >/dev/null
+psql -h /tmp/pg -p 54329 -U pguser aulas94 -q -At -f "$HERE/test_132.sql" 2>&1 | grep -v '^\s*$'
+# 133: ex-aluna sem linha de vínculo (Notion, Google Agenda, Banco).
+$P aulas94 -f "$MIG/133_former_students_history.sql" >/dev/null
+$P aulas94 -f "$MIG/133_former_students_history.sql" >/dev/null
+psql -h /tmp/pg -p 54329 -U pguser aulas94 -q -At -f "$HERE/test_133.sql" 2>&1 | grep -v '^\s*$'
+for t in 117 128 130 131 132; do psql -h /tmp/pg -p 54329 -U pguser aulas94 -q -At -f "$HERE/test_$t.sql" 2>&1 | grep -E 'verificações|FALHOU|ERRO|ERROR'; done
+# 134: "Lembrar" pelo e-mail vale também pelo nome do evento.
+$P aulas94 -f "$MIG/134_gcal_remember_email_and_title.sql" >/dev/null
+$P aulas94 -f "$MIG/134_gcal_remember_email_and_title.sql" >/dev/null
+psql -h /tmp/pg -p 54329 -U pguser aulas94 -q -At -f "$HERE/test_134.sql" 2>&1 | grep -v '^\s*$'
+for t in 117 133; do psql -h /tmp/pg -p 54329 -U pguser aulas94 -q -At -f "$HERE/test_$t.sql" 2>&1 | grep -E 'verificações|FALHOU|ERRO|ERROR'; done
+# 138: aulas de ex-aluno sem conta ligadas ao aluno do Banco (parte do SQL Editor + parte do MCP).
+$P aulas94 -f "$MIG/138_bank_former_lessons.sql" >/dev/null
+$P aulas94 -f "$MIG/138_bank_former_lessons.sql" >/dev/null
+psql -h /tmp/pg -p 54329 -U pguser aulas94 -q -At -f "$HERE/test_138.sql" 2>&1 | grep -v '^\s*$' | grep -E 'ok   |FALHOU|verificações|ERROR'
+for t in 117 128 132 133 134; do psql -h /tmp/pg -p 54329 -U pguser aulas94 -q -At -f "$HERE/test_$t.sql" 2>&1 | grep -E 'verificações|FALHOU|ERRO|ERROR'; done

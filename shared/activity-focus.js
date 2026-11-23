@@ -10,12 +10,15 @@
   // back = link de saída que já existe no topo da sessão; ganha ao lado a ⚑
   // (a ⚑ da topbar some no modo foco, ver shared/reports.js).
   const AREAS = [
-    { tab: 'review', wrap: 'review-session-wrap', back: 'review-back-to-modes' },
-    { tab: 'conjugaison', wrap: 'conj-practice-wrap', back: 'conj-back-to-select', lessonBar: true },
+    // Revisão (etapa D, lote 3, 2026-11-04): barra da lição; o ✕ aciona o link de voltar (aos modos, ao Deck ou ao Aluno).
+    { tab: 'review', wrap: 'review-session-wrap', back: 'review-back-to-modes', lessonBar: true, exitKey: 'activity.exit' },
+    { tab: 'conjugaison', wrap: 'conj-practice-wrap', back: 'conj-back-to-select', lessonBar: true, exitKey: 'activity.exit' },
     // lessonBar: topo igual ao da trilha (progresso + ⚑ + ⌨️ + X) em vez do link de voltar (padrão das telas de exercício, 2026-10-23).
     { tab: 'conjugaison', wrap: 'conj-game-wrap', back: 'conj-game-back', lessonBar: true },
     // lessonBarFlag: a barra da lição só aparece quando o player marca data-lesson-bar="1" (hoje, as Expressões; os outros tipos seguem com o link).
-    { tab: 'challenges', wrap: 'challenge-player-wrap', back: 'challenge-back-to-list', lessonBarFlag: 'lessonBar' }
+    { tab: 'challenges', wrap: 'challenge-player-wrap', back: 'challenge-back-to-list', lessonBarFlag: 'lessonBar', exitKey: 'activity.exit' },
+    // Ditados (etapa D, lote 2, 2026-11-04): modo foco e barra da lição; o ✕ aciona "← Voltar aos ditados".
+    { tab: 'dictation', wrap: 'dictation-player-wrap', back: 'dictation-back-to-list', lessonBar: true, exitKey: 'activity.exit' }
   ];
   const tr = (k, fb) => (typeof t === 'function' ? t(k) : fb);
 
@@ -53,8 +56,9 @@
       b.type = 'button';
       b.className = 'lesson-close-btn ' + d.cls;
       if (d.report) b.setAttribute('data-report-flag', '');
-      b.setAttribute('data-activity-label', d.key);
-      b.setAttribute('data-activity-fb', d.fb);
+      // ✕: "Sair" nas atividades; "Sair do jogo" só nos Jogos (etapa D, 2026-11-04: antes todas diziam "Sair do jogo" ao leitor de tela).
+      b.setAttribute('data-activity-label', d.cls === 'activity-exit-btn' && area.exitKey ? area.exitKey : d.key);
+      b.setAttribute('data-activity-fb', d.cls === 'activity-exit-btn' && area.exitKey ? 'Sair' : d.fb);
       b.textContent = d.icon;
       bar.appendChild(b);
     });

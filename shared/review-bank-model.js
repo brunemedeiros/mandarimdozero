@@ -92,12 +92,20 @@ function rbMakeCloze(sentence, gapWord){
 }
 
 // Tipo de cartão do item: erro = digitar a forma certa; frase com lacuna (estrutura/verbo) = completar; resto = ver resposta.
-function rbCardMode(item){
+// Verbo com várias formas ("je vais, tu vas, il va, ..."): digitar tudo exato e na ordem é injusto (caso da Rachel, 2026-11-06); vira cartão Normal.
+// Só para cartão NOVO: `existingMode` = tipo do cartão já entregue, que continua como está (mudar o tipo zera o progresso do aluno).
+function rbIsMultiForm(i){
+  return i.item_type === 'verbo' && String(i.answer || '').split(',').length >= 3;
+}
+function rbCardMode(item, existingMode){
   const i = rbNormalizeItem(item);
   if (i.item_type === 'erro') return 'type_answer';
   if ((i.item_type === 'estrutura' || i.item_type === 'verbo') && i.gap_word){
     const first = i.answer.split(' / ')[0];
-    if (first.split(/\s+/).length >= 3 && rbMakeCloze(first, i.gap_word)) return 'cloze';
+    if (first.split(/\s+/).length >= 3 && rbMakeCloze(first, i.gap_word)){
+      if (rbIsMultiForm(i) && existingMode !== 'cloze') return 'normal';
+      return 'cloze';
+    }
   }
   return 'normal';
 }
@@ -109,13 +117,13 @@ function rbItemTags(item){
 }
 
 // Item + aluno do Banco -> colunas nativas para a RPC approve_review_bank_item. Nunca grava: só monta e valida.
-function rbBuildCard(item, student){
+function rbBuildCard(item, student, opts){
   const i = rbNormalizeItem(item);
   const issues = rbItemIssues(i);
   if (issues.length) return { ok: false, error: 'Faltam campos: ' + issues.join(', ') };
   if (student.language_app_key === 'mandarim') return { ok: false, error: 'Cartão de mandarim precisa de pinyin: crie pelo formulário de cartões.' };
   const target = RB_LANG_SHORT[student.language_app_key], ref = student.reference_language || 'pt';
-  const mode = rbCardMode(i);
+  const mode = rbCardMode(i, opts && opts.existingMode);
   const st = createNativeNoteEditorState({ cardGenerationMode: mode, languageAppKey: student.language_app_key, origin: 'teacher', tags: rbItemTags(i) });
   st.privateNote = i.explanation || null;
   const add = (value, lang, role) => addFieldToEditorState(st, { content: { value }, lang, role: role || null });
@@ -286,4 +294,53 @@ function rbMarkdownToHTML(md){
     out.push('<p>' + buf.map(rbInlineMd).join('<br>') + '</p>');
   }
   return out.join('\n');
+}
+
+// ---------- gerenciar alunos e itens (migration 137; prévia aprovada em 2026-11-15) ----------
+// Id do Google Doc a partir do link colado (".../document/d/<id>/edit") ou do próprio id. null se não parecer um id.
+function rbNotebookIdFromInput(text){
+  const s = String(text == null ? '' : text).trim();
+  if (!s) return null;
+  const m = s.match(/\/d\/([A-Za-z0-9_-]{20,})/);
+  if (m) return m[1];
+  return /^[A-Za-z0-9_-]{20,}$/.test(s) ? s : null;
+}
+function rbNotebookUrl(id){ return id ? 'https://docs.google.com/document/d/' + encodeURIComponent(id) + '/edit' : ''; }
+const rbNormName = n => String(n == null ? '' : n).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9 ]+/g, ' ').replace(/\s+/g, ' ').trim();
+// Pares de fichas do mesmo idioma que parecem a mesma pessoa: mesmo caderno, ou um nome começando pelo outro (palavras inteiras, ex. "Luana" e "Luana Baionne").
+// `dismissed` = lista de "idA|idB" que a professora marcou "Não é duplicado". Quem fica: a que tem conta/turma, depois a ativa, depois a de nome mais completo.
+function rbDuplicatePairs(students, dismissed){
+  const list = (students || []).slice(), skip = new Set(dismissed || []), out = [];
+  for (let a = 0; a < list.length; a++){
+    for (let b = a + 1; b < list.length; b++){
+      const x = list[a], y = list[b];
+      if (x.language_app_key !== y.language_app_key) continue;
+      if (skip.has(x.id + '|' + y.id) || skip.has(y.id + '|' + x.id)) continue;
+      const nx = rbNormName(x.name), ny = rbNormName(y.name);
+      const sameNotebook = !!(x.notebook_id && x.notebook_id === y.notebook_id);
+      const prefix = !!(nx && ny && (nx === ny || (nx + ' ').startsWith(ny + ' ') || (ny + ' ').startsWith(nx + ' ')));
+      if (!sameNotebook && !prefix) continue;
+      const score = s => (rbHasTarget(s) ? 2 : 0) + (s.status === 'arquivado' ? 0 : 1);
+      const sx = score(x), sy = score(y);
+      const yWins = sy > sx || (sy === sx && ny.length > nx.length); // empate: fica a ficha de nome mais completo
+      out.push(yWins ? { keep: y, drop: x } : { keep: x, drop: y });
+    }
+  }
+  return out;
+}
+// Item que entra no "marcar todos" do lote: pendente, não sensível e sem pedido aberto da aluna.
+function rbBatchSelectable(item, openRequests){
+  return !!(item && item.status === 'pendente' && !item.sensitive && !(openRequests && openRequests.length));
+}
+// Outros alunos (mesmo idioma, ativos) para onde um item pode ser movido.
+function rbMoveTargets(students, item){
+  return (students || []).filter(s => s.id !== item.bank_student_id && s.language_app_key === item.language_app_key && s.status !== 'arquivado');
+}
+// Mensagem (chave i18n sem o prefixo "rb.") para os erros das RPCs de gerenciamento.
+function rbManageErrKey(message){
+  const m = String(message || '');
+  for (const k of ['has_card_other_recipient', 'duplicate_has_card', 'duplicate_in_target', 'language_mismatch', 'has_progress', 'has_card', 'same_student', 'not_authorized']){
+    if (m.indexOf(k) >= 0) return 'err.' + k;
+  }
+  return null;
 }

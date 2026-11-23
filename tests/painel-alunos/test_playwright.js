@@ -90,7 +90,7 @@ const check = (n, c, x) => { if (c) ok++; else { ruim++; console.log('  FALHOU:'
     L('Decks do aluno sem cartões: mensagem explicando', (await p.innerText('[data-bloco-decks]')).includes('O aluno ainda não tem cartões nos Decks.'));
     await p.click('[data-ir-secao="classlogs"]');
     await p.waitForFunction(() => document.getElementById('admin-classlogs-content')?.style.display !== 'none');
-    L('Registrar aula abre Mural > Aulas e materiais já no aluno (Aulas foi para dentro do Mural, 2026-10-29)', await p.evaluate(() => document.querySelector('[data-teacher-section="mural"]').classList.contains('is-active') && MURAL_STATE.teacher.tab === 'aulas' && MURAL_STATE.teacher.sel.startsWith('s:')));
+    L('Registrar aula abre a aba Aulas já no aluno, com só as aulas dele (Aulas virou aba do painel, 2026-11-10)', await p.evaluate(() => document.querySelector('[data-teacher-section="classlogs"]').classList.contains('is-active') && ADMIN_CLASS_LOGS_STATE.studentIds.size === 1 && ADMIN_CLASS_LOGS_STATE.listAll === false));
     await p.evaluate(() => switchTeacherPanelSection('students')); await p.waitForSelector('[data-tsu="geral"]');
     L('voltar à aba Alunos mostra o quadro geral (não fica preso na ficha)', !(await p.$('[data-tsu="ficha"]')));
 

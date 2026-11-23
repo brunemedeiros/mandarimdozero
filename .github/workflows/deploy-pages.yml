@@ -39,16 +39,23 @@ jobs:
       # e zh/service-worker.js) pelo SHA curto deste commit. Isso muda
       # CACHE_NAME em TODO deploy sem depender de ninguém lembrar de bumpar um
       # número à mão -- elimina o risco de "GitHub Pages atualizou, PWA
-      # continua preso na versão antiga" por esquecimento.
+      # continua preso na versão antiga" por esquecimento. O mesmo SHA vai para
+      # shared/pwa.js: a página compara a versão dela com a do SW novo e só
+      # mostra "Nova versão disponível" se forem diferentes (2026-11-11).
       - name: Injeta versão do build no Service Worker
         run: |
-          sed -i "s/__BUILD_ID__/${GITHUB_SHA::7}/" fr/service-worker.js zh/service-worker.js
+          sed -i "s/__BUILD_ID__/${GITHUB_SHA::7}/" fr/service-worker.js zh/service-worker.js shared/pwa.js
 
       - name: Empacota o site (sem build -- HTML/JS estático)
         uses: actions/upload-pages-artifact@v3
         with:
           path: '.'
 
+      # O passo "syncing_files" do GitHub às vezes passa de 10 min (padrão do deploy-pages) e o deploy era cancelado
+      # (PRs #452 e #453, 2026-11-09/10). Pedimos 30 min, mas o deploy-pages@v4 continua cancelando em 10 min (PR #459):
+      # o valor não funciona como esperado. Quando acontecer, rodar o deploy de novo uma vez (até hoje passou na 2ª).
       - name: Publica no GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+        with:
+          timeout: 1800000

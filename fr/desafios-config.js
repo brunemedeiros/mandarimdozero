@@ -7,6 +7,8 @@
 // português e o teclado dele; sem copiar o motor.
 registerChallenges({
   lang: 'fr',
+  // Rótulo (aria/title) do ícone de ouvir ao lado da frase; o site de outro idioma registra a sua chave.
+  audioListenKey: 'fr.audio.listen',
   // Acentuação: família latina com a configuração do francês (fr/lang-hooks.js, LANG_HOOKS.familiaLatina): acento
   // exigido, "oe" por "œ" = quase (decisão da dona, 2026-10-15).
   familia: () => latinaFr(),

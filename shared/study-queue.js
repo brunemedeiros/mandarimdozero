@@ -70,7 +70,11 @@ function getStudyQueue(pool, options){
     // venceram (reps>0); cartões novos entram exclusivamente pela via
     // limitada por newCardsLimit.
     const dueReviewed = pool.filter(c => cardStudyBucket(c) !== 'new' && c.due <= Date.now());
-    const newLimit = options.newCardsLimit != null ? options.newCardsLimit : 10;
+    let newLimit = options.newCardsLimit != null ? options.newCardsLimit : 10;
+    // Cartões da professora (resumo da aula, Aluno > Revisão) NÃO têm o limite diário de novos (2026-11-08, decisão da dona; caso da Rachel):
+    // a aluna esteve na aula, e uma aula costuma deixar mais de 10 cartões (Catharina 28 em uma semana). O contador mostra o que falta de verdade
+    // e diminui conforme ela estuda; o tamanho da sessão continua pela "Intensidade da sessão". O limite de novos por dia é da trilha.
+    if (pool.length > 0 && pool.every(c => c.origin === 'teacher')) newLimit = Infinity;
     const fresh = newCards(pool).slice(0, newLimit);
     selected = dueReviewed.concat(fresh);
   }

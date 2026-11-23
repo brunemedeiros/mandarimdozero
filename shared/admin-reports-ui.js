@@ -12,6 +12,14 @@
 
 function trpEsc(v){ return escapeHTML(v == null ? '' : String(v)); }
 function trpSafeUrl(u){ return /^https?:\/\//i.test(String(u || '').trim()) ? String(u).trim() : ''; }
+// Pasta de prints privada desde a migration 139: o endereço gravado em screenshot_url
+// (formato antigo, .../object/public/report-screenshots/<uid>/<arquivo>) só serve para
+// achar o caminho do arquivo; o Painel troca por um link temporário (reportsSignScreenshot).
+function trpScreenshotPath(u){
+  const m = String(u || '').match(/\/report-screenshots\/([^?#]+)/);
+  if (!m) return '';
+  try { return decodeURIComponent(m[1]); } catch (e) { return m[1]; }
+}
 function trpDate(iso){ return fmtDate(iso, { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' }); }
 function trpSnippet(text, n){ const s = String(text || ''); return s.length > n ? s.slice(0, n) + '…' : s; }
 // Cor do selo de status: novo/em andamento chamam atenção, resolvido é verde, o resto fica neutro.
@@ -68,9 +76,13 @@ function trpReplyHTML(r){
   const history = r.admin_reply_sent_at
     ? `<div class="p-alerta p-alerta--info"><span><em>${trpEsc(r.reporter_email ? t('admin.reports.reply.lastSentTo', { date: trpDate(r.admin_reply_sent_at), email: r.reporter_email }) : t('admin.reports.reply.lastSent', { date: trpDate(r.admin_reply_sent_at) }))}</em><br>"${trpEsc(r.admin_reply_subject || '')}" ${trpEsc(r.admin_reply || '')}</span></div>` : '';
   if (!trpCanReply(r)) return `<h4>${trpEsc(t('admin.modal.report.replyByEmail'))}</h4>${history}<div class="p-alerta p-alerta--aviso"><span>${trpEsc(t('admin.modal.report.noEmail'))}</span></div>`;
-  return `<h4>${trpEsc(t('admin.modal.report.replyByEmail'))}</h4>${history}
-    <label>${trpEsc(t('admin.modal.report.subject'))}<input id="report-resp-assunto" maxlength="150" autocomplete="off"></label>
-    <label>${trpEsc(t('admin.modal.report.message'))}<textarea id="report-resp-msg" rows="5" placeholder="${trpEsc(t('admin.modal.report.replyPh'))}"></textarea></label>
+  // Rascunho no idioma de quem recebe (reportReplyDraft, shared/admin-reports.js); a admin troca o trecho entre colchetes.
+  const draft = typeof reportReplyDraft === 'function' ? reportReplyDraft(r) : null;
+  const langInfo = typeof reportReplyLang === 'function' ? reportReplyLang(r) : null;
+  const langNote = langInfo ? `<p class="p-subtitulo" style="margin:0" data-resposta-idioma="${trpEsc(langInfo.lang)}">${trpEsc(t(langInfo.lang === 'en' ? 'admin.reports.reply.langEn' : 'admin.reports.reply.langPt'))}${langInfo.fromReport ? '' : ' ' + trpEsc(t('admin.reports.reply.langGuess'))}</p>` : '';
+  return `<h4>${trpEsc(t('admin.modal.report.replyByEmail'))}</h4>${history}${langNote}
+    <label>${trpEsc(t('admin.modal.report.subject'))}<input id="report-resp-assunto" maxlength="150" autocomplete="off" value="${trpEsc(draft ? draft.subject : '')}"></label>
+    <label>${trpEsc(t('admin.modal.report.message'))}<textarea id="report-resp-msg" rows="7" placeholder="${trpEsc(t('admin.modal.report.replyPh'))}">${trpEsc(draft ? draft.body : '')}</textarea></label>
     <p class="profile-edit-error" id="report-resp-erro" role="alert"></p>
     <div class="p-acoes" style="justify-content:flex-end"><button type="button" id="report-resp-enviar" data-enviar-resposta="${trpEsc(r.id)}">${trpEsc(t('admin.reports.reply.send'))}</button></div>`;
 }
@@ -87,7 +99,7 @@ function trpDetailDialogHTML(r, L){
       ${block(t('admin.modal.report.expected'), r.expected_behavior ? `<p style="white-space:pre-wrap;overflow-wrap:anywhere;margin:0">${trpEsc(r.expected_behavior)}</p>` : notInformed)}
       ${block(t('admin.modal.report.severity'), r.severity_reported && L.severity(r.severity_reported) ? trpEsc(L.severity(r.severity_reported)) : notInformed)}
       <details class="p-automaticos"><summary>${trpEsc(t('admin.modal.report.context'))}</summary>${trpContextHTML(r.context)}</details>
-      <div>${shot ? `<a href="${trpEsc(shot)}" target="_blank" rel="noopener noreferrer">${trpEsc(t('admin.reports.detail.screenshotView'))}</a>` : `<small>${trpEsc(t('admin.reports.detail.screenshotNone'))}</small>`}</div>
+      <div>${shot ? `<a href="${trpEsc(shot)}" target="_blank" rel="noopener noreferrer" data-report-shot="${trpEsc(trpScreenshotPath(shot))}">${trpEsc(t('admin.reports.detail.screenshotView'))}</a>` : `<small>${trpEsc(t('admin.reports.detail.screenshotNone'))}</small>`}</div>
       <form id="form-report" data-id="${trpEsc(r.id)}" novalidate>
         <div class="p-grade-2" style="gap:.75rem">
           <label>${trpEsc(t('admin.modal.report.status'))}<select id="report-status">${L.statusKeys.map(s => `<option value="${trpEsc(s)}"${(r.status || 'novo') === s ? ' selected' : ''}>${trpEsc(L.status(s))}</option>`).join('')}</select></label>

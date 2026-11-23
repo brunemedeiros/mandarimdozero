@@ -12,18 +12,14 @@
 // Depende de: shared/permissions.js, shared/supabase-client.js, shared/auth.js,
 // fr/zh app.js (switchTab, APP_KEY) e os renders das abas acima.
 
-// Mural estilo Classroom (decisão da autora, 2026-10-29): Aulas e Material de apoio passaram para DENTRO do Mural
-// (abas Mural | Aulas e materiais | Pessoas, shared/mural.js). 'classlogs' e 'materials' continuam aceitos (atalhos da
-// ficha do aluno, avisos antigos) e abrem o Mural na aba Aulas e materiais.
-const TEACHER_PANEL_SECTIONS = ['students', 'flashcards', 'mural'];
+// Abas (decisão da autora, 2026-11-10): Alunos | Cartões | Mural | Aulas | Materiais. Aulas e Material de apoio saíram de
+// dentro do Mural (que fica com Mural | Pessoas). Aulas tem as abas internas Aulas | Calendário | Para conferir
+// (shared/admin-class-logs.js); Materiais é o Material de apoio (shared/admin-support-materials.js).
+const TEACHER_PANEL_SECTIONS = ['students', 'flashcards', 'mural', 'classlogs', 'materials'];
 const TEACHER_PANEL_CONTAINERS = ['students', 'flashcards', 'reviewbank', 'classlogs', 'materials', 'mural', 'people'];
 const TEACHER_PANEL_STATE = { section: 'students', cardsSub: 'cards' };
 
 function switchTeacherPanelSection(section){
-  if ((section === 'classlogs' || section === 'materials') && typeof muralOpenTeacherTab === 'function'){
-    muralOpenTeacherTab('aulas', section);
-    section = 'mural';
-  }
   if (!TEACHER_PANEL_SECTIONS.includes(section)) section = 'students';
   TEACHER_PANEL_STATE.section = section;
   document.querySelectorAll('[data-teacher-section]').forEach(btn => {
@@ -31,7 +27,7 @@ function switchTeacherPanelSection(section){
     btn.classList.toggle('is-active', on);
     btn.setAttribute('aria-selected', on ? 'true' : 'false');
   });
-  // Cada aba esconde todas as caixas; quem mostra a sua é o render (o Mural escolhe entre mural, aulas e pessoas).
+  // Cada aba esconde todas as caixas; quem mostra a sua é o render (o Mural escolhe entre mural e pessoas).
   TEACHER_PANEL_CONTAINERS.forEach(s => {
     const el = document.getElementById(`admin-${s}-content`);
     if (el) el.style.display = 'none';
@@ -54,6 +50,24 @@ function switchTeacherPanelSection(section){
   });
   if (section === 'students'){ document.getElementById('admin-students-content').style.display = ''; renderAdminStudentsView(); }
   else if (section === 'flashcards') (bank ? renderReviewBankView() : renderAdminFlashcardsView());
+  else if (section === 'classlogs'){
+    // Sem filtro de turma/aluno do Mural: a lista mostra as aulas de todos, menos quando veio da ficha de um aluno
+    // ("Registrar aula" / "Ver todas as aulas"), que abre só as aulas dele e com ele escolhido.
+    if (typeof ADMIN_CLASS_LOGS_STATE !== 'undefined'){
+      const st = ADMIN_CLASS_LOGS_STATE;
+      st.scope = null;
+      st.listAll = !st.fromFicha;
+      if (st.fromFicha) st.classroomIds = new Set();
+      st.fromFicha = false;
+    }
+    document.getElementById('admin-classlogs-content').style.display = '';
+    renderAdminClassLogsView();
+  }
+  else if (section === 'materials'){
+    if (typeof MATERIALS_VIEW !== 'undefined') MATERIALS_VIEW.filtros.aluno = '';
+    document.getElementById('admin-materials-content').style.display = '';
+    renderAdminSupportMaterialsView();
+  }
   else renderTeacherMuralSection();
 }
 

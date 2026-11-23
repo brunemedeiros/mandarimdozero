@@ -69,6 +69,9 @@ function etapa7(v){
     .split('sem nenhuma revisão pendente agora').join('sem nenhuma revisão para hoje')
     .split('Nenhuma revisão pendente agora').join('Nenhuma revisão para hoje')
     .split('no reviews due right now').join('no reviews due today')
-    .split('No reviews due right now').join('No reviews due today');
+    .split('No reviews due right now').join('No reviews due today')
+    // miudezas (2026-11-04, commit cb75b791): a opção sem limite de cartões novos por dia fala das novas
+    .split('Sem limite (todas as pendentes de uma vez)').join('Sem limite (todas as novas de uma vez)')
+    .split('No limit (all pending at once)').join('No limit (all new cards at once)');
 }
 module.exports = { etapa7 };

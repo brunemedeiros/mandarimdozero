@@ -126,7 +126,7 @@ const state = (page) => page.evaluate(() => {
     await page.evaluate(() => openReviewSession('flashcard'));
     let s = await state(page);
     check('fr revisão: sessão em foco', s.focus && s.owner === 'review' && !s.topbar && !s.sidebar && s.flag, s);
-    await page.click('#review-back-to-modes');
+    await page.click('#review-session-wrap .activity-exit-btn'); // etapa D, lote 3 (2026-11-04): o ✕ da barra no lugar do link de voltar
     s = await state(page);
     check('fr revisão: voltar aos modos desliga o foco', !s.focus && !s.owner && s.topbar, s);
     await page.evaluate(() => openReviewSession('speed'));
@@ -160,7 +160,7 @@ const state = (page) => page.evaluate(() => {
     await page.evaluate(() => openReviewSession('flashcard'));
     let s = await state(page);
     check('zh revisão: sessão em foco', s.focus && s.owner === 'review' && !s.topbar && s.flag, s);
-    await page.click('#review-back-to-modes');
+    await page.click('#review-session-wrap .activity-exit-btn'); // etapa D, lote 3 (2026-11-04): o ✕ da barra no lugar do link de voltar
     s = await state(page);
     check('zh revisão: voltar desliga o foco', !s.focus && !s.owner && s.topbar, s);
     check('zh: zero pageerror', errors.length === 0, errors);

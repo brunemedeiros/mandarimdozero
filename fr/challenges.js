@@ -52,8 +52,8 @@ const CHALLENGES = [
       audioFile: "3b1c6dda1481.mp3"
     },
     microActivity: {
-      prompt: "Hier soir, j'ai trop bu à la fête, alors ce matin, je __________ et je ne veux pas sortir.",
-      answer: "ai la gueule de bois"
+      prompt: "Hier soir, j'ai trop bu à la fête, alors ce matin, __________ et je ne veux pas sortir.",
+      answer: "j'ai la gueule de bois"
     },
     externalResources: [
       {

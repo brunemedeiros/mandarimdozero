@@ -104,6 +104,8 @@ const DICTATION_I18N = {
     'dict.placeholder': 'Digite aqui o que você ouviu...',
     'dict.textAria': 'Texto do ditado',
     'dict.check': 'Verificar',
+    'dict.cmd': 'Ouça e escreva o que você ouvir', // etapa D (2026-11-04): comando acima do player
+    'dict.title': 'Ditados',
     'dict.retry': 'Tentar novamente',
     'dict.audioFail': 'Não foi possível reproduzir o áudio',
     'dict.audioUnavailable': '⚠️ Áudio indisponível',
@@ -153,6 +155,8 @@ const DICTATION_I18N = {
     'dict.placeholder': "Type what you heard here...",
     'dict.textAria': "Dictation text",
     'dict.check': "Check",
+    'dict.cmd': "Listen and write what you hear", // ALTA -- etapa D (needs_review)
+    'dict.title': "Dictations",
     'dict.retry': "Try again",
     'dict.audioFail': "Couldn't play the audio",
     'dict.audioUnavailable': "⚠️ Audio unavailable",
@@ -409,9 +413,15 @@ function openDictationPlayer(id){
   document.getElementById('dictation-player-wrap').style.display = 'block';
 
   const content = document.getElementById('dictation-player-content');
+  // Etapa D, lote 2 (2026-11-04, aprovada pela dona): cabeçalho e barra da lição (⚑, ⌨️, ✕; shared/activity-focus.js), como os Desafios.
+  // Progresso por passo: escrevendo = metade, resultado = cheia.
+  const lessonBar = typeof activityBarGrab === 'function' ? activityBarGrab('dictation-player-wrap') : null;
   content.innerHTML = `
-    <div class="dictation-player-task">${escapeHtmlDictation(dictationTask(d))}</div>
-    <p class="dictation-player-module">${d.level} · ${escapeHtmlDictation(moduleTitleFor(d.moduleId))}</p>
+    <div class="lesson-unit-context">
+      <div class="lesson-hint-eyebrow dictation-player-module">${escapeHtmlDictation(dictT('dict.title'))} · ${d.level} · ${escapeHtmlDictation(moduleTitleFor(d.moduleId))}</div>
+      <div class="lesson-unit-title dictation-player-task">${escapeHtmlDictation(dictationTask(d))}</div>
+    </div>
+    <div class="exercise-prompt-label dictation-cmd">${dictT('dict.cmd')}</div>
     <div class="dictation-audio-player">
       <div class="dictation-transport">
         <button class="dictation-play-btn" id="dictation-play-btn">${dictT('dict.play')}</button>
@@ -450,6 +460,8 @@ function openDictationPlayer(id){
     <div id="dictation-result-wrap"></div>
   `;
 
+  if (typeof activityBarMount === 'function') activityBarMount('dictation-player-wrap', lessonBar, '.lesson-unit-context');
+  if (typeof activityBarProgress === 'function') activityBarProgress('dictation-player-wrap', 50);
   dictationAudioEl = new Audio(dictationAudioPath(d));
   dictCfg().wireAccentPicker(content, document.getElementById('dictation-input'));
   const playBtn = document.getElementById('dictation-play-btn');
@@ -582,6 +594,7 @@ function openDictationPlayer(id){
     document.getElementById('dictation-result-wrap').innerHTML = '';
     document.getElementById('dictation-retry-btn').style.display = 'none';
     document.getElementById('dictation-check-btn').style.display = 'inline-flex';
+    if (typeof activityBarProgress === 'function') activityBarProgress('dictation-player-wrap', 50);
   });
 }
 
@@ -863,6 +876,7 @@ function renderDictationResult(d, userText){
 
   document.getElementById('dictation-check-btn').style.display = 'none';
   document.getElementById('dictation-retry-btn').style.display = 'inline-flex';
+  if (typeof activityBarProgress === 'function') activityBarProgress('dictation-player-wrap', 100);
   const box = wrap.firstElementChild;
   if (box){ box.scrollIntoView({ behavior: 'smooth', block: 'start' }); try { box.focus({ preventScroll: true }); } catch(e){} }
 }

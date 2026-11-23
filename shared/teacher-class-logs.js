@@ -108,6 +108,20 @@ async function fetchTeacherClassLogsRange(fromDate, toDate){
   return (data || []).filter(l => l.class_date >= fromDate && l.class_date <= toDate);
 }
 
+// 138: aulas que não são de aluno ativo nem de turma (ex-alunos com conta e ex-alunos sem conta, ligados ao Banco).
+// activeKeys: Set de "aluno|idioma" com vínculo ativo (essas já vêm por fetchClassLogs).
+async function fetchTeacherFormerLogs(activeKeys){
+  if (!CURRENT_USER) return [];
+  const { data, error } = await supabaseClient
+    .from('teacher_class_logs')
+    .select('*')
+    .eq('teacher_id', CURRENT_USER.id)
+    .is('classroom_id', null)
+    .order('class_date', { ascending: false });
+  if (error){ console.error('Erro ao carregar aulas de ex-alunos:', error); return []; }
+  return (data || []).filter(l => l.bank_student_id || (l.student_id && !activeKeys.has(`${l.student_id}|${l.language_app_key}`)));
+}
+
 // Aulas de uma turma (lado da professora; RLS: teacher_id = ela).
 async function fetchClassroomLogs(classroomId){
   if (!CURRENT_USER || !classroomId) return [];
@@ -261,14 +275,39 @@ async function fetchCalendarFeedToken(regenerate){
   if (error){ console.error('my_calendar_feed_token falhou:', error.message); return null; }
   return data || null;
 }
-function calendarFeedBoxHTML(){
+// painel: versão do painel da professora (Aulas > Calendário), caixa do Design System igual às do Notion e do Google
+// (2026-11-10). Sem painel: a do aluno em Minhas aulas, como antes.
+function calendarFeedBoxHTML(painel){
+  if (painel){
+    return `<div class="painel aulas-painel feed-painel"><details class="aulas-box calendar-feed-box" data-calendar-feed data-calendar-feed-painel>
+      <summary><span class="aulas-titulo">🔗 ${t('myClassLogs.feed.title')}</span></summary>
+      <div class="aulas-corpo calendar-feed-body" data-calendar-feed-body></div>
+    </details></div>`;
+  }
   return `<details class="profile-section calendar-feed-box" data-calendar-feed>
     <summary class="section-label">📅 ${t('myClassLogs.feed.title')}</summary>
     <div class="calendar-feed-body" data-calendar-feed-body></div>
   </details>`;
 }
-function calendarFeedBodyHTML(token){
+function calendarFeedBodyHTML(token, painel){
   if (!token) return `<p class="profile-empty-note">${t('myClassLogs.feed.error')}</p>`;
+  if (painel){
+    const url = calendarFeedURL(token);
+    const webcal = url.replace(/^https:/, 'webcal:');
+    const google = `https://calendar.google.com/calendar/render?cid=${encodeURIComponent(webcal)}`;
+    return `<p class="p-descricao">${t('myClassLogs.feed.intro')}</p>
+      <div class="calendar-feed-actions">
+        <a role="button" class="p-pequeno" href="${escapeHTML(google)}" target="_blank" rel="noopener" data-calendar-feed-google>${t('myClassLogs.feed.google')}</a>
+        <a role="button" class="outline secondary p-pequeno" href="${escapeHTML(webcal)}" data-calendar-feed-webcal>${t('myClassLogs.feed.apple')}</a>
+      </div>
+      <div class="p-campo"><label for="calendar-feed-url-painel">${t('myClassLogs.feed.linkLabel')}</label>
+        <div class="calendar-feed-copy">
+          <input type="text" id="calendar-feed-url-painel" readonly value="${escapeHTML(url)}" data-calendar-feed-url>
+          <button type="button" class="outline secondary p-pequeno" data-calendar-feed-copy>${t('myClassLogs.feed.copy')}</button>
+        </div></div>
+      <p class="p-ajuda">${t('myClassLogs.feed.delayHint')}</p>
+      <p class="p-ajuda">${t('myClassLogs.feed.privacyHint')} <a href="#" data-calendar-feed-reset>${t('myClassLogs.feed.reset')}</a></p>`;
+  }
   const url = calendarFeedURL(token);
   const webcal = url.replace(/^https:/, 'webcal:');
   const google = `https://calendar.google.com/calendar/render?cid=${encodeURIComponent(webcal)}`;
@@ -289,9 +328,10 @@ function wireCalendarFeedBox(root){
   const box = root && root.querySelector('[data-calendar-feed]');
   if (!box) return;
   const body = box.querySelector('[data-calendar-feed-body]');
+  const painel = box.hasAttribute('data-calendar-feed-painel');
   const load = async (regenerate) => {
     body.innerHTML = typeof loadingHTML === 'function' ? loadingHTML() : '…';
-    body.innerHTML = calendarFeedBodyHTML(await fetchCalendarFeedToken(regenerate));
+    body.innerHTML = calendarFeedBodyHTML(await fetchCalendarFeedToken(regenerate), painel);
     box.dataset.loaded = '1';
   };
   box.addEventListener('toggle', () => { if (box.open && !box.dataset.loaded) load(false); });
@@ -302,7 +342,10 @@ function wireCalendarFeedBox(root){
       catch { input.select(); }
     } else if (e.target.closest('[data-calendar-feed-reset]')){
       e.preventDefault();
-      if (!confirm(t('myClassLogs.feed.resetConfirm'))) return;
+      const ok = painel && window.PainelUI && PainelUI.confirmar
+        ? await PainelUI.confirmar({ titulo: t('myClassLogs.feed.reset'), descricao: t('myClassLogs.feed.resetConfirm'), confirmar: t('myClassLogs.feed.reset'), cancelar: t('myFlashcards.edit.cancel'), perigo: true })
+        : confirm(t('myClassLogs.feed.resetConfirm'));
+      if (!ok) return;
       await load(true);
       showToast(t('myClassLogs.feed.resetDone'));
     }

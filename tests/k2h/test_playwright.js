@@ -177,7 +177,7 @@ async function bootPage(browser, lang, port){
 
     // sair da sessão
     await ev(async () => { await startDeckReviewSession(7000); });
-    await page.click('#review-back-to-modes');
+    await page.click('#review-session-wrap .activity-exit-btn'); // etapa D, lote 3 (2026-11-04): o ✕ da barra no lugar do link de voltar
     // Sessão iniciada por um Deck volta para a tela DAQUELE Deck (como no Anki;
     // backToReviewModeSelect -> openDeckDetail), não para a tela de modos.
     const ex = await ev(() => ({ deckId: STATE.reviewSessionDeckId, deckScreen: getComputedStyle(document.getElementById('review-deck-wrap')).display !== 'none' && DECK_BROWSER.nodeId === 7000, sess: getComputedStyle(document.getElementById('review-session-wrap')).display === 'none' }));

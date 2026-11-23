@@ -167,6 +167,7 @@ async function startDeckReviewSession(deckId, opts){
   if (typeof switchTab === 'function') switchTab('review');
   document.getElementById('review-mode-select-wrap').style.display = 'none';
   document.getElementById('review-session-wrap').style.display = 'block';
+  document.getElementById('review-session-wrap').dataset.reviewMode = 'flashcard';
   document.getElementById('review-content').style.display = 'block';
   document.getElementById('speed-review-content').style.display = 'none';
   document.getElementById('match-review-content').style.display = 'none';
@@ -192,6 +193,8 @@ function openReviewSession(mode, opts){
   // #review-content, sem isso não dava pra distinguir qual delas gerou o
   // report. Não afeta nenhuma lógica de revisão/memória.
   STATE.reviewActiveMode = mode;
+  // Etapa D, lote 3: o jogo de pares não tem fila; a trilha de progresso da barra do topo some nele (CSS em fr/zh index.html).
+  document.getElementById('review-session-wrap').dataset.reviewMode = mode;
   STATE.reviewSessionClassReview = false; // modos da Revisão geral nunca herdam a sessão do Aluno
 
   if (mode === 'flashcard'){

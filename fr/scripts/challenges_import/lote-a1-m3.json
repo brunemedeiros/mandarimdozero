@@ -6,6 +6,24 @@
     "moduleId": "A1-m3",
     "unitId": "A1-8",
     "theme": "Lugares e orientação",
+    "sentenceFr": "Le musée est loin d'ici.",
+    "audioFile": "e19385777230.mp3",
+    "hintText": "Le ______ est ______ d'ici.",
+    "referenceTranslations": [
+      "O museu fica longe daqui.",
+      "O museu é longe daqui.",
+      "O museu está longe daqui."
+    ],
+    "explanation": "\"Loin de\" = \"longe de\", e \"d'ici\" = de + ici (\"daqui\"). Para dizer onde um lugar fica, o francês usa \"être\": \"est loin\" = \"fica longe\".",
+    "status": "needs_review"
+  },
+  {
+    "id": "lt-a1m3-002",
+    "type": "listen_translate",
+    "level": "A1",
+    "moduleId": "A1-m3",
+    "unitId": "A1-8",
+    "theme": "Lugares e orientação",
     "sentenceFr": "Tournez à droite, puis tout droit.",
     "audioFile": "49966e9c21be.mp3",
     "hintText": "Tournez à ______, puis tout ______.",
@@ -14,11 +32,11 @@
       "Vire à direita, depois siga reto.",
       "Vire à direita, depois em frente."
     ],
-    "explanation": "\"Tournez\" é o imperativo de cortesia (vous); \"tout droit\" = \"siga em frente\".",
+    "explanation": "\"Tournez\" é o imperativo de cortesia (vous); \"tout droit\" = \"reto\", \"em frente\".",
     "status": "needs_review"
   },
   {
-    "id": "lt-a1m3-002",
+    "id": "lt-a1m3-003",
     "type": "listen_translate",
     "level": "A1",
     "moduleId": "A1-m3",
@@ -36,7 +54,24 @@
     "status": "needs_review"
   },
   {
-    "id": "lt-a1m3-003",
+    "id": "lt-a1m3-004",
+    "type": "listen_translate",
+    "level": "A1",
+    "moduleId": "A1-m3",
+    "unitId": "A1-9",
+    "theme": "Nacionalidades",
+    "sentenceFr": "Elle est américaine.",
+    "audioFile": "545537bb2c85.mp3",
+    "hintText": "Elle est ______.",
+    "referenceTranslations": [
+      "Ela é americana.",
+      "Ela é norte-americana."
+    ],
+    "explanation": "A nacionalidade concorda com a pessoa: \"américain\" (ele), \"américaine\" (ela). No feminino, o \"n\" passa a ser pronunciado.",
+    "status": "needs_review"
+  },
+  {
+    "id": "lt-a1m3-005",
     "type": "listen_translate",
     "level": "A1",
     "moduleId": "A1-m3",
@@ -54,7 +89,7 @@
     "status": "needs_review"
   },
   {
-    "id": "lt-a1m3-004",
+    "id": "lt-a1m3-006",
     "type": "listen_translate",
     "level": "A1",
     "moduleId": "A1-m3",
@@ -72,7 +107,7 @@
     "status": "needs_review"
   },
   {
-    "id": "lt-a1m3-005",
+    "id": "lt-a1m3-007",
     "type": "listen_translate",
     "level": "A1",
     "moduleId": "A1-m3",
@@ -90,7 +125,25 @@
     "status": "needs_review"
   },
   {
-    "id": "lt-a1m3-006",
+    "id": "lt-a1m3-008",
+    "type": "listen_translate",
+    "level": "A1",
+    "moduleId": "A1-m3",
+    "unitId": "A1-11",
+    "theme": "Compras de mercado",
+    "sentenceFr": "Tu veux du sucre ?",
+    "audioFile": "883eb45d48b4.mp3",
+    "hintText": "Tu ______ du ______ ?",
+    "referenceTranslations": [
+      "Você quer açúcar?",
+      "Quer açúcar?",
+      "Você quer um pouco de açúcar?"
+    ],
+    "explanation": "\"Du\" é o partitivo: um pouco de algo que não se conta; em português fica sem artigo (\"açúcar\"). \"Tu veux\" é o \"você quer\" informal, e a pergunta vem só pela entonação.",
+    "status": "needs_review"
+  },
+  {
+    "id": "lt-a1m3-009",
     "type": "listen_translate",
     "level": "A1",
     "moduleId": "A1-m3",
@@ -105,6 +158,23 @@
       "Levo um quilo de maçãs."
     ],
     "explanation": "Depois de quantidade, o francês usa \"de\": \"un kilo de pommes\", sem artigo.",
+    "status": "needs_review"
+  },
+  {
+    "id": "lt-a1m3-010",
+    "type": "listen_translate",
+    "level": "A1",
+    "moduleId": "A1-m3",
+    "unitId": "A1-12",
+    "theme": "Pesos e quantidades",
+    "sentenceFr": "Une bouteille d'eau, s'il vous plaît.",
+    "audioFile": "0d1f3fa74ea6.mp3",
+    "hintText": "Une ______ d'______, s'il vous plaît.",
+    "referenceTranslations": [
+      "Uma garrafa de água, por favor.",
+      "Uma garrafa d'água, por favor."
+    ],
+    "explanation": "Depois de um recipiente vem \"de\" sem artigo, e \"de\" vira \"d'\" antes de vogal: \"une bouteille d'eau\".",
     "status": "needs_review"
   },
   {

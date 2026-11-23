@@ -489,9 +489,15 @@ function renderMatchSizePicker(){
           </button>
         `).join('')}
       </div>
+      ${matchAudioOptionHTML()}
       <button class="btn btn-primary" id="match-size-start-btn">${t('review.match.start')}</button>
     </div>
   `;
+  document.getElementById('match-audio-opt')?.addEventListener('click', () => {
+    MATCH_STATE.withAudio = !MATCH_STATE.withAudio;
+    try { localStorage.setItem(MATCH_AUDIO_STORAGE_KEY, MATCH_STATE.withAudio ? '1' : '0'); } catch (e) {}
+    renderMatchSizePicker();
+  });
   el.querySelectorAll('.match-size-btn:not([disabled])').forEach(btn => {
     btn.addEventListener('click', () => {
       MATCH_STATE.pairSize = parseInt(btn.dataset.pairs, 10);
@@ -499,6 +505,63 @@ function renderMatchSizePicker(){
     });
   });
   document.getElementById('match-size-start-btn').addEventListener('click', startMatchGame);
+}
+
+// ---------- Combinar com áudio (decisão da autora, 2026-11-14) ----------
+// Algumas cartas do idioma estudado viram CARTA DE ÁUDIO: mostram só o ícone 🔊 e tocam a palavra sozinhas ao virar; a aluna
+// combina o som com a tradução. Só entra palavra que tem mp3 pré-gerado (nunca a voz do navegador, que pode nem existir, e nunca a
+// Edge tts-generate, que gasta a cota do plano). Cerca de um terço dos pares; nunca duas cartas de áudio com o mesmo som (tradução
+// não resolve). XP, recorde de tempo e a memória do par certo (palavra nova vira "Bom") são os mesmos de antes, com ou sem áudio.
+const MATCH_AUDIO_STORAGE_KEY = 'match-with-audio';
+function matchAudioPreference(){
+  try { return localStorage.getItem(MATCH_AUDIO_STORAGE_KEY) !== '0'; } catch (e) { return true; }
+}
+function matchHasPregenAudio(text){
+  return typeof AUDIO_MANIFEST !== 'undefined' && !!text && !!AUDIO_MANIFEST[text];
+}
+// Chave de "soa igual": o pinyin (zh) ou o próprio texto em minúsculas.
+function matchSoundKey(card){
+  const view = resolveCardContentView(card);
+  const f = view && (view.front || view.prompt);
+  const py = f && f.pinyinText;
+  return String(py || (f && f.text) || '').trim().toLowerCase();
+}
+// Duas palavras soam igual? Mesma chave, ou do mesmo grupo de homófonos da família do idioma (vert/verre/vers, mer/mère).
+function matchSameSound(a, b){
+  if (a === b) return true;
+  const fam = LANG_HOOKS.familiaLatina;
+  const groups = (fam && fam.homofonos) || [];
+  return groups.some(g => g.words && g.words.includes(a) && g.words.includes(b));
+}
+// Puro (testável): de uma lista [{ key, hasAudio }] devolve os índices que viram carta de áudio (no máximo `max`, nunca dois
+// com o mesmo som). `ordem` = ordem de preferência (já embaralhada pelo chamador).
+function matchPickAudioIndexes(items, max, ordem){
+  const out = [];
+  for (const i of (ordem || items.map((_, k) => k))){
+    if (out.length >= max) break;
+    if (!items[i].hasAudio) continue;
+    if (out.some(j => matchSameSound(items[j].key, items[i].key))) continue;
+    out.push(i);
+  }
+  return out;
+}
+// A opção só aparece se alguma palavra do jogo tem áudio; sem nenhuma, o jogo é igual ao de antes.
+function matchAudioAvailable(){
+  const pool = projectStudyWordsToA(eligibleReviewPool().filter(hasPlainFrontBack));
+  return pool.some(c => matchHasPregenAudio(cardPromptText(c)));
+}
+function matchAudioOptionHTML(){
+  if (MATCH_STATE.withAudio === null) MATCH_STATE.withAudio = matchAudioPreference();
+  if (!matchAudioAvailable()) return '';
+  const on = !!MATCH_STATE.withAudio;
+  return `<button type="button" class="match-audio-opt" id="match-audio-opt" role="switch" aria-checked="${on}">
+    <span class="mao-text"><span class="mao-title">${t('review.match.audio.title')}</span><span class="mao-help">${t('review.match.audio.help')}</span></span>
+    <span class="mao-switch${on ? ' on' : ''}" aria-hidden="true"></span>
+  </button>`;
+}
+function matchPlayAudioTile(btn){
+  const tile = MATCH_STATE.tiles[Number(btn.dataset.idx)];
+  if (tile && tile.audio) LANG_HOOKS.speak(tile.text, null, true);
 }
 
 function startMatchGame(){
@@ -509,8 +572,13 @@ function startMatchGame(){
   const pool = shuffle(getStudyQueue(projectStudyWordsToA(eligibleReviewPool().filter(hasPlainFrontBack)), { scope: 'all' }));
   const pairCount = Math.min(MATCH_STATE.pairSize, pool.length);
   MATCH_STATE.pairs = pool.slice(0, pairCount);
+  if (MATCH_STATE.withAudio === null) MATCH_STATE.withAudio = matchAudioPreference();
+  const audioItems = MATCH_STATE.pairs.map(c => ({ key: matchSoundKey(c), hasAudio: matchHasPregenAudio(cardPromptText(c)) }));
+  const audioIdx = MATCH_STATE.withAudio
+    ? matchPickAudioIndexes(audioItems, Math.floor(pairCount / 3), shuffle(audioItems.map((_, k) => k)))
+    : [];
   MATCH_STATE.tiles = shuffle([
-    ...MATCH_STATE.pairs.map(c => ({ cardId: c.id, side: 'front', text: cardPromptText(c) })),
+    ...MATCH_STATE.pairs.map((c, k) => ({ cardId: c.id, side: 'front', text: cardPromptText(c), audio: audioIdx.includes(k) })),
     ...MATCH_STATE.pairs.map(c => ({ cardId: c.id, side: 'back', text: cardAnswerText(c) }))
   ]);
   MATCH_STATE.selected = null;
@@ -524,11 +592,11 @@ function startMatchGame(){
 
 function renderMatchTiles(){
   const gridEl = document.getElementById('match-grid');
-  gridEl.innerHTML = MATCH_STATE.tiles.map((t, i) => `
-    <button class="match-tile" data-idx="${i}" data-card-id="${t.cardId}" data-side="${t.side}">
+  gridEl.innerHTML = MATCH_STATE.tiles.map((tile, i) => `
+    <button class="match-tile${tile.audio ? ' match-tile-audio' : ''}" data-idx="${i}" data-card-id="${tile.cardId}" data-side="${tile.side}"${tile.audio ? ` data-audio="1" aria-label="${escapeHTML(t('review.match.audio.tileLabel'))}"` : ''}>
       <div class="match-tile-inner">
         <div class="match-tile-face match-tile-back"><span>?</span></div>
-        <div class="match-tile-face match-tile-front">${escapeHTML(t.text)}</div>
+        <div class="match-tile-face match-tile-front">${tile.audio ? '<span class="match-audio-icon">🔊</span>' : escapeHTML(tile.text)}</div>
       </div>
     </button>
   `).join('');

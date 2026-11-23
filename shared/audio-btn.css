@@ -1,0 +1,16 @@
+/* Botão redondo de áudio (🔊) e tamanhos: peça comum a todos os sites (fr, zh, pt e futuros).
+   Antes ficava copiado em fr/index.html e zh/index.html (idêntico). Ligado no mesmo ponto da cascata de antes.
+   .audio-btn-md (32px) é o tamanho dos ícones de apoio ao lado de uma frase (Desafios; .claude/rules/frontend-fr-zh.md).
+   Cores usam os tokens do próprio site (--paper-warm, --seal-red-dark, --paper-line, --seal-red, --gold-bright). */
+.audio-btn, .custom-audio-btn{
+  border:none; background: var(--paper-warm); color: var(--seal-red-dark);
+  width:26px; height:26px; border-radius:50%; cursor:pointer; font-size:13px;
+  display:inline-flex; align-items:center; justify-content:center; flex-shrink:0;
+  transition: transform .12s ease, background .15s ease; padding:0; line-height:1;
+}
+.audio-btn:hover, .custom-audio-btn:hover{ background: var(--paper-line); transform: scale(1.08); }
+.audio-btn:active, .custom-audio-btn:active{ transform: scale(.94); }
+.audio-btn.speaking{ background: var(--seal-red); color: var(--gold-bright); animation: pulseAudio .6s ease infinite; }
+@keyframes pulseAudio{ 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.12); } }
+.audio-btn-lg{ width:38px; height:38px; font-size:17px; }
+.audio-btn-md{ width:32px; height:32px; font-size:15px; }
