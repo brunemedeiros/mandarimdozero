@@ -874,8 +874,7 @@ function renderDictationResult(d, userText){
         <div class="dictation-score-badge" style="background:${dictationScoreColorVar(score)};">${score}</div>
         <p class="dictation-score-text">${dictT('dict.score', { hit, total, light: ev.light ? dictT('dict.scoreLight', { n: ev.light }) : '', score })}</p>
       </div>
-      ${xpGain > 0 ? `<p class="dictation-xp-line">${dictT('dict.xpEarned', { n: xpGain })}</p>` : ''}
-      <p class="dictation-record-line">${dictT('dict.record', { best: rec.bestScore, n: rec.attempts, unit: dictT(rec.attempts === 1 ? 'dict.attempt.one' : 'dict.attempt.many') })}</p>
+      ${xpGain > 0 ? `<p class="dictation-xp-line">${dictT('dict.xpEarned', { n: xpGain })}</p>` : ''}<p class="dictation-record-line">${dictT('dict.record', { best: rec.bestScore, n: rec.attempts, unit: dictT(rec.attempts === 1 ? 'dict.attempt.one' : 'dict.attempt.many') })}</p>
       ${notesHtml}
       ${rec.wrongWords.length ? `<p class="dictation-review-words"><strong>${dictT('dict.reviewWords')}</strong> ${rec.wrongWords.map(escapeHtmlDictation).join(', ')}</p>` : ''}
       ${sentencesHtml}
