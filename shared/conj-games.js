@@ -132,7 +132,7 @@ function createConjGames({ games, soon = [], speak, ids, isLocked, onLocked, lan
         ${st.done ? `<span class="expr-card-seal">${esc(tt('games.doneSeal', { pct: st.pct }))}</span>` : ''}
         <span class="challenge-card-expr">${rich(L(g.title))}</span>
         ${sampleHTML(g)}
-        <span class="expr-card-foot">${theme ? `<span class="expr-reg expr-reg-neutral">${esc(theme)}</span>` : ''}${g.free ? '' : premiumSealHTML(g)}</span>
+        <span class="expr-card-foot">${theme ? `<span class="cg-theme">${esc(theme)}</span>` : ''}${g.free ? '' : premiumSealHTML(g)}</span>
       </button>
     </div>`;
   }
@@ -511,7 +511,7 @@ function createConjGames({ games, soon = [], speak, ids, isLocked, onLocked, lan
     const estado = revealed ? 'revelada' : (almost ? 'quase' : (ok ? 'certo' : 'erro'));
     const regra = `<figure class="cg-timeline${SKETCH[opt.sketch] ? '' : ' cg-rule'}">${SKETCH[opt.sketch] ? `<svg viewBox="0 0 134 44" role="img" aria-label="${esc(plain(L(opt.tl)))}">${SKETCH[opt.sketch]}</svg>` : ''}<figcaption>${rich(L(opt.tl))}</figcaption></figure>`;
     const extra = almost && typeof typedAttemptHTML === 'function'
-      ? `<div class="cg-pr-sua"><span class="cg-pr-sua-rot">${esc(tt('games.fb.youWrote'))}</span>${typedAttemptHTML(typedInfo.typed, it[it.ans])}</div>` : '';
+      ? `<div class="pr-sua"><span class="pr-sua-rot">${esc(tt('answerPanel.youWrote'))}</span>${typedAttemptHTML(typedInfo.typed, it[it.ans])}</div>` : '';
     fb.innerHTML = painelRespostaHTML({ estado, frase: tidyFr(full), traducao: txt.tr || '', lang, ouvir: true, extra, regra,
       explicacao: rich(txt.why || ''), continuar: tt(last ? 'common.seeResultArrow' : 'common.continueArrow'), idContinuar: 'cg-next' });
     const ouvir = fb.querySelector('[data-pr-ouvir]');

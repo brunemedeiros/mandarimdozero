@@ -872,7 +872,7 @@ window.I18N_CATALOG['en'] = {
   'answerPanel.almost': 'Almost right!', // ALTA
   'answerPanel.wrong': 'Almost there!', // ALTA
   'answerPanel.teacher': 'Prof. Brune', // ALTA (nome próprio)
-  'games.fb.youWrote': 'You wrote', // ALTA
+  'answerPanel.youWrote': 'You wrote', // ALTA
   'games.almost': 'Almost!', // ALTA
   'games.youAnswered': 'You answered:', // ALTA
   'games.dueTitle': 'Review mistakes ({n})', // ALTA

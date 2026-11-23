@@ -891,7 +891,7 @@ window.I18N_CATALOG['pt-BR'] = {
   'answerPanel.almost': 'Quase certo!',
   'answerPanel.wrong': 'Quase lá!',
   'answerPanel.teacher': 'Prof. Brune',
-  'games.fb.youWrote': 'Você escreveu',
+  'answerPanel.youWrote': 'Você escreveu',
   'games.almost': 'Quase!',
   'games.youAnswered': 'Você respondeu:',
   'games.dueTitle': 'Revisar erros ({n})',

@@ -881,6 +881,21 @@ function exprShowOptions(c){
   wireKeyboardOptions(btns, { mode: 'sequential' });
 }
 
+// Painel de resposta único do site nas Expressões (shared/core/painel-resposta.js, docs/painel-resposta-unico.md). A classe
+// expr-panel fica no invólucro (os testes de paridade a usam para reconhecer a cena do player).
+function exprPanelEl(o){
+  const el = document.createElement('div');
+  el.className = 'expr-panel';
+  el.innerHTML = painelRespostaHTML(Object.assign({ lang: chCfg().lang, continuar: t('common.continueArrow'), idContinuar: 'expr-continue-btn' }, o));
+  return el;
+}
+// Fala da Prof. Brune sobre a expressão (campo novo `profNote`, pt-BR no desafio e o idioma do site no overlay; francês entre
+// {chaves}, que sai em azul). Sem ela, nada.
+function exprProfNote(c){
+  const ov = challengeOverlay(c);
+  return String((ov ? ov.profNote : (c.profNote || {}).pt) || '').trim();
+}
+
 // origIdx null = "Não sei": revela a resposta, conta como erro e fica em silêncio (como na trilha).
 function exprAnswer(c, origIdx){
   const run = EXPR_RUN;
@@ -901,22 +916,18 @@ function exprAnswer(c, origIdx){
   if (!run.revealed) playFeedbackSound(run.isCorrect);
   recordChallengeReviewOutcome(c, run.isCorrect ? 'ok' : 'fail');
   if (typeof activityBarProgress === 'function') activityBarProgress('challenge-player-wrap', Math.round(100 / EXPR_LAST_STEP));
-  const panel = document.createElement('div');
-  panel.className = (run.isCorrect ? 'correct-feedback' : 'wrong-feedback') + ' expr-panel';
-  panel.innerHTML = run.isCorrect ? `
-    <div class="feedback-card-body">
-      <div class="correct-feedback-header">✅ ${nextCorrectFeedbackPhrase()}</div>
-      ${exprMeaningBoxHTML(c)}
-      <button class="btn btn-primary btn-block correct-feedback-continue" id="expr-continue-btn">${t('common.continueArrow')}</button>
-    </div>` : `
-    <div class="feedback-card-body">
-      <div class="wrong-feedback-header">${t(run.revealed ? 'feedback.header.revealed' : 'feedback.header.notThisTime')}</div>
-      ${run.revealed ? '' : `<div class="wrong-feedback-why"><div class="wrong-feedback-why-label">${t('feedback.label.yourAnswer')}</div>
-        <div class="feedback-inner-box">${escapeHtmlChallenge(exprOptionLabel(c, origIdx))}</div></div>`}
-      <div class="wrong-feedback-why"><div class="wrong-feedback-why-label">${t('feedback.label.answer')}</div>${exprMeaningBoxHTML(c)}</div>
-      <button class="btn btn-primary btn-block wrong-feedback-continue" id="expr-continue-btn">${t('common.continueArrow')}</button>
-    </div>`;
+  // Painel de resposta único do site (docs/painel-resposta-unico.md; aprovado pela autora para as Expressões em 2026-11-23):
+  // a expressão com o sentido no idioma do site e o áudio, a tradução literal, e a fala da Prof. Brune (profNote). Enquanto a
+  // expressão não tem a fala nova, a explicação em francês continua como linha de apoio (não como fala da professora).
+  const ov = challengeOverlay(c);
+  const meaningShown = (ov && ov.meaning) ? ov.meaning : (c.meaning || {}).pt;
+  const note = exprProfNote(c);
+  const extra = exprLiteralHTML(c) + (!note && c.explanation ? `<p class="challenge-explanation" lang="${chCfg().lang}">${escapeHtmlChallenge(c.explanation)}</p>` : '');
+  const panel = exprPanelEl({ estado: run.revealed ? 'revelada' : (run.isCorrect ? 'certo' : 'erro'), frase: c.canonicalExpression, traducao: meaningShown,
+    acoes: c.expressionAudioFile ? audioIconsHTML('expr-fb-play', 'expr-fb-slow') : '', extra, explicacao: note ? painelRespostaRico(note, chCfg().lang) : '' });
   stage.parentElement.appendChild(panel);
+  exprWireAudio('expr-fb-play', c.expressionAudioFile);
+  exprWireAudio('expr-fb-slow', c.expressionAudioFile, SLOW_AUDIO_RATE);
   panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   document.getElementById('expr-continue-btn').addEventListener('click', () => exprShowExamples(c));
 }
@@ -1020,21 +1031,9 @@ function exprShowOrder(c){
     const dk = document.getElementById('expr-order-dontknow-btn'); if (dk) dk.classList.add('disabled');
     // Frase montada inteira, com a expressão em destaque, ícones pequenos de áudio ao lado (▶ e 🐢, sem texto) e a tradução (decisão da autora, 2026-11-05).
     const ev = exprExampleView(c, 0);
-    const full = `<div class="feedback-inner-box expr-order-full" lang="${lang}"><div class="expr-order-line"><span>${exprHighlightHTML(c.example.text, ev.mark)}</span>${file ? audioIconsHTML('expr-order-done-play', 'expr-order-done-slow') : ''}</div>
-      ${ev.tr ? `<div class="expr-order-full-tr">${escapeHtmlChallenge(ev.tr)}</div>` : ''}</div>`;
-    const panel = document.createElement('div');
-    panel.className = (ok ? 'correct-feedback' : 'wrong-feedback') + ' expr-panel';
-    panel.innerHTML = ok ? `
-      <div class="feedback-card-body">
-        <div class="correct-feedback-header">✅ ${nextCorrectFeedbackPhrase()}</div>
-        ${full}
-        <button class="btn btn-primary btn-block correct-feedback-continue" id="expr-continue-btn">${t('common.continueArrow')}</button>
-      </div>` : `
-      <div class="feedback-card-body">
-        <div class="wrong-feedback-header">${t(revealed ? 'feedback.header.revealed' : 'feedback.header.notThisTime')}</div>
-        <div class="wrong-feedback-why"><div class="wrong-feedback-why-label">${t('feedback.label.fullSentence')}</div>${full}</div>
-        <button class="btn btn-primary btn-block wrong-feedback-continue" id="expr-continue-btn">${t('common.continueArrow')}</button>
-      </div>`;
+    // Painel de resposta único (2026-11-23): a frase montada com a expressão em destaque, a tradução e os ícones 🔊 e 🐢.
+    const panel = exprPanelEl({ estado: revealed ? 'revelada' : (ok ? 'certo' : 'erro'), fraseHTML: exprHighlightHTML(c.example.text, ev.mark),
+      traducao: ev.tr || '', acoes: file ? audioIconsHTML('expr-order-done-play', 'expr-order-done-slow') : '' });
     slotsEl.parentElement.appendChild(panel);
     exprWireAudio('expr-order-done-play', file);
     exprWireAudio('expr-order-done-slow', file, SLOW_AUDIO_RATE);
@@ -1111,23 +1110,10 @@ function exprCheckTurn(c, revealed){
   if (!revealed) playFeedbackSound(verdict !== 'errou');
   const good = verdict !== 'errou';
   const answer = String(c.microActivity.answer).split('/')[0].trim();
-  const panel = document.createElement('div');
-  panel.className = (good ? 'correct-feedback' : 'wrong-feedback') + ' expr-panel';
-  const full = `<div class="feedback-inner-box expr-turn-full" lang="${chCfg().lang}">${exprTurnSentenceHTML(c, true)}${exprTurnTranslation(c) ? `<div class="expr-order-full-tr">${escapeHtmlChallenge(exprTurnTranslation(c))}</div>` : ''}</div>`;
-  panel.innerHTML = good ? `
-    <div class="feedback-card-body">
-      <div class="correct-feedback-header">✅ ${nextCorrectFeedbackPhrase()}</div>
-      ${verdict === 'quase' ? `<div class="review-almost">${escapeHTML(t('review.almost'))}</div>` : ''}
-      ${full}
-      <button class="btn btn-primary btn-block correct-feedback-continue" id="expr-continue-btn">${t('common.continueArrow')}</button>
-    </div>` : `
-    <div class="feedback-card-body">
-      <div class="wrong-feedback-header">${t(revealed ? 'feedback.header.revealed' : 'feedback.header.notThisTime')}</div>
-      ${typed ? `<div class="wrong-feedback-why"><div class="wrong-feedback-why-label">${t('feedback.label.yourAnswer')}</div>
-        <div class="feedback-inner-box">${typedAttemptHTML(typed, answer)}</div></div>` : ''}
-      <div class="wrong-feedback-why"><div class="wrong-feedback-why-label">${t('feedback.label.fullSentence')}</div>${full}</div>
-      <button class="btn btn-primary btn-block wrong-feedback-continue" id="expr-continue-btn">${t('common.continueArrow')}</button>
-    </div>`;
+  // Painel de resposta único (2026-11-23): a frase completa com a tradução; no "quase", o que a aluna escreveu com a letra marcada.
+  const extra = verdict === 'quase' && typed ? `<div class="pr-sua"><span class="pr-sua-rot">${escapeHTML(t('answerPanel.youWrote'))}</span>${typedAttemptHTML(typed, answer)}</div>` : '';
+  const panel = exprPanelEl({ estado: revealed ? 'revelada' : (verdict === 'quase' ? 'quase' : (good ? 'certo' : 'erro')),
+    fraseHTML: exprTurnSentenceHTML(c, true), traducao: exprTurnTranslation(c) || '', extra });
   document.getElementById('expr-turn-stage').parentElement.appendChild(panel);
   panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   document.getElementById('expr-continue-btn').addEventListener('click', () => exprShowFinal(c));

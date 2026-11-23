@@ -17,15 +17,20 @@
 .painel-resposta .pr-frase{ display:flex; align-items:center; gap:12px; }
 .painel-resposta .pr-frase-t{ flex:1; min-width:0; display:flex; flex-direction:column; gap:2px; }
 .painel-resposta .pr-frase-fr{ font-size:17px; font-weight:900; line-height:1.35; overflow-wrap:anywhere; }
-.painel-resposta .pr-trad{ font-size:15px; font-weight:600; color:var(--ink-soft); }
-.painel-resposta .pr-ouvir{ flex:none; }
+.painel-resposta .pr-trad{ font-size:15px; font-weight:600; color:var(--ink-soft); white-space:pre-line; } /* diálogo de duas falas: uma por linha */
+.painel-resposta .pr-ouvir, .painel-resposta .pr-acoes{ flex:none; }
+.painel-resposta .pr-acoes{ display:flex; gap:8px; align-items:center; }
 .painel-resposta .pr-prof{ display:flex; align-items:flex-start; gap:12px; }
 .painel-resposta .pr-foto{ flex:none; width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid var(--paper); }
 .painel-resposta .pr-fala{ min-width:0; display:flex; flex-direction:column; gap:4px; }
 .painel-resposta .pr-nome{ font-size:12px; font-weight:800; color:var(--ink-soft); }
 .painel-resposta .pr-regra{ font-size:15.5px; font-weight:800; line-height:1.4; }
+.painel-resposta .pr-fr{ color:var(--seal-red-dark); font-weight:800; } /* idioma estudado dentro da fala (painelRespostaRico) */
 .painel-resposta .pr-explicacao{ margin:0; font-size:15px; line-height:1.55; max-width:62ch; }
 .painel-resposta .typed-attempt{ font-size:17px; }
+/* "quase": o que a aluna escreveu, com a letra errada marcada (typedAttemptHTML) */
+.painel-resposta .pr-sua{ display:flex; flex-direction:column; gap:2px; }
+.painel-resposta .pr-sua-rot{ font-size:12.5px; font-weight:800; color:var(--ink-soft); }
 .painel-resposta .pr-continuar{ min-height:52px; border:0; border-radius:16px; font-weight:800; }
 .painel-resposta.is-ok .pr-continuar{ background:var(--success-fill); color:var(--on-success-fill); }
 .painel-resposta.is-err .pr-continuar{ background:var(--error-red); color:var(--on-brand-fill); }

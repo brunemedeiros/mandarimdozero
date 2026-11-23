@@ -6,9 +6,12 @@
 // painelRespostaHTML({ estado, frase, traducao, lang, ouvir, extra, regra, explicacao, continuar, idContinuar })
 //   estado: 'certo' | 'quase' (conta como acerto, painel verde) | 'erro' | 'revelada' ("Não sei")
 //   frase / traducao: a frase (ou palavra) certa e a tradução no idioma do site; ouvir: true mostra o 🔊 (data-pr-ouvir)
+//   fraseHTML: no lugar de `frase`, HTML já pronto e escapado por quem chama (ex.: a expressão destacada dentro da frase)
+//   acoes: HTML dos botões de áudio no lugar do 🔊 (ex.: os ícones 🔊 e 🐢 das Expressões, audioIconsHTML)
 //   extra: HTML opcional logo abaixo da frase (ex.: o desenho letra a letra do "quase")
 //   regra: HTML opcional em negrito no começo da fala (ex.: a regra do jogo, com desenho); explicacao: HTML da fala
 //   continuar: texto do botão; idContinuar: id do botão (quem chama liga o clique)
+// painelRespostaRico(texto, lang): a fala com o francês entre {chaves} já escapada, com o trecho em azul (.pr-fr).
 // O símbolo ✓/✕ do título vem do CSS (escrito no texto, o shared/emoji-icons.js o trocaria por um ícone).
 (function(root){
   const t0 = (k, p) => (typeof t === 'function' ? t(k, p) : k);
@@ -20,9 +23,10 @@
   function painelRespostaHTML(o){
     const estado = TITULO[o.estado] ? o.estado : 'erro';
     const verde = estado === 'certo' || estado === 'quase';
-    const frase = o.frase ? `<div class="pr-frase">
-        <div class="pr-frase-t"><span class="pr-frase-fr"${o.lang ? ` lang="${esc(o.lang)}"` : ''}>${esc(o.frase)}</span>${o.traducao ? `<span class="pr-trad">${esc(o.traducao)}</span>` : ''}</div>
-        ${o.ouvir ? `<button type="button" class="audio-btn pr-ouvir" data-pr-ouvir aria-label="${esc(t0('games.listen'))}" title="${esc(t0('games.listen'))}">🔊</button>` : ''}
+    const fraseIn = o.fraseHTML != null ? o.fraseHTML : (o.frase ? esc(o.frase) : '');
+    const frase = fraseIn ? `<div class="pr-frase">
+        <div class="pr-frase-t"><span class="pr-frase-fr"${o.lang ? ` lang="${esc(o.lang)}"` : ''}>${fraseIn}</span>${o.traducao ? `<span class="pr-trad">${esc(o.traducao)}</span>` : ''}</div>
+        ${o.acoes ? `<span class="pr-acoes">${o.acoes}</span>` : ''}${!o.acoes && o.ouvir ? `<button type="button" class="audio-btn pr-ouvir" data-pr-ouvir aria-label="${esc(t0('games.listen'))}" title="${esc(t0('games.listen'))}">🔊</button>` : ''}
       </div>` : '';
     const fala = (o.regra || o.explicacao) ? `<div class="pr-prof">
         <img class="pr-foto" src="${FOTO}" alt="" width="40" height="40">
@@ -34,5 +38,10 @@
       <button type="button" class="btn btn-block pr-continuar" id="${esc(o.idContinuar || 'pr-continuar')}">${esc(o.continuar || t0('common.continueArrow'))}</button>
     </div>`;
   }
+  // Texto da fala com o idioma estudado entre {chaves} (mesma convenção dos Jogos): escapa e pinta o trecho de azul.
+  function painelRespostaRico(texto, lang){
+    return esc(texto).replace(/\{([^{}]+)\}/g, (m, x) => `<span class="pr-fr"${lang ? ` lang="${esc(lang)}"` : ''}>${x}</span>`);
+  }
   root.painelRespostaHTML = painelRespostaHTML;
+  root.painelRespostaRico = painelRespostaRico;
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -39,8 +39,8 @@ as outras telas de exercício** (Revisão, Desafios, Ditados, Conjugação, Banc
 | Área | Situação |
 |---|---|
 | Jogos da Conjugação | **Piloto, feito** (2026-11-11, branch `claude/affectionate-fermi-w2s41y`) |
-| Trilha (lição) | Prévia em 2026-11-11 (aguarda a autora); a reformulação da lição curta (outra sessão) deve usar este componente |
-| Expressões (Desafios) | Prévia em 2026-11-11 (aguarda a autora) |
+| Trilha (lição) | Aprovado em 2026-11-23, fica com a conversa da lição curta (texto de passagem no chat desta sessão); a reformulação da lição curta (outra sessão) deve usar este componente |
+| Expressões (Desafios) | **Feito** (aprovado em 2026-11-23): significado, Monte a frase e Sua vez; fala nova `profNote` aguarda o piloto de textos (`docs/voz-piloto-jogos-expressoes.md`) |
 | Ouça e traduza, Acentuação, Complete a frase, Ditados, Revisão, Banco, Conjugação (prática) | A fazer |
 
 Ao adotar numa área: trocar o painel antigo (`.correct-feedback` / `.wrong-feedback`) por `painelRespostaHTML`, manter os
@@ -51,3 +51,9 @@ ids dos botões, atualizar os testes da área e registrar a mudança de propósi
 O próprio componente fixa `text-align:left` (a lição centraliza a tela), traz `margin-top:16px` (sem as classes antigas o
 painel encostava nas opções) e usa `--on-brand-fill` no ✕ (no escuro o `--on-vivid` é escuro). Script da prévia (fora do
 repositório): Playwright que troca o painel antigo pelo `painelRespostaHTML` com o conteúdo do painel antigo.
+
+## Fala com o idioma estudado entre {chaves} (2026-11-23)
+
+`painelRespostaRico(texto, lang)` escapa a fala e pinta de azul (`.pr-fr`) o trecho entre {chaves}, a mesma convenção dos Jogos.
+Expressões: `profNote` (pt-BR no desafio; o idioma do site no overlay `challenges.<lang>.js`, campo `profNote`). Sem a fala, a
+explicação em francês (`explanation`) continua como linha de apoio e a professora não aparece.

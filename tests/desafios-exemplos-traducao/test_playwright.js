@@ -73,9 +73,10 @@ const ateExemplos = async page => { await ateResposta(page); await page.click('#
     await page.click('#expr-see-options-btn'); await page.waitForSelector('.exercise-option');
     const labs = await page.evaluate(() => [...document.querySelectorAll('.exercise-option')].reduce((o, b) => (o[b.dataset.origIdx] = b.querySelector('.opt-text').textContent, o), {}));
     check(label + ' opções no idioma do site, cada uma na sua posição de origem', JSON.stringify(labs) === JSON.stringify(pt ? { 0: 'Falta de sorte', 1: 'Muito', 2: 'Uma tigela', 3: 'Nada' } : { 0: 'Bad luck', 1: 'A lot', 2: 'A bowl', 3: 'Nothing' }), labs);
-    await page.click('.exercise-option[data-orig-idx="2"]'); await page.waitForSelector('.wrong-feedback'); await page.waitForTimeout(60);
-    const wrongTxt = await page.evaluate(() => ({ yours: (document.querySelector('.wrong-feedback .feedback-inner-box') || {}).textContent, okOpt: (document.querySelector('.exercise-option.correct .opt-text') || {}).textContent, badOpt: (document.querySelector('.exercise-option.incorrect .opt-text') || {}).textContent }));
-    check(label + ' errou: "Sua resposta" e as marcas verde/vermelha no idioma do site, correção pelo francês', wrongTxt.yours.trim() === (pt ? 'Uma tigela' : 'A bowl') && wrongTxt.okOpt === (pt ? 'Falta de sorte' : 'Bad luck') && wrongTxt.badOpt === (pt ? 'Uma tigela' : 'A bowl'), wrongTxt);
+    await page.click('.exercise-option[data-orig-idx="2"]'); await page.waitForSelector('.expr-panel .painel-resposta.is-err'); await page.waitForTimeout(60);
+    const wrongTxt = await page.evaluate(() => ({ yours: !!document.querySelector('.expr-panel .pr-sua'), meaning: (document.querySelector('.expr-panel .pr-trad') || {}).textContent, okOpt: (document.querySelector('.exercise-option.correct .opt-text') || {}).textContent, badOpt: (document.querySelector('.exercise-option.incorrect .opt-text') || {}).textContent }));
+    // 2026-11-23 (painel de resposta único): sem a caixa "Sua resposta" (a opção marcada já fica vermelha); o sentido vem no idioma do site
+    check(label + ' errou: marcas verde/vermelha no idioma do site, correção pelo francês, painel sem "Sua resposta"', !wrongTxt.yours && !!wrongTxt.meaning && wrongTxt.okOpt === (pt ? 'Falta de sorte' : 'Bad luck') && wrongTxt.badOpt === (pt ? 'Uma tigela' : 'A bowl'), wrongTxt);
     if (OUT) await page.screenshot({ path: path.join(OUT, `0-opcoes-${label}.png`) });
     await open(page, 'ch-old');
     check(label + ' sem questionMode: continua "O que significa?"', (await qLab()) === (pt ? 'O que significa?' : 'What does it mean?'));
@@ -102,15 +103,15 @@ const ateExemplos = async page => { await ateResposta(page); await page.click('#
     // ---- Monte a frase até o fim: caixa da frase montada (destaque, áudio, tradução) e a "Sua vez" com tradução ----
     const toks = await page.evaluate(() => EXPR_RUN.c.example.text.trim().split(/\s+/));
     for (const tok of toks) await page.evaluate(t => { [...document.querySelectorAll('.reorder-block:not(.used)')].find(b => b.textContent === t).click(); }, tok);
-    await page.waitForSelector('.correct-feedback .expr-order-full'); await page.waitForTimeout(80);
-    const box = await page.evaluate(() => { const b = document.querySelector('.expr-order-full'); return { mark: (b.querySelector('.expr-mark') || {}).textContent, tr: (b.querySelector('.expr-order-full-tr') || {}).innerText, audio: b.querySelectorAll('button').length, topAudio: document.querySelectorAll('.reorder-target button, .reorder-target .dictation-play-btn').length }; });
+    await page.waitForSelector('.expr-panel .painel-resposta.is-ok .pr-frase'); await page.waitForTimeout(80);
+    const box = await page.evaluate(() => { const b = document.querySelector('.expr-panel .pr-frase'); return { mark: (b.querySelector('.expr-mark') || {}).textContent, tr: (b.querySelector('.pr-trad') || {}).innerText, audio: b.querySelectorAll('button').length, topAudio: document.querySelectorAll('.reorder-target button, .reorder-target .dictation-play-btn').length }; });
     check(label + ' Monte a frase: caixa da resposta com a expressão em destaque e a tradução, com 2 ícones pequenos de áudio (▶ e 🐢) ao lado da frase', box.mark === 'Pas de bol' && box.audio === 2 && box.topAudio >= 2 && box.tr === (pt ? '— Perdi o ônibus por dois minutos.\n— Que azar!' : "— I missed the bus by two minutes.\n— Bad luck!"), box);
     if (OUT) { await page.waitForTimeout(400); await page.screenshot({ path: path.join(OUT, `4-monte-caixa-${label}.png`) }); }
     await page.click('#expr-continue-btn'); await page.waitForSelector('#expr-turn-input');
     const turnTr = await page.evaluate(() => (document.querySelector('.expr-turn-tr') || {}).innerText);
     check(label + ' Sua vez: tradução da frase junto da lacuna', turnTr === (pt ? 'Ah, que azar!' : 'Oh, bad luck!'), turnTr);
-    await page.fill('#expr-turn-input', 'pas de bol'); await page.click('#expr-turn-verify-btn'); await page.waitForSelector('.expr-turn-full'); await page.waitForTimeout(80);
-    const turnBox = await page.evaluate(() => ({ tr: (document.querySelector('.expr-turn-full .expr-order-full-tr') || {}).innerText, strong: (document.querySelector('.expr-turn-full strong') || {}).textContent }));
+    await page.fill('#expr-turn-input', 'pas de bol'); await page.click('#expr-turn-verify-btn'); await page.waitForSelector('.expr-panel .pr-frase'); await page.waitForTimeout(80);
+    const turnBox = await page.evaluate(() => ({ tr: (document.querySelector('.expr-panel .pr-trad') || {}).innerText, strong: (document.querySelector('.expr-panel .pr-frase strong') || {}).textContent }));
     check(label + ' Sua vez: caixa da resposta com a frase completa (preenchida em destaque) e a tradução', turnBox.strong === 'pas de bol' && turnBox.tr === (pt ? 'Ah, que azar!' : 'Oh, bad luck!'), turnBox);
     await page.click('#expr-continue-btn'); await page.waitForSelector('.expr-final'); await page.waitForTimeout(900);
     const fin = await page.evaluate(() => ({ learned: (document.querySelector('.expr-final-learned') || {}).innerText, xp: (document.getElementById('expr-final-xp-num') || { dataset: {} }).dataset.xp, shown: (document.getElementById('expr-final-xp-num') || {}).textContent, title: (document.querySelector('.expr-final-title') || {}).textContent }));

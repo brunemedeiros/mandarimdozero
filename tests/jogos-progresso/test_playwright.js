@@ -140,7 +140,7 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
         verbHint: card('pc-imparfait').querySelector('.cg-card-hint').textContent, lede: !!document.querySelector('.cg-card-lede'),
         order: qa('.challenges-level-section[data-level="A1"] .cg-game-card').map(c => c.dataset.game || c.dataset.soon),
         soon: qa('.cg-soon').map(c => c.closest('.challenges-level-section').dataset.level + ':' + c.dataset.soon), b1Count: !!document.querySelector('.challenges-level-section[data-level="B1"] .challenges-level-count'),
-        theme: card('tu-vous').querySelector('.expr-reg').textContent, prem: ['etre-avoir', 'pc-auxiliaire', 'tu-vous', 'pc-imparfait'].map(id => !!card(id).querySelector('.cg-premium')),
+        theme: card('tu-vous').querySelector('.cg-theme').textContent, prem: ['etre-avoir', 'pc-auxiliaire', 'tu-vous', 'pc-imparfait'].map(id => !!card(id).querySelector('.cg-premium')),
         hscroll: document.documentElement.scrollWidth > window.innerWidth + 1, noPt: lang => true };
     });
     const pt = lang === 'pt-BR';

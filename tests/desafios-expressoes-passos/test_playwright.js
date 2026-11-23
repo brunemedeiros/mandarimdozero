@@ -97,9 +97,9 @@ const state = page => page.evaluate(() => ({ xp: STATE.xp, done: !!STATE.complet
     check(label + ' opções: 4, numeradas 1-4, palpite mostrado, "Não sei"', o.n === 4 && o.hints === '1,2,3,4' && /estar com fome/.test(o.line) && o.dk === X.dk && o.noInput, o);
     if (OUT) { await page.waitForTimeout(450); await page.screenshot({ path: path.join(OUT, `2-opcoes-${label}.png`) }); }
     await pick(page, true);
-    const a = await page.evaluate(() => ({ panel: !!document.querySelector('.correct-feedback .expr-meaning-box'), correct: document.querySelectorAll('.exercise-option.correct').length, wrong: document.querySelectorAll('.exercise-option.incorrect').length, sounds: window.__sounds.join(), cont: (document.getElementById('expr-continue-btn') || {}).textContent, nr: !!document.getElementById('challenge-retry-btn') }));
+    const a = await page.evaluate(() => ({ panel: !!document.querySelector('.expr-panel .painel-resposta.is-ok'), correct: document.querySelectorAll('.exercise-option.correct').length, wrong: document.querySelectorAll('.exercise-option.incorrect').length, sounds: window.__sounds.join(), cont: (document.getElementById('expr-continue-btn') || {}).textContent, nr: !!document.getElementById('challenge-retry-btn') }));
     check(label + ' acerto: opção verde, painel com o sentido, som, "Continuar →"', a.panel && a.correct === 1 && a.wrong === 0 && a.sounds === 'true' && a.cont === X.cont && !a.nr, a);
-    check(label + ' painel da resposta: sem a linha "significa [francês]" (só a expressão e "Em português/inglês")', await page.evaluate(() => { const b = document.querySelector('.expr-meaning-box'); return !!b && !/significa|\bmeans\b/i.test(b.innerText) && /avoir faim/.test(b.innerText); }));
+    check(label + ' painel da resposta: sem a linha "significa [francês]" (só a expressão e "Em português/inglês")', await page.evaluate(() => { const b = document.querySelector('.expr-panel .painel-resposta'); return !!b && !/significa|\bmeans\b/i.test(b.innerText) && /avoir faim/.test(b.innerText); }));
     check(label + ' progresso 20%', (await prog(page)) === '20%');
     if (OUT) { await page.waitForTimeout(450); await page.screenshot({ path: path.join(OUT, `3-acerto-${label}.png`), fullPage: true }); }
     await page.keyboard.press('Enter'); // Enter avança
@@ -119,7 +119,7 @@ const state = page => page.evaluate(() => ({ xp: STATE.xp, done: !!STATE.complet
     if (OUT) { await page.waitForTimeout(450); await page.screenshot({ path: path.join(OUT, `4b-ordenar-${label}.png`) }); }
     // monta na ordem certa: cada toque pega a próxima palavra ainda não usada
     for (const tok of od.tokens) await page.evaluate(t => { [...document.querySelectorAll('.reorder-block:not(.used)')].find(b => b.textContent === t).click(); }, tok);
-    const or = await page.evaluate(() => ({ ok: !!document.querySelector('.correct-feedback .expr-order-full'), slots: [...document.querySelectorAll('.reorder-slot.correct')].length, wrongSlots: document.querySelectorAll('.reorder-slot.incorrect').length, sounds: window.__sounds.join(), xp: STATE.xp, full: (document.querySelector('.expr-order-full') || {}).textContent, audioBtns: document.querySelectorAll('.expr-order-full .dictation-play-btn, .expr-order-full .slow-audio-btn, .expr-order-full [id^=expr-order-done]').length }));
+    const or = await page.evaluate(() => ({ ok: !!document.querySelector('.expr-panel .painel-resposta.is-ok .pr-frase'), slots: [...document.querySelectorAll('.reorder-slot.correct')].length, wrongSlots: document.querySelectorAll('.reorder-slot.incorrect').length, sounds: window.__sounds.join(), xp: STATE.xp, full: (document.querySelector('.expr-panel .pr-frase-fr') || {}).textContent, audioBtns: document.querySelectorAll('.expr-panel .pr-acoes [id^=expr-order-done]').length }));
     check(label + ' "Monte a frase" certo: casas verdes, painel com a frase inteira, som, sem XP', or.ok && or.slots === od.tokens.length && or.wrongSlots === 0 && or.sounds === 'true,true' && or.xp === 0 && or.full.trim().startsWith(od.tokens.join(' ')) && or.audioBtns === 2, or);
     if (OUT) { await page.waitForTimeout(450); await page.screenshot({ path: path.join(OUT, `4c-ordenado-${label}.png`), fullPage: true }); }
     await page.keyboard.press('Enter'); // Enter avança
@@ -129,8 +129,8 @@ const state = page => page.evaluate(() => ({ xp: STATE.xp, done: !!STATE.complet
     if (OUT) { await page.waitForTimeout(450); await page.screenshot({ path: path.join(OUT, `5-suavez-${label}.png`) }); }
     await page.fill('#expr-turn-input', 'Avons faim.'); // maiúscula e ponto não contam
     await page.keyboard.press('Enter');
-    await page.waitForSelector('.expr-turn-full');
-    const t2 = await page.evaluate(() => ({ ok: !!document.querySelector('.correct-feedback .expr-turn-full'), almost: !!document.querySelector('.review-almost'), sounds: window.__sounds.join() }));
+    await page.waitForSelector('.expr-panel .pr-frase');
+    const t2 = await page.evaluate(() => ({ ok: !!document.querySelector('.expr-panel .painel-resposta.is-ok .pr-frase'), almost: !!document.querySelector('.painel-resposta[data-estado="quase"]'), sounds: window.__sounds.join() }));
     check(label + ' "Sua vez": resposta certa (ignora maiúscula e ponto), sem "Quase", som', t2.ok && !t2.almost && t2.sounds === 'true,true,true', t2);
     if (OUT) { await page.waitForTimeout(450); await page.screenshot({ path: path.join(OUT, `6-suavez-acerto-${label}.png`), fullPage: true }); }
     await page.click('#expr-continue-btn');
@@ -146,7 +146,7 @@ const state = page => page.evaluate(() => ({ xp: STATE.xp, done: !!STATE.complet
     // refazer um desafio JÁ concluído: sem XP
     await open(page);
     await page.click('#expr-see-options-btn'); await pick(page, true); await ateSuaVez(page);
-    await page.waitForSelector('#expr-turn-input'); await page.fill('#expr-turn-input', 'avons faim'); await page.keyboard.press('Enter'); await page.waitForSelector('.expr-turn-full'); await page.click('#expr-continue-btn');
+    await page.waitForSelector('#expr-turn-input'); await page.fill('#expr-turn-input', 'avons faim'); await page.keyboard.press('Enter'); await page.waitForSelector('.expr-panel .pr-frase'); await page.click('#expr-continue-btn');
     await page.waitForSelector('.expr-final');
     const rows2 = await page.evaluate(() => [...document.querySelectorAll('.expr-final-sum li')].length);
     const b2 = await state(page); await page.click('#challenge-complete-btn'); await page.waitForTimeout(150); const a2 = await state(page);
@@ -163,43 +163,44 @@ const state = page => page.evaluate(() => ({ xp: STATE.xp, done: !!STATE.complet
   const { page, ctx, errors } = await boot(browser, port, { lang: 'pt-BR', theme: 'light', vw: 1200, vh: 800 });
   const toTurn = async (right) => { await open(page); await page.click('#expr-see-options-btn'); await pick(page, right); await ateSuaVez(page); await page.waitForSelector('#expr-turn-input'); };
   // "Quase" (uma letra trocada em palavra de 5+ letras) vale 1 XP e mostra o aviso
-  await toTurn(true); await page.fill('#expr-turn-input', 'avons fain'); await page.click('#expr-turn-verify-btn'); await page.waitForSelector('.expr-turn-full');
-  check('Sua vez "quase": painel verde com o aviso Quase e a frase certa', await page.evaluate(() => !!document.querySelector('.correct-feedback .review-almost') && /avons faim/.test(document.querySelector('.expr-turn-full').innerText)));
+  await toTurn(true); await page.fill('#expr-turn-input', 'avons fain'); await page.click('#expr-turn-verify-btn'); await page.waitForSelector('.expr-panel .pr-frase');
+  check('Sua vez "quase": painel verde com o aviso Quase e a frase certa', await page.evaluate(() => !!document.querySelector('.expr-panel .painel-resposta[data-estado="quase"]') && /avons faim/.test(document.querySelector('.expr-panel .pr-frase').innerText)));
   await page.click('#expr-continue-btn'); await page.waitForSelector('.expr-final');
   check('final com "quase": linha ~ com +1 XP, escolha +1 e total +2', await page.evaluate(() => { const r = [...document.querySelectorAll('.expr-final-sum li')].map(l => l.innerText); return /~/.test(r[2]) && /\+1 XP/.test(r[2]) && /\+1 XP/.test(r[0]) && document.getElementById('expr-final-xp-num').dataset.xp === '2'; }));
   let b = await state(page); await page.click('#challenge-complete-btn'); await page.waitForTimeout(150); let a = await state(page);
   check('"quase" paga 1 + 1 = 2 XP (escolha certa e quase)', a.xp === b.xp + 2 && a.done, { b, a });
   // resposta alternativa escrita pelo autor (alsoAccept) vale; variação inventada não vale
   await page.evaluate(() => { delete STATE.completedChallenges['ch-e1']; });
-  await toTurn(true); await page.fill('#expr-turn-input', 'avons très faim'); await page.click('#expr-turn-verify-btn'); await page.waitForSelector('.expr-turn-full');
-  check('alternativa do autor (alsoAccept) vale como certa', await page.evaluate(() => !!document.querySelector('.correct-feedback') && !document.querySelector('.review-almost')));
-  await toTurn(true); await page.fill('#expr-turn-input', 'avons soif'); await page.click('#expr-turn-verify-btn'); await page.waitForSelector('.expr-turn-full');
-  check('resposta diferente: painel vermelho com a resposta marcada e a frase completa', await page.evaluate(() => !!document.querySelector('.wrong-feedback .typed-attempt') && /avons faim/.test(document.querySelector('.expr-turn-full').innerText)));
+  await toTurn(true); await page.fill('#expr-turn-input', 'avons très faim'); await page.click('#expr-turn-verify-btn'); await page.waitForSelector('.expr-panel .pr-frase');
+  check('alternativa do autor (alsoAccept) vale como certa', await page.evaluate(() => !!document.querySelector('.expr-panel .painel-resposta.is-ok') && !document.querySelector('.painel-resposta[data-estado="quase"]')));
+  await toTurn(true); await page.fill('#expr-turn-input', 'avons soif'); await page.click('#expr-turn-verify-btn'); await page.waitForSelector('.expr-panel .pr-frase');
+  // 2026-11-23 (painel de resposta único): o desenho letra a letra fica só para o "quase"; o que ela digitou continua no campo
+  check('resposta diferente: painel vermelho com a frase completa, sem o desenho letra a letra', await page.evaluate(() => !!document.querySelector('.expr-panel .painel-resposta.is-err') && !document.querySelector('.expr-panel .typed-attempt') && /avons faim/.test(document.querySelector('.expr-panel .pr-frase').innerText)));
   await page.click('#expr-continue-btn'); await page.waitForSelector('.expr-final');
   b = await state(page); await page.click('#challenge-complete-btn'); await page.waitForTimeout(150); a = await state(page);
   check('"Sua vez" errada: conclui só com o XP da escolha (1)', a.xp === b.xp + 1 && a.done, { b, a });
   // campo vazio não verifica
   await page.evaluate(() => { delete STATE.completedChallenges['ch-e1']; });
   await toTurn(true); await page.click('#expr-turn-verify-btn');
-  check('verificar com o campo vazio não faz nada', await page.evaluate(() => !document.querySelector('.expr-turn-full') && document.activeElement.id === 'expr-turn-input'));
+  check('verificar com o campo vazio não faz nada', await page.evaluate(() => !document.querySelector('.expr-panel .pr-frase') && document.activeElement.id === 'expr-turn-input'));
   // "Não sei" na Sua vez: sem XP, resposta revelada, silencioso
   const s0 = await page.evaluate(() => window.__sounds.length);
-  await page.click('#expr-turn-dontknow-btn'); await page.waitForSelector('.expr-turn-full');
-  check('"Não sei" na Sua vez: revela a frase, sem som, cabeçalho "Resposta revelada"', await page.evaluate(n => document.querySelector('.wrong-feedback-header').innerText.includes('revelada') && window.__sounds.length === n, s0));
+  await page.click('#expr-turn-dontknow-btn'); await page.waitForSelector('.expr-panel .pr-frase');
+  check('"Não sei" na Sua vez: revela a frase, sem som, cabeçalho "Resposta revelada"', await page.evaluate(n => document.querySelector('.expr-panel .pr-titulo').innerText.includes('revelada') && window.__sounds.length === n, s0));
   await page.click('#expr-continue-btn'); await page.waitForSelector('.expr-final');
   b = await state(page); await page.click('#challenge-complete-btn'); await page.waitForTimeout(150); a = await state(page);
   check('"Não sei" na Sua vez: só o XP da escolha (1)', a.xp === b.xp + 1, { b, a });
   // errar a escolha: fica na fila de revisão, final com Tentar de novo (sem Concluir, sem XP)
   await page.evaluate(() => { delete STATE.completedChallenges['ch-e1']; delete STATE.challengeReviews['ch-e1']; });
   await open(page); await page.click('#expr-see-options-btn'); await pick(page, false);
-  const w = await page.evaluate(() => ({ wrong: document.querySelectorAll('.exercise-option.incorrect').length, right: document.querySelectorAll('.exercise-option.correct').length, header: document.querySelector('.wrong-feedback-header').innerText, sounds: window.__sounds.slice(-1).join(), why: !!document.querySelector('.wrong-feedback .wrong-feedback-why') }));
-  check('erro: opção errada vermelha, certa verde, painel "Não foi dessa vez", som de erro', w.wrong === 1 && w.right === 1 && /Não foi dessa vez/.test(w.header) && w.sounds === 'false' && w.why, w);
-  await ateSuaVez(page); await page.waitForSelector('#expr-turn-input'); await page.fill('#expr-turn-input', 'avons faim'); await page.click('#expr-turn-verify-btn'); await page.waitForSelector('.expr-turn-full'); await page.click('#expr-continue-btn'); await page.waitForSelector('.expr-final');
+  const w = await page.evaluate(() => ({ wrong: document.querySelectorAll('.exercise-option.incorrect').length, right: document.querySelectorAll('.exercise-option.correct').length, header: document.querySelector('.expr-panel .pr-titulo').innerText, sounds: window.__sounds.slice(-1).join(), why: !!document.querySelector('.expr-panel .painel-resposta.is-err .pr-frase') }));
+  check('erro: opção errada vermelha, certa verde, painel "Quase lá!" (painel único, 2026-11-23), som de erro', w.wrong === 1 && w.right === 1 && /Quase lá!/.test(w.header) && w.sounds === 'false' && w.why, w);
+  await ateSuaVez(page); await page.waitForSelector('#expr-turn-input'); await page.fill('#expr-turn-input', 'avons faim'); await page.click('#expr-turn-verify-btn'); await page.waitForSelector('.expr-panel .pr-frase'); await page.click('#expr-continue-btn'); await page.waitForSelector('.expr-final');
   const ff = await page.evaluate(() => ({ retry: !!document.getElementById('challenge-retry-btn'), later: !!document.getElementById('challenge-later-btn'), complete: !!document.getElementById('challenge-complete-btn'), rev: !!STATE.challengeReviews['ch-e1'], done: !!STATE.completedChallenges['ch-e1'] }));
   check('erro na escolha: final com Tentar de novo/mais tarde, sem Concluir, fica na revisão, não conclui', ff.retry && ff.later && !ff.complete && ff.rev && !ff.done, ff);
   // "Não sei" na escolha: revela, silencioso, conta como erro
   await open(page); await page.click('#expr-see-options-btn'); const sn = await page.evaluate(() => window.__sounds.length); await page.click('#expr-dontknow-btn');
-  const dk = await page.evaluate(n => ({ revealed: document.querySelector('.wrong-feedback-header').innerText.includes('revelada'), correct: document.querySelectorAll('.exercise-option.correct').length, wrong: document.querySelectorAll('.exercise-option.incorrect').length, silent: window.__sounds.length === n, noYours: !document.querySelector('.wrong-feedback-why-label') || ![...document.querySelectorAll('.wrong-feedback-why-label')].some(l => /Sua resposta/i.test(l.innerText)) }), sn);
+  const dk = await page.evaluate(n => ({ revealed: document.querySelector('.expr-panel .pr-titulo').innerText.includes('revelada'), correct: document.querySelectorAll('.exercise-option.correct').length, wrong: document.querySelectorAll('.exercise-option.incorrect').length, silent: window.__sounds.length === n, noYours: !document.querySelector('.wrong-feedback-why-label') || ![...document.querySelectorAll('.wrong-feedback-why-label')].some(l => /Sua resposta/i.test(l.innerText)) }), sn);
   check('"Não sei" na escolha: resposta revelada em verde, silencioso, sem "Sua resposta"', dk.revealed && dk.correct === 1 && dk.wrong === 0 && dk.silent && dk.noYours, dk);
   // teclado: tecla 2 escolhe a 2ª opção; com palpite vazio não aparece a linha do palpite
   await open(page); await page.click('#expr-see-options-btn');
@@ -215,14 +216,24 @@ const state = page => page.evaluate(() => ({ xp: STATE.xp, done: !!STATE.complet
   await page.evaluate(() => document.querySelector('.reorder-slot.filled').click());
   check('ordenar: tocar numa casa preenchida devolve a palavra', await page.evaluate(() => document.querySelectorAll('.reorder-slot.filled').length === 0 && document.querySelectorAll('.reorder-block.used').length === 0));
   for (const tok of [...toks].reverse()) await page.evaluate(t => { [...document.querySelectorAll('.reorder-block:not(.used)')].find(b => b.textContent === t).click(); }, tok);
-  const oe = await page.evaluate(() => ({ bad: document.querySelectorAll('.reorder-slot.incorrect').length, header: (document.querySelector('.wrong-feedback-header') || {}).innerText, full: (document.querySelector('.expr-order-full') || {}).textContent, sound: window.__sounds.slice(-1).join(), hidden: document.getElementById('expr-order-blocks').style.display === 'none', ok: EXPR_RUN.order.ok }));
-  check('ordenar errado: casas fora do lugar em vermelho, frase certa no painel, som de erro, blocos somem', oe.bad >= 1 && /Não foi dessa vez/.test(oe.header) && oe.full.trim().startsWith(toks.join(' ')) && oe.sound === 'false' && oe.hidden && oe.ok === false, oe);
+  const oe = await page.evaluate(() => ({ bad: document.querySelectorAll('.reorder-slot.incorrect').length, header: (document.querySelector('.expr-panel .pr-titulo') || {}).innerText, full: (document.querySelector('.expr-panel .pr-frase-fr') || {}).textContent, sound: window.__sounds.slice(-1).join(), hidden: document.getElementById('expr-order-blocks').style.display === 'none', ok: EXPR_RUN.order.ok }));
+  check('ordenar errado: casas fora do lugar em vermelho, frase certa no painel, som de erro, blocos somem', oe.bad >= 1 && /Quase lá!/.test(oe.header) && oe.full.trim().startsWith(toks.join(' ')) && oe.sound === 'false' && oe.hidden && oe.ok === false, oe);
   await page.click('#expr-continue-btn'); await page.waitForSelector('#expr-turn-input');
   await paraOrdem(); const s1 = await page.evaluate(() => window.__sounds.length); await page.click('#expr-order-dontknow-btn');
-  const od2 = await page.evaluate(n => ({ header: document.querySelector('.wrong-feedback-header').innerText, slots: [...document.querySelectorAll('.reorder-slot.correct')].map(x => x.textContent.trim()).join(' '), silent: window.__sounds.length === n, revealed: EXPR_RUN.order.revealed && !EXPR_RUN.order.ok }), s1);
+  const od2 = await page.evaluate(n => ({ header: document.querySelector('.expr-panel .pr-titulo').innerText, slots: [...document.querySelectorAll('.reorder-slot.correct')].map(x => x.textContent.trim()).join(' '), silent: window.__sounds.length === n, revealed: EXPR_RUN.order.revealed && !EXPR_RUN.order.ok }), s1);
   check('ordenar "Não sei": frase certa revelada, silencioso, conta como erro', /revelada/.test(od2.header) && od2.slots === toks.join(' ') && od2.silent && od2.revealed, od2);
-  await page.click('#expr-continue-btn'); await page.waitForSelector('#expr-turn-input'); await page.click('#expr-turn-dontknow-btn'); await page.waitForSelector('.expr-turn-full'); await page.click('#expr-continue-btn'); await page.waitForSelector('.expr-final');
+  await page.click('#expr-continue-btn'); await page.waitForSelector('#expr-turn-input'); await page.click('#expr-turn-dontknow-btn'); await page.waitForSelector('.expr-panel .pr-frase'); await page.click('#expr-continue-btn'); await page.waitForSelector('.expr-final');
   check('final mostra "Monte a frase" como erro quando errou ou revelou', await page.evaluate(() => { const r = [...document.querySelectorAll('.expr-final-sum li')].map(l => l.innerText.replace(/\s+/g, ' ')); return r.length >= 3 && /Monte a frase\s*✕/.test(r[1]); }));
+  // Painel de resposta único (2026-11-23): fala da Prof. Brune (profNote) com o francês entre {chaves} em azul; sem a fala,
+  // a explicação em francês continua como linha de apoio e a professora não aparece.
+  await open(page); await page.click('#expr-see-options-btn'); await pick(page, true); await page.waitForSelector('.expr-panel');
+  const semFala = await page.evaluate(() => ({ prof: !!document.querySelector('.expr-panel .pr-prof'), apoio: !!document.querySelector('.expr-panel .challenge-explanation') }));
+  check('sem fala nova: explicação em francês como apoio, sem a professora', !semFala.prof && semFala.apoio, semFala);
+  await page.evaluate(() => { CHALLENGES.find(x => x.id === 'ch-e1').profNote = { pt: 'Em francês a fome se tem: {j\'ai faim}.' }; });
+  await open(page); await page.click('#expr-see-options-btn'); await pick(page, true); await page.waitForSelector('.expr-panel');
+  const comFala = await page.evaluate(() => { const f = document.querySelector('.expr-panel .pr-prof'); return { prof: !!f, nome: (f && f.querySelector('.pr-nome') || {}).textContent, azul: (f && f.querySelector('.pr-fr') || {}).textContent, chaves: f ? /[{}]/.test(f.textContent) : true, apoio: !!document.querySelector('.expr-panel .challenge-explanation') }; });
+  check('com fala nova: Prof. Brune, francês em azul, sem chaves à vista, sem a explicação em francês', comFala.prof && comFala.nome === 'Prof. Brune' && comFala.azul === "j'ai faim" && !comFala.chaves && !comFala.apoio, comFala);
+  await page.evaluate(() => { delete CHALLENGES.find(x => x.id === 'ch-e1').profNote; });
   // expressão sem registro e com exemplo de 2 palavras: sem "Quando usar" e sem o passo de ordenar
   await page.evaluate(() => openChallengePlayer('ch-e2')); await page.waitForSelector('#expr-see-options-btn'); await page.click('#expr-see-options-btn');
   await page.evaluate(() => { const c = CHALLENGES.find(x => x.id === 'ch-e2'); [...document.querySelectorAll('.exercise-option')].find(b => b.querySelector('.opt-text').textContent === c.correctAnswer).click(); });

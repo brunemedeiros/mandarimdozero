@@ -311,6 +311,9 @@
 /* sem o botão de áudio das Expressões: rodapé em linha, sem a reserva à direita nem altura mínima */
 #view-conjugaison .cg-game-card .expr-card-foot{ flex-direction:row; flex-wrap:wrap; align-items:center; gap:6px; padding-right:0; min-height:0; }
 #view-conjugaison .challenges-cards .challenge-card.cg-game-card{ min-height:0; padding:14px 16px; }
+/* etiqueta de tema do jogo: mesmo desenho da etiqueta de registro das Expressões (.expr-reg), com classe própria para não se
+   misturar com as Expressões (a lista dos Jogos fica montada na página mesmo escondida) */
+#view-conjugaison .cg-theme{ display:inline-flex; align-items:center; gap:4px; font-size:12px; font-weight:800; line-height:1.2; border-radius:999px; padding:2px 9px; border:1.5px solid currentColor; white-space:nowrap; background:var(--paper); color:var(--seal-red-dark); }
 #view-conjugaison .cg-game-card .cg-premium{ font-size:12px; font-weight:800; color:var(--ink-soft); }
 #conj-game-wrap{ max-width:720px; margin:0 auto; }
 #view-conjugaison .cg-title{ font-size:18px; font-weight:800; margin:0 0 10px; color:var(--ink); }
@@ -344,8 +347,6 @@
 #view-conjugaison .painel-resposta .cg-timeline{ display:flex; flex-direction:row; align-items:center; gap:10px; margin:0; padding:0; background:none; border:0; text-align:left; }
 #view-conjugaison .painel-resposta .cg-timeline svg{ flex:none; width:84px; height:auto; color:var(--ink); }
 #view-conjugaison .painel-resposta .cg-timeline figcaption, #view-conjugaison .painel-resposta .cg-timeline.cg-rule figcaption{ margin:0; padding:0; background:none; border:0; font-size:inherit; font-weight:inherit; color:inherit; line-height:inherit; }
-#view-conjugaison .cg-pr-sua{ display:flex; flex-direction:column; gap:2px; }
-#view-conjugaison .cg-pr-sua-rot{ font-size:12.5px; font-weight:800; color:var(--ink-soft); }
 #view-conjugaison .cg-verdict{ margin:0 0 14px; font-size:17px; font-weight:900; }
 #view-conjugaison .cg-verdict.ok{ color:var(--jade); }
 #view-conjugaison .cg-verdict.no{ color:var(--error-red); }
