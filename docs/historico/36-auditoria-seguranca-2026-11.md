@@ -131,3 +131,8 @@ Os 38 reports da produção são todos de contas logadas (nenhum convidado), por
   desligado de propósito, 4 falham. O teste real de Storage (`tests/fase-public-deck/staging_storage_test.js`, precisa de
   contas no Staging) não foi rodado aqui.
 
+## Rodada das 22h UTC de 2026-11-24 (v38) conferida
+
+- 200 ok:true, 44 combinações conta/idioma, **0 erros** (na véspera, 10 da missão `xp50`), 29 avisos criados.
+- Lembretes "faltam N missões": 2 (na véspera 9, no dia 22 eram 10): agora só saem para quem mexeu nas missões hoje.
+
