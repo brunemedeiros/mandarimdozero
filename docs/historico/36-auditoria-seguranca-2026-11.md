@@ -11,7 +11,7 @@ funções), código do repositório e cabeçalhos do site no ar.
 |---|---|---|---|
 | 1 | Grave | Pasta `report-screenshots` pública: visitante sem conta listava e baixava os 16 prints dos reports (testado como anônimo: a lista veio) e enviava arquivo de qualquer tipo e tamanho | Conserto: migration 139 + Painel com link temporário. Decisão da dona: só ela vê os prints |
 | 2 | Médio | `avatars`, `flashcard-media` e `support-materials`: qualquer um LISTAVA a pasta inteira (via os ids das contas); `avatars` sem limite de tipo/tamanho | Conserto: migration 139 (cada conta só lista a própria pasta; o link direto continua público) |
-| 3 | Médio | Bibliotecas externas sem versão fixa (`supabase-js@2`) e sem lacre SRI (nenhuma das 4) | Pendente (já era adiado no histórico 33) |
+| 3 | Médio | Bibliotecas externas sem versão fixa (`supabase-js@2`) e sem lacre SRI (nenhuma das 4) | Conserto: 3 guardadas no site, Hanzi Writer com SRI (abaixo) |
 | 4 | Médio | `notification-cron` aceita a chave pública (`verify_jwt` aceita o token anon): qualquer um dispara os avisos fora de hora. Limites por dia e intervalo mínimo seguram o estrago | Conserto: senha `x-cron-token` + migration 140 (abaixo) |
 | 5 | Leve | Proteção contra senhas vazadas (HaveIBeenPwned) desligada no Auth | Pendente (talvez só no plano pago) |
 | 6 | Leve | Sem CSP / proteção contra moldura (GitHub Pages não deixa configurar cabeçalhos) | Pendente; dá para pôr parte por `<meta>` |
@@ -84,4 +84,29 @@ Os 38 reports da produção são todos de contas logadas (nenhum convidado), por
   `computeMissionProgress` (nunca mais derruba a conta). `notification-cron` **v37** na produção (2026-11-24),
   conteúdo baixado de volta e idêntico ao repositório; sem senha = 401. `tests/pt-servidor/test_cron_pt.js` 75/75
   (4 novos). Conferir a rodada das 22h UTC de 2026-11-24 (esperado: 0 erros).
+
+## Conserto 3: bibliotecas com versão fixa (2026-11-24)
+
+- supabase-js **2.119.2**, JSZip 3.10.1 e sql.js 1.8.0 (+ `.wasm`) guardados em `shared/vendor/` (versão no nome da pasta;
+  baixados de 2 CDNs com sha256 idêntico; impressões digitais e passo a passo de atualização em `shared/vendor/README.md`).
+  Páginas: `index.html`, `fr/index.html`, `zh/index.html`; `locateFile` do sql.js em `shared/anki-export.js` e
+  `shared/anki-import-ui.js`. Por que guardar no site e não "lacrar" o CDN: os testes trocam o supabase-js por uma
+  versão falsa interceptando o endereço, e o lacre (SRI) faria o navegador recusá-la (154 pontos de teste); os testes do
+  Anki fazem o mesmo com JSZip/sql.js. Com a cópia no site, a versão só muda por commit e o site não depende do CDN.
+- Hanzi Writer (só `zh`) segue no jsdelivr, agora `@3.5.0` com `integrity` sha384 + `crossorigin`; testado num navegador
+  real: lacre certo carrega, lacre errado é bloqueado.
+- Testes: 154 interceptações trocadas para `/cdn\.jsdelivr\.net\/npm\/@supabase|\/shared\/vendor\/supabase-js/`.
+  Regressão (subagente) sem falha nova depois do ajuste: painel-admin (5 arquivos), painel-professora 895/895, pwa-cache,
+  volta-aba, cores-marca, i18n (3), banco-revisao 846/846, login-obrigatorio 124/124, zh-manual, trilha zh, paridade-sites.
+  Única falha nova era do teste `paridade-sites/test_modulos_niveis_zh_playwright.js`: o sorteio fixo do teste mudou de
+  ordem porque JSZip/sql.js agora carregam (antes o teste os bloqueava); o erro proposital passou a ser "1ª pergunta
+  comum a partir da 4ª" (95/95, 2 vezes). Pré-existentes iguais na `main`: checkpoint-zh (instável), registro
+  (literais de appKey), revisao-seguranca A1/A3, `i18n/test_playwright` (commit antigo ausente); k2f não roda aqui.
+
+## Missões de dias antigos no robô de avisos (2026-11-24)
+
+- Sugestão vinda da sessão do PR 492, conferida nos dados: 45 blocos de progresso com missões congeladas de dias antigos
+  (desde 18/09) e ~10 avisos "faltam N missões" por dia sobre elas. O conserto da v37 (xp50) ainda somaria ~10 contas.
+- Conserto: o lembrete só considera `state.daily.date === hoje` (mesma aproximação de fuso do cron). Teste de ponta a
+  ponta em `tests/pt-servidor/test_cron_pt.js` (77/77; contra a v37 o teste novo falha, como devia).
 
