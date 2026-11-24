@@ -79,6 +79,7 @@ Regras de código: `.claude/rules/qualidade-de-codigo.md`. Regras por área: `.c
   verificação independente de cada unidade com `docs/i18n/curriculo/checklist-verificacao-licao-curta.md`;
   painel das telas da lição curta na trilha = o painel de resposta único (`shared/core/painel-resposta.js`, contrato em `docs/painel-resposta-unico.md`;
   o `<b>` do francês nos rascunhos vira {chaves}); texto de erro não repete o título do painel (`conferirTelas`, decisão 375);
+  "Monte a frase" com peças de *tu* e de *vous*: a tradução diz o registro (`conferirTelas`, decisão 377);
   aviso de unidade grande (~18 cartões): `sinaisUnidadeGrande(mapa, excecoes)` não conta os conjuntos fechados de `excecoes.json` (`unidades_acima_do_limite`; decisão 371);
   "Relacione": ordem da coluna da direita por `ordemDaDireita` (nenhum par na mesma linha); lição `tipo: 'pratica'` (sem cartão; nota com gatilho
   em cartão de lição anterior) aceita por `conferirLicoesDaUnidade` (`fr/scripts/curriculo_mapa.js`) e `conferirTelas` (decisão 369);

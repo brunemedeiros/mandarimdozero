@@ -14,7 +14,7 @@ está em `fr/scripts/curriculo_licao_curta.js` (`conferirTelas`); o resto é lei
 
 ## Exercícios
 5. Um exercício depois de cada palavra, frase ou explicação nova (decisões 362 e 365).
-6. O exercício cobra o que a tela anterior ensinou; uma só resposta certa defensável; distratores plausíveis e de fato errados.
+6. O exercício cobra o que a tela anterior ensinou; uma só resposta certa defensável (ex.: "Monte a frase" com *tu* e *vous* nas peças diz o registro na tradução, decisão 377); distratores plausíveis e de fato errados.
 7. A resposta certa muda de posição (decisão 368); "Complete" alterna grafia e outra palavra (decisão 342).
 8. Nada que ainda não foi ensinado (palavra, forma, regra); frases neutras em gênero quando é o aluno que fala.
 9. Painel diz o que a palavra ou forma é e por que a resposta está certa ou errada; nada de "tradução ao pé da letra" quando o

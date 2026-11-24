@@ -102,6 +102,18 @@ function conferirTelas(R){
   for (const t of comErro) for (const [op, v] of Object.entries(t.explicacao_erro))
     confere(!titulos.test((v || {})['pt-BR'] || ''), `tela ${t.id || '?'}: o texto do erro "${op}" repete o título do painel`);
 
+  // "Monte a frase" com peças de tu e de vous: a tradução diz qual registro (senão as duas montagens servem; a dona,
+  // 2026-11-24, no "O que você faz da vida?" da unidade 7). Vale "(informal)", "(formal)", "senhor(a)" ou "vocês".
+  const palavrasDe = t => (t.pecas || []).map(x => String(x).toLowerCase().replace(/[?!.,]/g, ''));
+  const TU = /^(tu|toi|te|ta|ton|tes|t')$|^t'/, VOUS = /^(vous|votre|vos)$/;
+  for (const l of comTelas) for (const t of l.telas || []){
+    if (t.tipo !== 'montar') continue;
+    const ps = palavrasDe(t);
+    if (!(ps.some(x => TU.test(x)) && ps.some(x => VOUS.test(x)))) continue;
+    const tr = ((t.traducao || {})['pt-BR'] || '') + ' ' + ((t.pedido || {})['pt-BR'] || '');
+    confere(/\((in)?formal\)|senhor|senhora|vocês/i.test(tr), `tela ${t.id}: "Monte a frase" com tu e vous sem dizer o registro na tradução`);
+  }
+
   // Lições de cartões: cada cartão uma vez, na ordem; nota depois do gatilho; exercícios coerentes; "Complete" alternando (decisão 342).
   for (const l of comTelas.filter(l => l.tipo !== 'dialogos')){
     const telas = l.telas || [];

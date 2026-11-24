@@ -62,6 +62,11 @@ check('montar sem distrator para uma fala', acusa(r => { delete tela(r, 'd5').di
 check('lacuna que não reconstrói a fala', acusa(r => { tela(r, 'd6').depois = ' ?'; }, 'lacuna não reconstrói'));
 check('"sua vez" com opção errada sem dica', acusa(r => { delete tela(r, 'd9').turnos[1].dicas['De rien !']; }, 'cada opção errada precisa de uma dica'));
 check('nota marcada como painel sem tela de exercício', acusa(r => { r.notas.push({ id: 'n2', destino: 'painel', paineis: ['nao-existe'], texto: pt('x') }); }, 'painel sem tela'));
+check('"Monte a frase" com tu e vous sem registro na tradução é acusado', (() => {
+  const base = { id: 'mx', tipo: 'montar', traducao: pt('O que você faz da vida?'), pecas: ['Tu', 'fais', 'quoi', '?', 'vous'], resposta: ['Tu', 'fais', 'quoi', '?'] };
+  const comTelaMontar = extra => acusa(r => { (r.licoes[0].telas || []).push(Object.assign({}, base, extra)); }, 'sem dizer o registro');
+  return comTelaMontar({}) && !comTelaMontar({ traducao: pt('O que você faz da vida? (informal)') });
+})());
 check('texto do erro que repete o título do painel é acusado', acusa(r => { const t = (r.licoes[0].telas || []).find(x => x.opcoes) || tela(r, 'f'); t.explicacao_erro = { x: pt('Quase lá! Tente de novo.') }; }, 'repete o título do painel'));
 check('rótulo "Pergunta" em cartão ou frase é acusado (decisão 361)', acusa(r => { r.cartoes[0].papel_na_funcao = pt('Pergunta'); }, 'rótulo de pergunta')
   && acusa(r => { tela(r, 'f').papel = pt('Pergunta'); }, 'rótulo de pergunta'));

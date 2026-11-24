@@ -249,7 +249,7 @@
    },
    "destino": "nota",
    "texto": {
-    "pt-BR": "Hoje, na França, é comum escrever o feminino das profissões:<ul><li><strong>professeure</strong>, <strong>ingénieure</strong>;</li><li>em 2019, a Academia Francesa aceitou a feminização dos nomes de profissão;</li><li>ainda se ouve <strong>professeur</strong> ou <strong>ingénieur</strong> para uma mulher, e as duas formas servem.</li></ul>",
+    "pt-BR": "Hoje, na França, é comum escrever o feminino das profissões:<ul><li><strong>professeure</strong>, <strong>ingénieure</strong>;</li><li>em 2019, a Academia Francesa aceitou a feminização dos nomes de profissão;</li><li>na fala, soam igual ao masculino: a diferença está só na escrita;</li><li>ainda se escreve <strong>professeur</strong> ou <strong>ingénieur</strong> para uma mulher, e as duas formas servem.</li></ul>",
     "en": null
    },
    "exemplos": [
@@ -265,7 +265,7 @@
     },
     {
      "fr": "Elle est professeur.",
-     "pt-BR": "Ela é professora. (ainda se ouve)",
+     "pt-BR": "Ela é professora. (ainda se escreve assim)",
      "en": null
     }
    ],
@@ -277,7 +277,7 @@
      },
      "resposta": true,
      "porque": {
-      "pt-BR": "É comum hoje; <b>professeur</b> para uma mulher ainda se ouve.",
+      "pt-BR": "É comum hoje; <b>professeur</b> para uma mulher ainda se escreve, e na fala os dois soam igual.",
       "en": null
      }
     }
@@ -710,7 +710,7 @@
      "id": "u7-l1-montar",
      "tipo": "montar",
      "traducao": {
-      "pt-BR": "O que você faz da vida?",
+      "pt-BR": "O que você faz da vida? (informal)",
       "en": null
      },
      "pecas": [
@@ -1116,7 +1116,7 @@
       "en": null
      },
      "explicacao": {
-      "pt-BR": "<b>Ingénieur</b> para uma mulher ainda se ouve, e serve; <b>ingénieure</b> é a forma de hoje.",
+      "pt-BR": "Na escrita, <b>ingénieur</b> para uma mulher ainda serve; <b>ingénieure</b> é a de hoje. Na fala, soam igual.",
       "en": null
      }
     },
