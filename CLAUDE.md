@@ -32,6 +32,9 @@ Se uma regra deste arquivo ficar específica de uma pasta, mova-a para `.claude/
   seja "tudo grátis"). Não existe checkout/Stripe; o paywall dos Desafios está desligado.
 - **Código pronto não prova infraestrutura ativa**: nunca presumir que serviço externo/secret/cron/dado está ativo em
   produção; conferir ao vivo (MCP Supabase/Resend) ou dizer que está pendente.
+- **PR mesclado não prova site no ar** (dona, 2026-11-24): a `main` só chega ao site se a publicação do GitHub (Actions
+  "Deploy to GitHub Pages") terminar verde; se o que foi mesclado não aparece, conferir essa publicação primeiro e, depois dela,
+  o site ao vivo (`curl` em app.profbrune.com.br). Em 2026-11-24 cinco publicações falharam seguidas; consertado pelo PR #500.
 - **Edge Function só muda em produção após novo deploy**; deploy feito = registrar; não feito = avisar.
 - **Nunca apagar progresso de memória (FSRS) por engano**; mudanças de dado em produção só com autorização explícita.
 - **Site em inglês não tem NADA em português** (decisão da autora, 2026-10-15): inclui avisos gravados pelo banco, push e
