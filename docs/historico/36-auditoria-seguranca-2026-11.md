@@ -79,6 +79,9 @@ Os 38 reports da produção são todos de contas logadas (nenhum convidado), por
 - 10 erros na rodada, **anteriores a esta mudança** (código igual ao da v34): `Cannot read properties of undefined
   (reading 'split')` em 10 contas do francês. Causa: a missão do dia "Ganhe 50 XP hoje" (`xp50`, no site desde
   ~2026-10-23, substituiu `stars40`) não está em `MISSION_FIELD_BY_ID` do `notification-cron`; o erro acontece no
-  último passo (lembrete de missões), então só esse lembrete deixa de sair para essas contas. Conserto proposto à
-  autora (mapear `xp50` e tolerar missão desconhecida + novo deploy), aguardando aprovação.
+  último passo (lembrete de missões), então só esse lembrete deixa de sair para essas contas. Conserto aprovado pela
+  autora (2026-11-24): `xp50: { field: 'xp' }` (o site mede `d.xp`) e missão desconhecida passa a ser pulada em
+  `computeMissionProgress` (nunca mais derruba a conta). `notification-cron` **v37** na produção (2026-11-24),
+  conteúdo baixado de volta e idêntico ao repositório; sem senha = 401. `tests/pt-servidor/test_cron_pt.js` 75/75
+  (4 novos). Conferir a rodada das 22h UTC de 2026-11-24 (esperado: 0 erros).
 

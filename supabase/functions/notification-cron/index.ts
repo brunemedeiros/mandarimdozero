@@ -152,6 +152,9 @@ const MISSION_FIELD_BY_ID: Record<string, MissionFieldDef> = {
   matchGame1: { field: 'matchGamesPlayed' },
   overdue3: { field: 'overdueReviewsDone' },
   stars40: { field: 'stars' },
+  // 'Ganhe 50 XP hoje' (no site desde ~2026-10-23, no lugar de stars40). Faltava aqui: o cron quebrava em
+  // getFieldValue(undefined) e a conta ficava sem o lembrete de missões (achado em 2026-11-23).
+  xp50: { field: 'xp' },
   highscore2: { field: 'highScoreLessons' },
   perfect1: { field: 'perfectLessons' },
   grammar1: { field: 'grammarLessons' },
@@ -179,8 +182,9 @@ function missionCurrent(def: MissionFieldDef, state: any): number {
 function computeMissionProgress(state: any): { current: number; target: number }[] | null {
   const missions = state.daily?.missions;
   if (!Array.isArray(missions) || missions.length === 0 || !state.daily?.date) return null;
-  return missions.map((m: { id: string; target: number }) => {
-    const def = MISSION_FIELD_BY_ID[m.id] || {};
+  // Missão que o site criou e este mapa ainda não conhece: fica de fora da conta (antes derrubava a conta inteira).
+  return missions.filter((m: { id: string }) => Object.prototype.hasOwnProperty.call(MISSION_FIELD_BY_ID, m.id)).map((m: { id: string; target: number }) => {
+    const def = MISSION_FIELD_BY_ID[m.id];
     return { current: Math.min(missionCurrent(def, state), m.target), target: m.target };
   });
 }
