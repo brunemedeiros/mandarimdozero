@@ -114,6 +114,8 @@ async function fingerprint(browser, root){
     HTMLMediaElement.prototype.play = function(){ window.__plays.push(this.src.replace(/^https?:\/\/[^/]+/, '')); return Promise.resolve(); };
     window.__toasts = []; const st = window.showToast; window.showToast = (m) => { window.__toasts.push(m); };
     showStreakCelebration = () => {};
+    // Ditados passaram a dar XP (decisão da autora, 2026-11-23): o XP mexe no estado e no resultado, então aqui fica DESLIGADO nos dois lados (o antes não tem). Teste do XP: tests/ditado/.
+    if (typeof dictationXP === 'function') dictationXP = () => 0;
   });
   const out = {};
   const html = (sel) => page.evaluate((s) => { const e = document.querySelector(s); return e ? e.innerHTML : null; }, sel);

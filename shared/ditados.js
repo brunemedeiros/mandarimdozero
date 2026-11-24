@@ -128,6 +128,7 @@ const DICTATION_I18N = {
     'dict.score': 'Você escreveu <strong>{hit} de {total}</strong> palavras corretamente{light}. Você atingiu uma pontuação de {score} pontos ({score}%).',
     'dict.scoreLight': ' ({n} com pequeno desvio de grafia, valem meio ponto)',
     'dict.record': 'Melhor nota: <strong>{best}</strong> · {n} {unit}',
+    'dict.xpEarned': 'XP ganho: <strong>+{n} ⭐</strong>',
     'dict.reviewWords': 'Palavras para revisar:',
     'dict.static.title': 'Ditados',
     'dict.static.sub': 'Treine sua compreensão auditiva e sua ortografia com ditados baseados em tarefas reais de cada módulo.',
@@ -176,6 +177,7 @@ const DICTATION_I18N = {
     'dict.score': "You wrote <strong>{hit} of {total}</strong> words correctly{light}. You scored {score} points ({score}%).",
     'dict.scoreLight': " ({n} with a small spelling slip, worth half a point)",
     'dict.record': "Best score: <strong>{best}</strong> · {n} {unit}",
+    'dict.xpEarned': "XP earned: <strong>+{n} ⭐</strong>",
     'dict.reviewWords': "Words to review:",
     'dict.noAudio': "🔇 no audio", // ALTA
     'dict.noAudioAria': "Audio for sentence {n} isn't available on this device", // ALTA
@@ -803,13 +805,24 @@ function dictationLightNoteText(x){
   return dictLatina().textoErroLeve(x);
 }
 
+// XP do Ditado (decisão da autora, 2026-11-23: "Ditados também dão XP"; valores em constantes de shared/srs.js, ver .claude/rules/xp.md):
+// só na PRIMEIRA tentativa de cada ditado (refazer = 0, para não virar fonte infinita); nota 90 ou mais = LESSON_CLOSE_XP (um ditado inteiro vale como fechar
+// uma lição), de 60 a 89 = EXERCISE_XP_PRODUCE, abaixo de 60 = 0.
+function dictationXP(score, firstAttempt){
+  if (!firstAttempt) return 0;
+  return score >= 90 ? LESSON_CLOSE_XP : score >= 60 ? EXERCISE_XP_PRODUCE : 0;
+}
+
 function renderDictationResult(d, userText){
   const ev = evaluateDictation(d.text, userText);
   const { merged, total, score } = ev;
   trackEvent('lesson_complete', 'dictation', { dictationId: d.id, score });
   // Fatia 2: grava a tentativa (melhor nota nunca diminui).
+  const firstAttempt = !isDictationDone(d.id);
   const rec = updateDictationRecord(STATE.dictations[d.id], ev, new Date());
   STATE.dictations[d.id] = rec;
+  const xpGain = dictationXP(score, firstAttempt);
+  if (xpGain > 0 && typeof addXP === 'function') addXP(xpGain, { quiet: true }); // o resultado já mostra o XP (a tela de conclusão cobre o aviso)
   if (score >= 90) STATE.dictationsAced = (STATE.dictationsAced || 0) + 1; // conquistas: trilha Ditado
   saveState();
 
@@ -861,7 +874,7 @@ function renderDictationResult(d, userText){
         <div class="dictation-score-badge" style="background:${dictationScoreColorVar(score)};">${score}</div>
         <p class="dictation-score-text">${dictT('dict.score', { hit, total, light: ev.light ? dictT('dict.scoreLight', { n: ev.light }) : '', score })}</p>
       </div>
-      <p class="dictation-record-line">${dictT('dict.record', { best: rec.bestScore, n: rec.attempts, unit: dictT(rec.attempts === 1 ? 'dict.attempt.one' : 'dict.attempt.many') })}</p>
+      ${xpGain > 0 ? `<p class="dictation-xp-line">${dictT('dict.xpEarned', { n: xpGain })}</p>` : ''}<p class="dictation-record-line">${dictT('dict.record', { best: rec.bestScore, n: rec.attempts, unit: dictT(rec.attempts === 1 ? 'dict.attempt.one' : 'dict.attempt.many') })}</p>
       ${notesHtml}
       ${rec.wrongWords.length ? `<p class="dictation-review-words"><strong>${dictT('dict.reviewWords')}</strong> ${rec.wrongWords.map(escapeHtmlDictation).join(', ')}</p>` : ''}
       ${sentencesHtml}
