@@ -51,7 +51,8 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
     return b;
   };
   const EMAILS = {};
-  globalThis.__sb = { from: builder, auth: { admin: { getUserById: async (id) => ({ data: { user: EMAILS[id] ? { email: EMAILS[id] } : null }, error: null }) } } };
+  const SIGKEY = 'chave-propria-da-assinatura-com-mais-de-32-caracteres';
+  globalThis.__sb = { from: builder, rpc: async (name) => (name === 'cards_digest_signing_key' ? { data: SIGKEY, error: null } : { data: null, error: { message: 'rpc?' } }), auth: { admin: { getUserById: async (id) => ({ data: { user: EMAILS[id] ? { email: EMAILS[id] } : null }, error: null }) } } };
 
   const SECRET = 'segredo-de-teste-com-mais-de-24-caracteres';
   const sent = [];
@@ -95,6 +96,9 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
   r = await run({});
   check('modo teste: envia 2 e-mails (ativa e parada)', sent.length === 2 && sent.map(m => m.to).sort().join() === 'ana@x.test,carol@x.test', sent.map(m => m.to));
   const mAtiva = sent.find(m => m.to === 'ana@x.test'), mParada = sent.find(m => m.to === 'carol@x.test');
+  const tokAtiva = (/[?&]t=([0-9a-f]{64})/.exec(mAtiva.headers['List-Unsubscribe']) || [])[1];
+  const corex = await import(coreSrc);
+  check('link de sair do e-mail é assinado com a chave PRÓPRIA (não com a senha do agendamento)', !!tokAtiva && await corex.verifyUnsubscribe(SIGKEY, 'ativa', tokAtiva) === true && await corex.verifyUnsubscribe(SECRET, 'ativa', tokAtiva) === false);
   check('e-mail da ativa: "novos" com 2 cartões, nome, de remetente certo, texto puro e cabeçalhos de sair em 1 clique', mAtiva.subject === 'Você tem 2 cartões novos da sua professora' && mAtiva.html.includes('Oi, Ana!') && mAtiva.text.length > 20 && mAtiva.from.startsWith('Prof Brune') && mAtiva.headers['List-Unsubscribe-Post'] === 'List-Unsubscribe=One-Click' && /teacher-cards-digest\?u=ativa&t=[0-9a-f]{64}&l=pt/.test(mAtiva.headers['List-Unsubscribe']), mAtiva.headers);
   check('e-mail da parada: lembrete', mParada.subject === 'Seus cartões estão te esperando, Carol');
   const log = DB.teacher_cards_digest_log;
@@ -119,17 +123,28 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
   check('site em inglês: e-mail em inglês, sem português', bia && bia.subject === 'You have 1 new card from your teacher' && !/você|cartão|Revisão/i.test(bia.html.replace(/<style[\s\S]*?<\/style>/, '')) && /&l=en/.test(bia.headers['List-Unsubscribe']), bia && bia.subject);
   check('modo todos: quem tem preferência salva com e-mail ou sem nada recebe', sent.some(m => m.to === 'carol@x.test') && !sent.some(m => m.to === 'ana@x.test'));
 
-  // sair: link assinado
+  // sair: GET só confirma, POST grava; chave própria; link antigo (senha do agendamento) continua valendo
   seed();
   const core = await import(coreSrc);
-  const tk = await core.signUnsubscribe(SECRET, 'ativa');
-  const ok = await handler(new Request(`https://p.supabase.co/functions/v1/teacher-cards-digest?u=ativa&t=${tk}&l=pt`));
-  check('sair: link válido desliga só a categoria e mostra a página', ok.status === 200 && (await ok.text()).includes('Pronto!') && JSON.stringify(DB.notification_preferences) === JSON.stringify([{ user_id: 'ativa', channels: { cartoes_professora: [] } }]), DB.notification_preferences);
-  DB.notification_preferences[0].channels.estudo = ['email'];
-  const ok2 = await handler(new Request(`https://p.supabase.co/functions/v1/teacher-cards-digest?u=ativa&t=${tk}&l=en`, { method: 'POST' }));
-  check('sair por POST (1 clique do Gmail) e sem apagar as outras preferências', ok2.status === 200 && DB.notification_preferences[0].channels.estudo[0] === 'email' && Array.isArray(DB.notification_preferences[0].channels.cartoes_professora));
-  const bad = await handler(new Request(`https://p.supabase.co/functions/v1/teacher-cards-digest?u=outra&t=${tk}`));
-  check('sair: assinatura de outra conta é recusada e nada muda', bad.status === 400 && DB.notification_preferences.length === 1);
+  const tk = await core.signUnsubscribe(SIGKEY, 'ativa'), tkOld = await core.signUnsubscribe(SECRET, 'ativa');
+  const U = 'https://p.supabase.co/functions/v1/teacher-cards-digest';
+  const g = await handler(new Request(`${U}?u=ativa&t=${tk}&l=pt`));
+  const gTxt = await g.text();
+  check('sair: GET válido só PERGUNTA (botão que envia POST) e NÃO grava nada', g.status === 200 && gTxt.includes('Sim, parar de receber') && gTxt.includes('method="post"') && !(DB.notification_preferences || []).length, DB.notification_preferences);
+  const gEn = await (await handler(new Request(`${U}?u=ativa&t=${tk}&l=en`))).text();
+  check('sair: página de confirmação em inglês sem português', gEn.includes('Stop receiving these emails?') && !/você|Parar|Sim,/i.test(gEn));
+  const ok = await handler(new Request(`${U}?u=ativa&t=${tk}&l=pt`, { method: 'POST' }));
+  check('sair: POST válido desliga só a categoria e mostra "Pronto!"', ok.status === 200 && (await ok.text()).includes('Pronto!') && JSON.stringify(DB.notification_preferences) === JSON.stringify([{ user_id: 'ativa', channels: { cartoes_professora: [] } }]), DB.notification_preferences);
+  DB.notification_preferences[0].channels.estudo = ['email']; DB.notification_preferences[0].channels.cartoes_professora = ['email'];
+  const ok2 = await handler(new Request(`${U}?u=ativa&t=${tk}&l=en`, { method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded' }, body: 'List-Unsubscribe=One-Click' }));
+  check('sair por POST de 1 clique (Gmail) sem apagar as outras preferências', ok2.status === 200 && DB.notification_preferences[0].channels.estudo[0] === 'email' && Array.isArray(DB.notification_preferences[0].channels.cartoes_professora) && DB.notification_preferences[0].channels.cartoes_professora.length === 0);
+  DB.notification_preferences[0].channels.cartoes_professora = ['email'];
+  const okOld = await handler(new Request(`${U}?u=ativa&t=${tkOld}&l=pt`, { method: 'POST' }));
+  check('link antigo (assinado com a senha do agendamento) ainda vale no POST', okOld.status === 200 && DB.notification_preferences[0].channels.cartoes_professora.length === 0);
+  DB.notification_preferences[0].channels.cartoes_professora = ['email'];
+  const bad = await handler(new Request(`${U}?u=outra&t=${tk}`, { method: 'POST' }));
+  const badGet = await handler(new Request(`${U}?u=outra&t=${tk}`));
+  check('sair: assinatura de outra conta é recusada (GET e POST) e nada muda', bad.status === 400 && badGet.status === 400 && DB.notification_preferences[0].channels.cartoes_professora[0] === 'email');
 
   // e-mail de teste para a dona
   sent.length = 0;
