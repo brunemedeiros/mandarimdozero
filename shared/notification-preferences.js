@@ -39,6 +39,9 @@ const NOTIFICATION_PREF_CATEGORIES = [
   // Sem e-mail. Sem preferência salva o servidor entrega no sino E por push (para quem tem aparelho inscrito),
   // então a matriz mostra os dois ligados -- ver notifPrefEffectiveChannels.
   { id: 'amigos', labelKey: 'notif.cat.amigos', noEmail: true, defaultChannels: ['in_app', 'push'] },
+  // Cartões novos da professora (e-mail diário da Edge Function teacher-cards-digest, migration 141): só e-mail, ligado
+  // por padrão para quem tem professora (decisão da dona, 2026-11-23). Sem preferência salva o servidor envia.
+  { id: 'cartoes_professora', labelKey: 'notif.cat.cartoes_professora', emailOnly: true, defaultChannels: ['email'] },
 ];
 
 // Canais efetivos de uma categoria: o que está salvo; para categoria só-in_app
@@ -46,12 +49,12 @@ const NOTIFICATION_PREF_CATEGORIES = [
 // algo que na verdade chega.
 function notifPrefEffectiveChannels(prefs, c){
   const saved = prefs && prefs.channels ? prefs.channels[c.id] : undefined;
-  if (Array.isArray(saved)) return c.inAppOnly ? saved.filter(ch => ch === 'in_app') : (c.noEmail ? saved.filter(ch => ch !== 'email') : saved);
+  if (Array.isArray(saved)) return c.inAppOnly ? saved.filter(ch => ch === 'in_app') : c.emailOnly ? saved.filter(ch => ch === 'email') : (c.noEmail ? saved.filter(ch => ch !== 'email') : saved);
   return c.inAppOnly ? ['in_app'] : (c.defaultChannels ? [...c.defaultChannels] : []);
 }
 // Canal que a categoria não tem (desligado na matriz e ignorado pelos botões gerais).
 function notifPrefChannelMissing(c, channel){
-  return (c.inAppOnly && channel !== 'in_app') || (c.noEmail && channel === 'email');
+  return (c.inAppOnly && channel !== 'in_app') || (c.emailOnly && channel !== 'email') || (c.noEmail && channel === 'email');
 }
 
 function notifPrefHourOptionsHTML(selected){
@@ -86,7 +89,7 @@ async function renderNotificationPreferencesView(){
   const pushSubscribedHere = !!localPushSubscription;
 
   const anyInAppOn = NOTIFICATION_PREF_CATEGORIES.some(c => notifPrefEffectiveChannels(prefs, c).includes('in_app'));
-  const anyEmailOn = NOTIFICATION_PREF_CATEGORIES.filter(c => !c.inAppOnly && !c.noEmail).some(c => (prefs.channels?.[c.id] || []).includes('email'));
+  const anyEmailOn = NOTIFICATION_PREF_CATEGORIES.filter(c => !c.inAppOnly && !c.noEmail).some(c => notifPrefEffectiveChannels(prefs, c).includes('email') || (prefs.channels?.[c.id] || []).includes('email'));
 
   // Design System do painel (Pico escopado em .painel, 2026-10-17): blocos <article>, interruptores
   // input[role=switch] e a matriz por categoria numa tabela. Ids e data-pref-* continuam os mesmos.
@@ -94,12 +97,12 @@ async function renderNotificationPreferencesView(){
     const eff = notifPrefEffectiveChannels(prefs, c);
     const label = t(c.labelKey);
     const cell = (channel, titleKey, offAttr) => `<td><input type="checkbox" data-pref-category="${c.id}" data-pref-channel="${channel}" ${eff.includes(channel) ? 'checked' : ''} ${offAttr} aria-label="${escapeHTML(label + ': ' + t(titleKey))}"></td>`;
-    const offAttr = c.inAppOnly ? `disabled title="${t('notif.pref.inAppOnly')}"` : '';
-    const emailOffAttr = c.noEmail ? `disabled title="${t('notif.pref.noEmail')}"` : offAttr;
+    const offAttr = c.inAppOnly ? `disabled title="${t('notif.pref.inAppOnly')}"` : (c.emailOnly ? `disabled title="${t('notif.pref.emailOnly')}"` : '');
+    const emailOffAttr = c.noEmail ? `disabled title="${t('notif.pref.noEmail')}"` : (c.emailOnly ? '' : offAttr);
     return `
       <tr>
         <th scope="row">${label}</th>
-        ${cell('in_app', 'notif.pref.matrix.app', '')}
+        ${cell('in_app', 'notif.pref.matrix.app', c.emailOnly ? offAttr : '')}
         ${cell('push', 'notif.pref.matrix.push', offAttr)}
         ${cell('email', 'notif.pref.matrix.email', emailOffAttr)}
       </tr>

@@ -256,8 +256,10 @@ window.I18N_CATALOG['en'] = {
   'notif.cat.reengajamento': '👋 Come-back reminders', // MÉDIA -- Etapa 4: aprovado pela dona
   'notif.cat.sistema': '⚙️ System', // ALTA
   'notif.cat.amigos': '👥 Friends', // ALTA
+  'notif.cat.cartoes_professora': '📚 New cards from your teacher', // ALTA
   'notif.pref.inAppOnly': 'Friends only has in-app notifications', // ALTA
   'notif.pref.noEmail': 'Friends has no email notifications', // ALTA
+  'notif.pref.emailOnly': 'This notice only exists by email', // ALTA
   'notif.pref.guest': 'Create an account to set up notifications. Guest mode does not save preferences.', // ALTA
   'notif.pref.loadFailed': 'Could not load your preferences right now.', // ALTA
   'notif.pref.sectionTitle': 'Notifications', // ALTA
@@ -381,7 +383,7 @@ window.I18N_CATALOG['en'] = {
   'review.speed.points': '{n} pts', // ALTA
   'review.speed.answered': { one: 'You answered {n} word this round.', other: 'You answered {n} words this round.' }, // ALTA
   'review.back': 'Back', // ALTA
-  'review.practiceMore': 'Practice more', // ALTA
+  'review.practiceMore': 'Keep reviewing', // ALTA
   'review.complete.title': 'Review complete!', // ALTA
   'review.complete.reviewed': { one: 'You reviewed {n} card this session.', other: 'You reviewed {n} cards this session.' }, // ALTA
   'review.session.deckEmptyTitle': 'No cards in this Deck yet', // ALTA
@@ -788,7 +790,7 @@ window.I18N_CATALOG['en'] = {
   'fr.conj.sessionDone': 'Session complete!', // ALTA
   'fr.conj.wellDone': 'Great job!', // ALTA
   'fr.conj.keepPracticing': 'Keep practicing these conjugations.', // ALTA
-  'fr.conj.newSession': 'New session', // ALTA
+  'fr.conj.newSession': 'Finish session', // ALTA
   'fr.conj.verbCounter': 'Verb {i} of {n}', // ALTA
   'fr.conj.currentVerb': 'Current verb', // ALTA
   'fr.conj.regular': 'Regular verb', // ALTA
@@ -1718,6 +1720,7 @@ window.I18N_CATALOG['en'] = {
   'admin.reports.detail.problem': '⚑ Problem', // ALTA
   'admin.reports.detail.notInformed': '(not provided)', // ALTA
   'admin.reports.detail.screenshotView': '📎 View attached screenshot', // ALTA
+  'admin.reports.detail.screenshotError': "Couldn't open the screenshot. Please try again in a moment.", // ALTA
   'admin.reports.detail.screenshotNone': '(no screenshot attached)', // ALTA
   'admin.reports.reply.lastSentTo': 'Last reply sent on {date} to {email}:', // ALTA
   'admin.reports.reply.lastSent': 'Last reply sent on {date}:', // ALTA
@@ -3614,6 +3617,8 @@ window.I18N_CATALOG['en'] = {
   'panel.classLog.skill.pronuncia': 'Pronunciation', // ALTA
   'panel.classLog.classrooms': 'Classes', // ALTA
   'panel.gcal.formerHint': 'Former students are at the end of the list: the lesson only goes into their history, with no Board notice.', // ALTA
+  'panel.gcal.formerBankGroup': 'Former students without an account (history only)', // ALTA
+  'panel.classLog.formerTag': 'former student', // ALTA
   'panel.classLog.forWhom': 'For whom', // ALTA
   'panel.classLog.moreFields': 'More fields (Observations and Notes)', // ALTA
   'panel.classLog.classroomsHint': 'A class lesson is logged once and shows up for every student in the class.', // ALTA

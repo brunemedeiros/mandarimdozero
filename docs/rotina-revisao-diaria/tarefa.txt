@@ -38,7 +38,7 @@ Se a ferramenta Agent não existir nesta sessão, rode os testes você mesma(o) 
 3e. PRs ARRISCADOS (ajudante caro, só eles, e OBRIGATÓRIO): para CADA PR marcado como ARRISCADO no Passo 2, chame um subagente general-purpose com model "opus". Não pule este passo por achar o PR simples, por ter lido as migrations você mesma(o) ou por economia: a autora decidiu que PR arriscado sempre passa pelo Opus. Entregue: número do PR, o diff, o texto do PR e as regras do CLAUDE.md. Peça: "A mudança faz o que a autora pediu? Pode apagar ou corromper progresso/dados de aluno, quebrar uma tela, abrir falha de segurança ou de privacidade? Algo ficou pela metade? Responda com achados concretos (arquivo:linha, cenário, gravidade) ou 'nenhum achado'. Não edite nada." Descarte achado sem cenário concreto. Se a ferramenta Agent não existir, faça você mesma(o) essa leitura nos PRs arriscados e diga no relatório "revisão profunda feita sem o Opus".
 
 ## Gravidade
-- Severo: risco ao progresso (FSRS) ou aos dados de alunos; falha de segurança ou privacidade; tela quebrada; produção diferente do que o PR afirma; português no site em inglês.
+- Severo: risco ao progresso (FSRS) ou aos dados de alunos, inclusive quando é indireto ou só acontece num caso específico (ex.: uma ação da professora que apaga em cascata o histórico de revisão ou as respostas de um aluno). Na dúvida entre Severo e Médio para perda de dado de aluno, é Severo; falha de segurança ou privacidade; tela quebrada; produção diferente do que o PR afirma; português no site em inglês.
 - Médio: paridade quebrada (não classificada); conteúdo sem todas as traduções; teste que parou de passar; passo manual não avisado; regra do projeto descumprida; commit direto na main.
 - Leve: texto fora do padrão ("pra", "--", português de Portugal); documentação ou "Estado atual" desatualizados.
 
@@ -53,7 +53,7 @@ Revisão de DD/MM · N PRs, M sessões
 ⚪ Leve (n)
   ...
 ✅ Sem problema: #NNN, #NNN
-(Só é achado o que tem um problema concreto. "Nada errado" vai para ✅, nunca para Leve.)
+(Só é achado o que tem um problema concreto. "Nada errado" vai para ✅, nunca para Leve. Leve: no máximo 3, os mais úteis, em uma linha cada; o resto vira "e mais N leves".)
 Testes: <suíte passou/total, só as que falharam ou mudaram; e as "não rodado" com o motivo>
 
 Para colar nas sessões (a autora copia e cola; você NÃO envia):
@@ -66,3 +66,4 @@ Custo: diga quantos subagentes haiku e opus foram chamados.
 - Se houve PR ou commit na janela: envie o resumo com PushNotification (o texto inteiro) e termine com o mesmo texto como mensagem final.
 - Se não houve nada: sem PushNotification; mensagem final só com "Nada para revisar nas últimas 24 horas".
 - Se algo falhou (GitHub, Supabase, testes): diga qual passo e a mensagem de erro exata, em uma frase, e siga com o resto.
+- Nada de mensagens sobre o seu próprio funcionamento (andamento dos ajudantes, comandos de espera, tempo-limite de comando auxiliar): a autora só lê o resumo.

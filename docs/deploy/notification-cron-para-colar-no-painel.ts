@@ -16,6 +16,15 @@ const vapidPrivateKey = Deno.env.get('VAPID_PRIVATE_KEY')!;
 const vapidSubject = Deno.env.get('VAPID_SUBJECT') || 'mailto:brunemed1310@gmail.com';
 webpush.setVapidDetails(vapidSubject, vapidPublicKey, vapidPrivateKey);
 
+// Senha do agendamento (migration 140, cabeçalho x-cron-token); sem o secret a função recusa tudo.
+const cronToken = Deno.env.get('NOTIFICATION_CRON_TOKEN') || '';
+function safeEqual(a: string, b: string): boolean {
+  const ea = new TextEncoder().encode(a), eb = new TextEncoder().encode(b);
+  let diff = ea.length ^ eb.length;
+  for (let i = 0; i < Math.max(ea.length, eb.length); i++) diff |= (ea[i] || 0) ^ (eb[i] || 0);
+  return diff === 0;
+}
+
 const resendApiKey = Deno.env.get('RESEND_API_KEY');
 const resendFromEmail = Deno.env.get('RESEND_FROM_EMAIL');
 
@@ -46,6 +55,9 @@ const MISSION_FIELD_BY_ID: Record<string, MissionFieldDef> = {
   matchGame1: { field: 'matchGamesPlayed' },
   overdue3: { field: 'overdueReviewsDone' },
   stars40: { field: 'stars' },
+  // 'Ganhe 50 XP hoje' (no site desde ~2026-10-23, no lugar de stars40). Faltava aqui: o cron quebrava em
+  // getFieldValue(undefined) e a conta ficava sem o lembrete de missões (achado em 2026-11-23).
+  xp50: { field: 'xp' },
   highscore2: { field: 'highScoreLessons' },
   perfect1: { field: 'perfectLessons' },
   grammar1: { field: 'grammarLessons' },
@@ -66,8 +78,9 @@ function missionCurrent(def: MissionFieldDef, state: any): number {
 function computeMissionProgress(state: any): { current: number; target: number }[] | null {
   const missions = state.daily?.missions;
   if (!Array.isArray(missions) || missions.length === 0 || !state.daily?.date) return null;
-  return missions.map((m: { id: string; target: number }) => {
-    const def = MISSION_FIELD_BY_ID[m.id] || {};
+  // Missão que o site criou e este mapa ainda não conhece: fica de fora da conta (antes derrubava a conta inteira).
+  return missions.filter((m: { id: string }) => Object.prototype.hasOwnProperty.call(MISSION_FIELD_BY_ID, m.id)).map((m: { id: string; target: number }) => {
+    const def = MISSION_FIELD_BY_ID[m.id];
     return { current: Math.min(missionCurrent(def, state), m.target), target: m.target };
   });
 }
@@ -579,7 +592,14 @@ async function processTeacherStudentAlerts(
   return created;
 }
 
-Deno.serve(async (_req: Request) => {
+Deno.serve(async (req: Request) => {
+  if (cronToken.length < 24) {
+    console.error('notification-cron: secret NOTIFICATION_CRON_TOKEN ausente ou curto; recusando');
+    return new Response(JSON.stringify({ ok: false, error: 'not_configured' }), { status: 503, headers: { 'Content-Type': 'application/json' } });
+  }
+  if (!safeEqual(req.headers.get('x-cron-token') || '', cronToken)) {
+    return new Response(JSON.stringify({ ok: false, error: 'unauthorized' }), { status: 401, headers: { 'Content-Type': 'application/json' } });
+  }
   const supabase = createClient(supabaseUrl, serviceRoleKey);
 
   const rulesResult = await supabase.from('notification_rules').select('*');
