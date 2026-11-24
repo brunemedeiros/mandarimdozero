@@ -45,7 +45,7 @@ const STUB = `window.supabase = { createClient: () => {
     const page = await ctx.newPage();
     const errors = []; page.on('pageerror', e => errors.push(e.message));
     await page.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, r => r.abort());
-    await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
+    await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase|\/shared\/vendor\/supabase-js/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
     await page.addInitScript(([lg, th]) => { try { localStorage.setItem('ui-language', lg); localStorage.setItem('theme', th); } catch (e) {} }, [lang, theme]);
     await page.goto(`http://127.0.0.1:${port}/index.html`);
     await page.waitForSelector('#gate-login', { state: 'visible' });
