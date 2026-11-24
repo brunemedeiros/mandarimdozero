@@ -21,11 +21,14 @@ concurrency:
   group: pages
   cancel-in-progress: false
 
+# Duas etapas (2026-11-24): "build" monta e envia o pacote; "deploy" publica, só
+# depois que a primeira termina. Com as duas na mesma etapa, o deploy-pages
+# procurava o pacote ~0,3 s depois do envio e às vezes o GitHub ainda dizia
+# "No artifacts named github-pages were found" (6 de 8 publicações falharam
+# em 2026-11-24; falha conhecida, actions/deploy-pages#451). Separado, um
+# "Re-run failed jobs" refaz só a publicação, com o mesmo pacote.
 jobs:
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout do repositório
@@ -51,6 +54,13 @@ jobs:
         with:
           path: '.'
 
+  deploy:
+    needs: build
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
       # O passo "syncing_files" do GitHub às vezes passa de 10 min (padrão do deploy-pages) e o deploy era cancelado
       # (PRs #452 e #453, 2026-11-09/10). Pedimos 30 min, mas o deploy-pages@v4 continua cancelando em 10 min (PR #459):
       # o valor não funciona como esperado. Quando acontecer, rodar o deploy de novo uma vez (até hoje passou na 2ª).
