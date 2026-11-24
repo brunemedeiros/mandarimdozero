@@ -184,6 +184,29 @@ async function run(browser, port){
     check('sign_up: sem erro de página', errors.length === 0, errors);
     await ctx.close();
   }
+  // 2c) Conta NOVA pelo "Entrar com Google" da tela de Entrar (sem cadastro): sign_up ao escolher o curso; conta antiga não
+  {
+    const { ctx, page } = await openPage(browser, port, 'index.html', { gate: true,
+      init: () => { try { localStorage.setItem('cookie-consent', JSON.stringify({ v: 1, analytics: true, at: '2026-11-24T10:00:00Z' })); } catch (e) {} } });
+    await page.waitForSelector('#gate-login', { state: 'visible' });
+    await page.evaluate(() => { window.__went = null; goToLanguageApp = (id) => { window.__went = id; }; getCurrentLearningLanguage = async () => null; setCurrentLearningLanguage = async () => {}; });
+    await page.evaluate(() => afterAuthResolved({ id: 'nova', created_at: new Date(Date.now() - 60000).toISOString(), app_metadata: { provider: 'google' } }));
+    await page.waitForSelector('#gate-choose-language', { state: 'visible' });
+    await page.click('#lang-grid .lang-card[data-lang="zh"]');
+    await page.waitForTimeout(300);
+    let su = (await hits(page)).filter(h => h.name === 'sign_up');
+    check('Google pela tela de Entrar, conta nova: sign_up com google e o curso', su.length === 1 && su[0].p.method === 'google' && su[0].p.course === 'zh', su);
+    await page.goto(`http://127.0.0.1:${port}/index.html`);
+    await page.waitForSelector('#gate-login', { state: 'visible' });
+    await page.evaluate(() => { goToLanguageApp = () => {}; getCurrentLearningLanguage = async () => null; setCurrentLearningLanguage = async () => {}; });
+    await page.evaluate(() => afterAuthResolved({ id: 'antiga', created_at: '2026-01-01T00:00:00Z', app_metadata: { provider: 'google' } }));
+    await page.waitForSelector('#gate-choose-language', { state: 'visible' });
+    await page.click('#lang-grid .lang-card[data-lang="fr"]');
+    await page.waitForTimeout(300);
+    su = (await hits(page)).filter(h => h.name === 'sign_up');
+    check('conta antiga sem curso: não conta como cadastro', su.length === 0, su);
+    await ctx.close();
+  }
   // 3) UTM guardado na aba: chega com utm, navega, só aceita na segunda página
   {
     const { ctx, page } = await openPage(browser, port, 'sobre.html?utm_source=tiktok&utm_medium=video');

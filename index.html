@@ -624,7 +624,21 @@ async function afterAuthResolved(user){
     return;
   }
   showOnly('gate-choose-language');
-  renderLanguageChoices((langId) => finishCoursePick(user, langId, gateSpeak), 'lang-grid');
+  // Conta NOVA que entrou pelo "Entrar com Google" da tela de Entrar (sem passar pelo cadastro): também conta como
+  // cadastro no GA4 (pedido da dona, 2026-11-24). "Nova" = criada há menos de 30 minutos; conta antiga sem curso não conta.
+  const brandNew = isBrandNewAccount(user);
+  renderLanguageChoices((langId) => {
+    if (brandNew){ try { if (window.ProfBruneConsent) window.ProfBruneConsent.signUp(accountProvider(user), langId); } catch (e) {} }
+    finishCoursePick(user, langId, gateSpeak);
+  }, 'lang-grid');
+}
+function isBrandNewAccount(user){
+  const t = user && user.created_at ? Date.parse(user.created_at) : NaN;
+  return Number.isFinite(t) && Date.now() - t < 30 * 60 * 1000;
+}
+function accountProvider(user){
+  const p = user && user.app_metadata && user.app_metadata.provider;
+  return p === 'google' ? 'google' : 'email';
 }
 
 // O curso sai no idioma de "Eu falo...": vira o idioma do site, e o app grava na conta nova (shared/auth.js lê

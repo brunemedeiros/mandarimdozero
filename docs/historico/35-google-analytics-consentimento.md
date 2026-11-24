@@ -139,7 +139,13 @@ página" (o site manda as telas do app sozinho; com isso ligado, as limpezas de 
   `lesson_start`, `lesson_complete`. Ainda sem `sign_up` e `click`. Na produção: 1 conta nova desde a publicação (nasceu
   com perfil privado) e 6 confirmações de idade. `sign_up` conferido de ponta a ponta no teste (cadastro por e-mail com
   cookies aceitos; `tests/consentimento/test_playwright.js` 63/63): a ausência vem de não ter havido cadastro com aceite.
-  Por desenho, conta criada pelo "Entrar com Google" da tela de Entrar (sem passar pelo cadastro) não gera `sign_up`.
+  Conta criada pelo "Entrar com Google" da tela de Entrar (sem passar pelo cadastro) passou a gerar `sign_up` (pedido da
+  dona, 2026-11-24): `index.html`, ao escolher o curso, só se a conta foi criada há menos de 30 minutos (conta antiga sem
+  curso não conta); método pelo `app_metadata.provider`. Teste 65/65.
+- Dona criou o evento `abrir_teste_nivelamento` no GA4 (2026-11-24). Na "Aquisição de tráfego" ainda só "(direct) / (none)"
+  (5 sessões); o envio do site foi conferido ao vivo (o pedido ao Google leva o endereço com os `utm_*`, `_fv=1`, `_ss=1`),
+  então a falta do teste / teste deve ser atraso de processamento ou o período do relatório (o padrão "últimos 28 dias"
+  não inclui o dia de hoje). Conferir de novo depois de 48 h.
 - Na interface nova do GA4, "eventos-chave" viraram "Eventos principais" (estrela em Administrador > Exibição de dados >
   Eventos). `close_convert_lead`, `qualify_lead` e `purchase` foram criados pelo objetivo "Gerar leads" e nunca recebem dados.
 
