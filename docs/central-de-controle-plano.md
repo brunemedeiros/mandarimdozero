@@ -66,7 +66,7 @@ própria admin: `plan_tier` espelha o papel; nenhum aluno é Premium). `usage_ev
 ## 5. Fase 1: aba "Visão Geral" (aprovada em 2026-11-24; revisada pelo revisor de planos no mesmo dia)
 
 ### 5.0 Correções da revisão (o que mudou em relação à primeira versão)
-- Migration **142** (138 a 141 já existem na `main`; conferir `list_migrations` antes de aplicar).
+- Migration **145** (138 a 142 e 144 já existem na `main` e na produção; a 143 fica livre para quem a reservou. Primeiro foi escrita como 142 e renumerada em 2026-11-24 ao achar a `142_cards_digest_signing_key`).
 - **Situação não é refeita em SQL**: a regra da aba Alunos tem detalhes (bloco do curso, `_account.lastStudyDay`, data local, estado
   "Sem estudo") que divergiriam. A Visão Geral reaproveita `studentLoadRows` + `tsuRowData` (`shared/admin-students.js`), então o
   número bate com a aba Alunos por construção. São **4 estados**: Em dia, Atenção, Parado, Sem estudo.
@@ -91,7 +91,7 @@ própria admin: `plan_tier` espelha o papel; nenhum aluno é Premium). `usage_ev
 - **Idioma**: filtra os eventos; a conta entra se tiver evento, bloco de progresso ou vínculo nesse idioma; conta sem idioma só em
   "Todos". Alunos de português estudam pelo site fr (`usage_events.language_app_key` só tem `frances`/`mandarim`).
 
-### 5.2 Banco (migration 142, Staging antes da produção; skill `migration-supabase`)
+### 5.2 Banco (migration 145, Staging antes da produção; skill `migration-supabase`)
 - `_is_study_event(type, name)` (imutável).
 - `admin_overview_stats(p_days, p_scope, p_language)`: séries diárias com `generate_series` (dia vazio = 0; datas em texto
   `AAAA-MM-DD`), acessos, contas ativas, cadastros, faixas de engajamento com a lista de cada faixa (só `user_id`, nome, @ e números),
@@ -127,11 +127,12 @@ própria admin: `plan_tier` espelha o papel; nenhum aluno é Premium). `usage_ev
 Node (peças), Postgres local (RPCs), Playwright da aba, regressão de `tests/painel-admin/`, `tests/painel-professora/` e
 `tests/painel-alunos/`, capturas fr/zh × claro/escuro e celular. Na produção (com autorização), a Situação tem que bater 15/15 com a aba Alunos.
 
-### 5.6 Perguntas abertas para a autora
-- **Desafios e Ditados não contam para a Situação**: não atualizam o "último dia de estudo" (`lastStudyDay`), então quem só faz
-  Desafios pode aparecer "Alto" no engajamento e "Parado" na Situação. Corrigir isso mexe na sequência (🔥) das alunas.
-- **"Meus alunos"**: só os vínculos com a admin (hoje é a única professora)? Ex-alunas (vínculo removido) ficam em "Outras contas"?
-- **Filtro "Português"**: esconder até o site `/pt` existir?
+### 5.6 Respostas da autora (2026-11-24)
+- **Desafios e Ditados x Situação**: por agora a tela só explica a diferença numa frase (engajamento conta Desafios e Ditados; a
+  Situação usa o "último dia de estudo", que eles não atualizam). Corrigir os Desafios fica para depois, como tarefa separada.
+- **"Meus alunos"** = vínculo ativo com a admin; ex-alunas ficam em "Outras contas". Confirmado.
+- **Filtro "Português" fica visível.** Os alunos de português vão estudar pelo site de português quando ele existir; até lá o
+  filtro mostra pouco ou nada, e a tela não esconde a opção.
 
 ## 6. Fase 2: "Precisa de você" e saúde das rotinas (depois da Fase 1)
 
@@ -142,3 +143,9 @@ madrugada do Banco, Google Agenda, Notion, avisos e e-mails) com a última vez q
 ## 7. Fase 3: menu lateral único (depois de usar a Visão Geral)
 
 Juntar Admin e Professora num menu lateral, como no vídeo. Só com prévia visual aprovada.
+
+## 8. Registro de entregas
+
+| Data | O quê | Onde |
+|---|---|---|
+| 2026-11-24 | Migration `145_admin_overview` (primeiro escrita como 142) (4 funções só de leitura: `_is_study_event`, `_admin_overview_accounts` (interna, fechada), `admin_overview_stats`, `admin_overview_reviews`) | Postgres local: `tests/central-de-controle/run.sh` 29/29. **Staging**: versão `20261124023521` (gravada com o nome `142_admin_overview`) (grants conferidos; sem login = `not_authorized`). **Produção: NÃO aplicada** (aguarda a autora). |
