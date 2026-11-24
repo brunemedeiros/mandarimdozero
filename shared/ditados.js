@@ -37,7 +37,7 @@
 //
 // Grátis x Premium (igual ao fr de antes): 1 ditado Free por módulo (e o Free da "Revisão do A1"); os outros são
 // Premium, só com o selo, porque a trava está desligada (CHALLENGE_PAYWALL_ENABLED = false no fr).
-// XP: o ditado não dá XP (como sempre); conta para as conquistas (trilha Ditado: nota 90 ou mais).
+// XP: o ditado dá XP só na 1ª tentativa (dictationXP, .claude/rules/xp.md); conta para as conquistas (trilha Ditado: nota 90 ou mais).
 
 let DICT_CONFIG = null;
 let _dictAbbrev = null;
