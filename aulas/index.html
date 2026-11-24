@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Aulas de francês · Prof. Brune</title>
+<meta name="description" content="Quer ter aulas de francês com a Prof. Brune? Conte um pouco sobre você e o seu objetivo.">
+<meta name="theme-color" content="#3D167B">
+<meta property="og:title" content="Aulas de francês · Prof. Brune">
+<meta property="og:description" content="Conte um pouco sobre você e o seu objetivo com o francês.">
+<meta property="og:url" content="https://app.profbrune.com.br/aulas/">
+<meta property="og:type" content="website">
+<style>
+  /* Fase 6 do projeto GA4 (docs/historico/35-google-analytics-consentimento.md): moldura com o formulário de aulas de
+     francês do Google Forms dentro, para o endereço app.profbrune.com.br/aulas/ ficar na barra e o aviso de cookies
+     aparecer. O GA4 mede só esta moldura (com o utm_*), nunca o que a pessoa digita no formulário.
+     Para mudar perguntas ou visual, edite o formulário no Google Forms, não este arquivo. */
+  html, body { margin: 0; height: 100%; background: #FAF5EA; }
+  iframe { display: block; width: 100%; height: 100%; border: 0; }
+  .fallback { position: fixed; inset: auto 0 0 0; padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px)); font: 600 14px/1.4 system-ui, sans-serif; color: #221633; background: #FAF5EA; text-align: center; }
+  .fallback a { color: #3D167B; font-weight: 800; }
+</style>
+<link rel="stylesheet" href="../shared/consent.css">
+<script src="../shared/consent.js" data-page="public" defer></script>
+</head>
+<body>
+<iframe id="app" title="Aulas de francês com a Prof. Brune"></iframe>
+<noscript><p class="fallback">Ative o JavaScript ou <a href="https://forms.gle/9994D2GHdwDj4RyT7">abra o formulário aqui</a>.</p></noscript>
+<script>
+  // Formulário "Aulas de Francês com a Prof. Brune" (link curto https://forms.gle/9994D2GHdwDj4RyT7).
+  var FORM = 'https://docs.google.com/forms/d/e/1FAIpQLSfpHPNfRp_r6tyuSXuXFGHvVvsunvVjhyTprmNWU3zBepaAEA/viewform';
+  // "Como conheceu a Prof. Brune?" já marcada pelo utm_source do link (decisão da dona, 2026-11-15). O texto tem de ser
+  // IGUAL ao da opção no formulário; se ela mudar lá, mude aqui. Sem utm_source, ou com um valor fora da lista: nada marcado.
+  var FIELD = 'entry.1856921042';
+  var HOW = {
+    instagram: 'Instagram @prof.brune',
+    pessoal: 'Perfil pessoal da Brune (Instagram ou outra rede)',
+    tiktok: 'TikTok',
+    indicacao: 'Indicação de amigo, familiar ou aluno',
+    mundolingo: 'Mundo Lingo'
+  };
+  function formUrl(search){
+    var source = '';
+    try { source = (new URLSearchParams(search || '').get('utm_source') || '').trim().toLowerCase(); } catch (e) {}
+    var answer = Object.prototype.hasOwnProperty.call(HOW, source) ? HOW[source] : '';
+    // Só o que o formulário precisa: nada mais do link (outros parâmetros, #) vai para o Google.
+    return FORM + '?embedded=true' + (answer ? '&usp=pp_url&' + FIELD + '=' + encodeURIComponent(answer) : '');
+  }
+  window.__aulasFormUrl = formUrl;
+  document.getElementById('app').src = formUrl(location.search);
+</script>
+</body>
+</html>

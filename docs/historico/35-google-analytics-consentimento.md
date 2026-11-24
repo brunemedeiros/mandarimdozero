@@ -269,6 +269,22 @@ Google Forms com a pergunta "Como conheceu a Prof. Brune?" (campo `entry.1856921
 marcada. O GA4 registra a visita antes de redirecionar. Atenção: quem chega por esse link é redirecionado sem ver o banner,
 então no modo básico essa visita não chega ao GA4 (a origem fica registrada na resposta do formulário).
 
+### Fase 6 feita (2026-11-24, Fase 4 aprovada pela dona no mesmo dia; estrelas dos eventos principais ficam com ela)
+
+- `aulas/index.html`: moldura (como os testes de nivelamento) com o formulário "Aulas de Francês com a Prof. Brune"
+  (`.../1FAIpQLSfpHPNfRp_r6tyuSXuXFGHvVvsunvVjhyTprmNWU3zBepaAEA/viewform?embedded=true`); aviso de cookies e GA4 pelo
+  `shared/consent.js` (`data-page="public"`): o GA4 mede só a moldura (`/aulas/` + `utm_*`), nunca o formulário.
+- "Como conheceu a Prof. Brune?" (`entry.1856921042`) marcada pelo `utm_source` (sem diferença de maiúsculas/espaços):
+  instagram, pessoal, tiktok, indicacao, mundolingo; sem utm ou valor fora da lista = nada marcado. Nada mais do link vai
+  ao Google (nem outros parâmetros, nem o `#`). Os textos das opções são os do formulário publicado (conferidos em
+  2026-11-24): se a dona mudar uma opção lá, mudar em `aulas/index.html` e no teste. O formulário tem também "Pesquisa no
+  Google" e "Site app.profbrune.com.br", sem utm por enquanto.
+- Conferido com o formulário de verdade: a pergunta fica na 2ª página e chega marcada (indicacao, pessoal); nenhuma resposta
+  enviada no teste (o envio final ficou bloqueado). Política de cookies cita o formulário de aulas (pt-BR e en).
+- Testes: `tests/aulas/test_playwright.js` 44/44; `consentimento` 77/77; `test_pagina_cookies` 32/32.
+- Para o advogado: o formulário pergunta a data de nascimento e "Você faz parte da comunidade LGBTQIA+?" (dado sensível na
+  LGPD, art. 11); hoje isso já existia no link do Google, a moldura só o mostra no endereço do site.
+
 ## Pontos em aberto
 
 - **Idade mínima**: a dona não tem alunos menores nas aulas, mas o cadastro do site não pergunta a idade, e nem os Termos
