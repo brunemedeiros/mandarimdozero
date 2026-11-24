@@ -111,8 +111,17 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
   await page.fill('#lt-answer-input', 'Eu como uma maçã');
   await page.click('#lt-verify-btn');
   check('traduzir: acerto tem Concluir', await page.isVisible('#challenge-complete-btn'));
+  const xpLt0 = await ev(() => STATE.xp);
   await page.click('#challenge-complete-btn');
   check('traduzir: acerto conclui', await done('lt-old-001'));
+  // XP do Ouça e traduza (decisão da autora, 2026-11-10): digitar certo = EXERCISE_XP_PRODUCE (2), só na primeira conclusão.
+  check('traduzir: acerto na primeira conclusão paga EXERCISE_XP_PRODUCE (2)', (await ev(() => STATE.xp)) - xpLt0 === 2, (await ev(() => STATE.xp)) - xpLt0);
+  await ev(() => openChallengePlayer('lt-old-001'));
+  await page.fill('#lt-answer-input', 'Eu como uma maçã');
+  await page.click('#lt-verify-btn');
+  const xpLt1 = await ev(() => STATE.xp);
+  await page.click('#challenge-complete-btn');
+  check('traduzir: refazer desafio concluído não paga XP', (await ev(() => STATE.xp)) === xpLt1);
 
   // ---- Expressões (binário) ----
   // Expressões em passos (2026-10-26): palpite -> opções -> resposta -> exemplos -> "Sua vez" ("Não sei") -> tela final.

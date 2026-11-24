@@ -822,14 +822,9 @@ function renderNextStoryBeat(){
     // uma seção de estudo completa, não uma interação isolada).
     registerStudyToday();
     maybeShowStreakCelebration();
-    contentEl.insertAdjacentHTML('beforeend', `
-      <div class="story-complete">
-        <div class="big-emoji">🎉</div>
-        <h3>${t('zh.story.doneTitle')}</h3>
-        <p>${t('zh.story.doneBody', { from: story.coversUnits[0], to: story.coversUnits[story.coversUnits.length-1] })}</p>
-        <button class="btn btn-primary" id="story-finish-btn">${t('zh.story.backToPath')}</button>
-      </div>
-    `);
+    contentEl.insertAdjacentHTML('beforeend', conclusaoHTML({ icon: '🎉', title: t('zh.story.doneTitle'), cls: 'story-complete',
+      sub: t('zh.story.doneBody', { from: story.coversUnits[0], to: story.coversUnits[story.coversUnits.length-1] }),
+      actions: [{ id: 'story-finish-btn', label: t('zh.story.backToPath') }] }));
     document.getElementById('story-finish-btn').addEventListener('click', () => {
       finishStory();
     });
@@ -1786,14 +1781,9 @@ function renderHanziReviewView(){
     registerStudyToday();
     maybeShowStreakCelebration();
     trackEvent('lesson_complete', 'hanzi_review', { count: STATE.hanziReviewQueue.length });
-    el.innerHTML = `
-      <div class="review-empty">
-        <div class="big-emoji">🎉</div>
-        <h3>${t('zh.hanzi.sessionDone')}</h3>
-        <p>${tp('zh.hanzi.sessionReviewed', STATE.hanziReviewQueue.length === 1 ? 1 : 2, { n: STATE.hanziReviewQueue.length })}</p>
-        <button class="btn btn-primary" id="hanzi-review-again">${t('zh.hanzi.backToLessons')}</button>
-      </div>
-    `;
+    el.innerHTML = conclusaoHTML({ icon: '🎉', title: t('zh.hanzi.sessionDone'),
+      sub: tp('zh.hanzi.sessionReviewed', STATE.hanziReviewQueue.length === 1 ? 1 : 2, { n: STATE.hanziReviewQueue.length }),
+      actions: [{ id: 'hanzi-review-again', label: t('zh.hanzi.backToLessons') }] });
     document.getElementById('hanzi-review-again').addEventListener('click', () => {
       renderHanziLessonsGrid();
     });
@@ -2244,14 +2234,9 @@ function renderHanziTestStep(contentEl, nextBtn){
   if (HANZI_STUDY_STATE.testIndex >= total){
     // Etapa 6: a janela da sequência não cobre a tela "Lição concluída!"; aparece depois do botão (abaixo).
     const pct = Math.round((HANZI_STUDY_STATE.testScore / total) * 100);
-    contentEl.innerHTML = `
-      <div class="exercise-result">
-        <div class="big-emoji">${pct >= 70 ? '🎉' : '💪'}</div>
-        <h3>${t('zh.path.lessonDone.lessonTitle')}</h3>
-        <div class="score-num">${HANZI_STUDY_STATE.testScore}/${total}</div>
-        <p>${pct >= 70 ? t('zh.hanzi.retentionGood') : t('zh.hanzi.retentionReview')}</p>
-      </div>
-    `;
+    contentEl.innerHTML = conclusaoHTML({ icon: pct >= 70 ? '🎉' : '💪', title: t('zh.path.lessonDone.lessonTitle'), cls: 'exercise-result',
+      sub: pct >= 70 ? t('zh.hanzi.retentionGood') : t('zh.hanzi.retentionReview'),
+      stats: [{ label: t('zh.path.lessonDone.score'), value: `${HANZI_STUDY_STATE.testScore}/${total}` }] });
     nextBtn.textContent = t('zh.hanzi.backToLessons');
     nextBtn.style.display = 'flex';
     nextBtn.onclick = () => {
