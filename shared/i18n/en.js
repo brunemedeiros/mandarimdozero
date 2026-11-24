@@ -4097,6 +4097,24 @@ window.I18N_CATALOG['en'] = {
   'gate.forgot.needEmail': 'Type your email in the field above first.', // ALTA
   'gate.forgot.failed': 'Couldn\'t send the email right now.', // ALTA
   'gate.forgot.sent': 'We sent you a link to reset your password.', // ALTA
+  'gate.forgot.sending': 'Sending...', // ALTA (needs_review)
+  'gate.forgotAsk.title': 'Forgot your password?', // ALTA (needs_review)
+  'gate.forgotAsk.sub': 'No problem. Type your account\'s email and I\'ll send you a link to create a new password.', // ALTA (needs_review)
+  'gate.forgotAsk.submit': 'Send link', // ALTA (needs_review)
+  'gate.forgotAsk.needEmail': 'Type a valid email.', // ALTA (needs_review)
+  'gate.forgotSent.title': 'Link on its way!', // ALTA (needs_review)
+  'gate.forgotSent.from': 'From', // ALTA (needs_review)
+  'gate.forgotSent.sender': 'Prof. Brune', // ALTA (needs_review)
+  'gate.forgotSent.to': 'To', // ALTA (needs_review)
+  'gate.forgotSent.stamp': 'Sent now', // ALTA (needs_review)
+  'gate.forgotSent.bodyBefore': 'Open the email and tap ', // ALTA (needs_review)
+  'gate.forgotSent.bodyButton': 'Create new password', // ALTA (needs_review)
+  'gate.forgotSent.bodyAfter': '. The link is valid for 1 hour.', // ALTA (needs_review)
+  'gate.forgotSent.note': 'Didn\'t get it in a few minutes? Check your spam folder or ask for another link.', // ALTA (needs_review)
+  'gate.forgotSent.resend': 'Resend link', // ALTA (needs_review)
+  'gate.forgotSent.resendIn': 'Resend link in {s} s', // ALTA (needs_review)
+  'gate.forgotSent.back': 'Back to sign in', // ALTA (needs_review)
+  'gate.forgotSent.resent': 'We sent a new link. Use the most recent email.', // ALTA (needs_review)
   'gate.verify.title': 'Confirm your email', // ALTA
   'gate.verify.subBefore': 'We sent a code to ', // ALTA
   'gate.verify.subAfter': '. Enter it here to activate your account.', // ALTA

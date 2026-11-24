@@ -25,9 +25,10 @@ acesso depois do deploy). Quem nunca mais entrar continua sem a chave e recebe e
 
 ## Passo a passo para colar (você faz; leva uns 5 minutos)
 
-Pré-requisito: o merge desta branch na `main` (o portão precisa gravar o idioma) e o SMTP próprio já configurado, como
-em `docs/auth/confirmacao-por-codigo.md`. Antes de trocar, deixe guardados os modelos atuais (os arquivos de
-`docs/email/supabase/` são exatamente eles).
+Pré-requisito: o SMTP próprio já configurado, como em `docs/auth/confirmacao-por-codigo.md`. O site já grava o idioma
+(conferido na produção em 2026-11-16: 5 contas em inglês, 13 em português, 43 ainda sem o dado, que ganham no próximo acesso).
+Em 2026-11-16 o "app" virou "site" no Magic Link e no Change Email (vocabulário da Etapa 7, lote 1b), aqui e em
+`docs/email/supabase/`; o que está colado hoje no painel ainda diz "app", então colar os 4 de novo resolve as duas coisas.
 
 1. Supabase (produção) > Authentication > Emails: https://supabase.com/dashboard/project/eigjocalzwamisgqilhg/auth/templates
    (se o Staging tiver SMTP, teste lá antes: `ilfjzizjfcmhibkhwber`).
