@@ -148,6 +148,12 @@ async function run(browser, port){
     const c = await cfg(page);
     check('aceitar: cookies de 13 meses, sem Sinais nem anúncios, sem page_view automático', c && c[1] === 'G-CE3282C1FB' && c[2].cookie_expires === 34128000 && c[2].allow_google_signals === false && c[2].allow_ad_personalization_signals === false && c[2].send_page_view === false && !('user_id' in c[2]), c);
     check('aceitar: a configuração já leva o endereço limpo (sem convite, e-mail nem token)', c && typeof c[2].page_location === 'string' && !/convite|ABC123|email|access_token|segredo|#/.test(c[2].page_location + (c[2].page_referrer || '')), c && c[2]);
+    // A tag do Google desta propriedade ignora o 'config' da página (gtag.js real, 2026-11-24): as regras precisam ir num
+    // gtag('set') ANTES do 'js', senão sai um page_view automático com o endereço completo e o cookie dura 400 dias.
+    const order = await page.evaluate(() => (window.dataLayer || []).map(a => Array.from(a)));
+    const iSet0 = order.findIndex(a => a[0] === 'set'), iJs = order.findIndex(a => a[0] === 'js');
+    const s0 = order[iSet0] && order[iSet0][1];
+    check('aceitar: regras de privacidade num set ANTES do js (a tag ignora o config)', iSet0 >= 0 && iJs > iSet0 && s0 && s0.send_page_view === false && s0.cookie_expires === 34128000 && s0.allow_google_signals === false && s0.allow_ad_personalization_signals === false && !/convite|ABC123|email|access_token|segredo|#/.test(s0.page_location), order.slice(0, 3));
     const sets = await page.evaluate(() => (window.dataLayer || []).map(a => Array.from(a)).filter(a => a[0] === 'set').map(a => a[1]));
     check('aceitar: gtag set com o endereço limpo para os próximos eventos', sets.length >= 1 && /utm_source=instagram/.test(sets[sets.length - 1].page_location) && !/convite|ABC123|email|access_token|segredo|#/.test(sets[sets.length - 1].page_location), sets);
     const pv = (await hits(page)).filter(h => h.name === 'page_view');

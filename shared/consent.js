@@ -167,17 +167,22 @@
     gaLoaded = true;
     window['ga-disable-' + GA_ID] = false;
     window.dataLayer = window.dataLayer || [];
-    gtag('js', new Date());
     // Endereço e referência limpos já na configuração: TODO evento (lição, cadastro, clique de saída, os automáticos do
     // Google) sai com eles, não só o page_view (revisão diária, 2026-11-24). sendPage atualiza a cada página com gtag('set').
-    gtag('config', GA_ID, {
+    var settings = {
       send_page_view: false,
       cookie_expires: COOKIE_EXPIRES,
       allow_google_signals: false,
       allow_ad_personalization_signals: false,
       page_location: cleanLocation(null, {}),
       page_referrer: cleanReferrer()
-    });
+    };
+    // As mesmas regras com gtag('set') ANTES do 'js': a tag do Google desta propriedade se configura sozinha ao carregar e
+    // ignora o gtag('config') da página (teste com o gtag.js real, 2026-11-24: sem isto saía um page_view automático com o
+    // endereço completo, cookie de 400 dias e npa=0). O 'config' fica também, para o caso de o Google voltar a lê-lo.
+    gtag('set', settings);
+    gtag('js', new Date());
+    gtag('config', GA_ID, settings);
     var s = document.createElement('script');
     s.async = true;
     s.src = 'https://www.googletagmanager.com/gtag/js?id=' + GA_ID;
