@@ -24,7 +24,6 @@ function safeEqual(a: string, b: string): boolean {
   return diff === 0;
 }
 const todaySP = () => new Date().toLocaleDateString('sv-SE', { timeZone: 'America/Sao_Paulo' });
-const daysSince = (iso: string | null | undefined) => (iso ? Math.floor((Date.now() - new Date(iso).getTime()) / 86400000) : null);
 // Chave PRÓPRIA da assinatura do link de sair (Vault `cards_digest_signing_key`, lida pela função do banco `cards_digest_signing_key()`;
 // migration 142). Não é mais a senha do agendamento. Links já enviados antes (assinados com a senha do agendamento) continuam valendo:
 // `verifyAny` confere a chave nova e, só para conferir, a antiga. Tirar a antiga depois de uns 30 dias.
@@ -83,7 +82,7 @@ Deno.serve(async (req: Request) => {
 
   // ---- E-mail de teste só para o endereço informado (a dona confere a aparência antes de ligar) ----
   if (body && body.test_to) {
-    const lang = body.test_lang === 'en' ? 'en' : 'pt', kind = body.test_kind === 'lembrete' ? 'lembrete' : 'novos';
+    const lang = body.test_lang === 'en' ? 'en' : 'pt', kind = 'novos';
     const mail = renderEmail({ lang, kind, nome: String(body.test_name || ''), n: Number(body.test_n) || 12, unsubscribeUrl: `${supabaseUrl}/functions/v1/teacher-cards-digest`, test: true });
     const err = await sendResend(String(body.test_to), mail, null);
     return json(err ? 502 : 200, { ok: !err, error: err, sent_to: body.test_to, kind, lang });
@@ -110,14 +109,10 @@ Deno.serve(async (req: Request) => {
         const { data: lastNovos } = await sb.from('teacher_cards_digest_log').select('created_at').eq('student_id', uid).eq('kind', 'novos').eq('status', 'sent').order('created_at', { ascending: false }).limit(1);
         const since = lastNovos && lastNovos.length ? lastNovos[0].created_at : new Date(Date.now() - 3 * 86400000).toISOString();
         const { data: cards } = await sb.from('teacher_flashcards').select('created_at').eq('student_id', uid).eq('teacher_id', st.teacher_id).eq('status', 'active').not('bank_item_id', 'is', null);
-        const totalCards = (cards || []).length, newCount = (cards || []).filter((c: any) => c.created_at > since).length;
-        const { data: lastUse } = await sb.from('usage_events').select('created_at').eq('user_id', uid).order('created_at', { ascending: false }).limit(1);
-        const lastActivity = lastUse && lastUse.length ? lastUse[0].created_at : null;
-        const { data: rem } = await sb.from('teacher_cards_digest_log').select('created_at').eq('student_id', uid).eq('kind', 'lembrete').eq('status', 'sent').order('created_at', { ascending: false }).limit(20);
-        const remindersSinceActivity = (rem || []).filter((r: any) => !lastActivity || r.created_at > lastActivity).length;
-        const kind = decideKind({ newCount, totalCards, daysSinceActivity: daysSince(lastActivity), daysSinceReminder: rem && rem.length ? daysSince(rem[0].created_at) : null, remindersSinceActivity });
+        const newCount = (cards || []).filter((c: any) => c.created_at > since).length;
+        const kind = decideKind({ newCount }); // só "cartões novos" (decisão da dona, 2026-11-25: quem some continua com o aviso antigo do notification-cron)
         if (!kind) { item.skipped = 'nada_a_avisar'; summary.push(item); continue; }
-        const n = kind === 'novos' ? newCount : totalCards;
+        const n = newCount;
         item.kind = kind; item.n = n; item.lang = lang;
         if (dryRun) { item.dry_run = true; summary.push(item); continue; }
         const { data: au } = await sb.auth.admin.getUserById(uid);
