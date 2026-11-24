@@ -31,7 +31,7 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
 // nas duas árvores para a comparação provar que o resto não mudou: o último cartão de palavra diz "Continuar →"; o XP usa
 // ⭐ (o ⚡ ficou só no Combo); e a janela da sequência (agora depois do Continuar) limpa os avisos "+N XP" da tela, então
 // numa cena a árvore nova pode ter a lista de avisos vazia onde a antiga ainda tinha avisos.
-const ETAPA6 = (v) => etapa7(PROGRESSO_ORDEM(FAIXA_CONVIDADO(v))).split('Ver o que você aprendeu →').join('Continuar →').split('See what you learned →').join('Continue →')
+const ETAPA6 = (v) => etapa7(PROGRESSO_ORDEM(FAIXA_CONVIDADO(SELOS_PERFIL(v)))).split('Ver o que você aprendeu →').join('Continuar →').split('See what you learned →').join('Continue →')
   .replace(/26a1\.svg(&quot;\);\\?">)⚡/g, '2b50.svg$1⭐')
   // Recomeçar o curso (2026-10-30, migration 123): caixa nova e vazia (hidden) em Configurações > Geral, montada por shared/recomecar-curso.js.
   .replace(/<!-- Recomeçar este curso.*?-->(\\n|\n)\s*<article id=\\?"settings-restart-box\\?"[^>]*><\/article>(\\n|\n)\s*/g, '')
@@ -42,6 +42,18 @@ const ETAPA6 = (v) => etapa7(PROGRESSO_ORDEM(FAIXA_CONVIDADO(v))).split('Ver o q
   // syncReviewPrevRow cria a linha logo depois de #review-content em toda sessão da Revisão, VAZIA e escondida fora da sessão
   // da professora. Só a linha vazia e hidden sai; com o botão dentro a cena continua diferente.
   .replace(/<div id=\\?"review-prev-row\\?" class=\\?"review-prev-row\\?" hidden=\\?"\\?"><\/div>/g, '');
+// Passaporte e selos do Perfil (decisão da autora, 2026-11-24; shared/selos.js): a Visão geral foi redesenhada e a medalha do
+// cartão da trilha (Progresso) virou o selo pequeno. Nas duas árvores, o trecho redesenhado vira um marcador; o resto das telas
+// continua comparado. O desenho novo é conferido em tests/selos/test_selos_playwright.js.
+const SELOS_PERFIL = (v) => {
+  const ini = [v.indexOf('<div class=\\"profile-identity profile-hero\\">'), v.indexOf('<section class=\\"pp profile-hero\\"')].filter(i => i >= 0)[0];
+  const fim = v.indexOf('id=\\"profile-badges-link\\"');
+  if (ini != null && fim > ini) v = v.slice(0, ini) + 'PERFIL-REDESENHADO ' + v.slice(fim);
+  return v
+    .replace(/(<div class=\\?"track-card[^>]*>)[\s\S]*?(<div class=\\?"track-body\\?">)/g, '$1MEDALHA$2')
+    .replace(/ style=\\?"background:var\(--selo-[a-z]+-2\);color:var\(--on-selo-[a-z]+\)\\?"/g, '')
+    .replace(/(<div class=\\?"track-showcase)[^>]*>[\s\S]*?(<\/div><\/div>)/g, '$1\\">CLASSICAS$2');
+};
 // Faixa do modo convidado (conserto de 2026-11-10, pedido da dona): a frase ganhou um <span class="guest-warning-text"> em volta,
 // para o "não" em negrito não ganhar o espaço do flex; e "username" virou "nome de usuário". Na comparação, a etiqueta sai das duas árvores; o texto continua comparado.
 const FAIXA_CONVIDADO = (v) => v.replace(/<span class=\\?"guest-warning-text\\?">([\s\S]*?)<\/span>(?=(\\n|\n)\s*<button class=\\?"guest-warning-link)/g, '$1')

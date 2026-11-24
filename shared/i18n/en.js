@@ -1204,6 +1204,8 @@ window.I18N_CATALOG['en'] = {
   'profile.streakLabel': 'day streak', // ALTA
   'profile.xpLabel': 'Total XP', // ALTA
   'profile.statsLink': 'View full statistics →', // ALTA
+  'profile.passport.nextLevel': 'On the way to the next level', // ALTA
+  'profile.passport.stampAria': '{lang}: {level}', // ALTA
   'profile.sectionBadges': 'Achievements', // ALTA
   'profile.badgesLink': 'View all →', // ALTA
   'profile.featuredNone': 'None', // ALTA
@@ -2493,6 +2495,8 @@ window.I18N_CATALOG['en'] = {
   'badge.track.comeback.1': 'Back in the Game', // ALTA
   'badge.track.comeback.goal.1': 'Come back to studying a few days after stopping', // ALTA
   'badge.ui.levelOf': 'Level {n} of {total}', // ALTA
+  'badge.stamp.max': 'Max level', // ALTA
+  'badge.stamp.toNext': '{pct}% of the way to level {n}', // ALTA
   'badge.ui.locked': 'Locked', // ALTA
   'badge.ui.maxLevel': 'Max level', // ALTA
   'badge.ui.classic': 'Classic', // ALTA
