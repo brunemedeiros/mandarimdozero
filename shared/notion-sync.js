@@ -245,7 +245,7 @@ async function renderNotionBox(opts){
   const host = document.getElementById('admin-notion-box');
   if (!host) return;
   const body = host.querySelector('[data-notion-body]');
-  if (!(opts && opts.quiet)) body.innerHTML = typeof loadingHTML === 'function' ? loadingHTML() : '…';
+  if (!(opts && opts.quiet)) body.innerHTML = typeof loadingHTML === 'function' ? loadingHTML(t('loading.notion')) : '…';
   await notionLoad();
   body.innerHTML = notionBoxHTML();
   const n = NOTION_STATE.items.filter(i => i.state === 'approval' || i.state === 'review').length;

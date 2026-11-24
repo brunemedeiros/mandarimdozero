@@ -670,7 +670,7 @@ function publishBoxHTML(deck, status){
 }
 
 async function openPublishBox(deck, boxEl, onChange){
-  boxEl.innerHTML = loadingHTML();
+  boxEl.innerHTML = loadingHTML(t('loading.publishOptions'));
   const status = await fetchPublicDeckOwnerStatus(deck.id);
   boxEl.innerHTML = publishBoxHTML(deck, status);
   const errEl = boxEl.querySelector('[data-publish-error]');

@@ -2914,6 +2914,8 @@ body.lesson-focus .acq-phase-banner{ margin-bottom:10px; padding:4px 12px; }
   border-radius: 20px; padding: 36px 28px; text-align:center; box-shadow: var(--shadow-lift);
 }
 .login-lockup{ height:44px; width:auto; margin:0 auto 22px; display:block; }
+/* Tela de abertura (dona, 2026-11-24): logo e rodinha enquanto o site confere o login; antes dizia "Redirecionando..." sempre, em português. */
+.login-card-wait{ display:flex; flex-direction:column; align-items:center; padding:32px 28px 30px; }
 .login-desc{ margin:0 0 22px; color: var(--ink-soft); font-size:13.5px; line-height:1.5; }
 .login-note{ min-height:16px; font-size:12.5px; color: var(--ink-soft); margin: 14px 0 0; }
 .login-note.err{ color: var(--error-red-text); font-weight:700; }
@@ -4416,8 +4418,10 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
        tela de login (isso duplicava a do portão, com marca de idioma e link
        cruzado). Só existe uma tela de login neutra, no domínio raiz -- este
        overlay é só o que aparece no instante antes do redirecionamento. -->
-  <div class="login-card">
-    <p class="login-desc">Redirecionando...</p>
+  <div class="login-card login-card-wait" role="status">
+    <img class="login-lockup" src="logo/ativo1-lockup.svg" alt="">
+    <span class="loading-spinner" aria-hidden="true"></span>
+    <span class="sr-only" data-i18n="loading.opening">Abrindo o site...</span>
   </div>
 </div>
 

@@ -375,7 +375,7 @@ async function openStudentAnalyticsModal(profile, lang){
         <h3 id="student-analytics-title">📊 ${escapeHTML(t('studentAnalytics.title', { name }))}</h3>
         <button type="button" class="app-modal-close" aria-label="${escapeHTML(t('common.close'))}">✕</button>
       </div>
-      <div class="app-modal-body" id="student-analytics-body">${loadingHTML()}</div>
+      <div class="app-modal-body" id="student-analytics-body">${loadingHTML(t('loading.progress'))}</div>
     </div>`;
   document.body.appendChild(overlay);
   const close = () => overlay.remove();
@@ -460,7 +460,7 @@ async function renderPublicProfileCardsBox(bodyEl, username){
     return;
   }
 
-  box.innerHTML = loadingHTML();
+  box.innerHTML = loadingHTML(t('loading.cards'));
 
   // Etapa 5: limite da tabela Admin > Planos, contado na conta inteira (todos os cursos).
   const [cardsRes, quota] = await Promise.all([

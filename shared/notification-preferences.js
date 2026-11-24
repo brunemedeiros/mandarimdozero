@@ -73,7 +73,7 @@ async function renderNotificationPreferencesView(){
     wrap.innerHTML = `<p class="profile-empty-note">${t('notif.pref.guest')}</p>`;
     return;
   }
-  wrap.innerHTML = loadingHTML();
+  wrap.innerHTML = loadingHTML(t('loading.notifPrefs'));
   const prefs = await ensureNotificationPreferencesLoaded(true);
   if (!prefs){
     wrap.innerHTML = `<p class="profile-empty-note">${t('notif.pref.loadFailed')}</p>`;
