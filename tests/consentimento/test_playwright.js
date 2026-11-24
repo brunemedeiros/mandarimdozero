@@ -159,6 +159,54 @@ async function run(browser, port){
     check('revogar: desliga o envio e guarda a recusa', after.off && after.c.analytics === false, after);
     await ctx.close();
   }
+  // 2b) Cadastro por e-mail com os cookies aceitos: o evento sign_up sai depois do código (método e curso, sem dado pessoal)
+  {
+    const { ctx, page, errors } = await openPage(browser, port, 'index.html', { gate: true,
+      init: () => { try { localStorage.setItem('cookie-consent', JSON.stringify({ v: 1, analytics: true, at: '2026-11-24T10:00:00Z' })); } catch (e) {} } });
+    await page.waitForSelector('#gate-login', { state: 'visible' });
+    await page.click('#gate-signup-link');
+    await page.waitForSelector('#gate-signup-course', { state: 'visible' });
+    await page.click('#signup-grid .lang-card[data-lang="fr"]');
+    await page.waitForSelector('#gate-signup-method', { state: 'visible' });
+    await page.check('#signup-age-ack'); await page.click('#signup-email-btn');
+    await page.waitForSelector('#gate-signup-data', { state: 'visible' });
+    await page.fill('#signup-name', 'Nova Pessoa');
+    await page.waitForFunction(() => /livre|available/.test(document.getElementById('signup-arroba-msg').textContent), null, { timeout: 5000 });
+    await page.fill('#signup-email', 'nova@x.com'); await page.fill('#signup-password', 'segredo1');
+    await page.click('#signup-submit');
+    await page.waitForSelector('#gate-verify', { state: 'visible' });
+    check('sign_up: nada antes do código', !(await hits(page)).some(h => h.name === 'sign_up'));
+    await page.fill('#gate-code', '123456'); await page.click('#gate-verify-btn');
+    await page.waitForSelector('#gate-choose-experience', { state: 'visible' });
+    const su = (await hits(page)).filter(h => h.name === 'sign_up');
+    check('sign_up: sai 1 vez depois do código, com método e curso', su.length === 1 && su[0].p.method === 'email' && su[0].p.course === 'fr' && Object.keys(su[0].p).length === 2, su);
+    check('sign_up: sem e-mail nem nome no GA4', !JSON.stringify(await page.evaluate(() => window.dataLayer.map(a => Array.from(a)))).match(/nova@x\.com|Nova Pessoa|nova\.pessoa/));
+    check('sign_up: sem erro de página', errors.length === 0, errors);
+    await ctx.close();
+  }
+  // 2c) Conta NOVA pelo "Entrar com Google" da tela de Entrar (sem cadastro): sign_up ao escolher o curso; conta antiga não
+  {
+    const { ctx, page } = await openPage(browser, port, 'index.html', { gate: true,
+      init: () => { try { localStorage.setItem('cookie-consent', JSON.stringify({ v: 1, analytics: true, at: '2026-11-24T10:00:00Z' })); } catch (e) {} } });
+    await page.waitForSelector('#gate-login', { state: 'visible' });
+    await page.evaluate(() => { window.__went = null; goToLanguageApp = (id) => { window.__went = id; }; getCurrentLearningLanguage = async () => null; setCurrentLearningLanguage = async () => {}; });
+    await page.evaluate(() => afterAuthResolved({ id: 'nova', created_at: new Date(Date.now() - 60000).toISOString(), app_metadata: { provider: 'google' } }));
+    await page.waitForSelector('#gate-choose-language', { state: 'visible' });
+    await page.click('#lang-grid .lang-card[data-lang="zh"]');
+    await page.waitForTimeout(300);
+    let su = (await hits(page)).filter(h => h.name === 'sign_up');
+    check('Google pela tela de Entrar, conta nova: sign_up com google e o curso', su.length === 1 && su[0].p.method === 'google' && su[0].p.course === 'zh', su);
+    await page.goto(`http://127.0.0.1:${port}/index.html`);
+    await page.waitForSelector('#gate-login', { state: 'visible' });
+    await page.evaluate(() => { goToLanguageApp = () => {}; getCurrentLearningLanguage = async () => null; setCurrentLearningLanguage = async () => {}; });
+    await page.evaluate(() => afterAuthResolved({ id: 'antiga', created_at: '2026-01-01T00:00:00Z', app_metadata: { provider: 'google' } }));
+    await page.waitForSelector('#gate-choose-language', { state: 'visible' });
+    await page.click('#lang-grid .lang-card[data-lang="fr"]');
+    await page.waitForTimeout(300);
+    su = (await hits(page)).filter(h => h.name === 'sign_up');
+    check('conta antiga sem curso: não conta como cadastro', su.length === 0, su);
+    await ctx.close();
+  }
   // 3) UTM guardado na aba: chega com utm, navega, só aceita na segunda página
   {
     const { ctx, page } = await openPage(browser, port, 'sobre.html?utm_source=tiktok&utm_medium=video');

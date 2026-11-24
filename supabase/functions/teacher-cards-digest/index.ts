@@ -5,7 +5,7 @@
 // Rota pública única: `?u=<conta>&t=<assinatura>` (GET ou POST) = "Parar de receber" (link do e-mail e List-Unsubscribe de 1 clique).
 // Regras e textos: core.mjs (testado em tests/email-cartoes-professora/). Deploy com verify_jwt:false (cada rota confere quem chama).
 import { createClient } from 'npm:@supabase/supabase-js@2';
-import { CATEGORY, allowsDigest, decideKind, firstName, renderEmail, signUnsubscribe, unsubscribePage, verifyUnsubscribe } from './core.mjs';
+import { CATEGORY, allowsDigest, decideKind, firstName, renderEmail, signUnsubscribe, unsubscribeConfirmPage, unsubscribePage, verifyUnsubscribe } from './core.mjs';
 
 const CORS = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'authorization, apikey, content-type, x-cron-token, x-client-info', 'Access-Control-Allow-Methods': 'GET, POST, OPTIONS' };
 const json = (status: number, body: unknown) => new Response(JSON.stringify(body), { status, headers: { ...CORS, 'Content-Type': 'application/json' } });
@@ -25,7 +25,23 @@ function safeEqual(a: string, b: string): boolean {
 }
 const todaySP = () => new Date().toLocaleDateString('sv-SE', { timeZone: 'America/Sao_Paulo' });
 const daysSince = (iso: string | null | undefined) => (iso ? Math.floor((Date.now() - new Date(iso).getTime()) / 86400000) : null);
-const unsubUrl = async (uid: string, lang: string) => `${supabaseUrl}/functions/v1/teacher-cards-digest?u=${uid}&t=${await signUnsubscribe(secret, uid)}&l=${lang}`;
+// Chave PRÓPRIA da assinatura do link de sair (Vault `cards_digest_signing_key`, lida pela função do banco `cards_digest_signing_key()`;
+// migration 142). Não é mais a senha do agendamento. Links já enviados antes (assinados com a senha do agendamento) continuam valendo:
+// `verifyAny` confere a chave nova e, só para conferir, a antiga. Tirar a antiga depois de uns 30 dias.
+let signingKeyCache: string | null = null;
+async function signingKey(sb: any): Promise<string> {
+  if (signingKeyCache) return signingKeyCache;
+  const { data, error } = await sb.rpc('cards_digest_signing_key');
+  if (error || typeof data !== 'string' || data.length < 32) throw new Error('sem_chave_de_assinatura');
+  signingKeyCache = data;
+  return data;
+}
+async function verifyAny(sb: any, uid: string, token: string): Promise<boolean> {
+  let key = ''; try { key = await signingKey(sb); } catch (_) { /* cai para a conferência da chave antiga */ }
+  if (key && await verifyUnsubscribe(key, uid, token)) return true;
+  return await verifyUnsubscribe(secret, uid, token); // chave antiga: só para links já enviados
+}
+const unsubUrl = async (sb: any, uid: string, lang: string) => `${supabaseUrl}/functions/v1/teacher-cards-digest?u=${uid}&t=${await signUnsubscribe(await signingKey(sb), uid)}&l=${lang}`;
 
 async function sendResend(to: string, mail: { subject: string; html: string; text: string }, unsubscribe: string | null): Promise<string | null> {
   if (!resendApiKey || !resendFrom) return 'resend_not_configured';
@@ -46,10 +62,12 @@ Deno.serve(async (req: Request) => {
   const url = new URL(req.url);
   const sb = createClient(supabaseUrl, serviceRoleKey, { auth: { persistSession: false } });
 
-  // ---- Parar de receber (público; confere a assinatura) ----
+  // ---- Parar de receber (público; confere a assinatura). GET só mostra a confirmação; só o POST grava. ----
   const u = url.searchParams.get('u'), t = url.searchParams.get('t'), l = url.searchParams.get('l') === 'en' ? 'en' : 'pt';
   if (u || t) {
-    if (!(await verifyUnsubscribe(secret, u || '', t || ''))) return html(400, unsubscribePage(l, false));
+    if (!(await verifyAny(sb, u || '', t || ''))) return html(400, unsubscribePage(l, false));
+    if (req.method === 'GET') return html(200, unsubscribeConfirmPage(l, `${supabaseUrl}/functions/v1/teacher-cards-digest?u=${encodeURIComponent(u as string)}&t=${encodeURIComponent(t as string)}&l=${l}`));
+    if (req.method !== 'POST') return json(405, { ok: false, error: 'method_not_allowed' });
     const { data: row } = await sb.from('notification_preferences').select('channels').eq('user_id', u).maybeSingle();
     const channels = { ...((row && row.channels) || {}), [CATEGORY]: [] };
     const { error } = await sb.from('notification_preferences').upsert({ user_id: u, channels }, { onConflict: 'user_id' });
@@ -107,7 +125,7 @@ Deno.serve(async (req: Request) => {
         if (!to) { item.skipped = 'sem_email'; summary.push(item); continue; }
         const { error: claimErr } = await sb.from('teacher_cards_digest_log').insert({ teacher_id: st.teacher_id, student_id: uid, kind, cards_count: n, sent_on: today, status: 'pending' });
         if (claimErr) { item.skipped = 'trava_do_dia'; summary.push(item); continue; }
-        const unsubscribe = await unsubUrl(uid, lang);
+        const unsubscribe = await unsubUrl(sb, uid, lang);
         const mail = renderEmail({ lang, kind, nome: firstName(prof?.display_name), n, unsubscribeUrl: unsubscribe });
         const err = await sendResend(to, mail, unsubscribe);
         await sb.from('teacher_cards_digest_log').update({ status: err ? 'error' : 'sent', error: err }).eq('student_id', uid).eq('sent_on', today);

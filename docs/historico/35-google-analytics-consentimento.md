@@ -122,6 +122,33 @@ página" (o site manda as telas do app sozinho; com isso ligado, as limpezas de 
   igual nos dois idiomas; 2338/2338). Política geral em rascunho (aba Privacidade do Admin, `ajuda/textos/politica.html` e
   documento do advogado): item novo "Medição de visitas" na seção 5 e Google Fonts retirado da lista de terceiros.
 
+## Fase 4 (2026-11-16): publicação
+
+- PR #483 (Fases 2 e 3, com o aviso C2) mesclado na `main` com autorização da dona. Conferido no ar com navegador
+  automático (2026-11-16): aviso aparece; recusar não faz nenhum pedido ao Google; aceitar pede o `gtag.js` do
+  `G-CE3282C1FB` e o `page_view` sai como `https://app.profbrune.com.br/?utm_source=teste&utm_medium=teste` (o `convite=`
+  foi tirado); teste de nivelamento fr com aviso e `?origem=` chegando ao Apps Script; sem Google Fonts. O envio ao Google
+  foi bloqueado na conferência para não criar visita falsa.
+- Falta (com a dona): ver a visita no "Tempo real" do GA4 com o link de teste numa janela anônima (os aparelhos onde ela
+  entra como admin ficam marcados para não contar) e marcar os eventos-chave (`sign_up`, cliques de saída e o evento
+  criado para abertura dos testes de nivelamento).
+
+## Conferência de 2026-11-24
+
+- GA4 recebendo dados (print da dona, "Eventos recentes"): `first_visit`, `page_view`, `session_start`, `user_engagement`,
+  `lesson_start`, `lesson_complete`. Ainda sem `sign_up` e `click`. Na produção: 1 conta nova desde a publicação (nasceu
+  com perfil privado) e 6 confirmações de idade. `sign_up` conferido de ponta a ponta no teste (cadastro por e-mail com
+  cookies aceitos; `tests/consentimento/test_playwright.js` 63/63): a ausência vem de não ter havido cadastro com aceite.
+  Conta criada pelo "Entrar com Google" da tela de Entrar (sem passar pelo cadastro) passou a gerar `sign_up` (pedido da
+  dona, 2026-11-24): `index.html`, ao escolher o curso, só se a conta foi criada há menos de 30 minutos (conta antiga sem
+  curso não conta); método pelo `app_metadata.provider`. Teste 65/65.
+- Dona criou o evento `abrir_teste_nivelamento` no GA4 (2026-11-24). Na "Aquisição de tráfego" ainda só "(direct) / (none)"
+  (5 sessões); o envio do site foi conferido ao vivo (o pedido ao Google leva o endereço com os `utm_*`, `_fv=1`, `_ss=1`),
+  então a falta do teste / teste deve ser atraso de processamento ou o período do relatório (o padrão "últimos 28 dias"
+  não inclui o dia de hoje). Conferir de novo depois de 48 h.
+- Na interface nova do GA4, "eventos-chave" viraram "Eventos principais" (estrela em Administrador > Exibição de dados >
+  Eventos). `close_convert_lead`, `qualify_lead` e `purchase` foram criados pelo objetivo "Gerar leads" e nunca recebem dados.
+
 ## Ajustes pedidos depois da Fase 3 (2026-11-16)
 
 - A dona achou o aviso grande. Prévias enviadas (tela real, celular e computador): **C1** sem o título "Cookies", ícone
