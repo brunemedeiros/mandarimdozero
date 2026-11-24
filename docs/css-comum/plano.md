@@ -1,6 +1,6 @@
 # Plano: CSS repetido dos `index.html` para `shared/`
 
-Situação: **aprovado como plano, nada executado** (autora, 2026-11-05 e 2026-11-24). Cada etapa só começa com a autorização dela.
+Situação: **etapa 0 feita (2026-11-24); nenhuma regra mudou de lugar ainda.** Cada etapa só começa com a autorização da autora.
 Lista das diferenças fr x zh que vieram antes deste plano, e o que já foi decidido sobre elas: `docs/css-comum/diferencas-fr-zh.md`.
 
 ## Por que
@@ -34,7 +34,26 @@ Provas em cada etapa:
 
 Cuidados já conferidos: nenhum `url(...)` dentro dos `<style>` (mudar de arquivo não quebra endereço); os `.css` de `shared/`
 não estão no pré-cache do service worker (igual aos que já existem); `tests/css-equilibrio/test_variaveis.js` e
-`tests/painel-ds/_css.js` leem só os `<style>` e precisam passar a ler também os `.css` de `shared/` ligados na página (etapa 0).
+`tests/painel-ds/_css.js` passaram a ler também os `.css` de `shared/` ligados na página (etapa 0).
+
+## Ferramentas (feitas na etapa 0, 2026-11-24)
+
+Roteiro de cada etapa, nesta ordem:
+
+1. **Mapa do dia:** `node scripts/css-comum-mapa.js` grava `docs/css-comum/mapa.md` com os trechos iguais e as linhas de hoje.
+2. **Mover** o trecho da etapa: sai do `<style>` dos dois sites e entra como `<link rel="stylesheet" href="../shared/<nome>.css">`
+   no mesmo lugar (fechando e reabrindo o `<style>` em volta).
+3. **Prova 1, cascata:** `node tests/css-comum/test_cascata.js` (referência padrão `origin/main`; outra: `CSS_COMUM_REF=<commit>`).
+   Lista todas as regras que o navegador montou, na ordem, antes e depois; tem que dar igual (hoje: fr 4866, zh 4298 regras).
+4. **Prova 2, capturas:** `git worktree add --detach <pasta-ref> origin/main`, depois
+   - `node tests/css-comum/capturas.js <pasta-ref> <antes>` e `node tests/css-comum/capturas.js . <depois>` (topo, todas as
+     abas, seções de Configurações e janelas; fr e zh, claro e escuro, 1200, 390 e 360 px);
+   - `node tests/paridade-sites/capturas_quase_iguais.js <pasta-ref> <antes-licao> fr,zh light,dark 390,1200` e o mesmo
+     com `.` (lição e Revisão passo a passo);
+   - `node tests/e4/comparar-capturas.js <antes> <depois> 0` para cada par: tolerância zero.
+   As capturas "antes" não ficam guardadas: saem da árvore de referência na hora, sempre iguais.
+5. **Regressão:** as pastas listadas em "Método". `tests/css-equilibrio/test_variaveis.js` e `tests/painel-ds/_css.js` já
+   leem o CSS da página inteira na ordem (`tests/css-comum/css-da-pagina.js`), então continuam valendo depois da mudança.
 
 ## Etapas (1 branch e 1 PR por etapa; a próxima só com aprovação)
 
@@ -43,7 +62,7 @@ mapa com as linhas do dia.
 
 | Etapa | O que sai do `<style>` | Risco |
 |---|---|---|
-| 0. Preparação | Nada. Script que mapeia os trechos iguais, teste CSSOM antes x depois, roteiro de capturas, capturas "antes" | nenhum |
+| 0. Preparação (FEITA, 2026-11-24) | Nada. Mapa, teste da cascata, roteiro de capturas e testes antigos lendo o CSS inteiro | nenhum |
 | 1. Piloto | Fim do arquivo: "cara de jogo", conquistas com níveis, sugestões de amigos, missão em dupla | baixo |
 | 2 | Decks e Aluno > Revisão | baixo |
 | 3 | Carteirinha, Progresso, Amigos, Pódio, Ranking, abas da Conjugação | baixo |
