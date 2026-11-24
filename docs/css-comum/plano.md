@@ -52,6 +52,8 @@ Roteiro de cada etapa, nesta ordem:
      com `.` (lição e Revisão passo a passo);
    - `node tests/e4/comparar-capturas.js <antes> <depois> 0` para cada par: tolerância zero.
    As capturas "antes" não ficam guardadas: saem da árvore de referência na hora, sempre iguais.
+   Conferido na etapa 0 (2026-11-24): `origin/main` x esta branch sem mudança de CSS deu **1.004 de 1.004 capturas iguais**
+   (288 telas e janelas, 716 de lição e Revisão), 0 erros de página; a mesma árvore dá sempre as mesmas imagens.
 5. **Regressão:** as pastas listadas em "Método". `tests/css-equilibrio/test_variaveis.js` e `tests/painel-ds/_css.js` já
    leem o CSS da página inteira na ordem (`tests/css-comum/css-da-pagina.js`), então continuam valendo depois da mudança.
 
