@@ -102,6 +102,23 @@ const events = (tables, user) => (tables.notification_events || []).filter((n) =
       try { m2 = ctx.__M(st([{ id: 'missaoQueAindaNaoExiste', target: 3 }, { id: 'xp50', target: 50 }], { xp: 60 })); } catch (e) { erro = String(e); }
       t(L('missões: missão desconhecida é pulada sem erro'), !erro && JSON.stringify(m2) === JSON.stringify([{ current: 50, target: 50 }]), erro || m2);
     }
+    if (label === 'repo') {
+      // Missões do dia só de HOJE (2026-11-24): antes o cron avisava "faltam N missões" todo dia sobre missões congeladas
+      // de dias antigos, para quem nem abriu o site.
+      const hojeUTC = new Date().toISOString().slice(0, 10);
+      const ontemUTC = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+      const comMissoes = (date) => ({ streak: 0, daily: { date, missions: [{ id: 'xp50', target: 50 }, { id: 'reviews15', target: 15 }], xp: 20, reviewsDone: 0 } });
+      const tabM = {
+        notification_rules: RULES,
+        notification_templates: [tpl('daily_missions_reminder', 'frances', 'pt-BR', 'Faltam {{missing}} missões')],
+        progress: [{ user_id: U(30), data: { frances: comMissoes(ontemUTC) } }, { user_id: U(31), data: { frances: comMissoes(hojeUTC) } }],
+        profiles: [], badge_grants: [], teacher_students: [], weekly_xp: [], push_subscriptions: [], notification_preferences: [],
+      };
+      await runCron(ctx, tabM);
+      const lembrete = (u) => notif(tabM, u).filter((n) => n.event_type === 'daily_missions_reminder');
+      t(L('missões de ontem (site não aberto hoje): sem aviso de missões'), lembrete(U(30)).length === 0, notif(tabM, U(30)));
+      t(L('missões de hoje começadas e não terminadas: avisa uma vez, com o que falta'), lembrete(U(31)).length === 1 && lembrete(U(31))[0].body === 'Faltam 2 missões', lembrete(U(31)));
+    }
     t(L('LANGUAGES tem portugues'), ctx.__L.some((l) => l.appKey === 'portugues' && l.id === 'pt'));
     t(L('bloco portugues@en é achado'), ctx.__B({ 'portugues@en': { a: 1 } }, 'portugues')?.a === 1);
     t(L('idioma principal de conta só pt'), ctx.__P({ 'portugues@en': { lastStudyDay: day(0) } }) === 'portugues');

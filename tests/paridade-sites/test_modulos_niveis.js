@@ -47,7 +47,7 @@ async function fingerprint(browser, root){
   page.on('pageerror', e => errors.push(String(e)));
   await page.clock.install({ time: new Date('2026-10-14T12:00:00Z') });
   await page.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, r => r.abort());
-  await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
+  await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase|\/shared\/vendor\/supabase-js/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
   await page.addInitScript(() => {
     try { sessionStorage.setItem('guest_mode', '1'); localStorage.setItem('ui-language', 'pt-BR'); } catch (e) {}
     let s = 12345; Math.random = () => (s = (s * 16807) % 2147483647) / 2147483647;
@@ -171,6 +171,9 @@ async function fingerprint(browser, root){
   // ---- 8. regras de bloqueio
   await grab('bloqueio', () => {
     const perms = (skip, roles) => ({ roles, admin: false, permissions: { trail_skip_locked: { enabled: skip, limit: null } }, free: {} });
+    // Semente fixa: a ordem das perguntas da prova que abre aqui (openCheckpoint/openLevelTest) vinha do sorteio sem semente, que depende de
+    // quantos sorteios aconteceram antes na página; qualquer mudança em outra tela mudava a 1ª pergunta (com ou sem áudio) e a contagem de áudios.
+    window.__seed(4242);
     const o = { off: trailSkipAllowed() };
     TRAIL_SKIP_PAYWALL_ENABLED = true; TRAIL_PERMS_REQUESTED = true;
     MY_PERMISSIONS = perms(false, ['user']);

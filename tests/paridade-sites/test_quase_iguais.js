@@ -50,6 +50,9 @@ const ETAPA6 = (v) => etapa7(PROGRESSO_ORDEM(FAIXA_CONVIDADO(v))).split('Ver o q
   .replace(/(<button class=\\?"grade-btn [^>]*>(?:(?!<\/button>).)*?)<span class=\\?"kbd-hint\\?">[1-4]<\/span>/g, '$1')
   .replace(/(<button class=\\?"mc-option[^>]*>(?:(?!<\/button>).)*?)<span class=\\?"kbd-hint\\?">[1-4]<\/span>/g, '$1')
   .replace(/(<button class=\\?"speed-option[^>]*>(?:(?!<\/button>).)*?)<span class=\\?"kbd-hint\\?">[1-4]<\/span>/g, '$1') // Revisão rápida (2026-11-13): número nas 4 opções
+  // Exercício de cenário (2026-11-24, decisão da autora): a bolinha própria (.scenario-option-num) saiu e o número vem do quadrado comum (.kbd-hint).
+  .replace(/(?:\\n|\n)\s*<span class=\\?"scenario-option-num\\?">\d+<\/span>/g, '')
+  .replace(/(<button class=\\?"scenario-option[^>]*>(?:(?!<\/button>)[\s\S])*?)<span class=\\?"kbd-hint\\?">[1-4]<\/span>/g, '$1')
   .replace(/<span class=\\?"hint-touch\\?">([^<]*)<\/span><span class=\\?"hint-kbd\\?">[^<]*<\/span>/g, '$1')
   .replace(/<span class=\\?"key-enter-hint\\?" aria-hidden=\\?"true\\?">Enter<\/span>/g, '')
   .replace(/(\.(?:grade-btn\.grade-\w+|mc-option|speed-option(?:\.\w+)?)\[[^\]]*?)[1-4]\]/g, '$1]')

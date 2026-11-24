@@ -87,3 +87,4 @@ Tudo o que for decidido sobre XP vale para todos os sites (fr, zh, pt e futuros)
 
 ## Ditados passam a dar XP (2026-11-23)
 - Decisão da autora ("Ditados também dão XP", em PR separado; vale para todos os sites). Valores propostos pelo Claude (a autora não definiu): primeira tentativa de cada ditado, nota >= 90 = 4 (`LESSON_CLOSE_XP`), 60 a 89 = 2 (`EXERCISE_XP_PRODUCE`), < 60 = 0; refazer = 0. `dictationXP` em `shared/ditados.js`; o resultado mostra "XP ganho". Teste: `tests/ditado/` 64/64.
+- Valores do Ditado confirmados pela autora em 2026-11-24 ("Os valores de XP dos Ditados estão bons").

@@ -75,7 +75,10 @@ const PAGE_LIB = () => {
     });
     return out;
   };
-  window.__desc = (el) => (el.id ? '#' + el.id : '') + '.' + String(el.className || '').split(/\s+/).slice(0, 2).join('.') + '[' + (el.textContent || '').trim().replace(/^(Praticar mais|Practice more|Continuar revisando|Keep reviewing)$/, 'CONTINUAR_REVISANDO').slice(0, 30) + ']'; // "Praticar mais" virou "Continuar revisando" de propósito (2026-11-10); o nome da cena não muda
+  // O texto do nome da cena não conta o número da tecla (.kbd-hint) nem a bolinha antiga do cenário (.scenario-option-num): 2026-11-24, número
+  // à esquerda nas opções do site; sem isso o corte em 30 letras muda o nome da cena de uma árvore para a outra.
+  window.__txtSemNumero = (el) => { const c = el.cloneNode(true); c.querySelectorAll('.kbd-hint, .scenario-option-num').forEach(n => n.remove()); return (c.textContent || ''); };
+  window.__desc = (el) => (el.id ? '#' + el.id : '') + '.' + String(el.className || '').split(/\s+/).slice(0, 2).join('.') + '[' + __txtSemNumero(el).trim().replace(/^(Praticar mais|Practice more|Continuar revisando|Keep reviewing)$/, 'CONTINUAR_REVISANDO').slice(0, 30) + ']'; // "Praticar mais" virou "Continuar revisando" de propósito (2026-11-10); o nome da cena não muda
 
   // uma ação: devolve a descrição (ou null se não há o que fazer)
   window.__acao = (rootSel, r) => {
@@ -110,7 +113,7 @@ async function abrir(browser, port, site, { lang = 'pt-BR', width = 1200, theme 
   page.on('pageerror', e => errors.push(String(e.message || e) + ' @ ' + String(e.stack || '').split('\n').slice(1, 3).join(' | ').replace(/http:\/\/127\.0\.0\.1:\d+/g, '')));
   await page.clock.install({ time: new Date('2026-10-14T12:00:00Z') });
   await page.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, r => r.abort());
-  await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
+  await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase|\/shared\/vendor\/supabase-js/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
   await page.addInitScript(([lang, theme]) => {
     try { sessionStorage.setItem('guest_mode', '1'); localStorage.setItem('ui-language', lang); localStorage.setItem('match-with-audio', '0'); /* Combinar com áudio (2026-11-14): a comparação antes x depois roda sem as cartas de áudio, que são novas */ if (theme) localStorage.setItem('theme', theme); } catch (e) {}
     let s = 12345; Math.random = () => (s = (s * 16807) % 2147483647) / 2147483647;

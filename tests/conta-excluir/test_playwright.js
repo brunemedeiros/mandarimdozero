@@ -19,7 +19,7 @@ const L = (name, cond, extra) => { total++; if (cond) ok++; else console.log('  
     const ctx = await browser.newContext({ serviceWorkers: 'block', viewport: { width: 430, height: 900 } });
     const page = await ctx.newPage(); const errs = []; page.on('pageerror', e => errs.push(e.message));
     await page.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, r => r.abort());
-    await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
+    await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase|\/shared\/vendor\/supabase-js/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
     await page.addInitScript(() => { try { sessionStorage.setItem('guest_mode', '1'); } catch (e) {} });
     await page.goto(`http://127.0.0.1:${port}/${site}/index.html`);
     await page.waitForFunction(() => typeof renderSettingsView === 'function' && typeof refreshDeleteAccountBox === 'function', null, { timeout: 25000 });

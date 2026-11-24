@@ -58,7 +58,7 @@ async function abrir(browser, base, site){
   await page.addInitScript(() => { try { localStorage.setItem('ui-language', 'pt-BR'); localStorage.setItem('ui-language-gate', 'pt-BR'); } catch (e) {} });
   // A última rota registrada vence: primeiro o bloqueio geral, depois o stub do Supabase.
   await page.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, r => r.abort());
-  await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
+  await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase|\/shared\/vendor\/supabase-js/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
   await page.goto(`${base}/${site}/index.html`);
   await page.waitForFunction(() => typeof CURRENT_USER !== 'undefined' && CURRENT_USER && progressLoadedOk, null, { timeout: 25000 });
   await page.waitForTimeout(1200);

@@ -173,7 +173,9 @@ function respostas(ex){
         const content = ctx.__dom.mk('content'), next = ctx.__dom.mk('next');
         ctx.STEP_STATE.exerciseIndex = 2; ctx.STATE.currentUnitId = u.id;
         ctx.renderScenarioExercise(ex, content, next, 9);
-        return JSON.stringify([content.innerHTML, next.style.display, ctx.answerExplanationHTML(ex), ctx.buildExerciseHint(ex, u)]);
+        // 2026-11-24 (decisão da autora): a bolinha própria do cenário (.scenario-option-num) saiu; o número vem do quadrado comum
+        // (.kbd-hint, criado por wireKeyboardOptions). Só a bolinha sai da comparação; o resto da tela continua igual.
+        return JSON.stringify([content.innerHTML.replace(/\n\s*<span class="scenario-option-num">\d+<\/span>/g, ''), next.style.display, ctx.answerExplanationHTML(ex), ctx.buildExerciseHint(ex, u)]);
       });
       n++;
       if (r[0] !== r[1] && diff.length < 3) diff.push({ u: u.id, i, a: r[0].slice(0, 400), b: r[1].slice(0, 400) });

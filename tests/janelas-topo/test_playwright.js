@@ -99,7 +99,7 @@ async function openApp(browser, base, app, o){
   const st = STATES[o.state || 'ativa'];
   const spec = { blockKey: o.lang === 'en' ? BLOCK[app] + '@en' : BLOCK[app], lang: o.lang, streak: st.streak, last: st.last, log: st.log,
     duo: o.duo || st.duo, cards: CARDS, xp: o.xp || XP_BETTER, account: o.account || null };
-  await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase/, r => r.fulfill({ contentType: 'text/javascript', body: STUB(spec) }));
+  await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase|\/shared\/vendor\/supabase-js/, r => r.fulfill({ contentType: 'text/javascript', body: STUB(spec) }));
   await page.goto(`${base}/${app}/index.html`);
   await page.waitForFunction(() => typeof CURRENT_USER !== 'undefined' && CURRENT_USER && CURRENT_USER.id && progressLoadedOk, null, { timeout: 25000 });
   await page.waitForTimeout(900);

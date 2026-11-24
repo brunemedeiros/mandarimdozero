@@ -90,7 +90,7 @@ async function openApp(browser, base, app, lang, spec, opts){
   const page = await ctx.newPage();
   const errs = []; page.on('pageerror', e => errs.push(String(e)));
   await page.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, r => r.abort());
-  await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase/, r => r.fulfill({ contentType: 'text/javascript', body: STUB(spec) }));
+  await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase|\/shared\/vendor\/supabase-js/, r => r.fulfill({ contentType: 'text/javascript', body: STUB(spec) }));
   await page.goto(`${base}/${app}/index.html`);
   await page.waitForFunction(() => CURRENT_USER && CURRENT_USER.id && progressLoadedOk, null, { timeout: 25000 });
   await page.waitForTimeout(1500);

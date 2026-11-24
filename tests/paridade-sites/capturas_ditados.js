@@ -37,7 +37,7 @@ const STUB = `(function(){
     page.on('pageerror', e => errors.push(String(e)));
     await page.clock.install({ time: new Date('2026-10-14T12:00:00Z') });
     await page.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, r => r.abort());
-    await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
+    await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase|\/shared\/vendor\/supabase-js/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
     // mp3 nunca responde: o player fica em 00:00 nas duas árvores (o tempo total chegava em momentos diferentes)
     await page.route(/\.mp3(\?|$)/, () => {});
     await page.addInitScript((th) => {
