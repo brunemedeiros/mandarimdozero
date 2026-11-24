@@ -85,6 +85,20 @@ webpush.setVapidDetails(vapidSubject, vapidPublicKey, vapidPrivateKey);
 // PR); sem isso a API recusa o envio. Ausência de qualquer um dos dois só
 // desliga o envio de e-mail (log + return cedo em sendEmailToUser), nunca
 // derruba o resto do cron -- mesmo espírito de robustez do push.
+// Senha do agendamento (auditoria de segurança de 2026-11-19, docs/historico/36):
+// o verify_jwt aceita a chave pública do site, então sem isto qualquer pessoa
+// disparava os avisos fora de hora. O agendamento (cron `notification-cron-diario`,
+// migration 140) manda o cabeçalho `x-cron-token` com o valor guardado no Vault
+// (`notif_cron_token`), igual ao secret NOTIFICATION_CRON_TOKEN daqui. Sem o secret
+// (ou com menos de 24 caracteres) a função recusa tudo, nunca roda aberta.
+const cronToken = Deno.env.get('NOTIFICATION_CRON_TOKEN') || '';
+function safeEqual(a: string, b: string): boolean {
+  const ea = new TextEncoder().encode(a), eb = new TextEncoder().encode(b);
+  let diff = ea.length ^ eb.length;
+  for (let i = 0; i < Math.max(ea.length, eb.length); i++) diff |= (ea[i] || 0) ^ (eb[i] || 0);
+  return diff === 0;
+}
+
 const resendApiKey = Deno.env.get('RESEND_API_KEY');
 const resendFromEmail = Deno.env.get('RESEND_FROM_EMAIL');
 
@@ -138,6 +152,9 @@ const MISSION_FIELD_BY_ID: Record<string, MissionFieldDef> = {
   matchGame1: { field: 'matchGamesPlayed' },
   overdue3: { field: 'overdueReviewsDone' },
   stars40: { field: 'stars' },
+  // 'Ganhe 50 XP hoje' (no site desde ~2026-10-23, no lugar de stars40). Faltava aqui: o cron quebrava em
+  // getFieldValue(undefined) e a conta ficava sem o lembrete de missões (achado em 2026-11-23).
+  xp50: { field: 'xp' },
   highscore2: { field: 'highScoreLessons' },
   perfect1: { field: 'perfectLessons' },
   grammar1: { field: 'grammarLessons' },
@@ -165,8 +182,9 @@ function missionCurrent(def: MissionFieldDef, state: any): number {
 function computeMissionProgress(state: any): { current: number; target: number }[] | null {
   const missions = state.daily?.missions;
   if (!Array.isArray(missions) || missions.length === 0 || !state.daily?.date) return null;
-  return missions.map((m: { id: string; target: number }) => {
-    const def = MISSION_FIELD_BY_ID[m.id] || {};
+  // Missão que o site criou e este mapa ainda não conhece: fica de fora da conta (antes derrubava a conta inteira).
+  return missions.filter((m: { id: string }) => Object.prototype.hasOwnProperty.call(MISSION_FIELD_BY_ID, m.id)).map((m: { id: string; target: number }) => {
+    const def = MISSION_FIELD_BY_ID[m.id];
     return { current: Math.min(missionCurrent(def, state), m.target), target: m.target };
   });
 }
@@ -809,7 +827,14 @@ async function processTeacherStudentAlerts(
   return created;
 }
 
-Deno.serve(async (_req: Request) => {
+Deno.serve(async (req: Request) => {
+  if (cronToken.length < 24) {
+    console.error('notification-cron: secret NOTIFICATION_CRON_TOKEN ausente ou curto; recusando');
+    return new Response(JSON.stringify({ ok: false, error: 'not_configured' }), { status: 503, headers: { 'Content-Type': 'application/json' } });
+  }
+  if (!safeEqual(req.headers.get('x-cron-token') || '', cronToken)) {
+    return new Response(JSON.stringify({ ok: false, error: 'unauthorized' }), { status: 401, headers: { 'Content-Type': 'application/json' } });
+  }
   const supabase = createClient(supabaseUrl, serviceRoleKey);
 
   const rulesResult = await supabase.from('notification_rules').select('*');

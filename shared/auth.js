@@ -286,6 +286,15 @@ async function onUserLoggedIn(user){
   askUiLanguageOnFirstAccess();
   // Escolher o @ uma vez (111): só para quem tem o @ aleatório e ainda não escolheu; espera outras janelas.
   if (typeof maybeAskUsernameChoice === 'function') maybeAskUsernameChoice().catch(() => {});
+  // Confirmação de idade de quem já tinha conta (136, opção A da dona): faixa no topo do Estudo, não trava nada.
+  if (typeof maybeShowAgeAckBanner === 'function') maybeShowAgeAckBanner().catch(() => {});
+  // GA4 (shared/consent.js): só mede depois de saber quem está logado; professora/admin não são medidas.
+  if (window.ProfBruneConsent && typeof ensureProfileLoaded === 'function'){
+    ensureProfileLoaded().catch(() => null).then(() => {
+      const staff = (typeof isTeacherOrAdmin === 'function' && isTeacherOrAdmin()) || (typeof isAdminUser === 'function' && isAdminUser());
+      window.ProfBruneConsent.setContext({ staff: !!staff });
+    });
+  }
   // Depois do render padrão (ver comentário equivalente em enterGuestMode)
   // -- só assim a navegação forçada por uma notificação clicada vence a
   // aba default do carregamento normal.

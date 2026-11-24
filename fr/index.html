@@ -59,6 +59,8 @@ try{
 <link rel="stylesheet" href="../shared/revisao-teclado.css">
 <link rel="stylesheet" href="../shared/combinar-audio.css">
 <link rel="stylesheet" href="../shared/gramatica-cenario.css">
+<link rel="stylesheet" href="../shared/age-ack.css">
+<link rel="stylesheet" href="../shared/consent.css">
 <style>
 :root{
   /* Design tokens — paleta própria do Francês do Zero (azul como cor
@@ -1367,13 +1369,13 @@ button.wrong-feedback-continue:active:not(:disabled){ box-shadow: 0 2px 0 color-
 .cloze-type-wrap input:disabled ~ .fr-accent-picker .fr-accent-key{ pointer-events:none; opacity:.5; }
 
 /* ---------- Tela final "Parabéns" (estilo Busuu) ---------- */
-.lesson-complete{ text-align:center; padding: 20px 4px; }
-.lesson-complete-icon{ font-size:52px; margin-bottom:8px; }
-.lesson-complete h2{ margin:0 0 18px; font-size:22px; }
+</style>
+<!-- Tela de conclusão única (.lesson-complete + partes opcionais): peça comum em shared/conclusao.css, ligada aqui para manter a ordem da cascata. -->
+<link rel="stylesheet" href="../shared/conclusao.css">
+<style>
 /* Tela leve entre lições da mesma unidade (Modelo B) -- reaproveita
    .lesson-complete/.lesson-complete-icon acima, só acrescenta o nome da
    lição e, quando há cartões devidos, um aviso que puxa pro Flashcard. */
-.lesson-boundary-title{ font-size:15px; color: var(--ink-soft); margin: -8px 0 18px; }
 .lesson-boundary-due{
   display:inline-block; margin: 0 0 8px; padding:8px 16px; border-radius:999px;
   background: rgba(29,90,130,0.08); color: var(--seal-red-dark); font-weight:700; font-size:13.5px;
@@ -1389,10 +1391,6 @@ button.wrong-feedback-continue:active:not(:disabled){ box-shadow: 0 2px 0 color-
 .lesson-boundary-challenge-chip.done{ background: rgba(227,179,65,0.18); color: var(--seal-red-dark); }
 .lbc-chip-count{ font-weight:800; opacity:.75; flex-shrink:0; }
 .lbc-chip-check{ font-weight:800; flex-shrink:0; }
-.lesson-complete-stats{ display:flex; gap:12px; margin-bottom:22px; }
-.lc-stat{ flex:1; background: var(--paper-warm); border:1px solid var(--paper-line); border-radius: var(--radius); padding:14px; }
-.lc-stat-label{ font-size:11px; text-transform:uppercase; letter-spacing:.05em; color: var(--ink-soft); font-weight:800; margin-bottom:6px; }
-.lc-stat-value{ font-size:24px; font-weight:800; color: var(--seal-red-dark); }
 
 /* Tela "Unidade concluída!" (Fase 4) -- lista de competências/objetivo
    comunicacional, mesmo padrão visual de .module-skills (Tier 4/6) mas em
@@ -1591,8 +1589,6 @@ button.wrong-feedback-continue:active:not(:disabled){ box-shadow: 0 2px 0 color-
 .review-empty .big-emoji{ font-size:52px; margin-bottom:12px; }
 .review-empty h3{ margin:0 0 6px; font-size:19px; }
 .review-empty p{ color:var(--ink-soft); margin:0 0 20px; font-size:14px; }
-.review-complete-actions{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
-.review-complete-actions .btn{ min-width:140px; }
 
 /* "Você está em dia" / "Ainda não há revisões" -- substitui os tiles de
    Flashcard/Speed Review quando não há nada devido (projeto "Reorganização
@@ -1752,9 +1748,6 @@ button.wrong-feedback-continue:active:not(:disabled){ box-shadow: 0 2px 0 color-
 .speed-option.incorrect{ border-color: var(--error-red); background: rgba(214,38,25,0.12); }
 .speed-option.disabled{ pointer-events:none; }
 
-.speed-gameover{ text-align:center; padding: 50px 20px; }
-.speed-gameover .big-emoji{ font-size:56px; margin-bottom:12px; }
-.speed-gameover .score-num{ font-size:38px; font-weight:800; color: var(--seal-red-dark); margin:14px 0; }
 .review-progress-bar{ flex:1; height:8px; background:var(--paper-warm); border-radius:4px; overflow:hidden; }
 .review-progress-fill{ height:100%; background: linear-gradient(90deg, var(--seal-red), var(--imperial-gold)); border-radius:4px; transition: width .3s ease; }
 .review-progress-count{ font-size:13px; font-weight:800; color:var(--ink-soft); white-space:nowrap; }
@@ -4864,6 +4857,12 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
         </article>
         <!-- Recomeçar este curso (migration 123; conteúdo montado por shared/recomecar-curso.js). -->
         <article id="settings-restart-box" class="rc-caixa" hidden></article>
+        <!-- Privacidade e cookies (Fase 3 do GA4): abre a janela de Preferências (shared/consent.js, [data-consent-open]). -->
+        <article id="settings-cookies-box">
+          <header><h3 data-i18n="consent.settings.title">Privacidade e cookies</h3></header>
+          <p class="pref-row-sub" data-i18n="consent.settings.sub">Escolha se o site pode medir as visitas com o Google Analytics. Dá para mudar quando quiser.</p>
+          <footer><button type="button" class="outline" data-consent-open data-i18n="consent.footer.prefs">Preferências de cookies</button> <a href="../privacidade-cookies.html" data-i18n="consent.footer.policy">Política de cookies</a></footer>
+        </article>
         <article id="settings-delete-box" hidden>
           <header><h3 data-i18n="accountDelete.title">Excluir minha conta</h3></header>
           <p class="pref-row-sub" data-i18n="accountDelete.hint">Apaga a sua conta e tudo o que está ligado a ela: progresso, cartões, conquistas, amizades, fotos e arquivos. Não dá para desfazer.</p>
@@ -5683,6 +5682,7 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
 <script src="../shared/painel/painel-ui.js"></script>
 <script src="../shared/teacher-invites.js"></script>
 <script src="../shared/username-choice.js"></script>
+<script src="../shared/age-ack.js"></script>
 <script src="../shared/mural.js"></script>
 <script src="../shared/own-flashcards.js"></script>
 <script src="../shared/deck-data.js"></script>
@@ -5705,6 +5705,7 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
 <script src="../shared/topbar-stats.js"></script>
 <script src="../shared/janelas-topo.js"></script>
 <script src="../shared/xp-semana.js"></script>
+<script src="../shared/consent.js" data-page="app"></script>
 <script src="../shared/analytics.js"></script>
 <script src="../shared/tabs.js"></script>
 <script src="../shared/activity-focus.js"></script>
@@ -5748,6 +5749,7 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
 <script src="../shared/core/quase-iguais-chaves.js"></script>
 <script src="../shared/core/quase-iguais-pinyin.js"></script>
 <script src="../shared/core/quase-iguais-dados.js"></script>
+<script src="../shared/core/conclusao.js"></script>
 <script src="../shared/core/licao-base.js"></script>
 <script src="../shared/core/licao-dialogo.js"></script>
 <script src="../shared/core/licao-exercicios.js"></script>

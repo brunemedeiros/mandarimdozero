@@ -160,5 +160,36 @@ const ANTES = () => {
     check(`[${lang}] sem reports: estado vazio`, (await h.page.textContent('[data-reports-lista]')).includes('Nenhum report encontrado'));
     await h.close();
   }
+  // ---- captura da pasta privada (migration 139): link temporário criado NA HORA DO CLIQUE ----
+  // (2026-11-23: criado ao abrir a janela, vencia se a admin demorasse; "exp claim timestamp check failed")
+  for (const lang of ['fr', 'zh']){
+    const URL_ANTIGO = 'https://x.supabase.co/storage/v1/object/public/report-screenshots/u1/9-a.png';
+    const h = await abrirAdmin({ lang, aba: 'reports', seed: { reports: [R(1, { user_id: 'u1', screenshot_url: URL_ANTIGO })], profiles: [] } });
+    const p = h.page;
+    await p.context().route('https://assinado.test/**', (r) => r.fulfill({ status: 200, contentType: 'text/plain', body: 'imagem' }));
+    await p.waitForSelector('[data-trp="pagina"]');
+    await p.evaluate(() => {
+      window.__assinou = [];
+      supabaseClient.storage = { from: (b) => ({ createSignedUrl: async (caminho, seg) => { window.__assinou.push({ b, caminho, seg }); return { data: { signedUrl: 'https://assinado.test/x?token=' + window.__assinou.length }, error: null }; } }) };
+    });
+    await p.click('[data-ver-report="1"]'); await p.waitForSelector('#dlg-report a[data-report-shot]');
+    await p.waitForTimeout(300);
+    check(`[${lang}] captura: abrir a janela não cria o link (não vence enquanto a janela fica aberta)`, (await p.evaluate(() => window.__assinou.length)) === 0);
+    const [aba] = await Promise.all([p.context().waitForEvent('page'), p.click('#dlg-report a[data-report-shot]')]);
+    await aba.waitForURL(/assinado\.test/, { timeout: 5000 }).catch(() => {});
+    const ass = await p.evaluate(() => window.__assinou);
+    check(`[${lang}] captura: o clique cria o link da pasta e do arquivo certos, válido por 10 min`, ass.length === 1 && ass[0].b === 'report-screenshots' && ass[0].caminho === 'u1/9-a.png' && ass[0].seg === 600, ass);
+    check(`[${lang}] captura: a aba nova abre o link temporário e a janela continua aberta`, /assinado\.test\/x\?token=1/.test(aba.url()) && await p.isVisible('#dlg-report'), aba.url());
+    await aba.close();
+    const [aba2] = await Promise.all([p.context().waitForEvent('page'), p.click('#dlg-report a[data-report-shot]')]);
+    await aba2.waitForURL(/token=2/, { timeout: 5000 }).catch(() => {});
+    check(`[${lang}] captura: clicar de novo cria um link novo (nunca reaproveita um vencido)`, /token=2/.test(aba2.url()), aba2.url());
+    await aba2.close();
+    await p.evaluate(() => { supabaseClient.storage = { from: () => ({ createSignedUrl: async () => ({ data: null, error: { message: 'x' } }) }) }; window.__alerta = null; window.alert = (m) => { window.__alerta = m; }; });
+    await p.click('#dlg-report a[data-report-shot]'); await p.waitForFunction(() => window.__alerta, null, { timeout: 5000 }).catch(() => {});
+    const alerta = await p.evaluate(() => window.__alerta);
+    check(`[${lang}] captura: se o link falhar, avisa no idioma do site`, alerta === 'Não foi possível abrir a captura de tela. Tente de novo em instantes.', alerta);
+    await h.close();
+  }
   console.log(`painel-admin reports (navegador): ${ok}/${ok + ruim} checks`); process.exit(ruim ? 1 : 0);
 })().catch(e => { console.error(e); process.exit(1); });

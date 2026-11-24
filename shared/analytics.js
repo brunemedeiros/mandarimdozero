@@ -38,7 +38,7 @@ const ANALYTICS_SESSION_ID = (typeof crypto !== 'undefined' && crypto.randomUUID
 // Heurística simples sobre navigator.userAgent -- sem biblioteca (mesma
 // filosofia de zero-dependência do resto do app). Não é infalível (UA
 // sniffing nunca é 100%), mas é o padrão aceitável pra "mobile/tablet/
-// desktop" + navegador/SO num app sem telemetria de terceiros. Calculado
+// desktop" + navegador/SO na medição própria do site (o GA4, com consentimento, é separado: shared/consent.js). Calculado
 // uma vez, igual ANALYTICS_SESSION_ID -- não muda durante a sessão.
 function analyticsDetectDevice(){
   const ua = (typeof navigator !== 'undefined' && navigator.userAgent) || '';
@@ -73,6 +73,8 @@ function trackEvent(eventType, eventName, meta){
   // página. Acessar uma variável "let" ainda não declarada lança
   // ReferenceError, não só é falsy; "!CURRENT_USER" sozinho quebraria
   // exatamente no cenário que o tracking de erro técnico deveria cobrir.
+  // Cópia para o Google Analytics 4 (shared/consent.js): só com o aceite da pessoa, lista fechada de eventos, sem dado pessoal.
+  try { if (window.ProfBruneConsent) window.ProfBruneConsent.mirror(eventType, eventName); } catch (e) {}
   if (typeof CURRENT_USER === 'undefined' || !CURRENT_USER) return;
 
   const actorType = (typeof isAdminUser === 'function' && isAdminUser()) ? 'admin' : 'user';
