@@ -45,16 +45,17 @@ function fakeDb(tables, users) {
   };
 }
 
-function loadCron(file) {
+const CRON_TOKEN = 'teste-token-do-agendamento-1234567890';
+function loadCron(file, envOver) {
   let src = fs.readFileSync(file, 'utf8').replace(/^import .*$/mg, '');
   const js = mod.stripTypeScriptTypes(src);
-  const ctx = { console: { log() {}, error() {} }, Date, Object, Number, Array, Promise, Map, Set, JSON, String, Math, Response: class { constructor(b) { this.body = b; } },
+  const ctx = { console: { log() {}, error() {} }, TextEncoder, Date, Object, Number, Array, Promise, Map, Set, JSON, String, Math, Response: class { constructor(b, init) { this.body = b; this.status = (init && init.status) || 200; } },
     fetch: async () => ({ ok: true }), webpush: { setVapidDetails() {}, sendNotification: async () => {} },
-    Deno: { env: { get: (k) => ({ SUPABASE_URL: 'http://x', SUPABASE_SERVICE_ROLE_KEY: 'k', VAPID_PUBLIC_KEY: 'p', VAPID_PRIVATE_KEY: 'q', RESEND_API_KEY: 'r', RESEND_FROM_EMAIL: 'f@example.invalid' })[k] }, serve(fn) { ctx.__handler = fn; } },
+    Deno: { env: { get: (k) => Object.assign({ SUPABASE_URL: 'http://x', SUPABASE_SERVICE_ROLE_KEY: 'k', VAPID_PUBLIC_KEY: 'p', VAPID_PRIVATE_KEY: 'q', RESEND_API_KEY: 'r', RESEND_FROM_EMAIL: 'f@example.invalid', NOTIFICATION_CRON_TOKEN: CRON_TOKEN }, envOver || {})[k] }, serve(fn) { ctx.__handler = fn; } },
     createClient: () => ctx.__db,
   };
   vm.createContext(ctx);
-  vm.runInContext(js + '\nthis.__B = blockForLanguage; this.__P = primaryLanguageAppKey; this.__L = LANGUAGES; this.__T = typeof templateLangsFor === "function" ? templateLangsFor : () => null;', ctx);
+  vm.runInContext(js + '\nthis.__B = blockForLanguage; this.__P = primaryLanguageAppKey; this.__L = LANGUAGES; this.__T = typeof templateLangsFor === "function" ? templateLangsFor : () => null; this.__M = computeMissionProgress;', ctx);
   return ctx;
 }
 
@@ -65,9 +66,10 @@ const U = (n) => `00000000-0000-0000-0000-0000000000${String(n).padStart(2, '0')
 
 async function runCron(ctx, tables, users = {}) {
   ctx.__db = fakeDb(tables, users);
-  await ctx.__handler({});
+  await ctx.__handler(cronReq(CRON_TOKEN));
   return tables;
 }
+const cronReq = (token) => ({ headers: { get: (h) => (h === 'x-cron-token' ? token : null) } });
 const notif = (tables, user) => (tables.notifications || []).filter((n) => n.user_id === user);
 const events = (tables, user) => (tables.notification_events || []).filter((n) => n.user_id === user);
 
@@ -76,6 +78,30 @@ const events = (tables, user) => (tables.notification_events || []).filter((n) =
   for (const [label, file] of sources) {
     const ctx = loadCron(file);
     const L = (n) => `${label}: ${n}`;
+    if (label === 'repo') {
+      // Senha do agendamento (auditoria 2026-11-19): sem secret, ou com cabeçalho errado, nada roda.
+      const tabs = { notification_rules: RULES, progress: [{ user_id: U(1), data: {} }] };
+      ctx.__db = fakeDb(tabs, {});
+      const semCab = await ctx.__handler(cronReq(null));
+      const errado = await ctx.__handler(cronReq(CRON_TOKEN + 'x'));
+      t(L('senha: sem cabeçalho = 401, senha errada = 401, nada gravado'), semCab.status === 401 && errado.status === 401 && !(tabs.notifications || []).length);
+      const semSecret = loadCron(file, { NOTIFICATION_CRON_TOKEN: '' });
+      semSecret.__db = fakeDb({ notification_rules: RULES }, {});
+      const r503 = await semSecret.__handler(cronReq(''));
+      const curto = loadCron(file, { NOTIFICATION_CRON_TOKEN: 'curto' });
+      curto.__db = fakeDb({ notification_rules: RULES }, {});
+      const r503b = await curto.__handler(cronReq('curto'));
+      t(L('senha: secret ausente ou curto = recusa tudo (503)'), r503.status === 503 && r503b.status === 503);
+    }
+    {
+      // Missões do dia (2026-11-23): 'Ganhe 50 XP hoje' (xp50) quebrava o cron em 10 contas; missão desconhecida é pulada.
+      const st = (missions, daily) => ({ daily: Object.assign({ date: '2026-11-23', missions }, daily || {}) });
+      const m1 = ctx.__M(st([{ id: 'xp50', target: 50 }, { id: 'reviews15', target: 15 }], { xp: 30, reviewsDone: 20 }));
+      t(L('missões: xp50 mede o XP do dia (30 de 50) e as outras seguem iguais'), JSON.stringify(m1) === JSON.stringify([{ current: 30, target: 50 }, { current: 15, target: 15 }]), m1);
+      let m2, erro = null;
+      try { m2 = ctx.__M(st([{ id: 'missaoQueAindaNaoExiste', target: 3 }, { id: 'xp50', target: 50 }], { xp: 60 })); } catch (e) { erro = String(e); }
+      t(L('missões: missão desconhecida é pulada sem erro'), !erro && JSON.stringify(m2) === JSON.stringify([{ current: 50, target: 50 }]), erro || m2);
+    }
     t(L('LANGUAGES tem portugues'), ctx.__L.some((l) => l.appKey === 'portugues' && l.id === 'pt'));
     t(L('bloco portugues@en é achado'), ctx.__B({ 'portugues@en': { a: 1 } }, 'portugues')?.a === 1);
     t(L('idioma principal de conta só pt'), ctx.__P({ 'portugues@en': { lastStudyDay: day(0) } }) === 'portugues');

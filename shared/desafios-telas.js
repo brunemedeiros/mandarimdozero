@@ -122,14 +122,8 @@ function openChallengeReviewQueue(){
 }
 function renderChallengeReviewDoneScreen(){
   const content = document.getElementById('challenge-player-content');
-  content.innerHTML = `
-    <div class="challenge-queue-interstitial">
-      <div class="big-emoji">🎉</div>
-      <h3>${chT('ch.review.doneTitle')}</h3>
-      <p>${chT('ch.review.doneSub')}</p>
-      <button class="btn btn-primary btn-block" id="review-queue-back-btn">${chT('ch.review.back')}</button>
-    </div>
-  `;
+  content.innerHTML = conclusaoHTML({ icon: '🎉', title: chT('ch.review.doneTitle'), sub: chT('ch.review.doneSub'), stats: challengeXPStat(),
+    actions: [{ id: 'review-queue-back-btn', label: chT('ch.review.back') }], cls: 'challenge-queue-interstitial' });
   document.getElementById('review-queue-back-btn').addEventListener('click', () => {
     challengeReviewQueueActive = false;
     renderChallengeCategories();
@@ -193,14 +187,20 @@ function challengeCompleteButtonHTML(){
 function challengeContinueButtonHTML(outcome){
   return `<button class="btn btn-primary challenge-complete-btn${outcome === 'ok' ? ' correct-feedback-continue' : ''}" id="challenge-complete-btn" style="margin-top:16px;width:100%;">${t('common.continueArrow')}</button>`;
 }
-// XP da Acentuação (decisão da autora, 2026-11-10; mesmo padrão da trilha, constantes de shared/srs.js, ver .claude/rules/xp.md): digitar certo
-// = EXERCISE_XP_PRODUCE, "quase" = EXERCISE_XP_ALMOST, errou = 0 (nem há Concluir). Só na PRIMEIRA conclusão (refazer concluído ou "Revisar erros" = 0).
-function accentXP(c, outcome){
+// XP dos Desafios que não são Expressões (decisão da autora, 2026-11-10; mesmo padrão da trilha, constantes de shared/srs.js, ver .claude/rules/xp.md):
+// Acentuação e Ouça e traduza (digitar) certo = EXERCISE_XP_PRODUCE, "quase" = EXERCISE_XP_ALMOST; Complete a frase (escolher a forma em cada lacuna)
+// certo = EXERCISE_XP_RECOGNIZE; errou ou "Não sei" = 0 (nem há Concluir). Só na PRIMEIRA conclusão (refazer concluído ou "Revisar erros" = 0).
+function challengeXP(c, outcome){
   if (isChallengeCompleted(c.id) || challengePreviewMode) return 0;
+  if (c.type === 'cloze_grammar') return outcome === 'ok' ? EXERCISE_XP_RECOGNIZE : 0;
   return outcome === 'ok' ? EXERCISE_XP_PRODUCE : outcome === 'partial' ? EXERCISE_XP_ALMOST : 0;
 }
 // Quanto de XP o último "Concluir" pagou (a tela de conclusão mostra; 0 = nada a mostrar).
 let challengeLastXP = 0;
+// Cartão "XP ganho" das telas de conclusão dos Desafios (só quando o último Concluir pagou XP).
+function challengeXPStat(){
+  return challengeLastXP > 0 ? [{ label: t('zh.path.lessonDone.xpEarned'), value: `+${challengeLastXP} ⭐` }] : [];
+}
 function wireChallengeCompleteButton(c, xpGain){
   const retry = document.getElementById('challenge-retry-btn');
   if (retry){
@@ -216,7 +216,6 @@ function wireChallengeCompleteButton(c, xpGain){
   const btn = document.getElementById('challenge-complete-btn');
   if (!btn) return;
   btn.addEventListener('click', () => {
-    challengeLastXP = 0;
     if (xpGain > 0 && !isChallengeCompleted(c.id)){ challengeLastXP = xpGain; addXP(xpGain); } // XP antes de marcar concluído
     markChallengeCompleted(c.id);
     if (challengeReviewQueueActive){
@@ -662,27 +661,16 @@ function queueLevelProgressLabel(type, level){
 
 function renderChallengeQueueContinueScreen(c, next){
   const content = document.getElementById('challenge-player-content');
-  content.innerHTML = `
-    <div class="challenge-queue-interstitial">
-      <div class="big-emoji">✅</div>
-      <h3>${chT('ch.queue.done')}</h3>
-      <p>${chT('ch.queue.levelProgress', { level: escapeHtmlChallenge(c.level), progress: queueLevelProgressLabel(c.type, c.level) })}</p>
-      <button class="btn btn-primary btn-block" id="queue-continue-btn">${chT('ch.queue.continue')}</button>
-    </div>
-  `;
+  content.innerHTML = conclusaoHTML({ icon: '✅', title: chT('ch.queue.done'),
+    sub: chT('ch.queue.levelProgress', { level: escapeHtmlChallenge(c.level), progress: queueLevelProgressLabel(c.type, c.level) }), stats: challengeXPStat(),
+    actions: [{ id: 'queue-continue-btn', label: chT('ch.queue.continue') }], cls: 'challenge-queue-interstitial' });
   document.getElementById('queue-continue-btn').addEventListener('click', () => openChallengePlayer(next.id));
 }
 
 function renderChallengeQueueLevelDoneScreen(c){
   const content = document.getElementById('challenge-player-content');
-  content.innerHTML = `
-    <div class="challenge-queue-interstitial">
-      <div class="big-emoji">🎉</div>
-      <h3>${chT('ch.queue.levelDone', { level: escapeHtmlChallenge(c.level) })}</h3>
-      <p>${chT('ch.queue.levelDoneSub')}</p>
-      <button class="btn btn-primary btn-block" id="queue-back-btn">${chT('ch.queue.back')}</button>
-    </div>
-  `;
+  content.innerHTML = conclusaoHTML({ icon: '🎉', title: chT('ch.queue.levelDone', { level: escapeHtmlChallenge(c.level) }), sub: chT('ch.queue.levelDoneSub'), stats: challengeXPStat(),
+    actions: [{ id: 'queue-back-btn', label: chT('ch.queue.back') }], cls: 'challenge-queue-interstitial' });
   document.getElementById('queue-back-btn').addEventListener('click', () => {
     challengeQueueContext = null;
     renderChallengesList(currentChallengesCategory);
@@ -692,6 +680,7 @@ function renderChallengeQueueLevelDoneScreen(c){
 let challengePreviewMode = false;
 
 function openChallengePlayer(id){
+  challengeLastXP = 0; // o cartão "XP ganho" da conclusão é só do exercício que acabou de pagar
   const c = CHALLENGES.find(x => x.id === id);
   if (!c) return;
   // M3: desafio sem tradução no idioma do site não abre para o aluno (a prévia da admin continua abrindo).
@@ -1175,7 +1164,7 @@ function exprShowFinal(c){
   }
   // O XP é pago antes do "Concluir" marcar o desafio como concluído (o listener de baixo roda depois deste).
   const done = document.getElementById('challenge-complete-btn');
-  if (done) done.addEventListener('click', () => { if (!run.xpPaid){ run.xpPaid = true; addXP(exprXPBreakdown(c).total); } });
+  if (done) done.addEventListener('click', () => { if (!run.xpPaid){ run.xpPaid = true; const g = exprXPBreakdown(c).total; challengeLastXP = g; addXP(g); } });
   wireChallengeCompleteButton(c);
 }
 
@@ -1304,7 +1293,7 @@ function checkListenTranslateAnswer(c, revealed){
   document.getElementById('lt-replay-slow-btn').addEventListener('click', (e) => {
     if (c.audioFile) playPregeneratedAudio(`challenges/${c.audioFile}`, e.currentTarget, false, SLOW_AUDIO_RATE);
   });
-  wireChallengeCompleteButton(c);
+  wireChallengeCompleteButton(c, challengeXP(c, outcome));
 }
 
 
@@ -1367,7 +1356,7 @@ function checkAccentAnswer(c, revealed){
   document.getElementById('accent-replay-slow-btn').addEventListener('click', (e) => {
     if (c.audioFile) playPregeneratedAudio(`challenges/${c.audioFile}`, e.currentTarget, false, SLOW_AUDIO_RATE);
   });
-  wireChallengeCompleteButton(c, accentXP(c, outcome));
+  wireChallengeCompleteButton(c, challengeXP(c, outcome));
 }
 
 
@@ -1462,7 +1451,7 @@ function renderClozeGrammarFeedback(c, chosen, res, revealed){
   chStepAnswered();
   if (!revealed) playFeedbackSound(isCorrect);
   recordChallengeReviewOutcome(c, res.outcome);
-  wireChallengeCompleteButton(c);
+  wireChallengeCompleteButton(c, revealed ? 0 : challengeXP(c, res.outcome));
 }
 
 

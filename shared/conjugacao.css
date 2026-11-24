@@ -83,9 +83,6 @@
 
 .conj-verb-pager{ display:flex; justify-content:space-between; gap:10px; }
 
-.conj-session-result{ text-align:center; padding:40px 20px; }
-.conj-session-result .big-emoji{ font-size:48px; margin-bottom:10px; }
-.conj-session-result .score-num{ font-size:34px; font-weight:800; color: var(--seal-red-dark); margin:14px 0; }
 
 /* ---------- Conjugação: passada de design (escolha, prática, resultado) ----------
    A tabela de prática imita a página de um livro de conjugação: pronome à
@@ -128,9 +125,6 @@
 }
 
 /* Resultado */
-#view-conjugaison .conj-session-result{ max-width:420px; margin:28px auto 0; padding:32px 24px; background:var(--paper); border:1px solid var(--paper-line); border-radius:18px; box-shadow:var(--shadow-card); }
-#view-conjugaison .conj-session-result .score-num{ font-size:44px; font-variant-numeric:tabular-nums; margin:8px 0 4px; }
-#view-conjugaison .conj-session-result p{ color:var(--ink-soft); margin:0 0 20px; }
 /* Conjugação, fase 1: barra de progresso, acentos, letras erradas, áudio por forma, revisão no fim. */
 #view-conjugaison .conj-progress{ display:flex; align-items:center; gap:12px; max-width:520px; margin:0 auto 14px; font-variant-numeric:tabular-nums; }
 #view-conjugaison .conj-progress > span:first-child{ white-space:nowrap; }
@@ -164,7 +158,6 @@
 /* Conjugação: só as letras que os verbos usam (hoje 7: é è ê î û â ç), numa fileira só. */
 #view-conjugaison .conj-size-hint{ margin:2px 0 0; font-size:12px; color:var(--ink-soft); }
 #view-conjugaison .conj-size-hint:empty{ display:none; }
-#view-conjugaison .conj-session-result:has(.conj-review){ max-width:560px; }
 #view-conjugaison .conj-review{ text-align:left; margin:18px 0 20px; border-top:1px solid var(--paper-line); padding-top:14px; }
 #view-conjugaison .conj-review-title{ font-weight:800; font-size:15px; margin-bottom:6px; }
 #view-conjugaison .conj-review-list{ list-style:none; margin:0; padding:0; }
@@ -174,7 +167,6 @@
 #view-conjugaison .conj-review-form i{ color:var(--ink-soft); }
 #view-conjugaison .conj-review-form .conj-answer-view{ min-height:0; display:inline-flex; padding:2px 8px; border-width:1px; border-radius:6px; }
 #view-conjugaison .conj-review-arrow, #view-conjugaison .conj-review-empty{ color:var(--ink-soft); }
-#view-conjugaison .conj-result-actions{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
 /* Conjugação, fase 2: escolha com verbos em cima (busca com bandeira + filtros) e tempos em cartões com frase de exemplo. */
 #view-conjugaison #conj-select-wrap{ max-width:780px; margin:0 auto; }
 #view-conjugaison .conj-sel-block{ margin-bottom:22px; }

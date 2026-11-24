@@ -24,6 +24,7 @@ const REPS = [R(1, { user_id: 'u1', context: { screen: 'path', browser: 'Chrome'
 
 // ---- peças pequenas ----
 check('url: só http(s)', run('trpSafeUrl("https://a.com/x.png")') === 'https://a.com/x.png' && run('trpSafeUrl("javascript:alert(1)")') === '' && run('trpSafeUrl("data:text/html,x")') === '' && run('trpSafeUrl(null)') === '');
+check('print: caminho do arquivo tirado do endereço antigo (pasta privada, migration 139)', run('trpScreenshotPath("https://x.supabase.co/storage/v1/object/public/report-screenshots/abc-123/1789-ff.png")') === 'abc-123/1789-ff.png' && run('trpScreenshotPath("https://x.supabase.co/storage/v1/object/public/report-screenshots/a/b%20c.png?t=1")') === 'a/b c.png' && run('trpScreenshotPath("https://outro.com/x.png")') === '' && run('trpScreenshotPath(null)') === '');
 check('trecho: corta com reticências, mantém o curto', run('trpSnippet("abcdef", 3)') === 'abc…' && run('trpSnippet("ab", 3)') === 'ab' && run('trpSnippet(null, 3)') === '');
 check('cor do status: novo vermelho, análise amarelo, resolvido verde, recusado neutro', run('trpStatusClass("novo")') === 'p-selo--erro' && run('trpStatusClass("em_analise")') === 'p-selo--aviso' && run('trpStatusClass("resolvido")') === 'p-selo--ok' && run('trpStatusClass("recusado")') === '' && run('trpStatusClass("em_desenvolvimento")') === 'p-selo--info');
 check('quem pode ser respondido: conta logada e convidado com e-mail; convidado sem e-mail não', run('trpCanReply({user_id:"u"})') && run('trpCanReply({reporter_email:"a@b"})') && !run('trpCanReply({})'));
@@ -60,6 +61,7 @@ const full = R(7, { user_id: 'u1', description: 'Linha 1\nLinha 2 <img src=x one
 const d = run('trpDetailDialogHTML(r, LB)', { r: full, LB });
 check('detalhe: título com tipo e categoria; descrição escapada', d.includes('Problema: Bug / erro técnico') && !d.includes('<img') && d.includes('&lt;img'));
 check('detalhe: esperava, gravidade percebida e link da captura seguro', d.includes('Abrir') && d.includes('Impede continuar') && d.includes('href="https://cdn/x.png"') && d.includes('rel="noopener noreferrer"'));
+check('detalhe: print da pasta privada leva o caminho para o link temporário', run('trpDetailDialogHTML(r, LB)', { r: R(10, { screenshot_url: 'https://x.supabase.co/storage/v1/object/public/report-screenshots/u1/9-a.png' }), LB }).includes('data-report-shot="u1/9-a.png"') && d.includes('data-report-shot=""'));
 check('detalhe: status e prioridade marcados, nota escapada no campo', /<option value="em_analise" selected/.test(d) && /<option value="alta" selected/.test(d) && d.includes('nota &quot;q&quot;'));
 check('detalhe: contexto recolhido', d.includes('<details class="p-automaticos"') && !/<details[^>]* open/.test(d));
 check('detalhe: histórico da última resposta e campos de nova resposta', d.includes('Última resposta enviada') && d.includes('Corrigido') && d.includes('id="report-resp-enviar"') && d.includes('maxlength="150"'));

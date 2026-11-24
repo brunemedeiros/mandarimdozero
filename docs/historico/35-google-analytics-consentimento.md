@@ -133,6 +133,16 @@ página" (o site manda as telas do app sozinho; com isso ligado, as limpezas de 
   entra como admin ficam marcados para não contar) e marcar os eventos-chave (`sign_up`, cliques de saída e o evento
   criado para abertura dos testes de nivelamento).
 
+## Conferência de 2026-11-24
+
+- GA4 recebendo dados (print da dona, "Eventos recentes"): `first_visit`, `page_view`, `session_start`, `user_engagement`,
+  `lesson_start`, `lesson_complete`. Ainda sem `sign_up` e `click`. Na produção: 1 conta nova desde a publicação (nasceu
+  com perfil privado) e 6 confirmações de idade. `sign_up` conferido de ponta a ponta no teste (cadastro por e-mail com
+  cookies aceitos; `tests/consentimento/test_playwright.js` 63/63): a ausência vem de não ter havido cadastro com aceite.
+  Por desenho, conta criada pelo "Entrar com Google" da tela de Entrar (sem passar pelo cadastro) não gera `sign_up`.
+- Na interface nova do GA4, "eventos-chave" viraram "Eventos principais" (estrela em Administrador > Exibição de dados >
+  Eventos). `close_convert_lead`, `qualify_lead` e `purchase` foram criados pelo objetivo "Gerar leads" e nunca recebem dados.
+
 ## Ajustes pedidos depois da Fase 3 (2026-11-16)
 
 - A dona achou o aviso grande. Prévias enviadas (tela real, celular e computador): **C1** sem o título "Cookies", ícone

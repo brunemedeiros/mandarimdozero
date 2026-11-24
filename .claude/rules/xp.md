@@ -24,8 +24,10 @@ site novo parte do molde da família (ver `docs/i18n/e4-plano-de-extracao.md`) e
   resposta certa `EXERCISE_XP_RECOGNIZE` 1, montar a frase certa `EXERCISE_XP_PRODUCE` 2, "Sua vez" digitar certo `EXERCISE_XP_PRODUCE` 2, "quase" `EXERCISE_XP_ALMOST` 1, errou ou
   "Não sei" 0 (teto 5). Só na PRIMEIRA conclusão do desafio, pago ao tocar em Concluir (`exprXPBreakdown`, `shared/desafios-telas.js`); refazer desafio concluído ou "Revisar erros" = 0, para
   não virar fonte infinita. Errou a escolha: não há Concluir (Tentar de novo), então nada é pago. Teste: `tests/desafios-expressoes-passos/`.
-- **Desafios, Acentuação** (decisão da autora, 2026-11-10; Ouça e traduza e Complete a frase continuam SEM XP até ela decidir): digitar certo `EXERCISE_XP_PRODUCE` 2, "quase" (erro só de acento)
-  `EXERCISE_XP_ALMOST` 1, errou 0 (sem Concluir). Só na PRIMEIRA conclusão, pago ao tocar em Concluir (`accentXP`, `shared/desafios-telas.js`); refazer concluído ou "Revisar erros" = 0. Teste: `tests/desafios-conclusao/`.
+- **Desafios, Acentuação, Ouça e traduza e Complete a frase** (decisão da autora, 2026-11-10: Acentuação, depois "Ouça e traduza, bem como outros Desafios também devem dar XP"; Ditados NÃO entram até ela decidir):
+  digitar certo (Acentuação, Ouça e traduza) `EXERCISE_XP_PRODUCE` 2, "quase" `EXERCISE_XP_ALMOST` 1, escolher a forma em cada lacuna (Complete a frase) `EXERCISE_XP_RECOGNIZE` 1,
+  errou ou "Não sei" 0 (sem Concluir). Só na PRIMEIRA conclusão, pago ao tocar em Concluir (`challengeXP`, `shared/desafios-telas.js`; a tela de conclusão mostra o cartão "XP ganho");
+  refazer concluído ou "Revisar erros" = 0. Teste: `tests/desafios-conclusao/`.
 - **Topo** (decisão da dona, 2026-10-29): ⭐ N XP = XP DA SEMANA, mesma semana (segunda a domingo) e mesma soma do Ranking "Geral" (`weekly_xp`
   de todos os idiomas); janela com 4 semanas, frase "+N XP a mais" só quando a semana é maior e "Ver ranking" (`shared/xp-semana.js`, desenho e controle comuns
   com a janela da sequência em `shared/janelas-topo.js`; recorde de dias seguidos = `bestStreak` da conta). Teste: `tests/janelas-topo/`. Aviso "+N XP" não aparece em tela de conclusão (`COMPLETION_SCREEN_SELECTOR`,
