@@ -65,6 +65,29 @@ const TRAIL_KEYS = ['level', 'unit_id', 'unit_title', 'module_id', 'module_title
     L('Cloze: frase com a lacuna preenchida e a resposta', cz && cz.review_card_front === 'Je mange une pomme.' && cz.review_card_snippet === 'mange', cz);
     L('Normal: frente e verso', nm && !!nm.review_card_front && !!nm.review_card_snippet, nm);
 
+    // 2b) Resposta digitada no report (Etapa 1, 2026-11-24): só depois de Verificar; certo/quase/errado; "ver cartão anterior".
+    const typeIn = async (cardType, text) => {
+      await ev(([cardType]) => { STATE.reviewPeek = null; STATE.reviewIndex = STATE.reviewQueue.findIndex(c => c.cardInstance.cardTypeId === cardType); STATE.reviewCardState = null; renderReviewView(); }, [cardType]);
+      await page.waitForSelector('#cloze-review-input', { timeout: 3000 });
+      const before = await ev(() => captureReportContext({ source: 'exercise' }));
+      await page.fill('#cloze-review-input', text);
+      await page.click('#cloze-review-verify-btn');
+      await page.waitForTimeout(150);
+      return { before, after: await ev(() => captureReportContext({ source: 'exercise' })) };
+    };
+    const wrong = await typeIn('type_answer', 'Je n’ai besoin de payer.');
+    L('digitar: antes de Verificar, nada da resposta no report', !('review_typed_answer' in wrong.before) && !('review_answer_result' in wrong.before), wrong.before);
+    L('digitar: resposta errada vai no report, com "errado"', wrong.after.review_typed_answer === 'Je n’ai besoin de payer.' && wrong.after.review_answer_result === 'errado' && wrong.after.review_card_row_id === 628, wrong.after);
+    const right = await typeIn('cloze', 'mange');
+    L('Cloze: resposta certa vai no report, com "certo"', right.after.review_typed_answer === 'mange' && right.after.review_answer_result === 'certo' && right.after.review_card_row_id === 629, right.after);
+    const normalCtx = await ev(() => { STATE.reviewPeek = null; STATE.reviewIndex = STATE.reviewQueue.findIndex(c => c.cardInstance.cardTypeId === 'normal'); STATE.reviewCardState = null; renderReviewView(); return captureReportContext({ source: 'exercise' }); });
+    L('Normal: sem campos de resposta digitada', !('review_typed_answer' in normalCtx) && !('review_answer_result' in normalCtx), normalCtx);
+    // Errou o "Digite a resposta", deu a nota e voltou para ver o cartão anterior: o report é do cartão da tela, não do próximo.
+    await typeIn('type_answer', 'nada a ver');
+    const peek = await ev(() => { gradeCurrentCard(0); reviewGoBack(); return { peek: STATE.reviewPeek, ctx: captureReportContext({ source: 'exercise' }) }; });
+    L('ver cartão anterior: report do cartão da tela, com o que foi digitado', peek.peek != null && peek.ctx.review_peek === true && peek.ctx.review_card_row_id === 628 && peek.ctx.review_typed_answer === 'nada a ver' && peek.ctx.review_answer_result === 'errado' && !('review_position' in peek.ctx), peek);
+    await ev(() => { STATE.reviewPeek = null; });
+
     // 3) Voltou para o Estudo: nada da Revisão vaza, e a trilha volta.
     await ev(() => { STATE.reviewSessionClassReview = false; switchTab('path'); });
     await page.waitForTimeout(200);

@@ -1,4 +1,4 @@
-# Guardar o que a aluna digitou nos cartões da professora: plano (NÃO implementado)
+# Guardar o que a aluna digitou nos cartões da professora: plano (Etapa 1 feita; 2 e 3 aguardam)
 
 Pedido da autora em 2026-11-24, depois do report 37 (Francielly, cartão "Corrija: Je n'ai besoin de payer").
 Situação: o banco só guarda "errou/acertou" (`review_bank_reviews.outcome`, `grade`, `typed` = se foi digitado). Ela errou
@@ -16,10 +16,12 @@ na forma oral, sem o "ne"; o item foi dividido em dois, ver `docs/banco-revisao-
 
 ## Etapas
 
-**Etapa 1: o report leva a resposta digitada (sem banco, só site).**
+**Etapa 1: o report leva a resposta digitada (sem banco, só site). FEITA em 2026-11-24** (`reportTypedAnswerInfo` em
+`shared/reports.js`; campos `review_typed_answer` e `review_answer_result` = certo/quase/errado; segue o cartão da tela também
+no "ver cartão anterior", com `review_peek`; teste `tests/reports-contexto/` 43/43).
 Quando a aluna aperta ⚑ num cartão de digitar já respondido, o contexto do report ganha `review_typed_answer` (o que ela
-digitou) e `review_answer_correct` (o site considerou certo ou errado). Ela mesma está enviando o report, então não
-há dado novo guardado sem ela saber. Mudança pequena em `shared/reports.js` (`reportReviewCardInfo`) + teste em
+digitou) e `review_answer_result` (o site considerou certo, quase ou errado). Ela mesma está enviando o report, então não
+há dado novo guardado sem ela saber. Mudança pequena em `shared/reports.js` (`reportTypedAnswerInfo`) + teste em
 `tests/reports-contexto/`. Vale para fr, zh e pt, e também para os cartões próprios e da trilha.
 
 **Etapa 2: guardar a resposta no Banco (migration + site).**
@@ -39,12 +41,12 @@ há dado novo guardado sem ela saber. Mudança pequena em `shared/reports.js` (`
 
 Tudo grátis (é ferramenta da professora sobre os cartões dela; não há limite de uso).
 
-## Decisões da autora (perguntas abertas)
+## Decisões da autora (2026-11-24)
 
-1. **Guardar só quando ela erra, ou toda resposta digitada?** Recomendação: só quando erra (menos dado guardado, e é o
-   que ajuda a achar cartão ruim; o acerto já é igual à resposta do cartão).
-2. **Avisar a aluna?** Recomendação: sim, uma linha na Política de Privacidade (rascunho em `shared/privacy-draft.js`) e
-   na Central de Ajuda: "sua professora vê o que você digita nos cartões que ela criou". Sem aviso na tela de estudo.
-3. **Por quanto tempo guardar o texto?** Recomendação: 180 dias. Depois disso o texto é apagado (a linha de errou/acertou fica).
-4. **Modo aula**: hoje a professora dá a nota na aula e a aluna não digita no site. Fica de fora, salvo pedido.
-5. Começar pela Etapa 1 sozinha (rápida, sem banco) e decidir a 2 e a 3 depois?
+1. Guardar o texto **só quando ela erra**.
+2. **Avisar** na Política de Privacidade (`shared/privacy-draft.js`, vai ao advogado) e na Central de Ajuda (`ajuda/`):
+   "sua professora vê o que você digita nos cartões que ela criou". O aviso entra JUNTO com a Etapa 2 (antes dela seria
+   descrever algo que o site ainda não faz).
+3. Guardar o texto por **180 dias**; depois o texto é apagado e a linha de errou/acertou fica.
+4. Modo aula fica de fora (a aluna não digita no site durante a aula).
+5. Ordem: Etapa 1 agora; Etapas 2 e 3 depois, quando a autora pedir.
