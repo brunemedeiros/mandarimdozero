@@ -665,7 +665,10 @@ async function processUserLanguage(
   // exige progresso > 0 em pelo menos uma; sem isso, alguém que nem abriu
   // o app hoje receberia isto JUNTO com streak_at_risk/study_goal_remaining
   // (redundante -- essas duas já cobrem "não estudou hoje").
-  const missions = computeMissionProgress(state);
+  // Só as missões de HOJE: state.daily fica congelado até a pessoa abrir o site de novo, e antes o cron mandava
+  // "faltam N missões" todo dia sobre missões de dias antigos (2026-11-24: ~10 avisos por dia, missões desde 18/09).
+  // Mesma aproximação de fuso do resto do arquivo (22h UTC = 19h em Brasília, a data local e a UTC coincidem).
+  const missions = state.daily?.date === today ? computeMissionProgress(state) : null;
   if (missions) {
     const anyStarted = missions.some((m) => m.current > 0);
     const missing = missions.filter((m) => m.current < m.target).length;

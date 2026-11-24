@@ -167,6 +167,21 @@ async function removeCopiedPublicDeckMedia(paths){
   catch (e) { console.error('Não foi possível limpar mídia temporária da importação:', e); }
 }
 
+// Copia UM objeto para a pasta de quem importa. Desde a migration 139 (2026-11-23, histórico 36) cada conta só
+// lê pela API a própria pasta do `flashcard-media`, então o copy() do Storage é recusado para o arquivo de outra
+// pessoa. O bucket continua público: nesse caso o arquivo é baixado pelo link público e enviado de novo para a pasta
+// de quem importa (o mesmo upload que o site já faz). Decisão registrada em docs/historico/36 (2026-11-24).
+async function copyPublicDeckMediaObject(bucket, srcPath, dest){
+  const tryCopy = await bucket.copy(srcPath, dest).catch(e => ({ error: e }));
+  if (!tryCopy || !tryCopy.error) return;
+  const { data: pub } = bucket.getPublicUrl(srcPath);
+  const res = await fetch(pub.publicUrl, { cache: 'no-store' });
+  if (!res.ok) throw new Error('media_download_failed');
+  const blob = await res.blob();
+  const { error } = await bucket.upload(dest, blob, { contentType: blob.type || undefined, cacheControl: '3600', upsert: false });
+  if (error) throw error;
+}
+
 // Duplica os objetos do manifest para a pasta do usuário atual. Devolve o mapa urlAntiga -> urlNova.
 async function duplicatePublicDeckMedia(rawItems, uid, onProgress){
   const created = [], map = {};
@@ -185,8 +200,7 @@ async function duplicatePublicDeckMedia(rawItems, uid, onProgress){
       const ext = (srcPath.split('.').pop() || 'bin').replace(/[^a-zA-Z0-9]/g, '').slice(0, 8) || 'bin';
       const dest = `${uid}/pubcopy-${stamp}-${Math.random().toString(36).slice(2, 8)}-${i}.${ext}`;
       try {
-        const { error } = await bucket.copy(srcPath, dest);
-        if (error) throw error;
+        await copyPublicDeckMediaObject(bucket, srcPath, dest);
         created.push(dest);
         const { data: pub } = bucket.getPublicUrl(dest);
         map[it.url] = pub.publicUrl;

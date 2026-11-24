@@ -214,7 +214,7 @@ async function run(browser, port, app){
     await c0.addInitScript(() => { try { sessionStorage.setItem('guest_mode', '1'); localStorage.setItem('ui-language', 'pt-BR'); } catch (e) {} });
     const p0 = await c0.newPage();
     await p0.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, r => r.abort());
-    await p0.route(/cdn\.jsdelivr\.net\/npm\/@supabase/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
+    await p0.route(/cdn\.jsdelivr\.net\/npm\/@supabase|\/shared\/vendor\/supabase-js/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
     await p0.goto(`http://127.0.0.1:${port}/${app}/index.html`);
     await p0.waitForFunction(() => typeof STATE !== 'undefined' && STATE.cards && STATE.cards.length > 0 && CURRENT_USER === false, null, { timeout: 30000 });
     ptSnap = await contentSnapshot(p0);
@@ -235,7 +235,7 @@ async function run(browser, port, app){
   page.on('pageerror', e => errors.push(e.message));
   page.on('dialog', d => { FOUND.push({ app, screen: 'diálogo do navegador', text: d.message(), src: 'dialog' }); d.dismiss().catch(() => {}); });
   await page.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, r => r.abort());
-  await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
+  await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase|\/shared\/vendor\/supabase-js/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
   await page.goto(`http://127.0.0.1:${port}/${app}/index.html`);
   await page.waitForFunction(() => typeof STATE !== 'undefined' && STATE.cards && STATE.cards.length > 0 && CURRENT_USER === false, null, { timeout: 30000 });
   await page.evaluate(() => window.i18nReady);

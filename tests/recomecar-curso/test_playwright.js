@@ -102,7 +102,7 @@ async function openApp(browser, base, app, o){
   const errs = []; page.on('pageerror', e => errs.push(String(e)));
   await page.clock.setFixedTime(new Date(NOW));
   await page.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, r => r.abort());
-  await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
+  await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase|\/shared\/vendor\/supabase-js/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
   await page.goto(`${base}/${app}/index.html`);
   await waitLoaded(page);
   await page.evaluate((th) => document.documentElement.setAttribute('data-theme', th), o.theme || 'light');

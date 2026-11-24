@@ -16,7 +16,7 @@ const STUB = `(function(){ const b = new Proxy({}, { get(_, k){ if (k === 'then'
   for (const scheme of ['light', 'dark']) {
     const ctx = await b.newContext({ colorScheme: scheme, viewport: { width: 1000, height: 800 }, serviceWorkers: 'block' }); const p = await ctx.newPage(); const erros = [];
     p.on('pageerror', e => erros.push(e.message)); await p.route(/^https?:\/\/(?!127\.0\.0\.1)/, r => r.abort());
-    await p.route(/cdn\.jsdelivr\.net\/npm\/@supabase/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
+    await p.route(/cdn\.jsdelivr\.net\/npm\/@supabase|\/shared\/vendor\/supabase-js/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
     await p.goto(base + '/index.html'); await p.waitForTimeout(600);
     const r = await p.evaluate(() => {
       const prob = (bg, fg) => { const P = s => s.match(/[\d.]+/g).map(Number); const l = c => { const f = x => { x /= 255; return x <= .03928 ? x / 12.92 : Math.pow((x + .055) / 1.055, 2.4); }; return .2126 * f(c[0]) + .7152 * f(c[1]) + .0722 * f(c[2]); }; const a = l(P(bg)), c = l(P(fg)); return (Math.max(a, c) + .05) / (Math.min(a, c) + .05); };

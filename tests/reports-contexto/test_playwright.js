@@ -20,7 +20,7 @@ const TRAIL_KEYS = ['level', 'unit_id', 'unit_title', 'module_id', 'module_title
     const ctx = await browser.newContext({ serviceWorkers: 'block', viewport: { width: 1200, height: 900 } });
     const page = await ctx.newPage(); page.on('pageerror', e => errors.push(`${lang}: ${e.message}`));
     await page.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, r => r.abort());
-    await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
+    await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase|\/shared\/vendor\/supabase-js/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
     await page.addInitScript(() => { try { sessionStorage.setItem('guest_mode', '1'); } catch (e) {} });
     await page.goto(`http://127.0.0.1:${port}/${lang}/index.html`);
     await page.waitForFunction(() => typeof STATE !== 'undefined' && STATE.cards && STATE.cards.length > 0, null, { timeout: 15000 });

@@ -110,7 +110,7 @@ async function abrir(browser, port, site, { lang = 'pt-BR', width = 1200, theme 
   page.on('pageerror', e => errors.push(String(e.message || e) + ' @ ' + String(e.stack || '').split('\n').slice(1, 3).join(' | ').replace(/http:\/\/127\.0\.0\.1:\d+/g, '')));
   await page.clock.install({ time: new Date('2026-10-14T12:00:00Z') });
   await page.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, r => r.abort());
-  await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
+  await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase|\/shared\/vendor\/supabase-js/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
   await page.addInitScript(([lang, theme]) => {
     try { sessionStorage.setItem('guest_mode', '1'); localStorage.setItem('ui-language', lang); localStorage.setItem('match-with-audio', '0'); /* Combinar com áudio (2026-11-14): a comparação antes x depois roda sem as cartas de áudio, que são novas */ if (theme) localStorage.setItem('theme', theme); } catch (e) {}
     let s = 12345; Math.random = () => (s = (s * 16807) % 2147483647) / 2147483647;

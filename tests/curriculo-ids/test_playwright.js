@@ -41,7 +41,7 @@ const check = (n, c, x) => { if (c) { pass++; console.log('ok  ', n); } else { f
   page.on('pageerror', e => errs.push(e.message));
   page.on('console', m => { if (m.type() === 'error' && !/ERR_TUNNEL|net::ERR|Failed to load resource/.test(m.text())) cons.push(m.text()); });
   await page.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, r => r.abort());
-  await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
+  await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase|\/shared\/vendor\/supabase-js/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
   // save inicial: palavra estudada + órfão antigo + cartão da professora
   const save = { frances: { xp: 50, cards: [
     { id: 'uA1-1-v0', reps: 3, stability: 12.5, difficulty: 4, state: 'review', lastReview: 1790000000000, due: 1791000000000, fsrsMigrated: true },
