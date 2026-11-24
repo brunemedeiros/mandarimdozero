@@ -20,3 +20,9 @@ Pedido da autora (grilling + prévia aprovada). Mesmo código para fr e zh (e pt
 - Fora desta entrega: desfazer a última nota (medir antes se nota errada é problema).
 
 **Testes**: `tests/teclado-revisao/test_playwright.js` (fr e zh, 66 verificações).
+
+## Exercício de cenário (2026-11-24)
+Decisão da autora: o cenário (gramática) deixou de ter desenho próprio. A bolinha cinza `.scenario-option-num` (que aparecia até no celular) saiu e o número
+vem do quadrado comum `.kbd-hint` (à esquerda, no meio da altura, só com mouse e teclado); o texto fica centralizado (no zh, pinyin sobre hanzi, também centralizados).
+`shared/core/gramatica-cenario.js` e `shared/revisao-teclado.css`; testes: `tests/teclado-revisao` (cenário) e neutralizações em `tests/paridade-sites/` (cenário e nome da cena sem o número).
+
