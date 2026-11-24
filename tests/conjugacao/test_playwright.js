@@ -248,6 +248,9 @@ async function fill(page, wrongIdx){
     const res = await page.evaluate(() => ({ items: document.querySelectorAll('.conj-review-list li').length, btn: !!document.getElementById('conj-practice-mistakes-btn'),
       first: document.querySelector('.conj-review-list li').textContent.replace(/\s+/g, ' ').trim() }));
     check('fim da sessão lista as formas para revisar (1 de parler + 6 vazias de avoir)', res.items === 7 && res.btn && res.first.includes('parler') && res.first.includes('parles'), res);
+    // Resumo mostra o XP SOMADO da sessão (decisão da autora, 2026-11-24): parler é regular, 5 formas certas = 5 XP.
+    const xpRes = await page.evaluate(() => ({ xp: CONJ_STATE.xp, vals: [...document.querySelectorAll('.conj-session-result .lc-stat-value')].map(e => e.textContent.trim()) }));
+    check('resumo da Conjugação soma o XP da sessão (+5) ao lado do placar', xpRes.xp === 5 && xpRes.vals.length === 2 && /\+5/.test(xpRes.vals[1]), xpRes);
     await page.click('#conj-practice-mistakes-btn');
     await page.waitForSelector('.conj-tense-box');
     const again = await page.evaluate(() => ({ q: CONJ_STATE.verbQueue.join(), t: CONJ_STATE.sessionTenses.join() }));

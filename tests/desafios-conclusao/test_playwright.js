@@ -150,6 +150,40 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
   await page.click('#challenge-complete-btn');
   check('expressão: acertar conclui', await done('expr-old-001'));
 
+  // ---- Telas de RESUMO somam o XP da sessão (decisão da autora, 2026-11-24) ----
+  const resumo = await ev(() => {
+    const c = CHALLENGES.find(x => x.type === 'accent');
+    const content = () => document.getElementById('challenge-player-content');
+    const stat = () => { const e = content().querySelector('.conclusao .lc-stat-value'); return e ? e.textContent.trim() : null; };
+    const out = {};
+    openChallengeReviewQueue(); // sem erros devidos: só zera o contexto
+    challengeSessionXpStart = STATE.xp; addXP(2); addXP(4);
+    renderChallengeQueueLevelDoneScreen(c); out.nivel = stat();
+    challengeSessionXpStart = STATE.xp; renderChallengeReviewDoneScreen(); out.revisaoSem = stat();
+    challengeSessionXpStart = STATE.xp; addXP(1); addXP(2); renderChallengeReviewDoneScreen(); out.revisao = stat();
+    challengeLastXP = 2; const b = CHALLENGES.find(x => x.type === 'accent' && x.id !== c.id) || c;
+    renderChallengeQueueContinueScreen(c, b); out.exercicio = stat();
+    return out;
+  });
+  check('resumo "Nível concluído" soma o XP da sessão (2 + 4 = +6)', /\+6/.test(resumo.nivel || ''), resumo);
+  check('resumo sem XP na sessão não mostra o cartão', resumo.revisaoSem === null, resumo);
+  check('resumo "Revisão do dia concluída" soma o XP da sessão (1 + 2 = +3)', /\+3/.test(resumo.revisao || ''), resumo);
+  check('"Exercício concluído" mostra o XP do exercício (+2)', /\+2/.test(resumo.exercicio || ''), resumo);
+
+  // Revisão concluída soma o XP da sessão (STATE.reviewSessionXpStart é marcado quando a sessão começa)
+  const rev = await ev(() => {
+    switchTab('review');
+    STATE.reviewQueue = [STATE.cards[0], STATE.cards[1]]; STATE.reviewIndex = 2; STATE.reviewSessionClassReview = false;
+    STATE.reviewSessionXpStart = STATE.xp; addXP(3); addXP(4);
+    renderReviewViewInner();
+    const e = document.querySelector('#review-content .conclusao .lc-stat-value');
+    const com = e ? e.textContent.trim() : null;
+    STATE.reviewSessionXpStart = STATE.xp; renderReviewViewInner();
+    const e2 = document.querySelector('#review-content .conclusao .lc-stat-value');
+    return { com, sem: e2 ? e2.textContent.trim() : null };
+  });
+  check('Revisão concluída soma o XP da sessão (3 + 4 = +7) e sem XP não mostra o cartão', /\+7/.test(rev.com || '') && rev.sem === null, rev);
+
   check('sem erros de JS', errors.length === 0, errors);
   await browser.close(); server.close();
   console.log(`Conclusão dos Desafios playwright: ${passed}/${passed + failed} verificações — ${failed ? 'FALHOU' : 'OK'}`);

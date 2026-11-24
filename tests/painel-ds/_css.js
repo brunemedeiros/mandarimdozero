@@ -35,10 +35,11 @@ function declaracoes(corpo){
 function ler(p){ return fs.readFileSync(p, 'utf8'); }
 // Paleta efetiva do site: { light:{--x:v}, dark:{--x:v} } lida dos <style> de fr/zh (mesma regra de precedência do navegador).
 function paletaSite(ROOT, curso){
-  const html = ler(require('path').join(ROOT, curso, 'index.html'));
+  // Todo o CSS da página na ordem do navegador (<style> e .css de shared/ ligados; plano do CSS comum).
+  const { cssDaPagina } = require('../css-comum/css-da-pagina.js');
   const luz = {}, esc = {};
-  for (const m of html.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/g)){
-    regras(m[1], (sels, corpo, ctx) => {
+  for (const bloco of cssDaPagina(ROOT, curso)){
+    regras(bloco.css, (sels, corpo, ctx) => {
       const d = declaracoes(corpo); const media = ctx.some(c => /prefers-color-scheme:\s*dark/.test(c));
       for (const s of sels){
         if (s === ':root' && !media) Object.assign(luz, d);

@@ -181,7 +181,7 @@ Observações: "Leaderboard" (ranking) e "Study materials" (material de apoio) t
 | review.speed.points | {n} pts | {n} pts | alta | aprovado (2026-10-05) |
 | review.speed.answered | Você respondeu {n} palavra(s) nesta rodada. | You answered {n} word(s) this round. | alta | aprovado (2026-10-05) |
 | review.back | Voltar | Back | alta | aprovado (2026-10-05) |
-| review.practiceMore | Praticar mais | Practice more | alta | aprovado (2026-10-05) |
+| review.practiceMore | Continuar revisando | Keep reviewing | alta | texto novo da autora (2026-11-10; antes "Praticar mais" / "Practice more", aprovado 2026-10-05) |
 | review.complete.title | Revisão concluída! | Review complete! | alta | aprovado (2026-10-05) |
 | review.complete.reviewed | Você revisou {n} cartão(s) nesta sessão. | You reviewed {n} card(s) this session. | alta | aprovado (2026-10-05) |
 | review.session.deckEmptyTitle | Nenhum cartão neste Deck ainda | No cards in this Deck yet | alta | aprovado (2026-10-05) |
@@ -574,7 +574,7 @@ Observações: "Leaderboard" (ranking) e "Study materials" (material de apoio) t
 | fr.conj.sessionDone | Sessão concluída! | Session complete! | alta | aprovado (2026-10-05) |
 | fr.conj.wellDone | Muito bem! | Great job! | alta | aprovado (2026-10-05) |
 | fr.conj.keepPracticing | Continue praticando essas conjugações. | Keep practicing these conjugations. | alta | aprovado (2026-10-05) |
-| fr.conj.newSession | Nova sessão | New session | alta | aprovado (2026-10-05) |
+| fr.conj.newSession | Concluir sessão | Finish session | alta | texto novo da autora (2026-11-10; antes "Nova sessão" / "New session", aprovado 2026-10-05) |
 | fr.conj.verbCounter | Verbo {i} de {n} | Verb {i} of {n} | alta | aprovado (2026-10-05) |
 | fr.conj.currentVerb | Verbo atual | Current verb | alta | aprovado (2026-10-05) |
 | fr.conj.regular | Regular | Regular verb | alta | aprovado (2026-10-05) |

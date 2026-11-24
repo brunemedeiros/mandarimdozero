@@ -89,6 +89,7 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
   check('verificar sem escolher não abre feedback', !(await page.isVisible('#challenge-retry-btn')) && !(await page.isVisible('#challenge-complete-btn')));
 
   // ---- erro = fail ----
+  const xpCz0 = await ev(() => STATE.xp);
   await page.click('.challenge-choice-btn[data-value="sommes"]');
   check('escolha preenche a lacuna', (await page.textContent('.cloze-grammar-slot')).trim() === 'sommes');
   await page.click('#cloze-grammar-verify-btn');
@@ -99,6 +100,7 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
   check('erro mostra a resposta certa', (await page.textContent('.challenge-feedback-chosen')).includes('nous avons mangé'));
   check('erro marca a opção certa e a errada', await page.isVisible('.challenge-choice-btn.correct') && await page.isVisible('.challenge-choice-btn.incorrect'));
   check('erro não conclui', !(await done('cloze-a1m6-001')));
+  check('erro não paga XP', (await ev(() => STATE.xp)) === xpCz0);
   check('erro entra na revisão espaçada (caixa 1)', await ev(() => STATE.challengeReviews['cloze-a1m6-001'] && STATE.challengeReviews['cloze-a1m6-001'].box === 1));
 
   // ---- Tentar de novo + acerto ----
@@ -112,6 +114,9 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
   await page.click('#challenge-complete-btn');
   check('acerto conclui', await done('cloze-a1m6-001'));
   check('fila segue para o próximo', await page.isVisible('#queue-continue-btn'));
+  // XP do Complete a frase (decisão da autora, 2026-11-10): escolher a forma certa = EXERCISE_XP_RECOGNIZE (1), só na 1ª conclusão.
+  check('acerto na 1ª conclusão paga EXERCISE_XP_RECOGNIZE (1)', (await ev(() => STATE.xp)) - xpCz0 === 1, (await ev(() => STATE.xp)) - xpCz0);
+  check('tela de conclusão mostra o XP ganho (+1)', /\+1/.test(await page.textContent('.conclusao .lc-stat-value')));
 
   // ---- 2 lacunas ----
   await ev(() => openChallengePlayer('cloze-a1m6-006'));
@@ -129,8 +134,18 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
   await page.click('.challenge-choice-btn[data-blank="0"][data-value="sommes"]');
   await page.click('.challenge-choice-btn[data-blank="1"][data-value="allés"]');
   await page.click('#cloze-grammar-verify-btn');
+  const xpCz1 = await ev(() => STATE.xp);
   await page.click('#challenge-complete-btn');
   check('2 lacunas: acerto conclui', await done('cloze-a1m6-006'));
+  check('2 lacunas: paga 1 XP (escolha), não 1 por lacuna', (await ev(() => STATE.xp)) - xpCz1 === 1, (await ev(() => STATE.xp)) - xpCz1);
+  // refazer o desafio JÁ concluído não paga XP de novo
+  await ev(() => openChallengePlayer('cloze-a1m6-001'));
+  await page.waitForSelector('#cloze-grammar-verify-btn');
+  await page.click('.challenge-choice-btn[data-value="avons"]');
+  await page.click('#cloze-grammar-verify-btn');
+  const xpCz2 = await ev(() => STATE.xp);
+  await page.click('#challenge-complete-btn');
+  check('refazer desafio já concluído não paga XP', (await ev(() => STATE.xp)) === xpCz2);
 
   // ---- progresso por categoria atualizado ----
   await ev(() => renderChallengeCategories());

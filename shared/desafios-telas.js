@@ -118,11 +118,12 @@ function openChallengeReviewQueue(){
   if (!due.length){ challengeReviewQueueActive = false; renderChallengeCategories(); return; }
   challengeReviewQueueActive = true;
   challengeQueueContext = null;
+  challengeSessionXpStart = STATE.xp; // o resumo da revisão do dia soma o XP da sessão
   openChallengePlayer(due[0]);
 }
 function renderChallengeReviewDoneScreen(){
   const content = document.getElementById('challenge-player-content');
-  content.innerHTML = conclusaoHTML({ icon: '🎉', title: chT('ch.review.doneTitle'), sub: chT('ch.review.doneSub'), stats: challengeXPStat(),
+  content.innerHTML = conclusaoHTML({ icon: '🎉', title: chT('ch.review.doneTitle'), sub: chT('ch.review.doneSub'), stats: challengeSessionXPStat(),
     actions: [{ id: 'review-queue-back-btn', label: chT('ch.review.back') }], cls: 'challenge-queue-interstitial' });
   document.getElementById('review-queue-back-btn').addEventListener('click', () => {
     challengeReviewQueueActive = false;
@@ -150,8 +151,8 @@ function markChallengeCompleted(id){
   saveState();
   // Sem notificação aqui de propósito: "Missão concluída" é só pras 3
   // Missões do dia (ver checkDailyMissionCompletions em addXP()) -- estes
-  // são os desafios de conteúdo (Expressões/Ouça e traduza/Acentuação, sem
-  // XP desde a auditoria de XP), categoria diferente.
+  // são os desafios de conteúdo (Expressões/Ouça e traduza/Acentuação/Complete a frase; o XP é pago antes, no
+  // Concluir, e só na 1ª conclusão), categoria diferente.
 }
 // Wrapper compartilhado pelas 3 telas de feedback (Expressões, Ouça e
 // traduza, Acentuação): mesmo invólucro (classe correct/incorrect + header)
@@ -200,6 +201,12 @@ let challengeLastXP = 0;
 // Cartão "XP ganho" das telas de conclusão dos Desafios (só quando o último Concluir pagou XP).
 function challengeXPStat(){
   return challengeLastXP > 0 ? [{ label: t('zh.path.lessonDone.xpEarned'), value: `+${challengeLastXP} ⭐` }] : [];
+}
+// Telas de RESUMO (nível concluído, revisão do dia concluída): XP SOMADO da sessão inteira (desde que a fila começou), não só do último exercício.
+let challengeSessionXpStart = 0;
+function challengeSessionXPStat(){
+  const n = Math.max(0, STATE.xp - challengeSessionXpStart);
+  return n > 0 ? [{ label: t('zh.path.lessonDone.xpEarned'), value: `+${n} ⭐` }] : [];
 }
 function wireChallengeCompleteButton(c, xpGain){
   const retry = document.getElementById('challenge-retry-btn');
@@ -649,6 +656,7 @@ function nextQueueChallenge(type, level){
 
 function openChallengeQueueLevel(type, level){
   challengeQueueContext = { type, level };
+  challengeSessionXpStart = STATE.xp; // o resumo do nível soma o XP da sessão (2026-11-24)
   const next = nextQueueChallenge(type, level) || playableChallenges().find(c => c.type === type && c.level === level);
   if (next) openChallengePlayer(next.id);
 }
@@ -669,7 +677,7 @@ function renderChallengeQueueContinueScreen(c, next){
 
 function renderChallengeQueueLevelDoneScreen(c){
   const content = document.getElementById('challenge-player-content');
-  content.innerHTML = conclusaoHTML({ icon: '🎉', title: chT('ch.queue.levelDone', { level: escapeHtmlChallenge(c.level) }), sub: chT('ch.queue.levelDoneSub'), stats: challengeXPStat(),
+  content.innerHTML = conclusaoHTML({ icon: '🎉', title: chT('ch.queue.levelDone', { level: escapeHtmlChallenge(c.level) }), sub: chT('ch.queue.levelDoneSub'), stats: challengeSessionXPStat(),
     actions: [{ id: 'queue-back-btn', label: chT('ch.queue.back') }], cls: 'challenge-queue-interstitial' });
   document.getElementById('queue-back-btn').addEventListener('click', () => {
     challengeQueueContext = null;
@@ -721,7 +729,7 @@ function openExpressionPlayer(c){
 
 // ---------- Expressões em passos curtos, no molde da trilha (decisão da autora, 2026-10-26) ----------
 // 1) pergunta com "Meu palpite" (livre, NÃO corrigido) e "Ver opções"; 2) resposta (opções coloridas + painel curto + Continuar);
-// 3) "Veja em frases" (com "Quando usar": registro e cuidado); 4) "Monte a frase" (ordenar o exemplo 1; sem XP); 5) "Sua vez" (digitar;
+// 3) "Veja em frases" (com "Quando usar": registro e cuidado); 4) "Monte a frase" (ordenar o exemplo 1; 2 XP, pago no Concluir); 5) "Sua vez" (digitar;
 // o "Quase" é o da trilha, typedAnswerVerdictForExpected); 6) final ("Ir além" + Concluir ou Tentar de novo). A barra do topo (progresso, ⚑, ⌨️, X) é a de shared/activity-focus.js (data-lesson-bar no #challenge-player-wrap).
 // XP da "Sua vez": só na PRIMEIRA conclusão do desafio (refazer concluído = 0, como na trilha), pago ao tocar em Concluir.
 const EXPR_LAST_STEP = 5;
@@ -1265,8 +1273,8 @@ function checkListenTranslateAnswer(c, revealed){
     analysis = analyzeTranslation(ptPt ? ptPt.text : studentAnswer, c.referenceTranslations, c);
   }
   const isCorrect = outcome === 'ok';
-  // Desafio de conteúdo continua clicável mesmo já concluído -- não dá XP
-  // (mesma decisão de answerChallenge, ver auditoria do sistema de XP).
+  // Desafio de conteúdo continua clicável mesmo já concluído -- refazer concluído não paga XP
+  // (challengeXP: só a 1ª conclusão paga; .claude/rules/xp.md).
 
   const marked = (outcome !== 'ok' && studentAnswer && analysis) ? markTranslationWords(studentAnswer, analysis.bestRef || c.referenceTranslations[0]) : null;
   const yoursHTML = marked ? markedWordsHTML(marked.student) : escapeHtmlChallenge(studentAnswer || '—');
@@ -1336,8 +1344,8 @@ function checkAccentAnswer(c, revealed){
   const studentAnswer = revealed ? '' : input.value.trim();
   const outcome = revealed ? 'fail' : accentAnswerOutcome(studentAnswer, c.targetText);
   const isCorrect = outcome === 'ok';
-  // Desafio de conteúdo continua clicável mesmo já concluído -- não dá XP
-  // (mesma decisão de answerChallenge, ver auditoria do sistema de XP).
+  // Desafio de conteúdo continua clicável mesmo já concluído -- refazer concluído não paga XP
+  // (challengeXP: só a 1ª conclusão paga; .claude/rules/xp.md).
 
   const accentBodyHTML = `
       ${!isCorrect && !revealed ? `<p class="accent-feedback-answer">${chT('ch.accent.yours', { answer: escapeHtmlChallenge(studentAnswer || '—') })}</p>` : ''}

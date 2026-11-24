@@ -63,7 +63,8 @@ async function fingerprint(browser, root){
   // Tela de conclusão única (2026-11-10, decisão da autora): as telas de conclusão trocaram de marcação DE PROPÓSITO (shared/core/conclusao.js); o antes (várias marcações) e o depois (.conclusao) viram o mesmo marcador nos dois lados. O resto da tela continua comparado.
   const html = (sel) => page.evaluate((s) => { const e = document.querySelector(s); if (!e) return null; const c = e.cloneNode(true); c.querySelectorAll('.conclusao, .speed-gameover, .conj-session-result, .challenge-queue-interstitial, .review-empty:has(.review-complete-actions), .story-complete, .exercise-result').forEach(n => n.replaceWith(document.createComment('CONCLUSAO'))); return c.innerHTML.replace(/\s*<!--CONCLUSAO-->\s*/g, '<!--CONCLUSAO-->'); }, sel);
   const view = () => html('#view-conjugaison');
-  const state = () => page.evaluate(() => JSON.stringify({ conj: CONJ_STATE, checked: CONJ_STATE.checked ? [...CONJ_STATE.checked] : null,
+  const state = () => page.evaluate(() => JSON.stringify({ conj: Object.assign({}, CONJ_STATE, { xp: undefined }), // CONJ_STATE.xp (XP somado do resumo, 2026-11-24) não existia antes: fora da comparação
+     checked: CONJ_STATE.checked ? [...CONJ_STATE.checked] : null,
     daily: STATE.daily, xp: STATE.xp, modes: STATE.modesUsed, saved: serializeState(),
     missions: REVISAO_CONJ_CHALLENGES.map(c => [c.id, c.icon, c.label, c.target, c.get(STATE.daily)]) }));
 
