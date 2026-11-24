@@ -379,7 +379,7 @@ async function fill(page, wrongIdx){
       const en = await page.evaluate(() => { const it = CONJ_GAMES_UI.state.order[0];
         return { tr: document.querySelector('.painel-resposta .pr-trad').textContent === it.text.en.tr, why: document.querySelector('.painel-resposta .pr-explicacao').textContent === it.text.en.why.replace(/[{}]/g, ''),
           tl: document.querySelector('.cg-timeline figcaption').textContent }; });
-      check('site em inglês: tradução, explicação e legenda em inglês', en.tr && en.why && /^a (point|line)/.test(en.tl), en);
+      check('site em inglês: tradução, explicação e legenda em inglês', en.tr && en.why && /^(passé composé|imparfait): a (point|line)/.test(en.tl), en);
       check('jogos: zero pageerror', errors.length === 0, errors);
       await ctx.close(); })();
   }

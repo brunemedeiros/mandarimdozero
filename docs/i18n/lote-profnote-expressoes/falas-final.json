@@ -1,0 +1,722 @@
+[
+ {
+  "id": "expr-a1-001",
+  "expr": "avoir faim",
+  "pt": "Em francês a fome se tem, com {avoir}: {j'ai faim}. Nunca {je suis faim}.",
+  "en": "In French you have hunger, with {avoir}: {j'ai faim}, never {je suis faim}."
+ },
+ {
+  "id": "expr-a1-002",
+  "expr": "avoir soif",
+  "pt": "Igual à fome: sede se tem. {J'ai soif} serve em qualquer situação, com amigos ou desconhecidos.",
+  "en": "Just like hunger: you have thirst. {J'ai soif} works anywhere, with friends or strangers."
+ },
+ {
+  "id": "expr-a1-003",
+  "expr": "avoir raison",
+  "pt": "Como em português, razão se tem: {avoir raison}. O contrário também vai com {avoir}: {avoir tort}.",
+  "en": "French says you \"have reason\": {avoir raison}. The opposite also takes {avoir}: {avoir tort}, to be wrong."
+ },
+ {
+  "id": "expr-a1m1-001",
+  "expr": "Enchanté !",
+  "pt": "Homem escreve {enchanté}, mulher escreve {enchantée}, e o som é o mesmo. Eu escrevo {enchantée}.",
+  "en": "Men write {enchanté}, women write {enchantée}, and they sound the same. I write {enchantée}."
+ },
+ {
+  "id": "expr-a1m1-003",
+  "expr": "Pas mal",
+  "pt": "Resposta comum a {ça va ?}. Apesar do \"nada mal\", é positivo: quer dizer \"até que bem\".",
+  "en": "A common answer to {ça va ?}. Like \"not bad\" in English, it means \"pretty good\"."
+ },
+ {
+  "id": "expr-a1m1-004",
+  "expr": "Ça marche !",
+  "pt": "É informal, mas muito comum: com amigos, colegas e até o garçom. Numa situação formal, evite.",
+  "en": "It's casual but everywhere: friends, coworkers, even waiters. In formal settings, pick something else."
+ },
+ {
+  "id": "expr-a1m1-005",
+  "expr": "Pas de problème !",
+  "pt": "Serve para responder a um {pardon !} ou a um pedido de ajuda, com qualquer pessoa.",
+  "en": "Use it to answer a {pardon !} or a request for help, with anyone."
+ },
+ {
+  "id": "expr-a1m2-001",
+  "expr": "Bon appétit !",
+  "pt": "Vale à mesa, antes de comer. Para responder: {merci, vous aussi !} ou {toi aussi !}",
+  "en": "Said at the table, right before eating. To answer: {merci, vous aussi !} or {toi aussi !}"
+ },
+ {
+  "id": "expr-a1m2-002",
+  "expr": "À table !",
+  "pt": "É o chamado quando a comida está pronta, bem caseiro: {les enfants, à table !}",
+  "en": "It's the call that the meal is ready, very much a family thing: {les enfants, à table !}"
+ },
+ {
+  "id": "expr-a1m2-003",
+  "expr": "À tout à l'heure !",
+  "pt": "Só para quem você vai ver de novo no mesmo dia. Para outro dia, diga {à demain} ou {à bientôt}.",
+  "en": "Only for someone you'll see again the same day. For another day, say {à demain} or {à bientôt}."
+ },
+ {
+  "id": "expr-a1m2-004",
+  "expr": "Tout de suite",
+  "pt": "Serve para responder a um chamado: {oui, tout de suite !} Não confunda com {tout à l'heure}.",
+  "en": "The go-to reply when someone calls you: {oui, tout de suite !} Don't mix it up with {tout à l'heure}."
+ },
+ {
+  "id": "expr-a1m2-005",
+  "expr": "Bonne journée !",
+  "pt": "É a despedida de dia, com qualquer pessoa: na padaria, no trabalho. À noite, troque por {bonne soirée}.",
+  "en": "A daytime goodbye you can say to anyone, even the cashier. In the evening, switch to {bonne soirée}."
+ },
+ {
+  "id": "expr-a1m3-001",
+  "expr": "Excusez-moi !",
+  "pt": "Vem com {vous}: é o jeito educado de abordar quem você não conhece. Com amigos: {excuse-moi}.",
+  "en": "It uses {vous}, so it's the polite way to stop a stranger. With friends, say {excuse-moi}."
+ },
+ {
+  "id": "expr-a1m3-002",
+  "expr": "Je vous en prie",
+  "pt": "É o {de rien} mais educado, com {vous}. Com amigos: {je t'en prie}. Também cede a vez, como \"pode passar\".",
+  "en": "A politer {de rien}, with {vous}. With friends: {je t'en prie}. It can also mean \"go ahead\" or \"after you\"."
+ },
+ {
+  "id": "expr-a1m3-003",
+  "expr": "Ça fait combien ?",
+  "pt": "Na hora de pagar o total, no caixa. Para saber o preço de uma coisa só, pergunte {c'est combien ?}",
+  "en": "For the total at the checkout. To ask the price of just one thing, say {c'est combien ?}"
+ },
+ {
+  "id": "expr-a1m3-004",
+  "expr": "C'est trop cher !",
+  "pt": "Repare no {trop}: quer dizer \"demais\". Para só \"muito caro\", diga {c'est très cher}.",
+  "en": "Watch the {trop}: it means \"too much\". If it's just \"very expensive\", say {c'est très cher}."
+ },
+ {
+  "id": "expr-a1m3-005",
+  "expr": "Et avec ça ?",
+  "pt": "É a pergunta do vendedor na feira ou na padaria. Se não quiser mais nada: {c'est tout, merci}.",
+  "en": "What the seller asks at the market or bakery. If you're done, answer {c'est tout, merci}."
+ },
+ {
+  "id": "expr-a1m4-002",
+  "expr": "Bon voyage !",
+  "pt": "Para quem vai viajar, com qualquer pessoa. Antes das férias, também se diz {bonnes vacances !}",
+  "en": "For anyone leaving on a trip. Before a holiday, French also says {bonnes vacances !}"
+ },
+ {
+  "id": "expr-a1m4-003",
+  "expr": "Bon rétablissement !",
+  "pt": "Para quem está doente ou se recuperando, com qualquer pessoa. Com amigos, também: {soigne-toi bien !}",
+  "en": "For anyone sick or recovering. With friends, you can also say {soigne-toi bien !}"
+ },
+ {
+  "id": "expr-a1m4-004",
+  "expr": "À tes souhaits !",
+  "pt": "É com {tu}, para amigos e família. Com quem você não conhece, diga {à vos souhaits !}",
+  "en": "This one uses {tu}, for friends and family. With people you don't know, say {à vos souhaits !}"
+ },
+ {
+  "id": "expr-a1m4-005",
+  "expr": "Quel temps !",
+  "pt": "{Quel temps !} é exclamação, não pergunta. Quase sempre é reclamação, mas o tom pode virar elogio.",
+  "en": "{Quel temps !} is an exclamation, not a question. It's usually a complaint, but tone can flip it."
+ },
+ {
+  "id": "expr-a1m5-001",
+  "expr": "Fais comme chez toi",
+  "pt": "Com {tu}, para quem é próximo. Para uma visita mais formal, diga {faites comme chez vous}.",
+  "en": "This is the {tu} version, for people you're close to. For a more formal guest: {faites comme chez vous}."
+ },
+ {
+  "id": "expr-a1m5-002",
+  "expr": "Chez moi",
+  "pt": "{Chez} já quer dizer \"na casa de\": {chez moi}, {chez toi}, {chez Marie}. Não precisa de {maison}.",
+  "en": "{Chez} already means \"at the home of\": {chez moi}, {chez toi}, {chez Marie}. No need for {maison}."
+ },
+ {
+  "id": "expr-a1m5-003",
+  "expr": "Bienvenue !",
+  "pt": "Em {bienvenue !} sozinho, a forma não muda para homem ou mulher. Para receber em casa: {bienvenue chez moi}.",
+  "en": "On its own, {bienvenue !} stays the same for anyone. To welcome someone home: {bienvenue chez moi}."
+ },
+ {
+  "id": "expr-a1m5-004",
+  "expr": "Ça te va bien !",
+  "pt": "Para elogiar roupa, cor ou corte de cabelo, com {tu}. Com quem você trata por {vous}: {ça vous va bien}.",
+  "en": "To compliment clothes, a color or a haircut, with {tu}. With someone you call {vous}: {ça vous va bien}."
+ },
+ {
+  "id": "expr-a1m5-005",
+  "expr": "Ça te plaît ?",
+  "pt": "Cuidado: quem agrada é a coisa, não a pessoa. Para dizer que gosta, responda {oui, ça me plaît !}",
+  "en": "Careful: the thing does the pleasing, not you. To say you like it, answer {oui, ça me plaît !}"
+ },
+ {
+  "id": "expr-a1m6-001",
+  "expr": "Bon week-end !",
+  "pt": "É a despedida da sexta-feira, no trabalho ou na escola. Em francês se diz {week-end}, com hífen.",
+  "en": "The Friday goodbye at work or school. Note the French spelling: {week-end}, with a hyphen."
+ },
+ {
+  "id": "expr-a1m6-002",
+  "expr": "Bonne soirée !",
+  "pt": "Serve na despedida; ao chegar, é {bonsoir}. Na hora de dormir, é {bonne nuit}.",
+  "en": "It's for goodbyes; when you arrive, it's {bonsoir}. At bedtime, it's {bonne nuit}."
+ },
+ {
+  "id": "expr-a1m6-003",
+  "expr": "C'est parti !",
+  "pt": "{C'est parti !} dá a largada com animação: um jogo, uma viagem, uma lição. Serve com qualquer pessoa.",
+  "en": "{C'est parti !} kicks things off with energy: a game, a trip, a lesson. Fine with anyone."
+ },
+ {
+  "id": "expr-a1m6-004",
+  "expr": "Quoi de neuf ?",
+  "pt": "É informal, para amigos. Depois de um {salut}, cai bem. Sem novidades? Responda {rien de spécial}.",
+  "en": "Casual, for friends, right after {salut}. Nothing to report? Just say {rien de spécial}."
+ },
+ {
+  "id": "expr-a1m6-005",
+  "expr": "Ça fait longtemps !",
+  "pt": "É o que se diz ao reencontrar alguém depois de muito tempo. Para medir o tempo: {ça fait deux ans}.",
+  "en": "What you say when you run into someone after ages. To give the length: {ça fait deux ans}."
+ },
+ {
+  "id": "expr-a2-001",
+  "expr": "coup de main",
+  "pt": "Bem do dia a dia, serve até com colegas. Quem ajuda {donne un coup de main}: {tu me donnes un coup de main ?}",
+  "en": "Everyday French, fine even with coworkers. The helper {donne un coup de main}: {tu me donnes un coup de main ?}"
+ },
+ {
+  "id": "expr-a2-002",
+  "expr": "avoir le trac",
+  "pt": "É o nervoso de antes: prova, palco, entrevista. Não é medo em geral. Vai com {avoir}: {j'ai le trac}.",
+  "en": "The nerves right before an exam, a show, an interview, not fear in general. It's {j'ai le trac}."
+ },
+ {
+  "id": "expr-a2-003",
+  "expr": "faire la grasse matinée",
+  "pt": "Vai com {faire}: {je fais la grasse matinée}. É o programa clássico do domingo, com qualquer pessoa.",
+  "en": "It takes {faire}: {je fais la grasse matinée}. The classic Sunday plan, fine to say to anyone."
+ },
+ {
+  "id": "expr-lote1-001",
+  "expr": "n'importe quoi",
+  "pt": "Como \"qualquer coisa\", é neutro. Como \"bobagem\", é informal e direto: {tu dis n'importe quoi !} só entre amigos.",
+  "en": "Meaning \"anything\", it's neutral. Meaning \"nonsense\", it's blunt: {tu dis n'importe quoi !} is for friends."
+ },
+ {
+  "id": "expr-lote1-002",
+  "expr": "en avoir marre",
+  "pt": "Não esqueça o {en}: {j'en ai marre}. Para dizer do quê, use {de}: {j'en ai marre du bruit}. É informal.",
+  "en": "Don't drop the {en}: {j'en ai marre}. Add what with {de}: {j'en ai marre du bruit}. It's casual."
+ },
+ {
+  "id": "expr-lote1-015",
+  "expr": "passer un coup de fil",
+  "pt": "Serve com qualquer pessoa, até no trabalho. Para dizer para quem, use {à}: {passer un coup de fil à Paul}.",
+  "en": "Fine anywhere, even at work. Say who with {à}: {passer un coup de fil à Paul}."
+ },
+ {
+  "id": "expr-lote1-016",
+  "expr": "faire la queue",
+  "pt": "Vai com {faire}: {je fais la queue}. Para avisar que tem fila, diga {il y a la queue}.",
+  "en": "Like British English, French uses {queue} for a line: {je fais la queue}, with {faire}."
+ },
+ {
+  "id": "expr-lote1-017",
+  "expr": "avoir hâte",
+  "pt": "Vai com {de} + verbo: {j'ai hâte de partir}. Só para coisa boa que vai chegar, nunca para pressa.",
+  "en": "It takes {de} + verb: {j'ai hâte de partir}. Despite looking like \"haste\", it's not about hurrying."
+ },
+ {
+  "id": "expr-lote2-013",
+  "expr": "nuit blanche",
+  "pt": "O comum é com {passer}: {j'ai passé une nuit blanche}. Vale para festa, trabalho ou preocupação.",
+  "en": "It usually goes with {passer}: {j'ai passé une nuit blanche}. Party, work or worry, any reason counts."
+ },
+ {
+  "id": "expr-lote3-006",
+  "expr": "c'est nul",
+  "pt": "Informal, para coisas e situações. Com pessoa vira crítica: {il est nul en maths}, péssimo em matemática.",
+  "en": "Casual, for things and situations. About a person it's a put-down: {il est nul en maths}, hopeless at math."
+ },
+ {
+  "id": "expr-lote3-007",
+  "expr": "c'est génial",
+  "pt": "Vale para qualquer notícia boa: {c'est génial !} E também para pessoas: {il est génial}, \"ele é incrível\".",
+  "en": "For any good news: {c'est génial !} It works for people too: {il est génial}, \"he's amazing\"."
+ },
+ {
+  "id": "expr-lote3-008",
+  "expr": "mince alors",
+  "pt": "É a versão educada de um palavrão: dá para dizer na frente de crianças. Muitas vezes sai só {mince !}",
+  "en": "It's the polite stand-in for a swear word, fine in front of kids, like \"darn\". Often just {mince !}"
+ },
+ {
+  "id": "expr-lote3-012",
+  "expr": "tomber amoureux",
+  "pt": "Repare: é {de}, não \"por\": {tomber amoureux de Julie}. E no passado vai com {être}: {il est tombé}.",
+  "en": "Note the {de}, where English says \"with\": {tomber amoureux de Julie}. In the past it takes {être}: {il est tombé}."
+ },
+ {
+  "id": "expr-lote4-001",
+  "expr": "faire semblant",
+  "pt": "Diferente do nosso \"finge que\", o normal é {de} + verbo: {il fait semblant de dormir}.",
+  "en": "Where English says \"pretend that\", French prefers {de} + verb: {il fait semblant de dormir}."
+ },
+ {
+  "id": "expr-lote4-002",
+  "expr": "faire exprès",
+  "pt": "Muito comum na negativa, para pedir desculpas: {je n'ai pas fait exprès}. O {s} final é mudo.",
+  "en": "Very common in the negative, to apologize: {je n'ai pas fait exprès}. The final {s} is silent."
+ },
+ {
+  "id": "expr-001",
+  "expr": "avoir la gueule de bois",
+  "pt": "É informal e vai com {avoir}: {j'ai la gueule de bois}. Para o rosto de alguém, {gueule} é grosseira.",
+  "en": "It's casual and takes {avoir}: {j'ai la gueule de bois}. For a person's face, {gueule} is rude."
+ },
+ {
+  "id": "expr-002",
+  "expr": "casser les pieds",
+  "pt": "Quem se irrita entra antes do verbo: {tu me casses les pieds}. É informal, mas sem palavrão.",
+  "en": "The annoyed person goes before the verb: {tu me casses les pieds}. Casual, but no swear word."
+ },
+ {
+  "id": "expr-003",
+  "expr": "poser un lapin",
+  "pt": "Quem leva o bolo vem antes do verbo: {il m'a posé un lapin}. Informal, para encontro ou compromisso.",
+  "en": "The person stood up goes before the verb: {il m'a posé un lapin}. Casual, for a date or any plan."
+ },
+ {
+  "id": "expr-lote1-003",
+  "expr": "s'en foutre",
+  "pt": "Muito comum entre amigos, mas grosseiro: nunca com chefe ou desconhecidos. Neutro: {ça m'est égal}.",
+  "en": "Very common among friends, but crude: never with your boss or strangers. Neutral: {ça m'est égal}."
+ },
+ {
+  "id": "expr-lote1-004",
+  "expr": "être dans la merde",
+  "pt": "Vulgar: só com gente muito próxima, e de preferência falando de você mesmo: {je suis dans la merde}.",
+  "en": "Vulgar: only with people you're very close to, ideally about yourself: {je suis dans la merde}."
+ },
+ {
+  "id": "expr-lote1-005",
+  "expr": "ça craint",
+  "pt": "Muito usado pelos jovens. Também diz que um lugar é perigoso: {ce quartier craint}.",
+  "en": "Young people use it a lot. It can also mean a place is sketchy: {ce quartier craint}."
+ },
+ {
+  "id": "expr-lote1-006",
+  "expr": "avoir la flemme",
+  "pt": "Vai com {de} + verbo: {j'ai la flemme de cuisiner}. Bem informal: com o chefe, melhor não.",
+  "en": "It takes {de} + verb: {j'ai la flemme de cuisiner}. Very casual, so not something to tell your boss."
+ },
+ {
+  "id": "expr-lote1-007",
+  "expr": "c'est dingue",
+  "pt": "Serve para surpresa boa ou ruim, igual a {c'est fou}. Informal, para usar com amigos.",
+  "en": "Works for good or bad surprises, just like {c'est fou}. Casual, for friends."
+ },
+ {
+  "id": "expr-lote1-008",
+  "expr": "foutre le camp",
+  "pt": "No imperativo é bem agressivo: {foutez le camp !} Já {je fous le camp} é só \"vou embora\", mas grosso.",
+  "en": "As an order it's aggressive: {foutez le camp !} {Je fous le camp} just means \"I'm leaving\", but crudely."
+ },
+ {
+  "id": "expr-lote1-009",
+  "expr": "ta gueule",
+  "pt": "Ofende de verdade; só entre amigos muito próximos, brincando. Sem grosseria, mas ainda seco: {tais-toi}.",
+  "en": "It truly offends; only among close friends, joking. Not crude, but still curt: {tais-toi}."
+ },
+ {
+  "id": "expr-lote1-010",
+  "expr": "faire chier",
+  "pt": "É vulgar: o mais comum é {ça me fait chier}. Com quem você não conhece bem, evite totalmente.",
+  "en": "It's vulgar: you'll mostly hear {ça me fait chier}. Avoid it with anyone you don't know well."
+ },
+ {
+  "id": "expr-lote1-011",
+  "expr": "se prendre la tête",
+  "pt": "Muito comum no imperativo, para acalmar alguém: {ne te prends pas la tête}. Informal.",
+  "en": "Very common as advice to calm someone down: {ne te prends pas la tête}. Casual."
+ },
+ {
+  "id": "expr-lote1-012",
+  "expr": "tu parles !",
+  "pt": "Tudo está no tom irônico: {tu parles !} não pede para a pessoa falar. É informal.",
+  "en": "It's all in the ironic tone, like \"yeah, right\": {tu parles !} isn't asking anyone to talk."
+ },
+ {
+  "id": "expr-lote1-013",
+  "expr": "c'est du gâteau",
+  "pt": "Repare no {du}, nunca {un}. Na negativa também é comum: {ce n'est pas du gâteau}, \"não é moleza\".",
+  "en": "Like \"a piece of cake\", but with {du}, never {un}. The negative is common too: {ce n'est pas du gâteau}."
+ },
+ {
+  "id": "expr-lote1-014",
+  "expr": "avoir le cafard",
+  "pt": "{Cafard} também é barata, mas aqui é só tristeza passageira. Vai com {avoir}: {j'ai le cafard}.",
+  "en": "{Cafard} also means cockroach, but here it's a passing sadness. It takes {avoir}: {j'ai le cafard}."
+ },
+ {
+  "id": "expr-lote2-001",
+  "expr": "dégage",
+  "pt": "É agressivo, coisa de briga. Em outros contextos, o verbo {dégager} quer dizer \"liberar\".",
+  "en": "It's aggressive, the language of a fight. Elsewhere, the verb {dégager} means \"to clear\"."
+ },
+ {
+  "id": "expr-lote2-002",
+  "expr": "se casser",
+  "pt": "Cuidado: {se casser} também é quebrar, como em {le verre s'est cassé}. O contexto diz se alguém saiu.",
+  "en": "Careful: {se casser} can also mean to break, as in {le verre s'est cassé}. Context tells you."
+ },
+ {
+  "id": "expr-lote2-003",
+  "expr": "c'est chiant",
+  "pt": "É vulgar, mas muito ouvido. Dito de alguém, ofende: {il est chiant}. Com desconhecidos, evite.",
+  "en": "It's vulgar but heard a lot. About a person it's insulting: {il est chiant}. Avoid it with strangers."
+ },
+ {
+  "id": "expr-lote2-004",
+  "expr": "avoir la trouille",
+  "pt": "Igual a {avoir peur}, vai com {avoir} e {de}: {j'ai la trouille de prendre l'avion}. É informal.",
+  "en": "Like {avoir peur}, it takes {avoir} and {de}: {j'ai la trouille de prendre l'avion}. Casual."
+ },
+ {
+  "id": "expr-lote2-005",
+  "expr": "être crevé",
+  "pt": "É informal e concorda com quem fala: eu digo {je suis crevée}. Num pneu, {crevé} é furado.",
+  "en": "It's casual and agrees with the speaker: I say {je suis crevée}. On a tire, {crevé} means flat."
+ },
+ {
+  "id": "expr-lote2-006",
+  "expr": "être bourré",
+  "pt": "Gíria de festa, só com gente próxima. A palavra neutra é {ivre}. Mulher diz {je suis bourrée}.",
+  "en": "Party slang, close friends only. The neutral word is {ivre}. A woman says {je suis bourrée}."
+ },
+ {
+  "id": "expr-lote2-007",
+  "expr": "avoir la dalle",
+  "pt": "Gíria, entre amigos ou em casa. Como {avoir faim}, vai com {avoir}: {j'ai la dalle}.",
+  "en": "Slang, with friends or family. Like {avoir faim}, it takes {avoir}: {j'ai la dalle}."
+ },
+ {
+  "id": "expr-lote2-008",
+  "expr": "casser les bonbons",
+  "pt": "Gíria, só com gente próxima: versão suave de uma expressão grosseira. Repare no {me}: {tu me casses les bonbons}.",
+  "en": "Slang, close friends only: a softened form of a cruder phrase. Note the {me}: {tu me casses les bonbons}."
+ },
+ {
+  "id": "expr-lote2-009",
+  "expr": "arrête ton char",
+  "pt": "Informal, entre amigos, para uma história difícil de engolir. Com {vous}: {arrêtez votre char}.",
+  "en": "Informal, among friends, when a story sounds too good to be true. With {vous}: {arrêtez votre char}."
+ },
+ {
+  "id": "expr-lote2-010",
+  "expr": "tomber dans les pommes",
+  "pt": "Informal e muito comum. No passado, {tomber} vai com {être}: {elle est tombée dans les pommes}.",
+  "en": "Informal and very common. In the past tense {tomber} takes {être}: {elle est tombée dans les pommes}."
+ },
+ {
+  "id": "expr-lote2-011",
+  "expr": "donner sa langue au chat",
+  "pt": "Serve para charadas e adivinhas, entre amigos. O {sa} muda com a pessoa: {je donne ma langue au chat}.",
+  "en": "For riddles and guessing games, among friends. {Sa} changes with the person: {je donne ma langue au chat}."
+ },
+ {
+  "id": "expr-lote2-012",
+  "expr": "coûter les yeux de la tête",
+  "pt": "Quase igual ao português, mas em francês são os olhos {de la tête}. Serve em qualquer conversa.",
+  "en": "English pays an arm and a leg; French pays {les yeux de la tête}. Fine in any conversation."
+ },
+ {
+  "id": "expr-lote2-014",
+  "expr": "jeter l'éponge",
+  "pt": "Em português se joga a toalha; em francês, a esponja: {jeter l'éponge}. Cabe em qualquer conversa.",
+  "en": "English throws in the towel, French throws the sponge: {jeter l'éponge}. Both come from boxing."
+ },
+ {
+  "id": "expr-lote2-015",
+  "expr": "avoir la tête dans les nuages",
+  "pt": "Em português é o mundo da lua; em francês, as nuvens. Vai com {avoir}: {il a la tête dans les nuages}.",
+  "en": "Same picture as in English, but with {avoir}: {il a la tête dans les nuages}. Fine in any setting."
+ },
+ {
+  "id": "expr-lote2-016",
+  "expr": "avoir le cœur sur la main",
+  "pt": "Elogio que cabe em qualquer conversa. Cuidado com a preposição: o coração fica {sur la main}.",
+  "en": "A compliment that works anywhere. Watch the preposition: the heart is {sur la main}, \"on\" the hand."
+ },
+ {
+  "id": "expr-lote3-001",
+  "expr": "ça vaut le coup",
+  "pt": "Muito comum no dia a dia, com qualquer pessoa. Para dizer o contrário: {ça ne vaut pas le coup}.",
+  "en": "Very common in everyday talk, with anyone. To say the opposite: {ça ne vaut pas le coup}."
+ },
+ {
+  "id": "expr-lote3-002",
+  "expr": "pas de bol",
+  "pt": "Informal, para azar pequeno, como perder o ônibus. Diante de uma notícia triste, {pas de bol} soa leve demais.",
+  "en": "Informal, for small mishaps like missing a bus. For truly sad news, {pas de bol} sounds far too light."
+ },
+ {
+  "id": "expr-lote3-003",
+  "expr": "avoir du bol",
+  "pt": "Repare no {du}: {il a du bol}. Para o azar, diga {pas de bol}. As duas são informais, entre amigos.",
+  "en": "Note the {du}: {il a du bol}. For bad luck it's {pas de bol}. Both are informal, among friends."
+ },
+ {
+  "id": "expr-lote3-004",
+  "expr": "faire gaffe",
+  "pt": "Informal; num contexto formal, {faites attention}. Cuidado: {faire une gaffe}, com {une}, é cometer uma gafe.",
+  "en": "Casual; in formal settings, {faites attention}. Careful: {faire une gaffe}, with {une}, means to make a blunder."
+ },
+ {
+  "id": "expr-lote3-005",
+  "expr": "se planter",
+  "pt": "Informal. É verbo com {se}, então o passado vai com {être}: {je me suis planté}, ou {plantée} se for mulher.",
+  "en": "Informal. It's a {se} verb, so the past takes {être}: {je me suis planté}, or {plantée} for a woman."
+ },
+ {
+  "id": "expr-lote3-009",
+  "expr": "mort de rire",
+  "pt": "Informal. Concorda com quem ri: mulher diz {j'étais morte de rire}. Por escrito, vira {mdr}.",
+  "en": "Informal. It agrees with whoever's laughing: a woman says {j'étais morte de rire}. In texts it's {mdr}."
+ },
+ {
+  "id": "expr-lote3-010",
+  "expr": "être au top",
+  "pt": "Informal, e serve para pessoa, lugar ou coisa: {elle est au top}, {ce restaurant est au top}.",
+  "en": "Informal, and it works for people, places or things: {elle est au top}, {ce restaurant est au top}."
+ },
+ {
+  "id": "expr-lote3-011",
+  "expr": "perdre patience",
+  "pt": "Repare: em francês não tem artigo, é {perdre patience}, sem {la}. Serve em qualquer conversa.",
+  "en": "No article, just like \"lose patience\" in English: {je perds patience}. Fine in any setting, formal or not."
+ },
+ {
+  "id": "expr-lote3-013",
+  "expr": "ferme-la",
+  "pt": "Soa grosseiro, mesmo sem palavrão: o {la} é a boca. Mais neutro, mas ainda seco: {tais-toi}.",
+  "en": "It's rude, even with no swear word: the {la} is the mouth. Still blunt but milder: {tais-toi}."
+ },
+ {
+  "id": "expr-lote3-014",
+  "expr": "fous-moi la paix",
+  "pt": "Soa irritado e grosseiro, então só com gente muito próxima. Versão educada: {laisse-moi tranquille}.",
+  "en": "It sounds angry and rude, so only with people you're very close to. Politer: {laisse-moi tranquille}."
+ },
+ {
+  "id": "expr-lote3-015",
+  "expr": "tu te fous de moi ?",
+  "pt": "Gíria para reagir a algo absurdo, só com gente próxima. Mais leve, sem grosseria: {tu te moques de moi ?}",
+  "en": "Slang for reacting to something outrageous, close friends only. Milder: {tu te moques de moi ?}"
+ },
+ {
+  "id": "expr-lote3-016",
+  "expr": "bordel",
+  "pt": "Pode chocar, então nada de usar com desconhecidos. Também quer dizer bagunça: {c'est le bordel ici}.",
+  "en": "It can shock, so never with strangers. It also means a big mess: {c'est le bordel ici}."
+ },
+ {
+  "id": "expr-lote3-017",
+  "expr": "putain",
+  "pt": "Serve para raiva, susto e até admiração, mas é grosseiro: reconheça {putain} e evite com desconhecidos.",
+  "en": "It covers anger, shock, even awe, but it's crude: recognize {putain} and never use it with strangers."
+ },
+ {
+  "id": "expr-lote3-018",
+  "expr": "espèce de con",
+  "pt": "Insulto de verdade, que pode gerar briga: melhor só reconhecer. Para mulher, vira {espèce de conne}.",
+  "en": "A real insult that can start a fight: best to just recognize it. For a woman it becomes {espèce de conne}."
+ },
+ {
+  "id": "expr-lote3-019",
+  "expr": "connard",
+  "pt": "Insulto forte, melhor só reconhecer. É masculino; para mulher, os franceses dizem {connasse}.",
+  "en": "A strong insult, best kept for recognizing. It's masculine; for a woman French uses {connasse}."
+ },
+ {
+  "id": "expr-lote4-003",
+  "expr": "tourner la page",
+  "pt": "Mesma imagem do português, e cabe em qualquer conversa, até no trabalho: {il faut tourner la page}.",
+  "en": "Same image as in English, and fine anywhere, even at work: {il faut tourner la page}."
+ },
+ {
+  "id": "expr-lote4-004",
+  "expr": "en vouloir à quelqu'un",
+  "pt": "Não tem nada a ver com querer algo. Repare no {en} e no {à}: {je t'en veux}, {elle en veut à son amie}.",
+  "en": "Nothing to do with wanting. Don't drop the {en}: {je t'en veux} means \"I hold it against you\"."
+ },
+ {
+  "id": "expr-lote4-005",
+  "expr": "c'est foutu",
+  "pt": "Informal e um pouco grosseiro: evite no trabalho. Uma versão mais leve é {c'est fichu}.",
+  "en": "Informal and a bit crude: skip it at work. A milder version is {c'est fichu}."
+ },
+ {
+  "id": "expr-lote4-006",
+  "expr": "être fauché",
+  "pt": "Informal e bem comum. Concorda com quem fala: eu diria {je suis fauchée}, com o \"e\" do feminino.",
+  "en": "Casual and very common. It agrees with the speaker: as a woman, I'd say {je suis fauchée}."
+ },
+ {
+  "id": "expr-lote4-007",
+  "expr": "avoir les boules",
+  "pt": "Bem informal: fica para os amigos. Repare que vem com {avoir} e o artigo {les}: {j'ai les boules}.",
+  "en": "Not \"have the balls\" (be brave): {j'ai les boules} means you're gutted. Very casual, friends only."
+ },
+ {
+  "id": "expr-lote4-008",
+  "expr": "avoir la pêche",
+  "pt": "Informal e sempre com {avoir} e {la}: {j'ai la pêche}. Nada a ver com fruta na conversa, é pura energia.",
+  "en": "Casual, and always with {avoir} and {la}: {j'ai la pêche}. Nobody's talking fruit here, it's all energy."
+ },
+ {
+  "id": "expr-lote4-009",
+  "expr": "galérer",
+  "pt": "Verbo informal, conjugado como {parler}: {j'ai galéré}. Para algo difícil de fazer, diga {c'est la galère}.",
+  "en": "A casual verb, conjugated like {parler}: {j'ai galéré}. For a hard task, say {c'est la galère}."
+ },
+ {
+  "id": "expr-lote4-010",
+  "expr": "avoir du fric",
+  "pt": "{Le fric} é gíria para {l'argent}: com amigos, tudo bem; numa entrevista ou no banco, fique com {argent}.",
+  "en": "{Le fric} is slang for {l'argent}: fine with friends, but at a job interview or the bank, stick to {argent}."
+ },
+ {
+  "id": "expr-lote4-011",
+  "expr": "tu m'emmerdes",
+  "pt": "Vulgar e ofende: entenda quando ouvir, mas evite dizer. Sem palavrão, os franceses dizem {tu m'embêtes}.",
+  "en": "Vulgar and hurtful: understand it, but don't say it. Without the swear word, French says {tu m'embêtes}."
+ },
+ {
+  "id": "expr-lote4-020",
+  "expr": "être cinglé",
+  "pt": "Informal, com amigos. Concorda com a pessoa: {il est cinglé}, {elle est cinglée}.",
+  "en": "Casual, for friends. It agrees with the person: {il est cinglé}, {elle est cinglée}."
+ },
+ {
+  "id": "expr-b2-001",
+  "expr": "mettre les points sur les i",
+  "pt": "Igual ao nosso \"pôr os pingos nos is\". Em francês também soa firme: {je vais mettre les points sur les i}.",
+  "en": "Like \"dot the i's\", but often firmer, close to \"set the record straight\": {mettre les points sur les i}."
+ },
+ {
+  "id": "expr-b2-002",
+  "expr": "avoir un poil dans la main",
+  "pt": "Informal e meio brincalhona. Repare no {un}: é sempre {un poil}, um pelo só, nunca {des poils}.",
+  "en": "Casual and a bit teasing. Note the {un}: it's always {un poil}, a single hair, never {des poils}."
+ },
+ {
+  "id": "expr-b2-003",
+  "expr": "ne pas y aller de main morte",
+  "pt": "Sempre na negativa, e repare no {y}: {tu n'y vas pas de main morte !}, {il n'y est pas allé de main morte}.",
+  "en": "Always negative, and watch the {y}: {tu n'y vas pas de main morte !}, {il n'y est pas allé de main morte}."
+ },
+ {
+  "id": "expr-lote1-018",
+  "expr": "mon œil !",
+  "pt": "Informal e irônico. Às vezes os franceses puxam a pálpebra com o dedo ao dizer {mon œil !}",
+  "en": "Casual and ironic, for people you know well. The French sometimes pull down an eyelid while saying {mon œil !}"
+ },
+ {
+  "id": "expr-lote1-019",
+  "expr": "monter sur ses grands chevaux",
+  "pt": "O possessivo muda com a pessoa: {je monte sur mes grands chevaux}, {il monte sur ses grands chevaux}.",
+  "en": "Close to \"get on your high horse\", and the possessive changes too: {je monte sur mes grands chevaux}."
+ },
+ {
+  "id": "expr-lote1-020",
+  "expr": "avoir un coup de barre",
+  "pt": "Informal e bem comum depois do almoço. Vem com {avoir} e {un}: {j'ai un coup de barre}.",
+  "en": "Casual and very common after lunch, like \"I'm crashing\". It takes {avoir} and {un}: {j'ai un coup de barre}."
+ },
+ {
+  "id": "expr-lote2-017",
+  "expr": "avoir un verre dans le nez",
+  "pt": "Informal e bem-humorada, mais leve que {être bourré}. Serve para falar de alguém, não para ofender.",
+  "en": "Casual and good-humored, much softer than {être bourré}. Use it to tease, not to insult."
+ },
+ {
+  "id": "expr-lote2-018",
+  "expr": "coûter la peau des fesses",
+  "pt": "Versão mais informal de {coûter les yeux de la tête}: {la peau des fesses} é a pele do bumbum. Só entre amigos.",
+  "en": "Cheekier than {coûter les yeux de la tête}, the everyday version. Keep {la peau des fesses} for friends."
+ },
+ {
+  "id": "expr-lote2-019",
+  "expr": "en faire tout un fromage",
+  "pt": "Informal. Não esqueça o {en}: {ne va pas en faire tout un fromage !} Em francês o drama vira queijo.",
+  "en": "Casual. Don't drop the {en}: {ne va pas en faire tout un fromage !} In French, the fuss becomes a cheese."
+ },
+ {
+  "id": "expr-lote2-020",
+  "expr": "rire jaune",
+  "pt": "Igualzinho ao nosso \"rir amarelo\", e cabe em qualquer conversa. No passado: {il a ri jaune}.",
+  "en": "Fine in any setting. {Jaune} never changes, and in the past it's {il a ri jaune}."
+ },
+ {
+  "id": "expr-lote3-020",
+  "expr": "être à côté de la plaque",
+  "pt": "Informal, para quem está \"viajando\" no assunto. Costuma vir com {complètement}: {il est complètement à côté}.",
+  "en": "Casual, for someone way off base. Often with {complètement} before it: {il est complètement à côté}."
+ },
+ {
+  "id": "expr-lote4-012",
+  "expr": "va te faire voir",
+  "pt": "{Va te faire voir} é grosseira e corta a conversa com raiva. Suaviza um palavrão, mas evite até com amigos.",
+  "en": "{Va te faire voir} is rude and ends the talk in anger. It softens a swear, but avoid it, even with friends."
+ },
+ {
+  "id": "expr-lote4-013",
+  "expr": "tirer la gueule",
+  "pt": "{La gueule} é a boca de bicho, por isso soa grosseira. Entre amigos passa; com o chefe, diga {faire la tête}.",
+  "en": "{La gueule} is an animal's mouth, so it sounds crude. Fine with friends; with your boss, say {faire la tête}."
+ },
+ {
+  "id": "expr-lote4-014",
+  "expr": "se foutre de la gueule de quelqu'un",
+  "pt": "Bem grosseira por causa do {foutre}: só entre amigos. Repare no possessivo: {ils se foutent de notre gueule}.",
+  "en": "Very crude because of {foutre}: friends only. The possessive changes: {ils se foutent de notre gueule}."
+ },
+ {
+  "id": "expr-lote4-015",
+  "expr": "être sur les nerfs",
+  "pt": "Vem com {être} e o artigo {les}: {je suis sur les nerfs}. Informal, mas bem natural no dia a dia.",
+  "en": "It takes {être} and {les}: {je suis sur les nerfs}. Casual, but very natural in everyday talk."
+ },
+ {
+  "id": "expr-lote4-016",
+  "expr": "il pleut des cordes",
+  "pt": "Só funciona com {il}, como todo verbo de chuva: {il pleut des cordes}. Nunca diga {ça pleut}.",
+  "en": "Like \"it's pouring\", it only works with {il}: {il pleut des cordes}, never {ça pleut}."
+ },
+ {
+  "id": "expr-lote4-017",
+  "expr": "mettre le paquet",
+  "pt": "Informal e positiva: sempre {le paquet}, no singular. No passado: {il a mis le paquet}.",
+  "en": "Casual and positive: always {le paquet}, singular. In the past: {il a mis le paquet}."
+ },
+ {
+  "id": "expr-lote4-018",
+  "expr": "à fond la caisse",
+  "pt": "Informal, muito usada para carro e moto. {La caisse} é gíria para carro. Com amigos, só {à fond} já basta.",
+  "en": "Casual, mostly about cars and bikes: {la caisse} is slang for a car. With friends, plain {à fond} works too."
+ },
+ {
+  "id": "expr-lote4-019",
+  "expr": "ça ne casse pas des briques",
+  "pt": "Informal e sempre na negativa. Na fala, o {ne} costuma cair: {ça casse pas des briques}.",
+  "en": "Casual and always negative. In speech, the {ne} often drops: {ça casse pas des briques}."
+ }
+]

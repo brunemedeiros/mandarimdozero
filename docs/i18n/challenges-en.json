@@ -10,7 +10,8 @@
    "To be in a bad mood for no real reason.",
    "To be shocked by some unexpected news."
   ],
-  "microActivity": "Last night I drank too much at the party, so this morning I'm hungover and I don't want to go out."
+  "microActivity": "Last night I drank too much at the party, so this morning I'm hungover and I don't want to go out.",
+  "profNote": "It's casual and takes {avoir}: {j'ai la gueule de bois}. For a person's face, {gueule} is rude."
  },
  "expr-002": {
   "meaning": "Means to bother or really irritate someone; to get on someone's nerves.",
@@ -23,7 +24,8 @@
    "To annoy someone a lot",
    "To break something"
   ],
-  "microActivity": "My brother forgot to do the dishes again, he's getting on my nerves!"
+  "microActivity": "My brother forgot to do the dishes again, he's getting on my nerves!",
+  "profNote": "The annoyed person goes before the verb: {tu me casses les pieds}. Casual, but no swear word."
  },
  "expr-003": {
   "meaning": "To stand someone up; to not show up to an appointment.",
@@ -36,7 +38,8 @@
    "To invite someone over to eat.",
    "To tell someone a funny joke."
   ],
-  "microActivity": "You shouldn't stand someone up when you've promised to come."
+  "microActivity": "You shouldn't stand someone up when you've promised to come.",
+  "profNote": "The person stood up goes before the verb: {il m'a posé un lapin}. Casual, for a date or any plan."
  },
  "lt-auto-001": {
   "referenceTranslations": [
@@ -178,7 +181,8 @@
    "When you're hungry",
    "When you're tired"
   ],
-  "microActivity": "Hi, my name is Ana. — Nice to meet you!"
+  "microActivity": "Hi, my name is Ana. — Nice to meet you!",
+  "profNote": "Men write {enchanté}, women write {enchantée}, and they sound the same. I write {enchantée}."
  },
  "expr-a1m1-002": {
   "meaning": "So-so; not great, not bad.",
@@ -203,7 +207,8 @@
    "Very expensive",
    "Very late"
   ],
-  "microActivity": "How are you? — Not bad, thanks!"
+  "microActivity": "How are you? — Not bad, thanks!",
+  "profNote": "A common answer to {ça va ?}. Like \"not bad\" in English, it means \"pretty good\"."
  },
  "expr-a1m1-004": {
   "meaning": "Deal! Sounds good! Great! Register: informal — use with friends and people you're close to; avoid in formal settings.",
@@ -216,7 +221,8 @@
    "I'm hungry",
    "Goodbye"
   ],
-  "microActivity": "A coffee? — Sounds good!"
+  "microActivity": "A coffee? — Sounds good!",
+  "profNote": "It's casual but everywhere: friends, coworkers, even waiters. In formal settings, pick something else."
  },
  "expr-a1m1-005": {
   "meaning": "No problem! No worries!",
@@ -228,7 +234,8 @@
    "I'm tired",
    "I don't know"
   ],
-  "microActivity": "Sorry! — No problem!"
+  "microActivity": "Sorry! — No problem!",
+  "profNote": "Use it to answer a {pardon !} or a request for help, with anyone."
  },
  "lt-a1m2-001": {
   "referenceTranslations": [
@@ -313,7 +320,8 @@
    "When leaving the house",
    "When you're sick"
   ],
-  "microActivity": "Dinner is ready. — Enjoy your meal!"
+  "microActivity": "Dinner is ready. — Enjoy your meal!",
+  "profNote": "Said at the table, right before eating. To answer: {merci, vous aussi !} or {toi aussi !}"
  },
  "expr-a1m2-002": {
   "meaning": "Time to eat! Come to the table!",
@@ -326,7 +334,8 @@
    "Go to work",
    "Clear the table"
   ],
-  "microActivity": "Mom calls out: \"Dinner's ready!\""
+  "microActivity": "Mom calls out: \"Dinner's ready!\"",
+  "profNote": "It's the call that the meal is ready, very much a family thing: {les enfants, à table !}"
  },
  "expr-a1m2-003": {
   "meaning": "See you in a bit!",
@@ -338,7 +347,8 @@
    "When you'll see each other next week",
    "When you arrive"
   ],
-  "microActivity": "I'm off to work. — See you later!"
+  "microActivity": "I'm off to work. — See you later!",
+  "profNote": "Only for someone you'll see again the same day. For another day, say {à demain} or {à bientôt}."
  },
  "expr-a1m2-004": {
   "meaning": "Right now; right away.",
@@ -350,7 +360,8 @@
    "Never",
    "In the evening"
   ],
-  "microActivity": "Are you coming to eat? — Yes, right away!"
+  "microActivity": "Are you coming to eat? — Yes, right away!",
+  "profNote": "The go-to reply when someone calls you: {oui, tout de suite !} Don't mix it up with {tout à l'heure}."
  },
  "expr-a1m2-005": {
   "meaning": "Have a good day!",
@@ -362,7 +373,8 @@
    "Before starting a meal",
    "When arriving somewhere"
   ],
-  "microActivity": "Bye, have a nice day!"
+  "microActivity": "Bye, have a nice day!",
+  "profNote": "A daytime goodbye you can say to anyone, even the cashier. In the evening, switch to {bonne soirée}."
  },
  "lt-a1m3-001": {
   "referenceTranslations": [
@@ -475,7 +487,8 @@
    "To thank someone for their help",
    "To turn down someone's request"
   ],
-  "microActivity": "Excuse me, where is the museum?"
+  "microActivity": "Excuse me, where is the museum?",
+  "profNote": "It uses {vous}, so it's the polite way to stop a stranger. With friends, say {excuse-moi}."
  },
  "expr-a1m3-002": {
   "meaning": "You're welcome; please, make yourself at home.",
@@ -488,7 +501,8 @@
    "I don't know",
    "Sorry"
   ],
-  "microActivity": "Thank you! — You're welcome."
+  "microActivity": "Thank you! — You're welcome.",
+  "profNote": "A politer {de rien}, with {vous}. With friends: {je t'en prie}. It can also mean \"go ahead\" or \"after you\"."
  },
  "expr-a1m3-003": {
   "meaning": "How much is it? How much does that come to?",
@@ -501,7 +515,8 @@
    "Where is it?",
    "Who is it?"
   ],
-  "microActivity": "How much is it, please?"
+  "microActivity": "How much is it, please?",
+  "profNote": "For the total at the checkout. To ask the price of just one thing, say {c'est combien ?}"
  },
  "expr-a1m3-004": {
   "meaning": "It's too expensive!",
@@ -513,7 +528,8 @@
    "It's free",
    "It's very small"
   ],
-  "microActivity": "Eighty euros? That's too expensive!"
+  "microActivity": "Eighty euros? That's too expensive!",
+  "profNote": "Watch the {trop}: it means \"too much\". If it's just \"very expensive\", say {c'est très cher}."
  },
  "expr-a1m3-005": {
   "meaning": "Anything else?",
@@ -526,7 +542,8 @@
    "The doctor",
    "The teacher"
   ],
-  "microActivity": "A liter of milk. — Anything else?"
+  "microActivity": "A liter of milk. — Anything else?",
+  "profNote": "What the seller asks at the market or bakery. If you're done, answer {c'est tout, merci}."
  },
  "lt-a1m4-001": {
   "referenceTranslations": [
@@ -623,7 +640,8 @@
    "To someone who is eating",
    "To someone who is sleeping"
   ],
-  "microActivity": "Goodbye, have a good trip!"
+  "microActivity": "Goodbye, have a good trip!",
+  "profNote": "For anyone leaving on a trip. Before a holiday, French also says {bonnes vacances !}"
  },
  "expr-a1m4-003": {
   "meaning": "Get well soon!",
@@ -635,7 +653,8 @@
    "To a person who is leaving",
    "To a person who is eating"
   ],
-  "microActivity": "He has a fever. — Get well soon!"
+  "microActivity": "He has a fever. — Get well soon!",
+  "profNote": "For anyone sick or recovering. With friends, you can also say {soigne-toi bien !}"
  },
  "expr-a1m4-004": {
   "meaning": "Bless you! (when someone sneezes)",
@@ -648,7 +667,8 @@
    "When someone leaves",
    "When someone arrives"
   ],
-  "microActivity": "Achoo! — Bless you!"
+  "microActivity": "Achoo! — Bless you!",
+  "profNote": "This one uses {tu}, for friends and family. With people you don't know, say {à vos souhaits !}"
  },
  "expr-a1m4-005": {
   "meaning": "What weather! (commenting on the weather)",
@@ -660,7 +680,8 @@
    "You say goodbye to someone",
    "You thank someone for a favor"
   ],
-  "microActivity": "What weather! It's snowing!"
+  "microActivity": "What weather! It's snowing!",
+  "profNote": "{Quel temps !} is an exclamation, not a question. It's usually a complaint, but tone can flip it."
  },
  "lt-a1m5-001": {
   "referenceTranslations": [
@@ -739,7 +760,8 @@
    "To a friend who's sick",
    "To a customer in a store"
   ],
-  "microActivity": "Come in! Make yourself at home!"
+  "microActivity": "Come in! Make yourself at home!",
+  "profNote": "This is the {tu} version, for people you're close to. For a more formal guest: {faites comme chez vous}."
  },
  "expr-a1m5-002": {
   "meaning": "At my place; at home.",
@@ -752,7 +774,8 @@
    "At the restaurant",
    "At the station"
   ],
-  "microActivity": "Tonight we're eating at my place."
+  "microActivity": "Tonight we're eating at my place.",
+  "profNote": "{Chez} already means \"at the home of\": {chez moi}, {chez toi}, {chez Marie}. No need for {maison}."
  },
  "expr-a1m5-003": {
   "meaning": "Welcome!",
@@ -764,7 +787,8 @@
    "When you sit down to eat",
    "When you're going to bed"
   ],
-  "microActivity": "Welcome to my home!"
+  "microActivity": "Welcome to my home!",
+  "profNote": "On its own, {bienvenue !} stays the same for anyone. To welcome someone home: {bienvenue chez moi}."
  },
  "expr-a1m5-004": {
   "meaning": "It looks good on you! It suits you!",
@@ -777,7 +801,8 @@
    "It's too expensive",
    "It's dirty"
   ],
-  "microActivity": "That green sweater looks good on you!"
+  "microActivity": "That green sweater looks good on you!",
+  "profNote": "To compliment clothes, a color or a haircut, with {tu}. With someone you call {vous}: {ça vous va bien}."
  },
  "expr-a1m5-005": {
   "meaning": "Do you like it? Do you like that?",
@@ -790,7 +815,8 @@
    "Are you tired?",
    "Are you coming?"
   ],
-  "microActivity": "Do you like this dress?"
+  "microActivity": "Do you like this dress?",
+  "profNote": "Careful: the thing does the pleasing, not you. To say you like it, answer {oui, ça me plaît !}"
  },
  "lt-a1m6-001": {
   "referenceTranslations": [
@@ -849,7 +875,8 @@
    "On Christmas Eve",
    "At a birthday"
   ],
-  "microActivity": "See you Monday! Have a good weekend!"
+  "microActivity": "See you Monday! Have a good weekend!",
+  "profNote": "The Friday goodbye at work or school. Note the French spelling: {week-end}, with a hyphen."
  },
  "expr-a1m6-002": {
   "meaning": "Have a good evening!",
@@ -861,7 +888,8 @@
    "At noon, before eating",
    "At midnight, when waking up"
   ],
-  "microActivity": "Goodbye, have a nice evening!"
+  "microActivity": "Goodbye, have a nice evening!",
+  "profNote": "It's for goodbyes; when you arrive, it's {bonsoir}. At bedtime, it's {bonne nuit}."
  },
  "expr-a1m6-003": {
   "meaning": "Let's go! Here we go!",
@@ -874,7 +902,8 @@
    "Let's go home",
    "Let's go to sleep"
   ],
-  "microActivity": "3, 2, 1... Here we go!"
+  "microActivity": "3, 2, 1... Here we go!",
+  "profNote": "{C'est parti !} kicks things off with energy: a game, a trip, a lesson. Fine with anyone."
  },
  "expr-a1m6-004": {
   "meaning": "What's new? What's up, any news? Register: informal — use with friends and people you're close to; avoid in formal settings.",
@@ -887,7 +916,8 @@
    "Where are you from?",
    "How old are you?"
   ],
-  "microActivity": "Hi! What's new?"
+  "microActivity": "Hi! What's new?",
+  "profNote": "Casual, for friends, right after {salut}. Nothing to report? Just say {rien de spécial}."
  },
  "expr-a1m6-005": {
   "meaning": "Long time no see! It's been a while!",
@@ -900,7 +930,8 @@
    "We're running really late",
    "We're absolutely starving"
   ],
-  "microActivity": "Hi! Long time no see!"
+  "microActivity": "Hi! Long time no see!",
+  "profNote": "What you say when you run into someone after ages. To give the length: {ça fait deux ans}."
  },
  "expr-lote1-001": {
   "meaning": "anything / nonsense Register: informal — use with friends and people you're close to; avoid in formal settings.",
@@ -913,7 +944,8 @@
    "Something very expensive",
    "Something very fast"
   ],
-  "microActivity": "Stop going on about your cat that speaks English, you're talking nonsense!"
+  "microActivity": "Stop going on about your cat that speaks English, you're talking nonsense!",
+  "profNote": "Meaning \"anything\", it's neutral. Meaning \"nonsense\", it's blunt: {tu dis n'importe quoi !} is for friends."
  },
  "expr-lote1-002": {
   "meaning": "to be fed up Register: informal — use with friends and people you're close to; avoid in formal settings.",
@@ -925,7 +957,8 @@
    "To be very happy",
    "To have a lot of money"
   ],
-  "microActivity": "I've been doing my homework for three hours, I'm fed up!"
+  "microActivity": "I've been doing my homework for three hours, I'm fed up!",
+  "profNote": "Don't drop the {en}: {j'en ai marre}. Add what with {de}: {j'en ai marre du bruit}. It's casual."
  },
  "expr-lote1-003": {
   "meaning": "to not give a damn ⚠️ Register: vulgar — can be offensive. Avoid in formal settings or with strangers.",
@@ -937,7 +970,8 @@
    "To be very angry with someone",
    "To be very scared of something"
   ],
-  "microActivity": "He can criticize my haircut, I don't fucking care: I like it."
+  "microActivity": "He can criticize my haircut, I don't fucking care: I like it.",
+  "profNote": "Very common among friends, but crude: never with your boss or strangers. Neutral: {ça m'est égal}."
  },
  "expr-lote1-004": {
   "meaning": "to be in deep trouble / in a terrible situation ⚠️ Register: vulgar — can be offensive. Avoid in formal settings or with strangers.",
@@ -949,7 +983,8 @@
    "To have a very big problem",
    "To be very comfortably settled"
   ],
-  "microActivity": "My computer broke down the day before I had to hand in my thesis: I'm in deep shit!"
+  "microActivity": "My computer broke down the day before I had to hand in my thesis: I'm in deep shit!",
+  "profNote": "Vulgar: only with people you're very close to, ideally about yourself: {je suis dans la merde}."
  },
  "expr-lote1-005": {
   "meaning": "that sucks / what a mess Register: informal — use with friends and people you're close to; avoid in formal settings.",
@@ -961,7 +996,8 @@
    "It's lame or worrying",
    "It's very easy"
   ],
-  "microActivity": "The battery's dead and we're lost in the forest… this sucks!"
+  "microActivity": "The battery's dead and we're lost in the forest… this sucks!",
+  "profNote": "Young people use it a lot. It can also mean a place is sketchy: {ce quartier craint}."
  },
  "expr-lote1-006": {
   "meaning": "to feel lazy / can't be bothered Register: informal — use with friends and people you're close to; avoid in formal settings.",
@@ -974,7 +1010,8 @@
    "To be in a big hurry",
    "To not feel like making an effort"
   ],
-  "microActivity": "The laundry is dry, but I can't be bothered to fold it right now."
+  "microActivity": "The laundry is dry, but I can't be bothered to fold it right now.",
+  "profNote": "It takes {de} + verb: {j'ai la flemme de cuisiner}. Very casual, so not something to tell your boss."
  },
  "expr-lote1-007": {
   "meaning": "that's crazy / that's incredible Register: informal — use with friends and people you're close to; avoid in formal settings.",
@@ -986,7 +1023,8 @@
    "It's very logical",
    "It's a little sad"
   ],
-  "microActivity": "She speaks six languages and she's only fifteen, that's crazy!"
+  "microActivity": "She speaks six languages and she's only fifteen, that's crazy!",
+  "profNote": "Works for good or bad surprises, just like {c'est fou}. Casual, for friends."
  },
  "expr-lote1-008": {
   "meaning": "to get out / to clear off ⚠️ Register: very informal/slang — only with people you're close to; avoid in formal settings.",
@@ -999,7 +1037,8 @@
    "To get to work",
    "To leave quickly, to go away"
   ],
-  "microActivity": "He'd had enough of that job and decided to get the hell out and move abroad."
+  "microActivity": "He'd had enough of that job and decided to get the hell out and move abroad.",
+  "profNote": "As an order it's aggressive: {foutez le camp !} {Je fous le camp} just means \"I'm leaving\", but crudely."
  },
  "expr-lote1-009": {
   "meaning": "shut up ⚠️ Register: vulgar — can be offensive. Avoid in formal settings or with strangers.",
@@ -1012,7 +1051,8 @@
    "To say hi to a friend",
    "To tell someone to shut up"
   ],
-  "microActivity": "Stop singing off-key at two in the morning, shut the hell up!"
+  "microActivity": "Stop singing off-key at two in the morning, shut the hell up!",
+  "profNote": "It truly offends; only among close friends, joking. Not crude, but still curt: {tais-toi}."
  },
  "expr-lote1-010": {
   "meaning": "to be a pain in the neck / to piss someone off ⚠️ Register: vulgar — can be offensive. Avoid in formal settings or with strangers.",
@@ -1025,7 +1065,8 @@
    "To make someone rich",
    "To please a lot"
   ],
-  "microActivity": "Stop asking me the same question every five minutes, you're pissing me off!"
+  "microActivity": "Stop asking me the same question every five minutes, you're pissing me off!",
+  "profNote": "It's vulgar: you'll mostly hear {ça me fait chier}. Avoid it with anyone you don't know well."
  },
  "expr-lote1-011": {
   "meaning": "to stress out / to argue over nothing Register: informal — use with friends and people you're close to; avoid in formal settings.",
@@ -1038,7 +1079,8 @@
    "To wash your hair slowly",
    "To compliment yourself"
   ],
-  "microActivity": "You've been arguing over nothing for two hours: stop getting so worked up!"
+  "microActivity": "You've been arguing over nothing for two hours: stop getting so worked up!",
+  "profNote": "Very common as advice to calm someone down: {ne te prends pas la tête}. Casual."
  },
  "expr-lote1-012": {
   "meaning": "yeah right! / no way! Register: informal — use with friends and people you're close to; avoid in formal settings.",
@@ -1051,7 +1093,8 @@
    "You speak French really well",
    "Go on, keep talking, please"
   ],
-  "microActivity": "\"Paul said he'd quit smoking tomorrow.\" — \"Yeah, right! He says that every month.\""
+  "microActivity": "\"Paul said he'd quit smoking tomorrow.\" — \"Yeah, right! He says that every month.\"",
+  "profNote": "It's all in the ironic tone, like \"yeah, right\": {tu parles !} isn't asking anyone to talk."
  },
  "expr-lote1-013": {
   "meaning": "it's a piece of cake Register: informal — use with friends and people you're close to; avoid in formal settings.",
@@ -1064,7 +1107,8 @@
    "It's a birthday party",
    "It's very sweet"
   ],
-  "microActivity": "Putting together this little piece of furniture with the instructions? Piece of cake, it takes ten minutes."
+  "microActivity": "Putting together this little piece of furniture with the instructions? Piece of cake, it takes ten minutes.",
+  "profNote": "Like \"a piece of cake\", but with {du}, never {un}. The negative is common too: {ce n'est pas du gâteau}."
  },
  "expr-lote1-014": {
   "meaning": "to feel down / to have the blues Register: informal — use with friends and people you're close to; avoid in formal settings.",
@@ -1077,7 +1121,8 @@
    "To have an insect at home",
    "To be sad and melancholy"
   ],
-  "microActivity": "Since his best friend moved away, he's been feeling down and doesn't go out anymore."
+  "microActivity": "Since his best friend moved away, he's been feeling down and doesn't go out anymore.",
+  "profNote": "{Cafard} also means cockroach, but here it's a passing sadness. It takes {avoir}: {j'ai le cafard}."
  },
  "expr-lote1-015": {
   "meaning": "to give someone a call",
@@ -1090,7 +1135,8 @@
    "To send a letter",
    "To cut a cable"
   ],
-  "microActivity": "Wait two minutes, I need to give my boss a call."
+  "microActivity": "Wait two minutes, I need to give my boss a call.",
+  "profNote": "Fine anywhere, even at work. Say who with {à}: {passer un coup de fil à Paul}."
  },
  "expr-lote1-016": {
   "meaning": "to stand in line / to wait in line",
@@ -1103,7 +1149,8 @@
    "To make a dish for dinner",
    "To run off really fast"
   ],
-  "microActivity": "There are lots of people at the post office, we're going to have to wait in line."
+  "microActivity": "There are lots of people at the post office, we're going to have to wait in line.",
+  "profNote": "Like British English, French uses {queue} for a line: {je fais la queue}, with {faire}."
  },
  "expr-lote1-017": {
   "meaning": "to be looking forward to it / can't wait",
@@ -1115,7 +1162,8 @@
    "To be eager for something to happen",
    "To be late"
   ],
-  "microActivity": "My brother arrives from Canada tomorrow, I can't wait to see him again!"
+  "microActivity": "My brother arrives from Canada tomorrow, I can't wait to see him again!",
+  "profNote": "It takes {de} + verb: {j'ai hâte de partir}. Despite looking like \"haste\", it's not about hurrying."
  },
  "expr-lote1-018": {
   "meaning": "yeah, sure... / tell me another one Register: informal — use with friends and people you're close to; avoid in formal settings.",
@@ -1128,7 +1176,8 @@
    "My eye hurts",
    "I don't believe you at all"
   ],
-  "microActivity": "\"The dog ate my homework, miss.\" — \"Oh, sure! Come up with a better excuse.\""
+  "microActivity": "\"The dog ate my homework, miss.\" — \"Oh, sure! Come up with a better excuse.\"",
+  "profNote": "Casual and ironic, for people you know well. The French sometimes pull down an eyelid while saying {mon œil !}"
  },
  "expr-lote1-019": {
   "meaning": "to get on one's high horse / to fly off the handle",
@@ -1141,7 +1190,8 @@
    "To go horseback riding",
    "To become very rich"
   ],
-  "microActivity": "I just made a little remark, no need to get on your high horse like that!"
+  "microActivity": "I just made a little remark, no need to get on your high horse like that!",
+  "profNote": "Close to \"get on your high horse\", and the possessive changes too: {je monte sur mes grands chevaux}."
  },
  "expr-lote1-020": {
   "meaning": "to hit a wall of tiredness / to feel suddenly drained Register: informal — use with friends and people you're close to; avoid in formal settings.",
@@ -1154,7 +1204,8 @@
    "To have a drink at a bar",
    "To feel suddenly exhausted"
   ],
-  "microActivity": "I'm going to take a nap, I'm suddenly wiped out after that big meal."
+  "microActivity": "I'm going to take a nap, I'm suddenly wiped out after that big meal.",
+  "profNote": "Casual and very common after lunch, like \"I'm crashing\". It takes {avoir} and {un}: {j'ai un coup de barre}."
  },
  "expr-lote2-001": {
   "meaning": "get lost / beat it ⚠️ Register: very informal/slang — only with people you're close to; avoid in formal settings.",
@@ -1166,7 +1217,8 @@
    "To wish someone a good trip",
    "To tell someone to get lost"
   ],
-  "microActivity": "You're getting on my nerves, get out of my room!"
+  "microActivity": "You're getting on my nerves, get out of my room!",
+  "profNote": "It's aggressive, the language of a fight. Elsewhere, the verb {dégager} means \"to clear\"."
  },
  "expr-lote2-002": {
   "meaning": "to leave / to take off Register: informal — use with friends and people you're close to; avoid in formal settings.",
@@ -1179,7 +1231,8 @@
    "Leave, go away",
    "Get angry at someone"
   ],
-  "microActivity": "This party sucks, wanna bail?"
+  "microActivity": "This party sucks, wanna bail?",
+  "profNote": "Careful: {se casser} can also mean to break, as in {le verre s'est cassé}. Context tells you."
  },
  "expr-lote2-003": {
   "meaning": "it's a pain / it's a drag ⚠️ Register: vulgar — can be offensive. Avoid in formal settings or with strangers.",
@@ -1191,7 +1244,8 @@
    "It's very expensive to buy",
    "It's very easy to do"
   ],
-  "microActivity": "Filling out these forms for three hours is a pain in the ass!"
+  "microActivity": "Filling out these forms for three hours is a pain in the ass!",
+  "profNote": "It's vulgar but heard a lot. About a person it's insulting: {il est chiant}. Avoid it with strangers."
  },
  "expr-lote2-004": {
   "meaning": "to be scared / to be scared to death Register: informal — use with friends and people you're close to; avoid in formal settings.",
@@ -1203,7 +1257,8 @@
    "Be sleepy",
    "Be scared"
   ],
-  "microActivity": "My little brother won't go into the cave: he's scared stiff."
+  "microActivity": "My little brother won't go into the cave: he's scared stiff.",
+  "profNote": "Like {avoir peur}, it takes {avoir} and {de}: {j'ai la trouille de prendre l'avion}. Casual."
  },
  "expr-lote2-005": {
   "meaning": "to be dead tired Register: informal — use with friends and people you're close to; avoid in formal settings.",
@@ -1216,7 +1271,8 @@
    "Be very angry",
    "Be very happy"
   ],
-  "microActivity": "I spent the whole day moving, I'm wiped out."
+  "microActivity": "I spent the whole day moving, I'm wiped out.",
+  "profNote": "It's casual and agrees with the speaker: I say {je suis crevée}. On a tire, {crevé} means flat."
  },
  "expr-lote2-006": {
   "meaning": "to be drunk / to be wasted ⚠️ Register: very informal/slang — only with people you're close to; avoid in formal settings.",
@@ -1229,7 +1285,8 @@
    "Be full of cash",
    "Be in a big hurry"
   ],
-  "microActivity": "After all those bottles of wine, Marc was completely hammered."
+  "microActivity": "After all those bottles of wine, Marc was completely hammered.",
+  "profNote": "Party slang, close friends only. The neutral word is {ivre}. A woman says {je suis bourrée}."
  },
  "expr-lote2-007": {
   "meaning": "to be starving ⚠️ Register: very informal/slang — only with people you're close to; avoid in formal settings.",
@@ -1242,7 +1299,8 @@
    "Be very hungry",
    "Have a stomachache"
   ],
-  "microActivity": "I haven't eaten anything since this morning, I'm starving!"
+  "microActivity": "I haven't eaten anything since this morning, I'm starving!",
+  "profNote": "Slang, with friends or family. Like {avoir faim}, it takes {avoir}: {j'ai la dalle}."
  },
  "expr-lote2-008": {
   "meaning": "to be a pain in the neck / to bug someone ⚠️ Register: very informal/slang — only with people you're close to; avoid in formal settings.",
@@ -1255,7 +1313,8 @@
    "Give someone gifts",
    "Make everyone laugh"
   ],
-  "microActivity": "You've been repeating the same thing for an hour, you're driving me nuts!"
+  "microActivity": "You've been repeating the same thing for an hour, you're driving me nuts!",
+  "profNote": "Slang, close friends only: a softened form of a cruder phrase. Note the {me}: {tu me casses les bonbons}."
  },
  "expr-lote2-009": {
   "meaning": "stop exaggerating / stop making things up Register: informal — use with friends and people you're close to; avoid in formal settings.",
@@ -1268,7 +1327,8 @@
    "When someone drives too fast",
    "When someone leaves too early"
   ],
-  "microActivity": "You speak ten languages? Give me a break!"
+  "microActivity": "You speak ten languages? Give me a break!",
+  "profNote": "Informal, among friends, when a story sounds too good to be true. With {vous}: {arrêtez votre char}."
  },
  "expr-lote2-010": {
   "meaning": "to pass out Register: informal — use with friends and people you're close to; avoid in formal settings.",
@@ -1281,7 +1341,8 @@
    "Faint",
    "Fall off a bike"
   ],
-  "microActivity": "She hadn't eaten anything and passed out during PE class."
+  "microActivity": "She hadn't eaten anything and passed out during PE class.",
+  "profNote": "Informal and very common. In the past tense {tomber} takes {être}: {elle est tombée dans les pommes}."
  },
  "expr-lote2-011": {
   "meaning": "to give up guessing / to ask for the answer Register: informal — use with friends and people you're close to; avoid in formal settings.",
@@ -1294,7 +1355,8 @@
    "Feed your pet",
    "Give up on finding the answer"
   ],
-  "microActivity": "So, did you guess? No? Do you give up?"
+  "microActivity": "So, did you guess? No? Do you give up?",
+  "profNote": "For riddles and guessing games, among friends. {Sa} changes with the person: {je donne ma langue au chat}."
  },
  "expr-lote2-012": {
   "meaning": "to cost a fortune / to cost an arm and a leg",
@@ -1307,7 +1369,8 @@
    "Cost a lot",
    "Hurt a lot"
   ],
-  "microActivity": "We can't buy this car, it costs an arm and a leg."
+  "microActivity": "We can't buy this car, it costs an arm and a leg.",
+  "profNote": "English pays an arm and a leg; French pays {les yeux de la tête}. Fine in any conversation."
  },
  "expr-lote2-013": {
   "meaning": "a sleepless night / a night without sleep",
@@ -1320,7 +1383,8 @@
    "A wedding party night",
    "A night with snow"
   ],
-  "microActivity": "I didn't sleep at all: I spent a sleepless night."
+  "microActivity": "I didn't sleep at all: I spent a sleepless night.",
+  "profNote": "It usually goes with {passer}: {j'ai passé une nuit blanche}. Party, work or worry, any reason counts."
  },
  "expr-lote2-014": {
   "meaning": "to give up / to throw in the towel",
@@ -1333,7 +1397,8 @@
    "Get angry",
    "Start a project"
   ],
-  "microActivity": "He failed his driving test five times, then he threw in the towel."
+  "microActivity": "He failed his driving test five times, then he threw in the towel.",
+  "profNote": "English throws in the towel, French throws the sponge: {jeter l'éponge}. Both come from boxing."
  },
  "expr-lote2-015": {
   "meaning": "to have your head in the clouds",
@@ -1346,7 +1411,8 @@
    "Be afraid of flying",
    "Be very smart"
   ],
-  "microActivity": "You never listen to what I say, you've got your head in the clouds!"
+  "microActivity": "You never listen to what I say, you've got your head in the clouds!",
+  "profNote": "Same picture as in English, but with {avoir}: {il a la tête dans les nuages}. Fine in any setting."
  },
  "expr-lote2-016": {
   "meaning": "to be generous / to have a heart of gold",
@@ -1359,7 +1425,8 @@
    "Be deeply in love",
    "Be very shy"
   ],
-  "microActivity": "Paul often gives his time to people in need: he has a heart of gold."
+  "microActivity": "Paul often gives his time to people in need: he has a heart of gold.",
+  "profNote": "A compliment that works anywhere. Watch the preposition: the heart is {sur la main}, \"on\" the hand."
  },
  "expr-lote2-017": {
   "meaning": "to be tipsy / to be a little drunk Register: informal — use with friends and people you're close to; avoid in formal settings.",
@@ -1372,7 +1439,8 @@
    "Be very curious",
    "Have a broken nose"
   ],
-  "microActivity": "He was laughing too loudly and talking to everyone: he'd clearly had a few."
+  "microActivity": "He was laughing too loudly and talking to everyone: he'd clearly had a few.",
+  "profNote": "Casual and good-humored, much softer than {être bourré}. Use it to tease, not to insult."
  },
  "expr-lote2-018": {
   "meaning": "to cost an arm and a leg Register: informal — use with friends and people you're close to; avoid in formal settings.",
@@ -1385,7 +1453,8 @@
    "Be very uncomfortable",
    "Cost nothing at all"
   ],
-  "microActivity": "With all these hidden fees, my phone plan is costing me an arm and a leg!"
+  "microActivity": "With all these hidden fees, my phone plan is costing me an arm and a leg!",
+  "profNote": "Cheekier than {coûter les yeux de la tête}, the everyday version. Keep {la peau des fesses} for friends."
  },
  "expr-lote2-019": {
   "meaning": "to make a mountain out of a molehill Register: informal — use with friends and people you're close to; avoid in formal settings.",
@@ -1398,7 +1467,8 @@
    "Cook a big meal",
    "Forget an appointment"
   ],
-  "microActivity": "It's just a little scratch on the car, no need to make a mountain out of a molehill."
+  "microActivity": "It's just a little scratch on the car, no need to make a mountain out of a molehill.",
+  "profNote": "Casual. Don't drop the {en}: {ne va pas en faire tout un fromage !} In French, the fuss becomes a cheese."
  },
  "expr-lote2-020": {
   "meaning": "to give a forced laugh / to laugh it off awkwardly",
@@ -1411,7 +1481,8 @@
    "Laugh very loudly for a long time",
    "Laugh to make fun of others"
   ],
-  "microActivity": "She didn't like the joke about her age: she gave a forced laugh."
+  "microActivity": "She didn't like the joke about her age: she gave a forced laugh.",
+  "profNote": "Fine in any setting. {Jaune} never changes, and in the past it's {il a ri jaune}."
  },
  "expr-lote3-001": {
   "meaning": "it's worth it",
@@ -1424,7 +1495,8 @@
    "It hurts like a blow",
    "It happens all of a sudden"
   ],
-  "microActivity": "This movie is three hours long, but trust me, it's worth it!"
+  "microActivity": "This movie is three hours long, but trust me, it's worth it!",
+  "profNote": "Very common in everyday talk, with anyone. To say the opposite: {ça ne vaut pas le coup}."
  },
  "expr-lote3-002": {
   "meaning": "bad luck / what a shame Register: informal — use with friends and people you're close to; avoid in formal settings.",
@@ -1438,7 +1510,8 @@
    "When you turn down an invitation",
    "When someone is very hungry"
   ],
-  "microActivity": "The store closed just as we were getting there. Just our luck!"
+  "microActivity": "The store closed just as we were getting there. Just our luck!",
+  "profNote": "Informal, for small mishaps like missing a bus. For truly sad news, {pas de bol} sounds far too light."
  },
  "expr-lote3-003": {
   "meaning": "to be lucky Register: informal — use with friends and people you're close to; avoid in formal settings.",
@@ -1452,7 +1525,8 @@
    "Have lots of money",
    "Have a bad temper"
   ],
-  "microActivity": "She won the lottery on her very first try, she's so lucky!"
+  "microActivity": "She won the lottery on her very first try, she's so lucky!",
+  "profNote": "Note the {du}: {il a du bol}. For bad luck it's {pas de bol}. Both are informal, among friends."
  },
  "expr-lote3-004": {
   "meaning": "to be careful / to watch out Register: informal — use with friends and people you're close to; avoid in formal settings.",
@@ -1464,7 +1538,8 @@
    "Make noise",
    "Party"
   ],
-  "microActivity": "Watch out when you cross, cars go fast around here!"
+  "microActivity": "Watch out when you cross, cars go fast around here!",
+  "profNote": "Casual; in formal settings, {faites attention}. Careful: {faire une gaffe}, with {une}, means to make a blunder."
  },
  "expr-lote3-005": {
   "meaning": "to mess up badly / to fail Register: informal — use with friends and people you're close to; avoid in formal settings.",
@@ -1477,7 +1552,8 @@
    "Stop to rest",
    "Get up very early"
   ],
-  "microActivity": "I didn't understand the question and totally blew it: I got a zero!"
+  "microActivity": "I didn't understand the question and totally blew it: I got a zero!",
+  "profNote": "Informal. It's a {se} verb, so the past takes {être}: {je me suis planté}, or {plantée} for a woman."
  },
  "expr-lote3-006": {
   "meaning": "it's terrible / it sucks Register: informal — use with friends and people you're close to; avoid in formal settings.",
@@ -1490,7 +1566,8 @@
    "It's very easy",
    "It's over"
   ],
-  "microActivity": "This movie is boring and the actors are bad. It sucks!"
+  "microActivity": "This movie is boring and the actors are bad. It sucks!",
+  "profNote": "Casual, for things and situations. About a person it's a put-down: {il est nul en maths}, hopeless at math."
  },
  "expr-lote3-007": {
   "meaning": "it's awesome Register: informal — use with friends and people you're close to; avoid in formal settings.",
@@ -1502,7 +1579,8 @@
    "It's hard",
    "It's a shame"
   ],
-  "microActivity": "My parents are giving me a dog for my birthday, that's awesome!"
+  "microActivity": "My parents are giving me a dog for my birthday, that's awesome!",
+  "profNote": "For any good news: {c'est génial !} It works for people too: {il est génial}, \"he's amazing\"."
  },
  "expr-lote3-008": {
   "meaning": "oh dear / darn (mild exclamation) Register: informal — use with friends and people you're close to; avoid in formal settings.",
@@ -1514,7 +1592,8 @@
    "When you talk about a thin person",
    "When you thank someone"
   ],
-  "microActivity": "Oh shoot, there's no more milk for the coffee!"
+  "microActivity": "Oh shoot, there's no more milk for the coffee!",
+  "profNote": "It's the polite stand-in for a swear word, fine in front of kids, like \"darn\". Often just {mince !}"
  },
  "expr-lote3-009": {
   "meaning": "dying of laughter (lol) Register: informal — use with friends and people you're close to; avoid in formal settings.",
@@ -1526,7 +1605,8 @@
    "Feeling very scared",
    "Feeling very sad"
   ],
-  "microActivity": "When he fell into the pool fully dressed, everyone was in stitches."
+  "microActivity": "When he fell into the pool fully dressed, everyone was in stitches.",
+  "profNote": "Informal. It agrees with whoever's laughing: a woman says {j'étais morte de rire}. In texts it's {mdr}."
  },
  "expr-lote3-010": {
   "meaning": "to be on top form Register: informal — use with friends and people you're close to; avoid in formal settings.",
@@ -1538,7 +1618,8 @@
    "Be late",
    "Be very busy"
   ],
-  "microActivity": "The hotel was clean, the staff was friendly: everything was top-notch."
+  "microActivity": "The hotel was clean, the staff was friendly: everything was top-notch.",
+  "profNote": "Informal, and it works for people, places or things: {elle est au top}, {ce restaurant est au top}."
  },
  "expr-lote3-011": {
   "meaning": "to lose patience",
@@ -1550,7 +1631,8 @@
    "Enjoy waiting",
    "Forget an appointment"
   ],
-  "microActivity": "I've been on hold for thirty minutes, I'm starting to lose patience."
+  "microActivity": "I've been on hold for thirty minutes, I'm starting to lose patience.",
+  "profNote": "No article, just like \"lose patience\" in English: {je perds patience}. Fine in any setting, formal or not."
  },
  "expr-lote3-012": {
   "meaning": "to fall in love",
@@ -1563,7 +1645,8 @@
    "To argue with someone",
    "To break up with someone"
   ],
-  "microActivity": "My grandparents met at a dance and fell in love right away."
+  "microActivity": "My grandparents met at a dance and fell in love right away.",
+  "profNote": "Note the {de}, where English says \"with\": {tomber amoureux de Julie}. In the past it takes {être}: {il est tombé}."
  },
  "expr-lote3-013": {
   "meaning": "shut up (milder than 'ta gueule') Register: informal — use with friends and people you're close to; avoid in formal settings.",
@@ -1576,7 +1659,8 @@
    "Go to bed",
    "Stop eating"
   ],
-  "microActivity": "You always talk nonsense. Shut up for a second and listen to me!"
+  "microActivity": "You always talk nonsense. Shut up for a second and listen to me!",
+  "profNote": "It's rude, even with no swear word: the {la} is the mouth. Still blunt but milder: {tais-toi}."
  },
  "expr-lote3-014": {
   "meaning": "leave me alone ⚠️ Register: very informal/slang — only with people you're close to; avoid in formal settings.",
@@ -1588,7 +1672,8 @@
    "Make peace with me",
    "Speak louder to me"
   ],
-  "microActivity": "That's the tenth time you've asked me the same question, leave me the hell alone!"
+  "microActivity": "That's the tenth time you've asked me the same question, leave me the hell alone!",
+  "profNote": "It sounds angry and rude, so only with people you're very close to. Politer: {laisse-moi tranquille}."
  },
  "expr-lote3-015": {
   "meaning": "are you kidding me? ⚠️ Register: very informal/slang — only with people you're close to; avoid in formal settings.",
@@ -1600,7 +1685,8 @@
    "Are you thinking of me?",
    "Are you coming with me?"
   ],
-  "microActivity": "You show up two hours late and tell me \"I'm early\"? Are you kidding me?"
+  "microActivity": "You show up two hours late and tell me \"I'm early\"? Are you kidding me?",
+  "profNote": "Slang for reacting to something outrageous, close friends only. Milder: {tu te moques de moi ?}"
  },
  "expr-lote3-016": {
   "meaning": "damn / hell (strong exclamation) ⚠️ Register: vulgar — can be offensive. Avoid in formal settings or with strangers.",
@@ -1613,7 +1699,8 @@
    "When someone is calm or sees something lovely",
    "When someone greets a friend or a neighbor"
   ],
-  "microActivity": "What the hell is going on? Everyone's yelling in the hallway!"
+  "microActivity": "What the hell is going on? Everyone's yelling in the hallway!",
+  "profNote": "It can shock, so never with strangers. It also means a big mess: {c'est le bordel ici}."
  },
  "expr-lote3-017": {
   "meaning": "strong exclamation (surprise, anger) ⚠️ Register: vulgar — can be offensive. Avoid in formal settings or with strangers.",
@@ -1626,7 +1713,8 @@
    "To say goodbye",
    "To thank someone"
   ],
-  "microActivity": "This fucking alarm clock didn't go off this morning!"
+  "microActivity": "This fucking alarm clock didn't go off this morning!",
+  "profNote": "It covers anger, shock, even awe, but it's crude: recognize {putain} and never use it with strangers."
  },
  "expr-lote3-018": {
   "meaning": "you idiot (insult) ⚠️ Register: vulgar — can be offensive. Avoid in formal settings or with strangers.",
@@ -1639,7 +1727,8 @@
    "It's a way of saying hello",
    "It's a word for apologizing"
   ],
-  "microActivity": "You dumbass, you broke my bike!"
+  "microActivity": "You dumbass, you broke my bike!",
+  "profNote": "A real insult that can start a fight: best to just recognize it. For a woman it becomes {espèce de conne}."
  },
  "expr-lote3-019": {
   "meaning": "jerk (insult) ⚠️ Register: vulgar — can be offensive. Avoid in formal settings or with strangers.",
@@ -1651,7 +1740,8 @@
    "It's the name of a job",
    "It's a compliment for someone"
   ],
-  "microActivity": "This guy isn't just a bit dumb, he's a real asshole: he hurts people on purpose."
+  "microActivity": "This guy isn't just a bit dumb, he's a real asshole: he hurts people on purpose.",
+  "profNote": "A strong insult, best kept for recognizing. It's masculine; for a woman French uses {connasse}."
  },
  "expr-lote3-020": {
   "meaning": "to be completely off the mark Register: informal — use with friends and people you're close to; avoid in formal settings.",
@@ -1664,7 +1754,8 @@
    "To be late for dinner",
    "To be very attentive"
   ],
-  "microActivity": "You're talking about vacation while we're looking for a solution to the problem? You're totally off the mark!"
+  "microActivity": "You're talking about vacation while we're looking for a solution to the problem? You're totally off the mark!",
+  "profNote": "Casual, for someone way off base. Often with {complètement} before it: {il est complètement à côté}."
  },
  "expr-lote4-001": {
   "meaning": "to pretend",
@@ -1677,7 +1768,8 @@
    "To always tell the truth",
    "To do the same as a friend"
   ],
-  "microActivity": "The little boy isn't sleeping, he's pretending to sleep."
+  "microActivity": "The little boy isn't sleeping, he's pretending to sleep.",
+  "profNote": "Where English says \"pretend that\", French prefers {de} + verb: {il fait semblant de dormir}."
  },
  "expr-lote4-002": {
   "meaning": "to do on purpose",
@@ -1690,7 +1782,8 @@
    "To do something with a friend",
    "To do something very well"
   ],
-  "microActivity": "Sorry for pushing you, I didn't do it on purpose!"
+  "microActivity": "Sorry for pushing you, I didn't do it on purpose!",
+  "profNote": "Very common in the negative, to apologize: {je n'ai pas fait exprès}. The final {s} is silent."
  },
  "expr-lote4-003": {
   "meaning": "to turn the page, to move on",
@@ -1702,7 +1795,8 @@
    "To bring up an old argument",
    "To change your mind often"
   ],
-  "microActivity": "That job made me unhappy for years, but I've finally turned the page."
+  "microActivity": "That job made me unhappy for years, but I've finally turned the page.",
+  "profNote": "Same image as in English, and fine anywhere, even at work: {il faut tourner la page}."
  },
  "expr-lote4-004": {
   "meaning": "to hold a grudge against someone",
@@ -1714,7 +1808,8 @@
    "To ask someone a favor",
    "To be jealous of someone"
   ],
-  "microActivity": "He lied to me, so I'm still a bit mad at him."
+  "microActivity": "He lied to me, so I'm still a bit mad at him.",
+  "profNote": "Nothing to do with wanting. Don't drop the {en}: {je t'en veux} means \"I hold it against you\"."
  },
  "expr-lote4-005": {
   "meaning": "it's over, it's lost Register: informal — use with friends and people you're close to; avoid in formal settings.",
@@ -1726,7 +1821,8 @@
    "When you want to thank someone",
    "When you start a project"
   ],
-  "microActivity": "Two minutes left and we're losing three to nothing: we're done for."
+  "microActivity": "Two minutes left and we're losing three to nothing: we're done for.",
+  "profNote": "Informal and a bit crude: skip it at work. A milder version is {c'est fichu}."
  },
  "expr-lote4-006": {
   "meaning": "to be broke Register: informal — use with friends and people you're close to; avoid in formal settings.",
@@ -1739,7 +1835,8 @@
    "To have too much work",
    "To be sick"
   ],
-  "microActivity": "Can you pay for the coffee? I don't have a single euro left, I'm broke."
+  "microActivity": "Can you pay for the coffee? I don't have a single euro left, I'm broke.",
+  "profNote": "Casual and very common. It agrees with the speaker: as a woman, I'd say {je suis fauchée}."
  },
  "expr-lote4-007": {
   "meaning": "to be upset, angry or disappointed Register: informal — use with friends and people you're close to; avoid in formal settings.",
@@ -1752,7 +1849,8 @@
    "To be cold",
    "To be hungry"
   ],
-  "microActivity": "We lost the game in the last second, I'm so bummed!"
+  "microActivity": "We lost the game in the last second, I'm so bummed!",
+  "profNote": "Not \"have the balls\" (be brave): {j'ai les boules} means you're gutted. Very casual, friends only."
  },
  "expr-lote4-008": {
   "meaning": "to be full of energy / to be in high spirits Register: informal — use with friends and people you're close to; avoid in formal settings.",
@@ -1765,7 +1863,8 @@
    "To be in a bad mood",
    "To be sleepy"
   ],
-  "microActivity": "I slept well, today I'm raring to go!"
+  "microActivity": "I slept well, today I'm raring to go!",
+  "profNote": "Casual, and always with {avoir} and {la}: {j'ai la pêche}. Nobody's talking fruit here, it's all energy."
  },
  "expr-lote4-009": {
   "meaning": "to struggle / to have a hard time Register: informal — use with friends and people you're close to; avoid in formal settings.",
@@ -1778,7 +1877,8 @@
    "To do something very easily",
    "To refuse to do any work"
   ],
-  "microActivity": "Without GPS, we struggled for an hour to find the hotel."
+  "microActivity": "Without GPS, we struggled for an hour to find the hotel.",
+  "profNote": "A casual verb, conjugated like {parler}: {j'ai galéré}. For a hard task, say {c'est la galère}."
  },
  "expr-lote4-010": {
   "meaning": "to have money / to have cash Register: informal — use with friends and people you're close to; avoid in formal settings.",
@@ -1790,7 +1890,8 @@
    "To be lucky",
    "To have friends"
   ],
-  "microActivity": "He drives a luxury car, he must be loaded."
+  "microActivity": "He drives a luxury car, he must be loaded.",
+  "profNote": "{Le fric} is slang for {l'argent}: fine with friends, but at a job interview or the bank, stick to {argent}."
  },
  "expr-lote4-011": {
   "meaning": "you're driving me crazy / you're a pain in the neck ⚠️ Register: vulgar — can be offensive. Avoid in formal settings or with strangers.",
@@ -1803,7 +1904,8 @@
    "When you say goodbye politely",
    "When you ask for help"
   ],
-  "microActivity": "That's the tenth time you've knocked on my door, you're pissing me off!"
+  "microActivity": "That's the tenth time you've knocked on my door, you're pissing me off!",
+  "profNote": "Vulgar and hurtful: understand it, but don't say it. Without the swear word, French says {tu m'embêtes}."
  },
  "expr-lote4-012": {
   "meaning": "get lost / go to hell ⚠️ Register: very informal/slang — only with people you're close to; avoid in formal settings.",
@@ -1816,7 +1918,8 @@
    "To suggest a guided tour",
    "To thank a friend"
   ],
-  "microActivity": "You want me to lend you money again? No, go to hell!"
+  "microActivity": "You want me to lend you money again? No, go to hell!",
+  "profNote": "{Va te faire voir} is rude and ends the talk in anger. It softens a swear, but avoid it, even with friends."
  },
  "expr-lote4-013": {
   "meaning": "to sulk / to wear a sour face Register: informal — use with friends and people you're close to; avoid in formal settings.",
@@ -1829,7 +1932,8 @@
    "To talk nonstop",
    "To make faces to amuse people"
   ],
-  "microActivity": "He didn't get the present he wanted, so he's been sulking since this morning."
+  "microActivity": "He didn't get the present he wanted, so he's been sulking since this morning.",
+  "profNote": "{La gueule} is an animal's mouth, so it sounds crude. Fine with friends; with your boss, say {faire la tête}."
  },
  "expr-lote4-014": {
   "meaning": "to make fun of someone / to mess with someone ⚠️ Register: very informal/slang — only with people you're close to; avoid in formal settings.",
@@ -1841,7 +1945,8 @@
    "To secretly help someone",
    "To politely ignore someone"
   ],
-  "microActivity": "Three hours late and no apology? They're screwing with us!"
+  "microActivity": "Three hours late and no apology? They're screwing with us!",
+  "profNote": "Very crude because of {foutre}: friends only. The possessive changes: {ils se foutent de notre gueule}."
  },
  "expr-lote4-015": {
   "meaning": "to be on edge / to be all keyed up Register: informal — use with friends and people you're close to; avoid in formal settings.",
@@ -1854,7 +1959,8 @@
    "To be playing sports",
    "To be deeply in love"
   ],
-  "microActivity": "She hasn't slept in two days because of the move, she's on edge."
+  "microActivity": "She hasn't slept in two days because of the move, she's on edge.",
+  "profNote": "It takes {être} and {les}: {je suis sur les nerfs}. Casual, but very natural in everyday talk."
  },
  "expr-lote4-016": {
   "meaning": "it's raining cats and dogs Register: informal — use with friends and people you're close to; avoid in formal settings.",
@@ -1867,7 +1973,8 @@
    "It's very windy",
    "It's starting to snow"
   ],
-  "microActivity": "I'm soaked: when I came out of the subway, it was raining cats and dogs!"
+  "microActivity": "I'm soaked: when I came out of the subway, it was raining cats and dogs!",
+  "profNote": "Like \"it's pouring\", it only works with {il}: {il pleut des cordes}, never {ça pleut}."
  },
  "expr-lote4-017": {
   "meaning": "to go all out / to pull out all the stops Register: informal — use with friends and people you're close to; avoid in formal settings.",
@@ -1880,7 +1987,8 @@
    "To do the bare minimum",
    "To give up on a project"
   ],
-  "microActivity": "The interview is tomorrow: tonight I'm going over everything, I'm going all out!"
+  "microActivity": "The interview is tomorrow: tonight I'm going over everything, I'm going all out!",
+  "profNote": "Casual and positive: always {le paquet}, singular. In the past: {il a mis le paquet}."
  },
  "expr-lote4-018": {
   "meaning": "at full speed / flat out Register: informal — use with friends and people you're close to; avoid in formal settings.",
@@ -1893,7 +2001,8 @@
    "In silence",
    "Very carefully"
   ],
-  "microActivity": "The delivery guy floored it and nearly ran over a pedestrian."
+  "microActivity": "The delivery guy floored it and nearly ran over a pedestrian.",
+  "profNote": "Casual, mostly about cars and bikes: {la caisse} is slang for a car. With friends, plain {à fond} works too."
  },
  "expr-lote4-019": {
   "meaning": "it's nothing special Register: informal — use with friends and people you're close to; avoid in formal settings.",
@@ -1906,7 +2015,8 @@
    "It's very dangerous",
    "It's breaking"
   ],
-  "microActivity": "This restaurant is okay, but honestly, it's nothing to write home about."
+  "microActivity": "This restaurant is okay, but honestly, it's nothing to write home about.",
+  "profNote": "Casual and always negative. In speech, the {ne} often drops: {ça casse pas des briques}."
  },
  "expr-lote4-020": {
   "meaning": "to be crazy / to be nuts Register: informal — use with friends and people you're close to; avoid in formal settings.",
@@ -1919,7 +2029,8 @@
    "To be tired",
    "To be shy"
   ],
-  "microActivity": "Cross the highway on foot? You'd have to be nuts!"
+  "microActivity": "Cross the highway on foot? You'd have to be nuts!",
+  "profNote": "Casual, for friends. It agrees with the person: {il est cinglé}, {elle est cinglée}."
  },
  "lt-a1m6-005": {
   "referenceTranslations": [
@@ -1987,7 +2098,8 @@
    "To want to eat",
    "To be happy"
   ],
-  "microActivity": "It's noon. I'm hungry!"
+  "microActivity": "It's noon. I'm hungry!",
+  "profNote": "In French you have hunger, with {avoir}: {j'ai faim}, never {je suis faim}."
  },
  "expr-a1-002": {
   "meaning": "The feeling of wanting to drink.",
@@ -2000,7 +2112,8 @@
    "To be cold",
    "To be hot"
   ],
-  "microActivity": "I ran 5 kilometers, now I'm thirsty."
+  "microActivity": "I ran 5 kilometers, now I'm thirsty.",
+  "profNote": "Just like hunger: you have thirst. {J'ai soif} works anywhere, with friends or strangers."
  },
  "expr-a1-003": {
   "meaning": "When you hold the right opinion or give the correct answer.",
@@ -2013,7 +2126,8 @@
    "To be right",
    "To be thirsty"
   ],
-  "microActivity": "You say the movie is good. I think you're right."
+  "microActivity": "You say the movie is good. I think you're right.",
+  "profNote": "French says you \"have reason\": {avoir raison}. The opposite also takes {avoir}: {avoir tort}, to be wrong."
  },
  "expr-a2-001": {
   "meaning": "Help; a helping hand.",
@@ -2027,7 +2141,8 @@
    "Great fatigue",
    "A sudden idea"
   ],
-  "microActivity": "Can you give me a hand to finish this job?"
+  "microActivity": "Can you give me a hand to finish this job?",
+  "profNote": "Everyday French, fine even with coworkers. The helper {donne un coup de main}: {tu me donnes un coup de main ?}"
  },
  "expr-a2-002": {
   "meaning": "To feel nervous or scared before doing something important; stage fright.",
@@ -2039,7 +2154,8 @@
    "To be tired.",
    "To be hungry."
   ],
-  "microActivity": "Tomorrow I have to present my project in front of the whole class. I think I'm going to get stage fright."
+  "microActivity": "Tomorrow I have to present my project in front of the whole class. I think I'm going to get stage fright.",
+  "profNote": "The nerves right before an exam, a show, an interview, not fear in general. It's {j'ai le trac}."
  },
  "expr-a2-003": {
   "meaning": "To sleep in; to wake up late.",
@@ -2052,7 +2168,8 @@
    "To get up late in the morning.",
    "To take a nap in the afternoon."
   ],
-  "microActivity": "When I'm on vacation, I love sleeping in."
+  "microActivity": "When I'm on vacation, I love sleeping in.",
+  "profNote": "It takes {faire}: {je fais la grasse matinée}. The classic Sunday plan, fine to say to anyone."
  },
  "expr-b2-001": {
   "meaning": "To clarify all the details; to be precise about every aspect of a situation or agreement.",
@@ -2065,7 +2182,8 @@
    "To argue over little things",
    "To make a rushed decision"
   ],
-  "microActivity": "Before signing the contract, we absolutely have to dot the i's and cross the t's to avoid any future misunderstanding."
+  "microActivity": "Before signing the contract, we absolutely have to dot the i's and cross the t's to avoid any future misunderstanding.",
+  "profNote": "Like \"dot the i's\", but often firmer, close to \"set the record straight\": {mettre les points sur les i}."
  },
  "expr-b2-002": {
   "meaning": "To be lazy; to have an aversion to work.",
@@ -2078,7 +2196,8 @@
    "To be lazy and avoid work.",
    "To have a slight pain in one's finger."
   ],
-  "microActivity": "It's amazing how lazy he is, even though he's so talented."
+  "microActivity": "It's amazing how lazy he is, even though he's so talented.",
+  "profNote": "Casual and a bit teasing. Note the {un}: it's always {un poil}, a single hair, never {des poils}."
  },
  "expr-b2-003": {
   "meaning": "To act with great force and energy, without holding back, in a very direct or forceful way.",
@@ -2091,7 +2210,8 @@
    "To express one's opinion hesitantly.",
    "To criticize in a subtle, indirect way."
   ],
-  "microActivity": "Faced with this blatant injustice, he decided not to pull any punches to make his voice heard."
+  "microActivity": "Faced with this blatant injustice, he decided not to pull any punches to make his voice heard.",
+  "profNote": "Always negative, and watch the {y}: {tu n'y vas pas de main morte !}, {il n'y est pas allé de main morte}."
  },
  "lt-a1-001": {
   "referenceTranslations": [
