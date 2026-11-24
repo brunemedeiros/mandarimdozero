@@ -100,6 +100,9 @@ paths:
 - Enter dentro de campo de resposta pertence ao campo (não aciona o atalho global de "Continuar").
 - Ícones: emoji escrito no texto vira desenho do Fluent por `shared/emoji-icons.js`. Emoji novo precisa entrar no MAP de lá
   e ter o SVG em `shared/icons/fluent/` (senão aparece o emoji do aparelho). Ícone de menu = `<img class="tab-icon" ...>`.
+- **Erro e Continuar** (decisão da autora, 2026-11-15, todos os sites): "errado" usa `--error-red`/`--error-red-text`, nunca a cor da
+  marca; Continuar do acerto/erro com `--success-fill`/`--error-fill` (texto `--on-*-fill`) e degrau num tom mais escuro do próprio
+  botão; rótulo do painel de erro em cinza. Celular: topo só com o logo. Guarda: `tests/paridade-sites/test_visual_licao_topo.js`.
 - **Paridade**: CSS de classe usada por `shared/` vai para um `.css` de `shared/` (não colar nos `index.html`; ver `onde-fica-cada-coisa.md`) no mesmo PR;
   `tests/paridade-sites/test_css_compartilhado.js` descobre os sites sozinho e barra a falta. Recurso só do fr: ver a
   classificação (A idioma, B pendência da autora, C esquecido) em `docs/auditoria-paridade-fr-zh.md` antes de dar por pronto.
