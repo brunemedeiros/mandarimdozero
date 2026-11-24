@@ -33,7 +33,7 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
       await ctx.addInitScript(({ flag }) => { try { sessionStorage.setItem('guest_mode', '1'); localStorage.setItem('ui-language', 'pt-BR'); localStorage.setItem('courses-per-site-language', flag ? '1' : '0'); } catch (e) {} }, { flag });
       const page = await ctx.newPage(); const errs = []; page.on('pageerror', e => errs.push(String(e)));
       await page.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, r => r.abort());
-      await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
+      await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase|\/shared\/vendor\/supabase-js/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
       await page.goto(`${base}/${app}/index.html`);
       await page.waitForFunction(() => typeof renderMyCourses === 'function' && typeof STATE !== 'undefined' && CURRENT_USER === false, null, { timeout: 20000 });
       await page.evaluate(() => { switchTab('settings'); renderMyCourses(); });

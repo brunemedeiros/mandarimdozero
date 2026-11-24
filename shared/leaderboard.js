@@ -175,7 +175,7 @@ async function renderSideRankingCard(){
   const loggedIn = !!(typeof CURRENT_USER !== 'undefined' && CURRENT_USER);
   if (!loggedIn) SIDE_RANKING_MODE = 'all';
   const mode = SIDE_RANKING_MODE;
-  targets.forEach(body => { body.innerHTML = loadingHTML(); });
+  targets.forEach(body => { body.innerHTML = loadingHTML(t('leaderboard.loading')); });
   const weekStart = leaderboardCurrentWeekStart();
   const seq = ++SIDE_RANKING_RENDER_SEQ;
   const rows = mode === 'friends' ? await fetchFriendsLeaderboard('all', weekStart) : await fetchLeaderboard('all', weekStart);

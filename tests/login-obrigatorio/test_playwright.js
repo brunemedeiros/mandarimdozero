@@ -78,7 +78,7 @@ const GATE_STUB = `window.supabase = { createClient: () => {
     const errors = [];
     page.on('pageerror', e => errors.push(e.message));
     await page.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, r => r.abort());
-    await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase/, r => r.fulfill({ contentType: 'text/javascript', body: GATE_STUB }));
+    await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase|\/shared\/vendor\/supabase-js/, r => r.fulfill({ contentType: 'text/javascript', body: GATE_STUB }));
     // navegador que já estudou como convidado: antes entrava direto; agora vê o login
     await page.addInitScript(() => { try { localStorage.setItem('currentLearningLanguage', 'french'); localStorage.setItem('lastLanguage', 'french'); sessionStorage.setItem('guest_mode', '1'); } catch (e) {} });
     await page.goto(`http://127.0.0.1:${port}/index.html`);
@@ -214,7 +214,7 @@ const GATE_STUB = `window.supabase = { createClient: () => {
     const errors = [];
     page.on('pageerror', e => errors.push(e.message));
     await page.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, r => r.abort());
-    await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
+    await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase|\/shared\/vendor\/supabase-js/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
     await page.addInitScript(() => { try { sessionStorage.setItem('guest_mode', '1'); } catch (e) {} });
     await page.goto(`http://127.0.0.1:${port}/${lang}/index.html`);
     await page.waitForFunction(() => typeof renderPublicProfileInto === 'function');

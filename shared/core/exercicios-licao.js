@@ -313,7 +313,7 @@ function clearKeyboardOptions(){ KEYBOARD_OPTION_MAP = null; }
 //   direita, 3=inferior esquerda, 4=inferior direita).
 // mode 'sequential': 1 = primeira opção na ordem de leitura, 2 = segunda...
 // badgeSelector: elemento QUE JÁ EXISTE dentro do botão pra escrever o
-//   número (ex. ".scenario-option-num", que já aparece na tela) -- evita
+//   número que já exista dentro do botão -- evita
 //   duplicar um indicador onde a interface já mostra a posição.
 function wireKeyboardOptions(buttons, { mode = 'sequential', badgeSelector = null } = {}){
   const list = Array.from(buttons);

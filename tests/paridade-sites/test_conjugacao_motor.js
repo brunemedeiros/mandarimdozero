@@ -87,7 +87,7 @@ const PT_CONFIG = `({
     const page = await ctx.newPage(); const errs = [];
     page.on('pageerror', e => errs.push(String(e)));
     await page.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, r => r.abort());
-    await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
+    await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase|\/shared\/vendor\/supabase-js/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
     await page.addInitScript(() => { try { sessionStorage.setItem('guest_mode', '1'); localStorage.setItem('ui-language', 'pt-BR'); } catch (e) {} });
     await page.goto(`http://127.0.0.1:${port}/fr/index.html`);
     await page.waitForFunction(() => typeof STATE !== 'undefined' && CURRENT_USER === false, null, { timeout: 20000 });
@@ -122,7 +122,7 @@ const PT_CONFIG = `({
     const page = await ctx.newPage(); const errs = [];
     page.on('pageerror', e => errs.push(String(e)));
     await page.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, r => r.abort());
-    await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
+    await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase|\/shared\/vendor\/supabase-js/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
     await page.addInitScript((th) => { try { sessionStorage.setItem('guest_mode', '1'); localStorage.setItem('ui-language', 'pt-BR'); localStorage.setItem('theme', th); } catch (e) {}
       let s = 7; Math.random = () => (s = (s * 16807) % 2147483647) / 2147483647; }, theme);
     await page.goto(`http://127.0.0.1:${port}/fr/index.html`);

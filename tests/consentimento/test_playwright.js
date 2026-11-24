@@ -57,7 +57,7 @@ async function boot(browser, lang, port, theme, viewport, ui, opts){
   const errors = [];
   page.on('pageerror', e => errors.push(e.message));
   await page.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, r => r.abort());
-  await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
+  await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase|\/shared\/vendor\/supabase-js/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
   await page.addInitScript(() => { try { sessionStorage.setItem('guest_mode', '1'); } catch (e) {} });
   await page.addInitScript(() => { window.__CONSENT_TEST__ = true; });
   if (ui) await page.addInitScript((ui) => { try { localStorage.setItem('ui-language', ui); } catch (e) {} }, ui);
@@ -76,7 +76,7 @@ async function openPage(browser, port, url, { locale = 'pt-BR', theme = 'light',
   page.on('request', r => { if (GOOGLE.test(r.url())) google.push(r.url()); });
   await page.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, r => r.abort());
   await page.addInitScript(() => { window.__CONSENT_TEST__ = true; });
-  if (gate) await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase/, r => r.fulfill({ contentType: 'text/javascript', body: GATE_STUB }));
+  if (gate) await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase|\/shared\/vendor\/supabase-js/, r => r.fulfill({ contentType: 'text/javascript', body: GATE_STUB }));
   if (init) await page.addInitScript(init);
   await page.goto(`http://127.0.0.1:${port}/${url}`);
   return { ctx, page, errors, google };

@@ -71,7 +71,7 @@ async function bootPage(browser, lang, port){
   page.on('pageerror', e => errors.push(e.message));
   // a última rota registrada tem precedência: bloqueia externos primeiro, stub do CDN depois
   await page.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, r => r.abort());
-  await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
+  await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase|\/shared\/vendor\/supabase-js/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
   await page.addInitScript(() => { try { sessionStorage.setItem('guest_mode', '1'); } catch (e) {} });
   await page.goto(`http://127.0.0.1:${port}/${lang}/index.html`);
   if (process.env.DBG) console.log('url', page.url());
@@ -109,7 +109,7 @@ async function readApkg(buf){
     const page = await ctxB.newPage();
     const errors = []; page.on('pageerror', e => errors.push(e.message));
     await page.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, r => r.abort());
-    await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
+    await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase|\/shared\/vendor\/supabase-js/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
     await page.route(/jszip\.min\.js/, r => r.fulfill({ contentType: 'text/javascript', body: fs.readFileSync(NM + '/jszip/dist/jszip.min.js', 'utf8') }));
     await page.route(/sql-wasm\.js/, r => r.fulfill({ contentType: 'text/javascript', body: fs.readFileSync(NM + '/sql.js/dist/sql-wasm.js', 'utf8') }));
     await page.route(/sql-wasm\.wasm/, r => r.fulfill({ contentType: 'application/wasm', body: fs.readFileSync(NM + '/sql.js/dist/sql-wasm.wasm') }));

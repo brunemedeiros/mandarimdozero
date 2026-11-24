@@ -308,7 +308,7 @@ function notificationBodyText(body){
 async function renderNotificationDropdown(){
   const list = document.getElementById('notifications-list');
   if (!list) return;
-  list.innerHTML = loadingHTML();
+  list.innerHTML = loadingHTML(t('notifications.loading'));
   const items = await fetchRecentNotifications();
   if (!items.length){
     list.innerHTML = `<p class="notifications-empty">${t('notif.empty')}</p>`;

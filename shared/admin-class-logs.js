@@ -685,7 +685,7 @@ async function renderAdminClassLogsView(){
     wrap.innerHTML = `<p class="profile-empty-note">${t('admin.common.adminOnly')}</p>`;
     return;
   }
-  wrap.innerHTML = loadingHTML();
+  wrap.innerHTML = loadingHTML(t('classlogs.loading'));
 
   const students = await fetchMyStudents();
   if (!students.length){

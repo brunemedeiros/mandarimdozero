@@ -18,22 +18,12 @@ function sessionStorageSafeSet(key, val){
   try{ window.sessionStorage.setItem(key, val); }catch(e){ /* ignore */ }
 }
 
-// ---------- Tela de carregamento (spinner + frase, estilo Duolingo) ----------
-// Reaproveitada por toda tela que busca dado assíncrono (perfil, ranking,
-// notificações, painéis de admin) -- antes era só um texto parado
-// ("Carregando..."), sem nenhum indicador visual de progresso de verdade.
-// `label`, quando informado, fixa uma frase específica pro contexto (ex:
-// "Carregando perfil..."); sem ele, sorteia da pool genérica -- dá um
-// pouco de variedade sem inventar informação que o contexto não tem.
-// Etapa 3: a pool é de CHAVES do catálogo (shared/i18n), uma por frase, na mesma ordem e com o mesmo único
-// Math.random por sorteio de antes (testes com semente continuam com a mesma sequência).
-const LOADING_PHRASES = [
-  'loading.phrase.loading', 'loading.phrase.oneSec', 'loading.phrase.almost', 'loading.phrase.fetching',
-  'loading.phrase.preparing', 'loading.phrase.moment'
-];
+// Tela de espera com rodinha. Cada tela diz o que está buscando ("Carregando ranking...", "Carregando o mural...");
+// sem texto próprio, "Carregando...". Decisão da dona (2026-11-24): acabou o sorteio entre 6 frases genéricas
+// ("Só um instante...", "Quase lá..."...), que não diziam nada e ainda mexiam no sorteio dos exercícios nos testes.
 function loadingHTML(label){
-  const text = label || t(LOADING_PHRASES[Math.floor(Math.random() * LOADING_PHRASES.length)]);
-  return `<div class="profile-loading"><span class="loading-spinner"></span><p>${text}</p></div>`;
+  const text = label || t('loading.phrase.loading');
+  return `<div class="profile-loading" role="status"><span class="loading-spinner" aria-hidden="true"></span><p>${text}</p></div>`;
 }
 
 // ---------- Mini popover de descrição de badge ----------

@@ -71,7 +71,7 @@ async function bootPage(browser, lang, port, theme, viewport){
   page.on('pageerror', e => errors.push(e.message));
   page.on('dialog', d => d.accept());
   await page.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, r => r.abort());
-  await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
+  await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase|\/shared\/vendor\/supabase-js/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
   await page.addInitScript(() => { try { sessionStorage.setItem('guest_mode', '1'); } catch (e) {} });
   await page.goto(`http://127.0.0.1:${port}/${lang}/index.html`);
   await page.waitForFunction(() => typeof STATE !== 'undefined' && STATE.cards && STATE.cards.length > 0 && CURRENT_USER === false, null, { timeout: 15000 });
@@ -248,6 +248,9 @@ async function fill(page, wrongIdx){
     const res = await page.evaluate(() => ({ items: document.querySelectorAll('.conj-review-list li').length, btn: !!document.getElementById('conj-practice-mistakes-btn'),
       first: document.querySelector('.conj-review-list li').textContent.replace(/\s+/g, ' ').trim() }));
     check('fim da sessão lista as formas para revisar (1 de parler + 6 vazias de avoir)', res.items === 7 && res.btn && res.first.includes('parler') && res.first.includes('parles'), res);
+    // Resumo mostra o XP SOMADO da sessão (decisão da autora, 2026-11-24): parler é regular, 5 formas certas = 5 XP.
+    const xpRes = await page.evaluate(() => ({ xp: CONJ_STATE.xp, vals: [...document.querySelectorAll('.conj-session-result .lc-stat-value')].map(e => e.textContent.trim()) }));
+    check('resumo da Conjugação soma o XP da sessão (+5) ao lado do placar', xpRes.xp === 5 && xpRes.vals.length === 2 && /\+5/.test(xpRes.vals[1]), xpRes);
     await page.click('#conj-practice-mistakes-btn');
     await page.waitForSelector('.conj-tense-box');
     const again = await page.evaluate(() => ({ q: CONJ_STATE.verbQueue.join(), t: CONJ_STATE.sessionTenses.join() }));

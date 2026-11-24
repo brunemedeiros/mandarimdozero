@@ -38,7 +38,7 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
   const page = await ctx.newPage(); const errs = [];
   page.on('pageerror', e => errs.push(e.message));
   await page.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, r => r.abort());
-  await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
+  await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase|\/shared\/vendor\/supabase-js/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
   await page.addInitScript(() => { try { sessionStorage.setItem('guest_mode', '1'); } catch (e) {} });
   await page.goto(`http://127.0.0.1:${port}/zh/index.html`);
   await page.waitForFunction(() => typeof STATE !== 'undefined' && CURRENT_USER === false && typeof openStory === 'function' && typeof openHanziLesson === 'function', null, { timeout: 20000 });

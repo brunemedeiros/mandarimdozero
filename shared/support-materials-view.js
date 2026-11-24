@@ -22,7 +22,7 @@ async function renderSupportMaterialsView(){
     wrap.innerHTML = `<p class="profile-empty-note">${t('supportMaterials.loginRequired')}</p>`;
     return;
   }
-  wrap.innerHTML = loadingHTML();
+  wrap.innerHTML = loadingHTML(t('materials.loading'));
 
   const materials = await fetchSupportMaterialsForCurrentStudent(APP_KEY);
 

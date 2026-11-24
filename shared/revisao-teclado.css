@@ -65,3 +65,13 @@
   #view-conjugaison .cg-choice:has(.kbd-hint){ padding-left:12px; padding-right:12px; }
   .cloze-grammar-group .challenge-choice-btn:has(.kbd-hint){ padding-left:22px; padding-right:22px; }
 }
+
+/* Opções do exercício de cenário (gramática): o mesmo desenho das outras opções (decisão da autora, 2026-11-24): número num quadrado à esquerda,
+   no meio da altura, só com mouse e teclado, e o texto centralizado (no mandarim, pinyin sobre o hanzi, também centralizados). */
+.scenario-option{ position:relative; justify-content:center; text-align:center; }
+.scenario-option-text{ text-align:center; }
+.scenario-option .kbd-hint{ top:50%; left:10px; transform:translateY(-50%); width:20px; height:20px; font-size:11px; }
+.scenario-option:has(.kbd-hint){ padding-left:40px; padding-right:40px; }
+@media not all and (hover:hover) and (pointer:fine){
+  .scenario-option:has(.kbd-hint){ padding-left:16px; padding-right:16px; }
+}
