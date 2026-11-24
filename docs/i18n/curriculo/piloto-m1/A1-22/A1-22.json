@@ -153,7 +153,7 @@
    },
    "destino": "nota",
    "texto": {
-    "pt-BR": "Para dizer a profissão, use <strong>être</strong> e a profissão sem <strong>le</strong> nem <strong>la</strong>:<ul><li>o cartão traz <strong>la professeure</strong>, mas na frase é <strong>Je suis professeure</strong>;</li><li>como em português: \"sou professora\".</li></ul>",
+    "pt-BR": "Para dizer a profissão, use <strong>être</strong> e a profissão sem <strong>le</strong>, <strong>la</strong> nem <strong>l'</strong>:<ul><li>o cartão traz <strong>la professeure</strong>, mas na frase é <strong>Je suis professeure</strong>;</li><li>como em português: \"sou professora\".</li></ul>",
     "en": null
    },
    "exemplos": [
@@ -249,7 +249,7 @@
    },
    "destino": "nota",
    "texto": {
-    "pt-BR": "Na França, as formas femininas das profissões são as de hoje:<ul><li><strong>professeure</strong>, <strong>ingénieure</strong>;</li><li>em 2019, a Academia Francesa aceitou a feminização dos nomes de profissão;</li><li>ainda se ouve <strong>professeur</strong> para uma mulher, e as duas formas servem.</li></ul>",
+    "pt-BR": "Hoje, na França, é comum escrever o feminino das profissões:<ul><li><strong>professeure</strong>, <strong>ingénieure</strong>;</li><li>em 2019, a Academia Francesa aceitou a feminização dos nomes de profissão;</li><li>ainda se ouve <strong>professeur</strong> ou <strong>ingénieur</strong> para uma mulher, e as duas formas servem.</li></ul>",
     "en": null
    },
    "exemplos": [
@@ -272,12 +272,12 @@
    "vf": [
     {
      "afirmacao": {
-      "pt-BR": "Hoje, na França, <i>professeure</i> é a forma comum para uma mulher.",
+      "pt-BR": "Hoje, na França, <i>professeure</i> é comum para uma mulher.",
       "en": null
      },
      "resposta": true,
      "porque": {
-      "pt-BR": "É a forma de hoje; <b>professeur</b> para uma mulher ainda se ouve.",
+      "pt-BR": "É comum hoje; <b>professeur</b> para uma mulher ainda se ouve.",
       "en": null
      }
     }
@@ -334,15 +334,15 @@
     {
      "chave": "nova",
      "falante": "A",
-     "fr": "À Paris. Et le travail, ça va ?",
-     "pt-BR": "Em Paris. E o trabalho, tudo bem?",
+     "fr": "À Paris. Et toi, tu habites où ?",
+     "pt-BR": "Em Paris. E você, mora onde?",
      "en": null
     },
     {
      "chave": "nova",
      "falante": "B",
-     "fr": "Oui, ça va bien, merci !",
-     "pt-BR": "Sim, tudo bem, obrigada!",
+     "fr": "J'habite à Nice.",
+     "pt-BR": "Moro em Nice.",
      "en": null
     }
    ],
@@ -459,9 +459,9 @@
       "en": null
      },
      "resposta": false,
-     "frase_do_painel": "la professeure",
+     "frase_do_painel": "le professeur / la professeure",
      "traducao_do_painel": {
-      "pt-BR": "a professora",
+      "pt-BR": "o professor / a professora",
       "en": null
      },
      "explicacao": {
@@ -553,7 +553,7 @@
       "en": null
      },
      "opcoes": [
-      "travay",
+      "travai",
       "travail"
      ],
      "resposta": "travail",
@@ -564,7 +564,7 @@
       "en": null
      },
      "explicacao_erro": {
-      "travay": {
+      "travai": {
        "pt-BR": "Você escreveu como se ouve! ",
        "en": null
       }
@@ -652,9 +652,9 @@
      "tipo": "nota",
      "nota": "tu-fais-quoi",
      "rotulos": {
-      "Qu'est-ce que tu fais dans la vie ?": "com est-ce que",
+      "Qu'est-ce que tu fais dans la vie ?": "com qu'est-ce que",
       "Tu fais quoi dans la vie ?": "na conversa",
-      "Tu fais quoi ?": "fala"
+      "Tu fais quoi ?": "na fala"
      }
     },
     {
@@ -853,7 +853,7 @@
       "en": null
      },
      "opcoes": [
-      "Je suis avocat.",
+      "Je suis l'avocate.",
       "Je suis médecin.",
       "Je suis avocate."
      ],
@@ -867,8 +867,8 @@
       "en": null
      },
      "explicacao_erro": {
-      "Je suis avocat.": {
-       "pt-BR": "<b>Avocat</b> é o advogado, com o <b>t</b> mudo. ",
+      "Je suis l'avocate.": {
+       "pt-BR": "Com <b>l'</b>, seria \"sou a advogada\". ",
        "en": null
       },
       "Je suis médecin.": {
@@ -1068,7 +1068,7 @@
      "id": "u7-ex-ingenieure",
      "tipo": "funcao",
      "pergunta": {
-      "pt-BR": "A Léa é engenheira. Como ela diz a profissão?",
+      "pt-BR": "A Ana é engenheira. Como ela diz a profissão?",
       "en": null
      },
      "opcoes": [
@@ -1223,32 +1223,32 @@
      "id": "u7-l3-montar",
      "tipo": "montar",
      "traducao": {
-      "pt-BR": "A Léa é engenheira e o Paul é garçom.",
+      "pt-BR": "A Ana é engenheira e o Léo é garçom.",
       "en": null
      },
      "pecas": [
-      "Léa",
+      "Ana",
       "est",
       "ingénieure",
       "et",
-      "Paul",
+      "Léo",
       "est",
       "serveur.",
       "serveuse.",
       "la"
      ],
      "resposta": [
-      "Léa",
+      "Ana",
       "est",
       "ingénieure",
       "et",
-      "Paul",
+      "Léo",
       "est",
       "serveur."
      ],
-     "frase_completa": "Léa est ingénieure et Paul est serveur.",
+     "frase_completa": "Ana est ingénieure et Léo est serveur.",
      "explicacao": {
-      "pt-BR": "Profissão sem artigo: feminino para a Léa e masculino para o Paul.",
+      "pt-BR": "Profissão sem artigo: feminino para a Ana e masculino para o Léo.",
       "en": null
      }
     },
@@ -1351,12 +1351,12 @@
        "tipo": "grafia"
       },
       "4": {
-       "texto": "À Paris. Et le travaille, ça va ?",
+       "texto": "À Paris. Et toi, tu habite où ?",
        "tipo": "grafia"
       },
       "5": {
-       "texto": "Oui, ça va bien, merci, madame !",
-       "tipo": "registro"
+       "texto": "J'habite en Nice.",
+       "tipo": "grafia"
       }
      },
      "explicacao": {
@@ -1386,7 +1386,7 @@
      "tipo": "dialogo_ordenar",
      "dialogo": "Numa festa, o Hugo conversa com a Léa.",
      "explicacao": {
-      "pt-BR": "Apresentação, profissão, estudo e trabalho.",
+      "pt-BR": "Apresentação, profissão, estudo e onde mora.",
       "en": null
      }
     },
@@ -1618,16 +1618,16 @@
      "id": "u7-d2-lacuna",
      "tipo": "dialogo_lacuna",
      "dialogo": "Num evento de trabalho, o Sr. Moreau conversa com a Sra. Lima.",
-     "fala": 3,
+     "fala": 4,
      "antes": "Je suis ",
-     "depois": ". Et vous ?",
+     "depois": ". Vous habitez à Paris ?",
      "opcoes": [
-      "avocate",
-      "avocat"
+      "médecine",
+      "médecin"
      ],
-     "resposta": "avocate",
+     "resposta": "médecin",
      "explicacao": {
-      "pt-BR": "Ela é mulher: <b>avocate</b>, e o <b>t</b> do fim soa.",
+      "pt-BR": "<b>Médecin</b> é a profissão; <b>médecine</b> é a medicina.",
       "en": null
      }
     },
@@ -1673,15 +1673,15 @@
      "tipo": "dialogo_papel",
      "dialogo": "Num evento de trabalho, o Sr. Moreau conversa com a Sra. Lima.",
      "situacao": {
-      "pt-BR": "Agora é você: num evento de trabalho, o Sr. Moreau puxa conversa.",
+      "pt-BR": "Agora é você: num evento de trabalho, a Sra. Lima puxa conversa.",
       "en": null
      },
-     "outro_falante": "A",
+     "outro_falante": "B",
      "turnos": [
       {
        "outro": {
-        "fr": "Bonjour. Je m'appelle Paul Moreau. Et vous ?",
-        "pt-BR": "Bom dia. Eu me chamo Paul Moreau. E o senhor (a senhora)?",
+        "fr": "Bonjour. Je m'appelle Carla Lima. Et vous ?",
+        "pt-BR": "Bom dia. Eu me chamo Carla Lima. E o senhor (a senhora)?",
         "en": null
        }
       },
@@ -1709,7 +1709,7 @@
       },
       {
        "outro": {
-        "fr": "Enchanté. Qu'est-ce que vous faites dans la vie ?",
+        "fr": "Enchantée. Qu'est-ce que vous faites dans la vie ?",
         "pt-BR": "Prazer. O que o senhor (a senhora) faz?",
         "en": null
        }
@@ -1727,7 +1727,7 @@
        "certa": 1,
        "dicas": {
         "Je suis médecin. Et toi ?": {
-         "pt-BR": "Com o Sr. Moreau, no formal: <b>et vous ?</b>",
+         "pt-BR": "Com a Sra. Lima, no formal: <b>et vous ?</b>",
          "en": null
         },
         "Je suis la médecin. Et vous ?": {
@@ -1738,8 +1738,8 @@
       },
       {
        "outro": {
-        "fr": "Moi, je suis ingénieur. Bonne journée !",
-        "pt-BR": "Eu sou engenheiro. Tenha um bom dia!",
+        "fr": "Moi, je suis avocate. Bonne journée !",
+        "pt-BR": "Eu sou advogada. Tenha um bom dia!",
         "en": null
        }
       },
@@ -1751,7 +1751,7 @@
        "opcoes": [
         "Salut, à plus !",
         "Bonne soirée !",
-        "Merci, monsieur. Au revoir !"
+        "Merci, madame. Au revoir !"
        ],
        "certa": 2,
        "dicas": {
