@@ -950,38 +950,6 @@
      }
     },
     {
-     "id": "u3-ex-eua",
-     "tipo": "funcao",
-     "pergunta": {
-      "pt-BR": "A Sofia mora nos Estados Unidos. O que ela diz?",
-      "en": null
-     },
-     "opcoes": [
-      "J'habite en États-Unis.",
-      "J'habite aux États-Unis.",
-      "J'habite au États-Unis."
-     ],
-     "resposta": "J'habite aux États-Unis.",
-     "traducao_do_painel": {
-      "pt-BR": "Eu moro nos Estados Unidos.",
-      "en": null
-     },
-     "explicacao": {
-      "pt-BR": "<b>Les États-Unis</b> está no plural: <b>j'habite aux États-Unis</b>.",
-      "en": null
-     },
-     "explicacao_erro": {
-      "J'habite en États-Unis.": {
-       "pt-BR": "Com <b>les États-Unis</b>, é <b>aux</b>. ",
-       "en": null
-      },
-      "J'habite au États-Unis.": {
-       "pt-BR": "Falta o <b>x</b>: é plural. ",
-       "en": null
-      }
-     }
-    },
-    {
      "id": "u3-l2-rel",
      "tipo": "relacionar",
      "pares": [
@@ -1009,6 +977,38 @@
      "explicacao": {
       "pt-BR": "Nos pares, o informal vem com <b>tu</b> (<b>tu es</b>, <b>tu habites</b>); o formal, com <b>vous</b> (<b>vous êtes</b>, <b>vous habitez</b>).",
       "en": null
+     }
+    },
+    {
+     "id": "u3-ex-eua",
+     "tipo": "funcao",
+     "pergunta": {
+      "pt-BR": "Você quer saber se a Sofia mora nos Estados Unidos. O que você pergunta?",
+      "en": null
+     },
+     "opcoes": [
+      "Tu habites en États-Unis ?",
+      "Tu habites aux États-Unis ?",
+      "Tu habites au États-Unis ?"
+     ],
+     "resposta": "Tu habites aux États-Unis ?",
+     "traducao_do_painel": {
+      "pt-BR": "Você mora nos Estados Unidos?",
+      "en": null
+     },
+     "explicacao": {
+      "pt-BR": "<b>Les États-Unis</b> está no plural: <b>aux États-Unis</b>.",
+      "en": null
+     },
+     "explicacao_erro": {
+      "Tu habites en États-Unis ?": {
+       "pt-BR": "Com <b>les États-Unis</b>, é <b>aux</b>. ",
+       "en": null
+      },
+      "Tu habites au États-Unis ?": {
+       "pt-BR": "Falta o <b>x</b>: é plural. ",
+       "en": null
+      }
      }
     },
     {
@@ -2604,7 +2604,7 @@
    },
    "destino": "nota",
    "texto": {
-    "pt-BR": "A mesma pergunta pode ser feita de dois jeitos: <strong>Tu parles anglais ?</strong>, só com a entonação, ou com <strong>est-ce que</strong> na frente: <strong>Est-ce que tu parles anglais ?</strong> No formal, igual: <strong>Est-ce que vous parlez anglais ?</strong>",
+    "pt-BR": "A mesma pergunta pode ser feita de dois jeitos: <strong>Tu parles anglais ?</strong>, só com a entonação, ou com <strong>est-ce que</strong> na frente: <strong>Est-ce que tu parles anglais ?</strong> No formal, igual: <strong>Est-ce que vous parlez anglais ?</strong> Soa mais ou menos \"és-quê\": o <b>t</b> de <i>est</i> não se pronuncia.",
     "en": null
    },
    "exemplos": [

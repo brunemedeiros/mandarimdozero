@@ -1028,19 +1028,19 @@
     {
      "id": "l3-ex-svp",
      "tipo": "vf",
-     "fr": "STP",
+     "fr": "SVP",
      "afirmacao": {
-      "pt-BR": "Numa mensagem para um amigo, quer dizer <i>s'il te plaît</i>.",
+      "pt-BR": "Numa placa, quer dizer <i>s'il te plaît</i>.",
       "en": null
      },
-     "resposta": true,
-     "frase_do_painel": "s'il te plaît",
+     "resposta": false,
+     "frase_do_painel": "s'il vous plaît",
      "traducao_do_painel": {
-      "pt-BR": "por favor (informal)",
+      "pt-BR": "por favor (formal)",
       "en": null
      },
      "explicacao": {
-      "pt-BR": "<b>STP</b> é o <b>s'il te plaît</b> curtinho das mensagens entre amigos.",
+      "pt-BR": "<b>SVP</b> é <b>s'il vous plaît</b>. O das mensagens entre amigos é <b>STP</b>.",
       "en": null
      },
      "sem_audio": true

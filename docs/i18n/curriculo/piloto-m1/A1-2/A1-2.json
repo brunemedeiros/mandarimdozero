@@ -378,26 +378,26 @@
     {
      "id": "u2-ex-tu",
      "tipo": "complete",
-     "antes": "",
-     "depois": " vas bien ?",
+     "antes": "Léa et Hugo, ",
+     "depois": " allez bien ?",
      "traducao": {
-      "pt-BR": "Você está bem?",
+      "pt-BR": "Léa e Hugo, vocês estão bem?",
       "en": null
      },
      "opcoes": [
-      "Je",
-      "Tu"
+      "tu",
+      "vous"
      ],
-     "resposta": "Tu",
-     "frase_completa": "Tu vas bien ?",
+     "resposta": "vous",
+     "frase_completa": "Léa et Hugo, vous allez bien ?",
      "distrator": "outra palavra",
      "explicacao": {
-      "pt-BR": "Com <b>vas</b>, quem está bem é \"você\": <b>tu vas</b>. Para \"eu\", é <b>je vais</b>.",
+      "pt-BR": "Com duas pessoas ou mais, é sempre <b>vous</b>, mesmo entre amigos: <b>vous allez</b>.",
       "en": null
      },
      "explicacao_erro": {
-      "Je": {
-       "pt-BR": "<b>Je</b> é \"eu\". ",
+      "tu": {
+       "pt-BR": "<b>Tu</b> é para uma pessoa só. ",
        "en": null
       }
      }
@@ -767,14 +767,14 @@
       "pt-BR": "Ouça o nome soletrado e escolha a grafia.",
       "en": null
      },
-     "audio": "L, E accent aigu, O",
+     "audio": "H, E accent aigu, L, E accent grave, N, E",
      "opcoes": [
-      "Lèo",
-      "Léo"
+      "Hèléne",
+      "Hélène"
      ],
-     "resposta": "Léo",
+     "resposta": "Hélène",
      "explicacao": {
-      "pt-BR": "<i>Accent aigu</i> é o acento agudo: <b>é</b>. O <i>accent grave</i> é o de <b>è</b>.",
+      "pt-BR": "<i>Accent aigu</i> é o agudo: <b>é</b>. <i>Accent grave</i> é o de <b>è</b>: <b>Hélène</b>.",
       "en": null
      }
     },
@@ -1110,17 +1110,17 @@
      "id": "u2-ex-funcao",
      "tipo": "funcao",
      "pergunta": {
-      "pt-BR": "A Ana é brasileira. O Léo pergunta: \"Tu es française ?\". O que ela responde?",
+      "pt-BR": "O Rafael é brasileiro. A Léa pergunta: \"Tu es français ?\". O que ele responde?",
       "en": null
      },
      "opcoes": [
-      "Oui, je suis française.",
-      "Non, je ne suis pas française.",
-      "Non, je suis française."
+      "Oui, je suis français.",
+      "Non, je ne suis pas français.",
+      "Non, je suis français."
      ],
-     "resposta": "Non, je ne suis pas française.",
+     "resposta": "Non, je ne suis pas français.",
      "traducao_do_painel": {
-      "pt-BR": "Não, eu não sou francesa.",
+      "pt-BR": "Não, eu não sou francês.",
       "en": null
      },
      "explicacao": {
@@ -1128,11 +1128,11 @@
       "en": null
      },
      "explicacao_erro": {
-      "Oui, je suis française.": {
-       "pt-BR": "A Ana é brasileira, não francesa. ",
+      "Oui, je suis français.": {
+       "pt-BR": "O Rafael é brasileiro, não francês. ",
        "en": null
       },
-      "Non, je suis française.": {
+      "Non, je suis français.": {
        "pt-BR": "Falta o <b>ne… pas</b> em volta do verbo. ",
        "en": null
       }

@@ -63,7 +63,7 @@
    },
    "destino": "nota",
    "texto": {
-    "pt-BR": "Coloque <strong>est-ce que</strong> no começo da frase; o resto não muda.<ul><li>Não se traduz: só avisa que vem uma pergunta.</li><li>Antes de sujeito com vogal: <strong>est-ce qu'</strong>.</li><li>É neutro: serve na conversa e na escrita.</li></ul>",
+    "pt-BR": "Coloque <strong>est-ce que</strong> no começo da frase; o resto não muda.<ul><li>Soa mais ou menos \"és-quê\": o <b>t</b> de <i>est</i> não se pronuncia.</li><li>Não se traduz: só avisa que vem uma pergunta.</li><li>Antes de sujeito com vogal: <strong>est-ce qu'</strong>.</li><li>É neutro: serve na conversa e na escrita.</li></ul>",
     "en": null
    },
    "exemplos": [
@@ -303,9 +303,9 @@
      "id": "g4-ex-estcequelle",
      "tipo": "complete",
      "antes": "Est-ce ",
-     "depois": "elle parle anglais ?",
+     "depois": "elle habite au Brésil ?",
      "traducao": {
-      "pt-BR": "Ela fala inglês?",
+      "pt-BR": "Ela mora no Brasil?",
       "en": null
      },
      "opcoes": [
@@ -313,7 +313,7 @@
       "que "
      ],
      "resposta": "qu'",
-     "frase_completa": "Est-ce qu'elle parle anglais ?",
+     "frase_completa": "Est-ce qu'elle habite au Brésil ?",
      "distrator": "grafia",
      "explicacao": {
       "pt-BR": "<b>Est-ce qu'</b> + sujeito com vogal: <b>est-ce qu'elle</b>.",
