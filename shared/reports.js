@@ -154,6 +154,21 @@ function reportReviewCardInfo(card){
   return info;
 }
 
+// O que a pessoa digitou num cartão de digitar (Digite a resposta, Cloze) e o resultado que o site deu, para quem
+// lê o report saber se o erro foi da aluna ou do cartão (Etapa 1 de docs/banco-revisao-resposta-digitada-plano.md,
+// 2026-11-24). Só depois de "Verificar" (antes disso a resposta não foi dada). Nada é guardado além do report que a
+// própria pessoa envia.
+function reportTypedAnswerInfo(card, local){
+  const info = {};
+  try {
+    const kind = card && card.cardInstance && card.cardInstance.cardTypeId;
+    if ((kind !== 'type_answer' && kind !== 'cloze') || !local || !local.answered) return info;
+    info.review_typed_answer = String(local.typedAnswer == null ? '' : local.typedAnswer).slice(0, 300);
+    info.review_answer_result = local.wasCorrect ? (local.almost ? 'quase' : 'certo') : 'errado';
+  } catch (e) {}
+  return info;
+}
+
 function captureReportContext(extra){
   const ctx = {};
   try { ctx.url = window.location.href; } catch (e) {}
@@ -235,14 +250,19 @@ function captureReportContext(extra){
   try {
     const reviewSessionOpen = document.getElementById('review-session-wrap')?.style.display !== 'none';
     const reviewContentVisible = reviewSessionOpen && document.getElementById('review-content')?.style.display === 'block';
-    if (ctx.screen === 'review' && reviewContentVisible &&
-        typeof STATE !== 'undefined' && STATE && Array.isArray(STATE.reviewQueue) && STATE.reviewQueue.length){
-      const card = STATE.reviewQueue[STATE.reviewIndex];
+    // "Ver cartão anterior" (botão Voltar dos cartões da professora): a tela mostra um cartão do histórico,
+    // não o da fila -- o report segue o que está na tela (mesma condição de renderReviewViewInner).
+    const peekEntry = typeof STATE !== 'undefined' && STATE && STATE.reviewPeek != null && STATE.reviewSessionClassReview &&
+      Array.isArray(STATE.reviewHistory) ? STATE.reviewHistory[STATE.reviewPeek] : null;
+    if (ctx.screen === 'review' && reviewContentVisible && typeof STATE !== 'undefined' && STATE &&
+        (peekEntry || (Array.isArray(STATE.reviewQueue) && STATE.reviewQueue.length))){
+      const card = peekEntry ? peekEntry.card : STATE.reviewQueue[STATE.reviewIndex];
       if (card){
         ctx.review_mode = STATE.reviewActiveMode || null;
         if (STATE.reviewSessionClassReview) ctx.review_scope = 'class';
-        ctx.review_position = `${STATE.reviewIndex + 1}/${STATE.reviewQueue.length}`;
-        Object.assign(ctx, reportReviewCardInfo(card));
+        if (peekEntry) ctx.review_peek = true;
+        else ctx.review_position = `${STATE.reviewIndex + 1}/${STATE.reviewQueue.length}`;
+        Object.assign(ctx, reportReviewCardInfo(card), reportTypedAnswerInfo(card, peekEntry ? peekEntry.local : STATE.reviewCardState));
       }
     }
   } catch (e) {}
