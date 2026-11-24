@@ -40,6 +40,8 @@ as decisões da autora e as fases. **Nada foi implementado ainda.**
    - **Situação** (Em dia 0 a 3 dias, Atenção 4 a 6, Parado 7+; a mesma regra da aba Alunos): útil já.
    - **Plano** (Grátis x Premium): importante no futuro. A autora **vai ter** cancelada, expirada e pagamento pendente quando houver
      venda; o bloco nasce preparado para receber esses estados sem refazer a tela.
+8. **Badges: pode tirar** (confirmado em 2026-11-24, sabendo que "Pioneiro/a" não poderá mais ser dado à mão; os já dados ficam).
+9. **"Dia com estudo" = só estudo de verdade** (lição, revisão, desafio, ditado, conjugação); abrir o site ou trocar de aba não conta.
 
 ## 4. Fase 0: levantamento (feito em 2026-11-24, só leitura)
 
@@ -60,7 +62,7 @@ Números da produção nesse dia: 40 contas, 15 alunos com vínculo ativo, 7 con
   vínculo, trigger da 077: continua funcionando sem a aba), "Pioneiro/a" (2 contas, dado à mão) e "Embaixador/a" (ninguém).
   Tirar a aba **não apaga** nenhum badge já dado. `shared/admin-badges.js` continua carregado (tem `fetchAllProfiles`, usada pela aba Alunos).
 
-## 5. Fase 1: aba "Visão Geral" (aguarda aprovação)
+## 5. Fase 1: aba "Visão Geral" (aprovada em 2026-11-24)
 
 ### 5.1 Banco (migration, Staging antes da produção; skill `migration-supabase`)
 Uma RPC só de leitura, `security definer`, que recusa quem não é admin: `admin_overview_stats(p_days, p_scope, p_language)`.
@@ -72,7 +74,7 @@ Faz as contas no servidor e devolve só números (sem nome, e-mail ou texto de a
 - contas por plano (e, no futuro, por estado de assinatura).
 
 Regras: dia contado no **fuso de São Paulo**, não em UTC; "dia com estudo" = evento de estudo de verdade (lição, revisão, desafio,
-ditado, conjugação), **sem** contar só abrir o site ou trocar de aba; o tipo exato da lista de eventos é fechado na implementação e
+ditado, conjugação), **sem** contar só abrir o site ou trocar de aba (decisão 9); o tipo exato da lista de eventos é fechado na implementação e
 registrado aqui. Ponto a conferir antes de codar: no Modo aula a revisão gera `review_answer` **e** linha em `review_bank_reviews`;
 a contagem não pode somar a mesma revisão duas vezes.
 
