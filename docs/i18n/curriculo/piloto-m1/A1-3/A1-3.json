@@ -1138,7 +1138,7 @@
      },
      "explicacao_erro": {
       "deus": {
-       "pt-BR": "Quase lá! O fim é <b>x</b>, não <b>s</b>. ",
+       "pt-BR": "Por pouco! O fim é <b>x</b>, não <b>s</b>. ",
        "en": null
       }
      }
@@ -1542,7 +1542,7 @@
      },
      "explicacao_erro": {
       "onse": {
-       "pt-BR": "Quase lá! É com <b>z</b>. ",
+       "pt-BR": "Por pouco! É com <b>z</b>. ",
        "en": null
       }
      }
@@ -1686,7 +1686,7 @@
      },
      "explicacao_erro": {
       "seise": {
-       "pt-BR": "Quase lá! É com <b>z</b>. ",
+       "pt-BR": "Por pouco! É com <b>z</b>. ",
        "en": null
       }
      }

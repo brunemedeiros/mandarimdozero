@@ -94,6 +94,14 @@ function conferirTelas(R){
   for (const c of R.cartoes) confere(!soPergunta(c.papel_na_funcao), `cartão "${c.fr}": rótulo de pergunta (o "?" já diz)`);
   for (const l of comTelas) for (const t of l.telas || []) confere(!soPergunta(t.papel), `tela ${t.id}: rótulo de pergunta (o "?" já diz)`);
 
+  // O título do painel já diz "Isso mesmo!" / "Quase lá!" / "Quase certo!" (painel de resposta único, docs/painel-resposta-unico.md):
+  // o texto da professora no erro não repete o título.
+  const titulos = /^\s*(Isso mesmo|Quase lá|Quase certo)!/;
+  const comErro = [];
+  (function anda(o){ if (Array.isArray(o)) o.forEach(anda); else if (o && typeof o === 'object'){ if (o.explicacao_erro) comErro.push(o); Object.values(o).forEach(anda); } })(R);
+  for (const t of comErro) for (const [op, v] of Object.entries(t.explicacao_erro))
+    confere(!titulos.test((v || {})['pt-BR'] || ''), `tela ${t.id || '?'}: o texto do erro "${op}" repete o título do painel`);
+
   // Lições de cartões: cada cartão uma vez, na ordem; nota depois do gatilho; exercícios coerentes; "Complete" alternando (decisão 342).
   for (const l of comTelas.filter(l => l.tipo !== 'dialogos')){
     const telas = l.telas || [];
