@@ -57,3 +57,12 @@ repositório): Playwright que troca o painel antigo pelo `painelRespostaHTML` co
 `painelRespostaRico(texto, lang)` escapa a fala e pinta de azul (`.pr-fr`) o trecho entre {chaves}, a mesma convenção dos Jogos.
 Expressões: `profNote` (pt-BR no desafio; o idioma do site no overlay `challenges.<lang>.js`, campo `profNote`). Sem a fala, a
 explicação em francês (`explanation`) continua como linha de apoio e a professora não aparece.
+
+## Relação com a conversa `claude/kind-darwin-fuwjgu` (visual da lição, decisões da autora de 2026-11-15)
+
+Essa conversa (parada desde 2026-11-15, ainda fora da `main`) acertou o VISUAL do painel antigo da trilha (`.correct-feedback` /
+`.wrong-feedback`): "Continuar" verde/vermelho fixos com texto branco e degrau no tom do próprio botão (token novo
+`--error-fill`/`--on-error-fill`), o mesmo vermelho de erro no fr e no zh, rótulo do painel de erro em cinza, negrito das
+explicações na cor de cada site. O painel único segue as mesmas decisões (2026-11-24): o "Continuar" usa
+`var(--error-fill, var(--error-red))` e o degrau no tom do botão; quando ela for mesclada, o token passa a valer sozinho.
+As duas não mexem nos mesmos arquivos, exceto 2 linhas de `fr/index.html` e `zh/index.html` (o link do CSS do painel).
