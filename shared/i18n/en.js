@@ -256,8 +256,10 @@ window.I18N_CATALOG['en'] = {
   'notif.cat.reengajamento': '👋 Come-back reminders', // MÉDIA -- Etapa 4: aprovado pela dona
   'notif.cat.sistema': '⚙️ System', // ALTA
   'notif.cat.amigos': '👥 Friends', // ALTA
+  'notif.cat.cartoes_professora': '📚 New cards from your teacher', // ALTA
   'notif.pref.inAppOnly': 'Friends only has in-app notifications', // ALTA
   'notif.pref.noEmail': 'Friends has no email notifications', // ALTA
+  'notif.pref.emailOnly': 'This notice only exists by email', // ALTA
   'notif.pref.guest': 'Create an account to set up notifications. Guest mode does not save preferences.', // ALTA
   'notif.pref.loadFailed': 'Could not load your preferences right now.', // ALTA
   'notif.pref.sectionTitle': 'Notifications', // ALTA
@@ -381,7 +383,7 @@ window.I18N_CATALOG['en'] = {
   'review.speed.points': '{n} pts', // ALTA
   'review.speed.answered': { one: 'You answered {n} word this round.', other: 'You answered {n} words this round.' }, // ALTA
   'review.back': 'Back', // ALTA
-  'review.practiceMore': 'Practice more', // ALTA
+  'review.practiceMore': 'Keep reviewing', // ALTA
   'review.complete.title': 'Review complete!', // ALTA
   'review.complete.reviewed': { one: 'You reviewed {n} card this session.', other: 'You reviewed {n} cards this session.' }, // ALTA
   'review.session.deckEmptyTitle': 'No cards in this Deck yet', // ALTA
@@ -788,7 +790,7 @@ window.I18N_CATALOG['en'] = {
   'fr.conj.sessionDone': 'Session complete!', // ALTA
   'fr.conj.wellDone': 'Great job!', // ALTA
   'fr.conj.keepPracticing': 'Keep practicing these conjugations.', // ALTA
-  'fr.conj.newSession': 'New session', // ALTA
+  'fr.conj.newSession': 'Finish session', // ALTA
   'fr.conj.verbCounter': 'Verb {i} of {n}', // ALTA
   'fr.conj.currentVerb': 'Current verb', // ALTA
   'fr.conj.regular': 'Regular verb', // ALTA
@@ -1718,6 +1720,7 @@ window.I18N_CATALOG['en'] = {
   'admin.reports.detail.problem': '⚑ Problem', // ALTA
   'admin.reports.detail.notInformed': '(not provided)', // ALTA
   'admin.reports.detail.screenshotView': '📎 View attached screenshot', // ALTA
+  'admin.reports.detail.screenshotError': "Couldn't open the screenshot. Please try again in a moment.", // ALTA
   'admin.reports.detail.screenshotNone': '(no screenshot attached)', // ALTA
   'admin.reports.reply.lastSentTo': 'Last reply sent on {date} to {email}:', // ALTA
   'admin.reports.reply.lastSent': 'Last reply sent on {date}:', // ALTA
@@ -1961,7 +1964,7 @@ window.I18N_CATALOG['en'] = {
   'admin.analytics.dev.type': 'Device type', // ALTA
   'admin.analytics.dev.browser': 'Browser', // ALTA
   'admin.analytics.dev.os': 'Operating system', // ALTA
-  'admin.analytics.dev.osNote': 'Classification by navigator.userAgent (simple heuristic, no library). It is not 100% accurate, but it is the acceptable standard without third-party telemetry.', // ALTA
+  'admin.analytics.dev.osNote': 'Classification by navigator.userAgent (simple heuristic, no library). It is not 100% accurate, but it is enough for the site\'s own measurement (Google Analytics, with consent, is separate).', // ALTA
   'admin.analytics.eng.perSession': 'Exercises/session', // ALTA
   'admin.analytics.eng.reviewsDone': 'Reviews completed', // ALTA
   'admin.analytics.eng.challengesDone': 'Challenges completed', // ALTA
@@ -3614,6 +3617,8 @@ window.I18N_CATALOG['en'] = {
   'panel.classLog.skill.pronuncia': 'Pronunciation', // ALTA
   'panel.classLog.classrooms': 'Classes', // ALTA
   'panel.gcal.formerHint': 'Former students are at the end of the list: the lesson only goes into their history, with no Board notice.', // ALTA
+  'panel.gcal.formerBankGroup': 'Former students without an account (history only)', // ALTA
+  'panel.classLog.formerTag': 'former student', // ALTA
   'panel.classLog.forWhom': 'For whom', // ALTA
   'panel.classLog.moreFields': 'More fields (Observations and Notes)', // ALTA
   'panel.classLog.classroomsHint': 'A class lesson is logged once and shows up for every student in the class.', // ALTA
@@ -4173,6 +4178,25 @@ window.I18N_CATALOG['en'] = {
   'gate.signup.methodTitle': 'Create your account and start learning {lang}', // ALTA
   'gate.signup.methodSub': 'It\'s free. Choose how you\'d like to sign up.', // ALTA
   'gate.signup.ageAck': 'I\'m 18 or older, or I have my parent or guardian\'s permission to use the site.', // ALTA
+  'consent.title': 'Cookies', // ALTA
+  'consent.text': 'This site uses cookies to improve your experience and measure visits.', // ALTA
+  'consent.policy': 'Cookie policy', // ALTA
+  'consent.reject': 'Reject optional', // ALTA
+  'consent.accept': 'Accept all', // ALTA
+  'consent.prefs': 'Preferences', // ALTA
+  'consent.prefsTitle': 'Cookie preferences', // ALTA
+  'consent.prefsSub': 'Choose what the site can use. You can change it any time.', // ALTA
+  'consent.necTitle': 'Necessary', // ALTA
+  'consent.necText': 'Sign-in, language, theme and the offline screen. The site doesn\'t work without them.', // ALTA
+  'consent.necAlways': 'Always on', // ALTA
+  'consent.anaTitle': 'Visit measurement', // ALTA
+  'consent.anaText': 'Google Analytics: how many people visit and where they come from. No name or email.', // ALTA
+  'consent.save': 'Save choice', // ALTA
+  'consent.close': 'Close', // ALTA
+  'consent.footer.policy': 'Cookie policy', // ALTA
+  'consent.footer.prefs': 'Cookie preferences', // ALTA
+  'consent.settings.title': 'Privacy and cookies', // ALTA
+  'consent.settings.sub': 'Choose whether the site can measure visits with Google Analytics. You can change it any time.', // ALTA
   'ageAck.title': 'A quick check', // ALTA
   'ageAck.sub': 'It takes a second and you only do it once.', // ALTA
   'ageAck.later': 'Not now', // ALTA
@@ -4322,11 +4346,20 @@ window.I18N_CATALOG['en'] = {
   'profile.err.photoNotImage': 'Choose an image file (JPG, PNG...).', // ALTA
   'zh.hanzi.reviewAll': '🔁 Review characters', // ALTA
   'loading.phrase.loading': 'Loading...', // ALTA
-  'loading.phrase.oneSec': 'Just a second...', // ALTA
-  'loading.phrase.almost': 'Almost there...', // ALTA
-  'loading.phrase.fetching': 'Getting the data...', // ALTA
-  'loading.phrase.preparing': 'Getting everything ready...', // ALTA
-  'loading.phrase.moment': 'One moment...', // ALTA
+  'loading.opening': 'Opening the site...', // ALTA
+  'loading.progress': 'Loading progress...', // ALTA
+  'loading.cards': 'Loading cards...', // ALTA
+  'loading.challenges': 'Loading challenges...', // ALTA
+  'loading.mural': 'Loading the board...', // ALTA
+  'loading.muralSide': 'Loading class details...', // ALTA
+  'loading.myClasses': 'Loading your classes...', // ALTA
+  'loading.notion': 'Loading Notion...', // ALTA
+  'loading.myCards': 'Loading your cards...', // ALTA
+  'loading.googleCalendar': 'Loading Google Calendar...', // ALTA
+  'loading.calendarLink': 'Loading the calendar link...', // ALTA
+  'loading.publishOptions': 'Loading sharing options...', // ALTA
+  'loading.reviewBank': 'Loading the Review Bank...', // ALTA
+  'loading.notifPrefs': 'Loading preferences...', // ALTA
   'zh.hanzi.radicals': '🧬 Radicals', // ALTA (achado extra: botão e título da tela de Radicais)
   // Etapa 3, lote C (2026-10-19): gerenciador de Tags, excluir Deck, importação cortada, Meus cartões, validação de
   // tags, novo editor, importação .apkg e Decks públicos. Texto pt idêntico ao que estava escrito direto no JS/HTML.

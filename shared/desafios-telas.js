@@ -118,18 +118,13 @@ function openChallengeReviewQueue(){
   if (!due.length){ challengeReviewQueueActive = false; renderChallengeCategories(); return; }
   challengeReviewQueueActive = true;
   challengeQueueContext = null;
+  challengeSessionXpStart = STATE.xp; // o resumo da revisão do dia soma o XP da sessão
   openChallengePlayer(due[0]);
 }
 function renderChallengeReviewDoneScreen(){
   const content = document.getElementById('challenge-player-content');
-  content.innerHTML = `
-    <div class="challenge-queue-interstitial">
-      <div class="big-emoji">🎉</div>
-      <h3>${chT('ch.review.doneTitle')}</h3>
-      <p>${chT('ch.review.doneSub')}</p>
-      <button class="btn btn-primary btn-block" id="review-queue-back-btn">${chT('ch.review.back')}</button>
-    </div>
-  `;
+  content.innerHTML = conclusaoHTML({ icon: '🎉', title: chT('ch.review.doneTitle'), sub: chT('ch.review.doneSub'), stats: challengeSessionXPStat(),
+    actions: [{ id: 'review-queue-back-btn', label: chT('ch.review.back') }], cls: 'challenge-queue-interstitial' });
   document.getElementById('review-queue-back-btn').addEventListener('click', () => {
     challengeReviewQueueActive = false;
     renderChallengeCategories();
@@ -156,8 +151,8 @@ function markChallengeCompleted(id){
   saveState();
   // Sem notificação aqui de propósito: "Missão concluída" é só pras 3
   // Missões do dia (ver checkDailyMissionCompletions em addXP()) -- estes
-  // são os desafios de conteúdo (Expressões/Ouça e traduza/Acentuação, sem
-  // XP desde a auditoria de XP), categoria diferente.
+  // são os desafios de conteúdo (Expressões/Ouça e traduza/Acentuação/Complete a frase; o XP é pago antes, no
+  // Concluir, e só na 1ª conclusão), categoria diferente.
 }
 // Wrapper compartilhado pelas 3 telas de feedback (Expressões, Ouça e
 // traduza, Acentuação): mesmo invólucro (classe correct/incorrect + header)
@@ -193,14 +188,26 @@ function challengeCompleteButtonHTML(){
 function challengeContinueButtonHTML(outcome){
   return `<button class="btn btn-primary challenge-complete-btn${outcome === 'ok' ? ' correct-feedback-continue' : ''}" id="challenge-complete-btn" style="margin-top:16px;width:100%;">${t('common.continueArrow')}</button>`;
 }
-// XP da Acentuação (decisão da autora, 2026-11-10; mesmo padrão da trilha, constantes de shared/srs.js, ver .claude/rules/xp.md): digitar certo
-// = EXERCISE_XP_PRODUCE, "quase" = EXERCISE_XP_ALMOST, errou = 0 (nem há Concluir). Só na PRIMEIRA conclusão (refazer concluído ou "Revisar erros" = 0).
-function accentXP(c, outcome){
+// XP dos Desafios que não são Expressões (decisão da autora, 2026-11-10; mesmo padrão da trilha, constantes de shared/srs.js, ver .claude/rules/xp.md):
+// Acentuação e Ouça e traduza (digitar) certo = EXERCISE_XP_PRODUCE, "quase" = EXERCISE_XP_ALMOST; Complete a frase (escolher a forma em cada lacuna)
+// certo = EXERCISE_XP_RECOGNIZE; errou ou "Não sei" = 0 (nem há Concluir). Só na PRIMEIRA conclusão (refazer concluído ou "Revisar erros" = 0).
+function challengeXP(c, outcome){
   if (isChallengeCompleted(c.id) || challengePreviewMode) return 0;
+  if (c.type === 'cloze_grammar') return outcome === 'ok' ? EXERCISE_XP_RECOGNIZE : 0;
   return outcome === 'ok' ? EXERCISE_XP_PRODUCE : outcome === 'partial' ? EXERCISE_XP_ALMOST : 0;
 }
 // Quanto de XP o último "Concluir" pagou (a tela de conclusão mostra; 0 = nada a mostrar).
 let challengeLastXP = 0;
+// Cartão "XP ganho" das telas de conclusão dos Desafios (só quando o último Concluir pagou XP).
+function challengeXPStat(){
+  return challengeLastXP > 0 ? [{ label: t('zh.path.lessonDone.xpEarned'), value: `+${challengeLastXP} ⭐` }] : [];
+}
+// Telas de RESUMO (nível concluído, revisão do dia concluída): XP SOMADO da sessão inteira (desde que a fila começou), não só do último exercício.
+let challengeSessionXpStart = 0;
+function challengeSessionXPStat(){
+  const n = Math.max(0, STATE.xp - challengeSessionXpStart);
+  return n > 0 ? [{ label: t('zh.path.lessonDone.xpEarned'), value: `+${n} ⭐` }] : [];
+}
 function wireChallengeCompleteButton(c, xpGain){
   const retry = document.getElementById('challenge-retry-btn');
   if (retry){
@@ -216,7 +223,6 @@ function wireChallengeCompleteButton(c, xpGain){
   const btn = document.getElementById('challenge-complete-btn');
   if (!btn) return;
   btn.addEventListener('click', () => {
-    challengeLastXP = 0;
     if (xpGain > 0 && !isChallengeCompleted(c.id)){ challengeLastXP = xpGain; addXP(xpGain); } // XP antes de marcar concluído
     markChallengeCompleted(c.id);
     if (challengeReviewQueueActive){
@@ -650,6 +656,7 @@ function nextQueueChallenge(type, level){
 
 function openChallengeQueueLevel(type, level){
   challengeQueueContext = { type, level };
+  challengeSessionXpStart = STATE.xp; // o resumo do nível soma o XP da sessão (2026-11-24)
   const next = nextQueueChallenge(type, level) || playableChallenges().find(c => c.type === type && c.level === level);
   if (next) openChallengePlayer(next.id);
 }
@@ -662,27 +669,16 @@ function queueLevelProgressLabel(type, level){
 
 function renderChallengeQueueContinueScreen(c, next){
   const content = document.getElementById('challenge-player-content');
-  content.innerHTML = `
-    <div class="challenge-queue-interstitial">
-      <div class="big-emoji">✅</div>
-      <h3>${chT('ch.queue.done')}</h3>
-      <p>${chT('ch.queue.levelProgress', { level: escapeHtmlChallenge(c.level), progress: queueLevelProgressLabel(c.type, c.level) })}</p>
-      <button class="btn btn-primary btn-block" id="queue-continue-btn">${chT('ch.queue.continue')}</button>
-    </div>
-  `;
+  content.innerHTML = conclusaoHTML({ icon: '✅', title: chT('ch.queue.done'),
+    sub: chT('ch.queue.levelProgress', { level: escapeHtmlChallenge(c.level), progress: queueLevelProgressLabel(c.type, c.level) }), stats: challengeXPStat(),
+    actions: [{ id: 'queue-continue-btn', label: chT('ch.queue.continue') }], cls: 'challenge-queue-interstitial' });
   document.getElementById('queue-continue-btn').addEventListener('click', () => openChallengePlayer(next.id));
 }
 
 function renderChallengeQueueLevelDoneScreen(c){
   const content = document.getElementById('challenge-player-content');
-  content.innerHTML = `
-    <div class="challenge-queue-interstitial">
-      <div class="big-emoji">🎉</div>
-      <h3>${chT('ch.queue.levelDone', { level: escapeHtmlChallenge(c.level) })}</h3>
-      <p>${chT('ch.queue.levelDoneSub')}</p>
-      <button class="btn btn-primary btn-block" id="queue-back-btn">${chT('ch.queue.back')}</button>
-    </div>
-  `;
+  content.innerHTML = conclusaoHTML({ icon: '🎉', title: chT('ch.queue.levelDone', { level: escapeHtmlChallenge(c.level) }), sub: chT('ch.queue.levelDoneSub'), stats: challengeSessionXPStat(),
+    actions: [{ id: 'queue-back-btn', label: chT('ch.queue.back') }], cls: 'challenge-queue-interstitial' });
   document.getElementById('queue-back-btn').addEventListener('click', () => {
     challengeQueueContext = null;
     renderChallengesList(currentChallengesCategory);
@@ -692,6 +688,7 @@ function renderChallengeQueueLevelDoneScreen(c){
 let challengePreviewMode = false;
 
 function openChallengePlayer(id){
+  challengeLastXP = 0; // o cartão "XP ganho" da conclusão é só do exercício que acabou de pagar
   const c = CHALLENGES.find(x => x.id === id);
   if (!c) return;
   // M3: desafio sem tradução no idioma do site não abre para o aluno (a prévia da admin continua abrindo).
@@ -732,7 +729,7 @@ function openExpressionPlayer(c){
 
 // ---------- Expressões em passos curtos, no molde da trilha (decisão da autora, 2026-10-26) ----------
 // 1) pergunta com "Meu palpite" (livre, NÃO corrigido) e "Ver opções"; 2) resposta (opções coloridas + painel curto + Continuar);
-// 3) "Veja em frases" (com "Quando usar": registro e cuidado); 4) "Monte a frase" (ordenar o exemplo 1; sem XP); 5) "Sua vez" (digitar;
+// 3) "Veja em frases" (com "Quando usar": registro e cuidado); 4) "Monte a frase" (ordenar o exemplo 1; 2 XP, pago no Concluir); 5) "Sua vez" (digitar;
 // o "Quase" é o da trilha, typedAnswerVerdictForExpected); 6) final ("Ir além" + Concluir ou Tentar de novo). A barra do topo (progresso, ⚑, ⌨️, X) é a de shared/activity-focus.js (data-lesson-bar no #challenge-player-wrap).
 // XP da "Sua vez": só na PRIMEIRA conclusão do desafio (refazer concluído = 0, como na trilha), pago ao tocar em Concluir.
 const EXPR_LAST_STEP = 5;
@@ -1175,7 +1172,7 @@ function exprShowFinal(c){
   }
   // O XP é pago antes do "Concluir" marcar o desafio como concluído (o listener de baixo roda depois deste).
   const done = document.getElementById('challenge-complete-btn');
-  if (done) done.addEventListener('click', () => { if (!run.xpPaid){ run.xpPaid = true; addXP(exprXPBreakdown(c).total); } });
+  if (done) done.addEventListener('click', () => { if (!run.xpPaid){ run.xpPaid = true; const g = exprXPBreakdown(c).total; challengeLastXP = g; addXP(g); } });
   wireChallengeCompleteButton(c);
 }
 
@@ -1276,8 +1273,8 @@ function checkListenTranslateAnswer(c, revealed){
     analysis = analyzeTranslation(ptPt ? ptPt.text : studentAnswer, c.referenceTranslations, c);
   }
   const isCorrect = outcome === 'ok';
-  // Desafio de conteúdo continua clicável mesmo já concluído -- não dá XP
-  // (mesma decisão de answerChallenge, ver auditoria do sistema de XP).
+  // Desafio de conteúdo continua clicável mesmo já concluído -- refazer concluído não paga XP
+  // (challengeXP: só a 1ª conclusão paga; .claude/rules/xp.md).
 
   const marked = (outcome !== 'ok' && studentAnswer && analysis) ? markTranslationWords(studentAnswer, analysis.bestRef || c.referenceTranslations[0]) : null;
   const yoursHTML = marked ? markedWordsHTML(marked.student) : escapeHtmlChallenge(studentAnswer || '—');
@@ -1304,7 +1301,7 @@ function checkListenTranslateAnswer(c, revealed){
   document.getElementById('lt-replay-slow-btn').addEventListener('click', (e) => {
     if (c.audioFile) playPregeneratedAudio(`challenges/${c.audioFile}`, e.currentTarget, false, SLOW_AUDIO_RATE);
   });
-  wireChallengeCompleteButton(c);
+  wireChallengeCompleteButton(c, challengeXP(c, outcome));
 }
 
 
@@ -1347,8 +1344,8 @@ function checkAccentAnswer(c, revealed){
   const studentAnswer = revealed ? '' : input.value.trim();
   const outcome = revealed ? 'fail' : accentAnswerOutcome(studentAnswer, c.targetText);
   const isCorrect = outcome === 'ok';
-  // Desafio de conteúdo continua clicável mesmo já concluído -- não dá XP
-  // (mesma decisão de answerChallenge, ver auditoria do sistema de XP).
+  // Desafio de conteúdo continua clicável mesmo já concluído -- refazer concluído não paga XP
+  // (challengeXP: só a 1ª conclusão paga; .claude/rules/xp.md).
 
   const accentBodyHTML = `
       ${!isCorrect && !revealed ? `<p class="accent-feedback-answer">${chT('ch.accent.yours', { answer: escapeHtmlChallenge(studentAnswer || '—') })}</p>` : ''}
@@ -1367,7 +1364,7 @@ function checkAccentAnswer(c, revealed){
   document.getElementById('accent-replay-slow-btn').addEventListener('click', (e) => {
     if (c.audioFile) playPregeneratedAudio(`challenges/${c.audioFile}`, e.currentTarget, false, SLOW_AUDIO_RATE);
   });
-  wireChallengeCompleteButton(c, accentXP(c, outcome));
+  wireChallengeCompleteButton(c, challengeXP(c, outcome));
 }
 
 
@@ -1462,7 +1459,7 @@ function renderClozeGrammarFeedback(c, chosen, res, revealed){
   chStepAnswered();
   if (!revealed) playFeedbackSound(isCorrect);
   recordChallengeReviewOutcome(c, res.outcome);
-  wireChallengeCompleteButton(c);
+  wireChallengeCompleteButton(c, revealed ? 0 : challengeXP(c, res.outcome));
 }
 
 

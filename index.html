@@ -7,9 +7,10 @@
 <!-- Nunito de verdade: antes o @font-face só usava local('Nunito'), então quase
      ninguém via a fonte (caía em Arial/Segoe). display=swap mostra o texto na
      fonte do sistema até a Nunito chegar; offline, fica a do sistema. -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap">
+<!-- Nunito do próprio site (antes vinha do Google Fonts, que recebia o IP antes de qualquer escolha; Fase 3 do GA4). -->
+<link rel="stylesheet" href="shared/fonts/nunito.css">
+<link rel="stylesheet" href="shared/consent.css">
+<script src="shared/consent.js" data-page="public" defer></script>
 <meta name="description" content="Plataforma de idiomas com Prof. Brune. Entre para continuar aprendendo.">
 <!-- Open Graph / Twitter Card -- precisam ser HTML estático (crawlers de
      redes sociais não executam JS), por isso os valores são digitados aqui
@@ -38,7 +39,7 @@ try{
   }
 }catch(e){ /* localStorage indisponível — cai na preferência do sistema */ }
 </script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="shared/vendor/supabase-js-2.119.2/supabase.js"></script>
 <link rel="preload" href="shared/fonts/nunito-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="shared/fonts/nunito.css">
 <style>
@@ -116,6 +117,9 @@ h1{
 .jp-icone--grande{ width:72px; height:72px; border-radius:22px; font-size:38px; }
 :is(.jp-icone, .jp-bloco).jp-tom-verde{ --tom:var(--success); } :is(.jp-icone, .jp-bloco).jp-tom-ouro{ --tom:var(--ouro); }
 .gate-note{ min-height:0; font-size:13px; color:var(--ink-soft); margin:0; text-align:center; }
+/* Links da política e das preferências de cookies (Fase 3 do GA4) no pé da entrada. */
+.gate-cookie-links{ margin:18px auto 24px; text-align:center; font-size:13px; color:var(--ink-soft); }
+.gate-cookie-links a{ color:var(--ink-soft); font-weight:700; }
 .gate-note:empty{ display:none; }
 .gate-note.err{ color:var(--danger); font-weight:700; }
 .gate-note.ok{ color:var(--success); font-weight:800; font-size:14px; }
@@ -706,11 +710,27 @@ async function afterAuthResolved(user){
   }
   if (intent && intent.lang && AVAILABLE_LANGUAGES.some(l => l.id === intent.lang)){
     if (intent.username && !(await claimSignupUsername(user, intent))) return;
+    // GA4 (shared/consent.js): cadastro concluído, só com o aceite da pessoa. Nada de dado pessoal: só o caminho e o curso.
+    try { if (window.ProfBruneConsent) window.ProfBruneConsent.signUp(intent.username ? 'email' : 'google', intent.lang); } catch (e) {}
     finishCoursePick(user, intent.lang, intent.speak || gateSiteLang());
     return;
   }
   showOnly('gate-choose-language');
-  renderLanguageChoices((langId) => finishCoursePick(user, langId, gateSpeak), 'lang-grid');
+  // Conta NOVA que entrou pelo "Entrar com Google" da tela de Entrar (sem passar pelo cadastro): também conta como
+  // cadastro no GA4 (pedido da dona, 2026-11-24). "Nova" = criada há menos de 30 minutos; conta antiga sem curso não conta.
+  const brandNew = isBrandNewAccount(user);
+  renderLanguageChoices((langId) => {
+    if (brandNew){ try { if (window.ProfBruneConsent) window.ProfBruneConsent.signUp(accountProvider(user), langId); } catch (e) {} }
+    finishCoursePick(user, langId, gateSpeak);
+  }, 'lang-grid');
+}
+function isBrandNewAccount(user){
+  const t = user && user.created_at ? Date.parse(user.created_at) : NaN;
+  return Number.isFinite(t) && Date.now() - t < 30 * 60 * 1000;
+}
+function accountProvider(user){
+  const p = user && user.app_metadata && user.app_metadata.provider;
+  return p === 'google' ? 'google' : 'email';
 }
 
 // O curso sai no idioma de "Eu falo...": vira o idioma do site, e o app grava na conta nova (shared/auth.js lê
@@ -1439,5 +1459,6 @@ paintGateTexts();
   });
 })();
 </script>
+<p class="gate-cookie-links"><a href="privacidade-cookies.html" data-i18n="consent.footer.policy">Política de cookies</a> · <a href="#" data-consent-open data-i18n="consent.footer.prefs">Preferências de cookies</a></p>
 </body>
 </html>

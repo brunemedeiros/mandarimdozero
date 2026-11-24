@@ -360,3 +360,9 @@ Já existe `tests/paridade-sites/test_css_compartilhado.js` (CSS de peças comun
 
 O que é grátis e o que é Premium: esta auditoria não cria recurso; os itens C propostos são todos de lição e Revisão,
 grátis como no fr hoje.
+
+## 13. Visual (CSS) dos `index.html` (2026-11-10 a 2026-11-24)
+
+Diferenças de estilo entre fr e zh, com o que é de propósito (marca e escrita do idioma) e o que era esquecimento (já
+igualado em 2026-11-15): `docs/css-comum/diferencas-fr-zh.md`. Plano para levar o CSS repetido dos dois `index.html` para
+`shared/`, em etapas: `docs/css-comum/plano.md`.

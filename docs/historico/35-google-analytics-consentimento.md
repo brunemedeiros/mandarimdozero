@@ -92,6 +92,130 @@ página" (o site manda as telas do app sozinho; com isso ligado, as limpezas de 
 - GA4: anúncios desligados em todas as regiões (conferido por ela). Vinculações: conferir que não há nada vinculado.
   Filtros de dados: o GA4 já cria o filtro "Tráfego interno" em modo de teste, que não faz nada sem regras; deixar como está.
 
+## Fase 3 (2026-11-16): aviso de cookies + GA4
+
+- `shared/consent.js` + `shared/consent.css` (um só arquivo para todas as páginas e sites; `data-page="app"` no fr/zh,
+  `"public"` no resto). Aviso "B1 nova" (G3, botões iguais, "Recusar opcionais" à esquerda, link "Política de cookies" e
+  "Preferências"); janela de Preferências (Necessários sempre ativos + chave "Medição de visitas", desligada até aceitar).
+  Escolha em `localStorage['cookie-consent']` (`{v:1, analytics, at}`; subir `STORE_VERSION` quando a política mudar de
+  verdade). Links "Preferências de cookies" (`[data-consent-open]`): rodapé do Sobre e das páginas de privacidade, pé da
+  entrada e Configurações > Geral > "Privacidade e cookies" (fr e zh).
+- GA4 `G-CE3282C1FB` modo básico: o `gtag.js` só é pedido depois do aceite; `cookie_expires` 13 meses (34128000 s), sem
+  Sinais do Google nem anúncios, sem `user_id`, `send_page_view:false` e `page_view` manual com endereço limpo (caminho +
+  `utm_*`; convite, token, e-mail e `#...` nunca saem; referência sem parâmetros). UTM da chegada guardado na aba
+  (`sessionStorage['consent-utm']`) até a escolha. Recusar depois de aceitar apaga `_ga`/`_ga_*` e liga `ga-disable`.
+- App: só mede depois de `setContext` (chamado em `shared/auth.js` com o perfil carregado); professora/admin não são
+  medidas e o aparelho fica marcado (`localStorage['ga-ignore-device']='1'`, vale também nas páginas abertas). Telas viram
+  páginas virtuais (`/fr/<aba>`; abas com "admin"/"teacher" nunca), `lesson_start`/`lesson_complete` (tipo + curso),
+  `course_restart`; tudo espelhado de `trackEvent` (`shared/analytics.js`). Entrada: `sign_up` (método + curso).
+- Entrada sem Google Fonts (usa `shared/fonts/nunito.css`). "Sem telemetria de terceiros" atualizado em `shared/analytics.js`
+  e em `admin.analytics.dev.osNote` (pt-BR e en).
+- Navegador automático (`navigator.webdriver`) não vê o aviso sozinho (cobriria os botões dos outros testes); o teste do aviso
+  liga com `window.__CONSENT_TEST__ = true`.
+- Testes: `tests/consentimento/test_playwright.js` 57/57 (nada ao Google antes da escolha nem depois de recusar; aceitar pede
+  o gtag com o ID; config; endereço limpo com utm; revogar apaga cookies; UTM guardado; en sem português; `?origem=` dos testes
+  intacto; app fr e zh com telas, eventos, admin/professora fora; Configurações; posição acima do menu de baixo).
+- Fora desta fase: Contrato e Central de Ajuda sem GA4 (decisão da dona); `/aulas/` é a Fase 6.
+- Regressão (subagente `regressao`, 2026-11-16): tudo passando, exceto dois testes que precisavam registrar a mudança
+  aprovada: `tests/paridade-sites/test_quase_iguais.js` (neutralização da caixa "Privacidade e cookies" das Configurações,
+  agora 2770/2770) e `tests/i18n/test_i18n_unit.js` (chaves `consent.*` e `ageAck.*` na lista de textos novos, "Cookies"
+  igual nos dois idiomas; 2338/2338). Política geral em rascunho (aba Privacidade do Admin, `ajuda/textos/politica.html` e
+  documento do advogado): item novo "Medição de visitas" na seção 5 e Google Fonts retirado da lista de terceiros.
+
+## Fase 4 (2026-11-16): publicação
+
+- PR #483 (Fases 2 e 3, com o aviso C2) mesclado na `main` com autorização da dona. Conferido no ar com navegador
+  automático (2026-11-16): aviso aparece; recusar não faz nenhum pedido ao Google; aceitar pede o `gtag.js` do
+  `G-CE3282C1FB` e o `page_view` sai como `https://app.profbrune.com.br/?utm_source=teste&utm_medium=teste` (o `convite=`
+  foi tirado); teste de nivelamento fr com aviso e `?origem=` chegando ao Apps Script; sem Google Fonts. O envio ao Google
+  foi bloqueado na conferência para não criar visita falsa.
+- Falta (com a dona): ver a visita no "Tempo real" do GA4 com o link de teste numa janela anônima (os aparelhos onde ela
+  entra como admin ficam marcados para não contar) e marcar os eventos-chave (`sign_up`, cliques de saída e o evento
+  criado para abertura dos testes de nivelamento).
+
+## Correções da revisão diária (2026-11-24)
+
+Dois achados da revisão diária, confirmados pela dona:
+1. **Data do aceite de idade editável pela API** (a policy de update da 073 libera qualquer coluna de `profile_private`).
+   Migration `144_protect_age_ack` (a 143 já era de outra conversa: `143_review_bank_typed_text`): trigger
+   `profile_private_age_ack_guard` + função `_guard_age_ack()`. Pela API (authenticated/anon) ninguém grava, troca nem apaga
+   `age_ack_at`, nem apaga a linha que já tem a data; o gênero continua editável. Só a `ack_my_age()` grava, uma vez;
+   depois nem o servidor troca a data (exclusão de conta pelo servidor continua apagando a linha). Teste local
+   `tests/privacidade-padrao/test_144.sql` 11/11 (e `test_136.sql` 8/8). **Staging: aplicada (versão `20261124160100`) e
+   testada numa transação desfeita (4/4). Produção: aplicada com autorização da dona em 2026-11-24 (versão `20261124170904`);
+   8 linhas e o hash das datas iguais antes e depois; trigger ligado; tentativa de troca como `authenticated` numa transação
+   desfeita recusada com `age_ack_at_protected`.**
+2. **Eventos do GA4 com o endereço completo** (só o `page_view` era limpo). `shared/consent.js`: `page_location` e
+   `page_referrer` limpos já no `gtag('config')` e `gtag('set')` a cada página, então lição, cadastro, recomeço e cliques de
+   saída também saem limpos; só mede em `app.profbrune.com.br` (fora dele, só o teste do aviso com `__CONSENT_TEST__`);
+   nome de tela só vira página se existir `#view-<aba>` (antes `#segredo` no link virava `/fr/segredo`). `shared/auth.js`:
+   `setContext` só com o perfil de fato carregado (sem perfil, nada medido; a admin pelo e-mail marca o aparelho).
+   `tests/consentimento/test_playwright.js` 76/76. Conferido com o `gtag.js` de verdade (envio capturado e bloqueado):
+   nossos eventos saem com `/fr/` limpo. **Ainda vaza** o `page_view` automático do próprio Google ao mudar o endereço
+   (`dl` com `?cur=&view=&ui=`): vem da opção "Alterações na página de acordo com os eventos do histórico de navegação",
+   que o `gtag.js` servido para o ID mostra LIGADA (`vtp_enableHistoryEvents:true`; também rolagem, formulários, vídeo e
+   downloads ligados). Só dá para desligar no painel do GA4 (dona); depois, conferir de novo no `gtag.js`.
+3. **Causa real do vazamento (2026-11-24, depois do PR)**: a dona conferiu o painel e as opções já estavam desligadas. O que
+   manda as opções de verdade são as tags `__ccd_em_*` do `gtag.js` servido, e só existe a `__ccd_em_outbound_click`
+   (Cliques de saída): o painel está certo; o `__ogt_auto_events` com tudo `true` é só o "ouvinte" genérico. Testes com o
+   `gtag.js` real numa página mínima (envio capturado e bloqueado): **a tag do Google desta propriedade se configura sozinha
+   ao carregar e ignora o `gtag('config')` da página inteiro**, até no snippet padrão do Google. Sem nenhum `config`, ela
+   já mandava um `page_view` com o endereço completo; e com o `config` vinham cookie de 400 dias (não 13 meses), `npa=0`
+   e o título errado. Saída: as mesmas regras num **`gtag('set', …)` ANTES do `gtag('js')`**: nenhum envio automático,
+   endereço limpo, cookie de 395 dias e `npa=1`. O `config` continua, caso o Google volte a lê-lo.
+   `tests/consentimento/test_playwright.js` 77/77 (nova conferência da ordem). Na `main` de 16/11 até a publicação, o 1º
+   `page_view` de cada visita com aceite levou o endereço de chegada sem o trecho do `#` (a tag apaga e-mails do endereço,
+   `__ccd_auto_redact`), e os cookies `_ga` foram gravados por 400 dias (o Google renova a validade a cada envio, então
+   passam a 13 meses na próxima visita). Opcional: pedir ao Google a exclusão do `page_location` desse período
+   (Administrador > Coleta e modificação de dados > Solicitações de exclusão de dados).
+
+## Conferência de 2026-11-24
+
+- GA4 recebendo dados (print da dona, "Eventos recentes"): `first_visit`, `page_view`, `session_start`, `user_engagement`,
+  `lesson_start`, `lesson_complete`. Ainda sem `sign_up` e `click`. Na produção: 1 conta nova desde a publicação (nasceu
+  com perfil privado) e 6 confirmações de idade. `sign_up` conferido de ponta a ponta no teste (cadastro por e-mail com
+  cookies aceitos; `tests/consentimento/test_playwright.js` 63/63): a ausência vem de não ter havido cadastro com aceite.
+  Conta criada pelo "Entrar com Google" da tela de Entrar (sem passar pelo cadastro) passou a gerar `sign_up` (pedido da
+  dona, 2026-11-24): `index.html`, ao escolher o curso, só se a conta foi criada há menos de 30 minutos (conta antiga sem
+  curso não conta); método pelo `app_metadata.provider`. Teste 65/65.
+- Dona criou o evento `abrir_teste_nivelamento` no GA4 (2026-11-24). Na "Aquisição de tráfego" ainda só "(direct) / (none)"
+  (5 sessões); o envio do site foi conferido ao vivo (o pedido ao Google leva o endereço com os `utm_*`, `_fv=1`, `_ss=1`),
+  então a falta do teste / teste deve ser atraso de processamento ou o período do relatório (o padrão "últimos 28 dias"
+  não inclui o dia de hoje). Conferir de novo depois de 48 h.
+- Na interface nova do GA4, "eventos-chave" viraram "Eventos principais" (estrela em Administrador > Exibição de dados >
+  Eventos). `close_convert_lead`, `qualify_lead` e `purchase` foram criados pelo objetivo "Gerar leads" e nunca recebem dados.
+
+## Ajustes pedidos depois da Fase 3 (2026-11-16)
+
+- A dona achou o aviso grande. Prévias enviadas (tela real, celular e computador): **C1** sem o título "Cookies", ícone
+  menor, faixa colorida (celular 208 px em vez de 255); **C2** sem faixa colorida (198 px); no computador as duas viram uma
+  faixa larga e baixa (67 px em vez de 260). **Escolhida: C2** (2026-11-16), aplicada em `shared/consent.js`/`.css`;
+  `tests/consentimento/test_playwright.js` 59/59 (inclui altura no celular e no computador). Fase 3 aprovada e publicação
+  autorizada pela dona no mesmo dia.
+- Documento do advogado: seção "Como o aviso de cookies e o Google Analytics funcionam (16/11/2026)" na aba Resumo, com a
+  tabela do comportamento e 3 perguntas (UTM guardado na aba antes da escolha, medição própria fora do aviso, texto curto).
+
+## Fase 2 (2026-11-16): política de cookies
+
+- Página nova `privacidade-cookies.html` (pt-BR e en na mesma página, molde das outras de privacidade): o que fica no
+  aparelho sem pedir, a medição com o GA4 (para quê, o que não é enviado, sem anúncios, 14 meses no Google), tabela dos
+  cookies `_ga` e `_ga_CE3282C1FB` com **13 meses** (a Fase 3 tem de configurar o GA4 com essa duração, `cookie_expires`),
+  Google LLC e dados fora do Brasil, outros serviços (formulários do Google nos testes e no contrato, jsDelivr, cdnjs,
+  Supabase), a medição própria sem cookies, como aceitar/recusar/mudar (recusar depois de aceitar APAGA os cookies do GA4:
+  a Fase 3 tem de fazer isso), direitos da LGPD e ANPD, contato. O formulário de aulas entra na página quando a Fase 6 sair.
+- Links: rodapé do `sobre.html` e rodapé novo nas três páginas de privacidade. Teste `tests/privacidade-padrao/test_pagina_cookies.js` 32/32.
+- Recomendação: publicar junto com a Fase 3, porque a página cita o aviso e o "Preferências de cookies", que só existem nela.
+- A seção curta de cookies na política geral (aba Privacidade do Admin, `ajuda/textos/politica.html` e documento do
+  advogado) entra depois que a dona aprovar o texto desta página.
+
+## Fase P publicada (2026-11-16)
+
+- PR #481 mesclado na `main` com autorização da dona (2026-11-16) e conferido no ar (o cadastro tem a caixinha e
+  `shared/age-ack.js` publicado). Regressão: todas as áreas vizinhas passando; o teste das janelas do topo
+  (`tests/janelas-topo/test_playwright.js`) passou a marcar "Agora não" na janela de idade antes de clicar no 🔥/⭐ (276/276).
+- Documento do advogado atualizado: seção "Já aplicado no site em 16/11/2026" na aba Resumo, com a pergunta se a
+  autodeclaração + perfil privado por padrão bastam para o ECA Digital.
+
 ## Respostas de 2026-11-15 (quarta rodada)
 
 - **"Preferências" no banner: sim.** Link discreto embaixo dos botões do banner B1 nova, abrindo a janela "Preferências de

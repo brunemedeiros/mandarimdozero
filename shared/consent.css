@@ -1,0 +1,75 @@
+/* Aviso de cookies e janela "Preferências de cookies" (shared/consent.js, Fase 3 do projeto GA4; "B1 nova" da dona).
+   Mesmo desenho das janelas do topo (🔥/⭐): cabeçalho na cor da marca com título grande e ícone, corpo claro, botões em
+   pílula com borda. Usa os tokens do site quando existem (app e entrada) e cores de reserva nas páginas simples (Sobre,
+   privacidade, testes de nivelamento). "Recusar opcionais" e "Aceitar todos" têm o MESMO tamanho e o mesmo peso; só o texto
+   do "Aceitar" usa a cor da marca (pedido do prompt: recusar tão fácil quanto aceitar). */
+.cc-banner-wrap{ position:fixed; left:0; right:0; bottom:16px; z-index:8000; display:flex; justify-content:center; padding:0 12px; pointer-events:none; }
+.cc-banner-wrap.cc-in-app{ bottom:calc(16px + env(safe-area-inset-bottom, 0px)); }
+@media (max-width: 899px){ .cc-banner-wrap.cc-in-app{ bottom:calc(76px + env(safe-area-inset-bottom, 0px)); } }
+.cc-pop{
+  pointer-events:auto; width:380px; max-width:100%; box-sizing:border-box; overflow:hidden;
+  background:var(--paper, #FAF7F2); color:var(--ink, #201A2C); font-family:var(--font-body, 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif);
+  border:1px solid var(--paper-line, #E3DCCE); border-radius:18px; box-shadow:var(--shadow-lift, 0 14px 40px rgba(20,16,30,.22));
+}
+.cc-head{ position:relative; background:var(--brand-fill, #2879B3); color:var(--on-brand-fill, #FFFFFF); padding:16px 96px 16px 20px; min-height:92px; box-sizing:border-box; }
+.cc-title{ font-family:var(--font-display, inherit); font-size:24px; font-weight:800; line-height:1.15; margin:0; color:inherit; }
+.cc-sub{ margin:6px 0 0; font-size:14px; font-weight:600; line-height:1.4; color:inherit; }
+.cc-art{ position:absolute; right:16px; top:50%; transform:translateY(-50%) rotate(-6deg); font-size:54px; line-height:1; pointer-events:none; }
+.cc-art .emo{ width:1.15em; height:1.15em; }
+.cc-body{ padding:14px 18px 16px; display:flex; flex-direction:column; gap:12px; }
+.cc-policy{ margin:0; font-size:13.5px; font-weight:800; }
+.cc-policy a{ color:var(--ink, #201A2C); }
+.cc-row{ display:flex; gap:10px; }
+.cc-row > .cc-btn{ flex:1 1 0; }
+.cc-btn{
+  min-height:44px; padding:8px 12px; border-radius:999px; cursor:pointer; font:inherit; font-size:14.5px; font-weight:800; line-height:1.2;
+  background:transparent; color:var(--ink-soft, #6B6478); border:2px solid var(--paper-line, #E3DCCE);
+}
+.cc-btn.cc-main{ color:var(--seal-red-dark, var(--brand-fill, #2879B3)); border-color:currentColor; }
+.cc-btn:hover{ background:color-mix(in srgb, var(--brand-fill, #2879B3) 8%, transparent); }
+.cc-btn:focus-visible, .cc-link:focus-visible, .cc-x:focus-visible, .cc-policy a:focus-visible{ outline:2px solid var(--brand-fill, #2879B3); outline-offset:2px; }
+.cc-more{ margin:-2px 0 0; text-align:center; }
+.cc-link{ background:none; border:0; padding:6px 4px; font:inherit; font-size:13.5px; font-weight:800; color:var(--ink-soft, #6B6478); text-decoration:underline; cursor:pointer; min-height:36px; }
+
+/* Janela de Preferências */
+.cc-overlay{ position:fixed; inset:0; z-index:8500; background:rgba(20,16,30,.5); display:flex; align-items:center; justify-content:center; padding:16px; }
+.cc-modal{ width:400px; max-height:calc(100vh - 32px); overflow:auto; }
+.cc-pop .cc-x{ position:absolute; top:8px; right:8px; width:36px; height:36px; padding:0; margin:0; border-radius:999px; border:0; background:transparent; color:var(--on-brand-fill, #FFFFFF); font:inherit; font-size:18px; font-weight:800; line-height:1; cursor:pointer; box-shadow:none; display:flex; align-items:center; justify-content:center; }
+.cc-pop .cc-x svg{ pointer-events:none; }
+.cc-modal .cc-head{ padding-right:104px; }
+.cc-modal .cc-art{ right:44px; }
+.cc-card{ background:var(--paper-warm, #F1ECE2); border:1px solid var(--paper-line, #E3DCCE); border-radius:14px; padding:12px 14px; }
+.cc-cat{ display:flex; gap:12px; align-items:flex-start; justify-content:space-between; }
+label.cc-cat{ cursor:pointer; }
+.cc-cat-t{ margin:0; font-size:14.5px; font-weight:800; }
+.cc-cat-s{ margin:3px 0 0; font-size:13px; line-height:1.4; color:var(--ink-soft, #6B6478); }
+.cc-always{ font-size:12.5px; font-weight:800; white-space:nowrap; padding-top:2px; color:var(--success-fill, #3A7359); }
+.cc-switch{ position:relative; flex:0 0 auto; width:46px; height:28px; }
+.cc-switch input{ position:absolute; inset:0; width:100%; height:100%; margin:0; opacity:0; cursor:pointer; z-index:1; }
+.cc-switch span{ position:absolute; inset:0; border-radius:999px; background:var(--paper-line, #E3DCCE); transition:background .15s; }
+.cc-switch span::after{ content:""; position:absolute; top:4px; left:4px; width:20px; height:20px; border-radius:50%; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.25); transition:transform .15s; }
+.cc-switch input:checked + span{ background:var(--success-fill, #3A7359); }
+.cc-switch input:checked + span::after{ transform:translateX(18px); }
+.cc-switch input:focus-visible + span{ outline:2px solid var(--brand-fill, #2879B3); outline-offset:2px; }
+.cc-row3 > .cc-btn{ font-size:13.5px; padding:8px 8px; }
+@media (max-width: 420px){
+  .cc-head{ padding-right:84px; }
+  .cc-title{ font-size:22px; }
+  .cc-art{ font-size:46px; }
+}
+@media (prefers-reduced-motion: reduce){ .cc-switch span, .cc-switch span::after{ transition:none; } }
+
+/* ---- Aviso compacto "C2" (escolha da dona, 2026-11-16): sem título e sem faixa colorida, ícone pequeno ao lado do texto.
+   No computador (900 px ou mais) vira uma faixa larga e baixa, com tudo numa linha. A janela de Preferências não muda. ---- */
+.cc-banner .cc-head{ display:flex; align-items:flex-start; gap:10px; min-height:0; padding:14px 16px 0; background:transparent; color:var(--ink, #201A2C); }
+.cc-banner .cc-art{ position:static; transform:rotate(-6deg); font-size:28px; flex:0 0 auto; }
+.cc-banner .cc-sub{ margin:2px 0 0; font-size:14.5px; font-weight:600; line-height:1.4; color:var(--ink, #201A2C); }
+.cc-banner .cc-body{ padding:12px 16px 12px; gap:10px; }
+@media (min-width: 900px){
+  .cc-banner-wrap .cc-banner{ width:min(980px, 100%); display:flex; align-items:center; }
+  .cc-banner .cc-head{ flex:1 1 auto; align-items:center; padding:12px 8px 12px 16px; }
+  .cc-banner .cc-body{ flex:0 0 auto; flex-direction:row; align-items:center; gap:14px; padding:10px 16px 10px 8px; }
+  .cc-banner .cc-row > .cc-btn{ flex:0 0 auto; padding:8px 18px; }
+  .cc-banner .cc-more{ margin:0; }
+}
+

@@ -1,4 +1,4 @@
-// RASCUNHO da política de privacidade (admin vê na aba Privacidade do Painel de Admin; ainda NÃO é a política oficial).
+// RASCUNHO da política de privacidade (2026-11-16: seção 5 ganhou a medição de visitas com o Google Analytics e perdeu o Google Fonts, que saiu do site) (admin vê na aba Privacidade do Painel de Admin; ainda NÃO é a política oficial).
 // SÓ em português por decisão da dona (2026-10-19): o advogado lê em português; a versão em inglês fica arquivada em
 // docs/historico/privacidade-rascunho-en-arquivado.json e volta quando o texto estiver fechado. Feito a partir de como o site funciona em 2026-10-19 (política por tipo de conta, mapa do fluxo dos dados e pontos para o advogado) e entregue ao advogado para revisão. Trechos [CONFIRMAR: ...] são
 // pontos que só a dona ou o advogado sabem. Inglês traduzido com DeepL (site em inglês não mostra português).
@@ -155,7 +155,11 @@ const PRIVACY_DRAFT = {
  ],
  [
   "li",
-  "Bibliotecas e fontes carregadas de terceiros (Google Fonts, cdnjs e jsDelivr): ao abrir o site, o seu navegador contacta esses serviços e eles recebem o seu endereço de rede."
+  "Bibliotecas carregadas de terceiros (cdnjs e jsDelivr): ao abrir o site, o seu navegador contacta esses serviços e eles recebem o seu endereço de rede."
+ ],
+ [
+  "li",
+  "Medição de visitas (opcional): só se você aceitar no aviso de cookies, o site usa o Google Analytics para contar as visitas e saber de onde elas vêm, sem nome nem e-mail. Os cookies, por quanto tempo duram e como mudar a escolha estão na página Privacidade: cookies e medição de visitas (app.profbrune.com.br/privacidade-cookies.html)."
  ],
  [
   "li",
@@ -374,7 +378,7 @@ const PRIVACY_DRAFT = {
  ],
  [
   "li",
-  "Serviços fora do Brasil: Google (fontes, voz e agenda), Cloudflare (cdnjs), jsDelivr, GitHub Pages, Resend, serviços de push dos navegadores e a ferramenta de IA. Verificar transferência internacional de dados (LGPD, art. 33)."
+  "Serviços fora do Brasil: Google (voz, agenda e Google Analytics, este só com o aceite no aviso de cookies), Cloudflare (cdnjs), jsDelivr, GitHub Pages, Resend, serviços de push dos navegadores e a ferramenta de IA. Verificar transferência internacional de dados (LGPD, art. 33)."
  ],
  [
   "li",

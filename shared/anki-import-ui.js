@@ -105,7 +105,7 @@ async function handleAnkiImportFileSelected(file){
 
   let SQL;
   try {
-    SQL = await initSqlJs({ locateFile: f => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${f}` });
+    SQL = await initSqlJs({ locateFile: f => new URL('../shared/vendor/sqljs-1.8.0/' + f, location.href).href });
   } catch (e) {
     body.innerHTML = ankiImportErrorHTML(t('ankiImport.err.loadDb'));
     return;

@@ -106,7 +106,7 @@ async function renderReviewBankView(){
   }
   if (!wrap.dataset.rbWired){ wrap.dataset.rbWired = '1'; rbWire(wrap); }
   if (!RB.ready){
-    wrap.innerHTML = loadingHTML();
+    wrap.innerHTML = loadingHTML(t('loading.reviewBank'));
     try { await rbLoadBase(); }
     catch (e){ console.error('Banco de Revisão:', e); wrap.innerHTML = `<p class="profile-empty-note">${rbH(rbt('loadError'))}</p>`; return; }
     const saved = rbLs.get('cur');

@@ -36,7 +36,7 @@
 //
 // Grátis x Premium (igual ao fr de antes): desafio com moduleId é Premium (Desafios do Módulo), sem moduleId é Free;
 // hoje só com o selo, porque a trava está desligada (CHALLENGE_PAYWALL_ENABLED = false; permissão challenges_premium
-// em Admin > Planos). XP: os desafios não dão XP (auditoria de XP); contam para as conquistas (challengesDone).
+// em Admin > Planos). XP: Expressões, Acentuação, Ouça e traduza e Complete a frase dão XP só na 1ª conclusão (.claude/rules/xp.md); todos contam para as conquistas (challengesDone).
 
 let CH_CONFIG = null;
 

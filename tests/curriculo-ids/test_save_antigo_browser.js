@@ -40,7 +40,7 @@ async function openPage(browser, port, lang, seed){
   const page = await ctx.newPage(); const errs = [];
   page.on('pageerror', e => errs.push(e.message));
   await page.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, r => r.abort());
-  await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
+  await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase|\/shared\/vendor\/supabase-js/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
   await page.addInitScript((s) => { try { sessionStorage.setItem('guest_mode', '1'); } catch (e) {} if (s) window.__seedProgress = s; }, seed || null);
   await page.goto(`http://127.0.0.1:${port}/${lang}/index.html`);
   await page.waitForFunction(() => typeof STATE !== 'undefined' && CURRENT_USER === false && typeof saveState === 'function', null, { timeout: 20000 });
