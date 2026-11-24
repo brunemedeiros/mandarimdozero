@@ -12,6 +12,9 @@
   --ok:#2E6B4F; --ok-tint:#E2F2E8; --on-ok:#FFFFFF;
   --err:#B81F13; --err-tint:#FBE4E1; --on-err:#FFFFFF;
   --note-tint:#FBF0D9; --bub-a:#F0E8D8;
+  /* Painel de resposta único (shared/painel-resposta.css): mesmos tokens do site; os "fill" são iguais nos dois temas. */
+  --jade:#3A7359; --error-red:#D62619; --error-red-text:#B81F13; --on-brand-fill:#FFFFFF;
+  --success-fill:#3A7359; --on-success-fill:#FFFFFF; --error-fill:#D62619; --on-error-fill:#FFFFFF;
   --shadow:0 1px 2px rgba(32,19,53,.06),0 8px 24px rgba(32,19,53,.08);
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
@@ -22,6 +25,7 @@
   --ok:#52B487; --ok-tint:#173126; --on-ok:#201335;
   --err:#FF8A7E; --err-tint:#3A1C1C; --on-err:#201335;
   --note-tint:#33290F; --bub-a:#3A3050;
+  --jade:#52B487; --error-red:#FF6B5C; --error-red-text:#FF6B5C;
   --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.35);
   color-scheme:dark;
 }}
@@ -33,6 +37,7 @@
   --ok:#52B487; --ok-tint:#173126; --on-ok:#201335;
   --err:#FF8A7E; --err-tint:#3A1C1C; --on-err:#201335;
   --note-tint:#33290F; --bub-a:#3A3050;
+  --jade:#52B487; --error-red:#FF6B5C; --error-red-text:#FF6B5C;
   --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.35);
   color-scheme:dark;
 }
@@ -101,23 +106,33 @@ header.top p{margin:0;color:var(--ink-soft);max-width:65ch}
 .ex-row span{color:var(--ink-soft);font-size:.92rem}
 .ex-row .lbl{display:inline-block;font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--brand-dark);margin-left:6px}
 /* painel de resposta */
-.panel{position:absolute;left:0;right:0;bottom:0;padding:18px 22px 22px;border-radius:24px 24px 0 0;transform:translateY(105%);transition:transform .25s ease;display:flex;flex-direction:column;gap:10px}
+/* Painel de resposta: o mesmo visual do painel único do site (shared/painel-resposta.css, docs/painel-resposta-unico.md),
+   com o "Continuar" de degrau no tom do próprio botão (decisões da autora de 2026-11-15). Aqui ele sobe do pé da tela do celular. */
+.panel{position:absolute;left:0;right:0;bottom:0;padding:18px 20px 20px;border-radius:24px 24px 0 0;transform:translateY(105%);transition:transform .25s ease;display:flex;flex-direction:column;gap:12px;text-align:left}
 .panel.show{transform:none}
-.panel.ok{background:var(--ok-tint)}
-.panel.err{background:var(--err-tint)}
-.panel h4{margin:0;font-size:1.2rem;display:flex;align-items:center;gap:8px}
-.panel.ok h4{color:var(--ok)}
-.panel.err h4{color:var(--err)}
-.mark{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-size:1rem;font-weight:800}
-.panel.ok .mark{background:var(--ok);color:var(--on-ok)}
-.panel.err .mark{background:var(--err);color:var(--on-err)}
-.panel .ans{display:flex;align-items:center;gap:10px;font-weight:800}
-.panel mark.dif{background:var(--card);color:var(--err);box-shadow:0 0 0 2px var(--err);border-radius:5px;padding:0 4px}
-.panel .ans .t{flex:1;min-width:0}
-.panel .ans span{display:block;font-weight:600;color:var(--ink-soft)}
-.panel .why{margin:0;color:var(--ink)}
-.panel.ok .btn{background:var(--ok);color:var(--on-ok)}
-.panel.err .btn{background:var(--err);color:var(--on-err)}
+.panel.ok{background:color-mix(in srgb,var(--jade) 16%,var(--paper))}
+.panel.err{background:color-mix(in srgb,var(--error-red) 13%,var(--paper))}
+.panel h4{margin:0;font-size:20px;font-weight:900;display:flex;align-items:center;gap:10px}
+.panel.ok h4{color:var(--jade)}
+.panel.err h4{color:var(--error-red-text)}
+.mark{flex:none;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-size:16px;font-weight:900;line-height:1}
+.panel.ok .mark{background:var(--success-fill);color:var(--on-success-fill)}
+.panel.err .mark{background:var(--error-red);color:var(--on-brand-fill)}
+.panel .ans{display:flex;align-items:center;gap:12px;font-size:17px;font-weight:900;line-height:1.35}
+.panel mark.dif{background:var(--card);color:var(--error-red-text);box-shadow:0 0 0 2px var(--error-red-text);border-radius:5px;padding:0 4px}
+.panel .ans .t{flex:1;min-width:0;overflow-wrap:anywhere}
+.panel .ans span{display:block;margin-top:2px;font-size:15px;font-weight:600;color:var(--ink-soft)}
+.panel .why{margin:0;font-size:15px;line-height:1.55;color:var(--ink);max-width:62ch}
+.panel .why b{color:var(--brand-dark);font-weight:800} /* o francês da fala em azul, como o {trecho} do painelRespostaRico */
+.panel .prof{gap:12px}
+.panel .prof img{border-color:var(--paper)}
+.panel .prof .fala{gap:4px}
+.panel .prof .nome{font-size:12px;letter-spacing:0;text-transform:none}
+.panel .btn{min-height:52px;border-radius:16px}
+.panel.ok .btn{background:var(--success-fill);color:var(--on-success-fill);box-shadow:0 4px 0 color-mix(in srgb,var(--success-fill) 62%,#000)}
+.panel.err .btn{background:var(--error-fill);color:var(--on-error-fill);box-shadow:0 4px 0 color-mix(in srgb,var(--error-fill) 62%,#000)}
+.panel.ok .btn:active{box-shadow:0 2px 0 color-mix(in srgb,var(--success-fill) 62%,#000)}
+.panel.err .btn:active{box-shadow:0 2px 0 color-mix(in srgb,var(--error-fill) 62%,#000)}
 .done-hero{text-align:center;padding-top:12px}
 .done-hero h2{margin:0 0 2px;font-size:1.5rem}
 .lessons{display:grid;gap:10px}
@@ -195,7 +210,7 @@ aside{display:grid;gap:16px;min-width:0}
 <div class="wrap">
   <header class="top">
     <div class="eyebrow">Maquete · módulo "Apresentar-se"</div>
-    <h1>Lições curtas: unidades 1 a 6</h1>
+    <h1>Lições curtas: unidades 1 a 7</h1>
     <p>Clique como se fosse a aluna. Ao lado, o porquê de cada tela. Nada disso está no app ainda.</p>
     <div class="unit-tabs" id="units"></div>
     <div class="lesson-tabs" id="tabs"></div>
@@ -777,10 +792,13 @@ function next(){
   go(i+1);
 }
 
+const TITULO_PAINEL={certo:'Isso mesmo!',quase:'Quase certo!',erro:'Quase lá!'};
+const estadoDe=ok=>ok===true?'certo':(ok===false?'erro':ok); // ok: true | false | 'quase'
+const tituloPainel=ok=>{ const e=estadoDe(ok); return `<h4><span class="mark">${e==='erro'?'✕':(e==='quase'?'~':'✓')}</span>${TITULO_PAINEL[e]}</h4>`; };
 function showPanel(ok, s, extra){
   const fr=s.full||s.answer, tr=s.fullTr||s.tr||'';
   panel.className='panel show '+(ok?'ok':'err');
-  panel.innerHTML=`<h4><span class="mark">${ok?'✓':'✕'}</span>${ok?'Isso mesmo!':'Quase lá!'}</h4>
+  panel.innerHTML=`${tituloPainel(ok)}
     <div class="ans"><div class="t">${s.frHtml||esc(fr)}<span>${esc(tr)}</span></div>${audBtn(fr,'')}</div>
     <div class="prof"><img src="${FOTO}" alt="Prof. Brune"><div class="fala"><span class="nome">Prof. Brune</span><p class="why">${extra||s.why_ok}</p></div></div>
     <button class="btn" id="cont">Continuar</button>`;
@@ -792,7 +810,7 @@ function showPanel(ok, s, extra){
 function painelDialogo(ok, why, d, j, rotulo){
   panel.className='panel show '+(ok?'ok':'err');
   const linha = (d && j!=null) ? `<div class="ans"><div class="t">${esc(d.names[d.lines[j][0]])}: ${esc(d.lines[j][1])}<span>${esc(d.lines[j][2])}</span></div>${audBtn(d.lines[j][1],'')}</div>` : (rotulo?`<div class="ans"><div class="t">${esc(rotulo)}</div></div>`:'');
-  panel.innerHTML=`<h4><span class="mark">${ok?'✓':'✕'}</span>${ok?'Isso mesmo!':'Quase lá!'}</h4>${linha}
+  panel.innerHTML=`${tituloPainel(ok)}${linha}
     <div class="prof"><img src="${FOTO}" alt="Prof. Brune"><div class="fala"><span class="nome">Prof. Brune</span><p class="why">${why}</p></div></div>
     <button class="btn" id="cont">Continuar</button>`;
   $('cont').onclick=next; $('cont').focus({preventScroll:true});
@@ -1011,8 +1029,9 @@ function bind(s){
   if(s.type==='digitar'){
     const campo=$('campo'), chk=$('check');
     campo.oninput=()=>{ chk.disabled=!campo.value.trim(); };
-    const confere=()=>{ if(chk.disabled) return; const ok=campo.value.trim().toLowerCase()===s.answer.toLowerCase();
-      chk.disabled=true; campo.disabled=true; painelDialogo(ok, s.why_ok, null, null, 'Resposta: '+s.answer); };
+    const semAcento=x=>x.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+    const confere=()=>{ if(chk.disabled) return; const v=campo.value.trim(); const ok=v.toLowerCase()===s.answer.toLowerCase()?true:(semAcento(v)===semAcento(s.answer)?'quase':false);
+      chk.disabled=true; campo.disabled=true; painelDialogo(ok, ok==='quase'?'Faltou só o acento: '+s.why_ok:s.why_ok, null, null, 'Resposta: '+s.answer); };
     chk.onclick=confere; campo.onkeydown=e=>{ if(e.key==='Enter'){ e.preventDefault(); confere(); } };
   }
   const d=s.dlg;
