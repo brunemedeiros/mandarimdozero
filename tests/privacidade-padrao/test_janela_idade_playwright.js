@@ -54,7 +54,7 @@ async function boot(browser, lang, port, theme, viewport, ui, opts){
   const errors = [];
   page.on('pageerror', e => errors.push(e.message));
   await page.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, r => r.abort());
-  await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
+  await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase|\/shared\/vendor\/supabase-js/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
   await page.addInitScript(() => { try { sessionStorage.setItem('guest_mode', '1'); } catch (e) {} });
   if (ui) await page.addInitScript((ui) => { try { localStorage.setItem('ui-language', ui); } catch (e) {} }, ui);
   await page.goto(`http://127.0.0.1:${port}/${lang}/index.html`);

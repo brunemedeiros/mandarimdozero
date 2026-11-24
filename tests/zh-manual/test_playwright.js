@@ -63,7 +63,7 @@ async function openZh(browser, { theme = 'light', lang = 'pt-BR', width = 390 } 
   const errors = [];
   page.on('pageerror', e => errors.push(String(e)));
   await page.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, r => r.abort());
-  await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
+  await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase|\/shared\/vendor\/supabase-js/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
   await page.addInitScript(({ th, lg }) => {
     try { sessionStorage.setItem('guest_mode', '1'); localStorage.setItem('ui-language', lg); localStorage.setItem('theme', th); localStorage.setItem('mandarim_trail_view', 'list'); } catch (e) {}
   }, { th: theme, lg: lang });

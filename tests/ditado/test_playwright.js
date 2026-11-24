@@ -57,7 +57,7 @@ async function boot(browser, port, theme){
   const errors = [];
   page.on('pageerror', e => errors.push(e.message));
   await page.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, r => r.abort());
-  await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
+  await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase|\/shared\/vendor\/supabase-js/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
   await page.addInitScript(() => { try { sessionStorage.setItem('guest_mode', '1'); } catch (e) {} });
   await page.goto(`http://127.0.0.1:${port}/fr/index.html`);
   await page.waitForFunction(() => typeof STATE !== 'undefined' && STATE.cards && STATE.cards.length > 0 && CURRENT_USER === false, null, { timeout: 15000 });
@@ -203,6 +203,21 @@ const SENTENCE_MP3_RE = /\/audio\/dictation-.*-s\d+\.mp3/;
     await page.waitForFunction(() => document.getElementById('dictation-play-btn').disabled, null, { timeout: 5000 }).catch(() => {});
     r = await ev(() => document.getElementById('dictation-play-btn').disabled);
     check(`${tag}: áudio ausente desabilita o botão de ouvir`, r === true);
+    // XP do Ditado (decisão da autora, 2026-11-23): primeira tentativa com nota >= 90 paga LESSON_CLOSE_XP (4), nota < 60 paga 0, refazer paga 0.
+    const xpr = await page.evaluate(() => {
+      const ds = dictCfg().dictations(); const d1 = ds[0], d2 = ds[1];
+      STATE.dictations = STATE.dictations || {}; delete STATE.dictations[d1.id]; delete STATE.dictations[d2.id];
+      const out = {}; const x0 = STATE.xp;
+      openDictationPlayer(d1.id); renderDictationResult(d1, d1.text); out.primeira = STATE.xp - x0; const x1 = STATE.xp;
+      out.linha = !!document.querySelector('.dictation-xp-line');
+      renderDictationResult(d1, d1.text); out.refazer = STATE.xp - x1; const x2 = STATE.xp;
+      openDictationPlayer(d2.id); renderDictationResult(d2, 'xyz'); out.baixa = STATE.xp - x2;
+      out.semLinha = !document.querySelector('.dictation-xp-line');
+      return out;
+    });
+    check(`${tag}: ditado, 1ª tentativa com nota alta paga LESSON_CLOSE_XP (4) e mostra o XP`, xpr.primeira === 4 && xpr.linha, xpr);
+    check(`${tag}: ditado, refazer não paga XP`, xpr.refazer === 0, xpr);
+    check(`${tag}: ditado, nota baixa na 1ª tentativa não paga XP nem mostra a linha`, xpr.baixa === 0 && xpr.semLinha, xpr);
     check(`${tag}: sem erros de página`, errors.length === 0, errors);
     await ctx.close();
   }

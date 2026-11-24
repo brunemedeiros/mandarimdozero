@@ -84,7 +84,7 @@ async function openApp(browser, base, app, o){
   const errs = []; page.on('pageerror', e => errs.push(String(e)));
   await page.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, r => r.abort());
   const blockKey = o.lang === 'en' ? BLOCK[app] + '@en' : BLOCK[app];
-  await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase/, r => r.fulfill({ contentType: 'text/javascript',
+  await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase|\/shared\/vendor\/supabase-js/, r => r.fulfill({ contentType: 'text/javascript',
     body: STUB({ blockKey, localWeek: 40, weekly: WEEKLY, weeklyDelay: o.weeklyDelay || 0 }) }));
   await page.goto(`${base}/${app}/index.html`);
   await page.waitForFunction(() => typeof CURRENT_USER !== 'undefined' && CURRENT_USER && CURRENT_USER.id && progressLoadedOk, null, { timeout: 25000 });

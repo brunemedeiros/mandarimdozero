@@ -56,7 +56,7 @@ async function abrir(browser, base, site, o){
   const errs = []; page.on('pageerror', e => errs.push(String(e).slice(0, 160)));
   // A última rota registrada vence: primeiro o bloqueio geral, depois o stub do Supabase.
   await page.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, r => r.abort());
-  await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
+  await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase|\/shared\/vendor\/supabase-js/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
   await page.goto(`${base}/${site}/index.html`);
   await page.waitForFunction(() => typeof CURRENT_USER !== 'undefined' && CURRENT_USER && progressLoadedOk, null, { timeout: 25000 });
   await page.waitForTimeout(800);
@@ -130,7 +130,7 @@ const estado = (page) => page.evaluate(() => {
         check(`${site} (${gatilho}): rede caiu sem o evento 'offline' e o aviso aparece`, ox.visivel && ox.appInerte && (await sx.page.evaluate(() => navigator.onLine)) === true, ox);
         await sx.page.unrouteAll({ behavior: 'ignoreErrors' });
         await sx.page.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, r => r.abort());
-        await sx.page.route(/cdn\.jsdelivr\.net\/npm\/@supabase/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
+        await sx.page.route(/cdn\.jsdelivr\.net\/npm\/@supabase|\/shared\/vendor\/supabase-js/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
         await sx.page.waitForFunction(() => window.semInternetAviso && !window.semInternetAviso.visivel(), null, { timeout: 8000 }).catch(() => {});
         const vx = await estado(sx.page);
         check(`${site} (${gatilho}): rede volta sem o evento 'online' e o aviso some sozinho`, !vx.visivel && !vx.appInerte, vx);

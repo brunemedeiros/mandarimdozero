@@ -175,7 +175,7 @@ function teacherBellItemHTML(n){
 }
 
 function teacherBellListHTML(){
-  if (!TBELL.loaded) return typeof loadingHTML === 'function' ? loadingHTML() : '';
+  if (!TBELL.loaded) return typeof loadingHTML === 'function' ? loadingHTML(t('notifications.loading')) : '';
   if (TBELL.error) return `<p class="tbell-empty">${escapeHTML(t('panel.tbell.err'))}</p>`;
   if (!TBELL.items.length) return `<p class="tbell-empty">${escapeHTML(t('panel.tbell.empty'))}</p>`;
   // Agrupados por dia, como o sino do topo (notificationDayGroup em shared/notifications.js).
@@ -454,7 +454,7 @@ async function renderMyClassLogsView(){
     wrap.innerHTML = `<p class="profile-empty-note">${t('supportMaterials.loginRequired')}</p>`;
     return;
   }
-  wrap.innerHTML = loadingHTML();
+  wrap.innerHTML = loadingHTML(t('loading.myClasses'));
   const logs = await fetchMyClassLogs(APP_KEY);
   MY_CLASS_LOGS_STATE.logs = logs;
   // Link de agenda (103) fora do corpo que se redesenha (Lista | Calendário), para não fechar a cada clique.

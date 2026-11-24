@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Esqueceu a senha (versão B)</title>
+<!-- Protótipo da VERSÃO B das telas de "Esqueceu sua senha?" (2026-11-16). A versão A está no index.html (gate-forgot e
+     gate-forgot-sent). Ideia: a tela é a outra ponta do e-mail que a pessoa vai receber (faixa roxa, título Anton, botão
+     rosa com sombra sólida, voz da Brune); o único destaque é o envelope do passo 2, com o carimbo que cai uma vez.
+     ?passo=2 abre direto no envelope; ?tema=escuro força o escuro. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Nunito:wght@400;700;800;900&display=swap">
+<style>
+:root{
+  --roxo:#3D167B; --rosa:#E36BCA; --bege:#FAF5EA; --tinta:#22113f; --cinza:#5d4f72; --azul:#1d6fa5; --linha:#ece4f2;
+  --cartao:#ffffff; --campo:#ffffff; --fundo:#FAF5EA; --papel:#fffdf8; --papel-borda:#e6dcc8;
+}
+:root[data-tema="escuro"]{
+  --fundo:#17112a; --cartao:#221a38; --tinta:#f3ecfb; --cinza:#b8acd0; --linha:#3a2f57; --campo:#1b1430; --azul:#7cc0ee;
+  --papel:#2b2245; --papel-borda:#463a68;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-tema="claro"]){
+    --fundo:#17112a; --cartao:#221a38; --tinta:#f3ecfb; --cinza:#b8acd0; --linha:#3a2f57; --campo:#1b1430; --azul:#7cc0ee;
+    --papel:#2b2245; --papel-borda:#463a68;
+  }
+}
+*{ box-sizing:border-box; }
+body{ margin:0; min-height:100vh; background:var(--fundo); color:var(--tinta); font-family:'Nunito','Helvetica Neue',Arial,sans-serif;
+  display:flex; align-items:flex-start; justify-content:center; padding:48px 16px; }
+.cartao{ width:100%; max-width:420px; background:var(--cartao); border-radius:22px; overflow:hidden;
+  box-shadow:0 1px 0 var(--linha), 0 18px 40px -24px rgba(61,22,123,.45); }
+.faixa{ background:var(--roxo); color:var(--bege); padding:26px 28px 24px; }
+.marca{ display:flex; align-items:center; gap:10px; font-weight:900; font-size:13px; letter-spacing:.04em; opacity:.9; }
+.marca img{ width:22px; height:25px; }
+.voltar{ appearance:none; background:none; border:0; color:var(--bege); font:inherit; font-weight:800; font-size:14px; padding:0;
+  margin:0 0 18px; cursor:pointer; opacity:.85; display:inline-flex; align-items:center; gap:6px; min-height:32px; }
+.voltar:hover{ opacity:1; text-decoration:underline; text-underline-offset:3px; }
+h1{ font-family:'Anton','Impact','Arial Narrow',sans-serif; font-weight:400; text-transform:uppercase; letter-spacing:.01em;
+  font-size:38px; line-height:1.02; margin:18px 0 0; }
+.corpo{ padding:24px 28px 26px; }
+.corpo p{ margin:0 0 18px; font-size:16px; line-height:1.6; }
+label{ display:block; font-weight:800; font-size:14px; margin:0 0 6px; }
+input{ width:100%; font:inherit; font-size:16px; color:var(--tinta); background:var(--campo); border:2px solid var(--linha);
+  border-radius:14px; padding:13px 14px; outline:none; }
+input:focus{ border-color:var(--rosa); box-shadow:0 0 0 4px rgba(227,107,202,.18); }
+.erro{ color:#c0392b; font-weight:700; font-size:14px; margin:6px 0 0; }
+.erro:empty{ margin:0; }
+h1:focus{ outline:none; }
+:root[data-tema="escuro"] .erro{ color:#ff9a8a; }
+.botao{ display:block; width:100%; margin:14px 0 0; font:inherit; font-weight:900; font-size:16px; color:#22113f; background:var(--rosa);
+  border:2px solid #22113f; border-radius:999px; padding:14px 18px; cursor:pointer; box-shadow:4px 4px 0 #22113f;
+  transition:transform .08s ease, box-shadow .08s ease; }
+.botao:hover{ transform:translate(-1px,-1px); box-shadow:5px 5px 0 #22113f; }
+.botao:active{ transform:translate(3px,3px); box-shadow:1px 1px 0 #22113f; }
+.botao:disabled{ cursor:default; opacity:.75; transform:none; box-shadow:4px 4px 0 #22113f; }
+.botao:focus-visible, .link:focus-visible, .voltar:focus-visible{ outline:3px solid var(--azul); outline-offset:3px; }
+.link{ appearance:none; background:none; border:0; font:inherit; font-weight:800; font-size:15px; color:var(--azul); padding:6px 0;
+  cursor:pointer; text-decoration:underline; text-underline-offset:3px; }
+.link:disabled{ color:var(--cinza); text-decoration:none; cursor:default; }
+.rodape{ display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-top:18px;
+  padding-top:14px; border-top:1px solid var(--linha); }
+.nota{ font-size:14px; color:var(--cinza); line-height:1.55; margin:14px 0 0; }
+
+/* ---------- O envelope (único destaque) ---------- */
+.envelope{ position:relative; background:var(--papel); border:1.5px solid var(--papel-borda); border-radius:12px;
+  padding:22px 20px 20px; margin:2px 0 18px; overflow:hidden; }
+.envelope::before{ /* listras de correio aéreo na borda de cima */
+  content:''; position:absolute; left:0; right:0; top:0; height:7px;
+  background:repeating-linear-gradient(135deg, var(--rosa) 0 12px, transparent 12px 20px, var(--roxo) 20px 32px, transparent 32px 40px); }
+.envelope .para{ font-size:13px; color:var(--cinza); font-weight:700; margin:78px 0 2px; }
+.envelope .endereco{ font-size:19px; font-weight:900; overflow-wrap:anywhere; line-height:1.3; margin:0; max-width:100%; }
+.linhas{ margin-top:12px; height:22px; max-width:100%;
+  background:repeating-linear-gradient(to bottom, transparent 0 10px, var(--papel-borda) 10px 11px); }
+.selo{ position:absolute; right:16px; top:20px; width:60px; height:68px; background:var(--roxo); border-radius:4px;
+  display:flex; align-items:center; justify-content:center; outline:3px dotted var(--papel); outline-offset:-2px; }
+.selo img{ width:30px; height:34px; filter:brightness(0) invert(1); opacity:.95; }
+.carimbo{ position:absolute; z-index:2; right:66px; top:22px; width:72px; height:72px; border:3px solid var(--rosa); border-radius:50%;
+  color:var(--rosa); display:flex; align-items:center; justify-content:center; text-align:center; transform:rotate(-14deg);
+  font-family:'Anton','Impact',sans-serif; font-size:13px; line-height:1.05; text-transform:uppercase; letter-spacing:.04em;
+  background:color-mix(in srgb, var(--papel) 55%, transparent); }
+.carimbo.cai{ animation:cai .5s cubic-bezier(.2,.9,.3,1.3) .15s both; }
+@keyframes cai{ 0%{ opacity:0; transform:rotate(-30deg) scale(1.9); } 70%{ opacity:1; } 100%{ opacity:1; transform:rotate(-14deg) scale(1); } }
+@media (prefers-reduced-motion: reduce){ .carimbo.cai{ animation:none; } .botao{ transition:none; } }
+
+[hidden]{ display:none !important; }
+@media (max-width:400px){ h1{ font-size:32px; } .faixa{ padding:22px 20px 20px; } .corpo{ padding:20px; } }
+.sr{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
+</style>
+</head>
+<body>
+<main class="cartao" aria-live="polite">
+  <!-- Passo 1: só o e-mail -->
+  <section id="passo1" aria-labelledby="t1">
+    <div class="faixa">
+      <button type="button" class="voltar" id="voltar1"><span aria-hidden="true">‹</span> Voltar para entrar</button>
+      <div class="marca"><img src="../../../shared/brand/logo-mark.svg" alt=""> IDIOMAS COM PROF BRUNE</div>
+      <h1 id="t1">Esqueceu a senha?</h1>
+    </div>
+    <form class="corpo" id="form" novalidate>
+      <p>Sem problema. Digite o e-mail da sua conta e eu mando um link para você criar uma senha nova.</p>
+      <label for="email">E-mail</label>
+      <input id="email" type="email" autocomplete="email" placeholder="seu@email.com" value="aluna@exemplo.com">
+      <p class="erro" id="erro" role="alert"></p>
+      <button type="submit" class="botao" id="enviar">Enviar link</button>
+    </form>
+  </section>
+
+  <!-- Passo 2: o envelope -->
+  <section id="passo2" aria-labelledby="t2" hidden>
+    <div class="faixa">
+      <div class="marca"><img src="../../../shared/brand/logo-mark.svg" alt=""> IDIOMAS COM PROF BRUNE</div>
+      <h1 id="t2" tabindex="-1">Link a caminho!</h1>
+    </div>
+    <div class="corpo">
+      <div class="envelope" aria-label="E-mail enviado para">
+        <span class="selo" aria-hidden="true"><img src="../../../shared/brand/logo-mark.svg" alt=""></span>
+        <span class="carimbo" id="carimbo" aria-hidden="true">Enviado<br>agora</span>
+        <p class="para">Para</p>
+        <p class="endereco" id="endereco">aluna@exemplo.com</p>
+        <div class="linhas" aria-hidden="true"></div>
+      </div>
+      <p>Abra o e-mail e toque em <b>Criar nova senha</b>. O link vale por 1 hora.</p>
+      <p class="nota">Não chegou em alguns minutos? Olhe a caixa de spam ou peça outro link.</p>
+      <div class="rodape">
+        <button type="button" class="link" id="reenviar" disabled>Reenviar link em 60 s</button>
+        <button type="button" class="link" id="voltar2">Voltar para entrar</button>
+      </div>
+    </div>
+  </section>
+</main>
+<script>
+(function(){
+  const q = new URLSearchParams(location.search);
+  if (q.get('tema') === 'escuro') document.documentElement.dataset.tema = 'escuro';
+  if (q.get('tema') === 'claro') document.documentElement.dataset.tema = 'claro';
+  const $ = id => document.getElementById(id);
+  let falta = 0, timer = null;
+  function contagem(s){
+    falta = s; clearInterval(timer);
+    const pinta = () => { $('reenviar').disabled = falta > 0; $('reenviar').textContent = falta > 0 ? `Reenviar link em ${falta} s` : 'Reenviar link'; };
+    pinta(); timer = setInterval(() => { falta--; if (falta <= 0){ falta = 0; clearInterval(timer); } pinta(); }, 1000);
+  }
+  function passo2(email){
+    $('endereco').textContent = email;
+    $('passo1').hidden = true; $('passo2').hidden = false;
+    const c = $('carimbo'); c.classList.remove('cai'); void c.offsetWidth; c.classList.add('cai');
+    $('t2').focus(); contagem(60);
+  }
+  $('form').addEventListener('submit', e => {
+    e.preventDefault();
+    const v = $('email').value.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)){ $('erro').textContent = 'Digite o e-mail completo, como seu@email.com.'; $('email').focus(); return; }
+    $('erro').textContent = '';
+    const b = $('enviar'); b.disabled = true; b.textContent = 'Enviando...';
+    setTimeout(() => { b.disabled = false; b.textContent = 'Enviar link'; passo2(v); }, 900);
+  });
+  $('reenviar').addEventListener('click', () => { const c = $('carimbo'); c.classList.remove('cai'); void c.offsetWidth; c.classList.add('cai'); contagem(60); });
+  $('voltar2').addEventListener('click', () => { $('passo2').hidden = true; $('passo1').hidden = false; $('email').focus(); });
+  $('voltar1').addEventListener('click', () => {});
+  if (q.get('passo') === '2') passo2($('email').value);
+})();
+</script>
+</body>
+</html>

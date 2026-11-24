@@ -34,3 +34,9 @@ Depois: migration (2 tabelas + preferência), função, agendamento, testes, e-m
 - Testes: `node tests/email-cartoes-professora/test_core.js` (31) e `test_function.js` (19, banco e Resend de mentira).
 - IDs do teste (produção): Raíssa `f22719c9-1381-4635-a21a-52375f1422c9`, Carol `d079a986-52ee-4166-96ff-2774369c901d`.
 - Roteiro para ligar: PR e merge; migration 141 na produção; deploy da função; segredo `cards_digest_url` no Vault; linha em `teacher_cards_digest_settings` (modo `teste`); e-mail de teste só para a dona; OK dela; agendar o cron; depois do teste, modo `todos`.
+
+## Ajustes da revisão do PR #491 (2026-11-24)
+- Marca do topo do e-mail em inglês: `LANGUAGES WITH PROF BRUNE` (antes aparecia `IDIOMAS COM PROF BRUNE`).
+- Link de sair: GET só mostra a confirmação (botão que envia POST); só o POST grava. Evita antivírus e pré-visualizadores desligarem o aviso sozinhos.
+- Assinatura do link com chave PRÓPRIA: Vault `cards_digest_signing_key` (gerada no banco pela migration 142, lida por `cards_digest_signing_key()`, só service role). Links já enviados (assinados com a senha do agendamento) continuam valendo; retirar essa conferência uns 30 dias depois.
+- Testes: `test_core.js` 33 e `test_function.js` 23.

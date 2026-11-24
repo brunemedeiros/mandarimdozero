@@ -4097,6 +4097,24 @@ window.I18N_CATALOG['en'] = {
   'gate.forgot.needEmail': 'Type your email in the field above first.', // ALTA
   'gate.forgot.failed': 'Couldn\'t send the email right now.', // ALTA
   'gate.forgot.sent': 'We sent you a link to reset your password.', // ALTA
+  'gate.forgot.sending': 'Sending...', // ALTA (needs_review)
+  'gate.forgotAsk.title': 'Forgot your password?', // ALTA (needs_review)
+  'gate.forgotAsk.sub': 'No problem. Type your account\'s email and I\'ll send you a link to create a new password.', // ALTA (needs_review)
+  'gate.forgotAsk.submit': 'Send link', // ALTA (needs_review)
+  'gate.forgotAsk.needEmail': 'Type a valid email.', // ALTA (needs_review)
+  'gate.forgotSent.title': 'Link on its way!', // ALTA (needs_review)
+  'gate.forgotSent.from': 'From', // ALTA (needs_review)
+  'gate.forgotSent.sender': 'Prof. Brune', // ALTA (needs_review)
+  'gate.forgotSent.to': 'To', // ALTA (needs_review)
+  'gate.forgotSent.stamp': 'Sent now', // ALTA (needs_review)
+  'gate.forgotSent.bodyBefore': 'Open the email and tap ', // ALTA (needs_review)
+  'gate.forgotSent.bodyButton': 'Create new password', // ALTA (needs_review)
+  'gate.forgotSent.bodyAfter': '. The link is valid for 1 hour.', // ALTA (needs_review)
+  'gate.forgotSent.note': 'Didn\'t get it in a few minutes? Check your spam folder or ask for another link.', // ALTA (needs_review)
+  'gate.forgotSent.resend': 'Resend link', // ALTA (needs_review)
+  'gate.forgotSent.resendIn': 'Resend link in {s} s', // ALTA (needs_review)
+  'gate.forgotSent.back': 'Back to sign in', // ALTA (needs_review)
+  'gate.forgotSent.resent': 'We sent a new link. Use the most recent email.', // ALTA (needs_review)
   'gate.verify.title': 'Confirm your email', // ALTA
   'gate.verify.subBefore': 'We sent a code to ', // ALTA
   'gate.verify.subAfter': '. Enter it here to activate your account.', // ALTA
@@ -4328,11 +4346,20 @@ window.I18N_CATALOG['en'] = {
   'profile.err.photoNotImage': 'Choose an image file (JPG, PNG...).', // ALTA
   'zh.hanzi.reviewAll': '🔁 Review characters', // ALTA
   'loading.phrase.loading': 'Loading...', // ALTA
-  'loading.phrase.oneSec': 'Just a second...', // ALTA
-  'loading.phrase.almost': 'Almost there...', // ALTA
-  'loading.phrase.fetching': 'Getting the data...', // ALTA
-  'loading.phrase.preparing': 'Getting everything ready...', // ALTA
-  'loading.phrase.moment': 'One moment...', // ALTA
+  'loading.opening': 'Opening the site...', // ALTA
+  'loading.progress': 'Loading progress...', // ALTA
+  'loading.cards': 'Loading cards...', // ALTA
+  'loading.challenges': 'Loading challenges...', // ALTA
+  'loading.mural': 'Loading the board...', // ALTA
+  'loading.muralSide': 'Loading class details...', // ALTA
+  'loading.myClasses': 'Loading your classes...', // ALTA
+  'loading.notion': 'Loading Notion...', // ALTA
+  'loading.myCards': 'Loading your cards...', // ALTA
+  'loading.googleCalendar': 'Loading Google Calendar...', // ALTA
+  'loading.calendarLink': 'Loading the calendar link...', // ALTA
+  'loading.publishOptions': 'Loading sharing options...', // ALTA
+  'loading.reviewBank': 'Loading the Review Bank...', // ALTA
+  'loading.notifPrefs': 'Loading preferences...', // ALTA
   'zh.hanzi.radicals': '🧬 Radicals', // ALTA (achado extra: botão e título da tela de Radicais)
   // Etapa 3, lote C (2026-10-19): gerenciador de Tags, excluir Deck, importação cortada, Meus cartões, validação de
   // tags, novo editor, importação .apkg e Decks públicos. Texto pt idêntico ao que estava escrito direto no JS/HTML.

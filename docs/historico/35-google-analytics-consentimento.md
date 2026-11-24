@@ -122,6 +122,69 @@ página" (o site manda as telas do app sozinho; com isso ligado, as limpezas de 
   igual nos dois idiomas; 2338/2338). Política geral em rascunho (aba Privacidade do Admin, `ajuda/textos/politica.html` e
   documento do advogado): item novo "Medição de visitas" na seção 5 e Google Fonts retirado da lista de terceiros.
 
+## Fase 4 (2026-11-16): publicação
+
+- PR #483 (Fases 2 e 3, com o aviso C2) mesclado na `main` com autorização da dona. Conferido no ar com navegador
+  automático (2026-11-16): aviso aparece; recusar não faz nenhum pedido ao Google; aceitar pede o `gtag.js` do
+  `G-CE3282C1FB` e o `page_view` sai como `https://app.profbrune.com.br/?utm_source=teste&utm_medium=teste` (o `convite=`
+  foi tirado); teste de nivelamento fr com aviso e `?origem=` chegando ao Apps Script; sem Google Fonts. O envio ao Google
+  foi bloqueado na conferência para não criar visita falsa.
+- Falta (com a dona): ver a visita no "Tempo real" do GA4 com o link de teste numa janela anônima (os aparelhos onde ela
+  entra como admin ficam marcados para não contar) e marcar os eventos-chave (`sign_up`, cliques de saída e o evento
+  criado para abertura dos testes de nivelamento).
+
+## Correções da revisão diária (2026-11-24)
+
+Dois achados da revisão diária, confirmados pela dona:
+1. **Data do aceite de idade editável pela API** (a policy de update da 073 libera qualquer coluna de `profile_private`).
+   Migration `144_protect_age_ack` (a 143 já era de outra conversa: `143_review_bank_typed_text`): trigger
+   `profile_private_age_ack_guard` + função `_guard_age_ack()`. Pela API (authenticated/anon) ninguém grava, troca nem apaga
+   `age_ack_at`, nem apaga a linha que já tem a data; o gênero continua editável. Só a `ack_my_age()` grava, uma vez;
+   depois nem o servidor troca a data (exclusão de conta pelo servidor continua apagando a linha). Teste local
+   `tests/privacidade-padrao/test_144.sql` 11/11 (e `test_136.sql` 8/8). **Staging: aplicada (versão `20261124160100`) e
+   testada numa transação desfeita (4/4). Produção: aplicada com autorização da dona em 2026-11-24 (versão `20261124170904`);
+   8 linhas e o hash das datas iguais antes e depois; trigger ligado; tentativa de troca como `authenticated` numa transação
+   desfeita recusada com `age_ack_at_protected`.**
+2. **Eventos do GA4 com o endereço completo** (só o `page_view` era limpo). `shared/consent.js`: `page_location` e
+   `page_referrer` limpos já no `gtag('config')` e `gtag('set')` a cada página, então lição, cadastro, recomeço e cliques de
+   saída também saem limpos; só mede em `app.profbrune.com.br` (fora dele, só o teste do aviso com `__CONSENT_TEST__`);
+   nome de tela só vira página se existir `#view-<aba>` (antes `#segredo` no link virava `/fr/segredo`). `shared/auth.js`:
+   `setContext` só com o perfil de fato carregado (sem perfil, nada medido; a admin pelo e-mail marca o aparelho).
+   `tests/consentimento/test_playwright.js` 76/76. Conferido com o `gtag.js` de verdade (envio capturado e bloqueado):
+   nossos eventos saem com `/fr/` limpo. **Ainda vaza** o `page_view` automático do próprio Google ao mudar o endereço
+   (`dl` com `?cur=&view=&ui=`): vem da opção "Alterações na página de acordo com os eventos do histórico de navegação",
+   que o `gtag.js` servido para o ID mostra LIGADA (`vtp_enableHistoryEvents:true`; também rolagem, formulários, vídeo e
+   downloads ligados). Só dá para desligar no painel do GA4 (dona); depois, conferir de novo no `gtag.js`.
+3. **Causa real do vazamento (2026-11-24, depois do PR)**: a dona conferiu o painel e as opções já estavam desligadas. O que
+   manda as opções de verdade são as tags `__ccd_em_*` do `gtag.js` servido, e só existe a `__ccd_em_outbound_click`
+   (Cliques de saída): o painel está certo; o `__ogt_auto_events` com tudo `true` é só o "ouvinte" genérico. Testes com o
+   `gtag.js` real numa página mínima (envio capturado e bloqueado): **a tag do Google desta propriedade se configura sozinha
+   ao carregar e ignora o `gtag('config')` da página inteiro**, até no snippet padrão do Google. Sem nenhum `config`, ela
+   já mandava um `page_view` com o endereço completo; e com o `config` vinham cookie de 400 dias (não 13 meses), `npa=0`
+   e o título errado. Saída: as mesmas regras num **`gtag('set', …)` ANTES do `gtag('js')`**: nenhum envio automático,
+   endereço limpo, cookie de 395 dias e `npa=1`. O `config` continua, caso o Google volte a lê-lo.
+   `tests/consentimento/test_playwright.js` 77/77 (nova conferência da ordem). Na `main` de 16/11 até a publicação, o 1º
+   `page_view` de cada visita com aceite levou o endereço de chegada sem o trecho do `#` (a tag apaga e-mails do endereço,
+   `__ccd_auto_redact`), e os cookies `_ga` foram gravados por 400 dias (o Google renova a validade a cada envio, então
+   passam a 13 meses na próxima visita). Opcional: pedir ao Google a exclusão do `page_location` desse período
+   (Administrador > Coleta e modificação de dados > Solicitações de exclusão de dados).
+
+## Conferência de 2026-11-24
+
+- GA4 recebendo dados (print da dona, "Eventos recentes"): `first_visit`, `page_view`, `session_start`, `user_engagement`,
+  `lesson_start`, `lesson_complete`. Ainda sem `sign_up` e `click`. Na produção: 1 conta nova desde a publicação (nasceu
+  com perfil privado) e 6 confirmações de idade. `sign_up` conferido de ponta a ponta no teste (cadastro por e-mail com
+  cookies aceitos; `tests/consentimento/test_playwright.js` 63/63): a ausência vem de não ter havido cadastro com aceite.
+  Conta criada pelo "Entrar com Google" da tela de Entrar (sem passar pelo cadastro) passou a gerar `sign_up` (pedido da
+  dona, 2026-11-24): `index.html`, ao escolher o curso, só se a conta foi criada há menos de 30 minutos (conta antiga sem
+  curso não conta); método pelo `app_metadata.provider`. Teste 65/65.
+- Dona criou o evento `abrir_teste_nivelamento` no GA4 (2026-11-24). Na "Aquisição de tráfego" ainda só "(direct) / (none)"
+  (5 sessões); o envio do site foi conferido ao vivo (o pedido ao Google leva o endereço com os `utm_*`, `_fv=1`, `_ss=1`),
+  então a falta do teste / teste deve ser atraso de processamento ou o período do relatório (o padrão "últimos 28 dias"
+  não inclui o dia de hoje). Conferir de novo depois de 48 h.
+- Na interface nova do GA4, "eventos-chave" viraram "Eventos principais" (estrela em Administrador > Exibição de dados >
+  Eventos). `close_convert_lead`, `qualify_lead` e `purchase` foram criados pelo objetivo "Gerar leads" e nunca recebem dados.
+
 ## Ajustes pedidos depois da Fase 3 (2026-11-16)
 
 - A dona achou o aviso grande. Prévias enviadas (tela real, celular e computador): **C1** sem o título "Cookies", ícone

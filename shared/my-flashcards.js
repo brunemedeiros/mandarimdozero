@@ -382,7 +382,7 @@ async function renderMyFlashcardsView(opts){
     MY_FLASHCARDS_STATE.editingNativeState = null;
     MY_FLASHCARDS_STATE.editingNativeConversionBaseline = null;
   }
-  wrap.innerHTML = loadingHTML();
+  wrap.innerHTML = loadingHTML(t('loading.myCards'));
 
   const isMandarim = LanguageRegistry.isCjk(APP_KEY);
   const { cards, hasLink, premium, decks, activeCards, archivedCards, atLimit, tierBadgeHTML } = await loadMyFlashcardsContext();

@@ -644,6 +644,7 @@ function startSpeedReview(){
   SPEED_STATE.index = 0;
   SPEED_STATE.hearts = 3;
   SPEED_STATE.score = 0;
+  SPEED_STATE.xpPaid = 0; // XP pago ao fim da rodada (só na 1ª do dia), mostrado no resumo
   SPEED_STATE.correctCount = 0;
   SPEED_STATE.streak = 0;
   SPEED_STATE.bestStreak = 0;
@@ -746,7 +747,7 @@ function startReviewSession(opts){
   // eliminou STATE.reviewClozeAnswered (Cloze migrou 100% pra este slot
   // único, mesmo padrão dos outros 3 tipos) -- não há mais nenhum campo
   // solto de tipo pra zerar aqui.
-  STATE.reviewSessionStartedAt = Date.now();
+  STATE.reviewSessionStartedAt = Date.now(); STATE.reviewSessionXpStart = STATE.xp;
   STATE.reviewCardState = null;
   STATE.reviewHistory = [];
   STATE.reviewPeek = null;

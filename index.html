@@ -39,7 +39,7 @@ try{
   }
 }catch(e){ /* localStorage indisponível — cai na preferência do sistema */ }
 </script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="shared/vendor/supabase-js-2.119.2/supabase.js"></script>
 <link rel="preload" href="shared/fonts/nunito-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="shared/fonts/nunito.css">
 <style>
@@ -150,6 +150,43 @@ h1{
 .jp-campo{ position:relative; }
 .jp-campo-ico{ position:absolute; left:14px; top:50%; transform:translateY(-50%); font-size:1.1rem; line-height:1; pointer-events:none; }
 .jp-campo .gate-input{ padding-left:2.8rem; }
+/* ---------- Esqueceu a senha, versão C (2026-11-16): carta com faixa de correio aéreo (azul do fr, vermelho do zh) ---------- */
+.fp-card{ position:relative; overflow:hidden; }
+.fp-topo{ display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.fp-topo--direita{ justify-content:flex-end; }
+.fp-topo .cad-voltar{ margin:0; }
+.fp-marca{ display:inline-flex; align-items:center; gap:8px; font-weight:800; font-size:13px; color:var(--ink-soft); }
+.fp-cabeca{ margin-top:18px; }
+.fp-cabeca--carta{ margin-top:6px; }
+.fp-form{ display:grid; gap:12px; }
+.fp-form .gate-note:empty{ display:none; }
+.fp-passos{ display:flex; gap:6px; justify-content:center; margin-top:2px; }
+.fp-passos i{ width:22px; height:5px; border-radius:99px; background:var(--paper-line); }
+.fp-passos i.on{ background:var(--accent); }
+.fp-envelope{ position:relative; background:var(--elevado); border:1px solid var(--paper-line); border-radius:14px;
+  padding:22px 18px 18px; box-shadow:var(--shadow-card); overflow:hidden; text-align:left; }
+.fp-envelope::before{ content:''; position:absolute; left:0; right:0; top:0; height:7px;
+  background:repeating-linear-gradient(135deg, var(--accent) 0 12px, transparent 12px 19px, #C0231F 19px 31px, transparent 31px 38px); }
+.fp-selo{ position:absolute; right:16px; top:20px; width:58px; height:66px; border-radius:6px; display:grid; place-items:center;
+  background:var(--paper); border:1px solid var(--paper-line); outline:3px dotted var(--elevado); outline-offset:-3px; box-shadow:var(--shadow-card); }
+.fp-carimbo{ position:absolute; z-index:2; right:62px; top:24px; width:70px; height:70px; border:2.5px solid var(--accent); border-radius:50%;
+  color:var(--accent); display:grid; place-items:center; text-align:center; transform:rotate(-14deg); font-weight:900; font-size:11px;
+  letter-spacing:.06em; line-height:1.15; text-transform:uppercase; padding:0 8px; background:color-mix(in srgb, var(--paper) 50%, transparent); }
+.fp-carimbo::after{ content:''; position:absolute; inset:5px; border:1px solid currentColor; border-radius:50%; opacity:.6; }
+.fp-carimbo.cai{ animation:fpCai .5s cubic-bezier(.2,.9,.3,1.3) .15s both; }
+@keyframes fpCai{ 0%{ opacity:0; transform:rotate(-30deg) scale(1.8); } 70%{ opacity:1; } 100%{ opacity:1; transform:rotate(-14deg) scale(1); } }
+@media (prefers-reduced-motion: reduce){ .fp-carimbo.cai{ animation:none; } }
+.fp-envelope p{ margin:0; }
+.fp-de{ font-size:13px; color:var(--ink-soft); font-weight:700; line-height:1.4; margin-top:4px !important; }
+.fp-de b{ display:block; color:var(--ink); font-size:15px; font-weight:800; }
+.fp-para{ font-size:13px; color:var(--ink-soft); font-weight:800; margin-top:38px !important; }
+.fp-endereco{ font-size:18px; font-weight:900; overflow-wrap:anywhere; line-height:1.3; margin-top:2px !important; color:var(--ink); }
+.fp-linhas{ margin-top:12px; height:22px; background:repeating-linear-gradient(to bottom, transparent 0 10px, var(--paper-line) 10px 11px); }
+.fp-texto{ text-align:center; text-wrap:pretty; margin:0 !important; }
+.fp-texto b{ color:var(--ink); white-space:nowrap; }
+#gate-forgot-sent-note{ text-align:center; margin:0; }
+.fp-acoes{ display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; padding-top:10px; border-top:1px solid var(--paper-line); }
+#gate-forgot-sent-title:focus{ outline:none; }
 .gate-link-btn{
   background:none; border:none; padding:0; font-family:'Nunito', sans-serif; font-size:13px;
   font-weight:800; color:var(--marca-texto); cursor:pointer; text-decoration:underline;
@@ -424,6 +461,61 @@ button.jp-bloco:hover{ background:color-mix(in srgb, var(--tom, var(--accent)) 1
   </div>
 </div>
 
+<!-- Esqueceu a senha (2026-11-16, pedido da dona): tela de "Confira seu e-mail" depois do envio, no estilo da do código do
+     cadastro. Antes só aparecia uma linha pequena embaixo do botão; a pessoa clicava de novo, o Supabase recusava (espera de
+     60 s) e o erro apagava o "Enviamos um link". -->
+<!-- Esqueceu a senha (versão C, aprovada pela dona em 2026-11-16): passo 1 só com o e-mail, passo 2 com a carta (envelope com
+     faixa de correio aéreo azul e vermelha, as cores do fr e do zh, selo do logo e carimbo que cai uma vez). Protótipos e as
+     versões A e B: docs/prototipos/esqueci-senha/. -->
+<div class="wrap" id="gate-forgot" style="display:none;">
+  <div class="gate-card fp-card">
+    <div class="fp-topo">
+      <button type="button" class="cad-voltar" id="gate-forgot-cancel"><span aria-hidden="true">‹</span> <span data-i18n="gate.signup.back">Voltar</span></button>
+      <span class="fp-marca"><img src="shared/brand/logo-mark.svg" alt="" width="18" height="21"><span data-i18n="gate.brand">Idiomas com Prof.&nbsp;Brune</span></span>
+    </div>
+    <div class="er-head fp-cabeca">
+      <span class="jp-icone jp-icone--grande" aria-hidden="true">✉️</span>
+      <h1 data-i18n="gate.forgotAsk.title">Esqueceu a senha?</h1>
+      <p class="sub" data-i18n="gate.forgotAsk.sub">Sem problema. Digite o e-mail da sua conta e eu mando um link para você criar uma senha nova.</p>
+    </div>
+    <form id="gate-forgot-form" novalidate class="fp-form">
+      <div class="cad-campo">
+        <label for="gate-forgot-email" data-i18n="gate.login.emailLabel">E-mail</label>
+        <div class="jp-campo"><span class="jp-campo-ico" aria-hidden="true">✉️</span><input type="email" id="gate-forgot-email" class="gate-input" placeholder="seu@email.com" data-i18n-attr="placeholder:gate.login.emailPh" autocomplete="email" required></div>
+      </div>
+      <p class="gate-note" id="gate-forgot-note" role="status"></p>
+      <button type="submit" class="btn btn-primary btn-block" id="gate-forgot-send-btn" data-i18n="gate.forgotAsk.submit">Enviar link</button>
+    </form>
+    <div class="fp-passos" aria-hidden="true"><i class="on"></i><i></i></div>
+  </div>
+</div>
+
+<div class="wrap" id="gate-forgot-sent" style="display:none;">
+  <div class="gate-card fp-card">
+    <div class="fp-topo fp-topo--direita">
+      <span class="fp-marca"><img src="shared/brand/logo-mark.svg" alt="" width="18" height="21"><span data-i18n="gate.brand">Idiomas com Prof.&nbsp;Brune</span></span>
+    </div>
+    <div class="er-head fp-cabeca fp-cabeca--carta">
+      <h1 id="gate-forgot-sent-title" tabindex="-1" data-i18n="gate.forgotSent.title">Link a caminho!</h1>
+    </div>
+    <div class="fp-envelope">
+      <span class="fp-selo" aria-hidden="true"><img src="shared/brand/logo-mark.svg" alt="" width="28" height="32"></span>
+      <span class="fp-carimbo" id="gate-forgot-carimbo" aria-hidden="true" data-i18n="gate.forgotSent.stamp">Enviado agora</span>
+      <p class="fp-de"><span data-i18n="gate.forgotSent.from">De</span><b data-i18n="gate.forgotSent.sender">Prof. Brune</b></p>
+      <p class="fp-para" data-i18n="gate.forgotSent.to">Para</p>
+      <p class="fp-endereco" id="gate-forgot-sent-email"></p>
+      <div class="fp-linhas" aria-hidden="true"></div>
+    </div>
+    <p class="sub fp-texto"><span data-i18n="gate.forgotSent.bodyBefore">Abra o e-mail e toque em </span><b data-i18n="gate.forgotSent.bodyButton">Criar nova senha</b><span data-i18n="gate.forgotSent.bodyAfter">. O link vale por 1 hora.</span></p>
+    <p class="gate-note" id="gate-forgot-sent-note" role="status" data-i18n="gate.forgotSent.note">Não chegou em alguns minutos? Olhe a caixa de spam ou peça outro link.</p>
+    <div class="fp-acoes">
+      <button type="button" class="gate-link-btn" id="gate-forgot-resend-btn">Reenviar link</button>
+      <button type="button" class="gate-link-btn" id="gate-forgot-back-btn" data-i18n="gate.forgotSent.back">Voltar para entrar</button>
+    </div>
+    <div class="fp-passos" aria-hidden="true"><i class="on"></i><i class="on"></i></div>
+  </div>
+</div>
+
 <div class="wrap" id="gate-confirm-link" style="display:none;">
   <div class="gate-card">
     <div class="er-head">
@@ -516,7 +608,7 @@ function gateSiteLang(){ return getUiLang() === 'en' ? 'en' : 'pt-BR'; }
 const GUEST_MODE_FLAG = 'guest_mode'; // mesma chave usada por shared/auth.js dentro de cada idioma
 
 function showOnly(id){
-  ['gate-loading', 'gate-login', 'gate-signup-course', 'gate-signup-method', 'gate-signup-data', 'gate-signup-retry', 'gate-verify',
+  ['gate-loading', 'gate-login', 'gate-signup-course', 'gate-signup-method', 'gate-signup-data', 'gate-signup-retry', 'gate-verify', 'gate-forgot', 'gate-forgot-sent',
    'gate-confirm-link', 'gate-new-password', 'gate-choose-language', 'gate-choose-experience'].forEach(x => {
     document.getElementById(x).style.display = (x === id) ? '' : 'none';
   });
@@ -624,7 +716,21 @@ async function afterAuthResolved(user){
     return;
   }
   showOnly('gate-choose-language');
-  renderLanguageChoices((langId) => finishCoursePick(user, langId, gateSpeak), 'lang-grid');
+  // Conta NOVA que entrou pelo "Entrar com Google" da tela de Entrar (sem passar pelo cadastro): também conta como
+  // cadastro no GA4 (pedido da dona, 2026-11-24). "Nova" = criada há menos de 30 minutos; conta antiga sem curso não conta.
+  const brandNew = isBrandNewAccount(user);
+  renderLanguageChoices((langId) => {
+    if (brandNew){ try { if (window.ProfBruneConsent) window.ProfBruneConsent.signUp(accountProvider(user), langId); } catch (e) {} }
+    finishCoursePick(user, langId, gateSpeak);
+  }, 'lang-grid');
+}
+function isBrandNewAccount(user){
+  const t = user && user.created_at ? Date.parse(user.created_at) : NaN;
+  return Number.isFinite(t) && Date.now() - t < 30 * 60 * 1000;
+}
+function accountProvider(user){
+  const p = user && user.app_metadata && user.app_metadata.provider;
+  return p === 'google' ? 'google' : 'email';
 }
 
 // O curso sai no idioma de "Eu falo...": vira o idioma do site, e o app grava na conta nova (shared/auth.js lê
@@ -794,13 +900,96 @@ document.getElementById('gate-email-form').addEventListener('submit', async (e) 
   await afterAuthResolved(data.user);
 });
 
-document.getElementById('gate-forgot-btn').addEventListener('click', async () => {
+// Esqueceu a senha: trava o botão enquanto envia e, enviado, mostra a tela "Confira seu e-mail" (gate-forgot-sent).
+// O Supabase só aceita um pedido por minuto para o mesmo e-mail (429, "after N seconds"): nesse caso o e-mail anterior
+// já saiu, então também vai para a tela, com a contagem que falta.
+let gateForgotEmail = '', gateForgotLeft = 0, gateForgotTimer = null, gateForgotBusy = false;
+function gateForgotWaitSeconds(error){
+  const m = /after (\d+) seconds?/i.exec(String((error && error.message) || ''));
+  if (m) return Math.max(1, Math.min(120, parseInt(m[1], 10)));
+  return (error && (error.status === 429 || error.code === 'over_email_send_rate_limit')) ? 60 : 0;
+}
+function paintForgotResend(){
+  const btn = document.getElementById('gate-forgot-resend-btn');
+  btn.textContent = gateForgotLeft > 0 ? t('gate.forgotSent.resendIn', { s: gateForgotLeft }) : t('gate.forgotSent.resend');
+  btn.disabled = gateForgotLeft > 0 || gateForgotBusy;
+}
+function startForgotCooldown(seconds){
+  gateForgotLeft = seconds;
+  clearInterval(gateForgotTimer);
+  paintForgotResend();
+  gateForgotTimer = setInterval(() => {
+    gateForgotLeft--;
+    if (gateForgotLeft <= 0){ clearInterval(gateForgotTimer); gateForgotLeft = 0; }
+    paintForgotResend();
+  }, 1000);
+}
+// Carimbo "Enviado agora" cai uma vez a cada envio (sem animação para quem pediu menos movimento: CSS).
+function forgotStamp(){ const c = document.getElementById('gate-forgot-carimbo'); if (!c) return; c.classList.remove('cai'); void c.offsetWidth; c.classList.add('cai'); }
+function showForgotSent(email, wait, noteKey){
+  gateForgotEmail = email;
+  document.getElementById('gate-forgot-sent-email').textContent = email;
+  const n = document.getElementById('gate-forgot-sent-note');
+  n.textContent = t(noteKey || 'gate.forgotSent.note'); n.className = 'gate-note';
+  showOnly('gate-forgot-sent');
+  startForgotCooldown(wait || 60);
+  forgotStamp();
+  document.getElementById('gate-forgot-sent-title').focus();
+}
+async function sendForgotEmail(email){
+  if (gateForgotBusy) return { busy: true };
+  gateForgotBusy = true;
+  try {
+    const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo: cleanRedirectURL() });
+    return { error };
+  } finally { gateForgotBusy = false; }
+}
+// "Esqueceu sua senha?" abre a tela só com o e-mail (já preenchido com o que estiver no login).
+function showForgotRequest(){
   const email = document.getElementById('gate-email').value.trim();
-  const note = document.getElementById('gate-login-note');
-  if (!email){ note.textContent = t('gate.forgot.needEmail'); note.className = 'gate-note'; return; }
-  const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo: cleanRedirectURL() });
-  note.textContent = error ? t('gate.forgot.failed') : t('gate.forgot.sent');
-  note.className = error ? 'gate-note err' : 'gate-note';
+  const input = document.getElementById('gate-forgot-email');
+  if (email && !input.value) input.value = email;
+  const n = document.getElementById('gate-forgot-note'); n.textContent = ''; n.className = 'gate-note';
+  showOnly('gate-forgot');
+  input.focus();
+}
+document.getElementById('gate-forgot-btn').addEventListener('click', showForgotRequest);
+document.getElementById('gate-forgot-cancel').addEventListener('click', () => {
+  const email = document.getElementById('gate-forgot-email').value.trim();
+  if (email && !document.getElementById('gate-email').value) document.getElementById('gate-email').value = email;
+  showLoginScreen();
+});
+document.getElementById('gate-forgot-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('gate-forgot-send-btn');
+  const email = document.getElementById('gate-forgot-email').value.trim();
+  const note = document.getElementById('gate-forgot-note');
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ note.textContent = t('gate.forgotAsk.needEmail'); note.className = 'gate-note err'; return; }
+  if (gateForgotBusy) return;
+  btn.disabled = true; btn.textContent = t('gate.forgot.sending');
+  note.textContent = ''; note.className = 'gate-note';
+  const { error, busy } = await sendForgotEmail(email);
+  btn.disabled = false; btn.textContent = t('gate.forgotAsk.submit');
+  if (busy) return;
+  const wait = error ? gateForgotWaitSeconds(error) : 60;
+  if (!error || wait){ showForgotSent(email, wait); return; }
+  note.textContent = t('gate.forgot.failed'); note.className = 'gate-note err';
+});
+document.getElementById('gate-forgot-resend-btn').addEventListener('click', async () => {
+  if (gateForgotLeft > 0 || !gateForgotEmail) return;
+  const n = document.getElementById('gate-forgot-sent-note');
+  paintForgotResend();
+  const { error, busy } = await sendForgotEmail(gateForgotEmail);
+  if (busy) return;
+  const wait = error ? gateForgotWaitSeconds(error) : 60;
+  if (!error){ n.textContent = t('gate.forgotSent.resent'); n.className = 'gate-note'; startForgotCooldown(60); forgotStamp(); return; }
+  if (wait){ startForgotCooldown(wait); n.textContent = t('gate.forgotSent.note'); n.className = 'gate-note'; return; }
+  n.textContent = t('gate.forgot.failed'); n.className = 'gate-note err'; paintForgotResend();
+});
+document.getElementById('gate-forgot-back-btn').addEventListener('click', () => {
+  clearInterval(gateForgotTimer); gateForgotLeft = 0;
+  if (gateForgotEmail) document.getElementById('gate-email').value = gateForgotEmail;
+  showLoginScreen();
 });
 
 document.getElementById('gate-verify-form').addEventListener('submit', async (e) => {

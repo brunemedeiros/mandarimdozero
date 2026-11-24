@@ -57,11 +57,11 @@ async function boot(browser, lang, port, theme, viewport, ui, opts){
   const errors = [];
   page.on('pageerror', e => errors.push(e.message));
   await page.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, r => r.abort());
-  await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
+  await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase|\/shared\/vendor\/supabase-js/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
   await page.addInitScript(() => { try { sessionStorage.setItem('guest_mode', '1'); } catch (e) {} });
   await page.addInitScript(() => { window.__CONSENT_TEST__ = true; });
   if (ui) await page.addInitScript((ui) => { try { localStorage.setItem('ui-language', ui); } catch (e) {} }, ui);
-  await page.goto(`http://127.0.0.1:${port}/${lang}/index.html`);
+  await page.goto(`http://127.0.0.1:${port}/${lang}/index.html${(opts && opts.query) || ''}`);
   await page.waitForFunction(() => typeof STATE !== 'undefined' && STATE.cards && STATE.cards.length > 0 && CURRENT_USER === false, null, { timeout: 15000 });
   return { page, errors, ctx };
 }
@@ -76,7 +76,7 @@ async function openPage(browser, port, url, { locale = 'pt-BR', theme = 'light',
   page.on('request', r => { if (GOOGLE.test(r.url())) google.push(r.url()); });
   await page.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, r => r.abort());
   await page.addInitScript(() => { window.__CONSENT_TEST__ = true; });
-  if (gate) await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase/, r => r.fulfill({ contentType: 'text/javascript', body: GATE_STUB }));
+  if (gate) await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase|\/shared\/vendor\/supabase-js/, r => r.fulfill({ contentType: 'text/javascript', body: GATE_STUB }));
   if (init) await page.addInitScript(init);
   await page.goto(`http://127.0.0.1:${port}/${url}`);
   return { ctx, page, errors, google };
@@ -128,6 +128,10 @@ async function run(browser, port){
     await page.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, r => r.abort());
     await page.goto(`http://127.0.0.1:${port}/sobre.html`); await page.waitForTimeout(600);
     check('navegador automático: sem aviso e sem Google', !(await bannerOn(page)) && google.length === 0, google);
+    // mesmo com o aceite guardado, fora de app.profbrune.com.br nada é medido
+    await page.evaluate(() => localStorage.setItem('cookie-consent', JSON.stringify({ v: 1, analytics: true, at: '2026-11-24T10:00:00Z' })));
+    await page.reload(); await page.waitForTimeout(800);
+    check('fora do endereço do site: com aceite guardado, nada é medido', google.length === 0 && !(await page.evaluate(() => ProfBruneConsent.measuring())), google);
     await page.click('footer [data-consent-open]');
     check('navegador automático: Preferências ainda abrem pelo rodapé', await prefsOn(page));
     await ctx.close();
@@ -143,6 +147,15 @@ async function run(browser, port){
     check('aceitar: pede o gtag.js com o ID G-CE3282C1FB', google.some(u => /googletagmanager\.com\/gtag\/js\?id=G-CE3282C1FB/.test(u)), google);
     const c = await cfg(page);
     check('aceitar: cookies de 13 meses, sem Sinais nem anúncios, sem page_view automático', c && c[1] === 'G-CE3282C1FB' && c[2].cookie_expires === 34128000 && c[2].allow_google_signals === false && c[2].allow_ad_personalization_signals === false && c[2].send_page_view === false && !('user_id' in c[2]), c);
+    check('aceitar: a configuração já leva o endereço limpo (sem convite, e-mail nem token)', c && typeof c[2].page_location === 'string' && !/convite|ABC123|email|access_token|segredo|#/.test(c[2].page_location + (c[2].page_referrer || '')), c && c[2]);
+    // A tag do Google desta propriedade ignora o 'config' da página (gtag.js real, 2026-11-24): as regras precisam ir num
+    // gtag('set') ANTES do 'js', senão sai um page_view automático com o endereço completo e o cookie dura 400 dias.
+    const order = await page.evaluate(() => (window.dataLayer || []).map(a => Array.from(a)));
+    const iSet0 = order.findIndex(a => a[0] === 'set'), iJs = order.findIndex(a => a[0] === 'js');
+    const s0 = order[iSet0] && order[iSet0][1];
+    check('aceitar: regras de privacidade num set ANTES do js (a tag ignora o config)', iSet0 >= 0 && iJs > iSet0 && s0 && s0.send_page_view === false && s0.cookie_expires === 34128000 && s0.allow_google_signals === false && s0.allow_ad_personalization_signals === false && !/convite|ABC123|email|access_token|segredo|#/.test(s0.page_location), order.slice(0, 3));
+    const sets = await page.evaluate(() => (window.dataLayer || []).map(a => Array.from(a)).filter(a => a[0] === 'set').map(a => a[1]));
+    check('aceitar: gtag set com o endereço limpo para os próximos eventos', sets.length >= 1 && /utm_source=instagram/.test(sets[sets.length - 1].page_location) && !/convite|ABC123|email|access_token|segredo|#/.test(sets[sets.length - 1].page_location), sets);
     const pv = (await hits(page)).filter(h => h.name === 'page_view');
     const loc = pv[0] && pv[0].p.page_location;
     check('aceitar: 1 page_view', pv.length === 1, pv);
@@ -157,6 +170,54 @@ async function run(browser, port){
     const after = await page.evaluate(() => ({ cookies: document.cookie, off: window['ga-disable-G-CE3282C1FB'] === true, c: JSON.parse(localStorage.getItem('cookie-consent')) }));
     check('revogar: apaga _ga e _ga_CE3282C1FB', !/_ga/.test(after.cookies), after.cookies);
     check('revogar: desliga o envio e guarda a recusa', after.off && after.c.analytics === false, after);
+    await ctx.close();
+  }
+  // 2b) Cadastro por e-mail com os cookies aceitos: o evento sign_up sai depois do código (método e curso, sem dado pessoal)
+  {
+    const { ctx, page, errors } = await openPage(browser, port, 'index.html', { gate: true,
+      init: () => { try { localStorage.setItem('cookie-consent', JSON.stringify({ v: 1, analytics: true, at: '2026-11-24T10:00:00Z' })); } catch (e) {} } });
+    await page.waitForSelector('#gate-login', { state: 'visible' });
+    await page.click('#gate-signup-link');
+    await page.waitForSelector('#gate-signup-course', { state: 'visible' });
+    await page.click('#signup-grid .lang-card[data-lang="fr"]');
+    await page.waitForSelector('#gate-signup-method', { state: 'visible' });
+    await page.check('#signup-age-ack'); await page.click('#signup-email-btn');
+    await page.waitForSelector('#gate-signup-data', { state: 'visible' });
+    await page.fill('#signup-name', 'Nova Pessoa');
+    await page.waitForFunction(() => /livre|available/.test(document.getElementById('signup-arroba-msg').textContent), null, { timeout: 5000 });
+    await page.fill('#signup-email', 'nova@x.com'); await page.fill('#signup-password', 'segredo1');
+    await page.click('#signup-submit');
+    await page.waitForSelector('#gate-verify', { state: 'visible' });
+    check('sign_up: nada antes do código', !(await hits(page)).some(h => h.name === 'sign_up'));
+    await page.fill('#gate-code', '123456'); await page.click('#gate-verify-btn');
+    await page.waitForSelector('#gate-choose-experience', { state: 'visible' });
+    const su = (await hits(page)).filter(h => h.name === 'sign_up');
+    check('sign_up: sai 1 vez depois do código, com método e curso', su.length === 1 && su[0].p.method === 'email' && su[0].p.course === 'fr' && Object.keys(su[0].p).length === 2, su);
+    check('sign_up: sem e-mail nem nome no GA4', !JSON.stringify(await page.evaluate(() => window.dataLayer.map(a => Array.from(a)))).match(/nova@x\.com|Nova Pessoa|nova\.pessoa/));
+    check('sign_up: sem erro de página', errors.length === 0, errors);
+    await ctx.close();
+  }
+  // 2c) Conta NOVA pelo "Entrar com Google" da tela de Entrar (sem cadastro): sign_up ao escolher o curso; conta antiga não
+  {
+    const { ctx, page } = await openPage(browser, port, 'index.html', { gate: true,
+      init: () => { try { localStorage.setItem('cookie-consent', JSON.stringify({ v: 1, analytics: true, at: '2026-11-24T10:00:00Z' })); } catch (e) {} } });
+    await page.waitForSelector('#gate-login', { state: 'visible' });
+    await page.evaluate(() => { window.__went = null; goToLanguageApp = (id) => { window.__went = id; }; getCurrentLearningLanguage = async () => null; setCurrentLearningLanguage = async () => {}; });
+    await page.evaluate(() => afterAuthResolved({ id: 'nova', created_at: new Date(Date.now() - 60000).toISOString(), app_metadata: { provider: 'google' } }));
+    await page.waitForSelector('#gate-choose-language', { state: 'visible' });
+    await page.click('#lang-grid .lang-card[data-lang="zh"]');
+    await page.waitForTimeout(300);
+    let su = (await hits(page)).filter(h => h.name === 'sign_up');
+    check('Google pela tela de Entrar, conta nova: sign_up com google e o curso', su.length === 1 && su[0].p.method === 'google' && su[0].p.course === 'zh', su);
+    await page.goto(`http://127.0.0.1:${port}/index.html`);
+    await page.waitForSelector('#gate-login', { state: 'visible' });
+    await page.evaluate(() => { goToLanguageApp = () => {}; getCurrentLearningLanguage = async () => null; setCurrentLearningLanguage = async () => {}; });
+    await page.evaluate(() => afterAuthResolved({ id: 'antiga', created_at: '2026-01-01T00:00:00Z', app_metadata: { provider: 'google' } }));
+    await page.waitForSelector('#gate-choose-language', { state: 'visible' });
+    await page.click('#lang-grid .lang-card[data-lang="fr"]');
+    await page.waitForTimeout(300);
+    su = (await hits(page)).filter(h => h.name === 'sign_up');
+    check('conta antiga sem curso: não conta como cadastro', su.length === 0, su);
     await ctx.close();
   }
   // 3) UTM guardado na aba: chega com utm, navega, só aceita na segunda página
@@ -229,6 +290,25 @@ async function run(browser, port){
       await page.evaluate(() => { const b = document.querySelector('#settings-cookies-box [data-consent-open]'); b.click(); });
       check(`${lang}: Configurações abrem as Preferências`, await prefsOn(page));
       check(`${lang}: sem erro de página`, errors.length === 0, errors);
+      await ctx.close();
+    }
+    // link do app com parâmetros (turma, curso, tela, idioma, trecho depois do #): todo evento sai com o endereço limpo
+    {
+      const { page, ctx } = await boot(browser, lang, port, 'light', null, 'pt-BR', { query: '?turma=TURMA9&cur=frances&view=review&ui=en#/deck/segredo' });
+      await page.evaluate(accepted);
+      await page.evaluate(() => { window.dataLayer = []; ProfBruneConsent.setContext({ staff: false }); trackEvent('lesson_start', 'vocab_lesson'); trackEvent('tab_switch', 'review'); trackEvent('course_restart', 'x'); });
+      const dl = await page.evaluate(() => (window.dataLayer || []).map(a => Array.from(a)));
+      const dirty = /turma|TURMA9|cur=|view=|ui=|#|segredo/; // "/fr/deck" é só o nome da tela que o link abriu
+      const cfgx = dl.find(a => a[0] === 'config'); const setsx = dl.filter(a => a[0] === 'set').map(a => a[1]);
+      // a configuração e cada set valem para os eventos seguintes; nenhum deles pode levar os parâmetros do link
+      check(`${lang}: link com ?turma=/?cur=/?view=/?ui=/#: configuração limpa`, cfgx && !dirty.test(JSON.stringify(cfgx[2])), cfgx && cfgx[2]);
+      check(`${lang}: link com parâmetros: todo set limpo`, setsx.length >= 2 && setsx.every(f => !dirty.test(f.page_location) && !dirty.test(f.page_referrer || '')), setsx);
+      const iLesson = dl.findIndex(a => a[0] === 'event' && a[1] === 'lesson_start');
+      const lastSetBefore = dl.slice(0, iLesson).filter(a => a[0] === 'set').pop();
+      await page.evaluate(() => { trackEvent('tab_switch', 'segredo'); trackEvent('tab_switch', 'access_token=abc'); });
+      const pvx = (await hits(page)).filter(h => h.name === 'page_view').map(h => h.p.page_location);
+      check(`${lang}: texto do link (#segredo) nunca vira nome de página`, !pvx.some(u => /segredo|access_token/.test(u)), pvx);
+      check(`${lang}: o evento de lição vem depois de um set limpo`, iLesson > 0 && lastSetBefore && !dirty.test(lastSetBefore[1].page_location), lastSetBefore);
       await ctx.close();
     }
     // professora: nada medido e o aparelho fica marcado

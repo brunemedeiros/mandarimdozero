@@ -131,6 +131,7 @@
     "📥": "fluent/1f4e5.svg",
     "📦": "fluent/1f4e6.svg",
     "📧": "fluent/1f4e7.svg",
+    "✉": "fluent/2709.svg", // envelope simples, sem @ (tela de "Esqueceu a senha?", pedido da dona 2026-11-16)
     "📰": "fluent/1f4f0.svg",
     "📱": "fluent/1f4f1.svg",
     "📺": "fluent/1f4fa.svg",
