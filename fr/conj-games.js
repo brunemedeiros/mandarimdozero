@@ -311,7 +311,7 @@ const CONJ_GAMES = [
           en: { tr: 'Excuse me, sir, do you speak English?', why: "{Excusez-moi} is the {vous} form ({excuse-moi} is the {tu} one), so the verb matches: {vous parlez}." } } },
       { id: 8, before: 'Madame, ', after: ' répéter, s\'il vous plaît ?', verb: 'pouvoir', a: 'tu peux', b: 'vous pouvez', ans: 'b', clue: 's\'il vous plaît',
         text: {
-          'pt-BR': { tr: 'Professora, pode repetir, por favor?', why: "{Madame} e {s'il vous plaît} pedem {vous}. Na França, é assim que os alunos chamam a professora." },
+          'pt-BR': { tr: 'Senhora, pode repetir, por favor?', why: "{Madame} e {s'il vous plaît} pedem {vous}. Na França, é assim que os alunos chamam a professora." },
           en: { tr: 'Ma\'am, could you repeat that, please?', why: "{Madame} and {s'il vous plaît} both call for {vous}. It's also how French students address a female teacher." } } },
       { id: 9, before: '', after: ' me passer le sel, s\'il te plaît ?', verb: 'pouvoir', a: 'Tu peux', b: 'Vous pouvez', ans: 'a', clue: 's\'il te plaît',
         text: {

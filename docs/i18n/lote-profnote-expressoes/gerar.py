@@ -14,6 +14,10 @@ for x in r:
                f"where id = '{x['id']}' and type = 'expression' and data->>'canonicalExpression' = {q(x['expr'])};")
 out.append('commit;')
 open('aplicar-profnote.sql', 'w').write('\n'.join(out) + '\n')
+open('aplicar-profnote.sql', 'w').write('-- Mesmo lote em um só UPDATE (cabe numa chamada). Guarda: canonicalExpression igual.\n' +
+    "update public.challenges c set data = jsonb_set(c.data,'{profNote}',jsonb_build_object('pt',v.pt)) from (values " +
+    ','.join(f"('{x['id']}',{q(x['expr'])},{q(x['pt'])})" for x in r) +
+    ") v(id,e,pt) where c.id=v.id and c.type='expression' and c.data->>'canonicalExpression'=v.e;\n")
 json.dump({x['id']: x['en'] for x in r}, open('overlay-en-profnote.json', 'w'), ensure_ascii=False, indent=1)
 # hash para conferir depois de gravar: md5 de string_agg(id||':'||profNote.pt, '|' order by id)
 s = '|'.join(f"{x['id']}:{x['pt']}" for x in sorted(r, key=lambda x: x['id']))

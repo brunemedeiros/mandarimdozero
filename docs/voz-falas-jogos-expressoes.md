@@ -6,8 +6,17 @@ Como foi feito: um redator por lote, depois uma revisão independente (agente re
 
 ## Situação
 
-- **Jogos** (Passé composé: avoir ou être?, Tu ou vous?, Passé composé ou imparfait?, mais o Être ou avoir do piloto): textos já em `fr/conj-games.js` na branch `claude/affectionate-fermi-w2s41y`; só chegam ao site com o PR.
-- **Expressões**: pt-BR gravado no **Staging** em 2026-11-24 (120 linhas, hash `f7dd55b43542790ed3b178c2fcf1785d`); inglês em `docs/i18n/challenges-en.json` (campo `profNote`). **Produção: aguarda autorização da autora.** Lote: `docs/i18n/lote-profnote-expressoes/` (`falas-final.json`, `aplicar-profnote-compacto.sql`, `gerar.py`).
+- **Jogos** (Passé composé: avoir ou être?, Tu ou vous?, Passé composé ou imparfait?, mais o Être ou avoir do piloto): textos em `fr/conj-games.js` na branch `claude/affectionate-fermi-w2s41y`; só chegam ao site com o PR.
+- **Expressões**: falas aprovadas pela autora e gravadas no Staging e na **produção em 2026-11-24** (120 linhas, hash `b858daf7470392ca8a2a335d2b04ab96`); o site só as mostra depois do PR (o código que lê `profNote` está na branch). Inglês em `docs/i18n/challenges-en.json`. Lote: `docs/i18n/lote-profnote-expressoes/`.
+
+## Decisões da autora (2026-11-24)
+
+1. Frases dos jogos na 1ª pessoa: **ficam no masculino** (a concordância do particípio é do A2).
+2. "Madame, vous pouvez répéter, s'il vous plaît ?": tradução trocada para **"Senhora, pode repetir, por favor?"**.
+3. Aviso de registro colado ao significado: **removido** dos 65 itens (pt no banco, en no overlay) e do script de importação (`fr/scripts/challenges_import/build_lote_expressoes.py`); o selo de registro da tela já explica. Cópia: `docs/i18n/lote-profnote-expressoes/backup-avisos-registro.json`.
+4. Correções dos revisores aplicadas (`correcoes.py`, com o valor antigo de cada troca): significados de Je vous en prie, Bonne soirée, casser les pieds, avoir la gueule de bois, bordel, espèce de con, mettre les points sur les i, ne pas y aller de main morte (e en de connard, tu m'emmerdes, foutre le camp); literais de foutre le camp e arrête ton char; explicações em francês de Bienvenue, Ça fait longtemps, c'est génial, ça vaut le coup, être bourré, tirer la gueule, mettre les points sur les i, il pleut des cordes, coup de main; registros: coup de main, c'est génial, il pleut des cordes e ne pas y aller de main morte viram neutro; s'en foutre, se casser e ferme-la viram gíria; va te faire voir vira vulgar.
+5. Falas sem a professora falando de si mesma: Enchanté, être crevé e être fauché ("uma mulher diz..."); ça craint sem "jovens".
+6. Não mudou (decisão 1 vale também para os exemplos): exemplos traduzidos no masculino ("Muito obrigado", "Bem-vindo", "Estou chateado"); "dit Léa" (mudaria o áudio). **Ainda aberto:** os 28 exemplos em diálogo usam travessão no começo das falas (os revisores citaram 2).
 
 ## Para a autora decidir
 

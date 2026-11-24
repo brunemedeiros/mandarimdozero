@@ -1,6 +1,6 @@
 {
  "expr-001": {
-  "meaning": "To feel sick and have a headache after drinking too much alcohol; to be hungover.",
+  "meaning": "To be hungover.",
   "example": "Last night I drank too much, and this morning I'm really hungover.",
   "secondExample": "After the party, the students were hungover and regretted their excesses.",
   "literal": "to have a wooden mouth",
@@ -14,7 +14,7 @@
   "profNote": "It's casual and takes {avoir}: {j'ai la gueule de bois}. For a person's face, {gueule} is rude."
  },
  "expr-002": {
-  "meaning": "Means to bother or really irritate someone; to get on someone's nerves.",
+  "meaning": "To bother or really irritate someone; to get on someone's nerves.",
   "example": "Stop making that noise, you've been driving me nuts since this morning!",
   "secondExample": "I tried to explain the situation to him calmly, but he kept asking me the same questions, and it was driving me nuts.",
   "literal": "to break (someone's) feet",
@@ -182,7 +182,7 @@
    "When you're tired"
   ],
   "microActivity": "Hi, my name is Ana. — Nice to meet you!",
-  "profNote": "Men write {enchanté}, women write {enchantée}, and they sound the same. I write {enchantée}."
+  "profNote": "Men write {enchanté}, women write {enchantée}, and they sound the same."
  },
  "expr-a1m1-002": {
   "meaning": "So-so; not great, not bad.",
@@ -211,7 +211,7 @@
   "profNote": "A common answer to {ça va ?}. Like \"not bad\" in English, it means \"pretty good\"."
  },
  "expr-a1m1-004": {
-  "meaning": "Deal! Sounds good! Great! Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "meaning": "Deal! Sounds good! Great!",
   "example": "— Coffee together?\n— Sounds good!",
   "secondExample": "— I'll call you tonight.\n— Works for me!",
   "literal": "That works!",
@@ -491,7 +491,7 @@
   "profNote": "It uses {vous}, so it's the polite way to stop a stranger. With friends, say {excuse-moi}."
  },
  "expr-a1m3-002": {
-  "meaning": "You're welcome; please, make yourself at home.",
+  "meaning": "You're welcome; please, go ahead.",
   "example": "— Thank you so much!\n— You're welcome.",
   "secondExample": "Please, come in.",
   "literal": "I beg you",
@@ -906,7 +906,7 @@
   "profNote": "{C'est parti !} kicks things off with energy: a game, a trip, a lesson. Fine with anyone."
  },
  "expr-a1m6-004": {
-  "meaning": "What's new? What's up, any news? Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "meaning": "What's new? What's up, any news?",
   "example": "Hi! What's new?",
   "secondExample": "What's new since last week?",
   "literal": "What of new?",
@@ -934,7 +934,7 @@
   "profNote": "What you say when you run into someone after ages. To give the length: {ça fait deux ans}."
  },
  "expr-lote1-001": {
-  "meaning": "anything / nonsense Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "meaning": "anything / nonsense",
   "example": "— The Earth is flat.\n— You're talking nonsense!",
   "secondExample": "He ate a bunch of junk for dinner, and now he has a stomachache.",
   "literal": "any thing",
@@ -948,7 +948,7 @@
   "profNote": "Meaning \"anything\", it's neutral. Meaning \"nonsense\", it's blunt: {tu dis n'importe quoi !} is for friends."
  },
  "expr-lote1-002": {
-  "meaning": "to be fed up Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "meaning": "to be fed up",
   "example": "I'm sick of the rain, I want sunshine!",
   "secondExample": "The kids were fed up with waiting in the car.",
   "options": [
@@ -961,7 +961,7 @@
   "profNote": "Don't drop the {en}: {j'en ai marre}. Add what with {de}: {j'en ai marre du bruit}. It's casual."
  },
  "expr-lote1-003": {
-  "meaning": "to not give a damn ⚠️ Register: vulgar — can be offensive. Avoid in formal settings or with strangers.",
+  "meaning": "to not give a damn",
   "example": "— Your team lost!\n— I don't give a damn, I don't like soccer.",
   "secondExample": "She couldn't care less what people say.",
   "options": [
@@ -974,7 +974,7 @@
   "profNote": "Very common among friends, but crude: never with your boss or strangers. Neutral: {ça m'est égal}."
  },
  "expr-lote1-004": {
-  "meaning": "to be in deep trouble / in a terrible situation ⚠️ Register: vulgar — can be offensive. Avoid in formal settings or with strangers.",
+  "meaning": "to be in deep trouble / in a terrible situation",
   "example": "I missed my train and I have an interview in twenty minutes: I'm in deep shit.",
   "secondExample": "Without their keys or their phone, they were in deep shit.",
   "options": [
@@ -987,7 +987,7 @@
   "profNote": "Vulgar: only with people you're very close to, ideally about yourself: {je suis dans la merde}."
  },
  "expr-lote1-005": {
-  "meaning": "that sucks / what a mess Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "meaning": "that sucks / what a mess",
   "example": "The concert is canceled? That sucks, I already had my tickets.",
   "secondExample": "That neighborhood at night was a bit sketchy, so we took a taxi.",
   "options": [
@@ -997,10 +997,10 @@
    "It's very easy"
   ],
   "microActivity": "The battery's dead and we're lost in the forest… this sucks!",
-  "profNote": "Young people use it a lot. It can also mean a place is sketchy: {ce quartier craint}."
+  "profNote": "Very common in everyday speech. It can also mean a place is sketchy: {ce quartier craint}."
  },
  "expr-lote1-006": {
-  "meaning": "to feel lazy / can't be bothered Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "meaning": "to feel lazy / can't be bothered",
   "example": "I can't be bothered to cook tonight, want to order a pizza?",
   "secondExample": "On Sunday, he felt too lazy to go out, so he stayed in bed.",
   "literal": "to have the phlegm",
@@ -1014,7 +1014,7 @@
   "profNote": "It takes {de} + verb: {j'ai la flemme de cuisiner}. Very casual, so not something to tell your boss."
  },
  "expr-lote1-007": {
-  "meaning": "that's crazy / that's incredible Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "meaning": "that's crazy / that's incredible",
   "example": "He ran the marathon in under three hours? That's crazy!",
   "secondExample": "It was crazy: it was snowing in the middle of May.",
   "options": [
@@ -1027,10 +1027,10 @@
   "profNote": "Works for good or bad surprises, just like {c'est fou}. Casual, for friends."
  },
  "expr-lote1-008": {
-  "meaning": "to get out / to clear off ⚠️ Register: very informal/slang — only with people you're close to; avoid in formal settings.",
+  "meaning": "to get out / to get the hell out",
   "example": "The neighbor yelled: \"Get the hell out of my garden!\"",
   "secondExample": "By the time the police arrived, the thieves had already taken off.",
-  "literal": "to throw the camp",
+  "literal": "to break camp (with a vulgar verb)",
   "options": [
    "To pitch a tent",
    "To party",
@@ -1041,7 +1041,7 @@
   "profNote": "As an order it's aggressive: {foutez le camp !} {Je fous le camp} just means \"I'm leaving\", but crudely."
  },
  "expr-lote1-009": {
-  "meaning": "shut up ⚠️ Register: vulgar — can be offensive. Avoid in formal settings or with strangers.",
+  "meaning": "shut up",
   "example": "— You lost again, huh?\n— Oh, shut your trap!",
   "secondExample": "Annoyed by his brother's jokes, Paul snapped: \"Shut the hell up, seriously!\"",
   "literal": "your muzzle",
@@ -1055,7 +1055,7 @@
   "profNote": "It truly offends; only among close friends, joking. Not crude, but still curt: {tais-toi}."
  },
  "expr-lote1-010": {
-  "meaning": "to be a pain in the neck / to piss someone off ⚠️ Register: vulgar — can be offensive. Avoid in formal settings or with strangers.",
+  "meaning": "to be a pain in the neck / to piss someone off",
   "example": "It pisses me off to have to work this Saturday.",
   "secondExample": "Your dog barked all night again, he really pissed us off.",
   "literal": "to make (someone) shit",
@@ -1069,7 +1069,7 @@
   "profNote": "It's vulgar: you'll mostly hear {ça me fait chier}. Avoid it with anyone you don't know well."
  },
  "expr-lote1-011": {
-  "meaning": "to stress out / to argue over nothing Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "meaning": "to stress out / to argue over nothing",
   "example": "Don't stress about it, we'll pick the restaurant when we get there.",
   "secondExample": "Yesterday, my parents got into a pointless argument over the remote control.",
   "literal": "to take one's head",
@@ -1083,7 +1083,7 @@
   "profNote": "Very common as advice to calm someone down: {ne te prends pas la tête}. Casual."
  },
  "expr-lote1-012": {
-  "meaning": "yeah right! / no way! Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "meaning": "yeah right! / no way!",
   "example": "— He's going to clean his room by himself.\n— Yeah, right! He's never done it.",
   "secondExample": "— The bus will be on time today.\n— Yeah, right, it's already twenty minutes late!",
   "literal": "you speak!",
@@ -1097,7 +1097,7 @@
   "profNote": "It's all in the ironic tone, like \"yeah, right\": {tu parles !} isn't asking anyone to talk."
  },
  "expr-lote1-013": {
-  "meaning": "it's a piece of cake Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "meaning": "it's a piece of cake",
   "example": "Changing a light bulb? It's a piece of cake!",
   "secondExample": "For her, the first exam was a piece of cake, but the second one was harder.",
   "literal": "it's cake",
@@ -1111,7 +1111,7 @@
   "profNote": "Like \"a piece of cake\", but with {du}, never {un}. The negative is common too: {ce n'est pas du gâteau}."
  },
  "expr-lote1-014": {
-  "meaning": "to feel down / to have the blues Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "meaning": "to feel down / to have the blues",
   "example": "On Sunday evenings, I often feel down.",
   "secondExample": "Far from her family, she felt blue all winter.",
   "literal": "to have the cockroach",
@@ -1166,7 +1166,7 @@
   "profNote": "It takes {de} + verb: {j'ai hâte de partir}. Despite looking like \"haste\", it's not about hurrying."
  },
  "expr-lote1-018": {
-  "meaning": "yeah, sure... / tell me another one Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "meaning": "yeah, sure... / tell me another one",
   "example": "— I finished all my homework in ten minutes.\n— Yeah, right!",
   "secondExample": "— I only ate one chocolate.\n— Yeah, right, the box is empty!",
   "literal": "my eye!",
@@ -1194,7 +1194,7 @@
   "profNote": "Close to \"get on your high horse\", and the possessive changes too: {je monte sur mes grands chevaux}."
  },
  "expr-lote1-020": {
-  "meaning": "to hit a wall of tiredness / to feel suddenly drained Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "meaning": "to hit a wall of tiredness / to feel suddenly drained",
   "example": "After lunch, I always hit a wall around three in the afternoon.",
   "secondExample": "He suddenly felt exhausted at the wheel and pulled over at a rest area.",
   "literal": "to have a blow of the bar",
@@ -1208,7 +1208,7 @@
   "profNote": "Casual and very common after lunch, like \"I'm crashing\". It takes {avoir} and {un}: {j'ai un coup de barre}."
  },
  "expr-lote2-001": {
-  "meaning": "get lost / beat it ⚠️ Register: very informal/slang — only with people you're close to; avoid in formal settings.",
+  "meaning": "get lost / beat it",
   "example": "\"Get lost, I don't want to see you anymore!\" she yelled at her ex.",
   "secondExample": "The cat got up on the table, so I told him: \"Come on, scram!\"",
   "options": [
@@ -1221,7 +1221,7 @@
   "profNote": "It's aggressive, the language of a fight. Elsewhere, the verb {dégager} means \"to clear\"."
  },
  "expr-lote2-002": {
-  "meaning": "to leave / to take off Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "meaning": "to leave / to take off",
   "example": "It's late, I'm out of here. See you tomorrow!",
   "secondExample": "When the police showed up, they took off running.",
   "literal": "to break oneself",
@@ -1235,7 +1235,7 @@
   "profNote": "Careful: {se casser} can also mean to break, as in {le verre s'est cassé}. Context tells you."
  },
  "expr-lote2-003": {
-  "meaning": "it's a pain / it's a drag ⚠️ Register: vulgar — can be offensive. Avoid in formal settings or with strangers.",
+  "meaning": "it's a pain / it's a drag",
   "example": "Another hour-long meeting? What a pain in the ass!",
   "secondExample": "Standing in line at the government office was a real pain in the ass.",
   "options": [
@@ -1248,7 +1248,7 @@
   "profNote": "It's vulgar but heard a lot. About a person it's insulting: {il est chiant}. Avoid it with strangers."
  },
  "expr-lote2-004": {
-  "meaning": "to be scared / to be scared to death Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "meaning": "to be scared / to be scared to death",
   "example": "I'm scared to death of flying.",
   "secondExample": "During the horror movie, we were scared stiff all evening.",
   "options": [
@@ -1261,7 +1261,7 @@
   "profNote": "Like {avoir peur}, it takes {avoir} and {de}: {j'ai la trouille de prendre l'avion}. Casual."
  },
  "expr-lote2-005": {
-  "meaning": "to be dead tired Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "meaning": "to be dead tired",
   "example": "I'm beat, I worked twelve hours today.",
   "secondExample": "After the marathon, they were completely wiped out.",
   "literal": "to be dead",
@@ -1272,10 +1272,10 @@
    "Be very happy"
   ],
   "microActivity": "I spent the whole day moving, I'm wiped out.",
-  "profNote": "It's casual and agrees with the speaker: I say {je suis crevée}. On a tire, {crevé} means flat."
+  "profNote": "It's casual and agrees with the speaker: a woman says {je suis crevée}. On a tire, {crevé} means flat."
  },
  "expr-lote2-006": {
-  "meaning": "to be drunk / to be wasted ⚠️ Register: very informal/slang — only with people you're close to; avoid in formal settings.",
+  "meaning": "to be drunk / to be wasted",
   "example": "He drank six beers, he's completely hammered.",
   "secondExample": "Last night we were so wasted that we took a taxi home.",
   "literal": "to be stuffed",
@@ -1289,7 +1289,7 @@
   "profNote": "Party slang, close friends only. The neutral word is {ivre}. A woman says {je suis bourrée}."
  },
  "expr-lote2-007": {
-  "meaning": "to be starving ⚠️ Register: very informal/slang — only with people you're close to; avoid in formal settings.",
+  "meaning": "to be starving",
   "example": "I'm starving, what are we eating tonight?",
   "secondExample": "The kids were starving when they got home from school.",
   "literal": "to have the gullet",
@@ -1303,7 +1303,7 @@
   "profNote": "Slang, with friends or family. Like {avoir faim}, it takes {avoir}: {j'ai la dalle}."
  },
  "expr-lote2-008": {
-  "meaning": "to be a pain in the neck / to bug someone ⚠️ Register: very informal/slang — only with people you're close to; avoid in formal settings.",
+  "meaning": "to be a pain in the neck / to bug someone",
   "example": "Quit busting my chops with your questions!",
   "secondExample": "My neighbor drives us nuts with his music every night.",
   "literal": "to break the candies",
@@ -1317,10 +1317,10 @@
   "profNote": "Slang, close friends only: a softened form of a cruder phrase. Note the {me}: {tu me casses les bonbons}."
  },
  "expr-lote2-009": {
-  "meaning": "stop exaggerating / stop making things up Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "meaning": "stop exaggerating / stop making things up",
   "example": "— I ate ten pizzas yesterday.\n— Get out of here!",
   "secondExample": "You won the lottery twice? Get out of here, I don't believe you!",
-  "literal": "stop your exaggeration",
+  "literal": "stop your chariot",
   "options": [
    "When someone speaks too quietly",
    "When someone exaggerates or lies",
@@ -1331,7 +1331,7 @@
   "profNote": "Informal, among friends, when a story sounds too good to be true. With {vous}: {arrêtez votre char}."
  },
  "expr-lote2-010": {
-  "meaning": "to pass out Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "meaning": "to pass out",
   "example": "It was so hot in the subway that a lady passed out.",
   "secondExample": "When I see blood, I pass out.",
   "literal": "to fall in the apples",
@@ -1345,7 +1345,7 @@
   "profNote": "Informal and very common. In the past tense {tomber} takes {être}: {elle est tombée dans les pommes}."
  },
  "expr-lote2-011": {
-  "meaning": "to give up guessing / to ask for the answer Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "meaning": "to give up guessing / to ask for the answer",
   "example": "I can't figure out the answer to your riddle, I give up.",
   "secondExample": "After ten minutes, the students gave up.",
   "literal": "to give one's tongue to the cat",
@@ -1429,7 +1429,7 @@
   "profNote": "A compliment that works anywhere. Watch the preposition: the heart is {sur la main}, \"on\" the hand."
  },
  "expr-lote2-017": {
-  "meaning": "to be tipsy / to be a little drunk Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "meaning": "to be tipsy / to be a little drunk",
   "example": "At the end of the wedding, Uncle Bernard was tipsy and singing off-key.",
   "secondExample": "Don't let her drive, she's had a few.",
   "literal": "to have a glass in the nose",
@@ -1443,7 +1443,7 @@
   "profNote": "Casual and good-humored, much softer than {être bourré}. Use it to tease, not to insult."
  },
  "expr-lote2-018": {
-  "meaning": "to cost an arm and a leg Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "meaning": "to cost an arm and a leg",
   "example": "The tickets for the final cost a bundle.",
   "secondExample": "Fixing my motorcycle cost me a bundle.",
   "literal": "to cost the skin of the butt",
@@ -1457,7 +1457,7 @@
   "profNote": "Cheekier than {coûter les yeux de la tête}, the everyday version. Keep {la peau des fesses} for friends."
  },
  "expr-lote2-019": {
-  "meaning": "to make a mountain out of a molehill Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "meaning": "to make a mountain out of a molehill",
   "example": "I'm five minutes late, don't make a big deal out of it!",
   "secondExample": "She spilled a little coffee and he made a huge fuss about it.",
   "literal": "to make a whole cheese out of it",
@@ -1499,7 +1499,7 @@
   "profNote": "Very common in everyday talk, with anyone. To say the opposite: {ça ne vaut pas le coup}."
  },
  "expr-lote3-002": {
-  "meaning": "bad luck / what a shame Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "meaning": "bad luck / what a shame",
   "example": "— I missed the bus by two minutes.\n— Ah, tough luck!",
   "secondExample": "It's raining the whole weekend of our vacation, just our luck.",
   "literal": "no bowl",
@@ -1514,7 +1514,7 @@
   "profNote": "Informal, for small mishaps like missing a bus. For truly sad news, {pas de bol} sounds far too light."
  },
  "expr-lote3-003": {
-  "meaning": "to be lucky Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "meaning": "to be lucky",
   "example": "He found a parking spot right out front, he's so lucky!",
   "secondExample": "We got lucky: the last train waited for us.",
   "literal": "to have a bowl",
@@ -1529,7 +1529,7 @@
   "profNote": "Note the {du}: {il a du bol}. For bad luck it's {pas de bol}. Both are informal, among friends."
  },
  "expr-lote3-004": {
-  "meaning": "to be careful / to watch out Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "meaning": "to be careful / to watch out",
   "example": "Watch out, the floor is wet!",
   "secondExample": "We were careful not to wake the baby when we got home.",
   "options": [
@@ -1542,7 +1542,7 @@
   "profNote": "Casual; in formal settings, {faites attention}. Careful: {faire une gaffe}, with {une}, means to make a blunder."
  },
  "expr-lote3-005": {
-  "meaning": "to mess up badly / to fail Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "meaning": "to mess up badly / to fail",
   "example": "I didn't study enough and I bombed the exam.",
   "secondExample": "— Did you take the right road?\n— No, we messed up, we have to turn around.",
   "literal": "to plant oneself",
@@ -1556,7 +1556,7 @@
   "profNote": "Informal. It's a {se} verb, so the past takes {être}: {je me suis planté}, or {plantée} for a woman."
  },
  "expr-lote3-006": {
-  "meaning": "it's terrible / it sucks Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "meaning": "it's terrible / it sucks",
   "example": "This game is too hard and no fun, it sucks.",
   "secondExample": "— The concert is canceled?\n— Yes, that sucks!",
   "literal": "it's null",
@@ -1570,7 +1570,7 @@
   "profNote": "Casual, for things and situations. About a person it's a put-down: {il est nul en maths}, hopeless at math."
  },
  "expr-lote3-007": {
-  "meaning": "it's awesome Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "meaning": "it's awesome",
   "example": "You got your license? That's awesome!",
   "secondExample": "We're going to the beach tomorrow, it's awesome!",
   "options": [
@@ -1583,7 +1583,7 @@
   "profNote": "For any good news: {c'est génial !} It works for people too: {il est génial}, \"he's amazing\"."
  },
  "expr-lote3-008": {
-  "meaning": "oh dear / darn (mild exclamation) Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "meaning": "oh dear / darn (mild exclamation)",
   "example": "Darn, I forgot my keys!",
   "secondExample": "— The store closes at noon today.\n— Oh, darn!",
   "options": [
@@ -1596,7 +1596,7 @@
   "profNote": "It's the polite stand-in for a swear word, fine in front of kids, like \"darn\". Often just {mince !}"
  },
  "expr-lote3-009": {
-  "meaning": "dying of laughter (lol) Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "meaning": "dying of laughter (lol)",
   "example": "His joke was so funny, I was dying laughing.",
   "secondExample": "Check out this cat video, my sister and I were dying laughing!",
   "options": [
@@ -1609,7 +1609,7 @@
   "profNote": "Informal. It agrees with whoever's laughing: a woman says {j'étais morte de rire}. In texts it's {mdr}."
  },
  "expr-lote3-010": {
-  "meaning": "to be on top form Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "meaning": "to be on top form",
   "example": "This restaurant is really top-notch, I recommend it.",
   "secondExample": "After a good night's sleep, I'm in top form!",
   "options": [
@@ -1649,7 +1649,7 @@
   "profNote": "Note the {de}, where English says \"with\": {tomber amoureux de Julie}. In the past it takes {être}: {il est tombé}."
  },
  "expr-lote3-013": {
-  "meaning": "shut up (milder than 'ta gueule') Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "meaning": "shut up (milder than 'ta gueule')",
   "example": "Stop telling everyone my secrets! Shut up!",
   "secondExample": "\"Shut up for a bit, I'm trying to listen to the game!\"",
   "literal": "close it",
@@ -1663,7 +1663,7 @@
   "profNote": "It's rude, even with no swear word: the {la} is the mouth. Still blunt but milder: {tais-toi}."
  },
  "expr-lote3-014": {
-  "meaning": "leave me alone ⚠️ Register: very informal/slang — only with people you're close to; avoid in formal settings.",
+  "meaning": "leave me alone",
   "example": "Stop following me everywhere and leave me the hell alone!",
   "secondExample": "\"Leave me the hell alone, I'm working!\" shouted the neighbor.",
   "options": [
@@ -1676,7 +1676,7 @@
   "profNote": "It sounds angry and rude, so only with people you're very close to. Politer: {laisse-moi tranquille}."
  },
  "expr-lote3-015": {
-  "meaning": "are you kidding me? ⚠️ Register: very informal/slang — only with people you're close to; avoid in formal settings.",
+  "meaning": "are you kidding me?",
   "example": "You're asking me for another hundred euros? Are you kidding me?",
   "secondExample": "— The plumber said he'd come next Tuesday.\n— Is he messing with us or what?",
   "options": [
@@ -1689,7 +1689,7 @@
   "profNote": "Slang for reacting to something outrageous, close friends only. Milder: {tu te moques de moi ?}"
  },
  "expr-lote3-016": {
-  "meaning": "damn / hell (strong exclamation) ⚠️ Register: vulgar — can be offensive. Avoid in formal settings or with strangers.",
+  "meaning": "damn / hell (strong exclamation)",
   "example": "Dammit, another traffic jam on the highway!",
   "secondExample": "\"What the hell is this mess?\" asked the teacher when he saw the classroom.",
   "literal": "brothel",
@@ -1703,7 +1703,7 @@
   "profNote": "It can shock, so never with strangers. It also means a big mess: {c'est le bordel ici}."
  },
  "expr-lote3-017": {
-  "meaning": "strong exclamation (surprise, anger) ⚠️ Register: vulgar — can be offensive. Avoid in formal settings or with strangers.",
+  "meaning": "strong exclamation (surprise, anger)",
   "example": "Shit, I missed the train again!",
   "secondExample": "\"Holy shit, it's beautiful!\" said Marc, looking at the sea.",
   "literal": "whore",
@@ -1717,7 +1717,7 @@
   "profNote": "It covers anger, shock, even awe, but it's crude: recognize {putain} and never use it with strangers."
  },
  "expr-lote3-018": {
-  "meaning": "you idiot (insult) ⚠️ Register: vulgar — can be offensive. Avoid in formal settings or with strangers.",
+  "meaning": "you idiot (insult)",
   "example": "\"You dumbass, watch where you're walking!\"",
   "secondExample": "He shouted \"you dumbass!\" at the driver who hadn't stopped.",
   "literal": "kind of idiot",
@@ -1731,7 +1731,7 @@
   "profNote": "A real insult that can start a fight: best to just recognize it. For a woman it becomes {espèce de conne}."
  },
  "expr-lote3-019": {
-  "meaning": "jerk (insult) ⚠️ Register: vulgar — can be offensive. Avoid in formal settings or with strangers.",
+  "meaning": "jerk / asshole (insult)",
   "example": "That asshole cut ahead of me in line without saying anything.",
   "secondExample": "\"What an asshole, he didn't even say thank you!\"",
   "options": [
@@ -1744,7 +1744,7 @@
   "profNote": "A strong insult, best kept for recognizing. It's masculine; for a woman French uses {connasse}."
  },
  "expr-lote3-020": {
-  "meaning": "to be completely off the mark Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "meaning": "to be completely off the mark",
   "example": "His answer has nothing to do with the question, he's completely off base.",
   "secondExample": "I was completely off: I thought the meeting was tomorrow.",
   "literal": "to be next to the plate",
@@ -1812,7 +1812,7 @@
   "profNote": "Nothing to do with wanting. Don't drop the {en}: {je t'en veux} means \"I hold it against you\"."
  },
  "expr-lote4-005": {
-  "meaning": "it's over, it's lost Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "meaning": "it's over, it's lost",
   "example": "We missed the last train, that's it for tonight.",
   "secondExample": "The project fell through, it's all ruined.",
   "options": [
@@ -1825,7 +1825,7 @@
   "profNote": "Informal and a bit crude: skip it at work. A milder version is {c'est fichu}."
  },
  "expr-lote4-006": {
-  "meaning": "to be broke Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "meaning": "to be broke",
   "example": "I can't go out this weekend, I'm totally broke.",
   "secondExample": "When we were students, we were always broke at the end of the month.",
   "literal": "to be mown",
@@ -1836,10 +1836,10 @@
    "To be sick"
   ],
   "microActivity": "Can you pay for the coffee? I don't have a single euro left, I'm broke.",
-  "profNote": "Casual and very common. It agrees with the speaker: as a woman, I'd say {je suis fauchée}."
+  "profNote": "Casual and very common. It agrees with the speaker: a woman says {je suis fauchée}."
  },
  "expr-lote4-007": {
-  "meaning": "to be upset, angry or disappointed Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "meaning": "to be upset, angry or disappointed",
   "example": "I'm bummed, my favorite concert got canceled.",
   "secondExample": "She was crushed when she failed her driving test by one point.",
   "literal": "to have the balls",
@@ -1853,7 +1853,7 @@
   "profNote": "Not \"have the balls\" (be brave): {j'ai les boules} means you're gutted. Very casual, friends only."
  },
  "expr-lote4-008": {
-  "meaning": "to be full of energy / to be in high spirits Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "meaning": "to be full of energy / to be in high spirits",
   "example": "This morning I'm full of energy: I'm going for a run before work.",
   "secondExample": "After her vacation, my grandmother was really full of pep.",
   "literal": "to have the peach",
@@ -1867,7 +1867,7 @@
   "profNote": "Casual, and always with {avoir} and {la}: {j'ai la pêche}. Nobody's talking fruit here, it's all energy."
  },
  "expr-lote4-009": {
-  "meaning": "to struggle / to have a hard time Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "meaning": "to struggle / to have a hard time",
   "example": "I struggled to find an apartment in Paris.",
   "secondExample": "The new students are struggling a bit with math.",
   "literal": "to row in a galley",
@@ -1881,7 +1881,7 @@
   "profNote": "A casual verb, conjugated like {parler}: {j'ai galéré}. For a hard task, say {c'est la galère}."
  },
  "expr-lote4-010": {
-  "meaning": "to have money / to have cash Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "meaning": "to have money / to have cash",
   "example": "His parents have loads of cash, they go on vacation three times a year.",
   "secondExample": "If I had some cash, I'd buy a house by the sea.",
   "options": [
@@ -1894,7 +1894,7 @@
   "profNote": "{Le fric} is slang for {l'argent}: fine with friends, but at a job interview or the bank, stick to {argent}."
  },
  "expr-lote4-011": {
-  "meaning": "you're driving me crazy / you're a pain in the neck ⚠️ Register: vulgar — can be offensive. Avoid in formal settings or with strangers.",
+  "meaning": "you're pissing me off / you're a pain in the ass",
   "example": "\"Stop asking me the same question, you're pissing me off!\"",
   "secondExample": "His lame jokes really piss me off.",
   "literal": "you cover me in shit",
@@ -1908,7 +1908,7 @@
   "profNote": "Vulgar and hurtful: understand it, but don't say it. Without the swear word, French says {tu m'embêtes}."
  },
  "expr-lote4-012": {
-  "meaning": "get lost / go to hell ⚠️ Register: very informal/slang — only with people you're close to; avoid in formal settings.",
+  "meaning": "get lost / go to hell",
   "example": "He asked me to do his job for him; I told him to get lost.",
   "secondExample": "\"Get lost with your advice!\" shouted the neighbor.",
   "literal": "go get yourself seen",
@@ -1922,7 +1922,7 @@
   "profNote": "{Va te faire voir} is rude and ends the talk in anger. It softens a swear, but avoid it, even with friends."
  },
  "expr-lote4-013": {
-  "meaning": "to sulk / to wear a sour face Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "meaning": "to sulk / to wear a sour face",
   "example": "Ever since we refused to go to the restaurant, Julien has been sulking.",
   "secondExample": "She sulked all evening because they had forgotten to invite her.",
   "literal": "to pull the muzzle",
@@ -1936,7 +1936,7 @@
   "profNote": "{La gueule} is an animal's mouth, so it sounds crude. Fine with friends; with your boss, say {faire la tête}."
  },
  "expr-lote4-014": {
-  "meaning": "to make fun of someone / to mess with someone ⚠️ Register: very informal/slang — only with people you're close to; avoid in formal settings.",
+  "meaning": "to make fun of someone / to mess with someone",
   "example": "Did you see the price of this sandwich? They must think we're idiots!",
   "secondExample": "Quit messing with me, I know you're lying.",
   "options": [
@@ -1949,7 +1949,7 @@
   "profNote": "Very crude because of {foutre}: friends only. The possessive changes: {ils se foutent de notre gueule}."
  },
  "expr-lote4-015": {
-  "meaning": "to be on edge / to be all keyed up Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "meaning": "to be on edge / to be all keyed up",
   "example": "With exams coming up, everyone is on edge.",
   "secondExample": "Don't talk to him about the bill now, he's already on edge.",
   "literal": "to be on the nerves",
@@ -1963,7 +1963,7 @@
   "profNote": "It takes {être} and {les}: {je suis sur les nerfs}. Casual, but very natural in everyday talk."
  },
  "expr-lote4-016": {
-  "meaning": "it's raining cats and dogs Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "meaning": "it's raining cats and dogs",
   "example": "Take an umbrella, it's pouring outside!",
   "secondExample": "Yesterday it was pouring rain and the game was canceled.",
   "literal": "it's raining ropes",
@@ -1977,7 +1977,7 @@
   "profNote": "Like \"it's pouring\", it only works with {il}: {il pleut des cordes}, never {ça pleut}."
  },
  "expr-lote4-017": {
-  "meaning": "to go all out / to pull out all the stops Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "meaning": "to go all out / to pull out all the stops",
   "example": "For his daughter's wedding, he went all out: orchestra, fireworks, everything.",
   "secondExample": "If we want to win the final, we'll have to give it everything we've got.",
   "literal": "to put the package",
@@ -1991,7 +1991,7 @@
   "profNote": "Casual and positive: always {le paquet}, singular. In the past: {il a mis le paquet}."
  },
  "expr-lote4-018": {
-  "meaning": "at full speed / flat out Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "meaning": "at full speed / flat out",
   "example": "A motorcycle zoomed past the school at full speed.",
   "secondExample": "We were late, so we raced across the city at full speed.",
   "literal": "to the floor, the box (slang: the car)",
@@ -2005,7 +2005,7 @@
   "profNote": "Casual, mostly about cars and bikes: {la caisse} is slang for a car. With friends, plain {à fond} works too."
  },
  "expr-lote4-019": {
-  "meaning": "it's nothing special Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "meaning": "it's nothing special",
   "example": "The movie is watchable, but it's nothing special.",
   "secondExample": "His new album was nothing special, the reviews were lukewarm.",
   "literal": "it doesn't break bricks",
@@ -2019,7 +2019,7 @@
   "profNote": "Casual and always negative. In speech, the {ne} often drops: {ça casse pas des briques}."
  },
  "expr-lote4-020": {
-  "meaning": "to be crazy / to be nuts Register: informal — use with friends and people you're close to; avoid in formal settings.",
+  "meaning": "to be crazy / to be nuts",
   "example": "You want to swim in the sea in January? You're nuts!",
   "secondExample": "My neighbor is a bit crazy: he talks to his plants all day long.",
   "literal": "to be lashed",
@@ -2172,7 +2172,7 @@
   "profNote": "It takes {faire}: {je fais la grasse matinée}. The classic Sunday plan, fine to say to anyone."
  },
  "expr-b2-001": {
-  "meaning": "To clarify all the details; to be precise about every aspect of a situation or agreement.",
+  "meaning": "To set the record straight; to make everything perfectly clear.",
   "example": "Although the project had been approved in principle, there was still a need to dot the i's and cross the t's on the budget details.",
   "secondExample": "After the meeting, the manager asked his team to dot the i's and cross the t's before submitting the final report.",
   "literal": "to put the dots on the i's",
@@ -2200,7 +2200,7 @@
   "profNote": "Casual and a bit teasing. Note the {un}: it's always {un poil}, a single hair, never {des poils}."
  },
  "expr-b2-003": {
-  "meaning": "To act with great force and energy, without holding back, in a very direct or forceful way.",
+  "meaning": "To act with great force and energy, without holding back.",
   "example": "Although the subject is sensitive, the speaker did not hold back in denouncing social injustices.",
   "secondExample": "Despite the warnings, she defended her project without holding back in the face of the harsh criticism.",
   "literal": "not to go with a dead hand",

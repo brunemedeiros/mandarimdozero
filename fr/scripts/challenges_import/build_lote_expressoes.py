@@ -44,13 +44,9 @@ REGISTER_KEY = {
 }
 REGISTERS = set(REGISTER_KEY.values())
 
-PT_SUFFIX = {
-    "soutenu": "",
-    "neutre": "",
-    "familier": " Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais.",
-    "très familier": " ⚠️ Registro: muito familiar/gíria — só com pessoas próximas; evite em contextos formais.",
-    "vulgaire": " ⚠️ Registro: vulgar — pode ofender. Evite em contextos formais ou com desconhecidos.",
-}
+# O aviso de registro NÃO vai mais colado ao significado (decisão da autora, 2026-11-24): o selo de registro da tela
+# (EXPRESSION_REGISTERS / ch.reg.*.hint) já explica, e o aviso antigo tinha travessão e "familiar" em vez de "informal".
+PT_SUFFIX = {"soutenu": "", "neutre": "", "familier": "", "très familier": "", "vulgaire": ""}
 FR_SUFFIX = {
     "soutenu": "",
     "neutre": "",

@@ -20,8 +20,8 @@
  {
   "id": "expr-a1m1-001",
   "expr": "Enchanté !",
-  "pt": "Homem escreve {enchanté}, mulher escreve {enchantée}, e o som é o mesmo. Eu escrevo {enchantée}.",
-  "en": "Men write {enchanté}, women write {enchantée}, and they sound the same. I write {enchantée}."
+  "pt": "Homem escreve {enchanté}, mulher escreve {enchantée}, e o som é o mesmo.",
+  "en": "Men write {enchanté}, women write {enchantée}, and they sound the same."
  },
  {
   "id": "expr-a1m1-003",
@@ -308,8 +308,8 @@
  {
   "id": "expr-lote1-005",
   "expr": "ça craint",
-  "pt": "Muito usado pelos jovens. Também diz que um lugar é perigoso: {ce quartier craint}.",
-  "en": "Young people use it a lot. It can also mean a place is sketchy: {ce quartier craint}."
+  "pt": "Muito comum no dia a dia. Também diz que um lugar é perigoso: {ce quartier craint}.",
+  "en": "Very common in everyday speech. It can also mean a place is sketchy: {ce quartier craint}."
  },
  {
   "id": "expr-lote1-006",
@@ -392,8 +392,8 @@
  {
   "id": "expr-lote2-005",
   "expr": "être crevé",
-  "pt": "É informal e concorda com quem fala: eu digo {je suis crevée}. Num pneu, {crevé} é furado.",
-  "en": "It's casual and agrees with the speaker: I say {je suis crevée}. On a tire, {crevé} means flat."
+  "pt": "É informal e concorda com quem fala: uma mulher diz {je suis crevée}. Num pneu, {crevé} é furado.",
+  "en": "It's casual and agrees with the speaker: a woman says {je suis crevée}. On a tire, {crevé} means flat."
  },
  {
   "id": "expr-lote2-006",
@@ -566,8 +566,8 @@
  {
   "id": "expr-lote4-006",
   "expr": "être fauché",
-  "pt": "Informal e bem comum. Concorda com quem fala: eu diria {je suis fauchée}, com o \"e\" do feminino.",
-  "en": "Casual and very common. It agrees with the speaker: as a woman, I'd say {je suis fauchée}."
+  "pt": "Informal e bem comum. Concorda com quem fala: uma mulher diz {je suis fauchée}, com o \"e\" do feminino.",
+  "en": "Casual and very common. It agrees with the speaker: a woman says {je suis fauchée}."
  },
  {
   "id": "expr-lote4-007",

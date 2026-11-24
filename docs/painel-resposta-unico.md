@@ -40,7 +40,7 @@ as outras telas de exercício** (Revisão, Desafios, Ditados, Conjugação, Banc
 |---|---|
 | Jogos da Conjugação | **Piloto, feito** (2026-11-11, branch `claude/affectionate-fermi-w2s41y`) |
 | Trilha (lição) | Aprovado em 2026-11-23, fica com a conversa da lição curta (texto de passagem no chat desta sessão); a reformulação da lição curta (outra sessão) deve usar este componente |
-| Expressões (Desafios) | **Feito** (aprovado em 2026-11-23): significado, Monte a frase e Sua vez; falas `profNote` das 120 Expressões escritas e revisadas (2026-11-24, `docs/voz-falas-jogos-expressoes.md`): pt-BR no Staging, produção aguarda a autora |
+| Expressões (Desafios) | **Feito** (aprovado em 2026-11-23): significado, Monte a frase e Sua vez; falas `profNote` das 120 Expressões escritas e revisadas (2026-11-24, `docs/voz-falas-jogos-expressoes.md`): no Staging e na produção (2026-11-24), aparecem no site com o PR |
 | Ouça e traduza, Acentuação, Complete a frase, Ditados, Revisão, Banco, Conjugação (prática) | A fazer |
 
 Ao adotar numa área: trocar o painel antigo (`.correct-feedback` / `.wrong-feedback`) por `painelRespostaHTML`, manter os
