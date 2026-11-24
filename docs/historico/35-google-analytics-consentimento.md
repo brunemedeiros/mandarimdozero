@@ -142,7 +142,9 @@ Dois achados da revisão diária, confirmados pela dona:
    `age_ack_at`, nem apaga a linha que já tem a data; o gênero continua editável. Só a `ack_my_age()` grava, uma vez;
    depois nem o servidor troca a data (exclusão de conta pelo servidor continua apagando a linha). Teste local
    `tests/privacidade-padrao/test_144.sql` 11/11 (e `test_136.sql` 8/8). **Staging: aplicada (versão `20261124160100`) e
-   testada numa transação desfeita (4/4). Produção: aguarda autorização da dona.**
+   testada numa transação desfeita (4/4). Produção: aplicada com autorização da dona em 2026-11-24 (versão `20261124170904`);
+   8 linhas e o hash das datas iguais antes e depois; trigger ligado; tentativa de troca como `authenticated` numa transação
+   desfeita recusada com `age_ack_at_protected`.**
 2. **Eventos do GA4 com o endereço completo** (só o `page_view` era limpo). `shared/consent.js`: `page_location` e
    `page_referrer` limpos já no `gtag('config')` e `gtag('set')` a cada página, então lição, cadastro, recomeço e cliques de
    saída também saem limpos; só mede em `app.profbrune.com.br` (fora dele, só o teste do aviso com `__CONSENT_TEST__`);
@@ -153,6 +155,19 @@ Dois achados da revisão diária, confirmados pela dona:
    (`dl` com `?cur=&view=&ui=`): vem da opção "Alterações na página de acordo com os eventos do histórico de navegação",
    que o `gtag.js` servido para o ID mostra LIGADA (`vtp_enableHistoryEvents:true`; também rolagem, formulários, vídeo e
    downloads ligados). Só dá para desligar no painel do GA4 (dona); depois, conferir de novo no `gtag.js`.
+3. **Causa real do vazamento (2026-11-24, depois do PR)**: a dona conferiu o painel e as opções já estavam desligadas. O que
+   manda as opções de verdade são as tags `__ccd_em_*` do `gtag.js` servido, e só existe a `__ccd_em_outbound_click`
+   (Cliques de saída): o painel está certo; o `__ogt_auto_events` com tudo `true` é só o "ouvinte" genérico. Testes com o
+   `gtag.js` real numa página mínima (envio capturado e bloqueado): **a tag do Google desta propriedade se configura sozinha
+   ao carregar e ignora o `gtag('config')` da página inteiro**, até no snippet padrão do Google. Sem nenhum `config`, ela
+   já mandava um `page_view` com o endereço completo; e com o `config` vinham cookie de 400 dias (não 13 meses), `npa=0`
+   e o título errado. Saída: as mesmas regras num **`gtag('set', …)` ANTES do `gtag('js')`**: nenhum envio automático,
+   endereço limpo, cookie de 395 dias e `npa=1`. O `config` continua, caso o Google volte a lê-lo.
+   `tests/consentimento/test_playwright.js` 77/77 (nova conferência da ordem). Na `main` de 16/11 até a publicação, o 1º
+   `page_view` de cada visita com aceite levou o endereço de chegada sem o trecho do `#` (a tag apaga e-mails do endereço,
+   `__ccd_auto_redact`), e os cookies `_ga` foram gravados por 400 dias (o Google renova a validade a cada envio, então
+   passam a 13 meses na próxima visita). Opcional: pedir ao Google a exclusão do `page_location` desse período
+   (Administrador > Coleta e modificação de dados > Solicitações de exclusão de dados).
 
 ## Conferência de 2026-11-24
 

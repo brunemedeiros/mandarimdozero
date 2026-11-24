@@ -35,6 +35,9 @@ clique em **Mostrar configurações avançadas** > **desmarque "Alterações na 
 navegação"** (deixe "Carregamentos de página") > desligue também Rolagens, Pesquisa no site, Interações com formulários,
 Engajamento com vídeo e Downloads de arquivos > deixe só **Cliques de saída** ligado > **Salvar**.
 
+Conferido em 2026-11-24: estava assim (só Cliques de saída). "Carregamentos de página" fica sempre marcado e não
+desmarca; o site impede o envio automático pelo código (`gtag('set')` antes do `js`, histórico 35).
+
 ## B. Privacidade (no mesmo dia)
 
 Tudo fica em **Administrador** (engrenagem no canto de baixo, à esquerda).
