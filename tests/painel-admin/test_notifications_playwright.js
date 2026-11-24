@@ -31,7 +31,7 @@ const SEED = {
 
     // ---- quadro ----
     L('tela cheia: sem Ranking ao lado', await p.evaluate(() => getComputedStyle(document.querySelector('.right-cards')).display === 'none'));
-    L('título, as 6 abas do Admin (a de Privacidade é temporária) e Notificações ativa', (await p.innerText('[data-tnt="pagina"] header')).includes('Notificações') && JSON.stringify(await p.$$eval('#view-admin-badges [data-admin-section]', l => l.map(b => b.dataset.adminSection))) === '["badges","analytics","notifications","reports","premium","privacy"]' && await p.$eval('[data-admin-section="notifications"]', b => b.classList.contains('is-active')));
+    L('título, as 6 abas do Admin (a de Privacidade é temporária) e Notificações ativa', (await p.innerText('[data-tnt="pagina"] header')).includes('Notificações') && JSON.stringify(await p.$$eval('#view-admin-badges [data-admin-section]', l => l.map(b => b.dataset.adminSection))) === '["overview","analytics","notifications","reports","premium","privacy"]' && await p.$eval('[data-admin-section="notifications"]', b => b.classList.contains('is-active')));
     L('6 variantes em 5 eventos, em ordem natural (1, 3, 15 dias; depois XP)', (await cards()).length === 6 && JSON.stringify((await heads()).map(x => x.replace(/\D+/g, ' ').trim())) === '["","1","3","15",""]' && (await p.innerText('[data-notif-lista]')).indexOf('Volte hoje') < (await p.innerText('[data-notif-lista]')).indexOf('Sentimos sua falta') && (await p.innerText('[data-notif-lista]')).indexOf('Sentimos sua falta') < (await p.innerText('[data-notif-lista]')).indexOf('Faz 15 dias'), await heads());
     const xp = (await cards()).find(c => c.includes('Boa!'));
     L('variante: emoji, título, texto, canal, idioma e estado', xp.includes('⭐') && xp.includes('Você ganhou {{amount}} XP') && xp.includes('no site') && xp.includes('Francês') && xp.includes('ativa'), xp);
@@ -133,7 +133,7 @@ const SEED = {
 
   // ---- sem ser admin, e sem variantes ----
   for (const lang of ['fr', 'zh']){
-    let h = await abrirAdmin({ lang, aba: 'badges', seed: SEED });
+    let h = await abrirAdmin({ lang, aba: 'overview', seed: SEED });
     await h.page.evaluate(() => { isAdminUser = () => false; renderAdminNotificationsView(); });
     check(`[${lang}] sem ser admin: só o aviso`, (await h.page.textContent('#admin-notifications-content')).includes('só para a administração') && !(await h.page.$('#form-variante')));
     await h.close();
