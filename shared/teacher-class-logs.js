@@ -330,7 +330,7 @@ function wireCalendarFeedBox(root){
   const body = box.querySelector('[data-calendar-feed-body]');
   const painel = box.hasAttribute('data-calendar-feed-painel');
   const load = async (regenerate) => {
-    body.innerHTML = typeof loadingHTML === 'function' ? loadingHTML() : '…';
+    body.innerHTML = typeof loadingHTML === 'function' ? loadingHTML(t('loading.calendarLink')) : '…';
     body.innerHTML = calendarFeedBodyHTML(await fetchCalendarFeedToken(regenerate), painel);
     box.dataset.loaded = '1';
   };
