@@ -45,7 +45,8 @@ as decisões da autora e as fases. **Nada foi implementado ainda.**
 
 ## 4. Fase 0: levantamento (feito em 2026-11-24, só leitura)
 
-Números da produção nesse dia: 40 contas, 15 alunos com vínculo ativo, 7 contas novas em 30 dias, 39 grátis e 1 Premium.
+Números da produção nesse dia: 40 contas, 15 alunos com vínculo ativo, 7 contas novas em 30 dias, 39 grátis e 1 Premium (o 1 Premium é a
+própria admin: `plan_tier` espelha o papel; nenhum aluno é Premium). `usage_events` tem ~5.700 eventos desde 2026-09-07 (90 dias é leve).
 
 - **Eventos**: tabela `usage_events` (`user_id, event_type, event_name, meta, created_at, session_id, language_app_key, device_type`).
   O Analytics baixa até 50 000 eventos para o navegador (páginas de 1000, `shared/admin-analytics.js:64-81`) e conta o dia em **UTC**
@@ -62,44 +63,75 @@ Números da produção nesse dia: 40 contas, 15 alunos com vínculo ativo, 7 con
   vínculo, trigger da 077: continua funcionando sem a aba), "Pioneiro/a" (2 contas, dado à mão) e "Embaixador/a" (ninguém).
   Tirar a aba **não apaga** nenhum badge já dado. `shared/admin-badges.js` continua carregado (tem `fetchAllProfiles`, usada pela aba Alunos).
 
-## 5. Fase 1: aba "Visão Geral" (aprovada em 2026-11-24)
+## 5. Fase 1: aba "Visão Geral" (aprovada em 2026-11-24; revisada pelo revisor de planos no mesmo dia)
 
-### 5.1 Banco (migration, Staging antes da produção; skill `migration-supabase`)
-Uma RPC só de leitura, `security definer`, que recusa quem não é admin: `admin_overview_stats(p_days, p_scope, p_language)`.
-Faz as contas no servidor e devolve só números (sem nome, e-mail ou texto de aluno, exceto na lista de quem está em cada faixa):
-- acessos e contas únicas por dia; cadastros por dia;
-- dias com estudo nos últimos 7 dias por conta, já agrupados nas 5 faixas, com a lista de contas de cada faixa;
-- situação (Em dia/Atenção/Parado) dos alunos com vínculo, pela mesma regra da aba Alunos;
-- revisões feitas no período por aluno com vínculo;
-- contas por plano (e, no futuro, por estado de assinatura).
+### 5.0 Correções da revisão (o que mudou em relação à primeira versão)
+- Migration **142** (138 a 141 já existem na `main`; conferir `list_migrations` antes de aplicar).
+- **Situação não é refeita em SQL**: a regra da aba Alunos tem detalhes (bloco do curso, `_account.lastStudyDay`, data local, estado
+  "Sem estudo") que divergiriam. A Visão Geral reaproveita `studentLoadRows` + `tsuRowData` (`shared/admin-students.js`), então o
+  número bate com a aba Alunos por construção. São **4 estados**: Em dia, Atenção, Parado, Sem estudo.
+- **Modo aula não marca "dia com estudo"**: o evento `review_answer` com `event_name='class_mode'` é gravado quando a aluna abre o
+  site depois da aula (não é estudo dela naquele dia). Fica fora.
+- **Revisões sem contar duas vezes**, em dois números separados (como o bloco "Desempenho (aula e casa)" do Banco):
+  **Em casa** = `usage_events` `review_answer` sem `class_mode`; **Na aula** = `review_bank_reviews` com `via='aula'` e
+  `source='modo_aula'`, ligada ao aluno pelo vínculo (ou membros da turma), dia por `created_at` em São Paulo. Nunca somar `via='casa'`
+  (repete o "Em casa") nem linhas importadas.
+- **Admin e professora ficam fora** de todas as contagens e do bloco Plano.
+- O e-mail diário da 141 (`teacher-cards-digest`) usa outra regra de "parado" (qualquer evento). Registrado para não confundir.
 
-Regras: dia contado no **fuso de São Paulo**, não em UTC; "dia com estudo" = evento de estudo de verdade (lição, revisão, desafio,
-ditado, conjugação), **sem** contar só abrir o site ou trocar de aba (decisão 9); o tipo exato da lista de eventos é fechado na implementação e
-registrado aqui. Ponto a conferir antes de codar: no Modo aula a revisão gera `review_answer` **e** linha em `review_bank_reviews`;
-a contagem não pode somar a mesma revisão duas vezes.
+### 5.1 Definições (fixas, testadas)
+- **Dia com estudo** (função `_is_study_event`): `lesson_complete` de `vocab_lesson`, `unit_checkpoint`, `flashcard_review`,
+  `speed_review`, `match_game`, `challenge`, `dictation`, `conjugation_session`, `conj_game`, `hanzi_lesson`, `hanzi_review`; e
+  `review_answer` de `flashcard`, `speed_review`, `hanzi`. Fora: `tab_switch`, `lesson_start`, `technical_*`, `report_submitted`,
+  `course_restart*`, `comeback_*`, `class_mode`. Só `actor_type` `user`/`student`. Dia no fuso America/Sao_Paulo.
+- **Últimos 7 dias** = hoje + 6 dias anteriores (São Paulo). O engajamento usa SEMPRE os últimos 7 dias, qualquer que seja o período
+  escolhido (a tela diz isso). **Engajamento médio** = média de dias com estudo. **Conta nova** (criada há menos de 7 dias) é marcada.
+- **Ativas no período** = pelo menos 1 dia com estudo. **Acessos** = sessões distintas (`session_id`), como no Analytics.
+- Visão Geral conta o dia em São Paulo; o Analytics ainda conta em UTC (nota na tela; alinhar o Analytics depois).
+- **Idioma**: filtra os eventos; a conta entra se tiver evento, bloco de progresso ou vínculo nesse idioma; conta sem idioma só em
+  "Todos". Alunos de português estudam pelo site fr (`usage_events.language_app_key` só tem `frances`/`mandarim`).
 
-### 5.2 Tela
-- Primeira aba do Painel de Admin; peças em `shared/admin-overview-ui.js` (dado -> HTML, testável em Node) e controlador
-  `shared/admin-overview.js`, no Design System do painel (`p-indicadores`, `p-barras`). Gráficos de linha e rosca em SVG feito à mão,
-  sem biblioteca nova.
+### 5.2 Banco (migration 142, Staging antes da produção; skill `migration-supabase`)
+- `_is_study_event(type, name)` (imutável).
+- `admin_overview_stats(p_days, p_scope, p_language)`: séries diárias com `generate_series` (dia vazio = 0; datas em texto
+  `AAAA-MM-DD`), acessos, contas ativas, cadastros, faixas de engajamento com a lista de cada faixa (só `user_id`, nome, @ e números),
+  contas por plano.
+- `admin_overview_reviews(p_days, p_language)`: revisões Em casa e Na aula por aluno com vínculo.
+- Padrão de segurança do projeto: `security definer`, `stable`, `set search_path = public`, checagem `public.is_admin()` com
+  `raise exception 'not_authorized' using errcode = '42501'`, `revoke all ... from public, anon`, `grant execute ... to authenticated`,
+  entradas validadas (`p_days` em 7/30/90, `p_scope` e `p_language` em lista fechada). Filtro de data com o fuso do lado da constante.
+- Teste em Postgres local (padrão de `tests/banco-revisao-compartilhado/run.sh`): admin vê; não admin e anônimo recebem erro;
+  `class_mode` não conta; `via='casa'` não soma; estudo às 22h de Brasília cai no dia certo.
+
+### 5.3 Tela
+- Peças `shared/admin-overview-ui.js` (dado -> HTML, teste em Node) e controlador `shared/admin-overview.js`, no Design System do
+  painel. Gráficos em SVG feito à mão: `role="img"` com resumo, valores também em texto, barras clicáveis como `<button>`, cores só
+  por tokens, poucos rótulos de eixo no celular. Datas montadas como `new Date(a, m-1, d)` (sem mudar de dia).
 - Topo: período (7 / 30 / 90 dias), categoria (Meus alunos | Outras contas | Todas as contas), idioma.
-- Números: contas na categoria, ativas no período, engajamento médio, cadastros novos, Premium.
-- Linhas: acessos por dia e cadastros por dia.
-- Barras: distribuição de engajamento. **Clicar numa barra abre a lista de quem está nela**, com atalho para a ficha do aluno.
-- Bloco "Situação" (só Meus alunos): Em dia / Atenção / Parado, clicável.
-- Bloco "Revisões feitas" (só Meus alunos): total do período e por aluno.
-- Bloco "Plano": Grátis x Premium hoje; cancelada/expirada/pagamento pendente quando houver venda.
-- Textos em pt-BR e en (`t()`), nada fixo em português; vale para fr, zh e os próximos sites (fica em `shared/`, liga nos dois `index.html`).
+- Números, linhas (acessos e cadastros por dia), barras de engajamento clicáveis (lista de quem está na faixa, com atalho para a ficha).
+- Só em Meus alunos: Situação (4 estados, clicável) e Revisões (Em casa e Na aula, total e por aluno).
+- Plano: por enquanto só números (hoje 0 Premium entre os alunos); o gráfico entra quando houver venda e os estados cancelada,
+  expirada e pagamento pendente.
+- Estados vazios: categoria sem contas, faixa vazia sem clique, série zerada, e falha da consulta mostra aviso (nunca "0").
+- Textos em pt-BR e en (`t()`); fica em `shared/` e liga nos `index.html` de fr e zh.
 
-### 5.3 Tirar a aba Badges
-- Sai o botão `data-admin-section="badges"`; a seção padrão vira a Visão Geral.
-- Ficam (testes antigos e rotas de aviso dependem deles): `#view-admin-badges`, `data-tab="admin-badges"`, `data-admin-section` e o script `admin-badges.js`.
-- Testes a atualizar (lista de abas e `aba: 'badges'`): `tests/painel-admin/test_{analytics,badges,notifications,reports,planos}_playwright.js`,
-  `tests/painel-admin/harness.js`, `tests/painel-professora/test_playwright.js:613-616`.
+### 5.4 Tirar a aba Badges
+- Sai o botão `data-admin-section="badges"`; `ADMIN_PANEL_STATE`, a lista de seções e o "volta para" de `shared/admin-panel.js`
+  passam a usar a Visão Geral; `is-active`/`aria-selected` vão para o botão novo (fr e zh).
+- Ficam: `#view-admin-badges`, `data-tab="admin-badges"`, CSS `[data-active-tab="admin-badges"]`, `data-admin-section`, o script
+  `admin-badges.js` (tem `fetchAllProfiles`, usada pela aba Alunos) e `test_badges_ui_unit.js`.
+- `test_badges_playwright.js` é aposentado (a aba deixa de existir); listas de abas atualizadas nos outros testes; chaves
+  `panel.tab.badges`/`admin.panel.tab.badges` conferidas no scan de i18n; cabeçalho de `admin-panel.js` e `.claude/rules/admin-professora.md` atualizados.
 
-### 5.4 Testes e conferência
-Teste das peças em Node, teste da RPC no Postgres local (admin vê, não admin recebe erro), Playwright da aba, regressão de
-`tests/painel-admin/` e `tests/painel-professora/`, capturas fr/zh × claro/escuro e celular (skill `teste-navegador`).
+### 5.5 Testes e conferência
+Node (peças), Postgres local (RPCs), Playwright da aba, regressão de `tests/painel-admin/`, `tests/painel-professora/` e
+`tests/painel-alunos/`, capturas fr/zh × claro/escuro e celular. Na produção (com autorização), a Situação tem que bater 15/15 com a aba Alunos.
+
+### 5.6 Perguntas abertas para a autora
+- **Desafios e Ditados não contam para a Situação**: não atualizam o "último dia de estudo" (`lastStudyDay`), então quem só faz
+  Desafios pode aparecer "Alto" no engajamento e "Parado" na Situação. Corrigir isso mexe na sequência (🔥) das alunas.
+- **"Meus alunos"**: só os vínculos com a admin (hoje é a única professora)? Ex-alunas (vínculo removido) ficam em "Outras contas"?
+- **Filtro "Português"**: esconder até o site `/pt` existir?
 
 ## 6. Fase 2: "Precisa de você" e saúde das rotinas (depois da Fase 1)
 
