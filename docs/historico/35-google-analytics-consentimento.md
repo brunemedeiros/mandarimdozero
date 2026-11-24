@@ -168,6 +168,10 @@ Dois achados da revisão diária, confirmados pela dona:
    `__ccd_auto_redact`), e os cookies `_ga` foram gravados por 400 dias (o Google renova a validade a cada envio, então
    passam a 13 meses na próxima visita). Opcional: pedir ao Google a exclusão do `page_location` desse período
    (Administrador > Coleta e modificação de dados > Solicitações de exclusão de dados).
+   Publicado pelo PR #510 (2026-11-24, ~14h10 de Brasília) e conferido no ar. A dona conferiu no painel que a "Coleta de
+   dados fornecidos pelo usuário" está DESLIGADA (o `__ogt_1p_data_v2` do `gtag.js` fica parado). Período registrado no
+   documento do advogado (aba Resumo, "Correção de 24/11/2026"), com 2 perguntas: avisar quem aceitou no período? pedir
+   ao Google a exclusão dos endereços completos?
 
 ## Conferência de 2026-11-24
 
