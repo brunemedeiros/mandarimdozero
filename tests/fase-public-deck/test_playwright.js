@@ -19,7 +19,8 @@ let STUB = src.slice(src.indexOf('const STUB = `') + 'const STUB = `'.length, sr
 STUB = STUB.replace("rpc: async (name, args) => {", "rpc: async (name, args) => {\n      if (window.__rpcLog) window.__rpcLog.push([name, args]);\n      if (window.__rpcHandler){ const r = window.__rpcHandler(name, args); if (r !== undefined) return r; }");
 STUB = STUB.replace("storage: { from: () => ({ upload: async () => ({}), getPublicUrl: () => ({ data: { publicUrl: '' } }), remove: async () => ({}) }) },",
   "storage: { from: () => ({ upload: async () => ({}), getPublicUrl: (p) => ({ data: { publicUrl: 'https://proj.supabase.co/storage/v1/object/public/flashcard-media/' + p } }),\n" +
-  "  copy: async (src, dest) => { const S = (window.__STORAGE = window.__STORAGE || { log: [], copies: 0, failCopyAt: null }); S.log.push(['copy', src, dest]); if (S.failCopyAt != null && S.copies >= S.failCopyAt) return { data: null, error: { message: 'boom' } }; S.copies++; return { data: { path: dest }, error: null }; },\n" +
+  "  upload: async (dest, blob) => { const S = (window.__STORAGE = window.__STORAGE || { log: [], copies: 0, failCopyAt: null }); S.log.push(['upload', dest, blob && blob.size]); return S.denyUpload ? { data: null, error: { message: 'upload negado' } } : { data: { path: dest }, error: null }; },\n" +
+  "  copy: async (src, dest) => { const S = (window.__STORAGE = window.__STORAGE || { log: [], copies: 0, failCopyAt: null }); S.log.push(['copy', src, dest]); if (S.denyCopy) return { data: null, error: { message: 'Object not found' } }; if (S.failCopyAt != null && S.copies >= S.failCopyAt) return { data: null, error: { message: 'boom' } }; S.copies++; return { data: { path: dest }, error: null }; },\n" +
   "  remove: async (paths) => { const S = (window.__STORAGE = window.__STORAGE || { log: [], copies: 0, failCopyAt: null }); S.log.push(['remove', paths]); return { data: paths, error: null }; } }) },");
 STUB = STUB.replace("getSession: async () => ({ data: { session: null } })", "getSession: async () => ({ data: { session: window.__SESSION || null } })");
 
@@ -200,8 +201,9 @@ async function newPage(browser, port, lang, { guest, session, hash, handlerSrc }
           window.__DB.decks.push({ id: 8100, kind: 'personal', owner_id: 'U', language_app_key: '${appKey}', parent_deck_id: 7000, name: 'Verbos' });
           window.__DB.own_flashcards.push({ id: 9100, owner_id: 'U', language_app_key: '${appKey}', status: 'active', revision: 0, deck_id: 8100, back_trans: 'olá', front: 'bonjour', card_generation_mode: 'normal', tags: ['criado-por-u0123456789'], fields: [{ id: 'a', lang: null, role: null, content: { value: 'bonjour' }, audio: { type: 'upload', url: Object.values(args.p_media_map)[0] || null }, image: null, pinyinFieldId: null }, { id: 'b', lang: 'pt-BR', role: null, content: { value: 'olá' }, audio: null, image: null, pinyinFieldId: null }] });
           return { data: { deck_id: 8100, notes_copied: 1, skipped_incompatible: 0, media_remapped: Object.keys(args.p_media_map).length }, error: null }; }`;
-      const runScenario = async (scen, storageInit) => {
+      const runScenario = async (scen, storageInit, antes) => {
         const r = await bootApp({ authenticated: true, premium: true, is_owner: false, can_open: true, can_import: true }, null, mediaHandler);
+        if (antes) await antes(r.page);
         await r.page.evaluate(([sc, st, uid]) => { window.__SCEN = sc; window.__STORAGE = Object.assign({ log: [], copies: 0, failCopyAt: null }, st || {}); CURRENT_USER = { id: uid }; }, [scen, storageInit, 'U']);
         await r.page.evaluate((id) => openPublicDeckPage(id), PID);
         await r.page.waitForSelector('#public-deck-import-btn');
@@ -223,6 +225,25 @@ async function newPage(browser, port, lang, { guest, session, hash, handlerSrc }
         L('mídia: sucesso não remove nada e a cópia entra na sessão', removes.length === 0 && out.imported && out.manifest === 1);
         L('mídia: botão volta ao rótulo normal', !/Copiando/.test(out.btn), out.btn);
         L('mídia: erros de página', errors.length === 0, errors);
+        await ctx.close();
+      }
+      {
+        // Depois da migration 139 o copy() do Storage é recusado para o arquivo de outra conta: o site baixa pelo link
+        // público e envia de novo para a pasta de quem importa.
+        let baixados = 0;
+        const { out, errors, ctx } = await runScenario({ items: ITEMS }, { denyCopy: true }, async (page) => {
+          await page.route(/proj\.supabase\.co\/storage\/v1\/object\/public\/flashcard-media\//, (rt) => { baixados++; rt.fulfill({ status: 200, contentType: 'audio/mpeg', body: Buffer.from('mp3-de-teste') }); });
+        });
+        const uploads = out.log.filter(x => x[0] === 'upload');
+        L('139: cópia direta recusada -> baixa pelo link público e envia para a pasta de quem importa', baixados === 3 && uploads.length === 3 && uploads.every(u => u[1].startsWith('U/pubcopy-') && u[2] === 12), { baixados, uploads });
+        L('139: a importação termina com o mapa das 3 mídias e sem erros', out.imported && Object.keys(out.args.p_media_map).length === 3 && errors.length === 0, { args: out.args, errors });
+        await ctx.close();
+      }
+      {
+        const { out, ctx } = await runScenario({ items: ITEMS }, { denyCopy: true, denyUpload: true }, async (page) => {
+          await page.route(/proj\.supabase\.co\/storage\/v1\/object\/public\/flashcard-media\//, (rt) => rt.fulfill({ status: 200, contentType: 'audio/mpeg', body: Buffer.from('x') }));
+        });
+        L('139: se o envio da cópia falhar, a RPC NÃO é chamada (nada criado no banco)', out.copyCalls === 0 && !out.imported, out.log);
         await ctx.close();
       }
       {

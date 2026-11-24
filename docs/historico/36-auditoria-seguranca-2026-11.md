@@ -109,4 +109,25 @@ Os 38 reports da produção são todos de contas logadas (nenhum convidado), por
   (desde 18/09) e ~10 avisos "faltam N missões" por dia sobre elas. O conserto da v37 (xp50) ainda somaria ~10 contas.
 - Conserto: o lembrete só considera `state.daily.date === hoje` (mesma aproximação de fuso do cron). Teste de ponta a
   ponta em `tests/pt-servidor/test_cron_pt.js` (77/77; contra a v37 o teste novo falha, como devia).
+- `notification-cron` **v38** na produção (2026-11-24, autorizada pela autora): conteúdo baixado de volta e idêntico ao
+  repositório; sem senha = 401. Conferir a rodada das 22h UTC de 2026-11-24.
+
+## Mídia de deck público depois da 139 (decisão de 2026-11-24)
+
+- Pergunta da sessão do PR 486: a 139 tirou de cada conta a leitura pela API da pasta de outra pessoa no
+  `flashcard-media`, e a importação de deck público copiava a mídia com `storage.copy()` da pasta da dona para a de
+  quem importa. Depois da 139 esse copy é recusado e a importação de deck com mídia falharia inteira
+  ("media_copy_failed"). Na produção (2026-11-24) há 0 decks públicos, 0 com mídia e 0 cópias: ninguém foi afetado.
+- Opções pesadas: (a) devolver a leitura só para arquivos de deck público (política com função que procura o
+  caminho nos cartões de decks públicos; mais SQL a manter e reabre a listagem desses arquivos); (b) copiar no servidor
+  (Edge Function nova com service role; mais um robô para publicar e proteger).
+- **Decisão: (c) baixar e enviar de novo no navegador.** O bucket continua público (o link direto abre para todos) e cada
+  conta já grava na própria pasta. `copyPublicDeckMediaObject` em `shared/public-deck.js` tenta o `copy()` (vale para
+  arquivo da própria conta) e, se for recusado, baixa pelo link público e faz `upload` para `<uid>/pubcopy-...`.
+  Não abre permissão nova, não precisa de migration nem de deploy. Custo: o arquivo passa pelo navegador (no máximo
+  5 MB cada, limite do bucket). CORS conferido na produção (`access-control-allow-origin: *` no link público).
+- Testes: `tests/fase-public-deck/test_playwright.js` 158/158 (3 novos por idioma: cópia recusada baixa e envia para a
+  pasta de quem importa; importação termina com o mapa das mídias; envio recusado não chama a RPC). Com o caminho novo
+  desligado de propósito, 4 falham. O teste real de Storage (`tests/fase-public-deck/staging_storage_test.js`, precisa de
+  contas no Staging) não foi rodado aqui.
 
