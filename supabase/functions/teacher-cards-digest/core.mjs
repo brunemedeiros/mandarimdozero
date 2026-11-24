@@ -7,7 +7,7 @@ export const APP_URL = 'https://app.profbrune.com.br/';
 
 const T = {
   pt: {
-    lang: 'pt-BR',
+    lang: 'pt-BR', brand: 'IDIOMAS COM PROF BRUNE',
     novos: {
       subject: n => (n === 1 ? 'Você tem 1 cartão novo da sua professora' : `Você tem ${n} cartões novos da sua professora`),
       pre: 'Já estão na sua Revisão. Leva poucos minutos.',
@@ -31,7 +31,7 @@ const T = {
     test: 'TESTE: ',
   },
   en: {
-    lang: 'en',
+    lang: 'en', brand: 'LANGUAGES WITH PROF BRUNE',
     novos: {
       subject: n => (n === 1 ? 'You have 1 new card from your teacher' : `You have ${n} new cards from your teacher`),
       pre: 'They are already in your Review. It only takes a few minutes.',
@@ -120,7 +120,7 @@ export function renderEmail({ lang, kind, nome, n, unsubscribeUrl, test }) {
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#FAF5EA"><tr><td align="center" style="padding:24px 10px">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#ffffff;border-radius:22px;overflow:hidden;font-family:'Nunito','Helvetica Neue',Arial,sans-serif;color:#22113f">
 <tr><td class="px" style="background:#3D167B;color:#FAF5EA;padding:34px 36px 30px">
-<div style="font-weight:900;font-size:14px;letter-spacing:.04em;opacity:.9">IDIOMAS COM PROF BRUNE</div>
+<div style="font-weight:900;font-size:14px;letter-spacing:.04em;opacity:.9">${esc(L.brand)}</div>
 <div style="margin-top:22px"><span style="display:inline-block;border:1px solid #E36BCA;color:#f6c4ec;border-radius:999px;padding:3px 12px;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase">${esc(K.label)}</span></div>
 <div class="h1" style="font-family:'Anton','Impact','Arial Narrow',sans-serif;font-weight:400;font-size:38px;line-height:1.05;margin:12px 0 0;letter-spacing:.01em;text-transform:uppercase">${esc(titleA)} <span style="color:#E36BCA">${esc(titleB)}</span></div>
 </td></tr>
@@ -137,6 +137,20 @@ export function renderEmail({ lang, kind, nome, n, unsubscribeUrl, test }) {
 </td></tr></table></body></html>`;
   const text = [body, '', ...box.map(x => '- ' + x), '', `${K.button}: ${APP_URL}`, '', `${K.bye} ${L.sig}`, '', L.footer + (unsubscribeUrl ? ` ${L.stop}: ${unsubscribeUrl}` : '')].join('\n');
   return { subject, html, text };
+}
+
+// Página do GET do link de sair: SÓ pergunta; quem grava é o POST (do botão desta página ou do "cancelar inscrição" do Gmail).
+// Assim antivírus e pré-visualizadores de link, que abrem links sozinhos, não desligam o aviso de ninguém.
+export function unsubscribeConfirmPage(lang, postUrl) {
+  const en = lang === 'en';
+  const title = en ? 'Stop receiving these emails?' : 'Parar de receber estes e-mails?';
+  const msg = en ? 'You will no longer get the email about new cards from your teacher.' : 'Você não vai mais receber o e-mail de cartões novos da sua professora.';
+  const btn = en ? 'Yes, stop receiving' : 'Sim, parar de receber';
+  const keep = en ? 'Keep receiving' : 'Continuar recebendo';
+  return `<!doctype html><html lang="${en ? 'en' : 'pt-BR'}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(title)}</title></head>
+<body style="margin:0;background:#FAF5EA;font-family:'Nunito','Helvetica Neue',Arial,sans-serif;color:#22113f"><div style="max-width:480px;margin:48px auto;padding:0 20px"><div style="background:#fff;border-radius:22px;padding:28px"><h1 style="margin:0 0 12px;font-size:26px">${esc(title)}</h1><p style="margin:0 0 20px;line-height:1.6">${esc(msg)}</p>
+<form method="post" action="${esc(postUrl)}" style="margin:0 0 14px"><button type="submit" style="font:inherit;font-weight:900;color:#22113f;background:#E36BCA;border:2px solid #22113f;box-shadow:4px 4px 0 #22113f;border-radius:999px;padding:13px 26px;cursor:pointer">${esc(btn)}</button></form>
+<a href="${APP_URL}" style="color:#1d6fa5">${esc(keep)}</a></div></div></body></html>`;
 }
 
 // Página mostrada depois de "Parar de receber".
