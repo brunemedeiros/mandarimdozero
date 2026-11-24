@@ -1,5 +1,5 @@
 #!/bin/bash
-# Postgres LOCAL (nunca produção): stubs + profiles mínima (padrão antigo = público, como a 041) + 073 + 136 + test_136.sql.
+# Postgres LOCAL (nunca produção): stubs + profiles mínima (padrão antigo = público, como a 041) + 073 + 136 + 144 + testes.
 set -e
 HERE=$(cd "$(dirname "$0")" && pwd); ROOT="$HERE/../.."
 pg_ctlcluster 16 main start 2>/dev/null || true; sleep 2
@@ -10,4 +10,8 @@ su postgres -c "psql -q -d pp136 -v ON_ERROR_STOP=1 -f $ROOT/shared/supabase_mig
 su postgres -c "psql -q -d pp136 -v ON_ERROR_STOP=1 -f $ROOT/shared/supabase_migrations/136_privacy_default_and_age_ack.sql"
 # Rodar a 136 duas vezes prova que é idempotente.
 su postgres -c "psql -q -d pp136 -v ON_ERROR_STOP=1 -f $ROOT/shared/supabase_migrations/136_privacy_default_and_age_ack.sql"
+su postgres -c "psql -q -d pp136 -v ON_ERROR_STOP=1 -f $ROOT/shared/supabase_migrations/144_protect_age_ack.sql"
+# Rodar a 144 duas vezes prova que é idempotente.
+su postgres -c "psql -q -d pp136 -v ON_ERROR_STOP=1 -f $ROOT/shared/supabase_migrations/144_protect_age_ack.sql"
 su postgres -c "psql -d pp136 -q -At -f $HERE/test_136.sql" 2>&1 | grep -v '^\s*$'
+su postgres -c "psql -d pp136 -q -At -f $HERE/test_144.sql" 2>&1 | grep -v '^\s*$'

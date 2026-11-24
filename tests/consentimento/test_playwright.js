@@ -61,7 +61,7 @@ async function boot(browser, lang, port, theme, viewport, ui, opts){
   await page.addInitScript(() => { try { sessionStorage.setItem('guest_mode', '1'); } catch (e) {} });
   await page.addInitScript(() => { window.__CONSENT_TEST__ = true; });
   if (ui) await page.addInitScript((ui) => { try { localStorage.setItem('ui-language', ui); } catch (e) {} }, ui);
-  await page.goto(`http://127.0.0.1:${port}/${lang}/index.html`);
+  await page.goto(`http://127.0.0.1:${port}/${lang}/index.html${(opts && opts.query) || ''}`);
   await page.waitForFunction(() => typeof STATE !== 'undefined' && STATE.cards && STATE.cards.length > 0 && CURRENT_USER === false, null, { timeout: 15000 });
   return { page, errors, ctx };
 }
@@ -128,6 +128,10 @@ async function run(browser, port){
     await page.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, r => r.abort());
     await page.goto(`http://127.0.0.1:${port}/sobre.html`); await page.waitForTimeout(600);
     check('navegador automático: sem aviso e sem Google', !(await bannerOn(page)) && google.length === 0, google);
+    // mesmo com o aceite guardado, fora de app.profbrune.com.br nada é medido
+    await page.evaluate(() => localStorage.setItem('cookie-consent', JSON.stringify({ v: 1, analytics: true, at: '2026-11-24T10:00:00Z' })));
+    await page.reload(); await page.waitForTimeout(800);
+    check('fora do endereço do site: com aceite guardado, nada é medido', google.length === 0 && !(await page.evaluate(() => ProfBruneConsent.measuring())), google);
     await page.click('footer [data-consent-open]');
     check('navegador automático: Preferências ainda abrem pelo rodapé', await prefsOn(page));
     await ctx.close();
@@ -143,6 +147,15 @@ async function run(browser, port){
     check('aceitar: pede o gtag.js com o ID G-CE3282C1FB', google.some(u => /googletagmanager\.com\/gtag\/js\?id=G-CE3282C1FB/.test(u)), google);
     const c = await cfg(page);
     check('aceitar: cookies de 13 meses, sem Sinais nem anúncios, sem page_view automático', c && c[1] === 'G-CE3282C1FB' && c[2].cookie_expires === 34128000 && c[2].allow_google_signals === false && c[2].allow_ad_personalization_signals === false && c[2].send_page_view === false && !('user_id' in c[2]), c);
+    check('aceitar: a configuração já leva o endereço limpo (sem convite, e-mail nem token)', c && typeof c[2].page_location === 'string' && !/convite|ABC123|email|access_token|segredo|#/.test(c[2].page_location + (c[2].page_referrer || '')), c && c[2]);
+    // A tag do Google desta propriedade ignora o 'config' da página (gtag.js real, 2026-11-24): as regras precisam ir num
+    // gtag('set') ANTES do 'js', senão sai um page_view automático com o endereço completo e o cookie dura 400 dias.
+    const order = await page.evaluate(() => (window.dataLayer || []).map(a => Array.from(a)));
+    const iSet0 = order.findIndex(a => a[0] === 'set'), iJs = order.findIndex(a => a[0] === 'js');
+    const s0 = order[iSet0] && order[iSet0][1];
+    check('aceitar: regras de privacidade num set ANTES do js (a tag ignora o config)', iSet0 >= 0 && iJs > iSet0 && s0 && s0.send_page_view === false && s0.cookie_expires === 34128000 && s0.allow_google_signals === false && s0.allow_ad_personalization_signals === false && !/convite|ABC123|email|access_token|segredo|#/.test(s0.page_location), order.slice(0, 3));
+    const sets = await page.evaluate(() => (window.dataLayer || []).map(a => Array.from(a)).filter(a => a[0] === 'set').map(a => a[1]));
+    check('aceitar: gtag set com o endereço limpo para os próximos eventos', sets.length >= 1 && /utm_source=instagram/.test(sets[sets.length - 1].page_location) && !/convite|ABC123|email|access_token|segredo|#/.test(sets[sets.length - 1].page_location), sets);
     const pv = (await hits(page)).filter(h => h.name === 'page_view');
     const loc = pv[0] && pv[0].p.page_location;
     check('aceitar: 1 page_view', pv.length === 1, pv);
@@ -277,6 +290,25 @@ async function run(browser, port){
       await page.evaluate(() => { const b = document.querySelector('#settings-cookies-box [data-consent-open]'); b.click(); });
       check(`${lang}: Configurações abrem as Preferências`, await prefsOn(page));
       check(`${lang}: sem erro de página`, errors.length === 0, errors);
+      await ctx.close();
+    }
+    // link do app com parâmetros (turma, curso, tela, idioma, trecho depois do #): todo evento sai com o endereço limpo
+    {
+      const { page, ctx } = await boot(browser, lang, port, 'light', null, 'pt-BR', { query: '?turma=TURMA9&cur=frances&view=review&ui=en#/deck/segredo' });
+      await page.evaluate(accepted);
+      await page.evaluate(() => { window.dataLayer = []; ProfBruneConsent.setContext({ staff: false }); trackEvent('lesson_start', 'vocab_lesson'); trackEvent('tab_switch', 'review'); trackEvent('course_restart', 'x'); });
+      const dl = await page.evaluate(() => (window.dataLayer || []).map(a => Array.from(a)));
+      const dirty = /turma|TURMA9|cur=|view=|ui=|#|segredo/; // "/fr/deck" é só o nome da tela que o link abriu
+      const cfgx = dl.find(a => a[0] === 'config'); const setsx = dl.filter(a => a[0] === 'set').map(a => a[1]);
+      // a configuração e cada set valem para os eventos seguintes; nenhum deles pode levar os parâmetros do link
+      check(`${lang}: link com ?turma=/?cur=/?view=/?ui=/#: configuração limpa`, cfgx && !dirty.test(JSON.stringify(cfgx[2])), cfgx && cfgx[2]);
+      check(`${lang}: link com parâmetros: todo set limpo`, setsx.length >= 2 && setsx.every(f => !dirty.test(f.page_location) && !dirty.test(f.page_referrer || '')), setsx);
+      const iLesson = dl.findIndex(a => a[0] === 'event' && a[1] === 'lesson_start');
+      const lastSetBefore = dl.slice(0, iLesson).filter(a => a[0] === 'set').pop();
+      await page.evaluate(() => { trackEvent('tab_switch', 'segredo'); trackEvent('tab_switch', 'access_token=abc'); });
+      const pvx = (await hits(page)).filter(h => h.name === 'page_view').map(h => h.p.page_location);
+      check(`${lang}: texto do link (#segredo) nunca vira nome de página`, !pvx.some(u => /segredo|access_token/.test(u)), pvx);
+      check(`${lang}: o evento de lição vem depois de um set limpo`, iLesson > 0 && lastSetBefore && !dirty.test(lastSetBefore[1].page_location), lastSetBefore);
       await ctx.close();
     }
     // professora: nada medido e o aparelho fica marcado
