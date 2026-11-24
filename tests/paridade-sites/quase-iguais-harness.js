@@ -75,7 +75,10 @@ const PAGE_LIB = () => {
     });
     return out;
   };
-  window.__desc = (el) => (el.id ? '#' + el.id : '') + '.' + String(el.className || '').split(/\s+/).slice(0, 2).join('.') + '[' + (el.textContent || '').trim().replace(/^(Praticar mais|Practice more|Continuar revisando|Keep reviewing)$/, 'CONTINUAR_REVISANDO').slice(0, 30) + ']'; // "Praticar mais" virou "Continuar revisando" de propósito (2026-11-10); o nome da cena não muda
+  // O texto do nome da cena não conta o número da tecla (.kbd-hint) nem a bolinha antiga do cenário (.scenario-option-num): 2026-11-24, número
+  // à esquerda nas opções do site; sem isso o corte em 30 letras muda o nome da cena de uma árvore para a outra.
+  window.__txtSemNumero = (el) => { const c = el.cloneNode(true); c.querySelectorAll('.kbd-hint, .scenario-option-num').forEach(n => n.remove()); return (c.textContent || ''); };
+  window.__desc = (el) => (el.id ? '#' + el.id : '') + '.' + String(el.className || '').split(/\s+/).slice(0, 2).join('.') + '[' + __txtSemNumero(el).trim().replace(/^(Praticar mais|Practice more|Continuar revisando|Keep reviewing)$/, 'CONTINUAR_REVISANDO').slice(0, 30) + ']'; // "Praticar mais" virou "Continuar revisando" de propósito (2026-11-10); o nome da cena não muda
 
   // uma ação: devolve a descrição (ou null se não há o que fazer)
   window.__acao = (rootSel, r) => {

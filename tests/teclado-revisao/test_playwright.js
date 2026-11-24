@@ -208,6 +208,24 @@ async function suite(browser, lang, port){
   check(L + ' completar a frase: número à esquerda e texto centralizado', opc.cl.length === 2 && opc.cl.every(o => o.esq && o.meio && o.centro), opc.cl);
   await page.evaluate(() => document.getElementById('demo-opt').remove());
 
+  // ---------- Exercício de cenário (gramática): mesmo desenho das outras opções ----------
+  const cenario = await page.evaluate(async () => {
+    const zh = APP_KEY === 'mandarim';
+    const certa = Object.assign(zh ? { c: '请给我一杯茶。', p: 'qǐng gěi wǒ yì bēi chá.' } : { f: "Bonjour, une baguette, s'il vous plaît." }, { t: 'x', scenario: 'Situação de teste. O que diz?', scenarioEmoji: '🥖' });
+    const b = Object.assign(zh ? { c: '我是老师。', p: 'wǒ shì lǎoshī.' } : { f: 'Je suis professeur, enchanté.' }, { t: 'x' });
+    const c = Object.assign(zh ? { c: '再见，明天见。', p: 'zàijiàn, míngtiān jiàn.' } : { f: 'Au revoir, à demain !' }, { t: 'x' });
+    document.body.insertAdjacentHTML('beforeend', '<div id="demo-cen" style="position:fixed;inset:0;z-index:99999;background:var(--paper);overflow:auto"><div style="max-width:720px;margin:0 auto"><div class="content"></div><button style="display:none"></button></div></div>');
+    const box = document.getElementById('demo-cen');
+    STEP_STATE.exerciseIndex = 2;
+    renderScenarioExercise({ phrase: certa, options: [b, certa, c] }, box.querySelector('.content'), box.querySelector('button'), 8);
+    await new Promise(r => setTimeout(r, 400)); // transition dos botões
+    const opts = [...box.querySelectorAll('.scenario-option')];
+    return { antigo: box.querySelectorAll('.scenario-option-num').length, n: opts.length, medidas: opts.map(o => { const r = o.getBoundingClientRect(), k = o.querySelector('.kbd-hint'), kr = k.getBoundingClientRect(), t = document.createRange(); t.selectNodeContents(o.querySelector('.scenario-option-text')); const tr = t.getBoundingClientRect(); return { num: k.textContent, esq: kr.left - r.left < 16, meio: Math.abs((kr.top + kr.bottom) / 2 - (r.top + r.bottom) / 2) < 2, centro: Math.abs((tr.left + tr.right) / 2 - (r.left + r.right) / 2) < 2, sobra: tr.left < kr.right }; }) };
+  });
+  check(L + ' cenário: some a bolinha própria e as 3 opções usam o quadrado do site, numerado 1 a 3', cenario.antigo === 0 && cenario.n === 3 && cenario.medidas.map(m => m.num).join('') === '123', cenario);
+  check(L + ' cenário: número à esquerda no meio da altura, texto centralizado e sem passar por cima do número', cenario.medidas.every(m => m.esq && m.meio && m.centro && !m.sobra), cenario.medidas);
+  await page.evaluate(() => document.getElementById('demo-cen').remove());
+
   // ---------- Janela de atalhos ----------
   const modal = await page.evaluate(() => document.getElementById('kbd-shortcuts-modal').textContent);
   const gap = await page.evaluate(() => { document.getElementById('kbd-shortcuts-modal').style.display = 'flex'; return [...document.querySelectorAll('#kbd-shortcuts-modal .kbd-shortcuts-row')].map(r => { const ks = [...r.querySelectorAll('.kbd-key')], d = r.querySelector('.kbd-shortcuts-desc').getBoundingClientRect(), maxR = Math.max(...ks.map(k => k.getBoundingClientRect().right)); return Math.round(d.left - maxR); }); });
