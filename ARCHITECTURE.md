@@ -249,10 +249,10 @@ Outras mudanças de UX decorrentes:
 - **Fim do "Jogar de novo" pós-revisão** (Fase 6) — terminar uma sessão de
   Flashcard ou Speed Review nunca mais oferece repetir a mesma bateria.
   Tela de conclusão vira sempre o par `.review-complete-actions`: "Voltar"
-  (→ `switchTab('path')`) e "Praticar mais" (→ `backToReviewModeSelect()`,
+  (→ `switchTab('path')`) e "Continuar revisando" (→ `backToReviewModeSelect()`,
   que leva pra PRATICAR — Combinar/Palavras difíceis — nunca reabre a
   revisão que acabou de terminar). `backToReviewModeSelect()` é a função
-  central reaproveitada por todo botão "Praticar mais"/back-link da tela
+  central reaproveitada por todo botão "Continuar revisando"/back-link da tela
   de Revisão. Combinar continua tendo seu próprio "Jogar de novo"
   (`match-restart-btn`) — ele é PRÁTICA, não revisão, então repetir a
   mesma atividade não viola a regra (que vale só pra telas de conclusão de
@@ -290,8 +290,8 @@ padrão.
   `validate_fase14_consistency_checklist.js` — cobre os itens da checklist
   de consistência do mesmo projeto que não tinham teste dedicado (palavra
   difícil-mas-não-devida fica fora da fila de revisão; palavra
-  forte-mas-devida continua na fila; "Praticar mais" não mexe em
+  forte-mas-devida continua na fila; "Continuar revisando" não mexe em
   due/stability; Speed Review não depende de "palavras medianas").
   `smoke_revisao_zh.js`/`smoke_revisao_fr.js` (scratchpad da sessão, não
   versionados) — fluxo visual completo Revisão→Speed Review→conclusão→
-  Praticar mais, com screenshots.
+  Continuar revisando, com screenshots.

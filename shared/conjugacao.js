@@ -516,6 +516,7 @@ function startConjSession(verbs, tenses){
   CONJ_STATE.checked = new Set();
   CONJ_STATE.answers = {};
   CONJ_STATE.mistakes = [];
+  CONJ_STATE.xp = 0; // XP somado da sessão, mostrado no resumo
   CONJ_STATE.hintLevel = 0;
   document.getElementById('conj-select-wrap').style.display = 'none';
   document.getElementById('conj-practice-wrap').style.display = 'block';
@@ -721,7 +722,7 @@ function renderConjPracticeStep(){
     CONJ_STATE.checked.add(verb);
     CONJ_STATE.score += correctCount;
     CONJ_STATE.totalFields += activeCount;
-    if (earnedXP > 0) addXP(earnedXP);
+    if (earnedXP > 0){ addXP(earnedXP); CONJ_STATE.xp = (CONJ_STATE.xp || 0) + earnedXP; }
     renderConjPracticeStep();
     document.getElementById('conj-next-verb-btn')?.focus();
   });
@@ -766,7 +767,7 @@ function renderConjSessionResult(contentEl){
   // Tela de conclusão única (shared/core/conclusao.js). "Concluir sessão" volta à escolha de verbos e tempos (a tela principal da Conjugação).
   contentEl.innerHTML = conclusaoHTML({ icon: pct >= 70 ? '🎉' : '💪', title: t('fr.conj.sessionDone'), cls: 'conj-session-result',
     sub: pct >= 70 ? t('fr.conj.wellDone') : t('fr.conj.keepPracticing'),
-    stats: [{ label: t('zh.path.lessonDone.score'), value: `${Math.round(CONJ_STATE.score)}/${CONJ_STATE.totalFields}` }],
+    stats: [{ label: t('zh.path.lessonDone.score'), value: `${Math.round(CONJ_STATE.score)}/${CONJ_STATE.totalFields}` }].concat(CONJ_STATE.xp > 0 ? [{ label: t('zh.path.lessonDone.xpEarned'), value: `+${CONJ_STATE.xp} ⭐` }] : []),
     body: reviewHTML,
     actions: mistakes.length
       ? [{ id: 'conj-practice-mistakes-btn', label: t('fr.conj.practiceMistakes') }, { id: 'conj-restart-btn', label: t('fr.conj.newSession'), secondary: true }]
