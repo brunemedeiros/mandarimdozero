@@ -140,16 +140,16 @@ console.log('== destaque do que ficou diferente no "Monte a frase" (decisão 366
 }
 
 console.log('== todos os rascunhos do piloto sem problema nas telas');
-for (const u of ['A1-1', 'A1-2', 'A1-9', 'A1-g12', 'A1-3', 'A1-g1', 'A1-22']){
+for (const u of ['A1-1', 'A1-2', 'A1-9', 'A1-g12', 'A1-3', 'A1-g1', 'A1-22', 'A1-g11']){
   const R = require(path.join(ROOT, `docs/i18n/curriculo/piloto-m1/${u}/${u}.json`));
   check(`rascunho ${u}: nenhum problema nas telas`, L.conferirTelas(R).length === 0, L.conferirTelas(R));
 }
 
 console.log('== "Relacione": nenhuma tradução na linha da sua frase (decisão 369)');
 {
-  const rels = ['A1-1', 'A1-2', 'A1-9', 'A1-g12', 'A1-3', 'A1-22'].flatMap(u => require(path.join(ROOT, `docs/i18n/curriculo/piloto-m1/${u}/${u}.json`)).licoes.flatMap(l => l.telas || []).filter(t => t.tipo === 'relacionar'));
+  const rels = ['A1-1', 'A1-2', 'A1-9', 'A1-g12', 'A1-3', 'A1-22', 'A1-g11'].flatMap(u => require(path.join(ROOT, `docs/i18n/curriculo/piloto-m1/${u}/${u}.json`)).licoes.flatMap(l => l.telas || []).filter(t => t.tipo === 'relacionar'));
   const lado = rels.filter(t => L.ordemDaDireita(t.pares).some((v, k) => v === k)).map(t => t.id);
-  check(`"Relacione" das unidades 1 a 5 e 7 (${rels.length}): nenhum par na mesma linha`, rels.length > 0 && lado.length === 0, lado);
+  check(`"Relacione" das unidades 1 a 5, 7 e 8 (${rels.length}): nenhum par na mesma linha`, rels.length > 0 && lado.length === 0, lado);
   check('a ordem da direita tem todos os pares, uma vez cada', rels.every(t => JSON.stringify([...L.ordemDaDireita(t.pares)].sort((a, b) => a - b)) === JSON.stringify(t.pares.map((_, k) => k))));
   check('2 pares: trocados de lugar', JSON.stringify(L.ordemDaDireita([['a', '1'], ['b', '2']])) === '[1,0]');
 }
@@ -172,9 +172,9 @@ console.log('== nota com formas: exemplo para cada forma e nenhum exemplo de for
 console.log('== embaralhar peças e falas (decisão 363)');
 {
   const naOrdem = (pecas, resposta) => { const lidas = []; for (const p of pecas) if (lidas.length < resposta.length && p === resposta[lidas.length]) lidas.push(p); return lidas.length === resposta.length; };
-  const montar = ['A1-1', 'A1-2', 'A1-9'].flatMap(u => require(path.join(ROOT, `docs/i18n/curriculo/piloto-m1/${u}/${u}.json`)).licoes.flatMap(l => l.telas || []).filter(t => t.tipo === 'montar'));
+  const montar = ['A1-1', 'A1-2', 'A1-9', 'A1-g11'].flatMap(u => require(path.join(ROOT, `docs/i18n/curriculo/piloto-m1/${u}/${u}.json`)).licoes.flatMap(l => l.telas || []).filter(t => t.tipo === 'montar'));
   const ruins = montar.filter(t => naOrdem(L.embaralharPecas(t.pecas, t.resposta), t.resposta)).map(t => t.id);
-  check(`"Monte a frase" das unidades 1 a 3 (${montar.length}): as peças certas nunca aparecem na ordem da resposta`, montar.length > 0 && ruins.length === 0, ruins);
+  check(`"Monte a frase" das unidades 1 a 3 e 8 (${montar.length}): as peças certas nunca aparecem na ordem da resposta`, montar.length > 0 && ruins.length === 0, ruins);
   check('as peças embaralhadas são as mesmas (nada some nem duplica)', montar.every(t => JSON.stringify([...L.embaralharPecas(t.pecas, t.resposta)].sort()) === JSON.stringify([...t.pecas].sort())));
   check('mesma tela, mesma ordem (determinístico)', montar.every(t => JSON.stringify(L.embaralharPecas(t.pecas, t.resposta)) === JSON.stringify(L.embaralharPecas(t.pecas, t.resposta))));
   check('peças só da resposta, com palavra repetida, também saem fora de ordem', !naOrdem(L.embaralharPecas(['Je', 'suis', 'de', 'Rio', 'et', 'de', 'Paris'], ['Je', 'suis', 'de', 'Rio', 'et', 'de', 'Paris']), ['Je', 'suis', 'de', 'Rio', 'et', 'de', 'Paris']));

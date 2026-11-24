@@ -1678,7 +1678,15 @@
               ],
               "versao_gratis_texto": "M1.2 nota \"o feminino que se ouve\"; pares da M1.7 com os painéis do feminino que se ouve (étudiante, infirmière, avocate, vendeuse, serveuse) e do que só muda na escrita (professeure, ingénieure), sem a regra geral",
               "telas": 5,
-              "exercicios": 8
+              "exercicios": 16,
+              "decisoes": [
+                21,
+                24,
+                25,
+                36,
+                59
+              ],
+              "telas_licao_curta": "5 explicações (4 jeitos + recapitulação) + 16 exercícios numa lição só, com a prática \"Pronúncia: masculino ou feminino?\" (decisões 21, 24, 25, 36 e 59)"
             }
           ],
           "tempo_08_nota": "Tempo digitado (decisão 270) mantido: \"Cumprimentar e se despedir\" agora tem 16 cartões (decisões 313 e 314), mas nenhum limite novo de tempo é proposto enquanto as lições são revistas (decisões 300 e 308); medição real em dados/medicao-tempo-licao-2026-10-29.md. Decisão 328: \"Dizer de onde é e onde mora\" entrou no módulo; o tempo digitado de \"Apresentar-se\" e de \"Família e pessoas próximas\" não foi recalculado (regra 16 suspensa, decisão 325; a dona decide na nova medição). Decisões 334 e 335: sai \"Perguntar a idade dos outros: até 69\" (para \"Família e pessoas próximas\") e entra a \"Gramática: perguntar sim ou não\"; o tempo digitado continua sem recálculo (regra 16 suspensa)."

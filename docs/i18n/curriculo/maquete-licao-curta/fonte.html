@@ -210,7 +210,7 @@ aside{display:grid;gap:16px;min-width:0}
 <div class="wrap">
   <header class="top">
     <div class="eyebrow">Maquete · módulo "Apresentar-se"</div>
-    <h1>Lições curtas: unidades 1 a 7</h1>
+    <h1>Lições curtas: unidades 1 a 8</h1>
     <p>Clique como se fosse a aluna. Ao lado, o porquê de cada tela. Nada disso está no app ainda.</p>
     <div class="unit-tabs" id="units"></div>
     <div class="lesson-tabs" id="tabs"></div>
@@ -376,6 +376,13 @@ const WHY={
  "g6-intro": {"titulo": "Segunda gramática na lição curta", "texto": "<p>Decisão 373, no molde da unidade 4: uma lição só, sem cartões e sem diálogo. Quatro explicações em tópicos (<i>être</i> no singular e no plural, <i>avoir</i> no singular e no plural), cada uma seguida de exercícios, e a recapitulação com as conjugações completas para ouvir. O mapa mantém <i>être</i> e <i>avoir</i> juntos aqui (a decisão 338 falava em dividir; pendência para a dona).</p>"},
  "g6-nota-avoir-pl": {"titulo": "Explicação: avoir no plural", "texto": "<p>Uma armadilha de som que vale tela: <i>ils ont</i> (z) x <i>ils sont</i> (s). O V ou F seguinte toca o áudio sozinho.</p>"},
  "g6-nota-quadro": {"titulo": "Recapitulação para ouvir", "texto": "<p>Cada linha é a conjugação inteira com áudio, como pedia o item 14 do <code>12</code> (\"ouvir a conjugação toda\"). Sem plural de adjetivo nos exemplos: ainda não foi ensinado.</p>"},
+ "g8-intro": {"titulo": "Última unidade do módulo 1", "texto": "<p>No molde das unidades 4 e 6: uma lição só, sem cartões e sem diálogo. Só o gênero de pessoas, com as nacionalidades e as profissões das unidades 2, 3 e 7 (decisão 59: artigos, plural e adjetivos de descrição ficam para depois). Quatro explicações, a prática de pronúncia, a recapitulação e os exercícios de relacionar e transformar.</p>"},
+ "g8-nota-iguais": {"titulo": "Escritas diferentes, mas sons iguais", "texto": "<p>O nome pedido pela dona (decisão 24). Decisão 25: os dois lados com áudio, o masculino e o feminino em linhas seguidas, para comparar o som.</p>"},
+ "g8-ouvir-1": {"chip": "Pronúncia", "titulo": "Pronúncia: masculino ou feminino?", "texto": "<p>A prática de pronúncia do módulo 1 fica só aqui (decisões 21 e 36). O áudio é a palavra sozinha: com <i>il</i> ou <i>elle</i> o pronome entregaria a resposta; com <i>Je suis</i>, a voz (feminina ou masculina) também. O painel mostra a forma escrita e o porquê.</p>"},
+ "g8-ouvir-2": {"chip": "Pronúncia", "titulo": "Não dá para saber pelo som", "texto": "<p>A terceira resposta possível: <i>espagnol</i> e <i>espagnole</i> soam igual.</p>"},
+ "g8-ouvir-3": {"chip": "Pronúncia", "titulo": "Pronúncia: masculino", "texto": "<p>O fim nasal, sem o <i>n</i>, é do masculino.</p>"},
+ "g8-ouvir-4": {"chip": "Pronúncia", "titulo": "Pronúncia: feminino", "texto": "<p>O <i>-euse</i> com som de z é do feminino.</p>"},
+ "g8-nota-quadro": {"titulo": "Recapitulação para ouvir", "texto": "<p>Um par por jeito, numa linha só com áudio, como a recapitulação da unidade 6: o botão diz o masculino e o feminino juntos, para comparar.</p>"},
  "u3-nota-fem": {"titulo": "Nota: o feminino que se ouve", "texto": "<p>Com <i>anglaise</i>, <i>espagnole</i>, <i>italienne</i> e <i>allemande</i>. <i>Portugaise</i> chega na lição 3, com a explicação no painel.</p>"},
  "u3-frase-dou": {"titulo": "Pergunta de onde é: forma informal", "texto": "<p>Decisão 360: o par vira duas telas. Primeiro só a forma informal; o exercício seguinte usa ela, e depois vem a formal.</p><p><i>Tu es d'où ?</i> ficou nesta lição (decisão 359), junto da resposta <i>Je suis de Rio</i>.</p>"},
  "u3-ex-ou": {"titulo": "A nota \"où vai para o fim\" virou painel", "texto": "<p>Decisão 359: a nota curta aparece no painel deste exercício.</p>"},
@@ -885,7 +892,7 @@ function render(){
   if(s.type==='ouvir'){
     h=`<span class="tag">Ouça e escolha</span><div class="grow ex"><p class="q">${esc(s.q)}</p>
       <button class="play-big" id="ouvir">${PLAY}<span>Ouvir</span></button>
-      <div class="opts two">${s.opts.map(o=>`<button class="opt" data-o="${esc(o)}">${esc(o)}</button>`).join('')}</div></div>`;
+      <div class="opts${s.opts.length>2?'':' two'}">${s.opts.map(o=>`<button class="opt" data-o="${esc(o)}">${esc(o)}</button>`).join('')}</div></div>`;
   }
   if(s.type==='digitar'){
     h=`<span class="tag">Ouça e escreva</span><div class="grow ex"><p class="q">${esc(s.q)}</p>

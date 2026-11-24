@@ -1,0 +1,777 @@
+{
+ "_doc": "Rascunho da unidade 8 do módulo \"Apresentar-se\", \"Gramática: masculino e feminino\" (A1-g11, M1.8, a última do módulo), no formato da lição curta, no molde das unidades 4 e 6 (decisões 365, 366, 373 e 374): uma lição só, só o gênero de pessoas (nacionalidades e profissões das unidades 2, 3 e 7; sem artigos, plural, adjetivos de descrição e c'est, decisão 59). Quatro explicações em tópicos, cada uma seguida de exercícios (o feminino com -e; \"Escritas diferentes, mas sons iguais\", decisões 24 e 25; -ien/-ain; -eur/-ier); a prática \"Pronúncia: masculino ou feminino?\" (decisões 21 e 36: ouvir a palavra sem ver a escrita); recapitulação com um par para ouvir em cada jeito; exercícios de relacionar, transformar e \"O que você diz?\". Validar com node docs/i18n/curriculo/piloto-m1/A1-g11/validar.js.",
+ "status": "rascunho (aguarda a dona)",
+ "formato": "licao-curta-gramatica",
+ "unidade": {
+  "id": "A1-g11",
+  "modulo": "A1-m1",
+  "posicao": "M1.8",
+  "tipo": "gramatica",
+  "titulo": {
+   "pt-BR": "Gramática: masculino e feminino",
+   "en": null
+  },
+  "funcao": "pôr nacionalidades e profissões no feminino: français / française, espagnol / espagnole, brésilien / brésilienne, américain / américaine, vendeur / vendeuse, infirmier / infirmière; e reconhecer pelo som quando dá para saber"
+ },
+ "cartoes": [],
+ "dialogos": [],
+ "frases_na_frase": [],
+ "notas": [
+  {
+   "id": "feminino-com-e",
+   "id_mapa": null,
+   "titulo": {
+    "pt-BR": "O feminino com -e",
+    "en": null
+   },
+   "tipo": "Gram",
+   "tipo_visivel": "gramática",
+   "confianca": "alta",
+   "momento": {
+    "licao": "masculino-e-feminino"
+   },
+   "destino": "nota",
+   "texto": {
+    "pt-BR": "Em geral, o feminino ganha um <strong>e</strong> no fim, e a consoante do fim, que era muda, passa a soar:<ul><li>em <strong>française</strong>, o <strong>s</strong> soa como <b>z</b>;</li><li>em <strong>allemande</strong>, o <strong>d</strong> aparece no som.</li></ul>",
+    "en": null
+   },
+   "exemplos": [
+    {
+     "fr": "français",
+     "pt-BR": "francês",
+     "en": null
+    },
+    {
+     "fr": "française",
+     "pt-BR": "francesa",
+     "en": null
+    },
+    {
+     "fr": "allemand",
+     "pt-BR": "alemão",
+     "en": null
+    },
+    {
+     "fr": "allemande",
+     "pt-BR": "alemã",
+     "en": null
+    }
+   ],
+   "formas": [
+    "français",
+    "française",
+    "allemand",
+    "allemande"
+   ]
+  },
+  {
+   "id": "escritas-diferentes-sons-iguais",
+   "id_mapa": null,
+   "titulo": {
+    "pt-BR": "Escritas diferentes, mas sons iguais",
+    "en": null
+   },
+   "tipo": "Gram",
+   "tipo_visivel": "gramática",
+   "confianca": "alta",
+   "momento": {
+    "licao": "masculino-e-feminino"
+   },
+   "destino": "nota",
+   "texto": {
+    "pt-BR": "Às vezes, o <strong>e</strong> do feminino só aparece na escrita:<ul><li>quando a palavra já termina em vogal ou em <strong>l</strong>, como <strong>espagnol</strong>;</li><li>em <strong>professeure</strong>, que você viu nas profissões;</li><li>e <strong>médecin</strong> nem muda.</li></ul>Ouça: cada par soa igual.",
+    "en": null
+   },
+   "exemplos": [
+    {
+     "fr": "espagnol",
+     "pt-BR": "espanhol",
+     "en": null
+    },
+    {
+     "fr": "espagnole",
+     "pt-BR": "espanhola",
+     "en": null
+    },
+    {
+     "fr": "professeur",
+     "pt-BR": "professor",
+     "en": null
+    },
+    {
+     "fr": "professeure",
+     "pt-BR": "professora",
+     "en": null
+    },
+    {
+     "fr": "Il est médecin.",
+     "pt-BR": "Ele é médico.",
+     "en": null
+    },
+    {
+     "fr": "Elle est médecin.",
+     "pt-BR": "Ela é médica.",
+     "en": null
+    }
+   ],
+   "formas": [
+    "espagnol",
+    "professeur",
+    "médecin"
+   ]
+  },
+  {
+   "id": "feminino-ien-ain",
+   "id_mapa": null,
+   "titulo": {
+    "pt-BR": "-ien vira -ienne, -ain vira -aine",
+    "en": null
+   },
+   "tipo": "Gram",
+   "tipo_visivel": "gramática",
+   "confianca": "alta",
+   "momento": {
+    "licao": "masculino-e-feminino"
+   },
+   "destino": "nota",
+   "texto": {
+    "pt-BR": "Nas palavras em <strong>-ien</strong> e <strong>-ain</strong>:<ul><li>na escrita, <strong>-ien</strong> vira <strong>-ienne</strong>, com dois <strong>n</strong>, e <strong>-ain</strong> vira <strong>-aine</strong>;</li><li>no som, a vogal deixa de ser nasal e o <strong>n</strong> passa a soar.</li></ul>",
+    "en": null
+   },
+   "exemplos": [
+    {
+     "fr": "brésilien",
+     "pt-BR": "brasileiro",
+     "en": null
+    },
+    {
+     "fr": "brésilienne",
+     "pt-BR": "brasileira",
+     "en": null
+    },
+    {
+     "fr": "américain",
+     "pt-BR": "americano",
+     "en": null
+    },
+    {
+     "fr": "américaine",
+     "pt-BR": "americana",
+     "en": null
+    }
+   ],
+   "formas": [
+    "brésilien",
+    "américain"
+   ]
+  },
+  {
+   "id": "feminino-eur-ier",
+   "id_mapa": null,
+   "titulo": {
+    "pt-BR": "-eur vira -euse, -ier vira -ière",
+    "en": null
+   },
+   "tipo": "Gram",
+   "tipo_visivel": "gramática",
+   "confianca": "alta",
+   "momento": {
+    "licao": "masculino-e-feminino"
+   },
+   "destino": "nota",
+   "texto": {
+    "pt-BR": "Em várias profissões:<ul><li><strong>-eur</strong> vira <strong>-euse</strong>, com som de <b>z</b>;</li><li><strong>-ier</strong> vira <strong>-ière</strong>, com acento grave, e o <strong>r</strong>, que era mudo, passa a soar.</li></ul>",
+    "en": null
+   },
+   "exemplos": [
+    {
+     "fr": "vendeur",
+     "pt-BR": "vendedor",
+     "en": null
+    },
+    {
+     "fr": "vendeuse",
+     "pt-BR": "vendedora",
+     "en": null
+    },
+    {
+     "fr": "infirmier",
+     "pt-BR": "enfermeiro",
+     "en": null
+    },
+    {
+     "fr": "infirmière",
+     "pt-BR": "enfermeira",
+     "en": null
+    }
+   ],
+   "formas": [
+    "vendeur",
+    "vendeuse",
+    "infirmier",
+    "infirmière"
+   ]
+  },
+  {
+   "id": "masculino-e-feminino-lado-a-lado",
+   "id_mapa": null,
+   "titulo": {
+    "pt-BR": "Os quatro jeitos, lado a lado",
+    "en": null
+   },
+   "tipo": "Gram",
+   "tipo_visivel": "gramática",
+   "confianca": "alta",
+   "momento": {
+    "licao": "masculino-e-feminino"
+   },
+   "destino": "nota",
+   "texto": {
+    "pt-BR": "Toque em cada linha para ouvir o masculino e o feminino:<ul><li>com <strong>e</strong>, a consoante do fim passa a soar;</li><li>escritas diferentes, mas sons iguais;</li><li><strong>-ien</strong> e <strong>-ain</strong>: o <strong>n</strong> passa a soar;</li><li><strong>-eur</strong> vira <strong>-euse</strong> e <strong>-ier</strong> vira <strong>-ière</strong>.</li></ul>",
+    "en": null
+   },
+   "exemplos": [
+    {
+     "fr": "anglais, anglaise",
+     "pt-BR": "inglês, inglesa",
+     "en": null
+    },
+    {
+     "fr": "enchanté, enchantée",
+     "pt-BR": "encantado, encantada",
+     "en": null
+    },
+    {
+     "fr": "italien, italienne",
+     "pt-BR": "italiano, italiana",
+     "en": null
+    },
+    {
+     "fr": "serveur, serveuse",
+     "pt-BR": "garçom, garçonete",
+     "en": null
+    }
+   ]
+  }
+ ],
+ "licoes": [
+  {
+   "id": "masculino-e-feminino",
+   "ordem": 1,
+   "tipo": "gramatica",
+   "id_novo": true,
+   "titulo": {
+    "publicado": null,
+    "pt-BR": "Masculino e feminino de pessoas",
+    "en": null,
+    "a_confirmar": false
+   },
+   "cartoes": [],
+   "inclui_dialogo": false,
+   "telas": [
+    {
+     "id": "g8-intro",
+     "tipo": "abertura",
+     "objetivo": {
+      "pt-BR": "Agora vou juntar numa regra só o que você já viu sobre o feminino das nacionalidades e das profissões. Vamos lá?",
+      "en": null
+     }
+    },
+    {
+     "id": "g8-nota-e",
+     "tipo": "nota",
+     "nota": "feminino-com-e",
+     "rotulos": {
+      "français": "masculino",
+      "française": "feminino",
+      "allemand": "masculino",
+      "allemande": "feminino"
+     }
+    },
+    {
+     "id": "g8-ex-etudiante",
+     "tipo": "complete",
+     "antes": "Elle est ",
+     "depois": ".",
+     "traducao": {
+      "pt-BR": "Ela é estudante.",
+      "en": null
+     },
+     "opcoes": [
+      "étudiant",
+      "étudiante"
+     ],
+     "resposta": "étudiante",
+     "frase_completa": "Elle est étudiante.",
+     "distrator": "par",
+     "explicacao": {
+      "pt-BR": "Com <b>elle</b>, o feminino: <b>étudiante</b>, com o <b>t</b> do fim soando.",
+      "en": null
+     },
+     "explicacao_erro": {
+      "étudiant": {
+       "pt-BR": "<b>Étudiant</b> é o masculino, para <b>il</b>. ",
+       "en": null
+      }
+     }
+    },
+    {
+     "id": "g8-ex-avocate",
+     "tipo": "ouvir_escolher",
+     "pergunta": {
+      "pt-BR": "Ouça a palavra e escolha.",
+      "en": null
+     },
+     "audio": "avocate",
+     "opcoes": [
+      "avocat",
+      "avocate"
+     ],
+     "resposta": "avocate",
+     "explicacao": {
+      "pt-BR": "O <b>t</b> do fim soou: <b>avocate</b>, advogada. Em <b>avocat</b>, o <b>t</b> é mudo.",
+      "en": null
+     }
+    },
+    {
+     "id": "g8-nota-iguais",
+     "tipo": "nota",
+     "nota": "escritas-diferentes-sons-iguais",
+     "rotulos": {
+      "espagnol": "masculino",
+      "espagnole": "feminino",
+      "professeur": "masculino",
+      "professeure": "feminino",
+      "Il est médecin.": "masculino",
+      "Elle est médecin.": "feminino"
+     }
+    },
+    {
+     "id": "g8-ex-enchantee",
+     "tipo": "funcao",
+     "pergunta": {
+      "pt-BR": "A Ana conhece o Hugo e escreve para ele. O que ela escreve?",
+      "en": null
+     },
+     "opcoes": [
+      "Enchantée, Hugo !",
+      "Enchanté, Hugo !"
+     ],
+     "resposta": "Enchantée, Hugo !",
+     "traducao_do_painel": {
+      "pt-BR": "Encantada, Hugo!",
+      "en": null
+     },
+     "explicacao": {
+      "pt-BR": "A Ana é mulher: <b>enchantée</b>. Na fala, soa igual a <b>enchanté</b>; só a escrita muda.",
+      "en": null
+     },
+     "explicacao_erro": {
+      "Enchanté, Hugo !": {
+       "pt-BR": "<b>Enchanté</b> é o que um homem escreve. ",
+       "en": null
+      }
+     }
+    },
+    {
+     "id": "g8-ex-ingenieure",
+     "tipo": "vf",
+     "fr": "Il est ingénieur. Elle est ingénieure.",
+     "afirmacao": {
+      "pt-BR": "<i>Ingénieur</i> e <i>ingénieure</i> soam igual.",
+      "en": null
+     },
+     "resposta": true,
+     "frase_do_painel": "Il est ingénieur. Elle est ingénieure.",
+     "traducao_do_painel": {
+      "pt-BR": "Ele é engenheiro. Ela é engenheira.",
+      "en": null
+     },
+     "explicacao": {
+      "pt-BR": "O <b>e</b> de <b>ingénieure</b> só aparece na escrita; no som, é igual a <b>ingénieur</b>.",
+      "en": null
+     }
+    },
+    {
+     "id": "g8-nota-ien",
+     "tipo": "nota",
+     "nota": "feminino-ien-ain",
+     "rotulos": {
+      "brésilien": "masculino",
+      "brésilienne": "feminino",
+      "américain": "masculino",
+      "américaine": "feminino"
+     }
+    },
+    {
+     "id": "g8-ex-italienne",
+     "tipo": "complete",
+     "antes": "Sofia est ",
+     "depois": ".",
+     "traducao": {
+      "pt-BR": "A Sofia é italiana.",
+      "en": null
+     },
+     "opcoes": [
+      "italienne",
+      "italiene"
+     ],
+     "resposta": "italienne",
+     "frase_completa": "Sofia est italienne.",
+     "distrator": "grafia",
+     "explicacao": {
+      "pt-BR": "<b>Italien</b> vira <b>italienne</b>, com dois <b>n</b>.",
+      "en": null
+     },
+     "explicacao_erro": {
+      "italiene": {
+       "pt-BR": "Por pouco! Faltou um <b>n</b>. ",
+       "en": null
+      }
+     }
+    },
+    {
+     "id": "g8-ex-americaine",
+     "tipo": "funcao",
+     "pergunta": {
+      "pt-BR": "Você conta que a Paula é dos Estados Unidos. O que diz?",
+      "en": null
+     },
+     "opcoes": [
+      "Elle est américain.",
+      "Elle est italienne.",
+      "Elle est américaine."
+     ],
+     "resposta": "Elle est américaine.",
+     "traducao_do_painel": {
+      "pt-BR": "Ela é americana.",
+      "en": null
+     },
+     "explicacao": {
+      "pt-BR": "Com <b>elle</b>, <b>américain</b> vira <b>américaine</b>, e o <b>n</b> passa a soar.",
+      "en": null
+     },
+     "explicacao_erro": {
+      "Elle est américain.": {
+       "pt-BR": "<b>Américain</b> é o masculino. ",
+       "en": null
+      },
+      "Elle est italienne.": {
+       "pt-BR": "<b>Italienne</b> é italiana. ",
+       "en": null
+      }
+     }
+    },
+    {
+     "id": "g8-nota-eur",
+     "tipo": "nota",
+     "nota": "feminino-eur-ier",
+     "rotulos": {
+      "vendeur": "masculino",
+      "vendeuse": "feminino",
+      "infirmier": "masculino",
+      "infirmière": "feminino"
+     }
+    },
+    {
+     "id": "g8-ex-serveuse",
+     "tipo": "complete",
+     "antes": "Léa est ",
+     "depois": ".",
+     "traducao": {
+      "pt-BR": "A Léa é garçonete.",
+      "en": null
+     },
+     "opcoes": [
+      "serveure",
+      "serveuse"
+     ],
+     "resposta": "serveuse",
+     "frase_completa": "Léa est serveuse.",
+     "distrator": "grafia",
+     "explicacao": {
+      "pt-BR": "<b>Serveur</b> vira <b>serveuse</b>, com som de <b>z</b>.",
+      "en": null
+     },
+     "explicacao_erro": {
+      "serveure": {
+       "pt-BR": "O <b>-eure</b> é de <b>professeure</b> e <b>ingénieure</b>. ",
+       "en": null
+      }
+     }
+    },
+    {
+     "id": "g8-ex-vendeuse",
+     "tipo": "funcao",
+     "pergunta": {
+      "pt-BR": "A Hélène trabalha numa loja. O que ela diz?",
+      "en": null
+     },
+     "opcoes": [
+      "Je suis vendeuse.",
+      "Je suis vendeur.",
+      "Je suis serveuse."
+     ],
+     "resposta": "Je suis vendeuse.",
+     "traducao_do_painel": {
+      "pt-BR": "Eu sou vendedora.",
+      "en": null
+     },
+     "explicacao": {
+      "pt-BR": "Numa loja, a Hélène é <b>vendeuse</b>: <b>-eur</b> vira <b>-euse</b>.",
+      "en": null
+     },
+     "explicacao_erro": {
+      "Je suis vendeur.": {
+       "pt-BR": "<b>Vendeur</b> é o masculino. ",
+       "en": null
+      },
+      "Je suis serveuse.": {
+       "pt-BR": "<b>Serveuse</b> trabalha num café ou restaurante. ",
+       "en": null
+      }
+     }
+    },
+    {
+     "id": "g8-ouvir-1",
+     "tipo": "ouvir_escolher",
+     "pergunta": {
+      "pt-BR": "Pronúncia: ouça a palavra. É masculino ou feminino?",
+      "en": null
+     },
+     "audio": "française",
+     "opcoes": [
+      "masculino",
+      "feminino",
+      "não dá para saber pelo som"
+     ],
+     "resposta": "feminino",
+     "explicacao": {
+      "pt-BR": "Escrita: <b>française</b>. O <b>s</b> soou como <b>z</b>: feminino.",
+      "en": null
+     }
+    },
+    {
+     "id": "g8-ouvir-2",
+     "tipo": "ouvir_escolher",
+     "pergunta": {
+      "pt-BR": "Ouça a palavra. É masculino ou feminino?",
+      "en": null
+     },
+     "audio": "espagnol",
+     "opcoes": [
+      "masculino",
+      "feminino",
+      "não dá para saber pelo som"
+     ],
+     "resposta": "não dá para saber pelo som",
+     "explicacao": {
+      "pt-BR": "Pode ser <b>espagnol</b> ou <b>espagnole</b>: os dois soam igual. Só a escrita mostra.",
+      "en": null
+     }
+    },
+    {
+     "id": "g8-ouvir-3",
+     "tipo": "ouvir_escolher",
+     "pergunta": {
+      "pt-BR": "Ouça a palavra. É masculino ou feminino?",
+      "en": null
+     },
+     "audio": "brésilien",
+     "opcoes": [
+      "masculino",
+      "feminino",
+      "não dá para saber pelo som"
+     ],
+     "resposta": "masculino",
+     "explicacao": {
+      "pt-BR": "Escrita: <b>brésilien</b>. O fim soou nasal, sem o <b>n</b>: masculino.",
+      "en": null
+     }
+    },
+    {
+     "id": "g8-ouvir-4",
+     "tipo": "ouvir_escolher",
+     "pergunta": {
+      "pt-BR": "Ouça a palavra. É masculino ou feminino?",
+      "en": null
+     },
+     "audio": "serveuse",
+     "opcoes": [
+      "masculino",
+      "feminino",
+      "não dá para saber pelo som"
+     ],
+     "resposta": "feminino",
+     "explicacao": {
+      "pt-BR": "Escrita: <b>serveuse</b>. O fim soou com <b>z</b>: feminino.",
+      "en": null
+     }
+    },
+    {
+     "id": "g8-nota-quadro",
+     "tipo": "nota",
+     "nota": "masculino-e-feminino-lado-a-lado",
+     "rotulos": {
+      "anglais, anglaise": "+ e",
+      "enchanté, enchantée": "som igual",
+      "italien, italienne": "-ienne",
+      "serveur, serveuse": "-euse"
+     }
+    },
+    {
+     "id": "g8-rel",
+     "tipo": "relacionar",
+     "pares": [
+      [
+       "avocat",
+       "avocate"
+      ],
+      [
+       "brésilien",
+       "brésilienne"
+      ],
+      [
+       "vendeur",
+       "vendeuse"
+      ],
+      [
+       "infirmier",
+       "infirmière"
+      ],
+      [
+       "allemand",
+       "allemande"
+      ]
+     ],
+     "explicacao": {
+      "pt-BR": "Nos pares, cada masculino com o seu feminino.",
+      "en": null
+     }
+    },
+    {
+     "id": "g8-ex-bresilienne",
+     "tipo": "montar",
+     "fr": "Il est brésilien.",
+     "pedido": {
+      "pt-BR": "Agora diga o mesmo de uma mulher.",
+      "en": null
+     },
+     "traducao": {
+      "pt-BR": "Ela é brasileira.",
+      "en": null
+     },
+     "pecas": [
+      "Elle",
+      "est",
+      "brésilienne.",
+      "brésilien.",
+      "Il"
+     ],
+     "resposta": [
+      "Elle",
+      "est",
+      "brésilienne."
+     ],
+     "frase_completa": "Elle est brésilienne.",
+     "explicacao": {
+      "pt-BR": "Com <b>elle</b>, <b>brésilien</b> vira <b>brésilienne</b>, e o <b>n</b> passa a soar.",
+      "en": null
+     }
+    },
+    {
+     "id": "g8-ex-vendeuse-montar",
+     "tipo": "montar",
+     "fr": "Il est vendeur.",
+     "pedido": {
+      "pt-BR": "Agora diga o mesmo de uma mulher.",
+      "en": null
+     },
+     "traducao": {
+      "pt-BR": "Ela é vendedora.",
+      "en": null
+     },
+     "pecas": [
+      "Elle",
+      "est",
+      "vendeuse.",
+      "vendeur.",
+      "Il"
+     ],
+     "resposta": [
+      "Elle",
+      "est",
+      "vendeuse."
+     ],
+     "frase_completa": "Elle est vendeuse.",
+     "explicacao": {
+      "pt-BR": "Com <b>elle</b>, <b>vendeur</b> vira <b>vendeuse</b>, com som de <b>z</b>.",
+      "en": null
+     }
+    },
+    {
+     "id": "g8-ex-claire",
+     "tipo": "funcao",
+     "pergunta": {
+      "pt-BR": "Você conta que a Claire é francesa e advogada. O que diz?",
+      "en": null
+     },
+     "opcoes": [
+      "Elle est français et avocate.",
+      "Elle est française et avocate.",
+      "Elle est française et avocat."
+     ],
+     "resposta": "Elle est française et avocate.",
+     "traducao_do_painel": {
+      "pt-BR": "Ela é francesa e advogada.",
+      "en": null
+     },
+     "explicacao": {
+      "pt-BR": "Para a Claire, as duas palavras vão para o feminino: <b>française</b> e <b>avocate</b>.",
+      "en": null
+     },
+     "explicacao_erro": {
+      "Elle est français et avocate.": {
+       "pt-BR": "<b>Français</b> é o masculino. ",
+       "en": null
+      },
+      "Elle est française et avocat.": {
+       "pt-BR": "<b>Avocat</b> é o masculino. ",
+       "en": null
+      }
+     }
+    },
+    {
+     "id": "g8-fim",
+     "tipo": "fim",
+     "fala": {
+      "pt-BR": "Parabéns! Agora você sabe o masculino e o feminino das pessoas.",
+      "en": null
+     },
+     "resumo": [
+      {
+       "fr": "français, française",
+       "pt-BR": "francês, francesa",
+       "rotulo": "+ e"
+      },
+      {
+       "fr": "espagnol, espagnole",
+       "pt-BR": "espanhol, espanhola",
+       "rotulo": "som igual"
+      },
+      {
+       "fr": "brésilien, brésilienne",
+       "pt-BR": "brasileiro, brasileira",
+       "rotulo": "-ienne"
+      },
+      {
+       "fr": "vendeur, vendeuse",
+       "pt-BR": "vendedor, vendedora",
+       "rotulo": "-euse"
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}
