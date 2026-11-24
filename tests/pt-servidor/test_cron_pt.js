@@ -55,7 +55,7 @@ function loadCron(file, envOver) {
     createClient: () => ctx.__db,
   };
   vm.createContext(ctx);
-  vm.runInContext(js + '\nthis.__B = blockForLanguage; this.__P = primaryLanguageAppKey; this.__L = LANGUAGES; this.__T = typeof templateLangsFor === "function" ? templateLangsFor : () => null;', ctx);
+  vm.runInContext(js + '\nthis.__B = blockForLanguage; this.__P = primaryLanguageAppKey; this.__L = LANGUAGES; this.__T = typeof templateLangsFor === "function" ? templateLangsFor : () => null; this.__M = computeMissionProgress;', ctx);
   return ctx;
 }
 
@@ -92,6 +92,15 @@ const events = (tables, user) => (tables.notification_events || []).filter((n) =
       curto.__db = fakeDb({ notification_rules: RULES }, {});
       const r503b = await curto.__handler(cronReq('curto'));
       t(L('senha: secret ausente ou curto = recusa tudo (503)'), r503.status === 503 && r503b.status === 503);
+    }
+    {
+      // Missões do dia (2026-11-23): 'Ganhe 50 XP hoje' (xp50) quebrava o cron em 10 contas; missão desconhecida é pulada.
+      const st = (missions, daily) => ({ daily: Object.assign({ date: '2026-11-23', missions }, daily || {}) });
+      const m1 = ctx.__M(st([{ id: 'xp50', target: 50 }, { id: 'reviews15', target: 15 }], { xp: 30, reviewsDone: 20 }));
+      t(L('missões: xp50 mede o XP do dia (30 de 50) e as outras seguem iguais'), JSON.stringify(m1) === JSON.stringify([{ current: 30, target: 50 }, { current: 15, target: 15 }]), m1);
+      let m2, erro = null;
+      try { m2 = ctx.__M(st([{ id: 'missaoQueAindaNaoExiste', target: 3 }, { id: 'xp50', target: 50 }], { xp: 60 })); } catch (e) { erro = String(e); }
+      t(L('missões: missão desconhecida é pulada sem erro'), !erro && JSON.stringify(m2) === JSON.stringify([{ current: 50, target: 50 }]), erro || m2);
     }
     t(L('LANGUAGES tem portugues'), ctx.__L.some((l) => l.appKey === 'portugues' && l.id === 'pt'));
     t(L('bloco portugues@en é achado'), ctx.__B({ 'portugues@en': { a: 1 } }, 'portugues')?.a === 1);
