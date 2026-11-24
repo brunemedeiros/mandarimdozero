@@ -59,3 +59,29 @@ Os 38 reports da produção são todos de contas logadas (nenhum convidado), por
   colado pela autora no painel (a tela de secrets do MCP estava desligada pelo Supabase); migration 140 gravada como
   `20261123141933`; `notification-cron` **v36** (conteúdo baixado de volta e idêntico ao repositório). Teste: sem senha
   e com senha errada = 401 (não 503, logo o secret existe). Falta conferir a rodada das 22h UTC (senha igual nos dois lados).
+
+## Ajuste do link da captura (2026-11-23)
+
+- A autora clicou em "Ver captura de tela anexada" muito depois de abrir a janela do report e recebeu
+  `"exp" claim timestamp check failed`: o link de 10 min era criado ao ABRIR a janela e tinha vencido.
+- Agora o link é criado na hora do clique (`reportsOpenScreenshot` em `shared/admin-reports.js`): a aba nova abre no
+  próprio clique e recebe o endereço logo depois; cada clique cria um link novo; se falhar, aviso
+  `admin.reports.detail.screenshotError` (pt-BR e en).
+- Testes: `tests/painel-admin/test_reports_playwright.js` 192/192 (10 novos: abrir não cria link, clique cria o link
+  certo, segundo clique cria outro, falha avisa), `test_reports_ui_unit.js` 32/32. Testes de `tests/i18n/` que quebram
+  (`test_i18n_unit`, `test_playwright`, `test_badges_i18n`, `test_translation_compare`) quebram igual na `main`
+  (pedem um commit antigo que não está nesta cópia do repositório).
+
+## 1ª rodada do robô de avisos com senha (2026-11-23, 22h UTC)
+
+- Cron `notification-cron-diario` = succeeded; resposta da função **200 ok:true**: 44 combinações conta/idioma lidas,
+  36 avisos criados, 62 eventos de cron no dia (59 no dia anterior, sem senha). Senha do Vault e secret batem.
+- 10 erros na rodada, **anteriores a esta mudança** (código igual ao da v34): `Cannot read properties of undefined
+  (reading 'split')` em 10 contas do francês. Causa: a missão do dia "Ganhe 50 XP hoje" (`xp50`, no site desde
+  ~2026-10-23, substituiu `stars40`) não está em `MISSION_FIELD_BY_ID` do `notification-cron`; o erro acontece no
+  último passo (lembrete de missões), então só esse lembrete deixa de sair para essas contas. Conserto aprovado pela
+  autora (2026-11-24): `xp50: { field: 'xp' }` (o site mede `d.xp`) e missão desconhecida passa a ser pulada em
+  `computeMissionProgress` (nunca mais derruba a conta). `notification-cron` **v37** na produção (2026-11-24),
+  conteúdo baixado de volta e idêntico ao repositório; sem senha = 401. `tests/pt-servidor/test_cron_pt.js` 75/75
+  (4 novos). Conferir a rodada das 22h UTC de 2026-11-24 (esperado: 0 erros).
+

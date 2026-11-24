@@ -1720,6 +1720,7 @@ window.I18N_CATALOG['en'] = {
   'admin.reports.detail.problem': '⚑ Problem', // ALTA
   'admin.reports.detail.notInformed': '(not provided)', // ALTA
   'admin.reports.detail.screenshotView': '📎 View attached screenshot', // ALTA
+  'admin.reports.detail.screenshotError': "Couldn't open the screenshot. Please try again in a moment.", // ALTA
   'admin.reports.detail.screenshotNone': '(no screenshot attached)', // ALTA
   'admin.reports.reply.lastSentTo': 'Last reply sent on {date} to {email}:', // ALTA
   'admin.reports.reply.lastSent': 'Last reply sent on {date}:', // ALTA
