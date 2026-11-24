@@ -22,7 +22,8 @@ const T = {
       pre: 'Cinco minutinhos já ajudam a não esquecer o que a gente viu.',
       label: 'Saudade de você',
       titleA: () => 'Seus cartões', titleB: 'estão te esperando.',
-      body: (n, nome) => `${nome ? `Oi, ${nome}!` : 'Oi!'} Faz alguns dias que você não aparece por aqui, e tem ${n === 1 ? '1 cartão' : `${n} cartões`} da sua professora esperando na Revisão. Cinco minutinhos já ajudam a não esquecer o que a gente viu nas aulas.`,
+      // sem número (decisão da dona, 2026-11-24): o total de cartões já recebidos assusta mais do que motiva
+      body: (n, nome) => `${nome ? `Oi, ${nome}!` : 'Oi!'} Faz alguns dias que você não aparece por aqui, e tem cartões da sua professora esperando na Revisão. Cinco minutinhos já ajudam a não esquecer o que a gente viu nas aulas.`,
       box: () => ['Cartões escolhidos por mim com o que vimos nas aulas', 'Você pode parar quando quiser: o progresso fica salvo'],
       button: 'Voltar para a Revisão', bye: 'Te espero lá!',
     },
@@ -45,7 +46,7 @@ const T = {
       pre: 'Five minutes already help you hold on to what we covered.',
       label: 'We miss you',
       titleA: () => 'Your cards', titleB: 'are waiting for you.',
-      body: (n, nome) => `${nome ? `Hi, ${nome}!` : 'Hi!'} It has been a few days, and ${n === 1 ? '1 card' : `${n} cards`} from your teacher ${n === 1 ? 'is' : 'are'} waiting in your Review. Five minutes already help you hold on to what we covered in class.`,
+      body: (n, nome) => `${nome ? `Hi, ${nome}!` : 'Hi!'} It has been a few days, and there are cards from your teacher waiting in your Review. Five minutes already help you hold on to what we covered in class.`,
       box: () => ['Cards I picked from what we covered in class', 'You can stop whenever you want: your progress is saved'],
       button: 'Back to my Review', bye: 'See you there!',
     },

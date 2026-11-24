@@ -35,7 +35,7 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
   const pn = E({ lang: 'pt', kind: 'novos' }), pl = E({ lang: 'pt', kind: 'lembrete', n: 17 }), en = E({ lang: 'en', kind: 'novos' }), el = E({ lang: 'en', kind: 'lembrete', n: 17 });
   check('pt novos: assunto e corpo com o número e o nome', pn.subject === 'Você tem 12 cartões novos da sua professora' && pn.text.includes('Oi, Ana!') && pn.html.includes('12 cartões novos'));
   check('singular: "1 cartão novo"', E({ lang: 'pt', kind: 'novos', n: 1 }).subject === 'Você tem 1 cartão novo da sua professora' && E({ lang: 'en', kind: 'novos', n: 1 }).subject === 'You have 1 new card from your teacher');
-  check('pt lembrete: assunto com o nome e 17 cartões', pl.subject === 'Seus cartões estão te esperando, Ana' && pl.html.includes('17 cartões'));
+  check('pt lembrete: assunto com o nome e SEM número de cartões (nem no corpo, nem no texto, nem em inglês)', pl.subject === 'Seus cartões estão te esperando, Ana' && !/\d/.test(pl.text.replace(/https?:\S+/g, '')) && !/\d/.test(el.text.replace(/https?:\S+/g, '')) && pl.text.includes('tem cartões da sua professora esperando'));
   check('sem nome: cumprimento sem nome e assunto sem vírgula solta', E({ lang: 'pt', kind: 'lembrete', nome: '' }).subject === 'Seus cartões estão te esperando' && E({ lang: 'pt', kind: 'novos', nome: '' }).text.startsWith('Oi! '));
   const ptWords = /você|cartões|cartão|aulas|professora|Revisão|Saudade|Parar de receber/i;
   check('site em inglês: NADA em português (assunto, html e texto)', ![en, el].some(m => ptWords.test(m.subject) || ptWords.test(m.html.replace(/<style[\s\S]*?<\/style>/, '')) || ptWords.test(m.text)));
