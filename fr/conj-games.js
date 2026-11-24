@@ -31,98 +31,98 @@ const CONJ_GAMES = [
     },
     perRound: 10,
     opts: {
-      a: { label: 'Avoir', tl: { 'pt-BR': '{avoir}: o que você tem (idade, fome, frio, medo, razão...)', en: '{avoir}: what you have (age, hunger, cold, fear, being right...)' } },
-      b: { label: 'Être', tl: { 'pt-BR': '{être}: o que você é ou como está (cansado, doente, atrasado, casado...)', en: '{être}: what you are or how you are (tired, sick, late, married...)' } }
+      a: { label: 'Avoir', tl: { 'pt-BR': "{avoir}: o que você tem (idade, fome, frio, medo, razão...)", en: "{avoir}: what you have (age, hunger, cold, fear, being right...)" } },
+      b: { label: 'Être', tl: { 'pt-BR': "{être}: o que você é ou como você está ({fatigué}, {malade}, {en retard}, {marié}...)", en: "{être}: what you are or how you are (tired, sick, late, married...)" } }
     },
     // "Corrija o erro" (etapa 7, aprovado pela autora em 2026-11-11; rascunho e revisão em docs/jogos-corrija-o-erro-rascunho.md):
     // a frase vem com UMA forma errada (wrong); a aluna escreve a certa (fix). kind: 'a'|'b' = a opção do jogo que está certa.
     fix: [
       { id: 'f1', before: "Elle ", wrong: "est", fix: "a", after: " trente ans.", kind: 'a', clue: "trente ans",
-        text: { 'pt-BR': { tr: "Ela tem trinta anos.", why: "Idade se tem, como em português: {elle a trente ans}. \"{Elle est trente ans}\" não existe." }, en: { tr: "She's thirty.", why: "Age goes with {avoir}: {elle a trente ans} (literally \"she has thirty years\"), never \"{elle est trente ans}\"." } } },
+        text: { 'pt-BR': { tr: "Ela tem trinta anos.", why: "Idade se tem, como em português: {elle a trente ans}. {Elle est trente ans} não existe." }, en: { tr: "She's thirty.", why: "Age goes with {avoir}: {elle a trente ans}, literally \"she has thirty years\"." } } },
       { id: 'f2', before: "Vous ", wrong: "êtes", fix: "avez", after: " raison, c'est fermé le lundi.", kind: 'a', clue: "raison",
-        text: { 'pt-BR': { tr: "Você tem razão, fecha às segundas.", why: "\"Ter razão\" é {avoir raison}, como em português. A armadilha é pensar \"você está certo\" e usar {être}: o certo é {vous avez raison}." }, en: { tr: "You're right, it's closed on Mondays.", why: "\"You're right\" uses \"are\", but French says you \"have reason\": {vous avez raison}. \"{Vous êtes raison}\" doesn't exist." } } },
+        text: { 'pt-BR': { tr: "Você tem razão, fecha às segundas.", why: "\"Ter razão\" é {avoir raison}, como em português: {vous avez raison}, nunca {vous êtes raison}." }, en: { tr: "You're right, it's closed on Mondays.", why: "English says \"you're right\", but French says you \"have reason\": {vous avez raison}." } } },
       { id: 'f3', before: "Mon fils ", wrong: "a", fix: "est", after: " jaloux de sa petite sœur.", kind: 'b', clue: "jaloux",
-        text: { 'pt-BR': { tr: "Meu filho tem ciúmes da irmãzinha.", why: "Em português se \"tem\" ciúmes, mas em francês ciumento é adjetivo: {être jaloux}, {il est jaloux}." }, en: { tr: "My son is jealous of his little sister.", why: "{Jaloux} is an adjective, so it takes {être}, just like \"is jealous\": {il est jaloux}." } } },
+        text: { 'pt-BR': { tr: "Meu filho tem ciúmes da irmãzinha.", why: "Em português se tem ciúmes, mas em francês ciumento é adjetivo, então vem com {être}: {il est jaloux}." }, en: { tr: "My son is jealous of his little sister.", why: "{Jaloux} is an adjective, so it takes {être}, just like \"is jealous\": {il est jaloux}." } } },
       { id: 'f4', before: "Tu ", wrong: "as", fix: "es", after: " malade ? Tu as l'air pâle.", kind: 'b', clue: "malade",
-        text: { 'pt-BR': { tr: "Você está doente? Você está pálido.", why: "Doente é adjetivo: {tu es malade}. A doença em si se tem ({tu as la grippe}), mas \"doente\" vem com {être}." }, en: { tr: "Are you sick? You look pale.", why: "\"Sick\" is an adjective: {tu es malade}. The illness itself goes with {avoir} ({tu as la grippe}), but \"sick\" takes {être}." } } },
+        text: { 'pt-BR': { tr: "Você está doente? Está com uma cara pálida.", why: "Doente é adjetivo: {tu es malade}. Já a doença em si se tem: {tu as la grippe}." }, en: { tr: "Are you sick? You look pale.", why: "\"Sick\" is an adjective: {tu es malade}. The illness itself takes {avoir}: {tu as la grippe}." } } },
     ],
     items: [
       { id: 1, before: '', after: ' vingt-cinq ans.', a: 'J\'ai', b: 'Je suis', ans: 'a', clue: 'vingt-cinq ans',
         text: {
-          'pt-BR': { tr: 'Eu tenho vinte e cinco anos.', why: 'Idade em francês se "tem", igual ao português: {avoir} + {ans}. Nunca "{je suis vingt-cinq ans}".' },
-          en: { tr: 'I\'m twenty-five.', why: 'In French you "have" your age: {avoir} + {ans}. "I am 25" becomes {j\'ai vingt-cinq ans}, never "{je suis vingt-cinq}".' } } },
+          'pt-BR': { tr: 'Eu tenho vinte e cinco anos.', why: "Idade em francês se tem, como em português: {j'ai vingt-cinq ans}. Nunca {je suis vingt-cinq ans}." },
+          en: { tr: 'I\'m twenty-five.', why: "In French you have your age: {j'ai vingt-cinq ans}. Never {je suis vingt-cinq ans}." } } },
       { id: 2, before: 'Il ', after: ' quel âge, ton frère ?', a: 'a', b: 'est', ans: 'a', clue: 'quel âge',
         text: {
-          'pt-BR': { tr: 'Quantos anos tem o seu irmão?', why: 'Perguntar a idade também usa {avoir}: "{il a quel âge ?}" é, ao pé da letra, "ele tem qual idade?".' },
-          en: { tr: 'How old is your brother?', why: '"How old is he?" uses "is", but French asks what age he "has": {il a quel âge ?} Age always goes with {avoir}.' } } },
+          'pt-BR': { tr: 'Quantos anos tem o seu irmão?', why: "Para perguntar a idade, também vai {avoir}: {il a quel âge ?} é \"ele tem qual idade?\"." },
+          en: { tr: 'How old is your brother?', why: "English asks how old he is, but French asks what age he has: {il a quel âge ?}" } } },
       { id: 3, before: '', after: ' faim ! On mange ?', a: 'J\'ai', b: 'Je suis', ans: 'a', clue: 'faim',
         text: {
-          'pt-BR': { tr: 'Estou com fome! Vamos comer?', why: 'Fome é coisa que se tem: {j\'ai faim}. O "estou com fome" engana, mas em francês a fome nunca vem com {être}.' },
-          en: { tr: 'I\'m hungry! Shall we eat?', why: '"I\'m hungry" uses "be", but in French hunger is something you have: {j\'ai faim}.' } } },
+          'pt-BR': { tr: 'Estou com fome! Vamos comer?', why: "O \"estou com fome\" engana: em francês a fome se tem, {j'ai faim}. Nunca com {être}." },
+          en: { tr: 'I\'m hungry! Shall we eat?', why: "English says \"I'm hungry\", but in French hunger is something you have: {j'ai faim}." } } },
       { id: 4, before: 'Il fait 35 degrés, ', after: ' chaud.', a: 'j\'ai', b: 'je suis', ans: 'a', clue: 'chaud',
         text: {
-          'pt-BR': { tr: 'Está fazendo 35 graus, estou com calor.', why: 'Sentir calor é {avoir chaud}. Cuidado: na linguagem informal, "{je suis chaud}" quer dizer "estou animado, topo", e dependendo do contexto soa com segundas intenções. É um erro que costuma arrancar risadas.' },
-          en: { tr: 'It\'s 35 degrees, I\'m hot.', why: 'Feeling hot is {avoir chaud}. Careful: in casual French, "{je suis chaud}" means "I\'m up for it", and depending on context it can sound suggestive. It\'s a mistake that often gets a laugh.' } } },
+          'pt-BR': { tr: 'Está fazendo 35 graus, estou com calor.', why: "Calor se tem: {j'ai chaud}. Cuidado: {je suis chaud} é gíria para \"topo, estou dentro\" e pode soar malicioso." },
+          en: { tr: 'It\'s 35 degrees, I\'m hot.', why: "Feeling hot is {j'ai chaud}. Careful: {je suis chaud} is slang for \"I'm up for it\" and can sound suggestive." } } },
       { id: 5, before: 'Tu peux fermer la fenêtre ? ', after: ' froid.', a: 'J\'ai', b: 'Je suis', ans: 'a', clue: 'froid',
         text: {
-          'pt-BR': { tr: 'Você pode fechar a janela? Estou com frio.', why: 'Sentir frio é {avoir froid}. "{Je suis froid}" descreveria você como uma pessoa fria, distante.' },
-          en: { tr: 'Can you close the window? I\'m cold.', why: 'Feeling cold is {avoir froid}. "{Je suis froid}" would describe you as a cold, distant person.' } } },
+          'pt-BR': { tr: 'Você pode fechar a janela? Estou com frio.', why: "Frio se tem: {j'ai froid}. Repare que {je suis froid} descreve uma pessoa fria, distante." },
+          en: { tr: 'Can you close the window? I\'m cold.', why: "Feeling cold is {j'ai froid}. Watch out: {je suis froid} describes a cold, distant person." } } },
       { id: 6, before: 'Tu ', after: ' raison, c\'est trop cher.', a: 'as', b: 'es', ans: 'a', clue: 'raison',
         text: {
-          'pt-BR': { tr: 'Você tem razão, está caro demais.', why: '"Ter razão" é {avoir raison}, como em português. A armadilha é pensar "você está certo" e trocar por {être}.' },
-          en: { tr: 'You\'re right, it\'s too expensive.', why: '"You\'re right" uses "be", but French says you "have reason": {tu as raison}. "{Tu es raison}" doesn\'t exist.' } } },
+          'pt-BR': { tr: 'Você tem razão, está caro demais.', why: "\"Ter razão\" é {avoir raison}, igual ao português: {tu as raison}, nunca {tu es raison}." },
+          en: { tr: 'You\'re right, it\'s too expensive.', why: "English says \"you're right\", but French says you \"have reason\": {tu as raison}." } } },
       { id: 7, before: 'Les enfants ', after: ' peur du chien.', a: 'ont', b: 'sont', ans: 'a', clue: 'peur',
         text: {
-          'pt-BR': { tr: 'As crianças estão com medo do cachorro.', why: 'Medo também se tem: {avoir peur de}. "Estar com medo" e "ter medo" viram a mesma coisa em francês: {avoir peur}.' },
-          en: { tr: 'The kids are scared of the dog.', why: '"Be scared" or "be afraid" uses "be", but French uses {avoir}: {avoir peur de} (literally "to have fear of").' } } },
+          'pt-BR': { tr: 'As crianças estão com medo do cachorro.', why: "Medo se tem: {avoir peur de}. \"Estar com medo\" e \"ter medo\" viram a mesma coisa: {ils ont peur}." },
+          en: { tr: 'The kids are scared of the dog.', why: "\"Scared\" uses \"be\" in English, but French uses {avoir}: {avoir peur de}, \"to have fear of\"." } } },
       { id: 8, before: 'Il est tard, ', after: ' sommeil.', a: 'j\'ai', b: 'je suis', ans: 'a', clue: 'sommeil',
         text: {
-          'pt-BR': { tr: 'Está tarde, estou com sono.', why: '"Estar com sono" é {avoir sommeil}: sono é substantivo, e aqui o substantivo vem com {avoir}.' },
-          en: { tr: 'It\'s late, I\'m sleepy.', why: '"Sleepy" is an adjective in English, but French uses a noun, {sommeil}, with {avoir}: {j\'ai sommeil}.' } } },
+          'pt-BR': { tr: 'Está tarde, estou com sono.', why: "Sono é substantivo e vem com {avoir}: {j'ai sommeil}. Não confunda com {fatigué}, que é adjetivo." },
+          en: { tr: 'It\'s late, I\'m sleepy.', why: "\"Sleepy\" is an adjective, but French uses a noun, {sommeil}, with {avoir}: {j'ai sommeil}." } } },
       { id: 9, before: '', after: ' fatigué après le travail.', a: 'J\'ai', b: 'Je suis', ans: 'b', clue: 'fatigué',
         text: {
-          'pt-BR': { tr: 'Estou cansado depois do trabalho.', why: 'Cansado é adjetivo, descreve como você está: {être} + adjetivo, {je suis fatigué}. Compare com o sono: {j\'ai sommeil} (substantivo, com {avoir}).' },
-          en: { tr: 'I\'m tired after work.', why: '"Tired" is an adjective, and adjectives go with {être}, just like in English: {je suis fatigué}. Compare {j\'ai sommeil} (a noun, with {avoir}).' } } },
+          'pt-BR': { tr: 'Estou cansado depois do trabalho.', why: "Cansado é adjetivo, então vem com {être}: {je suis fatigué}. Já o sono se tem: {j'ai sommeil}." },
+          en: { tr: 'I\'m tired after work.', why: "\"Tired\" is an adjective, so it takes {être}: {je suis fatigué}. \"Sleepy\" is {j'ai sommeil}." } } },
       { id: 10, before: 'Elle ', after: ' mal à la tête.', a: 'a', b: 'est', ans: 'a', clue: 'mal à la tête',
         text: {
-          'pt-BR': { tr: 'Ela está com dor de cabeça.', why: '"Estar com dor" é {avoir mal à}: {elle a mal à la tête}. Dor se tem, não se é.' },
-          en: { tr: 'She has a headache.', why: 'Pain goes with {avoir}: {avoir mal à} + body part, {elle a mal à la tête}. Here the English "has" points the right way.' } } },
+          'pt-BR': { tr: 'Ela está com dor de cabeça.', why: "Dor se tem, não se é: {avoir mal à} + parte do corpo, {elle a mal à la tête}." },
+          en: { tr: 'She has a headache.', why: "Pain goes with {avoir}: {avoir mal à} + body part. Here the English \"has\" points the right way." } } },
       { id: 11, before: '', after: ' sûr que c\'est ici.', a: 'J\'ai', b: 'Je suis', ans: 'b', clue: 'sûr',
         text: {
-          'pt-BR': { tr: 'Tenho certeza que é aqui.', why: 'Pegadinha de quem fala português: "tenho certeza" puxa para "{j\'ai certitude}", mas o normal é {je suis sûr} (ou {sûre}). Em francês a certeza vira adjetivo, e adjetivo vem com {être}.' },
-          en: { tr: 'I\'m sure it\'s here.', why: '"Sure" is an adjective, so it goes with {être}, just like in English: {je suis sûr} (or {sûre}).' } } },
+          'pt-BR': { tr: 'Tenho certeza que é aqui.', why: "Repare: \"tenho certeza\" puxa para {avoir}, mas em francês é adjetivo, com {être}: {je suis sûr} (ou {sûre})." },
+          en: { tr: 'I\'m sure it\'s here.', why: "\"Sure\" is an adjective, so it takes {être}, just like in English: {je suis sûr} (or {sûre})." } } },
       { id: 12, before: '', after: ' pressé, je te rappelle plus tard.', a: 'J\'ai', b: 'Je suis', ans: 'b', clue: 'pressé',
         text: {
-          'pt-BR': { tr: 'Estou com pressa, te ligo mais tarde.', why: 'Outra armadilha: "estou com pressa" parece pedir {avoir}, mas em francês é um adjetivo: {je suis pressé}. E cuidado com "{j\'ai hâte}": não é "estou com pressa", é "estou ansioso, não vejo a hora".' },
-          en: { tr: 'I\'m in a hurry, I\'ll call you back later.', why: '"In a hurry" is a single adjective in French, {pressé}, so it goes with {être}: {je suis pressé}. "{J\'ai pressé}" would mean "I squeezed".' } } },
+          'pt-BR': { tr: 'Estou com pressa, te ligo mais tarde.', why: "\"Com pressa\" é adjetivo em francês: {je suis pressé}. E {j'ai hâte} é \"não vejo a hora\", não pressa." },
+          en: { tr: 'I\'m in a hurry, I\'ll call you back later.', why: "\"In a hurry\" is one adjective in French, so it takes {être}: {je suis pressé}. {J'ai pressé} means \"I squeezed\"." } } },
       { id: 13, before: 'Nous ', after: ' en retard, le film commence !', a: 'avons', b: 'sommes', ans: 'b', clue: 'en retard',
         text: {
-          'pt-BR': { tr: 'Estamos atrasados, o filme está começando!', why: '"Estar atrasado" é {être en retard}. Como o português usa "estar", aqui a intuição acerta.' },
-          en: { tr: 'We\'re late, the movie is starting!', why: '"Be late" is {être en retard}, so English points the right way here.' } } },
+          'pt-BR': { tr: 'Estamos atrasados, o filme está começando!', why: "\"Estar atrasado\" é {être en retard}. Aqui o \"estar\" do português acerta." },
+          en: { tr: 'We\'re late, the movie is starting!', why: "\"Be late\" is {être en retard}, so here English points the right way." } } },
       { id: 14, before: 'Mon frère ', after: ' marié.', a: 'a', b: 'est', ans: 'b', clue: 'marié',
         text: {
-          'pt-BR': { tr: 'Meu irmão é casado.', why: 'Estado civil vem com {être}: {il est marié}, como "ele é casado".' },
-          en: { tr: 'My brother is married.', why: '"Be married" is {être marié}, just like in English.' } } },
+          'pt-BR': { tr: 'Meu irmão é casado.', why: "Estado civil vem com {être}: {il est marié}, como \"ele é casado\"." },
+          en: { tr: 'My brother is married.', why: "\"Be married\" is {être marié}, just like in English: {il est marié}." } } },
       { id: 15, before: '', after: ' d\'accord avec toi.', a: 'J\'ai', b: 'Je suis', ans: 'b', clue: 'd\'accord',
         text: {
-          'pt-BR': { tr: 'Eu concordo com você.', why: 'O jeito comum de dizer "concordo" é {je suis d\'accord} ("estou de acordo"), sempre com {être}.' },
-          en: { tr: 'I agree with you.', why: 'Everyday French has no single verb for "agree": you say {je suis d\'accord} ("I am in agreement"), always with {être}.' } } },
+          'pt-BR': { tr: 'Eu concordo com você.', why: "Para dizer \"concordo\", o mais comum em francês é {je suis d'accord}, sempre com {être}." },
+          en: { tr: 'I agree with you.', why: "To say \"I agree\", French usually says {je suis d'accord}, always with {être}." } } },
       { id: 16, before: 'Vous ', after: ' soif ? Il y a de l\'eau.', a: 'avez', b: 'êtes', ans: 'a', clue: 'soif',
         text: {
-          'pt-BR': { tr: 'Vocês estão com sede? Tem água.', why: 'Sede, como fome, se tem: {avoir soif}. "Estar com sede" vira {avoir}.' },
-          en: { tr: 'Are you thirsty? There\'s water.', why: '"Be thirsty" uses "be" in English, but in French thirst is something you have: {avoir soif}.' } } },
+          'pt-BR': { tr: 'Vocês estão com sede? Tem água.', why: "Sede, assim como fome, se tem: {avoir soif}. O \"estar com sede\" vira {vous avez soif ?}" },
+          en: { tr: 'Are you thirsty? There\'s water.', why: "Like hunger, thirst is something you have in French: {avoir soif}, never {être}." } } },
       { id: 17, before: 'Tu ', after: ' de la chance !', a: 'as', b: 'es', ans: 'a', clue: 'de la chance',
         text: {
-          'pt-BR': { tr: 'Você tem sorte!', why: '"Ter sorte" é {avoir de la chance}. Mesmo quando a gente diz "você está com sorte", em francês é {avoir}.' },
-          en: { tr: 'You\'re lucky!', why: '"Be lucky" becomes {avoir de la chance} (literally "to have some luck").' } } },
+          'pt-BR': { tr: 'Você tem sorte!', why: "Sorte se tem: {avoir de la chance}. Mesmo no \"você está com sorte\", em francês é {avoir}." },
+          en: { tr: 'You\'re lucky!', why: "\"Be lucky\" becomes {avoir de la chance}, literally \"to have some luck\"." } } },
       { id: 18, before: '', after: ' envie d\'un café.', a: 'J\'ai', b: 'Je suis', ans: 'a', clue: 'envie',
         text: {
-          'pt-BR': { tr: 'Estou com vontade de tomar um café.', why: '"Estar com vontade" é {avoir envie de}: vontade se tem. "{Je suis envie}" não existe.' },
-          en: { tr: 'I feel like having a coffee.', why: '"Feel like" becomes {avoir envie de} (literally "to have desire for"): {j\'ai envie d\'un café}.' } } },
+          'pt-BR': { tr: 'Estou com vontade de tomar um café.', why: "Vontade se tem: {avoir envie de}, {j'ai envie d'un café}. {Je suis envie} não existe." },
+          en: { tr: 'I feel like having a coffee.', why: "\"Feel like\" becomes {avoir envie de}, literally \"to have desire for\": {j'ai envie d'un café}." } } },
       { id: 19, before: 'Elle ', after: ' malade, elle reste à la maison.', a: 'a', b: 'est', ans: 'b', clue: 'malade',
         text: {
-          'pt-BR': { tr: 'Ela está doente, vai ficar em casa.', why: 'Doente é adjetivo: {être malade}. Mas a doença em si se tem: {elle a la grippe} (ela está com gripe).' },
-          en: { tr: 'She\'s sick, she\'s staying home.', why: '"Sick" is an adjective: {être malade}. But the illness itself is something you have: {elle a la grippe} (she has the flu).' } } }
+          'pt-BR': { tr: 'Ela está doente, vai ficar em casa.', why: "Doente é adjetivo: {elle est malade}. Já a doença em si se tem: {elle a la grippe}." },
+          en: { tr: 'She\'s sick, she\'s staying home.', why: "\"Sick\" is an adjective: {elle est malade}. But the illness itself you have: {elle a la grippe}." } } }
     ]
   },
   // A1 (A1-g9). Só o auxiliar: com être, os sujeitos são masculinos e no singular, para a concordância do particípio (A2) não aparecer.
