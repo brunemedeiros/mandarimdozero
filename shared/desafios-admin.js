@@ -748,7 +748,7 @@ async function renderChallengesAdmin(){
   document.getElementById('challenges-admin-wrap').style.display = 'block';
 
   const content = document.getElementById('challenges-admin-content');
-  content.innerHTML = loadingHTML();
+  content.innerHTML = loadingHTML(t('loading.challenges'));
   const ok = await loadChallengesFromDB(true);
   if (!ok){
     content.innerHTML = `<p class="challenges-admin-empty">${t('adminChallenges.loadFailed')}</p>`;

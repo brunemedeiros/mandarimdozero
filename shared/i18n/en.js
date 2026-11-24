@@ -4328,11 +4328,20 @@ window.I18N_CATALOG['en'] = {
   'profile.err.photoNotImage': 'Choose an image file (JPG, PNG...).', // ALTA
   'zh.hanzi.reviewAll': '🔁 Review characters', // ALTA
   'loading.phrase.loading': 'Loading...', // ALTA
-  'loading.phrase.oneSec': 'Just a second...', // ALTA
-  'loading.phrase.almost': 'Almost there...', // ALTA
-  'loading.phrase.fetching': 'Getting the data...', // ALTA
-  'loading.phrase.preparing': 'Getting everything ready...', // ALTA
-  'loading.phrase.moment': 'One moment...', // ALTA
+  'loading.opening': 'Opening the site...', // ALTA
+  'loading.progress': 'Loading progress...', // ALTA
+  'loading.cards': 'Loading cards...', // ALTA
+  'loading.challenges': 'Loading challenges...', // ALTA
+  'loading.mural': 'Loading the board...', // ALTA
+  'loading.muralSide': 'Loading class details...', // ALTA
+  'loading.myClasses': 'Loading your classes...', // ALTA
+  'loading.notion': 'Loading Notion...', // ALTA
+  'loading.myCards': 'Loading your cards...', // ALTA
+  'loading.googleCalendar': 'Loading Google Calendar...', // ALTA
+  'loading.calendarLink': 'Loading the calendar link...', // ALTA
+  'loading.publishOptions': 'Loading sharing options...', // ALTA
+  'loading.reviewBank': 'Loading the Review Bank...', // ALTA
+  'loading.notifPrefs': 'Loading preferences...', // ALTA
   'zh.hanzi.radicals': '🧬 Radicals', // ALTA (achado extra: botão e título da tela de Radicais)
   // Etapa 3, lote C (2026-10-19): gerenciador de Tags, excluir Deck, importação cortada, Meus cartões, validação de
   // tags, novo editor, importação .apkg e Decks públicos. Texto pt idêntico ao que estava escrito direto no JS/HTML.

@@ -249,7 +249,7 @@ async function renderGoogleCalendarBox(opts){
   const host = document.getElementById('admin-gcal-box');
   if (!host) return;
   const body = host.querySelector('[data-gcal-body]');
-  if (!(opts && opts.quiet)) body.innerHTML = typeof loadingHTML === 'function' ? loadingHTML() : '…';
+  if (!(opts && opts.quiet)) body.innerHTML = typeof loadingHTML === 'function' ? loadingHTML(t('loading.googleCalendar')) : '…';
   await gcalLoad();
   body.innerHTML = gcalBoxHTML();
   const n = GCAL_STATE.review.filter(e => e.match_state !== 'ignored' && !e.skipped_at).length;
