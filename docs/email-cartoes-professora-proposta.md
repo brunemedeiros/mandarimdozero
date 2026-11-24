@@ -34,3 +34,8 @@ Depois: migration (2 tabelas + preferência), função, agendamento, testes, e-m
 - Testes: `node tests/email-cartoes-professora/test_core.js` (31) e `test_function.js` (19, banco e Resend de mentira).
 - IDs do teste (produção): Raíssa `f22719c9-1381-4635-a21a-52375f1422c9`, Carol `d079a986-52ee-4166-96ff-2774369c901d`.
 - Roteiro para ligar: PR e merge; migration 141 na produção; deploy da função; segredo `cards_digest_url` no Vault; linha em `teacher_cards_digest_settings` (modo `teste`); e-mail de teste só para a dona; OK dela; agendar o cron; depois do teste, modo `todos`.
+
+## Estado (2026-11-24)
+- PR #491 mesclado (código e linha nova em Configurações). Migration 141 aplicada no Staging e na produção. Função `teacher-cards-digest` v1 na produção (`verify_jwt:false`, shim fixado no commit `394ce90f`; GET 405, POST sem senha 401, assinatura falsa 400).
+- 4 e-mails de teste (novos e lembrete, pt e en) enviados SÓ para o endereço da dona e aceitos pelo Resend (respostas 200). Linha de `teacher_cards_digest_settings` criada em modo `desligado` com Raíssa e Carol como teste.
+- NÃO feito: modo `teste` e o cron `teacher-cards-digest-diario` (falta o OK da dona depois de ver os e-mails) e o segredo `cards_digest_url` no Vault. Para ligar: `update teacher_cards_digest_settings set mode='teste'`; criar o segredo com `https://eigjocalzwamisgqilhg.supabase.co/functions/v1/teacher-cards-digest`; `select cron.schedule('teacher-cards-digest-diario','0 11 * * *','select public._cards_digest_post()')`. Depois do teste, `mode='todos'`.
