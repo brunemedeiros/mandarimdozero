@@ -172,6 +172,10 @@ Dois achados da revisão diária, confirmados pela dona:
    dados fornecidos pelo usuário" está DESLIGADA (o `__ogt_1p_data_v2` do `gtag.js` fica parado). Período registrado no
    documento do advogado (aba Resumo, "Correção de 24/11/2026"), com 2 perguntas: avisar quem aceitou no período? pedir
    ao Google a exclusão dos endereços completos?
+4. **Origem chegando (2026-11-24, depois do #510)**: em janela anônima nova (a anônima antiga ainda guardava o aceite, por
+   isso o aviso não aparecia), a dona aceitou e o "Tempo real" mostrou 1 usuário com "Origem atribuída ao primeiro
+   usuário" = `teste`. A cadeia UTM -> GA4 funciona de ponta a ponta. No menu dela (montado por "Objetivos de negócios"),
+   a "Aquisição de tráfego" se acha pela barra de pesquisa do GA4.
 
 ## Conferência de 2026-11-24
 
