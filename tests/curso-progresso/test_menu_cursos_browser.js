@@ -32,7 +32,7 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
       await ctx.addInitScript(({ flag }) => { try { sessionStorage.setItem('guest_mode', '1'); localStorage.setItem('ui-language', 'pt-BR'); localStorage.setItem('courses-per-site-language', flag ? '1' : '0'); } catch (e) {} }, { flag });
       const page = await ctx.newPage(); const errs = []; page.on('pageerror', e => errs.push(String(e)));
       await page.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, r => r.abort());
-      await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
+      await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase|\/shared\/vendor\/supabase-js/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
       await page.goto(`${base}/${app}/index.html`);
       await page.waitForFunction(() => typeof paintCourseMenu === 'function' && CURRENT_USER === false, null, { timeout: 20000 });
       await page.hover('#lang-switcher-btn');
@@ -76,7 +76,7 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
     await ctx.addInitScript(() => { try { sessionStorage.setItem('guest_mode', '1'); localStorage.setItem('ui-language', 'pt-BR'); localStorage.setItem('courses-per-site-language', '1'); } catch (e) {} });
     const page = await ctx.newPage();
     await page.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, r => r.abort());
-    await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
+    await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase|\/shared\/vendor\/supabase-js/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
     await page.goto(`${base}/fr/index.html`);
     await page.waitForFunction(() => typeof openAddCourse === 'function' && CURRENT_USER === false);
     await page.evaluate(() => openAddCourse()); await page.waitForSelector('.add-course-card');
@@ -94,7 +94,7 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
     await ctx.addInitScript(() => { try { sessionStorage.setItem('guest_mode', '1'); } catch (e) {} });
     const page = await ctx.newPage();
     await page.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, r => r.abort());
-    await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
+    await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase|\/shared\/vendor\/supabase-js/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
     await page.goto(`${base}/fr/index.html`);
     await page.waitForFunction(() => typeof speakControlHTML === 'function' && CURRENT_USER === false);
     const r = await page.evaluate(() => { const a = speakControlHTML('en'); const orig = courseSiteLanguages; courseSiteLanguages = () => ['pt-BR', 'en', 'es', 'de']; const b = speakControlHTML('en'); courseSiteLanguages = orig; return { a, b }; });

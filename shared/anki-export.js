@@ -252,7 +252,7 @@ async function generateApkg(config){
   statusEl.className = 'export-status';
 
   try{
-    const SQL = await initSqlJs({ locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${file}` });
+    const SQL = await initSqlJs({ locateFile: file => new URL('../shared/vendor/sqljs-1.8.0/' + file, location.href).href });
     const db = new SQL.Database();
 
     // ---- Schema mínimo do Anki (col, notes, cards, graves, revlog) ----

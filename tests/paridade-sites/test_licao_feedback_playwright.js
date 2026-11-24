@@ -29,7 +29,7 @@ async function abrir(browser, port, site, { lang = 'pt-BR', width = 390, theme =
   const page = await ctx.newPage(); const errors = [];
   page.on('pageerror', e => errors.push(e.message));
   await page.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, r => r.abort());
-  await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
+  await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase|\/shared\/vendor\/supabase-js/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
   await page.addInitScript(([lang, theme]) => {
     try { sessionStorage.setItem('guest_mode', '1'); localStorage.setItem('ui-language', lang); localStorage.setItem('theme', theme); } catch (e) {}
     // mp3: só registra a velocidade (o sandbox não toca som).

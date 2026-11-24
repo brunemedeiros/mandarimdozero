@@ -23,7 +23,7 @@ async function boot(browser, port, lang, vp, dark){
   const ctx = await browser.newContext({ serviceWorkers: 'block', viewport: vp || { width: 1280, height: 900 } });
   const page = await ctx.newPage(); const errors = []; page.on('pageerror', e => errors.push(e.message));
   await page.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, r => r.abort());
-  await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
+  await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase|\/shared\/vendor\/supabase-js/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
   await page.addInitScript(() => { try { sessionStorage.setItem('guest_mode', '1'); } catch (e) {} });
   await page.addInitScript((d) => { try { if (d) localStorage.setItem('theme_pref','dark'); } catch (e) {} }, dark);
   await page.goto(`http://127.0.0.1:${port}/${lang}/index.html`);

@@ -21,7 +21,7 @@ const STUB = `window.supabase={createClient(){return{auth:{getSession:async()=>(
   const grab = async (port, site, q) => { const ctx = await browser.newContext({ serviceWorkers: 'block' }); const page = await ctx.newPage();
     // Só o CDN do Supabase (antes '**/*supabase*' pegava também ../shared/supabase-client.js e o app não iniciava).
     await page.route(/^https?:\/\/(?!localhost)/, r => r.abort());
-    await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
+    await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase|\/shared\/vendor\/supabase-js/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
     await page.addInitScript(() => { try { sessionStorage.setItem('guest_mode', '1'); } catch (e) {} }); // convidado: o app inicia e semeia as conquistas
     await page.goto(`http://localhost:${port}/${site}/${q}`); await page.waitForFunction(() => typeof BADGES !== 'undefined' && typeof SPECIAL_BADGES !== 'undefined', null, { timeout: 15000 });
     await page.waitForTimeout(800);

@@ -117,7 +117,7 @@ const PANEL_STUB = (who) => {
     const ctx = await browser.newContext({ serviceWorkers: 'block' });
     const page = await ctx.newPage();
     await page.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, r => r.abort());
-    await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
+    await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase|\/shared\/vendor\/supabase-js/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
     await page.addInitScript(() => { try { sessionStorage.setItem('guest_mode', '1'); } catch (e) {} });
     await page.goto(`http://127.0.0.1:${port}/fr/index.html?convite=ABC123def4&x=1`);
     await page.waitForFunction(() => typeof teacherInvitesAfterLogin === 'function');
@@ -134,7 +134,7 @@ const PANEL_STUB = (who) => {
       page.on('pageerror', e => errors.push(e.message));
       page.on('dialog', d => d.accept());
       await page.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, r => r.abort());
-      await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
+      await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase|\/shared\/vendor\/supabase-js/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
       await page.addInitScript(() => { try { sessionStorage.setItem('guest_mode', '1'); } catch (e) {} });
       await page.goto(`http://127.0.0.1:${port}/${lang}/index.html`);
       await page.waitForFunction(() => typeof STATE !== 'undefined' && STATE.cards && STATE.cards.length > 0 && CURRENT_USER === false, null, { timeout: 15000 });
