@@ -133,6 +133,27 @@ página" (o site manda as telas do app sozinho; com isso ligado, as limpezas de 
   entra como admin ficam marcados para não contar) e marcar os eventos-chave (`sign_up`, cliques de saída e o evento
   criado para abertura dos testes de nivelamento).
 
+## Correções da revisão diária (2026-11-24)
+
+Dois achados da revisão diária, confirmados pela dona:
+1. **Data do aceite de idade editável pela API** (a policy de update da 073 libera qualquer coluna de `profile_private`).
+   Migration `144_protect_age_ack` (a 143 já era de outra conversa: `143_review_bank_typed_text`): trigger
+   `profile_private_age_ack_guard` + função `_guard_age_ack()`. Pela API (authenticated/anon) ninguém grava, troca nem apaga
+   `age_ack_at`, nem apaga a linha que já tem a data; o gênero continua editável. Só a `ack_my_age()` grava, uma vez;
+   depois nem o servidor troca a data (exclusão de conta pelo servidor continua apagando a linha). Teste local
+   `tests/privacidade-padrao/test_144.sql` 11/11 (e `test_136.sql` 8/8). **Staging: aplicada (versão `20261124160100`) e
+   testada numa transação desfeita (4/4). Produção: aguarda autorização da dona.**
+2. **Eventos do GA4 com o endereço completo** (só o `page_view` era limpo). `shared/consent.js`: `page_location` e
+   `page_referrer` limpos já no `gtag('config')` e `gtag('set')` a cada página, então lição, cadastro, recomeço e cliques de
+   saída também saem limpos; só mede em `app.profbrune.com.br` (fora dele, só o teste do aviso com `__CONSENT_TEST__`);
+   nome de tela só vira página se existir `#view-<aba>` (antes `#segredo` no link virava `/fr/segredo`). `shared/auth.js`:
+   `setContext` só com o perfil de fato carregado (sem perfil, nada medido; a admin pelo e-mail marca o aparelho).
+   `tests/consentimento/test_playwright.js` 76/76. Conferido com o `gtag.js` de verdade (envio capturado e bloqueado):
+   nossos eventos saem com `/fr/` limpo. **Ainda vaza** o `page_view` automático do próprio Google ao mudar o endereço
+   (`dl` com `?cur=&view=&ui=`): vem da opção "Alterações na página de acordo com os eventos do histórico de navegação",
+   que o `gtag.js` servido para o ID mostra LIGADA (`vtp_enableHistoryEvents:true`; também rolagem, formulários, vídeo e
+   downloads ligados). Só dá para desligar no painel do GA4 (dona); depois, conferir de novo no `gtag.js`.
+
 ## Conferência de 2026-11-24
 
 - GA4 recebendo dados (print da dona, "Eventos recentes"): `first_visit`, `page_view`, `session_start`, `user_engagement`,

@@ -27,6 +27,14 @@ um print. Leva uns 10 minutos.
 9. Aparece o **ID da métrica** (ou "ID de medição"), no formato **G-XXXXXXXXXX**, no canto de cima à direita da tela
    "Detalhes do fluxo da Web". **Copie e me mande.** Não precisa seguir as "instruções de instalação": essa parte é minha.
 
+## A2. Conferir a Medição otimizada depois (caminho exato, 2026-11-24)
+
+Administrador (engrenagem embaixo, à esquerda) > **Coleta e modificação de dados** > **Fluxos de dados** > clique em
+**Site do app** > em "Eventos", ao lado de **Medição otimizada**, clique na **engrenagem** > em **Visualizações de página**,
+clique em **Mostrar configurações avançadas** > **desmarque "Alterações na página de acordo com os eventos do histórico de
+navegação"** (deixe "Carregamentos de página") > desligue também Rolagens, Pesquisa no site, Interações com formulários,
+Engajamento com vídeo e Downloads de arquivos > deixe só **Cliques de saída** ligado > **Salvar**.
+
 ## B. Privacidade (no mesmo dia)
 
 Tudo fica em **Administrador** (engrenagem no canto de baixo, à esquerda).

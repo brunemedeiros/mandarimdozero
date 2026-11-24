@@ -8,7 +8,8 @@
 //   ativos" e a chave "Medição de visitas", que nasce DESLIGADA). A mesma janela abre pelo link "Preferências de cookies"
 //   do rodapé e das Configurações (qualquer elemento com [data-consent-open]).
 // - Nada de dado pessoal no Google: sem user_id, endereço limpo (só o caminho + utm_*; convite, token e outros parâmetros
-//   nunca saem), sem Sinais do Google nem anúncios. Cookies do GA4 com 13 meses (como diz a política).
+//   nunca saem) na configuração e em todo evento (gtag('set') a cada página), sem Sinais do Google nem anúncios. Só mede
+//   em app.profbrune.com.br. Cookies do GA4 com 13 meses (como diz a política).
 // - Professora e admin não são medidas: no app, o GA4 só começa depois de saber quem está logado (setContext); se for
 //   professora/admin, este aparelho fica marcado como "não contar" (também nas páginas abertas) e o GA4 nem carrega.
 // - Recusar depois de aceitar apaga os cookies do GA4 e desliga o envio na hora.
@@ -32,6 +33,10 @@
   var COOKIE_EXPIRES = 34128000;         // 395 dias, cerca de 13 meses
   var UTM_PARAMS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'];
   var BLOCKED_TAB = /admin|teacher/i;    // Painel de Admin e Painel da Professora nunca viram página no GA4
+  // Só mede no endereço de verdade (revisão diária, 2026-11-24): cópia local, prévia ou outro domínio nunca enviam nada.
+  // O teste do aviso (tests/consentimento/) liga com window.__CONSENT_TEST__ = true.
+  var MEASURE_HOST = 'app.profbrune.com.br';
+  function hostAllowed(){ return location.hostname === MEASURE_HOST || !!window.__CONSENT_TEST__; }
 
   var me = document.currentScript;
   var PAGE = (me && me.dataset && me.dataset.page) || 'public';
@@ -151,6 +156,7 @@
   function canMeasure(){
     var c = readChoice();
     if (!c || !c.analytics) return false;
+    if (!hostAllowed()) return false;
     if (deviceIgnored()) return false;
     if (PAGE === 'app' && (!appContext || appContext.staff)) return false;
     return true;
@@ -162,11 +168,15 @@
     window['ga-disable-' + GA_ID] = false;
     window.dataLayer = window.dataLayer || [];
     gtag('js', new Date());
+    // Endereço e referência limpos já na configuração: TODO evento (lição, cadastro, clique de saída, os automáticos do
+    // Google) sai com eles, não só o page_view (revisão diária, 2026-11-24). sendPage atualiza a cada página com gtag('set').
     gtag('config', GA_ID, {
       send_page_view: false,
       cookie_expires: COOKIE_EXPIRES,
       allow_google_signals: false,
-      allow_ad_personalization_signals: false
+      allow_ad_personalization_signals: false,
+      page_location: cleanLocation(null, {}),
+      page_referrer: cleanReferrer()
     });
     var s = document.createElement('script');
     s.async = true;
@@ -194,11 +204,13 @@
     if (firstHit && (!utm || !Object.keys(utm).length)) utm = takeStoredUtm() || {};
     else if (firstHit) dropStoredUtm();
     firstHit = false;
-    gtag('event', 'page_view', {
+    var fields = {
       page_location: cleanLocation(virtualPath, utm || {}),
       page_referrer: cleanReferrer(),
       page_title: title || document.title
-    });
+    };
+    gtag('set', fields);                 // vale para os próximos eventos desta página (lição, cliques de saída...)
+    gtag('event', 'page_view', fields);
   }
   function deleteGaCookies(){
     var names = document.cookie.split(';').map(function(c){ return c.split('=')[0].trim(); })
@@ -305,6 +317,8 @@
     if (eventType === 'tab_switch'){
       var tab = String(eventName || '');
       if (!tab || BLOCKED_TAB.test(tab)) return;
+      // Só nome de tela que existe de verdade (#view-<aba>): texto vindo do link (#qualquer-coisa) nunca vira página.
+      if (!/^[a-z][a-z0-9-]{0,40}$/.test(tab) || !document.getElementById('view-' + tab)) return;
       var vpath = location.pathname.replace(/[^/]*$/, '') + tab;
       if (!gaOn){ if (PAGE === 'app') pendingAppPage = vpath; return; }
       sendPage(vpath, tab);
