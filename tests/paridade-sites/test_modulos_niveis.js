@@ -171,6 +171,9 @@ async function fingerprint(browser, root){
   // ---- 8. regras de bloqueio
   await grab('bloqueio', () => {
     const perms = (skip, roles) => ({ roles, admin: false, permissions: { trail_skip_locked: { enabled: skip, limit: null } }, free: {} });
+    // Semente fixa: a ordem das perguntas da prova que abre aqui (openCheckpoint/openLevelTest) vinha do sorteio sem semente, que depende de
+    // quantos sorteios aconteceram antes na página; qualquer mudança em outra tela mudava a 1ª pergunta (com ou sem áudio) e a contagem de áudios.
+    window.__seed(4242);
     const o = { off: trailSkipAllowed() };
     TRAIL_SKIP_PAYWALL_ENABLED = true; TRAIL_PERMS_REQUESTED = true;
     MY_PERMISSIONS = perms(false, ['user']);
