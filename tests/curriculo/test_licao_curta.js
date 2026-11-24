@@ -135,16 +135,16 @@ console.log('== destaque do que ficou diferente no "Monte a frase" (decisão 366
 }
 
 console.log('== todos os rascunhos do piloto sem problema nas telas');
-for (const u of ['A1-1', 'A1-2', 'A1-9', 'A1-g12', 'A1-3', 'A1-g1']){
+for (const u of ['A1-1', 'A1-2', 'A1-9', 'A1-g12', 'A1-3', 'A1-g1', 'A1-22']){
   const R = require(path.join(ROOT, `docs/i18n/curriculo/piloto-m1/${u}/${u}.json`));
   check(`rascunho ${u}: nenhum problema nas telas`, L.conferirTelas(R).length === 0, L.conferirTelas(R));
 }
 
 console.log('== "Relacione": nenhuma tradução na linha da sua frase (decisão 369)');
 {
-  const rels = ['A1-1', 'A1-2', 'A1-9', 'A1-g12', 'A1-3'].flatMap(u => require(path.join(ROOT, `docs/i18n/curriculo/piloto-m1/${u}/${u}.json`)).licoes.flatMap(l => l.telas || []).filter(t => t.tipo === 'relacionar'));
+  const rels = ['A1-1', 'A1-2', 'A1-9', 'A1-g12', 'A1-3', 'A1-22'].flatMap(u => require(path.join(ROOT, `docs/i18n/curriculo/piloto-m1/${u}/${u}.json`)).licoes.flatMap(l => l.telas || []).filter(t => t.tipo === 'relacionar'));
   const lado = rels.filter(t => L.ordemDaDireita(t.pares).some((v, k) => v === k)).map(t => t.id);
-  check(`"Relacione" das unidades 1 a 5 (${rels.length}): nenhum par na mesma linha`, rels.length > 0 && lado.length === 0, lado);
+  check(`"Relacione" das unidades 1 a 5 e 7 (${rels.length}): nenhum par na mesma linha`, rels.length > 0 && lado.length === 0, lado);
   check('a ordem da direita tem todos os pares, uma vez cada', rels.every(t => JSON.stringify([...L.ordemDaDireita(t.pares)].sort((a, b) => a - b)) === JSON.stringify(t.pares.map((_, k) => k))));
   check('2 pares: trocados de lugar', JSON.stringify(L.ordemDaDireita([['a', '1'], ['b', '2']])) === '[1,0]');
 }

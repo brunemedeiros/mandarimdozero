@@ -321,6 +321,30 @@
         198
       ],
       "observacao": "diálogo publicado 'No parque' de 'Dizer a idade: de 1 a 29'"
+    },
+    {
+      "expressao": "Qu'est-ce que tu fais dans la vie ? / Qu'est-ce que vous faites dans la vie ?",
+      "tipo": "expressao_fixa",
+      "unidades": [
+        "A1-22"
+      ],
+      "chaves": [],
+      "cartao_em": [
+        {
+          "palavra": "faire",
+          "unidade": "A1-36"
+        },
+        {
+          "palavra": "dans",
+          "unidade": "A1-18"
+        },
+        {
+          "palavra": "la vie",
+          "unidade": "A2-2"
+        }
+      ],
+      "decisoes": [],
+      "observacao": "pergunta da profissão em \"Dizer a profissão\" (desenho da unidade 7; vale também para Tu fais quoi (dans la vie) ?); aguarda o OK da dona no rascunho"
     }
   ],
   "unidades_acima_do_limite": [

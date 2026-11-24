@@ -1,0 +1,1791 @@
+{
+ "_doc": "Rascunho da unidade 7 do módulo \"Apresentar-se\", \"Dizer a profissão\" (A1-22, M1.7), no formato da lição curta, com as decisões 338 a 375 como modelo: um exercício depois de cada palavra, frase ou nota nova (362, 365), par informal/formal em duas telas com \"Relacione\" (360, 361), pares masculino/feminino numa tela só (369), resposta certa em rodízio (368), sem tamanho na abertura (370). 3 lições de cartões + 2 lições de diálogo. Lição 1 com 3 cartões (le travail veio da lição 3 pela regra 13: de 3 a 5 cartões por lição). Validar com node docs/i18n/curriculo/piloto-m1/A1-22/validar.js.",
+ "status": "rascunho (aguarda a dona)",
+ "formato": "licao-curta",
+ "unidade": {
+  "id": "A1-22",
+  "modulo": "A1-m1",
+  "posicao": "M1.7",
+  "titulo": {
+   "pt-BR": "Dizer a profissão",
+   "en": null
+  },
+  "funcao": "perguntar a profissão no informal e no formal (Qu'est-ce que tu fais / vous faites dans la vie ?) e dizer a profissão sem artigo, no masculino e no feminino"
+ },
+ "cartoes": [
+  {
+   "chave": "nova",
+   "fr": "le professeur / la professeure",
+   "traducao": {
+    "pt-BR": "o professor / a professora",
+    "en": null
+   },
+   "licao": "o-que-voce-faz",
+   "origem": "novo"
+  },
+  {
+   "chave": "nova",
+   "fr": "l'étudiant / l'étudiante",
+   "traducao": {
+    "pt-BR": "o estudante / a estudante",
+    "en": null
+   },
+   "licao": "o-que-voce-faz",
+   "origem": "novo"
+  },
+  {
+   "chave": "nova",
+   "fr": "le travail",
+   "traducao": {
+    "pt-BR": "o trabalho",
+    "en": null
+   },
+   "licao": "o-que-voce-faz",
+   "origem": "novo"
+  },
+  {
+   "chave": "A1-15-v5",
+   "fr": "le médecin",
+   "traducao": {
+    "pt-BR": "o médico / a médica",
+    "en": null
+   },
+   "licao": "saude-e-direito",
+   "origem": "publicado",
+   "veio_de": "A1-15 (\"Corpo e saúde\"; o cartão publicado muda de unidade, 08 M1.7)"
+  },
+  {
+   "chave": "nova",
+   "fr": "l'infirmier / l'infirmière",
+   "traducao": {
+    "pt-BR": "o enfermeiro / a enfermeira",
+    "en": null
+   },
+   "licao": "saude-e-direito",
+   "origem": "novo"
+  },
+  {
+   "chave": "nova",
+   "fr": "l'avocat / l'avocate",
+   "traducao": {
+    "pt-BR": "o advogado / a advogada",
+    "en": null
+   },
+   "licao": "saude-e-direito",
+   "origem": "novo"
+  },
+  {
+   "chave": "nova",
+   "fr": "le vendeur / la vendeuse",
+   "traducao": {
+    "pt-BR": "o vendedor / a vendedora",
+    "en": null
+   },
+   "licao": "comercio-e-escritorio",
+   "origem": "novo"
+  },
+  {
+   "chave": "nova",
+   "fr": "le serveur / la serveuse",
+   "traducao": {
+    "pt-BR": "o garçom / a garçonete",
+    "en": null
+   },
+   "licao": "comercio-e-escritorio",
+   "origem": "novo"
+  },
+  {
+   "chave": "nova",
+   "fr": "l'ingénieur / l'ingénieure",
+   "traducao": {
+    "pt-BR": "o engenheiro / a engenheira",
+    "en": null
+   },
+   "licao": "comercio-e-escritorio",
+   "origem": "novo"
+  },
+  {
+   "chave": "nova",
+   "fr": "le bureau",
+   "traducao": {
+    "pt-BR": "o escritório",
+    "en": null
+   },
+   "licao": "comercio-e-escritorio",
+   "origem": "novo"
+  }
+ ],
+ "frases_na_frase": [
+  {
+   "chave": "nova",
+   "id_rascunho": "u7-fais",
+   "fr": "Qu'est-ce que tu fais dans la vie ? / Qu'est-ce que vous faites dans la vie ?",
+   "pt-BR": "O que você faz da vida? (informal / formal)",
+   "en": null,
+   "ilustra": "le travail",
+   "papel": "essencial"
+  },
+  {
+   "chave": "nova",
+   "id_rascunho": "u7-bureau",
+   "fr": "Je suis au bureau.",
+   "pt-BR": "Estou no escritório.",
+   "en": null,
+   "ilustra": "le bureau",
+   "papel": "essencial"
+  }
+ ],
+ "frases_que_saem": [],
+ "notas": [
+  {
+   "id": "profissao-sem-artigo",
+   "id_mapa": null,
+   "titulo": {
+    "pt-BR": "Je suis professeure: sem artigo",
+    "en": null
+   },
+   "tipo": "Exp",
+   "tipo_visivel": "explicação",
+   "confianca": "alta",
+   "momento": {
+    "licao": "o-que-voce-faz",
+    "depois_do_cartao": "l'étudiant / l'étudiante"
+   },
+   "destino": "nota",
+   "texto": {
+    "pt-BR": "Para dizer a profissão, use <strong>être</strong> e a profissão sem <strong>le</strong> nem <strong>la</strong>:<ul><li>o cartão traz <strong>la professeure</strong>, mas na frase é <strong>Je suis professeure</strong>;</li><li>como em português: \"sou professora\".</li></ul>",
+    "en": null
+   },
+   "exemplos": [
+    {
+     "fr": "Je suis professeure.",
+     "pt-BR": "Eu sou professora.",
+     "en": null
+    },
+    {
+     "fr": "Il est étudiant.",
+     "pt-BR": "Ele é estudante.",
+     "en": null
+    }
+   ],
+   "vf": [
+    {
+     "afirmacao": {
+      "pt-BR": "Para dizer a profissão, o certo é <i>Je suis la professeure</i>.",
+      "en": null
+     },
+     "resposta": false,
+     "porque": {
+      "pt-BR": "A profissão vem sem artigo: <b>Je suis professeure</b>.",
+      "en": null
+     }
+    }
+   ]
+  },
+  {
+   "id": "tu-fais-quoi",
+   "id_mapa": null,
+   "titulo": {
+    "pt-BR": "Tu fais quoi dans la vie ?",
+    "en": null
+   },
+   "tipo": "Real",
+   "tipo_visivel": "realidade",
+   "confianca": "alta",
+   "momento": {
+    "licao": "o-que-voce-faz",
+    "depois_do_cartao": "le travail"
+   },
+   "destino": "nota",
+   "texto": {
+    "pt-BR": "Na conversa, a pergunta informal costuma vir de outro jeito:<ul><li>sem <strong>qu'est-ce que</strong>, com <strong>quoi</strong> (o quê) no fim: <strong>Tu fais quoi dans la vie ?</strong></li><li>na fala, até sem <strong>dans la vie</strong>: <strong>Tu fais quoi ?</strong> Aí, a conversa diz se é a profissão ou o que a pessoa está fazendo.</li></ul>",
+    "en": null
+   },
+   "exemplos": [
+    {
+     "fr": "Qu'est-ce que tu fais dans la vie ?",
+     "pt-BR": "O que você faz da vida?",
+     "en": null
+    },
+    {
+     "fr": "Tu fais quoi dans la vie ?",
+     "pt-BR": "O que você faz da vida? (na conversa)",
+     "en": null
+    },
+    {
+     "fr": "Tu fais quoi ?",
+     "pt-BR": "O que você faz? (na fala)",
+     "en": null
+    }
+   ],
+   "vf": [
+    {
+     "afirmacao": {
+      "pt-BR": "<i>Tu fais quoi dans la vie ?</i> serve para um senhor que você acabou de conhecer.",
+      "en": null
+     },
+     "resposta": false,
+     "porque": {
+      "pt-BR": "É informal, com <b>tu</b>. Com um senhor: <b>Qu'est-ce que vous faites dans la vie ?</b>",
+      "en": null
+     }
+    }
+   ]
+  },
+  {
+   "id": "feminino-das-profissoes",
+   "id_mapa": null,
+   "titulo": {
+    "pt-BR": "Professeure, ingénieure: o feminino das profissões",
+    "en": null
+   },
+   "tipo": "Cult",
+   "tipo_visivel": "cultura",
+   "confianca": "média",
+   "revisao": "a dona revisa antes de publicar",
+   "momento": {
+    "licao": "comercio-e-escritorio",
+    "depois_do_cartao": "l'ingénieur / l'ingénieure"
+   },
+   "destino": "nota",
+   "texto": {
+    "pt-BR": "Na França, as formas femininas das profissões são as de hoje:<ul><li><strong>professeure</strong>, <strong>ingénieure</strong>;</li><li>em 2019, a Academia Francesa aceitou a feminização dos nomes de profissão;</li><li>ainda se ouve <strong>professeur</strong> para uma mulher, e as duas formas servem.</li></ul>",
+    "en": null
+   },
+   "exemplos": [
+    {
+     "fr": "Elle est professeure.",
+     "pt-BR": "Ela é professora.",
+     "en": null
+    },
+    {
+     "fr": "Elle est ingénieure.",
+     "pt-BR": "Ela é engenheira.",
+     "en": null
+    },
+    {
+     "fr": "Elle est professeur.",
+     "pt-BR": "Ela é professora. (ainda se ouve)",
+     "en": null
+    }
+   ],
+   "vf": [
+    {
+     "afirmacao": {
+      "pt-BR": "Hoje, na França, <i>professeure</i> é a forma comum para uma mulher.",
+      "en": null
+     },
+     "resposta": true,
+     "porque": {
+      "pt-BR": "É a forma de hoje; <b>professeur</b> para uma mulher ainda se ouve.",
+      "en": null
+     }
+    }
+   ]
+  }
+ ],
+ "dialogos": [
+  {
+   "titulo": {
+    "pt-BR": "Numa festa, o Hugo conversa com a Léa.",
+    "en": null
+   },
+   "registro": "informal",
+   "licao": "conversar-sobre-profissao",
+   "falantes": {
+    "A": {
+     "nome": "Hugo",
+     "emoji": "👨"
+    },
+    "B": {
+     "nome": "Léa",
+     "emoji": "👩"
+    }
+   },
+   "falas": [
+    {
+     "chave": "nova",
+     "falante": "A",
+     "fr": "Salut ! Moi, c'est Hugo. Tu fais quoi dans la vie ?",
+     "pt-BR": "Oi! Eu sou o Hugo. O que você faz da vida?",
+     "en": null
+    },
+    {
+     "chave": "nova",
+     "falante": "B",
+     "fr": "Je suis ingénieure. Et toi ?",
+     "pt-BR": "Sou engenheira. E você?",
+     "en": null
+    },
+    {
+     "chave": "nova",
+     "falante": "A",
+     "fr": "Je suis serveur et étudiant.",
+     "pt-BR": "Sou garçom e estudante.",
+     "en": null
+    },
+    {
+     "chave": "nova",
+     "falante": "B",
+     "fr": "Tu étudies où ?",
+     "pt-BR": "Onde você estuda?",
+     "en": null
+    },
+    {
+     "chave": "nova",
+     "falante": "A",
+     "fr": "À Paris. Et le travail, ça va ?",
+     "pt-BR": "Em Paris. E o trabalho, tudo bem?",
+     "en": null
+    },
+    {
+     "chave": "nova",
+     "falante": "B",
+     "fr": "Oui, ça va bien, merci !",
+     "pt-BR": "Sim, tudo bem, obrigada!",
+     "en": null
+    }
+   ],
+   "muda": "novo"
+  },
+  {
+   "titulo": {
+    "pt-BR": "Num evento de trabalho, o Sr. Moreau conversa com a Sra. Lima.",
+    "en": null
+   },
+   "registro": "formal",
+   "licao": "profissao-formal",
+   "falantes": {
+    "A": {
+     "nome": "Sr. Moreau",
+     "emoji": "👨"
+    },
+    "B": {
+     "nome": "Sra. Lima",
+     "emoji": "👩"
+    }
+   },
+   "falas": [
+    {
+     "chave": "nova",
+     "falante": "A",
+     "fr": "Bonjour, madame. Je m'appelle Paul Moreau.",
+     "pt-BR": "Bom dia, senhora. Eu me chamo Paul Moreau.",
+     "en": null
+    },
+    {
+     "chave": "nova",
+     "falante": "B",
+     "fr": "Enchantée, monsieur. Je m'appelle Carla Lima.",
+     "pt-BR": "Prazer, senhor. Eu me chamo Carla Lima.",
+     "en": null
+    },
+    {
+     "chave": "nova",
+     "falante": "A",
+     "fr": "Qu'est-ce que vous faites dans la vie ?",
+     "pt-BR": "O que a senhora faz?",
+     "en": null
+    },
+    {
+     "chave": "nova",
+     "falante": "B",
+     "fr": "Je suis avocate. Et vous ?",
+     "pt-BR": "Sou advogada. E o senhor?",
+     "en": null
+    },
+    {
+     "chave": "nova",
+     "falante": "A",
+     "fr": "Je suis médecin. Vous habitez à Paris ?",
+     "pt-BR": "Sou médico. A senhora mora em Paris?",
+     "en": null
+    },
+    {
+     "chave": "nova",
+     "falante": "B",
+     "fr": "Non, j'habite à Lyon. Et vous ?",
+     "pt-BR": "Não, moro em Lyon. E o senhor?",
+     "en": null
+    },
+    {
+     "chave": "nova",
+     "falante": "A",
+     "fr": "J'habite à Paris. Bonne journée, madame !",
+     "pt-BR": "Moro em Paris. Tenha um bom dia, senhora!",
+     "en": null
+    }
+   ],
+   "muda": "novo"
+  }
+ ],
+ "licoes": [
+  {
+   "id": "o-que-voce-faz",
+   "ordem": 1,
+   "id_novo": true,
+   "titulo": {
+    "publicado": null,
+    "pt-BR": "Perguntar e dizer o que você faz",
+    "en": null,
+    "a_confirmar": false
+   },
+   "cartoes": [
+    "nova",
+    "nova",
+    "nova"
+   ],
+   "inclui_dialogo": false,
+   "telas": [
+    {
+     "id": "u7-l1-intro",
+     "tipo": "abertura",
+     "objetivo": {
+      "pt-BR": "Vamos aprender a perguntar o que uma pessoa faz e a dizer a profissão.",
+      "en": null
+     }
+    },
+    {
+     "id": "u7-professeur",
+     "tipo": "cartao",
+     "cartao": "le professeur / la professeure"
+    },
+    {
+     "id": "u7-ex-professeure",
+     "tipo": "vf",
+     "fr": "la professeure",
+     "afirmacao": {
+      "pt-BR": "<i>Professeure</i> soa diferente de <i>professeur</i>.",
+      "en": null
+     },
+     "resposta": false,
+     "frase_do_painel": "la professeure",
+     "traducao_do_painel": {
+      "pt-BR": "a professora",
+      "en": null
+     },
+     "explicacao": {
+      "pt-BR": "<b>Professeur</b> e <b>professeure</b> soam igual: o <b>e</b> do fim só aparece na escrita.",
+      "en": null
+     }
+    },
+    {
+     "id": "u7-etudiant",
+     "tipo": "cartao",
+     "cartao": "l'étudiant / l'étudiante"
+    },
+    {
+     "id": "u7-ex-etudiante",
+     "tipo": "complete",
+     "antes": "Elle est ",
+     "depois": ".",
+     "traducao": {
+      "pt-BR": "Ela é estudante.",
+      "en": null
+     },
+     "opcoes": [
+      "étudiant",
+      "étudiante"
+     ],
+     "resposta": "étudiante",
+     "frase_completa": "Elle est étudiante.",
+     "distrator": "par",
+     "explicacao": {
+      "pt-BR": "Para uma mulher, <b>étudiante</b>: o <b>t</b> do fim passa a soar.",
+      "en": null
+     },
+     "explicacao_erro": {
+      "étudiant": {
+       "pt-BR": "<b>Étudiant</b> é o masculino, com o <b>t</b> mudo. ",
+       "en": null
+      }
+     }
+    },
+    {
+     "id": "u7-nota-artigo",
+     "tipo": "nota",
+     "nota": "profissao-sem-artigo"
+    },
+    {
+     "id": "u7-ex-artigo",
+     "tipo": "funcao",
+     "pergunta": {
+      "pt-BR": "A Ana faz faculdade. Como ela diz isso?",
+      "en": null
+     },
+     "opcoes": [
+      "Je suis étudiante.",
+      "Je suis l'étudiante.",
+      "Je suis étudiant."
+     ],
+     "resposta": "Je suis étudiante.",
+     "traducao_do_painel": {
+      "pt-BR": "Eu sou estudante.",
+      "en": null
+     },
+     "explicacao": {
+      "pt-BR": "A profissão vem sem artigo, e a Ana é mulher: <b>Je suis étudiante.</b>",
+      "en": null
+     },
+     "explicacao_erro": {
+      "Je suis l'étudiante.": {
+       "pt-BR": "Com <b>l'</b>, seria \"sou a estudante\". ",
+       "en": null
+      },
+      "Je suis étudiant.": {
+       "pt-BR": "<b>Étudiant</b> é o masculino. ",
+       "en": null
+      }
+     }
+    },
+    {
+     "id": "u7-travail",
+     "tipo": "cartao",
+     "cartao": "le travail"
+    },
+    {
+     "id": "u7-ex-travail",
+     "tipo": "complete",
+     "antes": "le ",
+     "depois": "",
+     "traducao": {
+      "pt-BR": "o trabalho",
+      "en": null
+     },
+     "opcoes": [
+      "travay",
+      "travail"
+     ],
+     "resposta": "travail",
+     "frase_completa": "le travail",
+     "distrator": "grafia",
+     "explicacao": {
+      "pt-BR": "Em <b>travail</b>, o <b>-ail</b> do fim soa \"ai\".",
+      "en": null
+     },
+     "explicacao_erro": {
+      "travay": {
+       "pt-BR": "Você escreveu como se ouve! ",
+       "en": null
+      }
+     }
+    },
+    {
+     "id": "u7-frase-fais",
+     "tipo": "frase",
+     "frase": "Qu'est-ce que tu fais dans la vie ? / Qu'est-ce que vous faites dans la vie ?",
+     "forma": 0,
+     "traducao": {
+      "pt-BR": "O que você faz da vida?",
+      "en": null
+     },
+     "registro": "informal"
+    },
+    {
+     "id": "u7-ex-fais-inf",
+     "tipo": "vf",
+     "fr": "Qu'est-ce que tu fais dans la vie ?",
+     "afirmacao": {
+      "pt-BR": "Você pergunta isso a um colega de turma.",
+      "en": null
+     },
+     "resposta": true,
+     "frase_do_painel": "Qu'est-ce que tu fais dans la vie ?",
+     "traducao_do_painel": {
+      "pt-BR": "O que você faz da vida?",
+      "en": null
+     },
+     "explicacao": {
+      "pt-BR": "<b>Qu'est-ce que</b> é \"o que\", e <b>tu fais</b>, \"você faz\": informal, com colegas, amigos, família e jovens da sua idade.",
+      "en": null
+     }
+    },
+    {
+     "id": "u7-frase-faites",
+     "tipo": "frase",
+     "frase": "Qu'est-ce que tu fais dans la vie ? / Qu'est-ce que vous faites dans la vie ?",
+     "forma": 1,
+     "traducao": {
+      "pt-BR": "O que o senhor (a senhora) faz?",
+      "en": null
+     },
+     "traducao_plural": {
+      "pt-BR": "O que vocês fazem?",
+      "en": null
+     },
+     "registro": "formal"
+    },
+    {
+     "id": "u7-ex-faites-formal",
+     "tipo": "funcao",
+     "pergunta": {
+      "pt-BR": "Num evento de trabalho, você quer saber a profissão de uma senhora. O que você diz?",
+      "en": null
+     },
+     "opcoes": [
+      "Vous êtes d'où ?",
+      "Qu'est-ce que vous faites dans la vie ?",
+      "Qu'est-ce que tu fais dans la vie ?"
+     ],
+     "resposta": "Qu'est-ce que vous faites dans la vie ?",
+     "traducao_do_painel": {
+      "pt-BR": "O que a senhora faz?",
+      "en": null
+     },
+     "explicacao": {
+      "pt-BR": "Com quem você trata por senhor ou senhora: <b>vous faites</b>, do verbo <b>faire</b>, fazer.",
+      "en": null
+     },
+     "explicacao_erro": {
+      "Vous êtes d'où ?": {
+       "pt-BR": "Isso pergunta de onde ela é. ",
+       "en": null
+      },
+      "Qu'est-ce que tu fais dans la vie ?": {
+       "pt-BR": "<b>Tu fais</b> é do informal. ",
+       "en": null
+      }
+     }
+    },
+    {
+     "id": "u7-nota-real",
+     "tipo": "nota",
+     "nota": "tu-fais-quoi",
+     "rotulos": {
+      "Qu'est-ce que tu fais dans la vie ?": "com est-ce que",
+      "Tu fais quoi dans la vie ?": "na conversa",
+      "Tu fais quoi ?": "fala"
+     }
+    },
+    {
+     "id": "u7-ex-nota-real",
+     "tipo": "vf",
+     "fr": "Tu fais quoi ?",
+     "afirmacao": {
+      "pt-BR": "Numa conversa sobre trabalho, essa pergunta é sobre a profissão.",
+      "en": null
+     },
+     "resposta": true,
+     "frase_do_painel": "Tu fais quoi ?",
+     "traducao_do_painel": {
+      "pt-BR": "O que você faz?",
+      "en": null
+     },
+     "explicacao": {
+      "pt-BR": "<b>Tu fais quoi ?</b> é a pergunta curta da fala; a conversa mostra que é sobre a profissão.",
+      "en": null
+     }
+    },
+    {
+     "id": "u7-l1-rel",
+     "tipo": "relacionar",
+     "pares": [
+      [
+       "le professeur",
+       "o professor"
+      ],
+      [
+       "l'étudiante",
+       "a estudante"
+      ],
+      [
+       "le travail",
+       "o trabalho"
+      ],
+      [
+       "Qu'est-ce que tu fais dans la vie ?",
+       "O que você faz da vida? (informal)"
+      ],
+      [
+       "Qu'est-ce que vous faites dans la vie ?",
+       "O que o senhor faz? (formal)"
+      ]
+     ],
+     "explicacao": {
+      "pt-BR": "Nos pares, as palavras novas e a pergunta com <b>tu fais</b> no informal e <b>vous faites</b> no formal.",
+      "en": null
+     }
+    },
+    {
+     "id": "u7-l1-montar",
+     "tipo": "montar",
+     "traducao": {
+      "pt-BR": "O que você faz da vida?",
+      "en": null
+     },
+     "pecas": [
+      "Qu'est-ce",
+      "que",
+      "tu",
+      "fais",
+      "dans",
+      "la",
+      "vie",
+      "?",
+      "vous",
+      "faites"
+     ],
+     "resposta": [
+      "Qu'est-ce",
+      "que",
+      "tu",
+      "fais",
+      "dans",
+      "la",
+      "vie",
+      "?"
+     ],
+     "frase_completa": "Qu'est-ce que tu fais dans la vie ?",
+     "explicacao": {
+      "pt-BR": "<b>Qu'est-ce que</b> abre a pergunta, e <b>tu fais</b> é o informal.",
+      "en": null
+     }
+    },
+    {
+     "id": "u7-l1-fim",
+     "tipo": "fim",
+     "fala": {
+      "pt-BR": "Muito bem! Agora você pergunta e diz o que faz.",
+      "en": null
+     }
+    }
+   ]
+  },
+  {
+   "id": "saude-e-direito",
+   "ordem": 2,
+   "id_novo": true,
+   "titulo": {
+    "publicado": null,
+    "pt-BR": "Profissões da saúde e do direito",
+    "en": null,
+    "a_confirmar": false
+   },
+   "cartoes": [
+    "A1-15-v5",
+    "nova",
+    "nova"
+   ],
+   "inclui_dialogo": false,
+   "telas": [
+    {
+     "id": "u7-l2-intro",
+     "tipo": "abertura",
+     "objetivo": {
+      "pt-BR": "Agora, profissões da saúde e do direito.",
+      "en": null
+     }
+    },
+    {
+     "id": "u7-medecin",
+     "tipo": "cartao",
+     "cartao": "le médecin"
+    },
+    {
+     "id": "u7-ex-medecin",
+     "tipo": "complete",
+     "antes": "Elle est ",
+     "depois": ".",
+     "traducao": {
+      "pt-BR": "Ela é médica.",
+      "en": null
+     },
+     "opcoes": [
+      "médecin",
+      "médecine"
+     ],
+     "resposta": "médecin",
+     "frase_completa": "Elle est médecin.",
+     "distrator": "grafia",
+     "explicacao": {
+      "pt-BR": "<b>Médecin</b> é igual para homem e mulher: <b>il est médecin</b>, <b>elle est médecin</b>.",
+      "en": null
+     },
+     "explicacao_erro": {
+      "médecine": {
+       "pt-BR": "<b>Médecine</b> é a medicina. ",
+       "en": null
+      }
+     }
+    },
+    {
+     "id": "u7-infirmier",
+     "tipo": "cartao",
+     "cartao": "l'infirmier / l'infirmière"
+    },
+    {
+     "id": "u7-ex-infirmiere",
+     "tipo": "complete",
+     "antes": "Elle est ",
+     "depois": ".",
+     "traducao": {
+      "pt-BR": "Ela é enfermeira.",
+      "en": null
+     },
+     "opcoes": [
+      "infirmier",
+      "infirmière"
+     ],
+     "resposta": "infirmière",
+     "frase_completa": "Elle est infirmière.",
+     "distrator": "par",
+     "explicacao": {
+      "pt-BR": "Para uma mulher, <b>infirmière</b>: o fim soa \"iér\", com o <b>r</b>.",
+      "en": null
+     },
+     "explicacao_erro": {
+      "infirmier": {
+       "pt-BR": "<b>Infirmier</b> é o enfermeiro, com o <b>r</b> mudo. ",
+       "en": null
+      }
+     }
+    },
+    {
+     "id": "u7-avocat",
+     "tipo": "cartao",
+     "cartao": "l'avocat / l'avocate"
+    },
+    {
+     "id": "u7-ex-avocate",
+     "tipo": "funcao",
+     "pergunta": {
+      "pt-BR": "A Paula é advogada. Como ela diz a profissão?",
+      "en": null
+     },
+     "opcoes": [
+      "Je suis avocat.",
+      "Je suis médecin.",
+      "Je suis avocate."
+     ],
+     "resposta": "Je suis avocate.",
+     "traducao_do_painel": {
+      "pt-BR": "Eu sou advogada.",
+      "en": null
+     },
+     "explicacao": {
+      "pt-BR": "Quem fala é mulher: <b>avocate</b>, e o <b>t</b> do fim passa a soar.",
+      "en": null
+     },
+     "explicacao_erro": {
+      "Je suis avocat.": {
+       "pt-BR": "<b>Avocat</b> é o advogado, com o <b>t</b> mudo. ",
+       "en": null
+      },
+      "Je suis médecin.": {
+       "pt-BR": "<b>Médecin</b> é médico ou médica. ",
+       "en": null
+      }
+     }
+    },
+    {
+     "id": "u7-ex-avocat-som",
+     "tipo": "vf",
+     "fr": "Il est avocat.",
+     "afirmacao": {
+      "pt-BR": "O <i>t</i> do fim de <i>avocat</i> se pronuncia.",
+      "en": null
+     },
+     "resposta": false,
+     "frase_do_painel": "Il est avocat.",
+     "traducao_do_painel": {
+      "pt-BR": "Ele é advogado.",
+      "en": null
+     },
+     "explicacao": {
+      "pt-BR": "Em <b>avocat</b>, o <b>t</b> do fim é mudo; ele só soa em <b>avocate</b>.",
+      "en": null
+     }
+    },
+    {
+     "id": "u7-l2-rel",
+     "tipo": "relacionar",
+     "pares": [
+      [
+       "le médecin",
+       "o médico"
+      ],
+      [
+       "l'infirmier",
+       "o enfermeiro"
+      ],
+      [
+       "l'infirmière",
+       "a enfermeira"
+      ],
+      [
+       "l'avocat",
+       "o advogado"
+      ],
+      [
+       "l'avocate",
+       "a advogada"
+      ]
+     ],
+     "explicacao": {
+      "pt-BR": "Nos pares, <b>médecin</b> serve para os dois, e o feminino se ouve em <b>infirmière</b> e <b>avocate</b>.",
+      "en": null
+     }
+    },
+    {
+     "id": "u7-l2-montar",
+     "tipo": "montar",
+     "traducao": {
+      "pt-BR": "Ele é médico e ela é advogada.",
+      "en": null
+     },
+     "pecas": [
+      "Il",
+      "est",
+      "médecin",
+      "et",
+      "elle",
+      "est",
+      "avocate.",
+      "le",
+      "avocat."
+     ],
+     "resposta": [
+      "Il",
+      "est",
+      "médecin",
+      "et",
+      "elle",
+      "est",
+      "avocate."
+     ],
+     "frase_completa": "Il est médecin et elle est avocate.",
+     "explicacao": {
+      "pt-BR": "Profissão sem artigo, e <b>avocate</b> para ela.",
+      "en": null
+     }
+    },
+    {
+     "id": "u7-l2-fim",
+     "tipo": "fim",
+     "fala": {
+      "pt-BR": "Muito bem! Agora você fala de profissões da saúde e do direito.",
+      "en": null
+     }
+    }
+   ]
+  },
+  {
+   "id": "comercio-e-escritorio",
+   "ordem": 3,
+   "id_novo": true,
+   "titulo": {
+    "publicado": null,
+    "pt-BR": "Profissões do comércio e do escritório",
+    "en": null,
+    "a_confirmar": false
+   },
+   "cartoes": [
+    "nova",
+    "nova",
+    "nova",
+    "nova"
+   ],
+   "inclui_dialogo": false,
+   "telas": [
+    {
+     "id": "u7-l3-intro",
+     "tipo": "abertura",
+     "objetivo": {
+      "pt-BR": "Para terminar, profissões do comércio e do escritório.",
+      "en": null
+     }
+    },
+    {
+     "id": "u7-vendeur",
+     "tipo": "cartao",
+     "cartao": "le vendeur / la vendeuse"
+    },
+    {
+     "id": "u7-ex-vendeuse",
+     "tipo": "complete",
+     "antes": "Elle est ",
+     "depois": ".",
+     "traducao": {
+      "pt-BR": "Ela é vendedora.",
+      "en": null
+     },
+     "opcoes": [
+      "vendeuse",
+      "vendeur"
+     ],
+     "resposta": "vendeuse",
+     "frase_completa": "Elle est vendeuse.",
+     "distrator": "par",
+     "explicacao": {
+      "pt-BR": "Para uma mulher, <b>vendeuse</b>: o <b>-eur</b> vira <b>-euse</b>, que soa com \"z\".",
+      "en": null
+     },
+     "explicacao_erro": {
+      "vendeur": {
+       "pt-BR": "<b>Vendeur</b> é o vendedor. ",
+       "en": null
+      }
+     }
+    },
+    {
+     "id": "u7-serveur",
+     "tipo": "cartao",
+     "cartao": "le serveur / la serveuse"
+    },
+    {
+     "id": "u7-ex-serveuse",
+     "tipo": "complete",
+     "antes": "Elle est ",
+     "depois": ".",
+     "traducao": {
+      "pt-BR": "Ela é garçonete.",
+      "en": null
+     },
+     "opcoes": [
+      "serveure",
+      "serveuse"
+     ],
+     "resposta": "serveuse",
+     "frase_completa": "Elle est serveuse.",
+     "distrator": "grafia",
+     "explicacao": {
+      "pt-BR": "Para uma mulher, <b>serveuse</b>, com som de \"z\", como <b>vendeuse</b>.",
+      "en": null
+     },
+     "explicacao_erro": {
+      "serveure": {
+       "pt-BR": "Por pouco! O feminino de <b>serveur</b> é <b>serveuse</b>. ",
+       "en": null
+      }
+     }
+    },
+    {
+     "id": "u7-ingenieur",
+     "tipo": "cartao",
+     "cartao": "l'ingénieur / l'ingénieure"
+    },
+    {
+     "id": "u7-ex-ingenieure",
+     "tipo": "funcao",
+     "pergunta": {
+      "pt-BR": "A Léa é engenheira. Como ela diz a profissão?",
+      "en": null
+     },
+     "opcoes": [
+      "Je suis vendeuse.",
+      "Je suis serveuse.",
+      "Je suis ingénieure."
+     ],
+     "resposta": "Je suis ingénieure.",
+     "traducao_do_painel": {
+      "pt-BR": "Eu sou engenheira.",
+      "en": null
+     },
+     "explicacao": {
+      "pt-BR": "<b>Ingénieure</b> soa igual a <b>ingénieur</b>: só a escrita muda.",
+      "en": null
+     },
+     "explicacao_erro": {
+      "Je suis vendeuse.": {
+       "pt-BR": "<b>Vendeuse</b> é vendedora. ",
+       "en": null
+      },
+      "Je suis serveuse.": {
+       "pt-BR": "<b>Serveuse</b> é garçonete. ",
+       "en": null
+      }
+     }
+    },
+    {
+     "id": "u7-nota-feminino",
+     "tipo": "nota",
+     "nota": "feminino-das-profissoes"
+    },
+    {
+     "id": "u7-ex-nota-feminino",
+     "tipo": "vf",
+     "fr": "Elle est ingénieur.",
+     "afirmacao": {
+      "pt-BR": "Para uma mulher, essa forma está errada.",
+      "en": null
+     },
+     "resposta": false,
+     "frase_do_painel": "Elle est ingénieur.",
+     "traducao_do_painel": {
+      "pt-BR": "Ela é engenheira.",
+      "en": null
+     },
+     "explicacao": {
+      "pt-BR": "<b>Ingénieur</b> para uma mulher ainda se ouve, e serve; <b>ingénieure</b> é a forma de hoje.",
+      "en": null
+     }
+    },
+    {
+     "id": "u7-bureau",
+     "tipo": "cartao",
+     "cartao": "le bureau"
+    },
+    {
+     "id": "u7-ex-bureau",
+     "tipo": "complete",
+     "antes": "le ",
+     "depois": "",
+     "traducao": {
+      "pt-BR": "o escritório",
+      "en": null
+     },
+     "opcoes": [
+      "bureau",
+      "burô"
+     ],
+     "resposta": "bureau",
+     "frase_completa": "le bureau",
+     "distrator": "grafia",
+     "explicacao": {
+      "pt-BR": "Em <b>bureau</b>, o <b>eau</b> do fim soa \"ô\".",
+      "en": null
+     },
+     "explicacao_erro": {
+      "burô": {
+       "pt-BR": "Você escreveu como se ouve! ",
+       "en": null
+      }
+     }
+    },
+    {
+     "id": "u7-frase-bureau",
+     "tipo": "frase",
+     "frase": "Je suis au bureau."
+    },
+    {
+     "id": "u7-ex-bureau-frase",
+     "tipo": "funcao",
+     "pergunta": {
+      "pt-BR": "Uma colega liga e pergunta onde você está. Você está no escritório. O que você diz?",
+      "en": null
+     },
+     "opcoes": [
+      "J'habite au bureau.",
+      "Je suis au bureau.",
+      "Je suis bureau."
+     ],
+     "resposta": "Je suis au bureau.",
+     "traducao_do_painel": {
+      "pt-BR": "Estou no escritório.",
+      "en": null
+     },
+     "explicacao": {
+      "pt-BR": "Aqui, <b>je suis</b> é \"estou\": <b>être</b> é ser e estar. <b>Au bureau</b>, no escritório.",
+      "en": null
+     },
+     "explicacao_erro": {
+      "J'habite au bureau.": {
+       "pt-BR": "<b>J'habite</b> é \"eu moro\". ",
+       "en": null
+      },
+      "Je suis bureau.": {
+       "pt-BR": "Faltou o <b>au</b>, como em <b>au Brésil</b>. ",
+       "en": null
+      }
+     }
+    },
+    {
+     "id": "u7-l3-rel",
+     "tipo": "relacionar",
+     "pares": [
+      [
+       "la vendeuse",
+       "a vendedora"
+      ],
+      [
+       "le serveur",
+       "o garçom"
+      ],
+      [
+       "la serveuse",
+       "a garçonete"
+      ],
+      [
+       "l'ingénieure",
+       "a engenheira"
+      ],
+      [
+       "le bureau",
+       "o escritório"
+      ]
+     ],
+     "explicacao": {
+      "pt-BR": "Nos pares, o feminino com <b>-euse</b>, que se ouve, e <b>ingénieure</b>, que só muda na escrita.",
+      "en": null
+     }
+    },
+    {
+     "id": "u7-l3-montar",
+     "tipo": "montar",
+     "traducao": {
+      "pt-BR": "A Léa é engenheira e o Paul é garçom.",
+      "en": null
+     },
+     "pecas": [
+      "Léa",
+      "est",
+      "ingénieure",
+      "et",
+      "Paul",
+      "est",
+      "serveur.",
+      "serveuse.",
+      "la"
+     ],
+     "resposta": [
+      "Léa",
+      "est",
+      "ingénieure",
+      "et",
+      "Paul",
+      "est",
+      "serveur."
+     ],
+     "frase_completa": "Léa est ingénieure et Paul est serveur.",
+     "explicacao": {
+      "pt-BR": "Profissão sem artigo: feminino para a Léa e masculino para o Paul.",
+      "en": null
+     }
+    },
+    {
+     "id": "u7-l3-fim",
+     "tipo": "fim",
+     "fala": {
+      "pt-BR": "Parabéns! Agora você diz a profissão de muita gente.",
+      "en": null
+     }
+    }
+   ]
+  },
+  {
+   "id": "conversar-sobre-profissao",
+   "ordem": 4,
+   "id_novo": true,
+   "tipo": "dialogos",
+   "titulo": {
+    "publicado": null,
+    "pt-BR": "Conversar sobre a profissão",
+    "en": null,
+    "a_confirmar": false
+   },
+   "cartoes": [],
+   "inclui_dialogo": true,
+   "telas": [
+    {
+     "id": "u7-d1-cena",
+     "tipo": "dialogo_cena",
+     "dialogo": "Numa festa, o Hugo conversa com a Léa.",
+     "foco": {
+      "pt-BR": "Ouça com atenção: repare em como o Hugo pergunta a profissão.",
+      "en": null
+     }
+    },
+    {
+     "id": "u7-d1-ouvir",
+     "tipo": "dialogo_ouvir",
+     "dialogo": "Numa festa, o Hugo conversa com a Léa.",
+     "pergunta": {
+      "pt-BR": "Eles se falam de um jeito formal ou informal?",
+      "en": null
+     },
+     "opcoes": [
+      {
+       "pt-BR": "Informal",
+       "en": null
+      },
+      {
+       "pt-BR": "Formal",
+       "en": null
+      }
+     ],
+     "resposta": 0,
+     "explicacao": {
+      "pt-BR": "Eles usam <b>tu</b>, <b>toi</b> e <b>salut</b>: é uma conversa informal.",
+      "en": null
+     }
+    },
+    {
+     "id": "u7-d1-ler",
+     "tipo": "dialogo_ler",
+     "dialogo": "Numa festa, o Hugo conversa com a Léa."
+    },
+    {
+     "id": "u7-d1-vf",
+     "tipo": "dialogo_vf",
+     "dialogo": "Numa festa, o Hugo conversa com a Léa.",
+     "fala": 1,
+     "afirmacao": {
+      "pt-BR": "Aqui, a Léa diz que é estudante.",
+      "en": null
+     },
+     "resposta": false,
+     "explicacao": {
+      "pt-BR": "Ela diz <b>je suis ingénieure</b>: é engenheira. O estudante é o Hugo.",
+      "en": null
+     }
+    },
+    {
+     "id": "u7-d1-montar",
+     "tipo": "dialogo_montar",
+     "dialogo": "Numa festa, o Hugo conversa com a Léa.",
+     "distratores": {
+      "0": {
+       "texto": "Salut ! Moi, c'est Hugo. Vous faites quoi dans la vie ?",
+       "tipo": "registro"
+      },
+      "1": {
+       "texto": "Je suis ingénieure. Et vous ?",
+       "tipo": "registro"
+      },
+      "2": {
+       "texto": "Je suis serveur et étudient.",
+       "tipo": "grafia"
+      },
+      "3": {
+       "texto": "Tu étudie où ?",
+       "tipo": "grafia"
+      },
+      "4": {
+       "texto": "À Paris. Et le travaille, ça va ?",
+       "tipo": "grafia"
+      },
+      "5": {
+       "texto": "Oui, ça va bien, merci, madame !",
+       "tipo": "registro"
+      }
+     },
+     "explicacao": {
+      "pt-BR": "Você montou a conversa informal pelo ouvido: <b>tu</b> do começo ao fim.",
+      "en": null
+     }
+    },
+    {
+     "id": "u7-d1-lacuna",
+     "tipo": "dialogo_lacuna",
+     "dialogo": "Numa festa, o Hugo conversa com a Léa.",
+     "fala": 2,
+     "antes": "Je suis ",
+     "depois": " et étudiant.",
+     "opcoes": [
+      "serveuse",
+      "serveur"
+     ],
+     "resposta": "serveur",
+     "explicacao": {
+      "pt-BR": "O Hugo é homem: <b>serveur</b>. <b>Serveuse</b> termina com som de \"z\".",
+      "en": null
+     }
+    },
+    {
+     "id": "u7-d1-ordenar",
+     "tipo": "dialogo_ordenar",
+     "dialogo": "Numa festa, o Hugo conversa com a Léa.",
+     "explicacao": {
+      "pt-BR": "Apresentação, profissão, estudo e trabalho.",
+      "en": null
+     }
+    },
+    {
+     "id": "u7-d1-entendeu",
+     "tipo": "dialogo_entendeu",
+     "dialogo": "Numa festa, o Hugo conversa com a Léa.",
+     "pergunta": {
+      "pt-BR": "O que a Léa faz?",
+      "en": null
+     },
+     "opcoes": [
+      {
+       "pt-BR": "É garçonete",
+       "en": null
+      },
+      {
+       "pt-BR": "É engenheira",
+       "en": null
+      },
+      {
+       "pt-BR": "É estudante",
+       "en": null
+      }
+     ],
+     "resposta": 1,
+     "explicacao": {
+      "pt-BR": "Ela diz <b>je suis ingénieure</b>: é engenheira.",
+      "en": null
+     }
+    },
+    {
+     "id": "u7-d1-papel",
+     "tipo": "dialogo_papel",
+     "dialogo": "Numa festa, o Hugo conversa com a Léa.",
+     "situacao": {
+      "pt-BR": "Agora é você: numa festa, o Hugo puxa conversa.",
+      "en": null
+     },
+     "outro_falante": "A",
+     "turnos": [
+      {
+       "outro": {
+        "fr": "Salut ! Moi, c'est Hugo.",
+        "pt-BR": "Oi! Eu sou o Hugo.",
+        "en": null
+       }
+      },
+      {
+       "pedido": {
+        "pt-BR": "Pergunte o que ele faz.",
+        "en": null
+       },
+       "opcoes": [
+        "Tu as quel âge ?",
+        "Tu fais quoi dans la vie ?",
+        "Vous faites quoi dans la vie ?"
+       ],
+       "certa": 1,
+       "dicas": {
+        "Tu as quel âge ?": {
+         "pt-BR": "Isso pergunta a idade. Para a profissão: <b>tu fais quoi ?</b>",
+         "en": null
+        },
+        "Vous faites quoi dans la vie ?": {
+         "pt-BR": "Com o Hugo, numa festa, no informal: <b>tu fais</b>.",
+         "en": null
+        }
+       }
+      },
+      {
+       "outro": {
+        "fr": "Je suis serveur et étudiant. Et toi ?",
+        "pt-BR": "Sou garçom e estudante. E você?",
+        "en": null
+       }
+      },
+      {
+       "pedido": {
+        "pt-BR": "Diga que é médico ou médica.",
+        "en": null
+       },
+       "opcoes": [
+        "Je suis le médecin.",
+        "Tu es médecin.",
+        "Je suis médecin."
+       ],
+       "certa": 2,
+       "dicas": {
+        "Je suis le médecin.": {
+         "pt-BR": "A profissão vem sem <b>le</b>: <b>je suis médecin</b>.",
+         "en": null
+        },
+        "Tu es médecin.": {
+         "pt-BR": "<b>Tu es</b> é \"você é\". Para você: <b>je suis</b>.",
+         "en": null
+        }
+       }
+      }
+     ],
+     "explicacao": {
+      "pt-BR": "Você perguntou a profissão e disse a sua, no informal.",
+      "en": null
+     }
+    },
+    {
+     "id": "u7-d1-fim",
+     "tipo": "dialogo_fim",
+     "dialogo": "Numa festa, o Hugo conversa com a Léa.",
+     "fala": {
+      "pt-BR": "Parabéns! Você conversou sobre profissões numa festa.",
+      "en": null
+     },
+     "frases": [
+      0,
+      1,
+      4
+     ]
+    }
+   ]
+  },
+  {
+   "id": "profissao-formal",
+   "ordem": 5,
+   "id_novo": true,
+   "tipo": "dialogos",
+   "titulo": {
+    "publicado": null,
+    "pt-BR": "Dizer a profissão de um jeito formal",
+    "en": null,
+    "a_confirmar": false
+   },
+   "cartoes": [],
+   "inclui_dialogo": true,
+   "telas": [
+    {
+     "id": "u7-d2-cena",
+     "tipo": "dialogo_cena",
+     "dialogo": "Num evento de trabalho, o Sr. Moreau conversa com a Sra. Lima.",
+     "foco": {
+      "pt-BR": "Ouça com atenção: repare em como o Sr. Moreau pergunta a profissão no formal.",
+      "en": null
+     }
+    },
+    {
+     "id": "u7-d2-ouvir",
+     "tipo": "dialogo_ouvir",
+     "dialogo": "Num evento de trabalho, o Sr. Moreau conversa com a Sra. Lima.",
+     "pergunta": {
+      "pt-BR": "Eles se falam de um jeito formal ou informal?",
+      "en": null
+     },
+     "opcoes": [
+      {
+       "pt-BR": "Informal",
+       "en": null
+      },
+      {
+       "pt-BR": "Formal",
+       "en": null
+      }
+     ],
+     "resposta": 1,
+     "explicacao": {
+      "pt-BR": "Eles usam <b>vous</b>, <b>madame</b> e <b>monsieur</b>: é uma conversa formal.",
+      "en": null
+     }
+    },
+    {
+     "id": "u7-d2-ler",
+     "tipo": "dialogo_ler",
+     "dialogo": "Num evento de trabalho, o Sr. Moreau conversa com a Sra. Lima."
+    },
+    {
+     "id": "u7-d2-vf",
+     "tipo": "dialogo_vf",
+     "dialogo": "Num evento de trabalho, o Sr. Moreau conversa com a Sra. Lima.",
+     "fala": 3,
+     "afirmacao": {
+      "pt-BR": "Aqui, a Sra. Lima diz que é advogada.",
+      "en": null
+     },
+     "resposta": true,
+     "explicacao": {
+      "pt-BR": "<b>Je suis avocate</b>: ela é advogada, e o <b>t</b> do fim soa.",
+      "en": null
+     }
+    },
+    {
+     "id": "u7-d2-montar",
+     "tipo": "dialogo_montar",
+     "dialogo": "Num evento de trabalho, o Sr. Moreau conversa com a Sra. Lima.",
+     "distratores": {
+      "0": {
+       "texto": "Salut, madame. Je m'appelle Paul Moreau.",
+       "tipo": "registro"
+      },
+      "1": {
+       "texto": "Enchanté, monsieur. Je m'appelle Carla Lima.",
+       "tipo": "grafia"
+      },
+      "2": {
+       "texto": "Qu'est-ce que tu fais dans la vie ?",
+       "tipo": "registro"
+      },
+      "3": {
+       "texto": "Je suis avocate. Et toi ?",
+       "tipo": "registro"
+      },
+      "4": {
+       "texto": "Je suis médecine. Vous habitez à Paris ?",
+       "tipo": "grafia"
+      },
+      "5": {
+       "texto": "Non, j'abite à Lyon. Et vous ?",
+       "tipo": "grafia"
+      },
+      "6": {
+       "texto": "J'habite à Paris. Salut, à plus !",
+       "tipo": "registro"
+      }
+     },
+     "explicacao": {
+      "pt-BR": "Você montou a conversa formal pelo ouvido: <b>vous</b> do começo ao fim.",
+      "en": null
+     }
+    },
+    {
+     "id": "u7-d2-lacuna",
+     "tipo": "dialogo_lacuna",
+     "dialogo": "Num evento de trabalho, o Sr. Moreau conversa com a Sra. Lima.",
+     "fala": 3,
+     "antes": "Je suis ",
+     "depois": ". Et vous ?",
+     "opcoes": [
+      "avocate",
+      "avocat"
+     ],
+     "resposta": "avocate",
+     "explicacao": {
+      "pt-BR": "Ela é mulher: <b>avocate</b>, e o <b>t</b> do fim soa.",
+      "en": null
+     }
+    },
+    {
+     "id": "u7-d2-ordenar",
+     "tipo": "dialogo_ordenar",
+     "dialogo": "Num evento de trabalho, o Sr. Moreau conversa com a Sra. Lima.",
+     "explicacao": {
+      "pt-BR": "Nomes, profissão e onde cada um mora.",
+      "en": null
+     }
+    },
+    {
+     "id": "u7-d2-entendeu",
+     "tipo": "dialogo_entendeu",
+     "dialogo": "Num evento de trabalho, o Sr. Moreau conversa com a Sra. Lima.",
+     "pergunta": {
+      "pt-BR": "O que o Sr. Moreau faz?",
+      "en": null
+     },
+     "opcoes": [
+      {
+       "pt-BR": "É médico",
+       "en": null
+      },
+      {
+       "pt-BR": "É advogado",
+       "en": null
+      },
+      {
+       "pt-BR": "É engenheiro",
+       "en": null
+      }
+     ],
+     "resposta": 0,
+     "explicacao": {
+      "pt-BR": "Ele diz <b>je suis médecin</b>: é médico.",
+      "en": null
+     }
+    },
+    {
+     "id": "u7-d2-papel",
+     "tipo": "dialogo_papel",
+     "dialogo": "Num evento de trabalho, o Sr. Moreau conversa com a Sra. Lima.",
+     "situacao": {
+      "pt-BR": "Agora é você: num evento de trabalho, o Sr. Moreau puxa conversa.",
+      "en": null
+     },
+     "outro_falante": "A",
+     "turnos": [
+      {
+       "outro": {
+        "fr": "Bonjour. Je m'appelle Paul Moreau. Et vous ?",
+        "pt-BR": "Bom dia. Eu me chamo Paul Moreau. E o senhor (a senhora)?",
+        "en": null
+       }
+      },
+      {
+       "pedido": {
+        "pt-BR": "Diga o seu nome. No exercício, você é Sam Dubois.",
+        "en": null
+       },
+       "opcoes": [
+        "Je m'appelle Sam Dubois.",
+        "Moi, c'est Sam Dubois. Et toi ?",
+        "Vous vous appelez Sam Dubois."
+       ],
+       "certa": 0,
+       "dicas": {
+        "Moi, c'est Sam Dubois. Et toi ?": {
+         "pt-BR": "No formal: <b>je m'appelle</b>, sem <b>et toi ?</b>.",
+         "en": null
+        },
+        "Vous vous appelez Sam Dubois.": {
+         "pt-BR": "<b>Vous vous appelez</b> é \"o senhor se chama\". Para você: <b>je m'appelle</b>.",
+         "en": null
+        }
+       }
+      },
+      {
+       "outro": {
+        "fr": "Enchanté. Qu'est-ce que vous faites dans la vie ?",
+        "pt-BR": "Prazer. O que o senhor (a senhora) faz?",
+        "en": null
+       }
+      },
+      {
+       "pedido": {
+        "pt-BR": "Diga que é médico ou médica e devolva a pergunta.",
+        "en": null
+       },
+       "opcoes": [
+        "Je suis médecin. Et toi ?",
+        "Je suis médecin. Et vous ?",
+        "Je suis la médecin. Et vous ?"
+       ],
+       "certa": 1,
+       "dicas": {
+        "Je suis médecin. Et toi ?": {
+         "pt-BR": "Com o Sr. Moreau, no formal: <b>et vous ?</b>",
+         "en": null
+        },
+        "Je suis la médecin. Et vous ?": {
+         "pt-BR": "A profissão vem sem artigo: <b>je suis médecin</b>.",
+         "en": null
+        }
+       }
+      },
+      {
+       "outro": {
+        "fr": "Moi, je suis ingénieur. Bonne journée !",
+        "pt-BR": "Eu sou engenheiro. Tenha um bom dia!",
+        "en": null
+       }
+      },
+      {
+       "pedido": {
+        "pt-BR": "Agradeça e se despeça.",
+        "en": null
+       },
+       "opcoes": [
+        "Salut, à plus !",
+        "Bonne soirée !",
+        "Merci, monsieur. Au revoir !"
+       ],
+       "certa": 2,
+       "dicas": {
+        "Salut, à plus !": {
+         "pt-BR": "Num evento de trabalho, no formal: <b>au revoir</b>.",
+         "en": null
+        },
+        "Bonne soirée !": {
+         "pt-BR": "Vocês se cumprimentaram com <b>bonjour</b>: é de dia.",
+         "en": null
+        }
+       }
+      }
+     ],
+     "explicacao": {
+      "pt-BR": "Você disse o seu nome e a sua profissão no formal.",
+      "en": null
+     }
+    },
+    {
+     "id": "u7-d2-fim",
+     "tipo": "dialogo_fim",
+     "dialogo": "Num evento de trabalho, o Sr. Moreau conversa com a Sra. Lima.",
+     "fala": {
+      "pt-BR": "Parabéns! Você falou da sua profissão no formal.",
+      "en": null
+     },
+     "frases": [
+      2,
+      3,
+      4
+     ]
+    }
+   ]
+  }
+ ]
+}

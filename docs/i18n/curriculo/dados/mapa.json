@@ -1479,78 +1479,188 @@
                 {
                   "palavra": "le professeur / la professeure",
                   "chave": "nova",
-                  "origem": "novo"
+                  "origem": "novo",
+                  "licao": 1
                 },
                 {
                   "palavra": "l'étudiant / l'étudiante",
                   "chave": "nova",
-                  "origem": "novo"
-                },
-                {
-                  "palavra": "le médecin",
-                  "chave": "A1-15-v5",
-                  "origem": "publicado"
-                },
-                {
-                  "palavra": "l'infirmier / l'infirmière",
-                  "chave": "nova",
-                  "origem": "novo"
-                },
-                {
-                  "palavra": "le vendeur / la vendeuse",
-                  "chave": "nova",
-                  "origem": "novo"
-                },
-                {
-                  "palavra": "le serveur / la serveuse",
-                  "chave": "nova",
-                  "origem": "novo"
-                },
-                {
-                  "palavra": "l'ingénieur / l'ingénieure",
-                  "chave": "nova",
-                  "origem": "novo"
-                },
-                {
-                  "palavra": "l'avocat / l'avocate",
-                  "chave": "nova",
-                  "origem": "novo"
+                  "origem": "novo",
+                  "licao": 1
                 },
                 {
                   "palavra": "le travail",
                   "chave": "nova",
-                  "origem": "novo"
+                  "origem": "novo",
+                  "licao": 1
+                },
+                {
+                  "palavra": "le médecin",
+                  "chave": "A1-15-v5",
+                  "origem": "publicado",
+                  "licao": 2
+                },
+                {
+                  "palavra": "l'infirmier / l'infirmière",
+                  "chave": "nova",
+                  "origem": "novo",
+                  "licao": 2
+                },
+                {
+                  "palavra": "l'avocat / l'avocate",
+                  "chave": "nova",
+                  "origem": "novo",
+                  "licao": 2
+                },
+                {
+                  "palavra": "le vendeur / la vendeuse",
+                  "chave": "nova",
+                  "origem": "novo",
+                  "licao": 3
+                },
+                {
+                  "palavra": "le serveur / la serveuse",
+                  "chave": "nova",
+                  "origem": "novo",
+                  "licao": 3
+                },
+                {
+                  "palavra": "l'ingénieur / l'ingénieure",
+                  "chave": "nova",
+                  "origem": "novo",
+                  "licao": 3
                 },
                 {
                   "palavra": "le bureau",
                   "chave": "nova",
-                  "origem": "novo"
+                  "origem": "novo",
+                  "licao": 3
                 }
               ],
               "notas": [
                 {
-                  "titulo": "Elle est infirmière: sem artigo (+1 linha: -ier / -ière, -eur / -euse)",
+                  "titulo": "Je suis professeure: sem artigo",
                   "tipo": "Exp",
                   "confianca": "alta",
                   "nova": true,
-                  "gancho": "la vendeuse",
-                  "versao_gratis_de": [
-                    "A1-g11"
+                  "observacao": "título antigo \"Elle est infirmière: sem artigo (+1 linha: -ier / -ière, -eur / -euse)\"; o feminino das profissões fica nos painéis dos exercícios (decisão 339), sem a regra geral, que é da gramática \"Masculino e feminino\" (A1-g11)",
+                  "momento": {
+                    "licao": 1,
+                    "depois_de": "l'étudiant / l'étudiante"
+                  },
+                  "exemplos": [
+                    {
+                      "fr": "Je suis professeure.",
+                      "pt-BR": "Eu sou professora."
+                    },
+                    {
+                      "fr": "Il est étudiant.",
+                      "pt-BR": "Ele é estudante."
+                    }
                   ]
                 },
                 {
-                  "titulo": "Qu'est-ce que vous faites dans la vie ? e Tu fais quoi dans la vie ?",
+                  "titulo": "Tu fais quoi dans la vie ?",
                   "tipo": "Real",
                   "confianca": "alta",
                   "nova": true,
-                  "breve": true
+                  "breve": true,
+                  "observacao": "título antigo \"Qu'est-ce que vous faites dans la vie ? e Tu fais quoi dans la vie ?\"; o par Qu'est-ce que tu fais / vous faites dans la vie ? é frase da lição 1",
+                  "momento": {
+                    "licao": 1,
+                    "depois_de": "le travail"
+                  },
+                  "exemplos": [
+                    {
+                      "fr": "Qu'est-ce que tu fais dans la vie ?",
+                      "pt-BR": "O que você faz da vida?"
+                    },
+                    {
+                      "fr": "Tu fais quoi dans la vie ?",
+                      "pt-BR": "O que você faz da vida? (na conversa)"
+                    },
+                    {
+                      "fr": "Tu fais quoi ?",
+                      "pt-BR": "O que você faz? (na fala)"
+                    }
+                  ]
                 },
                 {
-                  "titulo": "Professeure, autrice: o feminino das profissões",
+                  "titulo": "Professeure, ingénieure: o feminino das profissões",
                   "tipo": "Cult",
                   "confianca": "média",
                   "nova": true,
-                  "observacao": "revisão da dona antes de publicar"
+                  "observacao": "revisão da dona antes de publicar; título antigo \"Professeure, autrice: o feminino das profissões\" (autrice não é cartão)",
+                  "momento": {
+                    "licao": 3,
+                    "depois_de": "l'ingénieur / l'ingénieure"
+                  },
+                  "exemplos": [
+                    {
+                      "fr": "Elle est professeure.",
+                      "pt-BR": "Ela é professora."
+                    },
+                    {
+                      "fr": "Elle est ingénieure.",
+                      "pt-BR": "Ela é engenheira."
+                    },
+                    {
+                      "fr": "Elle est professeur.",
+                      "pt-BR": "Ela é professora. (ainda se ouve)"
+                    }
+                  ]
+                }
+              ],
+              "licoes": [
+                {
+                  "licao": 1,
+                  "id": "o-que-voce-faz",
+                  "id_novo": true,
+                  "titulo": "Perguntar e dizer o que você faz",
+                  "observacao": "le travail entra aqui (no 09 estava na lição de comércio e escritório) para a lição ter 3 cartões (regra 13)"
+                },
+                {
+                  "licao": 2,
+                  "id": "saude-e-direito",
+                  "id_novo": true,
+                  "titulo": "Profissões da saúde e do direito"
+                },
+                {
+                  "licao": 3,
+                  "id": "comercio-e-escritorio",
+                  "id_novo": true,
+                  "titulo": "Profissões do comércio e do escritório"
+                },
+                {
+                  "licao": 4,
+                  "id": "conversar-sobre-profissao",
+                  "id_novo": true,
+                  "tipo": "dialogos",
+                  "titulo": "Conversar sobre a profissão"
+                },
+                {
+                  "licao": 5,
+                  "id": "profissao-formal",
+                  "id_novo": true,
+                  "tipo": "dialogos",
+                  "titulo": "Dizer a profissão de um jeito formal"
+                }
+              ],
+              "licoes_motivo": "3 lições de cartões (o que você faz; saúde e direito; comércio e escritório) + 2 lições de diálogo + Revisão da unidade (formato da lição curta, decisões 355 e 368)",
+              "dialogos": [
+                {
+                  "titulo": "Numa festa, o Hugo conversa com a Léa.",
+                  "registro": "informal",
+                  "origem": "novo",
+                  "licao": 4,
+                  "falas": []
+                },
+                {
+                  "titulo": "Num evento de trabalho, o Sr. Moreau conversa com a Sra. Lima.",
+                  "registro": "formal",
+                  "origem": "novo",
+                  "licao": 5,
+                  "falas": []
                 }
               ]
             },
@@ -1566,7 +1676,7 @@
                 "A1-2",
                 "A1-22"
               ],
-              "versao_gratis_texto": "M1.2 nota \"o feminino que se ouve\"; pares da M1.7 + 1 linha na nota Elle est infirmière (M1.7, gancho la vendeuse)",
+              "versao_gratis_texto": "M1.2 nota \"o feminino que se ouve\"; pares da M1.7 com os painéis do feminino que se ouve (étudiante, infirmière, avocate, vendeuse, serveuse) e do que só muda na escrita (professeure, ingénieure), sem a regra geral",
               "telas": 5,
               "exercicios": 8
             }
