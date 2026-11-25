@@ -106,7 +106,7 @@
 
 /* ---------- "+N" de XP na lição (item 5): pílula pequena logo acima do fim da barra; sobe e some em 0,9 s ---------- */
 .xp-perto-barra{
-  position:fixed; z-index:var(--z-top, 1000); pointer-events:none; transform: translate(-100%, -170%);
+  position:absolute; z-index:var(--z-top, 1000); pointer-events:none; transform: translate(-100%, -170%);
   background: var(--success-fill); color: var(--on-success-fill); font-weight:900; font-size:13px; line-height:1;
   padding:4px 8px; border-radius:999px; font-variant-numeric: tabular-nums;
   animation: mov-xp-subir 900ms var(--mov-curva-entrar) forwards;

@@ -132,8 +132,9 @@ function xpPertoDaBarra(amount){
   el.setAttribute('role', 'status');
   el.setAttribute('aria-label', t('toast.xpGain', { amount }));
   el.textContent = `+${amount}`;
-  el.style.left = `${Math.round(r.right)}px`;
-  el.style.top = `${Math.round(r.top + r.height / 2)}px`;
+  // Preso à página (não à tela): se a tela rolar até o painel de acerto, o número acompanha a barra em vez de flutuar sobre o texto.
+  el.style.left = `${Math.round(r.right + window.scrollX)}px`;
+  el.style.top = `${Math.round(r.top + r.height / 2 + window.scrollY)}px`;
   document.body.appendChild(el);
   setTimeout(() => el.remove(), 1000);
   return true;
