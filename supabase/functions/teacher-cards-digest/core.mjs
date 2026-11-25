@@ -119,28 +119,3 @@ export function renderEmail({ lang, kind, nome, n, unsubscribeUrl, test }) {
   const text = [body, '', ...box.map(x => '- ' + x), '', `${K.button}: ${APP_URL}`, '', `${K.bye} ${L.sig}`, '', L.footer + (unsubscribeUrl ? ` ${L.stop}: ${unsubscribeUrl}` : '')].join('\n');
   return { subject, html, text };
 }
-
-// Página do GET do link de sair: SÓ pergunta; quem grava é o POST (do botão desta página ou do "cancelar inscrição" do Gmail).
-// Assim antivírus e pré-visualizadores de link, que abrem links sozinhos, não desligam o aviso de ninguém.
-export function unsubscribeConfirmPage(lang, postUrl) {
-  const en = lang === 'en';
-  const title = en ? 'Stop receiving these emails?' : 'Parar de receber estes e-mails?';
-  const msg = en ? 'You will no longer get the email about new cards from your teacher.' : 'Você não vai mais receber o e-mail de cartões novos da sua professora.';
-  const btn = en ? 'Yes, stop receiving' : 'Sim, parar de receber';
-  const keep = en ? 'Keep receiving' : 'Continuar recebendo';
-  return `<!doctype html><html lang="${en ? 'en' : 'pt-BR'}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(title)}</title></head>
-<body style="margin:0;background:#FAF5EA;font-family:'Nunito','Helvetica Neue',Arial,sans-serif;color:#22113f"><div style="max-width:480px;margin:48px auto;padding:0 20px"><div style="background:#fff;border-radius:22px;padding:28px"><h1 style="margin:0 0 12px;font-size:26px">${esc(title)}</h1><p style="margin:0 0 20px;line-height:1.6">${esc(msg)}</p>
-<form method="post" action="${esc(postUrl)}" style="margin:0 0 14px"><button type="submit" style="font:inherit;font-weight:900;color:#22113f;background:#E36BCA;border:2px solid #22113f;box-shadow:4px 4px 0 #22113f;border-radius:999px;padding:13px 26px;cursor:pointer">${esc(btn)}</button></form>
-<a href="${APP_URL}" style="color:#1d6fa5">${esc(keep)}</a></div></div></body></html>`;
-}
-
-// Página mostrada depois de "Parar de receber".
-export function unsubscribePage(lang, ok) {
-  const en = lang === 'en';
-  const title = ok ? (en ? 'Done!' : 'Pronto!') : (en ? 'This link is not valid' : 'Este link não é válido');
-  const msg = ok
-    ? (en ? 'You will no longer get the email about new cards from your teacher. To turn it back on, go to Settings > Notifications in the app.' : 'Você não vai mais receber o e-mail de cartões novos da sua professora. Para voltar a receber, ligue em Configurações > Notificações, dentro do site.')
-    : (en ? 'Open the app and turn this email off in Settings > Notifications.' : 'Abra o site e desligue este e-mail em Configurações > Notificações.');
-  return `<!doctype html><html lang="${en ? 'en' : 'pt-BR'}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(title)}</title></head>
-<body style="margin:0;background:#FAF5EA;font-family:'Nunito','Helvetica Neue',Arial,sans-serif;color:#22113f"><div style="max-width:480px;margin:48px auto;padding:0 20px"><div style="background:#fff;border-radius:22px;padding:28px"><h1 style="margin:0 0 12px;font-size:26px">${esc(title)}</h1><p style="margin:0 0 20px;line-height:1.6">${esc(msg)}</p><a href="${APP_URL}" style="color:#1d6fa5">app.profbrune.com.br</a></div></div></body></html>`;
-}
