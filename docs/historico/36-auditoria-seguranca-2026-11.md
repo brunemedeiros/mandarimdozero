@@ -256,3 +256,29 @@ da própria autora**, por três motivos independentes:
    de UPDATE (só SELECT, INSERT, DELETE da 013). Quem clica "Ativar" de novo vê "não foi possível salvar".
 Consertos propostos, aguardando a autora: CORS no `push-send` (deploy), regra de UPDATE da própria linha (migration sem DROP)
 e investigar por que ninguém ativa (convite, telas, iPhone exige o site instalado na tela inicial).
+
+### Consertos 1 e 2 no Staging e investigação da adesão (2026-11-25, aprovados pela autora)
+
+- **148 `push_subscriptions_owner_update`** (`shared/supabase_migrations/148_push_subscriptions_owner_update.sql`, sem DROP):
+  Staging aplicada. Teste (transação desfeita): ativar aparelho novo ok, ativar de novo o mesmo aparelho ok (antes: recusado),
+  A editar o aparelho de B = 0 linhas, A passar o próprio aparelho para B = recusado, A sobrescrever a inscrição de B pelo
+  upsert = recusado, chave de B intacta. Produção: pendente do "ok" da autora.
+- **`push-send` com CORS** (`supabase/functions/push-send/index.ts`, molde do push-dispatch; sem VAPID = 503 em vez de não subir).
+  Código da produção (v12) conferido igual ao repositório antes da mudança. Staging: publicada (v1, não existia lá).
+  `tests/push-cors/test_cors_push_send.js` (Chromium de verdade na origem do site, só chave pública): Staging 3/3
+  (chamada chega; 503 `vapid_missing` porque o Staging não tem as chaves de push); produção 2/3 (navegador bloqueia: o defeito).
+  Produção: pendente do "ok" da autora; depois rodar o teste com `producao` (esperado 4/4 com `sent:0`).
+- **Investigação da adesão (subagente, só leitura):**
+  - O servidor envia e o Google aceita: `notification-cron` (22h UTC de 24 e 25/11) e `push-dispatch` (fila de Amigos, 10 itens,
+    todos para a conta da autora) sem nenhum erro; inscrição não foi apagada (seria se o Google desse 404/410), chave VAPID bate
+    (senão 403). Logo a inscrição de 10/09 provavelmente é de OUTRO navegador/aparelho da autora, ou o Chrome/site está com
+    notificação bloqueada no Android. Teste para ela: Configurações > Notificações no celular atual.
+  - Convite de Amigos chega a no máximo 4 contas (só quem tem amizade aceita; janela só no 1º amigo). Fora disso, só o
+    interruptor escondido em Configurações > Notificações.
+  - iPhone (11 das 27 contas ativas em 60 dias; maior grupo de celular): fora da Tela de Início o interruptor só diz "Seu navegador
+    não suporta notificações push"; o passo a passo do iPhone existe só na faixa de Amigos. A página de entrada (`index.html`, raiz)
+    não tem manifest nem a meta da Apple: adicionar à Tela de Início a partir dela pode virar atalho comum (suspeito).
+  - Parte técnica certa (service workers com `push`/`notificationclick`, escopo /fr e /zh, CSP). Nada medido: 0 eventos de ativação.
+  - Plano proposto (aguarda a autora): convite visível para todas (depois de lição/Revisão, com "Agora não"); passo a passo do
+    iPhone em Configurações + manifest na raiz; medir tentativas/resultados; botão "mandar aviso de teste para este aparelho".
+    Tudo grátis.
