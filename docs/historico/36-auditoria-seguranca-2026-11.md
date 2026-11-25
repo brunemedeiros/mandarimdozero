@@ -209,11 +209,11 @@ teste IDOR com dois alunos fictícios no Staging). Nada mudou em produção.
   `user_id` e `reporter_email` nulo; ninguém preenche status (fica `novo`), prioridade, nota nem resposta. O site
   (`shared/reports.js`) já manda exatamente isso. **Staging: aplicada em 2026-11-25** (gravada como `147_reports_insert_own`);
   conferida em transação desfeita: 2 envios legítimos aceitos (logado e visitante com e-mail), 8 falsificações recusadas.
-  **Produção: aplicada em 2026-11-25 com autorização da autora** (versão `20261125220157`); leitura de conferência da
-  regra em `pg_policies` ainda a fazer. Voltar atrás: comentário no fim da migration.
+  **Produção: aplicada em 2026-11-25 com autorização da autora** (versão `20261125220157`); conferida em `pg_policies`: texto
+  certo, hash das 86 regras igual nos dois projetos (`102e79f81def52aa19d5222cafbaa08b`), os 38 reports intactos. Voltar atrás: comentário no fim da migration.
 - Teste de regressão: `tests/seguranca-idor/` (`idor_staging.sql` diz sozinho `IDOR_OK`/`IDOR_FALHOU`; README com a tabela).
-  A 1ª rodada desse arquivo final ficou esperando uma confirmação do MCP (o script tem `delete`) e não rodou; as rodadas
-  anteriores, com os mesmos casos, deram o resultado acima.
+  Rodado no Staging em 2026-11-25 depois da 147: **`IDOR_OK passou=90`** (a autora aprovou a confirmação do MCP, que
+  aparece porque o script tem `delete`); zero resíduo conferido (0 contas, 0 perfis, 0 reports de teste).
 - Não verificado nesta rodada: IDOR nas Edge Functions. Propostas pendentes: limite da `support-materials` (P2) e
   `is_admin()` no lugar do e-mail (P3).
 
