@@ -282,3 +282,9 @@ e investigar por que ninguém ativa (convite, telas, iPhone exige o site instala
   - Plano proposto (aguarda a autora): convite visível para todas (depois de lição/Revisão, com "Agora não"); passo a passo do
     iPhone em Configurações + manifest na raiz; medir tentativas/resultados; botão "mandar aviso de teste para este aparelho".
     Tudo grátis.
+
+- **Produção (2026-11-25, "ok" da autora):** `148_push_subscriptions_owner_update` gravada como `20261125224057` (regra
+  conferida em `pg_policies`); `push-send` **v13** (mesmo conteúdo do Staging, sha `336083...e1`; voltar atrás = v12, o
+  conteúdo anterior está no git antes do commit 985c118d). `tests/push-cors/test_cors_push_send.js producao` 4/4
+  (antes 2/3). A autora tentou ligar o push no celular: "Você não permitiu as notificações" (motivo `denied`: o Android/Chrome
+  recusou sem mostrar a pergunta; o site não tinha como pedir de novo). Plano B e A aprovados, prévia antes de mexer.
