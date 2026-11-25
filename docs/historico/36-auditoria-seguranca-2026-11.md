@@ -142,7 +142,7 @@ Os 38 reports da produção são todos de contas logadas (nenhum convidado), por
   (`get_organization`: plan free). Das 63 contas, 54 entram pelo Google e 9 por e-mail e senha; o site aceita senha
   de 6 caracteres (`index.html`, cadastro). Proposta à autora: mínimo de 8 sem obrigar maiúscula/número (o tamanho
   protege mais que regras de composição, que viram "Senha1"), testando antes no Staging o aviso de "senha fraca" que
-  o Supabase pode mostrar a quem já tem senha curta. Aguarda a autora.
+  o Supabase pode mostrar a quem já tem senha curta. **Decidido pela autora (2026-11-25): mínimo 8, sem regras extras.**
 - **Anti-moldura (clickjacking), aprovado em 2026-11-25:** `shared/anti-moldura.js` no começo do `<head>` de 12 páginas
   (`index.html`, `fr`, `zh`, Sobre, 4 de privacidade, Ajuda, contrato, 2 testes de nivelamento; não na tela sem internet).
   `frame-ancestors`/`X-Frame-Options` não funcionam por `<meta>` e o GitHub Pages não deixa cabeçalho. Em moldura de outro
@@ -162,4 +162,19 @@ Os 38 reports da produção são todos de contas logadas (nenhum convidado), por
   `main`). Pré-existentes iguais na `main`: checkpoint-zh, desafios-etapa-d, fase-j, xp-semana, recomecar-curso
   (timeouts), `i18n/test_playwright` e k2f (ambiente).
 - Falta conferir depois de publicar: o site no ar com o Google Analytics aceito (o sandbox não alcança o Google).
+
+## Senha com mínimo de 8 (2026-11-25)
+
+- Site (`index.html`): cadastro e "Crie uma senha nova" pedem 8 (`minlength` e conferência no código; antes a senha nova só
+  tinha o `minlength` do navegador); recusa do servidor por senha curta vira "A senha precisa ter pelo menos 8 caracteres."
+  (pt-BR e en). Testes: `login-obrigatorio/test_playwright.js` 127/127 (3 novos: 7 caracteres avisa e não salva),
+  `test_entrada_idioma.js` 162/162, `test_esqueci_senha.js` 57/57, `csp` 12/12 (lista recalculada).
+- Staging, com o mínimo 8 ligado pela autora no painel: conta com senha antiga de 6 continua entrando (200 com sessão; o
+  Supabase só devolve `weak_password` junto, que o site ignora); cadastro com 7 é recusado (422 `weak_password`).
+  Conta de teste `zz-teste-senha@example.invalid` criada no Staging para isso; a remoção pelo MCP pediu confirmação e ficou
+  sem resposta: apagar pelo SQL Editor do Staging (`delete from auth.users where email like 'zz-teste-senha%@example.invalid';`).
+- Falta: a autora ligar o mínimo 8 na produção e o PR do site.
+- Pedido da sessão dos PRs 492/504: `admin.reports.detail.screenshotError` entrou em `NEW_KEYS` de
+  `tests/i18n/test_i18n_unit.js` (precisa de `git fetch --unshallow`): 2331/2335 aqui; na `main` 2332/2337. As 4 que sobram
+  são de outras sessões (`fr.conj.newSession`, `notif.cat.cartoes_professora`, `notif.pref.emailOnly`, `review.practiceMore`).
 
