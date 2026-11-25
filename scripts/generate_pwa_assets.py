@@ -151,6 +151,36 @@ def make_maskable_icon(lang_id, size, background_color):
     print(f'  escrito {os.path.relpath(dst_path, ROOT)}')
 
 
+def paint_icon_background(path, background_color):
+    """Cantos do ícone na cor de fundo do app (dona, 2026-11-25). O ícone-mestre é um quadrado bege com cantos
+    arredondados sobre BRANCO; na tela que o Android mostra ao abrir o app instalado (fundo = background_color do
+    manifest) os cantos brancos apareciam como pedacinhos brancos. Aqui o que é branco ligado à borda, a faixa da curva
+    (mistura de branco com bege) e o próprio quadrado bege viram a cor de fundo do app: o B fica sozinho no fundo.
+    Cor sólida e não transparente de propósito: no iPhone (apple-touch-icon) o transparente vira preto.
+    Pode rodar mais de uma vez (num ícone já pintado não muda nada)."""
+    from collections import deque
+    bg = tuple(int(background_color.lstrip('#')[i:i + 2], 16) for i in (0, 2, 4))
+    im = Image.open(path).convert('RGB')
+    w, h = im.size
+    px = im.load()
+    tile = px[w // 2, h // 6]  # cor do quadrado, longe do B
+    claro = lambda c, ref, tol: all(c[i] >= ref[i] - tol for i in range(3))
+    perto = lambda c, ref, tol: all(abs(c[i] - ref[i]) <= tol for i in range(3))
+    fora, fila = set(), deque([(0, 0), (w - 1, 0), (0, h - 1), (w - 1, h - 1)])
+    while fila:
+        x, y = fila.popleft()
+        if (x, y) in fora or not (0 <= x < w and 0 <= y < h):
+            continue
+        c = px[x, y]
+        if not (claro(c, tile, 2) or perto(c, bg, 2)):
+            continue  # chegou no B (azul/rosa): para
+        fora.add((x, y))
+        fila.extend([(x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)])
+    for x, y in fora:
+        px[x, y] = bg
+    im.save(path)
+
+
 def _copy(src, dst):
     shutil.copyfile(src, dst)
     print(f'  copiado {os.path.relpath(dst, ROOT)}')
@@ -216,8 +246,13 @@ def main():
         app['name'] = course_name(languages_by_id[lang_id]['name'])
         app['shortName'] = languages_by_id[lang_id]['name']
 
+    # Ícone-mestre com os cantos na cor de fundo do fr (base da raiz e dos favicons); cada app repinta com a sua.
+    for size in ICON_SIZES:
+        paint_icon_background(os.path.join(BRAND_DIR, f'icon-{size}.png'), identity['apps']['fr']['backgroundColor'])
     for lang_id, app in identity['apps'].items():
         sync_brand_assets(lang_id)
+        for size in ICON_SIZES:
+            paint_icon_background(os.path.join(ROOT, lang_id, 'icons', f'icon-{size}.png'), app['backgroundColor'])
         write_manifest(lang_id, app, brand)
         for size in ICON_SIZES:
             make_maskable_icon(lang_id, size, app['backgroundColor'])
