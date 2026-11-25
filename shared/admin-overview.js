@@ -1,6 +1,6 @@
 // ---------- Visão Geral (Painel de Admin, Central de Controle): dados e eventos ----------
 // Primeira aba do Painel de Admin desde 2026-11-24 (substituiu Badges). Só a admin vê: a tela esconde, e quem barra de verdade são
-// as RPCs da migration 145 (admin_overview_stats / admin_overview_reviews, not_authorized para quem não é admin).
+// as RPCs da migration 146 (admin_overview_stats / admin_overview_reviews, not_authorized para quem não é admin).
 // A Situação (Em dia/Atenção/Parado/Sem estudo) NÃO vem do banco: reaproveita as linhas da aba Alunos (studentLoadRows + tsuRowData,
 // shared/admin-students.js), então o número bate com a aba Alunos. Peças de HTML: shared/admin-overview-ui.js.
 // Plano e decisões: docs/central-de-controle-plano.md.

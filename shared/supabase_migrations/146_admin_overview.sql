@@ -1,4 +1,4 @@
--- 145: Central de Controle, aba "Visão Geral" do Painel de Admin (plano: docs/central-de-controle-plano.md, seção 5).
+-- 146: Central de Controle, aba "Visão Geral" do Painel de Admin (plano: docs/central-de-controle-plano.md, seção 5).
 -- Só LEITURA: quatro funções novas (duas internas, fechadas), nenhuma tabela muda. Só a admin chama (public.is_admin()); o resto recebe not_authorized.
 --
 -- Regras (decisões da autora de 2026-11-24 + revisão do plano):

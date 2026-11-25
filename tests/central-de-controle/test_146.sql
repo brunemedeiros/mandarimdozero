@@ -1,4 +1,4 @@
--- 145 (Central de Controle, Visão Geral do Admin). Transação + ROLLBACK, Postgres LOCAL (nunca produção).
+-- 146 (Central de Controle, Visão Geral do Admin). Transação + ROLLBACK, Postgres LOCAL (nunca produção).
 begin;
 create temp table r(ok boolean, name text) on commit drop;
 grant all on r to public;

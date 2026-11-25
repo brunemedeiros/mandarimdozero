@@ -1,5 +1,5 @@
 // Aba "Visão Geral" do Painel de Admin (Central de Controle) no navegador real: FR + ZH x claro/escuro + celular.
-// Banco em memória (tests/painel-admin/harness.js) com as RPCs da migration 145 simuladas e os 7 alunos de exemplo da aba Alunos
+// Banco em memória (tests/painel-admin/harness.js) com as RPCs da migration 146 simuladas e os 7 alunos de exemplo da aba Alunos
 // (tests/painel-alunos/harness.js: 3 Em dia, 1 Atenção, 2 Parado, 1 Sem estudo). Cobre: aba no lugar de Badges, filtros mandam os
 // parâmetros certos, números, gráficos acessíveis, faixa clicável com lista e atalho para a ficha, Situação igual à da aba Alunos,
 // Revisões só em Meus alunos, erro com "Tentar de novo", acesso negado e celular sem rolagem lateral.
