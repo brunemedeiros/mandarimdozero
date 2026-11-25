@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<title>Parar de receber e-mails</title>
+<link rel="icon" href="../icons/favicon-32.png" sizes="32x32">
+<link rel="stylesheet" href="../shared/fonts/nunito.css">
+<!-- Página do link "Parar de receber" do e-mail "cartões novos da sua professora" (Edge Function teacher-cards-digest).
+     Existe porque o Supabase entrega HTML de função como texto cru (text/plain). Esta página só PERGUNTA; quem desliga é o clique
+     no botão (POST na função). Sem Google Analytics e sem consent.js de propósito: o endereço leva a assinatura do link. -->
+<style>
+:root { --ink: #22113f; --ink-soft: #5d4f72; --bg: #FAF5EA; --card: #fff; --btn: #E36BCA; --on-btn: #22113f; --link: #1d6fa5; }
+@media (prefers-color-scheme: dark) { :root { --ink: #EEE9F5; --ink-soft: #ADA5BE; --bg: #17141F; --card: #201C2B; --btn: #E36BCA; --on-btn: #22113f; --link: #6CB8E6; } }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: 'Nunito', 'Helvetica Neue', Arial, sans-serif; }
+.wrap { max-width: 480px; margin: 48px auto; padding: 0 20px; }
+.card { background: var(--card); border-radius: 22px; padding: 28px; }
+h1 { margin: 0 0 12px; font-size: 26px; }
+p { margin: 0 0 20px; line-height: 1.6; }
+button { font: inherit; font-weight: 900; color: var(--on-btn); background: var(--btn); border: 2px solid #22113f; box-shadow: 4px 4px 0 #22113f; border-radius: 999px; padding: 13px 26px; cursor: pointer; margin: 0 0 14px; }
+button[disabled] { opacity: .6; cursor: wait; }
+a { color: var(--link); }
+.act { display: block; }
+[hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<div class="wrap"><div class="card">
+  <h1 id="t"></h1>
+  <p id="m"></p>
+  <button id="go" type="button" class="act"></button>
+  <a id="keep" href="https://app.profbrune.com.br/"></a>
+</div></div>
+<script>
+(function () {
+  var q = new URLSearchParams(location.search);
+  var u = q.get('u') || '', t = q.get('t') || '', en = q.get('l') === 'en';
+  var FN = 'https://eigjocalzwamisgqilhg.supabase.co/functions/v1/teacher-cards-digest';
+  var T = en ? {
+    title: 'Stop receiving these emails?', msg: 'You will no longer get the email about new cards from your teacher.',
+    go: 'Yes, stop receiving', keep: 'Keep receiving', doneT: 'Done!',
+    doneM: 'You will no longer get the email about new cards from your teacher. To turn it back on, go to Settings > Notifications in the app.',
+    badT: 'This link is not valid', badM: 'Open the app and turn this email off in Settings > Notifications.',
+    errT: 'Something went wrong', errM: 'Please try again in a minute, or turn this email off in Settings > Notifications in the app.', site: 'app.profbrune.com.br'
+  } : {
+    title: 'Parar de receber estes e-mails?', msg: 'Você não vai mais receber o e-mail de cartões novos da sua professora.',
+    go: 'Sim, parar de receber', keep: 'Continuar recebendo', doneT: 'Pronto!',
+    doneM: 'Você não vai mais receber o e-mail de cartões novos da sua professora. Para voltar a receber, ligue em Configurações > Notificações, dentro do site.',
+    badT: 'Este link não é válido', badM: 'Abra o site e desligue este e-mail em Configurações > Notificações.',
+    errT: 'Algo deu errado', errM: 'Tente de novo daqui a pouco, ou desligue este e-mail em Configurações > Notificações, dentro do site.', site: 'app.profbrune.com.br'
+  };
+  document.documentElement.lang = en ? 'en' : 'pt-BR';
+  var $ = function (id) { return document.getElementById(id); };
+  function show(title, msg, hideBtn) { $('t').textContent = title; $('m').textContent = msg; $('go').hidden = !!hideBtn; $('keep').textContent = hideBtn ? T.site : T.keep; document.title = title; }
+  if (!u || !t) { show(T.badT, T.badM, true); return; }
+  show(T.title, T.msg, false); $('go').textContent = T.go;
+  $('go').addEventListener('click', function () {
+    var b = $('go'); b.disabled = true;
+    // POST simples (sem corpo nem cabeçalho extra): o navegador não faz pré-voo.
+    fetch(FN + '?u=' + encodeURIComponent(u) + '&t=' + encodeURIComponent(t) + '&l=' + (en ? 'en' : 'pt'), { method: 'POST' })
+      .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { return { s: r.status, j: j }; }); })
+      .then(function (x) {
+        if (x.s === 200 && x.j && x.j.ok) show(T.doneT, T.doneM, true);
+        else if (x.s === 400) show(T.badT, T.badM, true);
+        else { show(T.errT, T.errM, false); b.disabled = false; }
+      })
+      .catch(function () { show(T.errT, T.errM, false); b.disabled = false; });
+  });
+})();
+</script>
+</body>
+</html>

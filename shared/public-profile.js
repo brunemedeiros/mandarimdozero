@@ -259,8 +259,8 @@ async function renderPublicProfileInto(bodyEl, username){
         : `<p class="profile-empty-note">${t('publicProfile.noProgress')}</p>`);
 
   const conquestsHTML = earnedBadges.length ? `
-    <div class="public-profile-conquests track-showcase">
-      ${earnedBadges.map(badgeShowcaseItemHTML).join('')}
+    <div class="public-profile-conquests track-showcase selos-pagina">
+      ${earnedBadges.map(v => (typeof seloHTML === 'function' ? seloHTML(v) : badgeShowcaseItemHTML(v))).join('')}
     </div>
   ` : `<p class="profile-empty-note">${t('publicProfile.noBadges')}</p>`;
 

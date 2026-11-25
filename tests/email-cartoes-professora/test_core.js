@@ -36,8 +36,6 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
   check('html: link de sair no rodapé e no texto puro', pn.html.includes('https://x.test/sair?u=1&amp;t=2') && pn.text.includes('https://x.test/sair?u=1&t=2'));
   check('html escapa o nome (sem injeção)', E({ lang: 'pt', kind: 'novos', nome: '<img src=x onerror=1>' }).html.includes('&lt;img src=x onerror=1&gt;') && !E({ lang: 'pt', kind: 'novos', nome: '<img src=x onerror=1>' }).html.includes('<img src=x'));
   check('e-mail de teste leva o prefixo TESTE/TEST', E({ lang: 'pt', kind: 'novos', test: true }).subject.startsWith('TESTE: ') && E({ lang: 'en', kind: 'novos', test: true }).subject.startsWith('TEST: '));
-  check('página de confirmação do GET: pt e en, formulário POST, sem gravar nada', core.unsubscribeConfirmPage('pt', 'https://x.test/s?u=1&t=2').includes('method="post"') && core.unsubscribeConfirmPage('pt', 'https://x.test/s?u=1&t=2').includes('Sim, parar de receber') && core.unsubscribeConfirmPage('en', 'https://x.test/s').includes('Stop receiving these emails?'));
-  check('página de sair: pt, en e link inválido', core.unsubscribePage('pt', true).includes('Pronto!') && core.unsubscribePage('en', true).includes('Done!') && core.unsubscribePage('pt', false).includes('não é válido'));
 
   // Configurações > Notificações: a categoria nova só tem e-mail, ligada por padrão
   const ctx = vm.createContext({ t: k => k, escapeHTML: s => s, document: {}, window: {} });

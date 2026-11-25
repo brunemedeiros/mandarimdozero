@@ -77,6 +77,8 @@ function renderTrailMap(root, model, describe, opts){
       b.innerHTML = `<span class="tm-icon" aria-hidden="true">${trailEscape(n.icon)}</span><span class="tm-label">${trailEscape(n.label)}</span>${note ? `<span class="tm-note${n.noteClass ? ' ' + trailEscape(n.noteClass) : ''}" aria-hidden="true">${trailEscape(note)}</span>` : ''}`;
       b.addEventListener('click', () => select(n.key, b));
       row.appendChild(b);
+      // Unidade recém-liberada (shared/core/trilha-licao.js): o mesmo carimbo da lista, no mapa.
+      if (n.kind === 'unit' && typeof UNIDADE_RECEM_LIBERADA !== 'undefined' && UNIDADE_RECEM_LIBERADA !== null && n.key === 'u:' + UNIDADE_RECEM_LIBERADA && n.state !== 'locked' && typeof marcarUnidadeLiberada === 'function') marcarUnidadeLiberada(b);
     });
     s.appendChild(row);
     body.appendChild(s);
