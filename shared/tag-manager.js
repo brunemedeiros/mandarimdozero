@@ -190,7 +190,7 @@ async function renderTagManagerInto(mountEl, opts){
   if (!mountEl) return;
   const scope = opts.scope;
   const ui = { list: [], counts: {}, renaming: null, renameValue: '', deleting: null, busy: false, msg: '', msgKind: '' };
-  mountEl.innerHTML = `<p class="profile-empty-note">${tagManagerT('tagManager.loading', 'Carregando tags…')}</p>`;
+  mountEl.innerHTML = `<p class="profile-empty-note">${tagManagerT('tagManager.loading', 'Carregando tags...')}</p>`;
 
   const hint = scope === 'teacher'
     ? tagManagerT('tagManager.hint.teacher', 'Tags dos seus cartões de aluno (todos os alunos e idiomas). Renomear ou apagar vale para todos eles.')
