@@ -1150,7 +1150,7 @@ function renderProgressView(){
   const badgeGridEl = document.getElementById('badge-grid');
   badgeGridEl.classList.add('has-tracks');
   badgeGridEl.innerHTML = trackViews.map(badgeTrackCardHTML).join('')
-    + (classics.length ? `<div class="track-classics"><div class="track-classics-title">${t('badge.ui.classicTitle')}</div><div class="track-showcase">${classics.map(badgeShowcaseItemHTML).join('')}</div></div>` : '');
+    + (classics.length ? `<div class="track-classics"><div class="track-classics-title">${t('badge.ui.classicTitle')}</div><div class="track-showcase selos-pagina">${classics.map(v => (typeof seloHTML === 'function' ? seloHTML(v) : badgeShowcaseItemHTML(v))).join('')}</div></div>` : '');
   wireTrackChips(badgeGridEl, trackViews.concat(classics));
 }
 
