@@ -11,3 +11,6 @@ fr/scripts/lab_output_pt/
 tests/perfil-progresso/capturas/
 tests/perfil-editar/capturas/
 tests/selos/capturas/
+
+# Registro interno de arquivos editados por sessão do Claude Code (não é código)
+.claude/tsc-cache/
