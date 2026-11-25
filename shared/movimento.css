@@ -1,0 +1,81 @@
+/* Movimento comum dos sites (pedido da autora, 2026-11-25; vale para fr, zh, pt e os próximos).
+   Carregado por ÚLTIMO em cada index.html, para valer por cima das regras antigas.
+   Regra da casa: o que o aluno faz muitas vezes por sessão é curto e discreto; festa só nos momentos raros.
+   Peça nova usa os tempos e curvas daqui, em vez de número solto. Registro: docs/historico/37-animacoes.md. */
+
+:root{
+  --mov-toque: 120ms;    /* aperto de botão, troca de cor */
+  --mov-surgir: 160ms;   /* algo que aparece no mesmo lugar (resposta, aba) */
+  --mov-entrar: 200ms;   /* questão/cartão novo, item que sai */
+  --mov-janela: 240ms;   /* janela que cobre a tela */
+  --mov-curva-entrar: cubic-bezier(.2, .8, .2, 1);  /* começa rápido e assenta (a mesma do ranking) */
+}
+
+@keyframes mov-surgir{ from{ opacity:0; } to{ opacity:1; } }
+@keyframes mov-entrar{ from{ opacity:0; transform: translateY(6px); } to{ opacity:1; transform:none; } }
+@keyframes mov-carimbo{ 0%{ opacity:0; transform: scale(.4); } 70%{ opacity:1; transform: scale(1.15); } 100%{ transform: scale(1); } }
+
+/* ---------- Aperto: a opção responde no instante do toque ----------
+   Opções lado a lado encolhem um pouco mais; as que ocupam a largura toda, menos (senão a borda "pula"). */
+.mc-option, .challenge-choice-btn{
+  transition: border-color var(--mov-toque) ease, background-color var(--mov-toque) ease, transform var(--mov-toque) ease;
+}
+.exercise-option:not(.disabled):not(.correct):not(.incorrect):active,
+.tf-option:not(.disabled):not(.correct):not(.incorrect):active,
+.speed-option:not(.disabled):not(.correct):not(.incorrect):active,
+#view-conjugaison .cg-choice:not(:disabled):active{ transform: scale(.97); }
+.cloze-option:not(.disabled):not(.correct):not(.incorrect):active,
+.mc-option:not(.disabled):not(.correct):not(.incorrect):active,
+.challenge-choice-btn:not(:disabled):not(.correct):not(.incorrect):active,
+.scenario-option:not(:disabled):active,
+.dlg-opt:not(:disabled):active,
+.reorder-block:not(.used):not(.disabled):active{ transform: scale(.98); }
+
+/* ---------- Erro: a mesma tremidinha em todo exercício de escolher ---------- */
+.mc-option.incorrect, .speed-option.incorrect, .challenge-choice-btn.incorrect{ animation: shakeWrong .4s ease; }
+
+/* ---------- Questão / cartão novo entra igual em todo lugar (a lição já fazia) ---------- */
+.flashcard.mov-entrar, .gram-exercise, .cg-stage, .cg-result, .dictation-result{
+  animation: mov-entrar var(--mov-entrar) var(--mov-curva-entrar);
+}
+/* Revisão, mostrar a resposta: só o que acabou de aparecer surge (o resto do cartão fica parado). */
+.flashcard.mov-revelar > .divider-line,
+.flashcard.mov-revelar > .divider-line ~ :not(.cloze-blank),
+.flashcard.mov-revelar ~ *{ animation: mov-surgir var(--mov-surgir) ease-out both; }
+
+/* ---------- Jogo de pares: o par certo encolhe e some (antes sumia de uma vez) ---------- */
+.match-tile{ transition: opacity var(--mov-entrar) ease, transform var(--mov-entrar) ease; }
+.match-tile.matched{
+  opacity:0; transform: scale(.85);
+  transition: opacity var(--mov-entrar) ease, transform var(--mov-entrar) ease, visibility 0s linear var(--mov-entrar);
+}
+
+/* ---------- Janela da sequência (🔥): entra em vez de aparecer seca; a chama já tem a animação dela ---------- */
+.streak-modal-overlay{ animation: mov-surgir var(--mov-janela) ease-out; }
+.streak-modal-body{ animation: mov-entrar var(--mov-janela) var(--mov-curva-entrar); }
+
+/* ---------- Missão do dia concluída (chip da tela de fim de lição): o ✓ entra carimbado ---------- */
+.lesson-boundary-challenge-chip.done .lbc-chip-check{
+  display:inline-block; animation: mov-carimbo 360ms var(--mov-curva-entrar) 250ms both;
+}
+
+/* ---------- Carregando: a rodinha só aparece se demorar (evita piscar em carregamento rápido) ---------- */
+.profile-loading{ animation: mov-surgir var(--mov-surgir) ease-out 300ms both; }
+
+/* ---------- Troca de aba: mais curta e sem deslizar (é a ação mais repetida do site) ---------- */
+.view.active{ animation: mov-surgir var(--mov-surgir) ease-out; }
+
+/* ---------- Menos movimento (ajuste do celular/computador) ----------
+   Uma regra para o site inteiro: tudo termina na hora, no mesmo estado final de quem vê a animação.
+   Exceção de propósito: a rodinha de carregamento continua girando (devagar), senão parece site travado. */
+@media (prefers-reduced-motion: reduce){
+  *, *::before, *::after{
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    transition-delay: 0s !important;
+    scroll-behavior: auto !important;
+  }
+  .loading-spinner{ animation: loadingSpin 2.4s linear infinite !important; }
+  .p-spinner{ animation: p-giro 2.4s linear infinite !important; }
+}
