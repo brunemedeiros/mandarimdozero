@@ -31,7 +31,9 @@ const STUB = `(function(){
 // Funções que rodam DENTRO da página (iguais nas duas árvores).
 const PAGE_LIB = () => {
   window.__h = (s) => { let h = 2166136261 >>> 0; for (let i = 0; i < s.length; i++){ h ^= s.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; } return h.toString(16); };
-  window.__vis = (el) => { if (!el || !el.isConnected) return false; const r = el.getBoundingClientRect(); if (r.width === 0 && r.height === 0) return false; const s = getComputedStyle(el); return s.visibility !== 'hidden' && s.display !== 'none'; };
+  window.__vis = (el) => { if (!el || !el.isConnected) return false; const r = el.getBoundingClientRect(); if (r.width === 0 && r.height === 0) return false; const s = getComputedStyle(el); return s.visibility !== 'hidden' && s.display !== 'none' && !el.matches('.match-tile.matched'); };
+  // Par certo do jogo de pares (2026-11-25, animações): agora some em 0,2 s em vez de na hora; durante a saída ele já não aceita clique
+  // (pointer-events:none), então conta como invisível, igual a antes.
   // estado salvo, sem o que depende do relógio de parede de verdade (nada: o relógio é falso), resumido por hash + campos-chave
   window.__estado = () => {
     let ser = ''; try { ser = JSON.stringify(serializeState()); } catch (e) { ser = 'ERRO ' + e.message; }
