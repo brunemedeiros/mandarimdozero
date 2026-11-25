@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-9j2wnb8+O/sKppaRzMB2REH/3t8LRy9ujBtMHU+lkYg=' 'sha256-0p9aAkvwyIQxRKXpBugUe1rLIbKm1uOZkji6tbZFfQ8=' 'sha256-x5oCHDaMyQbleR+ZJCF5Zba85j+c7dXKBO5PXVaZ6co=' https://www.googletagmanager.com 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; media-src 'self' data: blob: https://eigjocalzwamisgqilhg.supabase.co; font-src 'self' data:; connect-src 'self' https://eigjocalzwamisgqilhg.supabase.co wss://eigjocalzwamisgqilhg.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com; worker-src 'self'; manifest-src 'self'; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'" data-csp="scripts/csp-atualizar.js">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-9j2wnb8+O/sKppaRzMB2REH/3t8LRy9ujBtMHU+lkYg=' 'sha256-0p9aAkvwyIQxRKXpBugUe1rLIbKm1uOZkji6tbZFfQ8=' 'sha256-Qpg1Qnd3KQehumNsJ7N91FLavQxJRTuxhkPbhg+/aQ4=' https://www.googletagmanager.com 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; media-src 'self' data: blob: https://eigjocalzwamisgqilhg.supabase.co; font-src 'self' data:; connect-src 'self' https://eigjocalzwamisgqilhg.supabase.co wss://eigjocalzwamisgqilhg.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com; worker-src 'self'; manifest-src 'self'; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'" data-csp="scripts/csp-atualizar.js">
 <script src="shared/anti-moldura.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Idiomas com Prof. Brune</title>
@@ -904,6 +904,10 @@ document.getElementById('gate-email-form').addEventListener('submit', async (e) 
   if (error){
     note.textContent = t('gate.login.wrong');
     note.className = 'gate-note err';
+    // O servidor não diz qual dos dois está errado: os dois ficam marcados; o cursor vai para a senha.
+    gateMarkFieldError(document.getElementById('gate-email'), 'gate-login-note');
+    gateMarkFieldError(document.getElementById('gate-password'), 'gate-login-note');
+    document.getElementById('gate-password').focus();
     return;
   }
   await afterAuthResolved(data.user);
@@ -973,7 +977,7 @@ document.getElementById('gate-forgot-form').addEventListener('submit', async (e)
   const btn = document.getElementById('gate-forgot-send-btn');
   const email = document.getElementById('gate-forgot-email').value.trim();
   const note = document.getElementById('gate-forgot-note');
-  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ note.textContent = t('gate.forgotAsk.needEmail'); note.className = 'gate-note err'; return; }
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ note.textContent = t('gate.forgotAsk.needEmail'); note.className = 'gate-note err'; const fe = document.getElementById('gate-forgot-email'); gateMarkFieldError(fe, 'gate-forgot-note'); fe.focus(); return; }
   if (gateForgotBusy) return;
   btn.disabled = true; btn.textContent = t('gate.forgot.sending');
   note.textContent = ''; note.className = 'gate-note';
@@ -1006,7 +1010,7 @@ document.getElementById('gate-verify-form').addEventListener('submit', async (e)
   const token = document.getElementById('gate-code').value.replace(/\D/g, '');
   const note = document.getElementById('gate-verify-note');
   const btn = document.getElementById('gate-verify-btn');
-  if (token.length < 6){ note.textContent = t('gate.verify.incomplete'); note.className = 'gate-note err'; return; }
+  if (token.length < 6){ note.textContent = t('gate.verify.incomplete'); note.className = 'gate-note err'; gateMarkFieldError(document.getElementById('gate-code'), 'gate-verify-note'); return; }
   btn.disabled = true;
   const { data, error } = await supabaseClient.auth.verifyOtp({ email: gateVerifyEmail, token, type: 'email' });
   if (error || !data || !data.user){
@@ -1015,6 +1019,7 @@ document.getElementById('gate-verify-form').addEventListener('submit', async (e)
     // O Supabase usa a mesma mensagem ("expired or invalid") para código vencido e código errado.
     note.textContent = t('gate.verify.invalid');
     note.className = 'gate-note err';
+    gateMarkFieldError(document.getElementById('gate-code'), 'gate-verify-note');
     return;
   }
   btn.disabled = false;
