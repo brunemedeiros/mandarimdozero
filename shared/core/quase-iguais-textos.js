@@ -17,7 +17,8 @@ function addXP(amount, opts){
   // diário 'xp50' (GENERAL_CHALLENGES), que substituiu 'stars40'.
   ensureDailyBucket();
   STATE.daily.xp += amount;
-  if (!(opts && opts.quiet)) showToast(t('toast.xpGain', { amount }), { kind: 'xp' });
+  // Na lição da trilha, "+N" pequeno perto da barra (shared/toast.js, xpPertoDaBarra); fora dela, o aviso de sempre.
+  if (!(opts && opts.quiet) && !(typeof xpPertoDaBarra === 'function' && xpPertoDaBarra(amount))) showToast(t('toast.xpGain', { amount }), { kind: 'xp' });
   // Fase 1 do sistema de notificações (evento "Cliente" -- ver
   // shared/notifications.js): fire-and-forget, o anti-spam (cooldown/
   // daily_cap da categoria "gamificacao") já evita virar spam a cada
@@ -104,9 +105,15 @@ function answerSpeedQuestion(isCorrect, el, chosenIdx){
 
 function onMatchTileClick(btn){
   if (MATCH_STATE.busy) return;
-  if (btn.classList.contains('matched') || btn.classList.contains('flipped')) return;
+  if (btn.classList.contains('matched')) return;
+  if (btn.classList.contains('flipped')){
+    // Carta de áudio já virada: tocar de novo repete o som (não conta como escolha nem como tentativa).
+    if (btn.dataset.audio === '1') matchPlayAudioTile(btn);
+    return;
+  }
 
   btn.classList.add('flipped');
+  if (btn.dataset.audio === '1') matchPlayAudioTile(btn); // toca sozinha ao virar
 
   if (!MATCH_STATE.selected){
     MATCH_STATE.selected = btn;

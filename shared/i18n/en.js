@@ -256,8 +256,10 @@ window.I18N_CATALOG['en'] = {
   'notif.cat.reengajamento': '👋 Come-back reminders', // MÉDIA -- Etapa 4: aprovado pela dona
   'notif.cat.sistema': '⚙️ System', // ALTA
   'notif.cat.amigos': '👥 Friends', // ALTA
+  'notif.cat.cartoes_professora': '📚 New cards from your teacher', // ALTA
   'notif.pref.inAppOnly': 'Friends only has in-app notifications', // ALTA
   'notif.pref.noEmail': 'Friends has no email notifications', // ALTA
+  'notif.pref.emailOnly': 'This notice only exists by email', // ALTA
   'notif.pref.guest': 'Create an account to set up notifications. Guest mode does not save preferences.', // ALTA
   'notif.pref.loadFailed': 'Could not load your preferences right now.', // ALTA
   'notif.pref.sectionTitle': 'Notifications', // ALTA
@@ -381,7 +383,7 @@ window.I18N_CATALOG['en'] = {
   'review.speed.points': '{n} pts', // ALTA
   'review.speed.answered': { one: 'You answered {n} word this round.', other: 'You answered {n} words this round.' }, // ALTA
   'review.back': 'Back', // ALTA
-  'review.practiceMore': 'Practice more', // ALTA
+  'review.practiceMore': 'Keep reviewing', // ALTA
   'review.complete.title': 'Review complete!', // ALTA
   'review.complete.reviewed': { one: 'You reviewed {n} card this session.', other: 'You reviewed {n} cards this session.' }, // ALTA
   'review.session.deckEmptyTitle': 'No cards in this Deck yet', // ALTA
@@ -396,6 +398,10 @@ window.I18N_CATALOG['en'] = {
   'review.cloze.placeholder': 'Type the missing word', // ALTA
   'review.typeAnswer.placeholder': 'Type the answer', // ALTA
   'review.tapToReveal': 'tap to see the answer', // ALTA
+  'review.pressToReveal': 'Space shows the answer', // ALTA
+  'review.match.audio.title': '🔊 With audio', // ALTA
+  'review.match.audio.help': 'Some cards play the word instead of showing the text. Turn it off if you have no sound.', // ALTA
+  'review.match.audio.tileLabel': 'Audio card', // ALTA
   'review.grade.again': 'Again', // MÉDIA -- botão de nota; PT "Errei" = "I got it wrong"; EN segue o padrão Anki
   'review.grade.hard': 'Hard', // ALTA
   'review.grade.good': 'Good', // ALTA
@@ -784,7 +790,7 @@ window.I18N_CATALOG['en'] = {
   'fr.conj.sessionDone': 'Session complete!', // ALTA
   'fr.conj.wellDone': 'Great job!', // ALTA
   'fr.conj.keepPracticing': 'Keep practicing these conjugations.', // ALTA
-  'fr.conj.newSession': 'New session', // ALTA
+  'fr.conj.newSession': 'Finish session', // ALTA
   'fr.conj.verbCounter': 'Verb {i} of {n}', // ALTA
   'fr.conj.currentVerb': 'Current verb', // ALTA
   'fr.conj.regular': 'Regular verb', // ALTA
@@ -1716,6 +1722,7 @@ window.I18N_CATALOG['en'] = {
   'admin.reports.detail.problem': '⚑ Problem', // ALTA
   'admin.reports.detail.notInformed': '(not provided)', // ALTA
   'admin.reports.detail.screenshotView': '📎 View attached screenshot', // ALTA
+  'admin.reports.detail.screenshotError': "Couldn't open the screenshot. Please try again in a moment.", // ALTA
   'admin.reports.detail.screenshotNone': '(no screenshot attached)', // ALTA
   'admin.reports.reply.lastSentTo': 'Last reply sent on {date} to {email}:', // ALTA
   'admin.reports.reply.lastSent': 'Last reply sent on {date}:', // ALTA
@@ -1959,7 +1966,7 @@ window.I18N_CATALOG['en'] = {
   'admin.analytics.dev.type': 'Device type', // ALTA
   'admin.analytics.dev.browser': 'Browser', // ALTA
   'admin.analytics.dev.os': 'Operating system', // ALTA
-  'admin.analytics.dev.osNote': 'Classification by navigator.userAgent (simple heuristic, no library). It is not 100% accurate, but it is the acceptable standard without third-party telemetry.', // ALTA
+  'admin.analytics.dev.osNote': 'Classification by navigator.userAgent (simple heuristic, no library). It is not 100% accurate, but it is enough for the site\'s own measurement (Google Analytics, with consent, is separate).', // ALTA
   'admin.analytics.eng.perSession': 'Exercises/session', // ALTA
   'admin.analytics.eng.reviewsDone': 'Reviews completed', // ALTA
   'admin.analytics.eng.challengesDone': 'Challenges completed', // ALTA
@@ -2210,6 +2217,8 @@ window.I18N_CATALOG['en'] = {
   'ui.profileEdit.featuredBadge': 'Featured badge (shown in the Leaderboard)', // ALTA
   'ui.kbd.title': '⌨️ Keyboard shortcuts', // ALTA
   'ui.kbd.choose': 'Pick an option by its position on screen', // ALTA
+  'ui.kbd.grade': 'In Review, grade the card by the position of the button (with four buttons: Again, Hard, Good, Easy)', // ALTA
+  'ui.kbd.reveal': 'In Review, show the answer of a card', // ALTA
   'ui.kbd.confirm': 'Confirm a typed answer and move on to the next one', // ALTA
   'ui.kbd.replay': 'Play audio again', // ALTA
   'ui.kbd.note': 'The numbers only appear when an exercise has options to choose from, never during typing or the sentence-ordering exercise. "r" repeats the last audio that played on screen.', // ALTA
@@ -2218,6 +2227,8 @@ window.I18N_CATALOG['en'] = {
   'ui.notNow': 'Not now', // ALTA
   'ui.update.title': 'New version available', // ALTA
   'ui.update.body': 'We updated the site. Reload when it\'s convenient to see what\'s new.', // ALTA -- Etapa 7 lote 1b (needs_review)
+  'ui.offline.title': 'You\'re offline', // ALTA -- aviso por cima quando a internet cai (2026-11-13)
+  'ui.offline.body': 'As soon as you\'re back online, you\'ll pick up right where you left off.', // ALTA
   'ui.path.sub14': '14 units organized by communication goal. Complete one unit to unlock the next.', // ALTA
   'ui.zh.unitManualBtn': '📖 Unit manual', // ALTA
   'ui.zh.unitManualTitle': 'Unit manual', // ALTA
@@ -2709,9 +2720,73 @@ window.I18N_CATALOG['en'] = {
   'friends.joint.aria': { one: 'You both studied {n} day in a row', other: 'You both studied {n} days in a row' }, // ALTA
   'friends.suggest.reason.mutual': { one: '{n} mutual friend', other: '{n} mutual friends' }, // ALTA
   'profile.tabFriends': 'Friends', // ALTA
-  'panel.admin.sub': 'Badges, metrics, notifications, reports and plans.', // ALTA
+  'panel.admin.sub': 'Overview, metrics, notifications, reports and plans.', // ALTA
   'panel.tab.badges': 'Badges', // ALTA
   'panel.tab.analytics': 'Analytics', // ALTA
+  'panel.tab.overview': 'Overview', // ALTA
+  'admin.overview.title': 'Overview', // ALTA
+  'admin.overview.sub': 'How accounts and your students are doing, all in one place.', // ALTA
+  'admin.overview.filter.period': 'Period', // ALTA
+  'admin.overview.period.7': '7 days', // ALTA
+  'admin.overview.period.30': '30 days', // ALTA
+  'admin.overview.period.90': '90 days', // ALTA
+  'admin.overview.filter.scope': 'Who', // ALTA
+  'admin.overview.scope.mine': 'My students', // ALTA
+  'admin.overview.scope.others': 'Other accounts', // ALTA
+  'admin.overview.scope.all': 'All accounts', // ALTA
+  'admin.overview.filter.language': 'Language', // ALTA
+  'admin.overview.lang.all': 'All', // ALTA
+  'admin.overview.kpi.students': 'Students', // ALTA
+  'admin.overview.kpi.accounts': 'Accounts', // ALTA
+  'admin.overview.kpi.active': 'Studied in the period', // ALTA
+  'admin.overview.kpi.activeDetail': 'At least 1 day with study', // ALTA
+  'admin.overview.kpi.engagement': 'Average engagement', // ALTA
+  'admin.overview.kpi.engagementDetail': 'Days with study in the last 7 days', // ALTA
+  'admin.overview.kpi.new': 'New sign-ups', // ALTA
+  'admin.overview.kpi.premium': 'Premium', // ALTA
+  'admin.overview.chart.activity.title': 'Visits and study per day', // ALTA
+  'admin.overview.chart.sessions': 'Visits', // ALTA
+  'admin.overview.chart.active': 'Studied', // ALTA
+  'admin.overview.chart.signups.title': 'Sign-ups per day', // ALTA
+  'admin.overview.chart.signups': 'Sign-ups', // ALTA
+  'admin.overview.chart.aria': '{title}: from {from} to {to}, at most {max} in one day.', // ALTA
+  'admin.overview.chart.tableCaption': '{title}: values per day', // ALTA
+  'admin.overview.chart.col.day': 'Day', // ALTA
+  'admin.overview.chart.empty': 'Nothing in this period.', // ALTA
+  'admin.overview.eng.title': 'Engagement in the last 7 days', // ALTA
+  'admin.overview.eng.note': 'Counts days with real study (lesson, review, challenge, dictation, conjugation) today and in the 6 days before, whatever period is chosen. Just opening the site doesn\'t count. Click a band to see who is in it.', // ALTA
+  'admin.overview.band.nenhum': 'None', // ALTA
+  'admin.overview.band.baixo': 'Low', // ALTA
+  'admin.overview.band.medio': 'Medium', // ALTA
+  'admin.overview.band.alto': 'High', // ALTA
+  'admin.overview.band.altissimo': 'Very high', // ALTA
+  'admin.overview.bandRange.nenhum': '0 days', // ALTA
+  'admin.overview.bandRange.baixo': '1 day', // ALTA
+  'admin.overview.bandRange.medio': '2 to 3 days', // ALTA
+  'admin.overview.bandRange.alto': '4 to 5 days', // ALTA
+  'admin.overview.bandRange.altissimo': '6 to 7 days', // ALTA
+  'admin.overview.list.people': { one: '{n} person', other: '{n} people' }, // ALTA
+  'admin.overview.list.days': { one: '{n} day with study', other: '{n} days with study' }, // ALTA
+  'admin.overview.list.newAccount': 'new account (less than 7 days)', // ALTA
+  'admin.overview.list.openFicha': 'Open details', // ALTA
+  'admin.overview.list.empty': 'No one here.', // ALTA
+  'admin.overview.sit.title': 'Students\' status', // ALTA
+  'admin.overview.sit.note': 'Challenges and Dictations don\'t count here yet (only in engagement), so someone can be "High" in engagement and "Stopped" in status.', // ALTA
+  'admin.overview.sit.failed': { one: 'Couldn\'t read {n} student right now; they are left out of the count.', other: 'Couldn\'t read {n} students right now; they are left out of the count.' }, // ALTA
+  'admin.overview.rev.title': 'Reviews done in the period', // ALTA
+  'admin.overview.rev.home': 'At home', // ALTA
+  'admin.overview.rev.class': 'In class', // ALTA
+  'admin.overview.rev.col.student': 'Student', // ALTA
+  'admin.overview.rev.note': 'At home = cards the student answered on the site. In class = cards from Class mode. A review is never counted in both.', // ALTA
+  'admin.overview.rev.error': 'Couldn\'t load the reviews.', // ALTA
+  'admin.overview.plans.title': 'Plan', // ALTA
+  'admin.overview.plans.free': 'Free', // ALTA
+  'admin.overview.plans.premium': 'Premium', // ALTA
+  'admin.overview.plans.note': 'You (admin and teacher) are left out of the counts. Cancelled, expired and pending payment will show up here once there are sales on the site.', // ALTA
+  'admin.overview.foot.tz': 'Days are counted in Brasília time. Analytics still counts in London time (UTC), so the daily numbers there may differ a little.', // ALTA
+  'admin.overview.empty.scope': 'No accounts for this choice.', // ALTA
+  'admin.overview.error': 'Couldn\'t load the Overview.', // ALTA
+  'admin.overview.retry': 'Try again', // ALTA
   'panel.tab.notifications': 'Notifications', // ALTA
   'panel.tab.reports': 'Reports', // ALTA
   'panel.tab.plans': 'Plans', // ALTA
@@ -3361,7 +3436,7 @@ window.I18N_CATALOG['en'] = {
   'rb.generateReady': 'Create cards', // ALTA
   'rb.generated': '{n} cards created.', // ALTA
   'rb.generatedPartial': '{ok} created, {fail} failed.', // ALTA
-  'rb.keys': 'Space shows · 1 Again · 2 Hard · 3 Good (right arrow) · 4 Easy', // ALTA
+  'rb.keys': 'Space shows · 1 Again · 2 Hard · 3 Good · 4 Easy', // ALTA
   'rb.classEmpty': 'No students in the class yet', // ALTA
   'rb.classMembers': '{n} in the class: {names}', // ALTA
   'rb.classPick': 'Class', // ALTA
@@ -3450,6 +3525,82 @@ window.I18N_CATALOG['en'] = {
   'rb.sfDateAdd': 'Add date', // ALTA
   'rb.sfDateDel': 'Remove date', // ALTA
   'rb.sfDates': 'Dates of the next classes', // ALTA
+  'rb.sfNotebook': 'Class notebook', // ALTA
+  'rb.sfNotebookNone': 'No notebook', // ALTA
+  'rb.nbOpen': 'Open notebook', // ALTA
+  'rb.nbChange': 'Change notebook', // ALTA
+  'rb.nbChangeHint': 'Paste the link of the notebook you already have (or just its id). The site never creates a new notebook.', // ALTA
+  'rb.nbUse': 'Use this notebook', // ALTA
+  'rb.nbInvalid': 'I could not find a notebook in that link. Paste the Google Docs link.', // ALTA
+  'rb.nbConfirm': 'Change the notebook of {name}? The nightly routine will start reading the new notebook. Confirm only if it is the right one.', // ALTA
+  'rb.nbPending': 'New notebook chosen. Click Save to apply it.', // ALTA
+  'rb.sfAgenda': 'Calendar names (as they appear in the event title)', // ALTA
+  'rb.sfAgendaAdd': 'Add name', // ALTA
+  'rb.sfAgendaNew': 'New name', // ALTA
+  'rb.sfAgendaDel': 'Remove this name', // ALTA
+  'rb.sfNoAgenda': 'No names yet.', // ALTA
+  'rb.sfLastRead': 'Last notebook reading', // ALTA
+  'rb.sfLastReadHint': 'The nightly routine only reads entries after this date. If you move the date back, it reads again (repeated items are ignored).', // ALTA
+  'rb.sfLastReadClear': 'Clear (read everything)', // ALTA
+  'rb.dangerTitle': 'Danger zone', // ALTA
+  'rb.deleteStudent': 'Delete student…', // ALTA
+  'rb.delTitle': 'Delete for good: {name}', // ALTA
+  'rb.delIntro': 'Archiving hides the student and keeps everything. Deleting removes it forever.', // ALTA
+  'rb.delWill': 'What will be deleted', // ALTA
+  'rb.delItems': 'Bank items: {n}', // ALTA
+  'rb.delRecaps': 'Recaps: {n}', // ALTA
+  'rb.delBlocked': 'This student has {cards} delivered cards, {mem} items with memory and {rev} saved answers. To avoid losing progress, archive instead of deleting.', // ALTA
+  'rb.delTypeName': 'To confirm, type the student name: {name}', // ALTA
+  'rb.delJustArchive': 'I would rather just archive', // ALTA
+  'rb.delForever': 'Delete forever', // ALTA
+  'rb.delDone': 'Student deleted.', // ALTA
+  'rb.archivedDone': 'Student archived.', // ALTA
+  'rb.itemMove': 'Move', // ALTA
+  'rb.moveTitle': 'Move this item to another student', // ALTA
+  'rb.movePick': 'Choose the student', // ALTA
+  'rb.moveConfirm': 'Move', // ALTA
+  'rb.moveNone': 'There is no other active student for this language.', // ALTA
+  'rb.moveDone': 'Item moved.', // ALTA
+  'rb.moveNote': 'An item that already became a card can only go to someone whose cards are delivered to the same place.', // ALTA
+  'rb.itemDelete': 'Delete', // ALTA
+  'rb.itemDeleteConfirm': 'Delete this item forever?', // ALTA
+  'rb.itemDeleted': 'Item deleted.', // ALTA
+  'rb.itemHasCardHint': 'Already a card: use Cut.', // ALTA
+  'rb.moreActions': 'More actions', // ALTA
+  'rb.selSafe': 'Select all non-sensitive', // ALTA
+  'rb.selNone': 'Clear selection', // ALTA
+  'rb.selCount': 'Selected: {n}', // ALTA
+  'rb.batchApprove': 'Approve selected', // ALTA
+  'rb.batchCut': 'Cut selected', // ALTA
+  'rb.batchConfirmApprove': 'Approve {n} items? Each one becomes a card for the people who receive them.', // ALTA
+  'rb.batchConfirmCut': 'Cut {n} items?', // ALTA
+  'rb.batchDone': '{ok} done, {fail} failed.', // ALTA
+  'rb.batchPick': 'Select for batch', // ALTA
+  'rb.dupTitle': 'Possible duplicates', // ALTA
+  'rb.dupHint': 'These records look like the same person (same notebook or similar name).', // ALTA
+  'rb.dupMerge': 'Merge into one…', // ALTA
+  'rb.dupNot': 'Not a duplicate', // ALTA
+  'rb.dupKeep': 'Kept: {name}', // ALTA
+  'rb.dupDrop': 'Removed: {name}', // ALTA
+  'rb.dupSwap': 'Swap which one stays', // ALTA
+  'rb.dupPreview': 'What happens when merging', // ALTA
+  'rb.dupLine': 'Items moving to the record that stays: {moved}. Already there (ignored): {dup}. Recaps moving: {rm}. Already there: {rd}.', // ALTA
+  'rb.dupNoLoss': 'Cards already delivered do not change and item memory is kept. Answers and requests of the repeated items move to the item that stays: nothing is lost.', // ALTA
+  'rb.dupLink': 'The linked account of the record that leaves moves to the record that stays.', // ALTA
+  'rb.dupHistory': 'Moving to the item that stays: {rv} class-mode answers and {rq} student requests.', // ALTA
+  'rb.err.different_targets': 'the two records have different accounts or classes. Unlink one of them before merging.', // ALTA
+  'rb.dupConfirm': 'Merge now', // ALTA
+  'rb.dupCancel': 'Cancel', // ALTA
+  'rb.dupDone': 'Records merged.', // ALTA
+  'rb.dupBlocked': 'Cannot merge: {why}', // ALTA
+  'rb.err.has_card_other_recipient': 'the item already became a card for another person or class.', // ALTA
+  'rb.err.duplicate_has_card': 'a repeated item already became a card. Cut one of them first.', // ALTA
+  'rb.err.duplicate_in_target': 'this item already exists for the other student.', // ALTA
+  'rb.err.language_mismatch': 'both students must have the same language.', // ALTA
+  'rb.err.has_progress': 'this student already has cards or saved memory. Archive instead of deleting.', // ALTA
+  'rb.err.has_card': 'this item already became a card. Use Cut.', // ALTA
+  'rb.err.same_student': 'pick another student.', // ALTA
+  'rb.err.not_authorized': 'not allowed.', // ALTA
   'rb.sfLang': 'Language studied', // ALTA
   'rb.sfName': 'Name', // ALTA
   'rb.sfNeedName': 'Write the student\'s name.', // ALTA
@@ -3537,6 +3688,8 @@ window.I18N_CATALOG['en'] = {
   'panel.classLog.skill.pronuncia': 'Pronunciation', // ALTA
   'panel.classLog.classrooms': 'Classes', // ALTA
   'panel.gcal.formerHint': 'Former students are at the end of the list: the lesson only goes into their history, with no Board notice.', // ALTA
+  'panel.gcal.formerBankGroup': 'Former students without an account (history only)', // ALTA
+  'panel.classLog.formerTag': 'former student', // ALTA
   'panel.classLog.forWhom': 'For whom', // ALTA
   'panel.classLog.moreFields': 'More fields (Observations and Notes)', // ALTA
   'panel.classLog.classroomsHint': 'A class lesson is logged once and shows up for every student in the class.', // ALTA
@@ -4015,6 +4168,24 @@ window.I18N_CATALOG['en'] = {
   'gate.forgot.needEmail': 'Type your email in the field above first.', // ALTA
   'gate.forgot.failed': 'Couldn\'t send the email right now.', // ALTA
   'gate.forgot.sent': 'We sent you a link to reset your password.', // ALTA
+  'gate.forgot.sending': 'Sending...', // ALTA (needs_review)
+  'gate.forgotAsk.title': 'Forgot your password?', // ALTA (needs_review)
+  'gate.forgotAsk.sub': 'No problem. Type your account\'s email and I\'ll send you a link to create a new password.', // ALTA (needs_review)
+  'gate.forgotAsk.submit': 'Send link', // ALTA (needs_review)
+  'gate.forgotAsk.needEmail': 'Type a valid email.', // ALTA (needs_review)
+  'gate.forgotSent.title': 'Link on its way!', // ALTA (needs_review)
+  'gate.forgotSent.from': 'From', // ALTA (needs_review)
+  'gate.forgotSent.sender': 'Prof. Brune', // ALTA (needs_review)
+  'gate.forgotSent.to': 'To', // ALTA (needs_review)
+  'gate.forgotSent.stamp': 'Sent now', // ALTA (needs_review)
+  'gate.forgotSent.bodyBefore': 'Open the email and tap ', // ALTA (needs_review)
+  'gate.forgotSent.bodyButton': 'Create new password', // ALTA (needs_review)
+  'gate.forgotSent.bodyAfter': '. The link is valid for 1 hour.', // ALTA (needs_review)
+  'gate.forgotSent.note': 'Didn\'t get it in a few minutes? Check your spam folder or ask for another link.', // ALTA (needs_review)
+  'gate.forgotSent.resend': 'Resend link', // ALTA (needs_review)
+  'gate.forgotSent.resendIn': 'Resend link in {s} s', // ALTA (needs_review)
+  'gate.forgotSent.back': 'Back to sign in', // ALTA (needs_review)
+  'gate.forgotSent.resent': 'We sent a new link. Use the most recent email.', // ALTA (needs_review)
   'gate.verify.title': 'Confirm your email', // ALTA
   'gate.verify.subBefore': 'We sent a code to ', // ALTA
   'gate.verify.subAfter': '. Enter it here to activate your account.', // ALTA
@@ -4077,6 +4248,33 @@ window.I18N_CATALOG['en'] = {
   'gate.signup.loginLink': 'Log in', // ALTA
   'gate.signup.methodTitle': 'Create your account and start learning {lang}', // ALTA
   'gate.signup.methodSub': 'It\'s free. Choose how you\'d like to sign up.', // ALTA
+  'gate.signup.ageAck': 'I\'m 18 or older, or I have my parent or guardian\'s permission to use the site.', // ALTA
+  'consent.title': 'Cookies', // ALTA
+  'consent.text': 'This site uses cookies to improve your experience and measure visits.', // ALTA
+  'consent.policy': 'Cookie policy', // ALTA
+  'consent.reject': 'Reject optional', // ALTA
+  'consent.accept': 'Accept all', // ALTA
+  'consent.prefs': 'Preferences', // ALTA
+  'consent.prefsTitle': 'Cookie preferences', // ALTA
+  'consent.prefsSub': 'Choose what the site can use. You can change it any time.', // ALTA
+  'consent.necTitle': 'Necessary', // ALTA
+  'consent.necText': 'Sign-in, language, theme and the offline screen. The site doesn\'t work without them.', // ALTA
+  'consent.necAlways': 'Always on', // ALTA
+  'consent.anaTitle': 'Visit measurement', // ALTA
+  'consent.anaText': 'Google Analytics: how many people visit and where they come from. No name or email.', // ALTA
+  'consent.save': 'Save choice', // ALTA
+  'consent.close': 'Close', // ALTA
+  'consent.footer.policy': 'Cookie policy', // ALTA
+  'consent.footer.prefs': 'Cookie preferences', // ALTA
+  'consent.settings.title': 'Privacy and cookies', // ALTA
+  'consent.settings.sub': 'Choose whether the site can measure visits with Google Analytics. You can change it any time.', // ALTA
+  'ageAck.title': 'A quick check', // ALTA
+  'ageAck.sub': 'It takes a second and you only do it once.', // ALTA
+  'ageAck.later': 'Not now', // ALTA
+  'ageAck.confirm': 'Confirm', // ALTA
+  'ageAck.label': 'I\'m 18 or older, or I have my parent or guardian\'s permission to use the site.', // ALTA
+  'ageAck.thanks': 'Thanks, all set!', // ALTA
+  'ageAck.error': 'We couldn\'t save it right now. Please try again in a moment.', // ALTA
   'gate.signup.withEmail': 'Continue with email', // ALTA
   'gate.signup.dataTitle': 'Your details', // ALTA
   'gate.signup.dataSub': 'Your name and your @ appear on your profile.', // ALTA
@@ -4219,11 +4417,20 @@ window.I18N_CATALOG['en'] = {
   'profile.err.photoNotImage': 'Choose an image file (JPG, PNG...).', // ALTA
   'zh.hanzi.reviewAll': '🔁 Review characters', // ALTA
   'loading.phrase.loading': 'Loading...', // ALTA
-  'loading.phrase.oneSec': 'Just a second...', // ALTA
-  'loading.phrase.almost': 'Almost there...', // ALTA
-  'loading.phrase.fetching': 'Getting the data...', // ALTA
-  'loading.phrase.preparing': 'Getting everything ready...', // ALTA
-  'loading.phrase.moment': 'One moment...', // ALTA
+  'loading.opening': 'Opening the site...', // ALTA
+  'loading.progress': 'Loading progress...', // ALTA
+  'loading.cards': 'Loading cards...', // ALTA
+  'loading.challenges': 'Loading challenges...', // ALTA
+  'loading.mural': 'Loading the board...', // ALTA
+  'loading.muralSide': 'Loading class details...', // ALTA
+  'loading.myClasses': 'Loading your classes...', // ALTA
+  'loading.notion': 'Loading Notion...', // ALTA
+  'loading.myCards': 'Loading your cards...', // ALTA
+  'loading.googleCalendar': 'Loading Google Calendar...', // ALTA
+  'loading.calendarLink': 'Loading the calendar link...', // ALTA
+  'loading.publishOptions': 'Loading sharing options...', // ALTA
+  'loading.reviewBank': 'Loading the Review Bank...', // ALTA
+  'loading.notifPrefs': 'Loading preferences...', // ALTA
   'zh.hanzi.radicals': '🧬 Radicals', // ALTA (achado extra: botão e título da tela de Radicais)
   // Etapa 3, lote C (2026-10-19): gerenciador de Tags, excluir Deck, importação cortada, Meus cartões, validação de
   // tags, novo editor, importação .apkg e Decks públicos. Texto pt idêntico ao que estava escrito direto no JS/HTML.

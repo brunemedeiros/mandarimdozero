@@ -69,7 +69,7 @@ async function bootPage(browser, lang, port, theme, viewport){
   page.on('pageerror', e => errors.push(e.message));
   page.on('dialog', d => d.accept());
   await page.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, r => r.abort());
-  await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
+  await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase|\/shared\/vendor\/supabase-js/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
   await page.addInitScript(() => { try { sessionStorage.setItem('guest_mode', '1'); } catch (e) {} });
   await page.goto(`http://127.0.0.1:${port}/${lang}/index.html`);
   await page.waitForFunction(() => typeof STATE !== 'undefined' && STATE.cards && STATE.cards.length > 0 && CURRENT_USER === false, null, { timeout: 15000 });
@@ -175,7 +175,8 @@ const ratio = (linha, fundo) => { const l = parse(linha), f = parse(fundo); cons
     // Configurar
     await page.evaluate(() => openReviewSettingsModal());
     check(L + ': Configurar dentro do painel', await page.evaluate(() => document.querySelector('.review-settings-modal').classList.contains('painel')));
-    const x = await page.evaluate(() => { const b = document.querySelector('.review-settings-modal .app-modal-close').getBoundingClientRect(); return [b.width, b.height]; });
+    // A janela entra crescendo de 96% para 100% em 0,24 s (animações, 2026-11-25): mede o tamanho final, não o do meio da entrada.
+    const x = await page.evaluate(() => { document.querySelectorAll('.app-modal-overlay, .app-modal').forEach(el => el.getAnimations().forEach(a => a.finish())); const b = document.querySelector('.review-settings-modal .app-modal-close').getBoundingClientRect(); return [b.width, b.height]; });
     check(L + ': X com área de toque ' + (mobile ? '44px' : 'normal') + ' ' + x, mobile ? (x[0] >= 44 && x[1] >= 44) : x[0] >= 32);
     await page.evaluate(() => closeReviewSettingsModal());
     // Adicionar

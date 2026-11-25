@@ -21,7 +21,7 @@ async function signupByEmail(page, email, password, opts){
   await page.waitForSelector('#gate-signup-course', { state: 'visible' });
   await page.click(`#signup-grid .lang-card[data-lang="${opts.lang || 'fr'}"]`);
   await page.waitForSelector('#gate-signup-method', { state: 'visible' });
-  await page.click('#signup-email-btn');
+  await page.check('#signup-age-ack'); await page.click('#signup-email-btn');
   await page.waitForSelector('#gate-signup-data', { state: 'visible' });
   await page.fill('#signup-name', opts.name || 'Nova Pessoa');
   await page.waitForFunction(() => /livre|available/.test(document.getElementById('signup-arroba-msg').textContent), null, { timeout: 5000 });
@@ -78,7 +78,7 @@ const GATE_STUB = `window.supabase = { createClient: () => {
     const errors = [];
     page.on('pageerror', e => errors.push(e.message));
     await page.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, r => r.abort());
-    await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase/, r => r.fulfill({ contentType: 'text/javascript', body: GATE_STUB }));
+    await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase|\/shared\/vendor\/supabase-js/, r => r.fulfill({ contentType: 'text/javascript', body: GATE_STUB }));
     // navegador que já estudou como convidado: antes entrava direto; agora vê o login
     await page.addInitScript(() => { try { localStorage.setItem('currentLearningLanguage', 'french'); localStorage.setItem('lastLanguage', 'french'); sessionStorage.setItem('guest_mode', '1'); } catch (e) {} });
     await page.goto(`http://127.0.0.1:${port}/index.html`);
@@ -101,6 +101,7 @@ const GATE_STUB = `window.supabase = { createClient: () => {
     await page.fill('#gate-code', '123456'); await page.click('#gate-verify-btn');
     await page.waitForSelector('#gate-choose-experience', { state: 'visible' });
     L('depois do código grava o @ escolhido e o nome', await page.evaluate(() => window.__calls.some(c => c[0] === 'rpc' && c[1][0] === 'claim_my_username' && c[1][1].p_username === 'nova.pessoa' && c[1][1].p_display_name === 'Nova Pessoa')));
+    L('depois do código grava a confirmação de idade (ack_my_age)', await page.evaluate(() => window.__calls.some(c => c[0] === 'rpc' && c[1][0] === 'ack_my_age')));
     L('cadastro manda o nome também (full_name)', await page.evaluate(() => window.__calls.some(c => c[0] === 'signUp' && c[1].options.data.full_name === 'Nova Pessoa')));
     L('curso escolhido no passo 1 segue sem perguntar de novo', await page.evaluate(() => document.getElementById('gate-exp-title').textContent === 'Você já sabe algo de francês?'));
     L('código certo confirma e segue para a escolha de idioma', await page.evaluate(() => window.__calls.some(c => c[0] === 'verifyOtp' && c[1].email === 'nova@x.com' && c[1].token === '123456' && c[1].type === 'email')));
@@ -213,7 +214,7 @@ const GATE_STUB = `window.supabase = { createClient: () => {
     const errors = [];
     page.on('pageerror', e => errors.push(e.message));
     await page.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, r => r.abort());
-    await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
+    await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase|\/shared\/vendor\/supabase-js/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
     await page.addInitScript(() => { try { sessionStorage.setItem('guest_mode', '1'); } catch (e) {} });
     await page.goto(`http://127.0.0.1:${port}/${lang}/index.html`);
     await page.waitForFunction(() => typeof renderPublicProfileInto === 'function');

@@ -89,6 +89,9 @@ async function openApp(browser, base, app, o){
   const ctx = await browser.newContext({ viewport: { width: o.width, height: mobile ? 844 : 860 }, deviceScaleFactor: o.dpr || 1, serviceWorkers: 'block',
     locale: o.lang, timezoneId: 'America/Sao_Paulo', hasTouch: mobile, isMobile: mobile });
   await ctx.addInitScript(({ lang }) => { try { localStorage.setItem('ui-language', lang); localStorage.setItem('ui-language-gate', lang); } catch (e) {} }, { lang: o.lang });
+  // A janela de confirmação de idade (Fase P, shared/age-ack.js) aparece para conta sem a data e cobriria o 🔥 e o ⭐:
+  // aqui a pessoa já escolheu "Agora não" nesta visita (a janela tem o próprio teste em tests/privacidade-padrao/).
+  await ctx.addInitScript(() => { try { sessionStorage.setItem('age-ack-later', '1'); } catch (e) {} });
   const page = await ctx.newPage();
   const errs = []; page.on('pageerror', e => errs.push(String(e)));
   await page.clock.setFixedTime(new Date(NOW));
@@ -96,7 +99,7 @@ async function openApp(browser, base, app, o){
   const st = STATES[o.state || 'ativa'];
   const spec = { blockKey: o.lang === 'en' ? BLOCK[app] + '@en' : BLOCK[app], lang: o.lang, streak: st.streak, last: st.last, log: st.log,
     duo: o.duo || st.duo, cards: CARDS, xp: o.xp || XP_BETTER, account: o.account || null };
-  await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase/, r => r.fulfill({ contentType: 'text/javascript', body: STUB(spec) }));
+  await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase|\/shared\/vendor\/supabase-js/, r => r.fulfill({ contentType: 'text/javascript', body: STUB(spec) }));
   await page.goto(`${base}/${app}/index.html`);
   await page.waitForFunction(() => typeof CURRENT_USER !== 'undefined' && CURRENT_USER && CURRENT_USER.id && progressLoadedOk, null, { timeout: 25000 });
   await page.waitForTimeout(900);

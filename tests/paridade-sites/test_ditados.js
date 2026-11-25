@@ -97,7 +97,7 @@ async function fingerprint(browser, root){
   page.on('pageerror', e => errors.push(String(e)));
   await page.clock.install({ time: new Date('2026-10-14T12:00:00Z') });
   await page.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, r => r.abort());
-  await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
+  await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase|\/shared\/vendor\/supabase-js/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
   // mp3 de frase: s1 existe, os outros dão 404 (para cair na voz do navegador)
   await page.addInitScript(() => {
     try { sessionStorage.setItem('guest_mode', '1'); localStorage.setItem('ui-language', 'pt-BR'); } catch (e) {}
@@ -114,6 +114,8 @@ async function fingerprint(browser, root){
     HTMLMediaElement.prototype.play = function(){ window.__plays.push(this.src.replace(/^https?:\/\/[^/]+/, '')); return Promise.resolve(); };
     window.__toasts = []; const st = window.showToast; window.showToast = (m) => { window.__toasts.push(m); };
     showStreakCelebration = () => {};
+    // Ditados passaram a dar XP (decisão da autora, 2026-11-23): o XP mexe no estado e no resultado, então aqui fica DESLIGADO nos dois lados (o antes não tem). Teste do XP: tests/ditado/.
+    if (typeof dictationXP === 'function') dictationXP = () => 0;
   });
   const out = {};
   const html = (sel) => page.evaluate((s) => { const e = document.querySelector(s); return e ? e.innerHTML : null; }, sel);

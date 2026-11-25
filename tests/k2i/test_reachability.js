@@ -70,7 +70,7 @@ async function bootPage(browser, lang, port){
   const errors = [];
   page.on('pageerror', e => errors.push(e.message));
   await page.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, r => r.abort());
-  await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
+  await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase|\/shared\/vendor\/supabase-js/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
   await page.addInitScript(() => { try { sessionStorage.setItem('guest_mode', '1'); } catch (e) {} });
   await page.goto(`http://127.0.0.1:${port}/${lang}/index.html`);
   await page.waitForFunction(() => typeof STATE !== 'undefined' && STATE.cards && STATE.cards.length > 0 && CURRENT_USER === false, null, { timeout: 15000 });
@@ -155,8 +155,9 @@ async function bootPage(browser, lang, port){
     check(lang + ' helpers chamados (instrumentação viva)', hits.total > 50, hits);
     check(lang + ' NENHUMA chamada dos helpers com objeto sem cardInstance (exceto pseudo-opções MC)', hits.legacy.length === 0, hits.legacy.slice(0, 5));
     check(lang + ' pseudo-opções MC (displayAnswerText) exercitadas', hits.pseudo > 0, hits);
-    // Fronteira: card nativo nunca usa campos legados soltos
-    const b = await ev(() => { const c = STATE.cards.find(x => x.origin === 'study'); return { hasFront: 'front' in c, hasBackHanzi: 'back_hanzi' in c, prompt: cardPromptText(c), answer: cardAnswerText(c), ok: hasPlainFrontBack(c) }; });
+    // Fronteira: card nativo nunca usa campos legados soltos. O texto exibido pode existir em MEMÓRIA (cópia usada para trocar
+    // a palavra pelo idioma do site, desde 2026-10-06); o que vale é o save não levar front/back_hanzi e o texto vir do CardInstance.
+    const b = await ev(() => { const c = STATE.cards.find(x => x.origin === 'study'); const sv = serializeCardsForSave([c])[0]; return { hasFront: 'front' in sv, hasBackHanzi: 'back_hanzi' in sv, prompt: cardPromptText(c), answer: cardAnswerText(c), ok: hasPlainFrontBack(c) }; });
     check(lang + ' card da trilha: sem campos soltos front/back_hanzi; texto vem do CardInstance', !b.hasFront && !b.hasBackHanzi && b.prompt && b.answer && b.ok === true, b);
     check(lang + ' sem pageerror', errors.length === 0, errors);
     await ctx.close();

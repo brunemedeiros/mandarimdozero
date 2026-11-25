@@ -22,7 +22,7 @@ async function first(browser, port, lang){
     const page = await ctx.newPage(); const errors = [];
     page.on('pageerror', e => errors.push(e.message));
     await page.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, r => r.abort());
-    await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
+    await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase|\/shared\/vendor\/supabase-js/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
     await page.addInitScript(() => { try { sessionStorage.setItem('guest_mode', '1'); localStorage.setItem('courses-per-site-language', '0'); } catch (e) {} }); // comportamento antigo (chave de emergência); o novo está em tests/curso-progresso/test_*_cursos_browser.js
     await page.goto(`http://127.0.0.1:${port}/${lang}/index.html`);
     await page.waitForFunction(() => typeof STATE !== 'undefined' && STATE.cards && STATE.cards.length > 0 && CURRENT_USER === false, null, { timeout: 20000 });
@@ -34,7 +34,10 @@ async function first(browser, port, lang){
   check(`${lang}: conta nova abre a pergunta`, (await arm(page, true)) === 'flex');
   check(`${lang}: navegador em inglês sugere English`, await page.evaluate(() => document.getElementById('ui-language-first-en').classList.contains('btn-primary') && !document.getElementById('ui-language-first-pt').classList.contains('btn-primary')));
   await page.click('#ui-language-first-en');
-  await page.waitForFunction(() => getUiLang() === 'en', null, { timeout: 10000 });
+  // getUiLang() vira 'en' na hora do clique, mas a janela só fecha (e a escolha só vai para a conta) depois que o catálogo em
+  // inglês termina de carregar (await setUiLang, shared/auth.js). Com a máquina ocupada, conferir antes disso falhava (2026-11-13):
+  // espera o estado final.
+  await page.waitForFunction(() => getUiLang() === 'en' && document.getElementById('ui-language-first-modal').style.display === 'none', null, { timeout: 15000 });
   check(`${lang}: escolher English troca e fecha`, await page.evaluate(() => document.getElementById('ui-language-first-modal').style.display === 'none' && localStorage.getItem('ui-language') === 'en'));
   check(`${lang}: a escolha vai para a conta`, await page.evaluate(() => progressAccountUiLanguage === 'en' || pendingAccountUiLanguage === 'en'));
   check(`${lang}: nunca pergunta de novo neste navegador`, (await arm(page, true)) === 'none');

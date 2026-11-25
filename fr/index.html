@@ -2,6 +2,8 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-vaIS6e4qO1s+IXrruThLop9QgnsTu/f2TROQsajFxg0=' 'sha256-Ksho7Sy7qDSkpip1Kaqjsx0VLmw80PUBgXZ2ln+o6tQ=' https://www.googletagmanager.com 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; media-src 'self' data: blob: https://eigjocalzwamisgqilhg.supabase.co; font-src 'self' data:; connect-src 'self' https://eigjocalzwamisgqilhg.supabase.co wss://eigjocalzwamisgqilhg.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com; worker-src 'self'; manifest-src 'self'; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'" data-csp="scripts/csp-atualizar.js">
+<script src="../shared/anti-moldura.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Francês com Prof. Brune</title>
 <link rel="manifest" href="manifest.json">
@@ -45,9 +47,9 @@ try{
   }
 }catch(e){ /* localStorage indisponível — cai na preferência do sistema */ }
 </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="../shared/vendor/jszip-3.10.1/jszip.min.js"></script>
+<script src="../shared/vendor/sqljs-1.8.0/sql-wasm.js"></script>
+<script src="../shared/vendor/supabase-js-2.119.2/supabase.js"></script>
 <link rel="preload" href="../shared/fonts/nunito-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="../shared/fonts/nunito.css">
 <!-- Design System do painel (tudo escopado em .painel: não muda nada fora dele). Ver .claude/rules/painel-design-system.md -->
@@ -56,7 +58,11 @@ try{
 <link rel="stylesheet" href="../shared/painel/painel-componentes.css">
 <link rel="stylesheet" href="../shared/review-bank.css">
 <link rel="stylesheet" href="../shared/licao-feedback.css">
+<link rel="stylesheet" href="../shared/revisao-teclado.css">
+<link rel="stylesheet" href="../shared/combinar-audio.css">
 <link rel="stylesheet" href="../shared/gramatica-cenario.css">
+<link rel="stylesheet" href="../shared/age-ack.css">
+<link rel="stylesheet" href="../shared/consent.css">
 <style>
 :root{
   /* Design tokens — paleta própria do Francês do Zero (azul como cor
@@ -92,6 +98,9 @@ try{
   --jade: #3A7359;           /* verde — sucesso/acerto (funcional, fora da paleta de marca) */
   /* Caixas de sucesso com texto/check (Continuar do acerto, ✓ de concluído): verde + branco, 5,6:1 nos dois temas (decisão da autora, 2026-10-22). */
   --success-fill: #3A7359; --on-success-fill: #FFFFFF;
+  /* Vermelho de erro como FUNDO de botão com texto (Continuar do erro), igual nos dois temas: no escuro o --error-red
+     fica claro (#FF6B5C) e não aguenta texto branco. Decisão da autora, 2026-11-15. */
+  --error-fill: #D62619; --on-error-fill: #FFFFFF;
   /* Botões de nota da Revisão e do Banco (decisão da autora, 2026-10-28): cores fixas, iguais nos dois temas e nos dois idiomas, texto branco.
      Difícil usa o amarelo exato da Revisão no escuro (#C9973A); branco sobre ele dá 2,6:1 (escolha da autora, abaixo do AA). */
   --grade-fill-again: #D62619; --grade-fill-hard: #C9973A; --grade-fill-good: #2879B3; --grade-fill-easy: #3A7359; --on-grade-fill: #FFFFFF;
@@ -407,7 +416,7 @@ a.pill:hover{ border-color: var(--imperial-gold); }
   flex:1; display:flex; align-items:center; justify-content:center; gap:6px;
   padding:10px 8px; border:none; background:transparent; cursor:pointer;
   font-family: var(--font-body); font-weight:700; font-size: 14px; color: var(--ink-soft);
-  border-radius: 9px; transition: all .15s ease; white-space:nowrap; min-width:fit-content;
+  border-radius: 9px; transition: color .15s ease, background-color .15s ease, border-color .15s ease, box-shadow .15s ease, transform .15s ease, opacity .15s ease; white-space:nowrap; min-width:fit-content;
 }
 .tab-btn.active{ background: var(--paper); color: var(--seal-red-dark); box-shadow: var(--shadow-card); }
 .tab-btn:hover:not(.active){ color: var(--ink); }
@@ -427,11 +436,13 @@ a.pill:hover{ border-color: var(--imperial-gold); }
    palavra. Mesmo breakpoint (480px) já usado pro ZH -- lá nunca truncava
    porque tem só 3 abas em vez de 4, então nunca precisou de ajuste. */
 @media (max-width: 480px){
-  .brand-text p{ display:none; }
-  .brand-text h1{ font-size:13px; }
+  /* Celular: no topo fica só o logo; o idioma já aparece na bandeira à direita (decisão da autora, 2026-11-15, igual em
+     todos os sites). O nome continua lá para leitor de tela, só some da vista. */
+  .brand-text{ position:absolute; width:1px; height:1px; margin:-1px; padding:0; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0; }
   .brand-seal{ width:34px; height:34px; }
-  .stats-pills{ gap:3px; }
-  .stats-pills .pill{ padding:5px 6px; }
+  /* Sino e ⚑ redondos (44 px, alvo de toque mínimo), como a bandeira do idioma. */
+  .notifications-pill, .report-topbar-pill{ min-width:44px; justify-content:center; }
+  .stats-pills{ gap:6px; }
   #user-label{ display:none; } /* "XP" fica visível ao lado do número também no celular (decisão da dona, 2026-10-29) */
 }
 /* Em telas bem estreitas, as 4 abas não cabiam numa linha só --
@@ -854,7 +865,7 @@ body.lesson-focus #pwa-update-banner{ display:none !important; }
 .lesson-close-btn{
   flex-shrink:0; width:36px; height:36px; border-radius:50%; border:1px solid var(--paper-line);
   background: var(--paper); color: var(--ink-soft); font-size:16px; cursor:pointer;
-  display:flex; align-items:center; justify-content:center; transition: all .15s ease; font-family: var(--font-body);
+  display:flex; align-items:center; justify-content:center; transition: color .15s ease, background-color .15s ease, border-color .15s ease, box-shadow .15s ease, transform .15s ease, opacity .15s ease; font-family: var(--font-body);
 }
 .lesson-close-btn:hover{ border-color: var(--imperial-gold); color: var(--ink); }
 .lesson-progress-track{ flex:1; height:8px; background: var(--paper-warm); border-radius:4px; overflow:hidden; }
@@ -939,7 +950,7 @@ body.lesson-focus #pwa-update-banner{ display:none !important; }
 .dlg-avatar{ flex:0 0 auto; display:flex; flex-direction:column; align-items:center; gap:2px; width:46px; }
 .dlg-emoji{ width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:20px; background: var(--brand-fill); color: var(--on-brand-fill); font-weight:800; }
 .dlg-row.b .dlg-emoji{ background: var(--imperial-gold); color: var(--ink); }
-.dlg-name{ font-size:10.5px; font-weight:800; color: var(--ink-soft); max-width:60px; text-align:center; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.dlg-name{ font-size:10.5px; font-weight:800; color: var(--ink-soft); max-width:64px; text-align:center; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .dlg-bubble{
   border-radius:16px; padding:10px 13px; border:2px solid transparent; min-width:0;
   transition: transform .2s ease, box-shadow .2s ease;
@@ -1084,14 +1095,11 @@ body.lesson-focus #pwa-update-banner{ display:none !important; }
    nota da unidade), num único bloco -- sem um "Rever conteúdo" à parte, e
    sem uma segunda caixa dentro da primeira: mesma superfície do painel pai. */
 .wrong-feedback-why{ margin-bottom:0; }
-.wrong-feedback-why-label{ font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--error-red); font-weight:800; margin-bottom:8px; }
+.wrong-feedback-why-label{ font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-soft); font-weight:800; margin-bottom:8px; }
 .wrong-feedback-why .usage-note-body{ font-size:14.5px; margin:0; text-align:left; }
 .wrong-feedback-why .usage-note-title{ text-align:left; font-size:13.5px; font-weight:800; margin:12px 0 6px; }
 .wrong-feedback-why .usage-note-title:first-child{ margin-top:0; }
-.wrong-feedback-why .grammar-note-table{ width:100%; border-collapse:collapse; margin:8px 0; font-size:13px; }
-.wrong-feedback-why .grammar-note-table td{ padding:5px 8px; border-bottom:1px solid var(--paper-line); }
-.wrong-feedback-why .grammar-note-example{ font-size:13px; color: var(--ink-soft); margin-top:6px; }
-.wrong-feedback-why .grammar-note-sep{ border:none; border-top:1px solid var(--paper-line); margin:12px 0; }
+/* Tabela de nota de gramática dentro do painel de erro: shared/licao-feedback.css, comum aos sites. */
 
 /* Botão "Continuar" é só mais um filho de .feedback-card-body -- herda o
    padding do cartão nos 4 lados (mesma margem que a caixa de conteúdo acima
@@ -1104,10 +1112,15 @@ body.lesson-focus #pwa-update-banner{ display:none !important; }
 .wrong-feedback-continue, .correct-feedback-continue{
   display:block; width:100%; margin-top:18px;
 }
-/* Vermelho mais escuro e menos saturado que --error-red puro; par background+color
-   revisado junto (texto branco fixo, legível nos dois temas). */
-button.wrong-feedback-continue{ background: var(--error-red); color: var(--on-brand-fill); }
-button.correct-feedback-continue{ background: var(--success-fill); color: var(--on-success-fill); }
+/* Continuar dos painéis de acerto e erro (decisão da autora, 2026-11-15, igual em todos os sites): fundo verde ou
+   vermelho fixo com texto branco nos dois temas, e o "degrau" embaixo num tom MAIS ESCURO da cor do próprio botão
+   (mesma receita do .btn-primary), nunca a cor da marca embaixo de um botão verde ou vermelho. */
+button.correct-feedback-continue{ background: var(--success-fill); color: var(--on-success-fill);
+  box-shadow: 0 var(--btn-depth) 0 color-mix(in srgb, var(--success-fill) 62%, #000); }
+button.wrong-feedback-continue{ background: var(--error-fill); color: var(--on-error-fill);
+  box-shadow: 0 var(--btn-depth) 0 color-mix(in srgb, var(--error-fill) 62%, #000); }
+button.correct-feedback-continue:active:not(:disabled){ box-shadow: 0 2px 0 color-mix(in srgb, var(--success-fill) 62%, #000); }
+button.wrong-feedback-continue:active:not(:disabled){ box-shadow: 0 2px 0 color-mix(in srgb, var(--error-fill) 62%, #000); }
 
 /* ---------- Passos de unidade de gramática (blocos, estilo Busuu) ---------- */
 .gram-block-counter{ text-align:center; font-size:12.5px; font-weight:800; color: var(--ink-soft); margin-bottom:14px; }
@@ -1119,6 +1132,8 @@ button.correct-feedback-continue{ background: var(--success-fill); color: var(--
 .gram-block-title{ margin:0 0 10px; font-size:19px; color: var(--brand-purple); }
 .gram-block.wrapup .gram-block-title{ color: var(--seal-red-dark); }
 .gram-block-body{ margin:0; font-size:14.5px; line-height:1.6; color: var(--ink); text-align:left; }
+/* Negrito das explicações na cor de destaque do site (azul no fr, vermelho no zh); decisão da autora, 2026-11-15. */
+.gram-block-body strong{ color: var(--seal-red-dark); }
 
 .gram-block-examples{
   margin-top:18px; text-align:left; background: var(--paper); border:1px solid var(--paper-line);
@@ -1139,6 +1154,7 @@ button.correct-feedback-continue{ background: var(--success-fill); color: var(--
 </style>
 <!-- Botão redondo de áudio (🔊): peça comum em shared/audio-btn.css, ligada aqui para manter a ordem da cascata. -->
 <link rel="stylesheet" href="../shared/audio-btn.css">
+<link rel="stylesheet" href="../shared/sem-internet.css">
 <style>
 
 /* ---------- Fase 8a: imagem/múltipla escolha no flashcard (ver CLAUDE.md) ---------- */
@@ -1181,7 +1197,7 @@ button.correct-feedback-continue{ background: var(--success-fill); color: var(--
 .know-btn{
   background: var(--paper-warm); border:1px solid var(--paper-line); border-radius:999px;
   padding:6px 12px; font-family: var(--font-body); font-weight:700; font-size:11.5px;
-  color: var(--ink-soft); cursor:pointer; white-space:nowrap; transition: all .15s ease;
+  color: var(--ink-soft); cursor:pointer; white-space:nowrap; transition: color .15s ease, background-color .15s ease, border-color .15s ease, box-shadow .15s ease, transform .15s ease, opacity .15s ease;
 }
 .know-btn:hover{ border-color: var(--imperial-gold); color: var(--seal-red-dark); }
 .know-btn.known{ background: rgba(58,115,89,0.14); border-color: var(--jade); color: var(--jade); }
@@ -1238,7 +1254,7 @@ button.correct-feedback-continue{ background: var(--success-fill); color: var(--
 .exercise-option{
   position:relative;
   background: var(--paper); border:2px solid var(--paper-line); border-radius:12px; padding:32px 12px 16px;
-  cursor:pointer; font-family: var(--font-body); text-align:center; transition: all .12s ease;
+  cursor:pointer; font-family: var(--font-body); text-align:center; transition: color .12s ease, background-color .12s ease, border-color .12s ease, box-shadow .12s ease, transform .12s ease, opacity .12s ease;
   display:flex; flex-direction:column; gap:4px; align-items:center;
 }
 /* Atalho de teclado 1-4 -- discreto, canto superior esquerdo, só aparece
@@ -1259,7 +1275,7 @@ button.correct-feedback-continue{ background: var(--success-fill); color: var(--
   font-size:10px; font-weight:800; font-family: var(--font-body);
   display:flex; align-items:center; justify-content:center; pointer-events:none;
 }
-.exercise-option:hover{ border-color: var(--imperial-gold); transform: translateY(-1px); }
+@media (hover:hover) and (pointer:fine){ .exercise-option:hover{ border-color: var(--imperial-gold); transform: translateY(-1px); } }
 .exercise-option .opt-text{ font-size:14px; font-weight:700; color: var(--ink); }
 .exercise-option.correct{ border-color: var(--jade); background: rgba(58,115,89,0.12); }
 .exercise-option.incorrect{ border-color: var(--error-red); background: rgba(214,38,25,0.10); animation: shakeWrong .4s ease; }
@@ -1279,9 +1295,9 @@ button.correct-feedback-continue{ background: var(--success-fill); color: var(--
 .tf-option{
   flex:1; background: var(--paper); border:2px solid var(--paper-line); border-radius:12px;
   padding:16px 12px; cursor:pointer; font-family: var(--font-body); font-size:15px; font-weight:800;
-  color: var(--ink); text-align:center; transition: all .12s ease;
+  color: var(--ink); text-align:center; transition: color .12s ease, background-color .12s ease, border-color .12s ease, box-shadow .12s ease, transform .12s ease, opacity .12s ease;
 }
-.tf-option:hover{ border-color: var(--imperial-gold); transform: translateY(-1px); }
+@media (hover:hover) and (pointer:fine){ .tf-option:hover{ border-color: var(--imperial-gold); transform: translateY(-1px); } }
 .tf-option.correct{ border-color: var(--jade); background: rgba(58,115,89,0.12); }
 .tf-option.incorrect{ border-color: var(--error-red); background: rgba(214,38,25,0.10); animation: shakeWrong .4s ease; }
 .tf-option.disabled{ pointer-events:none; opacity:.6; }
@@ -1306,9 +1322,9 @@ button.correct-feedback-continue{ background: var(--success-fill); color: var(--
   position:relative;
   background: var(--paper); border:2px solid var(--paper-line); border-radius:12px;
   padding:13px 40px; cursor:pointer; font-family: var(--font-body); font-size:15px; font-weight:700;
-  color: var(--ink); text-align:center; transition: all .12s ease;
+  color: var(--ink); text-align:center; transition: color .12s ease, background-color .12s ease, border-color .12s ease, box-shadow .12s ease, transform .12s ease, opacity .12s ease;
 }
-.cloze-option:hover{ border-color: var(--imperial-gold); transform: translateY(-1px); }
+@media (hover:hover) and (pointer:fine){ .cloze-option:hover{ border-color: var(--imperial-gold); transform: translateY(-1px); } }
 .cloze-option.correct{ border-color: var(--jade); background: rgba(58,115,89,0.12); }
 .cloze-option.incorrect{ border-color: var(--error-red); background: rgba(214,38,25,0.10); animation: shakeWrong .4s ease; }
 .cloze-option.disabled{ pointer-events:none; opacity:.6; }
@@ -1355,13 +1371,13 @@ button.correct-feedback-continue{ background: var(--success-fill); color: var(--
 .cloze-type-wrap input:disabled ~ .fr-accent-picker .fr-accent-key{ pointer-events:none; opacity:.5; }
 
 /* ---------- Tela final "Parabéns" (estilo Busuu) ---------- */
-.lesson-complete{ text-align:center; padding: 20px 4px; }
-.lesson-complete-icon{ font-size:52px; margin-bottom:8px; }
-.lesson-complete h2{ margin:0 0 18px; font-size:22px; }
+</style>
+<!-- Tela de conclusão única (.lesson-complete + partes opcionais): peça comum em shared/conclusao.css, ligada aqui para manter a ordem da cascata. -->
+<link rel="stylesheet" href="../shared/conclusao.css">
+<style>
 /* Tela leve entre lições da mesma unidade (Modelo B) -- reaproveita
    .lesson-complete/.lesson-complete-icon acima, só acrescenta o nome da
    lição e, quando há cartões devidos, um aviso que puxa pro Flashcard. */
-.lesson-boundary-title{ font-size:15px; color: var(--ink-soft); margin: -8px 0 18px; }
 .lesson-boundary-due{
   display:inline-block; margin: 0 0 8px; padding:8px 16px; border-radius:999px;
   background: rgba(29,90,130,0.08); color: var(--seal-red-dark); font-weight:700; font-size:13.5px;
@@ -1377,10 +1393,6 @@ button.correct-feedback-continue{ background: var(--success-fill); color: var(--
 .lesson-boundary-challenge-chip.done{ background: rgba(227,179,65,0.18); color: var(--seal-red-dark); }
 .lbc-chip-count{ font-weight:800; opacity:.75; flex-shrink:0; }
 .lbc-chip-check{ font-weight:800; flex-shrink:0; }
-.lesson-complete-stats{ display:flex; gap:12px; margin-bottom:22px; }
-.lc-stat{ flex:1; background: var(--paper-warm); border:1px solid var(--paper-line); border-radius: var(--radius); padding:14px; }
-.lc-stat-label{ font-size:11px; text-transform:uppercase; letter-spacing:.05em; color: var(--ink-soft); font-weight:800; margin-bottom:6px; }
-.lc-stat-value{ font-size:24px; font-weight:800; color: var(--seal-red-dark); }
 
 /* Tela "Unidade concluída!" (Fase 4) -- lista de competências/objetivo
    comunicacional, mesmo padrão visual de .module-skills (Tier 4/6) mas em
@@ -1513,7 +1525,7 @@ button.correct-feedback-continue{ background: var(--success-fill); color: var(--
 .reorder-blocks{ display:flex; flex-wrap:wrap; gap:12px; justify-content:center; padding:4px 0; }
 .reorder-block{
   background: var(--paper); border:2px solid var(--paper-line); border-radius:12px; padding:12px 16px; min-height:48px;
-  cursor:pointer; font-family: var(--font-body); transition: all .12s ease; display:flex; flex-direction:column; gap:2px; align-items:center;
+  cursor:pointer; font-family: var(--font-body); transition: color .12s ease, background-color .12s ease, border-color .12s ease, box-shadow .12s ease, transform .12s ease, opacity .12s ease; display:flex; flex-direction:column; gap:2px; align-items:center;
   font-weight:700; font-size:16px;
 }
 .reorder-target{ margin-bottom:14px; }
@@ -1528,7 +1540,7 @@ button.correct-feedback-continue{ background: var(--success-fill); color: var(--
 .reorder-blocks ~ .exercise-dontknow.disabled{ display:none; }
 .reorder-final-fr{ font-size:19px; font-weight:800; display:flex; align-items:center; justify-content:center; gap:8px; flex-wrap:wrap; line-height:1.35; }
 .reorder-final-tr{ font-size:13.5px; color: var(--ink-soft); margin-top:4px; }
-.reorder-block:hover:not(.used):not(.disabled){ border-color: var(--imperial-gold); transform: translateY(-1px); }
+@media (hover:hover) and (pointer:fine){ .reorder-block:hover:not(.used):not(.disabled){ border-color: var(--imperial-gold); transform: translateY(-1px); } }
 .reorder-block.used{ visibility:hidden; pointer-events:none; }
 /* Clone que "voa" do banco de blocos até o slot escolhido (ver
    flyBlockToSlot em app.js) -- position:fixed porque getBoundingClientRect()
@@ -1579,8 +1591,6 @@ button.correct-feedback-continue{ background: var(--success-fill); color: var(--
 .review-empty .big-emoji{ font-size:52px; margin-bottom:12px; }
 .review-empty h3{ margin:0 0 6px; font-size:19px; }
 .review-empty p{ color:var(--ink-soft); margin:0 0 20px; font-size:14px; }
-.review-complete-actions{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
-.review-complete-actions .btn{ min-width:140px; }
 
 /* "Você está em dia" / "Ainda não há revisões" -- substitui os tiles de
    Flashcard/Speed Review quando não há nada devido (projeto "Reorganização
@@ -1733,16 +1743,13 @@ button.correct-feedback-continue{ background: var(--success-fill); color: var(--
 .speed-option{
   background: var(--paper); border:2px solid var(--paper-line); border-radius:12px; padding:16px 12px;
   cursor:pointer; font-family: var(--font-body); font-weight:700; font-size:14px; text-align:center;
-  transition: all .1s ease;
+  transition: color .1s ease, background-color .1s ease, border-color .1s ease, box-shadow .1s ease, transform .1s ease, opacity .1s ease;
 }
 @media (hover:hover){ .speed-option:hover:not(.disabled){ border-color: var(--hover-gold); background: color-mix(in srgb, var(--hover-gold) 14%, transparent); } }
 .speed-option.correct{ border-color: var(--jade); background: rgba(58,115,89,0.14); }
 .speed-option.incorrect{ border-color: var(--error-red); background: rgba(214,38,25,0.12); }
 .speed-option.disabled{ pointer-events:none; }
 
-.speed-gameover{ text-align:center; padding: 50px 20px; }
-.speed-gameover .big-emoji{ font-size:56px; margin-bottom:12px; }
-.speed-gameover .score-num{ font-size:38px; font-weight:800; color: var(--seal-red-dark); margin:14px 0; }
 .review-progress-bar{ flex:1; height:8px; background:var(--paper-warm); border-radius:4px; overflow:hidden; }
 .review-progress-fill{ height:100%; background: linear-gradient(90deg, var(--seal-red), var(--imperial-gold)); border-radius:4px; transition: width .3s ease; }
 .review-progress-count{ font-size:13px; font-weight:800; color:var(--ink-soft); white-space:nowrap; }
@@ -2642,7 +2649,7 @@ button.correct-feedback-continue{ background: var(--success-fill); color: var(--
 .wizard-option-row{
   display:flex; align-items:center; gap:14px; background: var(--paper); border:2px solid var(--paper-line);
   border-radius:14px; padding:14px 16px; cursor:pointer; font-family: var(--font-body); text-align:left;
-  transition: all .12s ease;
+  transition: color .12s ease, background-color .12s ease, border-color .12s ease, box-shadow .12s ease, transform .12s ease, opacity .12s ease;
 }
 .wizard-option-row:hover{ border-color: var(--imperial-gold); }
 .wizard-option-row.active{ border-color: var(--seal-red); }
@@ -2918,6 +2925,9 @@ body.lesson-focus .acq-phase-banner{ margin-bottom:10px; padding:4px 12px; }
   border-radius: 20px; padding: 36px 28px; text-align:center; box-shadow: var(--shadow-lift);
 }
 .login-lockup{ height:44px; width:auto; margin:0 auto 22px; display:block; }
+/* Tela de abertura (dona, 2026-11-24): logo animado enquanto o site confere o login; antes dizia "Redirecionando..." sempre, em português. */
+.login-card-wait{ display:flex; flex-direction:column; align-items:center; padding:32px 28px 30px; }
+.login-anim{ width:132px; height:auto; display:block; }
 .login-desc{ margin:0 0 22px; color: var(--ink-soft); font-size:13.5px; line-height:1.5; }
 .login-note{ min-height:16px; font-size:12.5px; color: var(--ink-soft); margin: 14px 0 0; }
 .login-note.err{ color: var(--error-red-text); font-weight:700; }
@@ -4400,6 +4410,7 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
 <link rel="stylesheet" href="../shared/mural-classroom.css">
 <link rel="stylesheet" href="../shared/notion-sync.css">
 <link rel="stylesheet" href="../shared/aulas-painel.css">
+<link rel="stylesheet" href="../shared/admin-overview.css">
 <!-- Janelas do topo (🔥 sequência e ⭐ XP da semana), shared/janelas-topo.js e shared/xp-semana.js -->
 <link rel="stylesheet" href="../shared/janelas-topo.css">
 <!-- Recomeçar o curso e retomada guiada (shared/recomecar-curso.js) -->
@@ -4408,6 +4419,8 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
 <link rel="stylesheet" href="../shared/ditados.css">
 <!-- Selos das conquistas e passaporte do Perfil (shared/selos.js) -->
 <link rel="stylesheet" href="../shared/selos.css">
+<!-- Movimento comum (2026-11-25): por último de propósito, vale por cima das regras antigas -->
+<link rel="stylesheet" href="../shared/movimento.css">
 </head>
 <body>
 
@@ -4423,9 +4436,15 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
        tela de login (isso duplicava a do portão, com marca de idioma e link
        cruzado). Só existe uma tela de login neutra, no domínio raiz -- este
        overlay é só o que aparece no instante antes do redirecionamento. -->
-  <div class="login-card">
-    <p class="login-desc">Redirecionando...</p>
+  <div class="login-card login-card-wait" role="status">
+    <!-- Logo animado "duas cobrinhas" (dona, 2026-11-24): a azul sobe, a rosa desce e fecha o B, repetindo até o site abrir.
+         Animação embutida no próprio desenho (sem script nem biblioteca); fonte e arquivos para baixar: docs/marca/logo-animado/. -->
+    <svg viewBox="0 0 286.27 166.58" class="login-anim" aria-hidden="true" focusable="false"><defs><mask id="abertura-azul" maskUnits="userSpaceOnUse" x="-20" y="-20" width="330" height="210"><path transform="translate(101.22,0)" d="M5.54,98 V54.2 H46 C61,54.2 71.9,44 71.9,30 C71.9,16 61,5.54 46,5.54 H-2" pathLength="1" fill="none" stroke="#fff" stroke-width="19" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="1 2" stroke-dashoffset="1"><animate attributeName="stroke-dashoffset" dur="3.85s" repeatCount="indefinite" values="1;0;0" keyTimes="0;0.32978;1" calcMode="spline" keySplines=".3 0 .6 .6;0 0 1 1"/></path></mask><mask id="abertura-rosa" maskUnits="userSpaceOnUse" x="-20" y="-20" width="330" height="210"><path transform="translate(101.22,0)" d="M5.54,-2 V36.7 H48 C57,36.7 62,39 66,45 C71,51 78.5,57 79,68 C79.5,81 68,89.4 52,89.4 H-2" pathLength="1" fill="none" stroke="#fff" stroke-width="19" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="1 2" stroke-dashoffset="1"><animate attributeName="stroke-dashoffset" dur="3.85s" repeatCount="indefinite" values="1;1;0;0" keyTimes="0;0.32978;0.67532;1" calcMode="spline" keySplines="0 0 1 1;.4 .4 .7 1;0 0 1 1"/><animate attributeName="stroke-opacity" dur="3.85s" repeatCount="indefinite" values="0;1" keyTimes="0;0.32978" calcMode="discrete"/></path></mask></defs><g><animate attributeName="opacity" dur="3.85s" repeatCount="indefinite" values="1;1;0" keyTimes="0;0.90909;1"/><g mask="url(#abertura-azul)"><path d="M170.92,11.08c-5.48-6.76-13.84-11.08-23.22-11.08h-43.65c-.78,0-1.49.32-2,.83l10.25,10.25h32.67c12.91,0,24.17,9.85,21.35,22.52-.04.17-.07.33-.11.5,0,0-.01,0-.02,0-4.11,14.7-20.74,14.56-23.25,14.56h-38.89c-1.56,0-2.83,1.27-2.83,2.83v40.63c0,.78.32,1.49.83,2l10.25-10.25h0v-24.13h35.4c8.58,0,16.31-3.61,21.73-9.4,2.65-2.76,4.71-6.06,6.1-9.63,3.99-9.68,1.92-21.88-4.61-29.63Z" fill="#3498d6"/></g><g mask="url(#abertura-rosa)"><path d="M183.41,54.16c-.25-.82-1.05-3.05-1.06-3.07-2.71-6.58-11.08-1.57-9.93,3.9.31,1.46.68,2.86.68,2.86,3.51,12.91-6.77,26.21-20.18,26.02,0,0-40.62,0-40.62,0l-10.25,10.25c.51.51,1.22.83,2,.83h48.7c9.66,0,18.32-4.29,24.17-11.08,6.81-7.58,9.57-19.61,6.49-29.71Z" fill="#e36bca"/><path d="M147.14,31.12h-34.84V11.07h0L102.05.82c-.51.51-.83,1.22-.83,2v36.55c0,1.56,1.27,2.83,2.83,2.83h44.95c2.8,0,10.09.14,12.52,1.15,0,0,2.62-1.92,4.67-9.26-4.14-1.95-14.19-2.97-19.05-2.97Z" fill="#e36bca"/></g></g><path d="M10.1,162.83c-3.25-1.72-5.75-4.13-7.49-7.22-1.74-3.09-2.61-6.62-2.61-10.58,0-4.57.93-8.5,2.78-11.77,1.85-3.27,4.41-5.76,7.68-7.47,3.27-1.71,7-2.56,11.19-2.56s7.91.77,10.97,2.3c3.06,1.53,5.4,3.65,7.01,6.35,1.61,2.71,2.42,5.83,2.42,9.38,0,2.67-.41,5.02-1.23,7.03-.82,2.01-2,3.57-3.53,4.66-1.53,1.1-3.33,1.64-5.39,1.64-1.68,0-3.07-.36-4.18-1.09-1.11-.72-1.83-1.68-2.15-2.88h-.1c-.9,1.26-1.86,2.23-2.88,2.92-1.01.69-2.34,1.04-3.99,1.04-2.51,0-4.44-.81-5.77-2.44-1.34-1.63-2.01-3.76-2.01-6.4,0-2.32.43-4.41,1.3-6.28.87-1.87,2.07-3.33,3.6-4.4,1.53-1.06,3.26-1.59,5.19-1.59,1.26,0,2.35.23,3.29.7.95.47,1.64,1.18,2.13,2.15h.15v-.1c.13-.71.45-1.26.97-1.64.51-.39,1.21-.58,2.08-.58s1.55.25,2.05.75c.5.5.75,1.17.75,2.01,0,.16-.03.44-.1.82l-1.26,7.01c-.16,1.06-.24,1.92-.24,2.56,0,.9.17,1.58.51,2.03s.91.68,1.72.68c.51,0,1.04-.29,1.57-.87.53-.58.98-1.51,1.35-2.8.37-1.29.56-2.93.56-4.93,0-4.19-1.27-7.41-3.79-9.67-2.53-2.25-6.19-3.38-10.99-3.38-3.03,0-5.73.65-8.09,1.96s-4.21,3.22-5.53,5.75c-1.32,2.53-1.98,5.57-1.98,9.11,0,3.09.61,5.79,1.84,8.09,1.22,2.3,3,4.09,5.34,5.36,2.33,1.27,5.1,1.91,8.29,1.91,1.93,0,3.6-.17,5-.51s2.84-.89,4.32-1.67c.55-.29,1.05-.44,1.5-.44.71,0,1.32.26,1.84.77.51.52.77,1.11.77,1.79,0,.9-.45,1.67-1.35,2.32-1.26.74-2.95,1.38-5.07,1.93s-4.46.82-7.01.82c-4.35,0-8.15-.86-11.4-2.59ZM23.94,147.56c.95-1.53,1.43-3.31,1.43-5.34,0-1.32-.29-2.32-.87-3-.58-.68-1.39-1.01-2.42-1.01-1.61,0-2.87.77-3.77,2.32-.9,1.55-1.35,3.3-1.35,5.27,0,1.19.26,2.17.77,2.92.52.76,1.26,1.14,2.22,1.14,1.71,0,3.04-.76,3.99-2.3Z" fill="#3498d6"/><path d="M67.53,134.85c1.59,1.05,2.83,2.52,3.72,4.42.89,1.9,1.33,4.08,1.33,6.52s-.44,4.6-1.33,6.45c-.89,1.85-2.12,3.28-3.7,4.28-1.58,1-3.4,1.5-5.46,1.5-1.51,0-2.91-.31-4.18-.92-1.27-.61-2.26-1.43-2.97-2.46v8.22c0,1.13-.39,2.03-1.16,2.71-.77.68-1.79,1.01-3.04,1.01-1.32,0-2.38-.36-3.19-1.09-.81-.72-1.21-1.65-1.21-2.78v-25.37c0-1.19.38-2.15,1.14-2.88.76-.73,1.78-1.09,3.07-1.09s2.21.32,2.97.97c.76.65,1.18,1.5,1.28,2.56.68-1.13,1.67-2.01,2.97-2.66s2.75-.97,4.33-.97c2.03,0,3.84.52,5.44,1.57ZM62.89,150.1c.79-1,1.18-2.43,1.18-4.3,0-1.96-.4-3.47-1.21-4.52-.81-1.05-1.95-1.57-3.43-1.57s-2.63.52-3.43,1.55c-.81,1.03-1.21,2.51-1.21,4.45s.4,3.36,1.21,4.37c.8,1.01,1.96,1.52,3.48,1.52s2.62-.5,3.41-1.5Z" fill="#3498d6"/><path d="M94.23,134.13c.64.6.97,1.47.97,2.63,0,1.29-.3,2.22-.89,2.8-.6.58-1.67.95-3.21,1.11l-1.45.15c-1.61.19-2.76.7-3.46,1.52-.69.82-1.04,1.94-1.04,3.36v8.26c0,1.32-.41,2.31-1.23,2.97-.82.66-1.84.99-3.07.99s-2.25-.33-3.07-.99c-.82-.66-1.23-1.65-1.23-2.97v-16.72c0-1.22.41-2.17,1.23-2.85.82-.68,1.81-1.01,2.97-1.01s2.15.32,2.88.97c.72.65,1.09,1.55,1.09,2.71v.92c.52-1.42,1.36-2.51,2.54-3.29,1.18-.77,2.41-1.19,3.7-1.26l.68-.05c1.1-.1,1.96.15,2.61.75Z" fill="#3498d6"/><path d="M101.41,156.5c-1.98-1.01-3.51-2.46-4.59-4.32-1.08-1.87-1.62-4.06-1.62-6.57s.54-4.69,1.62-6.55c1.08-1.85,2.6-3.28,4.57-4.28,1.96-1,4.27-1.5,6.91-1.5s4.95.5,6.91,1.5c1.96,1,3.49,2.42,4.57,4.28,1.08,1.85,1.62,4.04,1.62,6.55s-.54,4.7-1.62,6.57c-1.08,1.87-2.6,3.31-4.57,4.32-1.97,1.02-4.27,1.52-6.91,1.52s-4.9-.51-6.89-1.52ZM112.88,145.6c0-3.99-1.53-5.99-4.59-5.99s-4.59,2-4.59,5.99,1.53,5.99,4.59,5.99,4.59-2,4.59-5.99Z" fill="#3498d6"/><path d="M136.39,130.79c-.47.63-.7,1.46-.7,2.49v.58h2.66c2.58,0,3.87,1.05,3.87,3.14s-1.29,3.19-3.87,3.19h-2.66v13.68c0,1.32-.41,2.32-1.23,3-.82.68-1.84,1.01-3.07,1.01s-2.25-.34-3.07-1.01c-.82-.68-1.23-1.67-1.23-3v-13.68h-1.4c-2.58,0-3.87-1.06-3.87-3.19s1.29-3.14,3.87-3.14h1.4c.06-3.09.99-5.52,2.78-7.27,1.79-1.76,4.21-2.75,7.27-2.97l1.26-.1c.26-.03.6-.05,1.02-.05,1.38,0,2.38.26,3,.77.61.52.92,1.26.92,2.22s-.29,1.72-.87,2.25c-.58.53-1.37.83-2.37.89l-1.26.1c-1.16.1-1.97.46-2.44,1.09Z" fill="#3498d6"/><path d="M143.21,156.57c-.89-.9-1.33-2.01-1.33-3.33s.44-2.43,1.33-3.33c.89-.9,2.01-1.35,3.36-1.35s2.42.45,3.31,1.35c.89.9,1.33,2.01,1.33,3.33s-.44,2.43-1.33,3.33c-.89.9-1.99,1.35-3.31,1.35s-2.47-.45-3.36-1.35Z" fill="#3498d6"/><path d="M176.86,134.78c1.58,1,2.81,2.42,3.7,4.28.89,1.85,1.33,4,1.33,6.45s-.44,4.62-1.33,6.52-2.13,3.38-3.72,4.42c-1.59,1.05-3.41,1.57-5.44,1.57-1.58,0-3.02-.32-4.33-.97s-2.29-1.53-2.97-2.66c-.1,1.1-.52,1.96-1.28,2.59-.76.63-1.75.94-2.97.94-1.29,0-2.31-.36-3.07-1.09-.76-.72-1.14-1.68-1.14-2.88v-26.77c0-1.13.4-2.05,1.21-2.78.8-.73,1.87-1.09,3.19-1.09s2.27.34,3.04,1.01c.77.68,1.16,1.58,1.16,2.71v9.62c.71-1.03,1.7-1.85,2.97-2.46,1.27-.61,2.67-.92,4.18-.92,2.06,0,3.88.5,5.46,1.5ZM172.18,150.03c.8-1.05,1.21-2.55,1.21-4.52s-.39-3.3-1.18-4.3c-.79-1-1.93-1.5-3.41-1.5s-2.67.51-3.48,1.52c-.81,1.02-1.21,2.47-1.21,4.37s.4,3.42,1.21,4.45c.8,1.03,1.95,1.55,3.43,1.55s2.62-.52,3.43-1.57Z" fill="#e36bca"/><path d="M203.54,134.13c.64.6.97,1.47.97,2.63,0,1.29-.3,2.22-.89,2.8-.6.58-1.67.95-3.21,1.11l-1.45.15c-1.61.19-2.76.7-3.46,1.52-.69.82-1.04,1.94-1.04,3.36v8.26c0,1.32-.41,2.31-1.23,2.97-.82.66-1.84.99-3.07.99s-2.25-.33-3.07-.99c-.82-.66-1.23-1.65-1.23-2.97v-16.72c0-1.22.41-2.17,1.23-2.85.82-.68,1.81-1.01,2.97-1.01s2.15.32,2.88.97c.73.65,1.09,1.55,1.09,2.71v.92c.51-1.42,1.36-2.51,2.54-3.29,1.17-.77,2.41-1.19,3.7-1.26l.68-.05c1.09-.1,1.96.15,2.61.75Z" fill="#e36bca"/><path d="M228.91,134.44c.77.71,1.16,1.68,1.16,2.9v16.72c0,1.13-.4,2.05-1.21,2.78-.81.73-1.85,1.09-3.14,1.09-1.16,0-2.11-.31-2.85-.94s-1.13-1.47-1.16-2.54c-.74,1.16-1.68,2.05-2.83,2.66-1.14.61-2.46.92-3.94.92-3.06,0-5.33-.85-6.81-2.54-1.48-1.69-2.22-4.26-2.22-7.71v-10.44c0-1.22.39-2.19,1.16-2.9.77-.71,1.82-1.06,3.14-1.06s2.37.35,3.14,1.06c.77.71,1.16,1.68,1.16,2.9v10.63c0,2.32,1,3.48,3,3.48,1.16,0,2.11-.42,2.85-1.26.74-.84,1.11-1.93,1.11-3.29v-9.57c0-1.22.39-2.19,1.16-2.9.77-.71,1.82-1.06,3.14-1.06s2.37.35,3.14,1.06Z" fill="#e36bca"/><path d="M257.42,135.82c1.38,1.69,2.08,4.26,2.08,7.71v10.44c0,1.23-.39,2.19-1.16,2.9-.77.71-1.82,1.06-3.14,1.06s-2.37-.35-3.14-1.06c-.77-.71-1.16-1.67-1.16-2.9v-10.05c0-1.42-.25-2.45-.75-3.09-.5-.64-1.25-.97-2.25-.97-1.29,0-2.31.41-3.07,1.23-.76.82-1.13,1.93-1.13,3.31v9.57c0,1.23-.39,2.19-1.16,2.9-.77.71-1.82,1.06-3.14,1.06s-2.37-.35-3.14-1.06c-.77-.71-1.16-1.67-1.16-2.9v-16.72c0-1.13.4-2.05,1.21-2.78.8-.73,1.85-1.09,3.14-1.09s2.2.34,2.92,1.01c.72.68,1.09,1.56,1.09,2.66.84-1.22,1.92-2.16,3.24-2.8,1.32-.64,2.79-.97,4.4-.97,2.83,0,4.94.85,6.33,2.54Z" fill="#e36bca"/><path d="M285.47,150.87c.47.58.7,1.34.7,2.27,0,1.29-.63,2.27-1.88,2.95-1.1.55-2.39,1.01-3.89,1.38-1.5.37-2.88.56-4.13.56-2.64,0-4.95-.5-6.91-1.5-1.96-1-3.48-2.43-4.54-4.3-1.06-1.87-1.59-4.06-1.59-6.57s.51-4.52,1.52-6.4c1.01-1.88,2.43-3.35,4.25-4.4s3.87-1.57,6.16-1.57,4.17.48,5.85,1.45c1.67.97,2.97,2.34,3.89,4.11.92,1.77,1.38,3.85,1.38,6.23,0,.74-.17,1.31-.51,1.72s-.83.6-1.47.6h-12.76c.22,1.55.72,2.66,1.5,3.33.77.68,1.92,1.01,3.43,1.01.81,0,1.55-.09,2.22-.27.68-.18,1.43-.43,2.27-.75.48-.19.96-.36,1.43-.51.47-.14.89-.22,1.28-.22.74,0,1.34.29,1.81.87ZM272.69,140.17c-.68.73-1.08,1.78-1.21,3.17h7.59c-.19-2.83-1.42-4.25-3.67-4.25-1.13,0-2.03.36-2.71,1.09Z" fill="#e36bca"/></svg>
+    <span class="sr-only" data-i18n="loading.opening">Abrindo o site...</span>
   </div>
+  <script>(function(){ /* menos movimento (acessibilidade do aparelho): o B fica pronto e parado */
+    try { if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) { var s = document.querySelector('#login-screen .login-anim'); s.pauseAnimations(); s.setCurrentTime(2.9); } } catch (e) {}
+  })();</script>
 </div>
 
 <!-- Fase 1 do perfil público (ver CLAUDE.md) -- única tela deste site que
@@ -4613,7 +4632,6 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
         <div class="lesson-hint-eyebrow" id="ud-eyebrow"></div>
         <div class="lesson-unit-title" id="ud-title"></div>
         <p class="lesson-unit-goal" id="ud-goal"></p>
-        <p class="lesson-unit-goal" id="ud-lang-notice" hidden style="font-style:italic;opacity:.8"></p>
       </div>
 
       <div class="lesson-focus-bar">
@@ -4856,6 +4874,12 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
         </article>
         <!-- Recomeçar este curso (migration 123; conteúdo montado por shared/recomecar-curso.js). -->
         <article id="settings-restart-box" class="rc-caixa" hidden></article>
+        <!-- Privacidade e cookies (Fase 3 do GA4): abre a janela de Preferências (shared/consent.js, [data-consent-open]). -->
+        <article id="settings-cookies-box">
+          <header><h3 data-i18n="consent.settings.title">Privacidade e cookies</h3></header>
+          <p class="pref-row-sub" data-i18n="consent.settings.sub">Escolha se o site pode medir as visitas com o Google Analytics. Dá para mudar quando quiser.</p>
+          <footer><button type="button" class="outline" data-consent-open data-i18n="consent.footer.prefs">Preferências de cookies</button> <a href="../privacidade-cookies.html" data-i18n="consent.footer.policy">Política de cookies</a></footer>
+        </article>
         <article id="settings-delete-box" hidden>
           <header><h3 data-i18n="accountDelete.title">Excluir minha conta</h3></header>
           <p class="pref-row-sub" data-i18n="accountDelete.hint">Apaga a sua conta e tudo o que está ligado a ela: progresso, cartões, conquistas, amizades, fotos e arquivos. Não dá para desfazer.</p>
@@ -4920,17 +4944,18 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
   <div class="view panel-view" id="view-admin-badges">
     <div class="path-header">
       <h2 data-i18n="admin.reports.screen.admin_badges">Painel de Admin</h2>
-      <p data-i18n="panel.admin.sub">Badges, métricas, notificações, reports e planos.</p>
+      <p data-i18n="panel.admin.sub">Visão geral, métricas, notificações, reports e planos.</p>
     </div>
     <div class="deck-topbar panel-nav" role="tablist" aria-label="Seção do painel de admin" data-i18n-attr="aria-label:admin.panel.aria">
-      <button class="deck-topbar-btn is-active" role="tab" aria-selected="true" data-admin-section="badges" data-i18n="panel.tab.badges">Badges</button>
+      <button class="deck-topbar-btn is-active" role="tab" aria-selected="true" data-admin-section="overview" data-i18n="panel.tab.overview">Visão Geral</button>
       <button class="deck-topbar-btn" role="tab" aria-selected="false" data-admin-section="analytics" data-i18n="panel.tab.analytics">Analytics</button>
       <button class="deck-topbar-btn" role="tab" aria-selected="false" data-admin-section="notifications" data-i18n="panel.tab.notifications">Notificações</button>
       <button class="deck-topbar-btn" role="tab" aria-selected="false" data-admin-section="reports" data-i18n="panel.tab.reports">Reports</button>
       <button class="deck-topbar-btn" role="tab" aria-selected="false" data-admin-section="premium" data-i18n="panel.tab.plans">Planos</button>
       <button class="deck-topbar-btn" role="tab" aria-selected="false" data-admin-section="privacy" data-i18n="panel.tab.privacy">Privacidade</button>
     </div>
-    <div id="admin-badges-content"></div>
+    <div id="admin-overview-content"></div>
+    <div id="admin-badges-content" style="display:none;"></div>
     <div id="admin-analytics-content" style="display:none;"></div>
     <div id="admin-notifications-content" style="display:none;"></div>
     <div id="admin-reports-content" style="display:none;"></div>
@@ -5245,6 +5270,16 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
           <span class="kbd-key">1</span><span class="kbd-key">2</span><span class="kbd-key">3</span><span class="kbd-key">4</span>
         </div>
         <div data-i18n="ui.kbd.choose" class="kbd-shortcuts-desc">Escolher uma alternativa, pela posição dela na tela</div>
+      </div>
+      <div class="kbd-shortcuts-row">
+        <div class="kbd-shortcuts-keys">
+          <span class="kbd-key">1</span><span class="kbd-key">2</span><span class="kbd-key">3</span><span class="kbd-key">4</span>
+        </div>
+        <div data-i18n="ui.kbd.grade" class="kbd-shortcuts-desc">Na Revisão, dar a nota ao cartão pela posição do botão (com quatro botões: Errei, Difícil, Bom, Fácil)</div>
+      </div>
+      <div class="kbd-shortcuts-row">
+        <div class="kbd-shortcuts-keys"><span class="kbd-key">Espaço</span><span class="kbd-key">Enter</span></div>
+        <div data-i18n="ui.kbd.reveal" class="kbd-shortcuts-desc">Na Revisão, mostrar a resposta de um cartão</div>
       </div>
       <div class="kbd-shortcuts-row">
         <div class="kbd-shortcuts-keys"><span class="kbd-key">Enter</span></div>
@@ -5665,6 +5700,7 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
 <script src="../shared/painel/painel-ui.js"></script>
 <script src="../shared/teacher-invites.js"></script>
 <script src="../shared/username-choice.js"></script>
+<script src="../shared/age-ack.js"></script>
 <script src="../shared/mural.js"></script>
 <script src="../shared/own-flashcards.js"></script>
 <script src="../shared/deck-data.js"></script>
@@ -5675,6 +5711,8 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
 <script src="../shared/admin-analytics-calc.js"></script>
 <script src="../shared/admin-analytics-ui.js"></script>
 <script src="../shared/admin-analytics.js"></script>
+<script src="../shared/admin-overview-ui.js"></script>
+<script src="../shared/admin-overview.js"></script>
 <script src="../shared/admin-panel.js"></script>
 <script src="../shared/admin-notifications-ui.js"></script>
 <script src="../shared/admin-notifications.js"></script>
@@ -5687,6 +5725,7 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
 <script src="../shared/topbar-stats.js"></script>
 <script src="../shared/janelas-topo.js"></script>
 <script src="../shared/xp-semana.js"></script>
+<script src="../shared/consent.js" data-page="app"></script>
 <script src="../shared/analytics.js"></script>
 <script src="../shared/tabs.js"></script>
 <script src="../shared/activity-focus.js"></script>
@@ -5702,8 +5741,10 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
 <script src="../shared/router.js"></script>
 <script src="../shared/anki-export.js"></script>
 <script src="../shared/pwa.js"></script>
+<script src="../shared/sem-internet.js"></script>
 <script src="../shared/toast.js"></script>
 <script src="../shared/modal-a11y.js"></script>
+<script src="../shared/janelas-movimento.js"></script>
 <script src="../shared/supabase-client.js"></script>
 <script src="../shared/language-pref.js"></script>
 <script src="../shared/auth.js"></script>
@@ -5730,6 +5771,7 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
 <script src="../shared/core/quase-iguais-chaves.js"></script>
 <script src="../shared/core/quase-iguais-pinyin.js"></script>
 <script src="../shared/core/quase-iguais-dados.js"></script>
+<script src="../shared/core/conclusao.js"></script>
 <script src="../shared/core/licao-base.js"></script>
 <script src="../shared/core/licao-dialogo.js"></script>
 <script src="../shared/core/licao-exercicios.js"></script>

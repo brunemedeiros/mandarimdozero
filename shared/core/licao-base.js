@@ -153,6 +153,8 @@ function renderReviewViewInner(){
   stopExerciseAudio();
   const el = document.getElementById('review-content');
   syncReviewPrevRow(false);
+  // Telas sem cartão (vazia, fim da sessão, "ver cartão anterior") não têm atalhos; cada renderer de cartão religa os seus.
+  REVIEW_KEYS.reveal = null; REVIEW_KEYS.mountEl = null; clearKeyboardOptions();
 
   if (STATE.reviewPeek != null && STATE.reviewSessionClassReview && STATE.reviewHistory && STATE.reviewHistory[STATE.reviewPeek]){
     renderReviewPeek(el);
@@ -210,21 +212,15 @@ function renderReviewViewInner(){
       STATE.reviewSessionUnitFilter ? { unitId: STATE.reviewSessionUnitFilter } : {}));
     // Fase 6 do projeto de reorganização: terminar a revisão nunca deve
     // convidar a repetir a mesma bateria -- "Voltar" leva pra trilha,
-    // "Praticar mais" leva pra PRATICAR (Combinar/Palavras difíceis), não
+    // "Continuar revisando" (antes "Praticar mais") leva pra PRATICAR (Combinar/Palavras difíceis), não
     // reinicia esta mesma sessão de revisão.
-    el.innerHTML = `
-      <div class="review-empty">
-        <div class="big-emoji">🎉</div>
-        <h3>${t('review.complete.title')}</h3>
-        <p>${tp('review.complete.reviewed', STATE.reviewQueue.length === 1 ? 1 : 2, { n: STATE.reviewQueue.length })}</p>
-        <div class="review-complete-actions">
-          ${STATE.reviewSessionClassReview
-            ? `<button class="btn btn-primary" id="review-class-back">${t('review.backToStudent')}</button>`
-            : `<button class="btn btn-secondary" id="review-again">${t('review.back')}</button>
-          <button class="btn btn-primary" id="review-go-practice">${t('review.practiceMore')}</button>`}
-        </div>
-      </div>
-    `;
+    const reviewXp = Math.max(0, STATE.xp - (STATE.reviewSessionXpStart == null ? STATE.xp : STATE.reviewSessionXpStart)); // XP somado da sessão (2026-11-24)
+    el.innerHTML = conclusaoHTML({ icon: '🎉', title: t('review.complete.title'),
+      sub: tp('review.complete.reviewed', STATE.reviewQueue.length === 1 ? 1 : 2, { n: STATE.reviewQueue.length }), cls: 'review-complete-actions',
+      stats: reviewXp > 0 ? [{ label: t('zh.path.lessonDone.xpEarned'), value: `+${reviewXp} ⭐` }] : [],
+      actions: STATE.reviewSessionClassReview
+        ? [{ id: 'review-class-back', label: t('review.backToStudent') }]
+        : [{ id: 'review-again', label: t('review.back'), secondary: true }, { id: 'review-go-practice', label: t('review.practiceMore') }] });
     checkUnitCompletion();
     document.getElementById('review-class-back')?.addEventListener('click', backToClassReviewTab);
     document.getElementById('review-again')?.addEventListener('click', () => {
@@ -311,6 +307,7 @@ function renderReviewViewInner(){
 
 function renderSpeedReview(){
   const el = document.getElementById('speed-review-content');
+  clearKeyboardOptions(); // telas sem pergunta (vazia, fim, game over) não têm atalhos; a pergunta religa os seus abaixo
 
   // Projeto "Reorganização da experiência de revisão e prática": Speed
   // Review agora usa a fila DEVIDA (ver buildSpeedQueue), então fila vazia
@@ -355,7 +352,7 @@ function renderSpeedReview(){
       // 1x por sessão (não por resposta) -- evita um toast "+2 XP" a cada
       // pergunta num jogo rápido, e usa o mesmo guard de dailyCounted pra
       // nunca dobrar em caso de re-render desta tela.
-      if (firstSpeedSessionToday && SPEED_STATE.correctCount > 0) addXP(SPEED_STATE.correctCount * SPEED_REVIEW_XP_PER_CORRECT);
+      if (firstSpeedSessionToday && SPEED_STATE.correctCount > 0){ const xp0 = STATE.xp; addXP(SPEED_STATE.correctCount * SPEED_REVIEW_XP_PER_CORRECT); SPEED_STATE.xpPaid = STATE.xp - xp0; }
     }
     maybeShowStreakCelebration();
     trackEvent('lesson_complete', 'speed_review', { score: SPEED_STATE.score });
@@ -364,22 +361,13 @@ function renderSpeedReview(){
     const speedIsRecord = speedScoreRecord || speedStreakRecord;
     if (speedIsRecord) saveState();
     // Fase 6 do projeto: nunca oferecer "Jogar de novo" repetindo a mesma
-    // bateria de revisão -- Voltar/Praticar mais, igual à conclusão do
+    // bateria de revisão -- Voltar/Continuar revisando, igual à conclusão do
     // Flashcard (ver renderReviewView).
     releaseBadgeCelebrations();
-    el.innerHTML = `
-      <div class="speed-gameover">
-        <div class="big-emoji">💔</div>
-        <h3>${t('review.speed.gameOver')}</h3>
-        <div class="score-num">${t('review.speed.points', { n: SPEED_STATE.score })}</div>
-        <p>${tp('review.speed.answered', SPEED_STATE.index === 1 ? 1 : 2, { n: SPEED_STATE.index })}</p>
-        <p class="review-record-line">${speedIsRecord ? `${t('review.records.newRecord')} ${speedRecordText(reviewRecords())}` : t('review.records.yourRecord', { record: speedRecordText(reviewRecords()) })}</p>
-        <div class="review-complete-actions">
-          <button class="btn btn-secondary" id="speed-back-btn">${t('review.back')}</button>
-          <button class="btn btn-primary" id="speed-practice-btn">${t('review.practiceMore')}</button>
-        </div>
-      </div>
-    `;
+    el.innerHTML = conclusaoHTML({ icon: '💔', title: t('review.speed.gameOver'), cls: 'speed-gameover',
+      sub: `${tp('review.speed.answered', SPEED_STATE.index === 1 ? 1 : 2, { n: SPEED_STATE.index })}<br>${speedIsRecord ? `${t('review.records.newRecord')} ${speedRecordText(reviewRecords())}` : t('review.records.yourRecord', { record: speedRecordText(reviewRecords()) })}`,
+      stats: [{ label: t('zh.path.lessonDone.score'), value: t('review.speed.points', { n: SPEED_STATE.score }) }].concat(SPEED_STATE.xpPaid > 0 ? [{ label: t('zh.path.lessonDone.xpEarned'), value: `+${SPEED_STATE.xpPaid} ⭐` }] : []),
+      actions: [{ id: 'speed-back-btn', label: t('review.back'), secondary: true }, { id: 'speed-practice-btn', label: t('review.practiceMore') }] });
     document.getElementById('speed-back-btn').addEventListener('click', () => switchTab('path'));
     document.getElementById('speed-practice-btn').addEventListener('click', backToReviewModeSelect);
     return;
@@ -404,7 +392,7 @@ function renderSpeedReview(){
       // 1x por sessão (não por resposta) -- evita um toast "+2 XP" a cada
       // pergunta num jogo rápido, e usa o mesmo guard de dailyCounted pra
       // nunca dobrar em caso de re-render desta tela.
-      if (firstSpeedSessionToday && SPEED_STATE.correctCount > 0) addXP(SPEED_STATE.correctCount * SPEED_REVIEW_XP_PER_CORRECT);
+      if (firstSpeedSessionToday && SPEED_STATE.correctCount > 0){ const xp0 = STATE.xp; addXP(SPEED_STATE.correctCount * SPEED_REVIEW_XP_PER_CORRECT); SPEED_STATE.xpPaid = STATE.xp - xp0; }
     }
     maybeShowStreakCelebration();
     // Fase 6 do projeto: idem -- sem "Jogar de novo" (a fila devida já foi
@@ -414,18 +402,10 @@ function renderSpeedReview(){
     const speedStreakRecord2 = recordSpeedReviewStreak(SPEED_STATE.bestStreak || 0);
     if (speedIsRecord2 || speedStreakRecord2) saveState();
     releaseBadgeCelebrations();
-    el.innerHTML = `
-      <div class="speed-gameover">
-        <div class="big-emoji">🏆</div>
-        <h3>${t('review.complete.title')}</h3>
-        <div class="score-num">${t('review.speed.points', { n: SPEED_STATE.score })}</div>
-        <p class="review-record-line">${speedIsRecord2 || speedStreakRecord2 ? `${t('review.records.newRecord')} ${speedRecordText(reviewRecords())}` : t('review.records.yourRecord', { record: speedRecordText(reviewRecords()) })}</p>
-        <div class="review-complete-actions">
-          <button class="btn btn-secondary" id="speed-back-btn">${t('review.back')}</button>
-          <button class="btn btn-primary" id="speed-practice-btn">${t('review.practiceMore')}</button>
-        </div>
-      </div>
-    `;
+    el.innerHTML = conclusaoHTML({ icon: '🏆', title: t('review.complete.title'), cls: 'speed-gameover',
+      sub: speedIsRecord2 || speedStreakRecord2 ? `${t('review.records.newRecord')} ${speedRecordText(reviewRecords())}` : t('review.records.yourRecord', { record: speedRecordText(reviewRecords()) }),
+      stats: [{ label: t('zh.path.lessonDone.score'), value: t('review.speed.points', { n: SPEED_STATE.score }) }].concat(SPEED_STATE.xpPaid > 0 ? [{ label: t('zh.path.lessonDone.xpEarned'), value: `+${SPEED_STATE.xpPaid} ⭐` }] : []),
+      actions: [{ id: 'speed-back-btn', label: t('review.back'), secondary: true }, { id: 'speed-practice-btn', label: t('review.practiceMore') }] });
     document.getElementById('speed-back-btn').addEventListener('click', () => switchTab('path'));
     document.getElementById('speed-practice-btn').addEventListener('click', backToReviewModeSelect);
     return;
@@ -457,6 +437,10 @@ function renderSpeedReview(){
       answerSpeedQuestion(options[chosenIdx] === card, el, chosenIdx);
     });
   });
+
+  // Teclado: 1 a 4 escolhem a opção pela posição (número à esquerda, só com mouse e teclado); tecla segurada é ignorada.
+  wireKeyboardOptions(el.querySelectorAll('.speed-option'));
+  if (KEYBOARD_OPTION_MAP) KEYBOARD_OPTION_MAP.noRepeat = true;
 
   runSpeedTimer(el, () => answerSpeedQuestion(false, el));
 }
@@ -519,12 +503,25 @@ function showAnswerPanel(contentEl, ex, opts = {}){
     STEP_STATE.exerciseIndex += 1;
     renderExerciseStep();
   });
-  panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  panel.scrollIntoView({ behavior: ((typeof prefersReducedMotion === 'function' && prefersReducedMotion()) ? 'auto' : 'smooth'), block: 'nearest' });
 }
 
 // Grupos da trilha na ordem de estudo (um por nível, vazios descartados).
+// Unidade sem tradução para o idioma do site (decisão da dona, 2026-11-11): não aparece na trilha, no Mapa, na busca nem no
+// "Continuar", e não abre. As seguintes seguem normais (a liberação pula a escondida, porque ela sai de trailGroups).
+// O progresso dela NÃO é apagado: a unidade continua em UNITS e no save; só some da tela enquanto faltar a tradução.
+// Aceita a unidade ou o id. Sem a camada de conteúdo (testes antigos), tudo fica disponível.
+function isUnitAvailable(u){
+  const id = (u && typeof u === 'object') ? u.id : u;
+  if (typeof CONTENT_I18N === 'undefined' || !CONTENT_I18N || typeof CONTENT_I18N.isUnitTranslated !== 'function') return true;
+  return CONTENT_I18N.isUnitTranslated(id);
+}
+function availableUnits(list){
+  return (list || []).filter(u => u && isUnitAvailable(u));
+}
+
 function trailGroups(){
-  return LEVELS.map(lvl => unitsOfLevel(lvl.id)).filter(g => g.length);
+  return LEVELS.map(lvl => availableUnits(unitsOfLevel(lvl.id))).filter(g => g.length);
 }
 
 // Resumo de progresso pro Perfil (shared/profile.js) -- NÃO usa

@@ -265,7 +265,6 @@ function scenarioExplanationHTML(ex){
 function renderScenarioExercise(ex, contentEl, nextBtn, total){
   const optionsHTML = ex.options.map((opt, i) => `
     <button class="scenario-option" data-idx="${i}">
-      <span class="scenario-option-num">${i + 1}</span>
       <span class="scenario-option-text">${LANG_HOOKS.scenarioOptionHTML(opt)}</span>
     </button>
   `).join('');
@@ -281,9 +280,9 @@ function renderScenarioExercise(ex, contentEl, nextBtn, total){
   `;
 
   nextBtn.style.display = 'none';
-  // A numeração já aparece na tela (.scenario-option-num) -- só liga o
-  // atalho a ela, sem duplicar indicador.
-  wireKeyboardOptions(contentEl.querySelectorAll('.scenario-option'), { badgeSelector: '.scenario-option-num' });
+  // Números 1-N no mesmo quadrado das outras opções do site (.kbd-hint: à esquerda, no meio da altura, só com mouse e teclado;
+  // decisão da autora, 2026-11-24). Antes o cenário tinha uma bolinha própria (.scenario-option-num) que aparecia até no celular.
+  wireKeyboardOptions(contentEl.querySelectorAll('.scenario-option'));
 
   function revealCorrectVisual(chosenIdx){
     contentEl.querySelectorAll('.scenario-option').forEach((b, i) => {

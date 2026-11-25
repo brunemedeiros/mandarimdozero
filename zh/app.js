@@ -551,7 +551,7 @@ function refreshHanziCardTexts(){
 function buildSearchIndex(){
   recalculateUnlockedUnits();
   const index = [];
-  UNITS.forEach(u => {
+  availableUnits(UNITS).forEach(u => {
     (u.vocab || []).forEach(v => {
       index.push({
         pinyin: v.p, hanzi: v.c, trans: v.t,
@@ -722,11 +722,11 @@ function renderTrailMapView(container){
   // Com módulos (shared/core/modulos-niveis.js): uma seção por módulo, com Revisão do módulo e Ponto de verificação,
   // e as histórias no mesmo lugar de sempre (logo depois da unidade). Hoje o zh não tem módulos.
   if (trailHasModules()){
-    renderModulesTrailMap(container, modulesOfLevel(LEVELS[0].id), { afterUnitNodes: storyMapNodes, describeExtra: storyMapDescribe });
+    renderModulesTrailMap(container, modulesOfLevel(LEVELS[0].id).filter(m => moduleVisibleUnitIds(m).length), { afterUnitNodes: storyMapNodes, describeExtra: storyMapDescribe });
     return;
   }
   const nodes = [];
-  UNITS.forEach(u => {
+  availableUnits(UNITS).forEach(u => {
     const st = unitBlockState(u);
     nodes.push({ key: 'u:' + u.id, kind: 'unit', icon: UNIT_ICONS[u.id] || '📖', label: u.title, state: st, current: st === 'current',
       aria: `${u.title}, ${TRAIL_MAP_STATE_LABEL[st]}` });
@@ -771,6 +771,7 @@ function buildStoryCheckpointCard(u){
 // ao longo da leitura (não só no final). Dados em stories.js.
 // ============================================================
 const STORY_STATE = {
+  xpStart: 0, // STATE.xp ao abrir a história: o resumo soma o XP das perguntas (+ o da conclusão, pago ao tocar no botão)
   storyId: null,
   beatIndex: 0,
   questionAnswered: false
@@ -781,6 +782,7 @@ function openStory(storyId){
   if (!story) return;
 
   STORY_STATE.storyId = storyId;
+  STORY_STATE.xpStart = STATE.xp;
   STORY_STATE.beatIndex = 0;
   STORY_STATE.questionAnswered = false;
 
@@ -822,14 +824,10 @@ function renderNextStoryBeat(){
     // uma seção de estudo completa, não uma interação isolada).
     registerStudyToday();
     maybeShowStreakCelebration();
-    contentEl.insertAdjacentHTML('beforeend', `
-      <div class="story-complete">
-        <div class="big-emoji">🎉</div>
-        <h3>${t('zh.story.doneTitle')}</h3>
-        <p>${t('zh.story.doneBody', { from: story.coversUnits[0], to: story.coversUnits[story.coversUnits.length-1] })}</p>
-        <button class="btn btn-primary" id="story-finish-btn">${t('zh.story.backToPath')}</button>
-      </div>
-    `);
+    contentEl.insertAdjacentHTML('beforeend', conclusaoHTML({ icon: '🎉', title: t('zh.story.doneTitle'), cls: 'story-complete',
+      sub: t('zh.story.doneBody', { from: story.coversUnits[0], to: story.coversUnits[story.coversUnits.length-1] }),
+      stats: (() => { const n = Math.max(0, STATE.xp - STORY_STATE.xpStart) + (STATE.storyProgress[STORY_STATE.storyId]?.completed ? 0 : STORY_DONE_XP); return n > 0 ? [{ label: t('zh.path.lessonDone.xpEarned'), value: `+${n} ⭐` }] : []; })(),
+      actions: [{ id: 'story-finish-btn', label: t('zh.story.backToPath') }] }));
     document.getElementById('story-finish-btn').addEventListener('click', () => {
       finishStory();
     });
@@ -1732,6 +1730,7 @@ wireAnkiExport(ANKI_EXPORT_CONFIG);
 // HANZI — trilha de caracteres, estudo (ver→escrever) e teste final
 // ============================================================
 const HANZI_STUDY_STATE = {
+  xpStart: 0, // STATE.xp ao abrir a lição: o resumo soma o XP de escrever/testar (+ o de fechar a lição, pago ao tocar no botão)
   lessonIndex: null,
   phase: null, // 'char' (ver/escrever intercalado) ou 'test' (teste final misturado)
   charIndex: 0, // dentro da fase 'char': 0-4, cada um passa por 'view' e 'write'
@@ -1786,14 +1785,9 @@ function renderHanziReviewView(){
     registerStudyToday();
     maybeShowStreakCelebration();
     trackEvent('lesson_complete', 'hanzi_review', { count: STATE.hanziReviewQueue.length });
-    el.innerHTML = `
-      <div class="review-empty">
-        <div class="big-emoji">🎉</div>
-        <h3>${t('zh.hanzi.sessionDone')}</h3>
-        <p>${tp('zh.hanzi.sessionReviewed', STATE.hanziReviewQueue.length === 1 ? 1 : 2, { n: STATE.hanziReviewQueue.length })}</p>
-        <button class="btn btn-primary" id="hanzi-review-again">${t('zh.hanzi.backToLessons')}</button>
-      </div>
-    `;
+    el.innerHTML = conclusaoHTML({ icon: '🎉', title: t('zh.hanzi.sessionDone'),
+      sub: tp('zh.hanzi.sessionReviewed', STATE.hanziReviewQueue.length === 1 ? 1 : 2, { n: STATE.hanziReviewQueue.length }),
+      actions: [{ id: 'hanzi-review-again', label: t('zh.hanzi.backToLessons') }] });
     document.getElementById('hanzi-review-again').addEventListener('click', () => {
       renderHanziLessonsGrid();
     });
@@ -2010,6 +2004,7 @@ document.getElementById('hanzi-back-to-lessons').addEventListener('click', () =>
 function openHanziLesson(lessonIndex){
   trackEvent('lesson_start', 'hanzi_lesson', { lessonIndex });
   HANZI_STUDY_STATE.lessonIndex = lessonIndex;
+  HANZI_STUDY_STATE.xpStart = STATE.xp;
   HANZI_STUDY_STATE.phase = 'char';
   HANZI_STUDY_STATE.charIndex = 0;
   HANZI_STUDY_STATE.charSubPhase = 'view';
@@ -2244,14 +2239,9 @@ function renderHanziTestStep(contentEl, nextBtn){
   if (HANZI_STUDY_STATE.testIndex >= total){
     // Etapa 6: a janela da sequência não cobre a tela "Lição concluída!"; aparece depois do botão (abaixo).
     const pct = Math.round((HANZI_STUDY_STATE.testScore / total) * 100);
-    contentEl.innerHTML = `
-      <div class="exercise-result">
-        <div class="big-emoji">${pct >= 70 ? '🎉' : '💪'}</div>
-        <h3>${t('zh.path.lessonDone.lessonTitle')}</h3>
-        <div class="score-num">${HANZI_STUDY_STATE.testScore}/${total}</div>
-        <p>${pct >= 70 ? t('zh.hanzi.retentionGood') : t('zh.hanzi.retentionReview')}</p>
-      </div>
-    `;
+    contentEl.innerHTML = conclusaoHTML({ icon: pct >= 70 ? '🎉' : '💪', title: t('zh.path.lessonDone.lessonTitle'), cls: 'exercise-result',
+      sub: pct >= 70 ? t('zh.hanzi.retentionGood') : t('zh.hanzi.retentionReview'),
+      stats: [{ label: t('zh.path.lessonDone.score'), value: `${HANZI_STUDY_STATE.testScore}/${total}` }].concat((() => { const n = Math.max(0, STATE.xp - HANZI_STUDY_STATE.xpStart) + (hanziLessonAlreadyCompleted() ? 0 : LESSON_CLOSE_XP); return n > 0 ? [{ label: t('zh.path.lessonDone.xpEarned'), value: `+${n} ⭐` }] : []; })()) });
     nextBtn.textContent = t('zh.hanzi.backToLessons');
     nextBtn.style.display = 'flex';
     nextBtn.onclick = () => {

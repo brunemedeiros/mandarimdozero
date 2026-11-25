@@ -14,6 +14,10 @@ const server = http.createServer((req, res) => {
 const base = fs.readFileSync(path.join(ROOT, 'tests/fase-i/test_playwright.js'), 'utf8');
 let STUB = base.slice(base.indexOf('const STUB = `') + 'const STUB = `'.length);
 STUB = STUB.slice(0, STUB.indexOf('\n})();`;') + '\n})();'.length);
+// 2026-10-16 (migration 110, PR #349): o site lê a própria linha pela RPC get_my_profile; resposta sem linha = "conta sem
+// perfil" (cria um novo). O stub da Fase I responde vazio a qualquer RPC, então aqui get_my_profile devolve a linha do __uid.
+STUB = STUB.replace("window.__rpc.push(name);", "window.__rpc.push(name);\n      if (name === 'get_my_profile'){ const row = ((window.__DB && window.__DB.profiles) || []).find(p => p.user_id === uid); return { data: row ? Object.assign({}, row) : null, error: null }; }");
+if (!STUB.includes("name === 'get_my_profile'")) throw new Error('stub da Fase I mudou: get_my_profile não entrou');
 let passed = 0, failed = 0;
 const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FALHOU:', n, x !== undefined ? JSON.stringify(x) : ''); } };
 
@@ -28,7 +32,7 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
     const errors = [];
     page.on('pageerror', e => errors.push(e.message));
     await page.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, r => r.abort());
-    await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
+    await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase|\/shared\/vendor\/supabase-js/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
     await page.addInitScript(() => { try { sessionStorage.setItem('guest_mode', '1'); } catch (e) {} });
     await page.goto(`http://127.0.0.1:${port}/${lang}/index.html`);
     await page.waitForFunction(() => typeof STATE !== 'undefined' && STATE.cards && STATE.cards.length > 0 && CURRENT_USER === false, null, { timeout: 15000 });

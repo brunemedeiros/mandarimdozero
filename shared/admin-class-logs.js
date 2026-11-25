@@ -281,7 +281,9 @@ function classLogEditFormHTML(log){
 
 function classLogRowHTML(log, showUsername){
   const isEditing = ADMIN_CLASS_LOGS_STATE.editingId === log.id;
-  const who = showUsername && log.__studentUsername ? `<span class="aulas-quem">@${escapeHTML(log.__studentUsername)}</span> · ` : '';
+  const who = log.__formerName
+    ? `<span class="aulas-quem">${escapeHTML(log.__formerName)} <small class="p-ajuda">(${t('panel.classLog.formerTag')})</small></span> · `
+    : showUsername && log.__studentUsername ? `<span class="aulas-quem">@${escapeHTML(log.__studentUsername)}</span> · ` : '';
   const when = `${fmtDate(new Date(`${log.class_date}T00:00:00`))}${classLogTimeLabel(log)}`;
   const badges = classLogRowBadgesHTML(log);
   const fields = classLogFieldRowsHTML(log);
@@ -305,6 +307,13 @@ async function buildClassLogsListBoxHTML(selectedStudents, selectedClassrooms){
   const roomLists = await Promise.all(selectedClassrooms.map(c => fetchClassroomLogs(c.id)));
   const logs = logLists.flatMap((list, i) => list.map(log => ({ ...log, __studentUsername: selectedStudents[i].username })))
     .concat(roomLists.flatMap((list, i) => list.map(log => ({ ...log, __classroomName: selectedClassrooms[i].name }))));
+  // 138: na aba Aulas (todos), as aulas de ex-alunos (com conta ou só no Banco) entram também, com o nome e "(ex-aluno)".
+  if (ADMIN_CLASS_LOGS_STATE.listAll && typeof fetchTeacherFormerLogs === 'function'){
+    const active = new Set((ADMIN_CLASS_LOGS_STATE._studentsCache || []).map(s => `${s.student_id}|${s.language_app_key}`));
+    const others = await fetchTeacherFormerLogs(active);
+    await classLogLoadFormerNames(others);
+    others.forEach(l => logs.push({ ...l, __formerName: classLogFormerName(l) }));
+  }
   logs.sort((a, b) => (b.class_date.localeCompare(a.class_date)) || (new Date(b.created_at) - new Date(a.created_at)));
   // Guarda o que veio do banco: busca, "mostrar mais" e "mostrar as próximas" só redesenham (sem buscar de novo).
   ADMIN_CLASS_LOGS_STATE._list = { logs, showUsername: selectedStudents.length + selectedClassrooms.length > 1, people: selectedStudents.length + selectedClassrooms.length };
@@ -317,7 +326,7 @@ function classLogNorm(x){ return String(x || '').normalize('NFD').replace(/[\u03
 function classLogMatches(log, q){
   if (!q) return true;
   const day = fmtDate(new Date(`${log.class_date}T00:00:00`));
-  return classLogNorm([log.topic, log.homework, log.observations, log.notes, log.__studentUsername, log.__classroomName, day, log.class_date].join(' ')).includes(q);
+  return classLogNorm([log.topic, log.homework, log.observations, log.notes, log.__studentUsername, log.__classroomName, log.__formerName, day, log.class_date].join(' ')).includes(q);
 }
 function classLogMonthLabel(ym){
   const [y, m] = ym.split('-').map(Number);
@@ -526,6 +535,26 @@ function classLogRepeatDates(from, until){
   return out;
 }
 
+// 138: nomes de ex-alunos (com conta: pela lista de ex-alunos; sem conta: pelo aluno do Banco). Cache por sessão.
+async function classLogLoadFormerNames(logs){
+  const st = ADMIN_CLASS_LOGS_STATE;
+  st._formerNames = st._formerNames || {};
+  const needStudents = logs.some(l => l.student_id && !st._formerNames[`s:${l.student_id}`]);
+  if (needStudents){
+    const { data } = await supabaseClient.rpc('notion_former_students');
+    ((data && data.data) || []).forEach(f => { st._formerNames[`s:${f.student_id}`] = f.name; });
+  }
+  const banks = [...new Set(logs.filter(l => l.bank_student_id && !st._formerNames[`b:${l.bank_student_id}`]).map(l => l.bank_student_id))];
+  if (banks.length){
+    const { data } = await supabaseClient.from('review_bank_students').select('id,name').in('id', banks);
+    (data || []).forEach(b => { st._formerNames[`b:${b.id}`] = b.name; });
+  }
+}
+function classLogFormerName(log){
+  const names = ADMIN_CLASS_LOGS_STATE._formerNames || {};
+  return (log.bank_student_id ? names[`b:${log.bank_student_id}`] : names[`s:${log.student_id}`]) || '?';
+}
+
 // ---------- Calendário da professora (101): todas as aulas do mês, alunos e turmas ----------
 function classLogWhoShort(log){
   if (log.classroom_id){
@@ -533,7 +562,7 @@ function classLogWhoShort(log){
     return c ? c.name : '?';
   }
   const st = ADMIN_CLASS_LOGS_STATE._studentsCache.find(x => x.student_id === log.student_id);
-  const name = st ? (st.display_name || st.username || '?') : '?';
+  const name = st ? (st.display_name || st.username || '?') : classLogFormerName(log);
   return String(name).split(/\s+/)[0];
 }
 
@@ -547,6 +576,8 @@ async function renderTeacherClassCalendar(){
   const scope = ADMIN_CLASS_LOGS_STATE.scope;
   const logs = (await fetchTeacherClassLogsRange(range.from, range.to))
     .filter(l => !scope || (scope.classroomId ? l.classroom_id === scope.classroomId : l.student_id === scope.studentId));
+  await classLogLoadFormerNames(logs.filter(l => l.bank_student_id
+    || (l.student_id && !ADMIN_CLASS_LOGS_STATE._studentsCache.some(s => s.student_id === l.student_id))));
   const entries = logs.map(l => {
     const label = l.attendance_label_id != null ? classLogLabelById(l.attendance_label_id) : null;
     return { id: l.id, date: String(l.class_date), time: l.start_time ? String(l.start_time).slice(0, 5) : '', label: classLogWhoShort(l), color: label ? label.color : '', log: l };
@@ -654,7 +685,7 @@ async function renderAdminClassLogsView(){
     wrap.innerHTML = `<p class="profile-empty-note">${t('admin.common.adminOnly')}</p>`;
     return;
   }
-  wrap.innerHTML = loadingHTML();
+  wrap.innerHTML = loadingHTML(t('classlogs.loading'));
 
   const students = await fetchMyStudents();
   if (!students.length){

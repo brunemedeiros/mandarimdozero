@@ -39,6 +39,14 @@ paths:
   `CACHE_PREFIX`; a instalação busca de novo o que a versão anterior guardava (abre sem internet logo depois de publicar). No teste com
   SW ligado, nunca usar `route()` (desliga o cache HTTP do SW). O SW entrega à página com `Cache-Control: no-cache` (`paraAPagina`), senão
   recarregar a aba mistura `index.html` novo com scripts antigos. Guarda: `tests/pwa-cache/test_playwright.js`.
+- **Por enquanto o site só funciona com internet** (decisão da autora, 2026-11-11): sem internet, abrir o site mostra a tela comum
+  `shared/offline.html` (pré-cache de cada SW, `OFFLINE_URL`), em pt-BR ou en; nunca o app pela metade. Site novo põe `OFFLINE_URL` no SW.
+  Internet cai com o site JÁ aberto (2026-11-13): aviso por cima `shared/sem-internet.js` + `.css` (site inerte, sem atalhos; some sozinho ao
+  voltar, sem recarregar, e relê o progresso se `progressLoadedOk` ficou falso). Não depende do evento `offline` (o celular da autora não o
+  dispara): `HEAD ./manifest.json` decide, conferido em pedido/áudio que falha, volta à aba e a cada 20 s. `sem-internet.js` carrega ANTES do
+  `supabase-client.js` (embrulha `fetch`). Site novo liga os dois. Guarda: `tests/pwa-cache/test_aviso_sem_internet_playwright.js`.
+- **Volta para a aba** (opção A da autora, 2026-11-14): o supabase-js avisa `SIGNED_IN` a cada volta; mesma conta já aberta nunca refaz o
+  login nem reaplica a rota (`isSameLoadedAccount`/`onSameAccountSignedInAgain` em `shared/auth.js`), senão a lição recomeça. Guarda: `tests/volta-aba/`.
 - Diálogo: palavras do vocabulário da unidade em COR + negrito (`.dlg-new`, `var(--seal-red-dark)`), nunca sublinhado
   (sublinhado = pontuação faltando/bloco no lugar errado). Transcrição (pinyin) também destacada (`.dlg-new-py`,
   alinhada por busca, `dlgHighlightPinyin`). zh: pinyin acima do hanzi. Idioma novo reutiliza essas classes.
@@ -86,9 +94,20 @@ paths:
   Dados opcionais de cada expressão: `example/secondExample.{pt,mark}` (tradução e trecho exato do francês a destacar), `literal.{pt,note}` (tradução literal e nota de origem); no site em outro idioma vêm do overlay (`docs/i18n/challenges-en.json`: `example`, `secondExample`, `literal`, `literalNote`) e nunca entram em `CHALLENGE_SITE_LANG_FIELDS` (sem o campo, a parte some; o desafio não). Teste: `tests/desafios-exemplos-traducao/`. Gravar SQL no navegador troca `\n` por `\r\n`: usar `chr(10)` (`docs/i18n/lote-exemplos-expressoes/gerar.py`) e conferir por hash.
 - **Lembrete de revisão do rodapé** (`maybeShowReviewReminder`, `shared/core/revisao-decks.js`): o dia só é gravado depois de o banner ficar visível uns segundos ou ser clicado/dispensado
   (`markReviewReminderSeen`); em lição (`lesson-focus`) nem aparece nem gasta o dia; reavalia ao voltar para a aba e ao sair da lição. Guarda: `tests/lembrete-revisao/`.
+- **Teclado na Revisão da aluna** (decisão da autora, 2026-11-05; `wireReviewKeyboard`, `shared/core/revisao-cartoes.js`; CSS `shared/revisao-teclado.css`): Espaço/Enter mostram a resposta do cartão Normal;
+  1 a 4 pela POSIÇÃO do botão (4 notas: Errei, Difícil, Bom, Fácil; digitar com acerto em cheio: 1 Bom, 2 Fácil; múltipla escolha: opções); Enter aciona o "Continuar"; Espaço/Enter nunca avaliam; só números (sem setas nem `h`);
+  tecla segurada e os 300 ms de cada cartão novo são ignorados; Preview e tela escondida nunca respondem. Cartão de Revisão novo chama `wireReviewKeyboard` no fim do renderer. Guarda: `tests/teclado-revisao/`.
+- **Lista do que a página pode carregar (CSP)** (auditoria de segurança, 2026-11-25): `index.html`, `fr/index.html` e `zh/index.html` têm um
+  `<meta http-equiv="Content-Security-Policy">` gerado por `scripts/csp-atualizar.js`. Mudou um `<script>` SEM `src` numa dessas páginas: rode
+  `node scripts/csp-atualizar.js` e faça commit (a publicação também roda, mas o teste `tests/csp/` falha até lá). Endereço externo novo (script,
+  fetch, áudio): entra no script, nunca à mão no `<meta>`. Teste que simula Supabase/mídia usa o endereço real do projeto, não um inventado. Nada de
+  `onclick=`/`onerror=` em HTML montado por JS (a lista bloqueia). Página nova: `shared/anti-moldura.js` no começo do `<head>`.
 - Enter dentro de campo de resposta pertence ao campo (não aciona o atalho global de "Continuar").
 - Ícones: emoji escrito no texto vira desenho do Fluent por `shared/emoji-icons.js`. Emoji novo precisa entrar no MAP de lá
   e ter o SVG em `shared/icons/fluent/` (senão aparece o emoji do aparelho). Ícone de menu = `<img class="tab-icon" ...>`.
-- **Paridade**: CSS de classe usada por `shared/` vai para o `index.html` de cada site (ou para um `.css` de `shared/`) no mesmo PR;
+- **Erro e Continuar** (decisão da autora, 2026-11-15, todos os sites): "errado" usa `--error-red`/`--error-red-text`, nunca a cor da
+  marca; Continuar do acerto/erro com `--success-fill`/`--error-fill` (texto `--on-*-fill`) e degrau num tom mais escuro do próprio
+  botão; rótulo do painel de erro em cinza. Celular: topo só com o logo. Guarda: `tests/paridade-sites/test_visual_licao_topo.js`.
+- **Paridade**: CSS de classe usada por `shared/` vai para um `.css` de `shared/` (não colar nos `index.html`; ver `onde-fica-cada-coisa.md`) no mesmo PR;
   `tests/paridade-sites/test_css_compartilhado.js` descobre os sites sozinho e barra a falta. Recurso só do fr: ver a
   classificação (A idioma, B pendência da autora, C esquecido) em `docs/auditoria-paridade-fr-zh.md` antes de dar por pronto.

@@ -70,6 +70,7 @@
 
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import webpush from 'npm:web-push@3';
+import { renderBrandedEmail } from './email-brand.mjs';
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -85,6 +86,20 @@ webpush.setVapidDetails(vapidSubject, vapidPublicKey, vapidPrivateKey);
 // PR); sem isso a API recusa o envio. Ausência de qualquer um dos dois só
 // desliga o envio de e-mail (log + return cedo em sendEmailToUser), nunca
 // derruba o resto do cron -- mesmo espírito de robustez do push.
+// Senha do agendamento (auditoria de segurança de 2026-11-19, docs/historico/36):
+// o verify_jwt aceita a chave pública do site, então sem isto qualquer pessoa
+// disparava os avisos fora de hora. O agendamento (cron `notification-cron-diario`,
+// migration 140) manda o cabeçalho `x-cron-token` com o valor guardado no Vault
+// (`notif_cron_token`), igual ao secret NOTIFICATION_CRON_TOKEN daqui. Sem o secret
+// (ou com menos de 24 caracteres) a função recusa tudo, nunca roda aberta.
+const cronToken = Deno.env.get('NOTIFICATION_CRON_TOKEN') || '';
+function safeEqual(a: string, b: string): boolean {
+  const ea = new TextEncoder().encode(a), eb = new TextEncoder().encode(b);
+  let diff = ea.length ^ eb.length;
+  for (let i = 0; i < Math.max(ea.length, eb.length); i++) diff |= (ea[i] || 0) ^ (eb[i] || 0);
+  return diff === 0;
+}
+
 const resendApiKey = Deno.env.get('RESEND_API_KEY');
 const resendFromEmail = Deno.env.get('RESEND_FROM_EMAIL');
 
@@ -138,6 +153,9 @@ const MISSION_FIELD_BY_ID: Record<string, MissionFieldDef> = {
   matchGame1: { field: 'matchGamesPlayed' },
   overdue3: { field: 'overdueReviewsDone' },
   stars40: { field: 'stars' },
+  // 'Ganhe 50 XP hoje' (no site desde ~2026-10-23, no lugar de stars40). Faltava aqui: o cron quebrava em
+  // getFieldValue(undefined) e a conta ficava sem o lembrete de missões (achado em 2026-11-23).
+  xp50: { field: 'xp' },
   highscore2: { field: 'highScoreLessons' },
   perfect1: { field: 'perfectLessons' },
   grammar1: { field: 'grammarLessons' },
@@ -165,8 +183,9 @@ function missionCurrent(def: MissionFieldDef, state: any): number {
 function computeMissionProgress(state: any): { current: number; target: number }[] | null {
   const missions = state.daily?.missions;
   if (!Array.isArray(missions) || missions.length === 0 || !state.daily?.date) return null;
-  return missions.map((m: { id: string; target: number }) => {
-    const def = MISSION_FIELD_BY_ID[m.id] || {};
+  // Missão que o site criou e este mapa ainda não conhece: fica de fora da conta (antes derrubava a conta inteira).
+  return missions.filter((m: { id: string }) => Object.prototype.hasOwnProperty.call(MISSION_FIELD_BY_ID, m.id)).map((m: { id: string; target: number }) => {
+    const def = MISSION_FIELD_BY_ID[m.id];
     return { current: Math.min(missionCurrent(def, state), m.target), target: m.target };
   });
 }
@@ -380,21 +399,19 @@ async function getUserEmail(supabase: any, cache: Map<string, string | null>, us
 // precisa pra assinatura VAPID). Sem RESEND_API_KEY/RESEND_FROM_EMAIL
 // configurados (secrets manuais, ver PR), só loga e sai -- nunca derruba o
 // resto da varredura por falta de um secret opcional.
-async function sendEmailToUser(supabase: any, cache: Map<string, string | null>, userId: string, subject: string, body: string): Promise<void> {
+async function sendEmailToUser(supabase: any, cache: Map<string, string | null>, userId: string, subject: string, body: string, eventType: string): Promise<void> {
   if (!resendApiKey || !resendFromEmail) return;
   const to = await getUserEmail(supabase, cache, userId);
   if (!to) return;
 
-  const html = `<div style="font-family:-apple-system,sans-serif;max-width:480px;margin:0 auto;padding:24px;">
-    <p style="font-size:15px;line-height:1.6;color:#241A15;">${body}</p>
-    <p style="font-size:12px;color:#93856F;margin-top:32px;">${uiLangFor(userId) === 'en' ? 'You can adjust which emails you receive in Settings &gt; Notifications, inside the app.' : 'Você pode ajustar quais e-mails recebe em Configurações &gt; Notificações, dentro do app.'}</p>
-  </div>`;
+  // Visual Prof Brune (email-brand.mjs); texto e assunto continuam vindo de notification_templates.
+  const mail = renderBrandedEmail({ lang: uiLangFor(userId) === 'en' ? 'en' : 'pt', eventType, subject, body });
 
   try {
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${resendApiKey}` },
-      body: JSON.stringify({ from: resendFromEmail, to, subject, html, text: body }),
+      body: JSON.stringify({ from: resendFromEmail, to, subject, html: mail.html, text: mail.text }),
     });
     if (!res.ok) console.error('notification-cron: falha ao enviar e-mail', userId, res.status, await res.text());
   } catch (e: any) {
@@ -539,7 +556,7 @@ async function maybeNotify(
     if (emailTemplate) {
       const emailSubject = fillPlaceholders(emailTemplate.title, payload) || title || (uiLangFor(userId) === 'en' ? 'Notification' : 'Notificação');
       const emailBody = fillPlaceholders(emailTemplate.body, payload);
-      if (emailBody) await sendEmailToUser(supabase, emailCache, userId, emailSubject, emailBody);
+      if (emailBody) await sendEmailToUser(supabase, emailCache, userId, emailSubject, emailBody, eventType);
     }
   }
 
@@ -647,7 +664,10 @@ async function processUserLanguage(
   // exige progresso > 0 em pelo menos uma; sem isso, alguém que nem abriu
   // o app hoje receberia isto JUNTO com streak_at_risk/study_goal_remaining
   // (redundante -- essas duas já cobrem "não estudou hoje").
-  const missions = computeMissionProgress(state);
+  // Só as missões de HOJE: state.daily fica congelado até a pessoa abrir o site de novo, e antes o cron mandava
+  // "faltam N missões" todo dia sobre missões de dias antigos (2026-11-24: ~10 avisos por dia, missões desde 18/09).
+  // Mesma aproximação de fuso do resto do arquivo (22h UTC = 19h em Brasília, a data local e a UTC coincidem).
+  const missions = state.daily?.date === today ? computeMissionProgress(state) : null;
   if (missions) {
     const anyStarted = missions.some((m) => m.current > 0);
     const missing = missions.filter((m) => m.current < m.target).length;
@@ -809,7 +829,14 @@ async function processTeacherStudentAlerts(
   return created;
 }
 
-Deno.serve(async (_req: Request) => {
+Deno.serve(async (req: Request) => {
+  if (cronToken.length < 24) {
+    console.error('notification-cron: secret NOTIFICATION_CRON_TOKEN ausente ou curto; recusando');
+    return new Response(JSON.stringify({ ok: false, error: 'not_configured' }), { status: 503, headers: { 'Content-Type': 'application/json' } });
+  }
+  if (!safeEqual(req.headers.get('x-cron-token') || '', cronToken)) {
+    return new Response(JSON.stringify({ ok: false, error: 'unauthorized' }), { status: 401, headers: { 'Content-Type': 'application/json' } });
+  }
   const supabase = createClient(supabaseUrl, serviceRoleKey);
 
   const rulesResult = await supabase.from('notification_rules').select('*');

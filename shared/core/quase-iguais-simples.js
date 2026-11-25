@@ -56,7 +56,7 @@ function customAudioBtnHTML(url){
 
 // Volta da sessão (Flashcard/Speed Review/Palavras difíceis/Combinar) pra
 // tela de escolha -- usada pelo link "← Voltar aos modos" e pelos botões
-// "Praticar mais" das telas de conclusão (Fase 6 do projeto: terminar uma
+// "Continuar revisando" (antes "Praticar mais") das telas de conclusão (Fase 6 do projeto: terminar uma
 // revisão leva pra PRATICAR, nunca repete a mesma bateria sozinha).
 // Rótulo do cartão: cartões próprios/da professora mostram o nome do Deck.
 function reviewCardTagLabel(card){
@@ -172,7 +172,7 @@ async function startDeckReviewSession(deckId, opts){
   document.getElementById('speed-review-content').style.display = 'none';
   document.getElementById('match-review-content').style.display = 'none';
 
-  STATE.reviewSessionStartedAt = Date.now();
+  STATE.reviewSessionStartedAt = Date.now(); STATE.reviewSessionXpStart = STATE.xp;
   renderReviewView();
   if (typeof routerNavigate === 'function') routerNavigate({ type: 'reviewSession', mode: 'flashcard', deckId });
   } finally {
@@ -211,7 +211,7 @@ function openReviewSession(mode, opts){
     STATE.reviewQueue = shuffle(getStudyQueue(eligibleReviewPool(), { scope: 'hard' }));
     STATE.reviewIndex = 0;
     STATE.reviewCardState = null;
-    STATE.reviewSessionStartedAt = Date.now(); // nunca herda o início de uma sessão anterior abandonada
+    STATE.reviewSessionStartedAt = Date.now(); STATE.reviewSessionXpStart = STATE.xp; // nunca herda o início de uma sessão anterior abandonada
     renderReviewView();
   } else if (mode === 'match'){
     renderMatchSizePicker();

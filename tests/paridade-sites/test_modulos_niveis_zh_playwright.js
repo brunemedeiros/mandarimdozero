@@ -33,7 +33,7 @@ async function openZh(browser, theme, withModules){
   const errors = [];
   page.on('pageerror', e => errors.push(String(e)));
   await page.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, r => r.abort());
-  await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
+  await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase|\/shared\/vendor\/supabase-js/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
   await page.addInitScript(({ th, mods }) => {
     try { sessionStorage.setItem('guest_mode', '1'); localStorage.setItem('ui-language', 'pt-BR'); localStorage.setItem('theme', th); localStorage.setItem('mandarim_trail_view', 'list'); } catch (e) {}
     let s = 4242; Math.random = () => (s = (s * 16807) % 2147483647) / 2147483647;
@@ -155,7 +155,8 @@ async function openZh(browser, theme, withModules){
         ans = ans.normalize('NFD').replace(/[̀-ͯ]/g, ''); mode = 'almost'; sawAlmost = true;
       } else if (!sawNumbered && st.ex.answer === 'nǐ hǎo'){
         ans = 'ni3 hao3'; sawNumbered = true;
-      } else if (!sawWrong && i === 3){ ans = 'bu dui'; mode = 'wrong'; sawWrong = true; }
+      // Erra a 1ª pergunta comum a partir da 4ª (antes: só a 4ª; a ordem muda quando outra biblioteca usa o sorteio fixo do teste).
+      } else if (!sawWrong && i >= 3){ ans = 'bu dui'; mode = 'wrong'; sawWrong = true; }
       await page.fill('#checkpoint-input', ans);
       await click('#checkpoint-verify-btn');
       const res = await page.evaluate(() => ({ cls: document.querySelector('.gram-exercise').className, exp: document.getElementById('checkpoint-expected').textContent }));

@@ -48,7 +48,7 @@ async function fingerprint(browser, root){
   page.on('pageerror', e => errors.push(String(e)));
   await page.clock.install({ time: new Date('2026-10-14T12:00:00Z') });
   await page.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, r => r.abort());
-  await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
+  await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase|\/shared\/vendor\/supabase-js/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
   await page.addInitScript(() => {
     try { sessionStorage.setItem('guest_mode', '1'); localStorage.setItem('ui-language', 'pt-BR'); } catch (e) {}
     let s = 12345; Math.random = () => (s = (s * 16807) % 2147483647) / 2147483647;
@@ -60,9 +60,11 @@ async function fingerprint(browser, root){
   const out = {};
   const grab = async (name, fn, arg) => { out[name] = await page.evaluate(fn, arg); };
   const click = (sel) => page.evaluate((s) => { const e = document.querySelector(s); if (!e) throw new Error('sem ' + s); e.click(); }, sel);
-  const html = (sel) => page.evaluate((s) => { const e = document.querySelector(s); return e ? e.innerHTML : null; }, sel);
+  // Tela de conclusão única (2026-11-10, decisão da autora): as telas de conclusão trocaram de marcação DE PROPÓSITO (shared/core/conclusao.js); o antes (várias marcações) e o depois (.conclusao) viram o mesmo marcador nos dois lados. O resto da tela continua comparado.
+  const html = (sel) => page.evaluate((s) => { const e = document.querySelector(s); if (!e) return null; const c = e.cloneNode(true); c.querySelectorAll('.conclusao, .speed-gameover, .conj-session-result, .challenge-queue-interstitial, .review-empty:has(.review-complete-actions), .story-complete, .exercise-result').forEach(n => n.replaceWith(document.createComment('CONCLUSAO'))); return c.innerHTML.replace(/\s*<!--CONCLUSAO-->\s*/g, '<!--CONCLUSAO-->'); }, sel);
   const view = () => html('#view-conjugaison');
-  const state = () => page.evaluate(() => JSON.stringify({ conj: CONJ_STATE, checked: CONJ_STATE.checked ? [...CONJ_STATE.checked] : null,
+  const state = () => page.evaluate(() => JSON.stringify({ conj: Object.assign({}, CONJ_STATE, { xp: undefined }), // CONJ_STATE.xp (XP somado do resumo, 2026-11-24) não existia antes: fora da comparação
+     checked: CONJ_STATE.checked ? [...CONJ_STATE.checked] : null,
     daily: STATE.daily, xp: STATE.xp, modes: STATE.modesUsed, saved: serializeState(),
     missions: REVISAO_CONJ_CHALLENGES.map(c => [c.id, c.icon, c.label, c.target, c.get(STATE.daily)]) }));
 
@@ -173,6 +175,7 @@ async function fingerprint(browser, root){
     await click('#conj-next-verb-btn');
   }
   out.s_resultado = await view();
+  out.s_resultado_crua = await page.evaluate(() => { const e = document.querySelector('#view-conjugaison'); return /conj-session-result/.test(e.innerHTML) && /conj-practice-mistakes-btn/.test(e.innerHTML); });
   out.s_estado_fim = await state();
   await click('#conj-practice-mistakes-btn');
   out.s_erros = await view();
@@ -287,7 +290,7 @@ async function fingerprint(browser, root){
     check('elisão e "que": j\'ai, que j\', qu\'ils', /^j'\|j'ai/m.test(depois.correcao['avoir']) && /que j'/.test(depois.correcao['avoir']) && /qu'ils \/ qu'elles/.test(depois.correcao['parler']));
     check('futur proche montado na hora (vais parler)', /"vais parler"/.test(depois.correcao['parler']));
     check('busca: "comer" acha manger', /^comer=>\[\{"verb":"manger"/m.test(depois.busca.join('\n')));
-    check('sessão teve resultado e "Praticar só os que errei"', /conj-session-result/.test(depois.s_resultado) && /conj-practice-mistakes-btn/.test(depois.s_resultado));
+    check('sessão teve resultado e "Praticar só os que errei"', depois.s_resultado_crua === true);
     check('XP e missões andaram na sessão', JSON.parse(depois.s_estado_fim).daily.conjugationSessions === 1 && JSON.parse(depois.s_estado_fim).xp > JSON.parse(depois.estado_inicial).xp);
     check('jogo inteiro até o resultado', /cg-result/.test(depois.j_fim));
     console.log(`  cenas iguais ao fr de antes: ${iguais}/${total} (correção: ${nCorr} respostas em 241 verbos)`);

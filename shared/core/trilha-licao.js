@@ -91,6 +91,19 @@ function renderBlockIntroCard(u, contentEl, nextBtn){
   nextBtn.textContent = posInBlock < block.length - 1 ? t('zh.path.nextWordArrow') : t('common.continueArrow');
 }
 
+// Unidade recém-liberada (animações, item 14; decisão da dona, 2026-11-25): marcada no instante em que a anterior é concluída
+// e mostrada com um carimbo na primeira vez que a trilha (lista ou mapa) aparece na tela. Fica só na memória da página: não vai
+// para o progresso salvo; recarregar o site antes de ver a trilha perde o carimbo, e nada mais muda.
+let UNIDADE_RECEM_LIBERADA = null;
+function marcarUnidadeLiberada(el){
+  el.classList.add('mov-liberada');
+  requestAnimationFrame(() => {
+    if (!el.isConnected || !el.getClientRects().length) return; // trilha ainda escondida (tela de conclusão): fica para a próxima vez
+    UNIDADE_RECEM_LIBERADA = null;
+    el.scrollIntoView({ block: 'center', behavior: (typeof prefersReducedMotion === 'function' && prefersReducedMotion()) ? 'auto' : 'smooth' });
+  });
+}
+
 function buildUnitBlock(u){
   const state = unitBlockState(u);
   const unlocked = state !== 'locked';
@@ -129,6 +142,7 @@ function buildUnitBlock(u){
     + (state === 'available' ? ' available' : '')
     + (expanded ? ' expanded' : '');
   if (state === 'current') block.setAttribute('aria-current', 'step');
+  if (UNIDADE_RECEM_LIBERADA !== null && String(u.id) === String(UNIDADE_RECEM_LIBERADA) && unlocked) marcarUnidadeLiberada(block);
 
   const badgeHTML = state === 'done' ? `<span class="ub-badge">✓</span>`
     : state === 'skipped' ? `<span class="ub-badge ub-badge-skipped" title="${t('trail.unit.skippedTitle')}">${t('trail.unit.skippedBadge')}</span>` : '';
@@ -201,6 +215,11 @@ function buildUnitBlock(u){
 }
 
 function openUnitDetail(unitId){
+  // Unidade sem tradução para o idioma do site não abre (nem por link/rota antiga): volta para a trilha.
+  if (!isUnitAvailable(unitId)){
+    if (typeof switchTab === 'function') switchTab('path');
+    return;
+  }
   STATE.currentUnitId = unitId;
   STATE.unitProgress[unitId].started = true;
   STEP_STATE.onChallengesScreen = false;
@@ -234,12 +253,6 @@ function openUnitDetail(unitId){
   document.getElementById('ud-title').textContent = u.title;
   document.getElementById('ud-goal').textContent = u.goal;
   LANG_HOOKS.afterOpenUnit(u); // zh: botão "Manual da unidade" (some na unidade de gramática)
-  const langNotice = document.getElementById('ud-lang-notice');
-  if (langNotice){
-    const untranslated = !CONTENT_I18N.isUnitTranslated(u.id);
-    langNotice.hidden = !untranslated;
-    langNotice.textContent = untranslated ? t('content.untranslatedNotice') : '';
-  }
 
   STEP_STATE.currentStep = 0;
   renderStep();
@@ -378,10 +391,11 @@ function renderUnitsGrid(){
   renderSideRankingCard();
   // Selo de nível concluído no título fixo da trilha (zh: sem seletor de nível); o fr não tem esse elemento.
   const levelBadge = document.getElementById('level-done-badge');
-  if (levelBadge) levelBadge.style.display = UNITS.every(u => STATE.unitProgress[u.id]?.completed) ? '' : 'none';
+  if (levelBadge) levelBadge.style.display = availableUnits(UNITS).every(u => STATE.unitProgress[u.id]?.completed) ? '' : 'none';
 
   const grid = document.getElementById('units-grid');
-  const levelModules = modular ? modulesOfLevel(STATE.currentLevel) : [];
+  // Módulo sem nenhuma unidade traduzida para o idioma do site some inteiro (isUnitAvailable em licao-base.js).
+  const levelModules = modular ? modulesOfLevel(STATE.currentLevel).filter(m => moduleVisibleUnitIds(m).length) : [];
 
   if (modular && !levelModules.length){
     grid.innerHTML = `
@@ -408,7 +422,7 @@ function renderUnitsGrid(){
   }
 
   if (!modular){
-    UNITS.forEach((u) => {
+    availableUnits(UNITS).forEach((u) => {
       grid.appendChild(buildUnitBlock(u));
       // Checkpoint de história (zh): aparece logo após a unidade que a desbloqueia, como um marco na trilha.
       const extra = LANG_HOOKS.trailAfterUnit(u);
@@ -455,7 +469,9 @@ function markUnitCompleted(unitId, scorePct, { skipToast = false } = {}){
   const levelUnits = unitsOfLevel(u.level);
   const idx = levelUnits.findIndex(x => x.id === unitId);
   if (idx >= 0 && idx+1 < levelUnits.length){
-    STATE.unitProgress[levelUnits[idx+1].id].unlocked = true;
+    const proxima = STATE.unitProgress[levelUnits[idx+1].id];
+    if (!proxima.unlocked) UNIDADE_RECEM_LIBERADA = levelUnits[idx+1].id;
+    proxima.unlocked = true;
   }
   addXP(25);
   registerStudyToday();

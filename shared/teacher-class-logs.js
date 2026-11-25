@@ -108,6 +108,20 @@ async function fetchTeacherClassLogsRange(fromDate, toDate){
   return (data || []).filter(l => l.class_date >= fromDate && l.class_date <= toDate);
 }
 
+// 138: aulas que não são de aluno ativo nem de turma (ex-alunos com conta e ex-alunos sem conta, ligados ao Banco).
+// activeKeys: Set de "aluno|idioma" com vínculo ativo (essas já vêm por fetchClassLogs).
+async function fetchTeacherFormerLogs(activeKeys){
+  if (!CURRENT_USER) return [];
+  const { data, error } = await supabaseClient
+    .from('teacher_class_logs')
+    .select('*')
+    .eq('teacher_id', CURRENT_USER.id)
+    .is('classroom_id', null)
+    .order('class_date', { ascending: false });
+  if (error){ console.error('Erro ao carregar aulas de ex-alunos:', error); return []; }
+  return (data || []).filter(l => l.bank_student_id || (l.student_id && !activeKeys.has(`${l.student_id}|${l.language_app_key}`)));
+}
+
 // Aulas de uma turma (lado da professora; RLS: teacher_id = ela).
 async function fetchClassroomLogs(classroomId){
   if (!CURRENT_USER || !classroomId) return [];
@@ -316,7 +330,7 @@ function wireCalendarFeedBox(root){
   const body = box.querySelector('[data-calendar-feed-body]');
   const painel = box.hasAttribute('data-calendar-feed-painel');
   const load = async (regenerate) => {
-    body.innerHTML = typeof loadingHTML === 'function' ? loadingHTML() : '…';
+    body.innerHTML = typeof loadingHTML === 'function' ? loadingHTML(t('loading.calendarLink')) : '…';
     body.innerHTML = calendarFeedBodyHTML(await fetchCalendarFeedToken(regenerate), painel);
     box.dataset.loaded = '1';
   };

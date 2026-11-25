@@ -114,6 +114,61 @@ function reportExerciseTextSnippet(ex){
   } catch (e) { return null; }
 }
 
+// Texto (frente/resposta) e identidade de um cartão da Revisão, para o report.
+// cardPromptText()/cardAnswerText() só conhecem Normal e Múltipla escolha e
+// quebram com "Digite a resposta" e Cloze (a view desses tipos não tem
+// front/back) -- por isso o report 37 (cartão da professora "Digite a
+// resposta") chegou sem o texto do cartão. Aqui cada tipo é lido pela sua
+// própria view, e a identidade (origem, linha, deck, unidade) vem separada,
+// para o cartão ser achado mesmo se a leitura do texto falhar.
+function reportReviewCardInfo(card){
+  const info = {};
+  try {
+    if (card.origin) info.review_card_origin = card.origin;
+    if (card.rowId != null) info.review_card_row_id = card.rowId;
+    if (card.deckId != null) info.review_card_deck_id = card.deckId;
+    if (card.unitId != null){
+      info.review_card_unit_id = card.unitId;
+      if (card.unitTitle) info.review_card_unit_title = card.unitTitle;
+    }
+    if (card.cardInstance && card.cardInstance.cardTypeId) info.review_card_type = card.cardInstance.cardTypeId;
+  } catch (e) {}
+  let front = null, answer = null;
+  try {
+    if (card.cardInstance && typeof resolveCardContentView === 'function'){
+      const v = resolveCardContentView(card);
+      if (v.kind === 'type_answer'){ front = v.prompt && v.prompt.text; answer = v.displayAnswerText; }
+      else if (v.kind === 'cloze'){
+        front = typeof renderClozeText === 'function' ? renderClozeText(v.rawSentenceText, v.markId, { reveal: true }) : v.rawSentenceText;
+        answer = v.displayAnswerText;
+      }
+      else if (v.kind === 'multiple_choice'){ front = v.prompt && v.prompt.text; answer = v.correctText; }
+      else { front = v.front && v.front.text; answer = v.back && v.back.text; }
+    } else {
+      front = card.front || card.back_hanzi || null;
+      answer = card.back_trans || null;
+    }
+  } catch (e) {}
+  if (front) info.review_card_front = String(front).slice(0, 300);
+  if (answer) info.review_card_snippet = String(answer).slice(0, 140);
+  return info;
+}
+
+// O que a pessoa digitou num cartão de digitar (Digite a resposta, Cloze) e o resultado que o site deu, para quem
+// lê o report saber se o erro foi da aluna ou do cartão (Etapa 1 de docs/banco-revisao-resposta-digitada-plano.md,
+// 2026-11-24). Só depois de "Verificar" (antes disso a resposta não foi dada). Nada é guardado além do report que a
+// própria pessoa envia.
+function reportTypedAnswerInfo(card, local){
+  const info = {};
+  try {
+    const kind = card && card.cardInstance && card.cardInstance.cardTypeId;
+    if ((kind !== 'type_answer' && kind !== 'cloze') || !local || !local.answered) return info;
+    info.review_typed_answer = String(local.typedAnswer == null ? '' : local.typedAnswer).slice(0, 300);
+    info.review_answer_result = local.wasCorrect ? (local.almost ? 'quase' : 'certo') : 'errado';
+  } catch (e) {}
+  return info;
+}
+
 function captureReportContext(extra){
   const ctx = {};
   try { ctx.url = window.location.href; } catch (e) {}
@@ -127,8 +182,21 @@ function captureReportContext(extra){
       ctx.device_type = ANALYTICS_DEVICE.deviceType;
     }
   } catch (e) {}
+  // Tela atual (aba ativa) primeiro: os blocos abaixo dependem dela.
   try {
-    if (typeof STATE !== 'undefined' && STATE){
+    const activeTab = document.querySelector('.tab-btn.active')?.dataset.tab;
+    if (activeTab) ctx.screen = activeTab;
+  } catch (e) {}
+
+  // Trilha (nível/módulo/unidade/lição e exercício da lição): só quando a
+  // pessoa está mesmo na aba Estudo. STATE.currentUnitId é "onde a aluna
+  // parou na trilha", não a tela que ela vê: fora do Estudo (ex.: cartões da
+  // professora em #/review/class) esses campos apontavam para uma lição sem
+  // relação com o que foi reportado (report 37, 2026-10-24; corrigido em
+  // 2026-11-23 a pedido da autora). STEP_STATE também não é limpo ao trocar de aba.
+  const onTrail = ctx.screen === 'path';
+  try {
+    if (onTrail && typeof STATE !== 'undefined' && STATE){
       ctx.level = STATE.currentLevel || null;
       const unitId = STATE.currentUnitId;
       if (unitId != null && typeof UNITS !== 'undefined'){
@@ -149,7 +217,7 @@ function captureReportContext(extra){
     }
   } catch (e) {}
   try {
-    if (typeof STEP_STATE !== 'undefined' && STEP_STATE && Array.isArray(STEP_STATE.exerciseList)){
+    if (onTrail && typeof STEP_STATE !== 'undefined' && STEP_STATE && Array.isArray(STEP_STATE.exerciseList)){
       const ex = STEP_STATE.exerciseList[STEP_STATE.exerciseIndex];
       if (ex){
         ctx.exercise_format = ex.format || null;
@@ -158,15 +226,6 @@ function captureReportContext(extra){
         if (snippet) ctx.exercise_snippet = snippet;
       }
     }
-  } catch (e) {}
-
-  // Fase 3-4 do projeto "Report global": tela atual (aba ativa) -- funciona
-  // em QUALQUER view, mesmo as sem nenhum estado pedagógico específico
-  // (Perfil, Progresso, Ranking...). Complementa, nunca substitui, os
-  // blocos mais específicos abaixo.
-  try {
-    const activeTab = document.querySelector('.tab-btn.active')?.dataset.tab;
-    if (activeTab) ctx.screen = activeTab;
   } catch (e) {}
 
   // Os blocos abaixo (Revisão/Conjugação/Desafios) só escrevem em ctx
@@ -191,15 +250,19 @@ function captureReportContext(extra){
   try {
     const reviewSessionOpen = document.getElementById('review-session-wrap')?.style.display !== 'none';
     const reviewContentVisible = reviewSessionOpen && document.getElementById('review-content')?.style.display === 'block';
-    if (ctx.screen === 'review' && reviewContentVisible &&
-        typeof STATE !== 'undefined' && STATE && Array.isArray(STATE.reviewQueue) && STATE.reviewQueue.length){
-      const card = STATE.reviewQueue[STATE.reviewIndex];
+    // "Ver cartão anterior" (botão Voltar dos cartões da professora): a tela mostra um cartão do histórico,
+    // não o da fila -- o report segue o que está na tela (mesma condição de renderReviewViewInner).
+    const peekEntry = typeof STATE !== 'undefined' && STATE && STATE.reviewPeek != null && STATE.reviewSessionClassReview &&
+      Array.isArray(STATE.reviewHistory) ? STATE.reviewHistory[STATE.reviewPeek] : null;
+    if (ctx.screen === 'review' && reviewContentVisible && typeof STATE !== 'undefined' && STATE &&
+        (peekEntry || (Array.isArray(STATE.reviewQueue) && STATE.reviewQueue.length))){
+      const card = peekEntry ? peekEntry.card : STATE.reviewQueue[STATE.reviewIndex];
       if (card){
         ctx.review_mode = STATE.reviewActiveMode || null;
-        ctx.review_position = `${STATE.reviewIndex + 1}/${STATE.reviewQueue.length}`;
-        ctx.review_card_front = (typeof cardPromptText === 'function' ? cardPromptText(card) : (card.front || card.back_hanzi)) || null;
-        const snippet = typeof cardAnswerText === 'function' ? cardAnswerText(card) : card.back_trans;
-        if (snippet) ctx.review_card_snippet = String(snippet).slice(0, 140);
+        if (STATE.reviewSessionClassReview) ctx.review_scope = 'class';
+        if (peekEntry) ctx.review_peek = true;
+        else ctx.review_position = `${STATE.reviewIndex + 1}/${STATE.reviewQueue.length}`;
+        Object.assign(ctx, reportReviewCardInfo(card), reportTypedAnswerInfo(card, peekEntry ? peekEntry.local : STATE.reviewCardState));
       }
     }
   } catch (e) {}
@@ -215,11 +278,7 @@ function captureReportContext(extra){
       ctx.review_mode = 'speed';
       ctx.review_position = `${SPEED_STATE.index + 1}/${SPEED_STATE.queue.length}`;
       ctx.speed_review_score = SPEED_STATE.score;
-      if (card){
-        ctx.review_card_front = (typeof cardPromptText === 'function' ? cardPromptText(card) : (card.front || card.back_hanzi)) || null;
-        const snippet = typeof cardAnswerText === 'function' ? cardAnswerText(card) : card.back_trans;
-        if (snippet) ctx.review_card_snippet = String(snippet).slice(0, 140);
-      }
+      if (card) Object.assign(ctx, reportReviewCardInfo(card));
     }
   } catch (e) {}
 

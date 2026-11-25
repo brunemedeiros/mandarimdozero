@@ -61,7 +61,7 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
   const errors = [];
   page.on('pageerror', e => errors.push(e.message));
   await page.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, r => r.abort());
-  await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
+  await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase|\/shared\/vendor\/supabase-js/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
   await page.addInitScript(() => { try { sessionStorage.setItem('guest_mode', '1'); } catch (e) {} });
   await page.goto(`http://127.0.0.1:${port}/fr/index.html`);
   await page.waitForFunction(() => typeof STATE !== 'undefined' && STATE.cards && STATE.cards.length > 0 && CURRENT_USER === false, null, { timeout: 15000 });
@@ -79,7 +79,9 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
   let p = await catProgress('accent');
   check('progresso: Acentuação mostra 0 de Y', p && p.done === 0 && p.total === expected.accent, p);
   check('progresso: texto "X de Y concluídos"', p && /0 de \d+ concluíd/.test(p.text), p);
-  check('progresso: barra existe', await page.isVisible('.challenge-category-card[data-category="accent"] .challenge-progress-track'));
+  // Passada de design (2026-10-06): no cartão da categoria o progresso aparece como anel no ícone; a barra continua no HTML
+  // (o CSS esconde só no cartão da categoria), então confere que ela existe, não que está visível.
+  check('progresso: barra existe', (await page.locator('.challenge-category-card[data-category="accent"] .challenge-progress-track').count()) > 0);
   check('progresso: card de Ditados tem progresso', await page.isVisible('#challenges-dictation-card .challenge-progress'));
 
   // concluir 1 acentuação (erro leve) e ver o contador subir

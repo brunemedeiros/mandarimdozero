@@ -647,3 +647,27 @@ Número 086 já usado por outras conversas (`086_friends_streak_milestones_and_c
 - Tela (mesmo PR): grupo "Ex-alunos (só para o histórico)" no seletor do Google Agenda. Propostas 3 ("Para quem": Alunos +
   Turmas numa caixa, fechada com os nomes quando já há alguém escolhido) e 5 (Nova aula com Tópico e Lição de casa lado a lado;
   Observações e Notas em "Mais campos").
+
+## 134 -- Google Agenda: "Lembrar" pelo e-mail vale também pelo nome do evento (2026-11-11)
+
+- Pedido da autora: "faça o Lembrar de um nome de aluno valer para os dois" (e-mail e nome). Caso real: Jakob com 28 eventos
+  com o e-mail dele e 3 só com "Jakob" no título; antes eram dois cliques.
+- `134_gcal_remember_email_and_title.sql` (só `google_calendar_resolve`): com "Lembrar" num evento com convidado, cria a regra do
+  e-mail e também a do título, se o título for só daquela pessoa (nenhum evento com o mesmo título tem outro convidado, não é
+  "agendamento", não há regra de título ativa). "Aulas de francês" com convidados diferentes continua sem regra de título.
+  "Trazer de volta" desliga as duas. Teste local `tests/aulas-presenca/test_134.sql` 6/6 (117 e 133 sem mudança).
+- Staging e produção (2026-11-11, produção versão 20261111123948). Sem mudança de tela.
+
+## 138 -- Aulas de ex-alunos sem conta, ligadas ao aluno do Banco (2026-11-16/19)
+
+- Pedido da autora: "sim, faça as aulas ligadas ao aluno do Banco" (Jakob, português, só no Banco, arquivado, 31 eventos no Google;
+  Enzo precisa ser cadastrado no Banco e arquivado). Ex-aluno sem conta = aluno do Banco arquivado, sem conta e sem turma.
+- `138_bank_former_lessons.sql` (aplicada como `135a_class_logs_bank_target_check` + `135_bank_former_lessons`: o número 135 já
+  era de outra conversa, `135_agent_turma_cards_and_absences`): `teacher_class_logs.bank_student_id`; checagem
+  `teacher_class_logs_target_check` com o 3º caso (DROP + ADD; o MCP aplicou a DROP sem travar); RLS das aulas aceita ex-aluno
+  com conta (vínculo em qualquer situação ou ligado no Banco; antes editar aula da Carmen era barrado) e ex-aluno sem conta;
+  Google: ação `former_bank` (regra `bank_student` + `history_only`), `_gcal_*` gravam a aula ligada ao Banco, sem Mural; trigger do
+  Mural ignora aula sem aluno e sem turma; link de agenda mostra o nome do Banco. Teste `tests/aulas-presenca/test_138.sql` 9/9.
+- Staging (2026-11-16) e produção (2026-11-19, versões 20261119155300 e 20261119155636; 1024 aulas, nenhuma mudou).
+- Tela (branch, aguarda "pode publicar"): grupo "Ex-alunos sem conta (só para o histórico)" no Google Agenda; Aulas registradas e
+  Calendário mostram as aulas de ex-alunos (com e sem conta) com o nome e "(ex-aluno)". Playwright do painel 895/895.

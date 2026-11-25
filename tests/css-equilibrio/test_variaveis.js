@@ -5,6 +5,7 @@
 // Rodar: node tests/css-equilibrio/test_variaveis.js
 const fs = require('fs'), path = require('path');
 const ROOT = path.resolve(__dirname, '..', '..');
+const { cssDaPagina } = require('../css-comum/css-da-pagina.js');
 const walk = (dir, exts, out = []) => {
   for (const e of fs.readdirSync(dir, { withFileTypes: true })){
     if (['node_modules', '.git', '.claude', 'tests', 'docs'].includes(e.name)) continue;
@@ -24,8 +25,8 @@ let passed = 0, failed = 0;
 for (const app of ['fr', 'zh', 'pt']){
   const f = path.join(ROOT, app, 'index.html');
   if (!fs.existsSync(f)) continue;
-  const html = fs.readFileSync(f, 'utf8');
-  const css = [...html.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/g)].map(m => m[1]).join('\n').replace(/\/\*[\s\S]*?\*\//g, '');
+  // Todo o CSS da página, na ordem: <style> e os .css de shared/ ligados nela (plano do CSS comum, docs/css-comum/plano.md).
+  const css = cssDaPagina(ROOT, app).map(c => c.css).join('\n').replace(/\/\*[\s\S]*?\*\//g, '');
   const missing = new Set();
   for (const m of css.matchAll(/var\(\s*(--[\w-]+)\s*\)/g)) if (!defined.has(m[1])) missing.add(m[1]);
   if (missing.size){ failed++; console.log(`  FALHOU: ${app}/index.html usa sem definir: ${[...missing].join(', ')}`); } else passed++;

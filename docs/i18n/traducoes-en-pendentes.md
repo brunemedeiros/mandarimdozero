@@ -7,6 +7,12 @@ Todas entram como `aprovado (2026-10-05)` até a dona aprovar.
 | Chave | PT | EN | Confiança | Status |
 |---|---|---|---|---|
 | settings.title | Configurações | Settings | alta | aprovado (2026-10-05) |
+| review.match.audio.title | 🔊 Com áudio | 🔊 With audio | alta | aprovado (2026-11-14, Combinar com áudio) |
+| review.match.audio.help | Algumas cartas tocam a palavra em vez de mostrar o texto. Desligue se estiver sem som. | Some cards play the word instead of showing the text. Turn it off if you have no sound. | alta | aprovado (2026-11-14, prévia da tela de tamanho) |
+| review.match.audio.tileLabel | Carta de áudio | Audio card | alta | aprovado (2026-11-14) |
+| ui.kbd.grade | Na Revisão, dar a nota ao cartão pela posição do botão (com quatro botões: Errei, Difícil, Bom, Fácil) | In Review, grade the card by the position of the button (with four buttons: Again, Hard, Good, Easy) | alta | aprovado (2026-11-13, janela de atalhos) |
+| ui.kbd.reveal | Na Revisão, mostrar a resposta de um cartão | In Review, show the answer of a card | alta | aprovado (2026-11-13, janela de atalhos) |
+| review.pressToReveal | Espaço mostra a resposta | Space shows the answer | alta | aprovado (2026-11-05, prévia do teclado na Revisão) |
 | settings.subtitle | Suas informações e preferências de conta | Your account information and preferences | alta | aprovado (2026-10-23, aba Exportar arquivada) |
 | settings.tab.general | Geral | General | alta | aprovado (2026-10-05) |
 | settings.tab.notifications | 🔔 Notificações | 🔔 Notifications | alta | aprovado (2026-10-05) |
@@ -175,7 +181,7 @@ Observações: "Leaderboard" (ranking) e "Study materials" (material de apoio) t
 | review.speed.points | {n} pts | {n} pts | alta | aprovado (2026-10-05) |
 | review.speed.answered | Você respondeu {n} palavra(s) nesta rodada. | You answered {n} word(s) this round. | alta | aprovado (2026-10-05) |
 | review.back | Voltar | Back | alta | aprovado (2026-10-05) |
-| review.practiceMore | Praticar mais | Practice more | alta | aprovado (2026-10-05) |
+| review.practiceMore | Continuar revisando | Keep reviewing | alta | texto novo da autora (2026-11-10; antes "Praticar mais" / "Practice more", aprovado 2026-10-05) |
 | review.complete.title | Revisão concluída! | Review complete! | alta | aprovado (2026-10-05) |
 | review.complete.reviewed | Você revisou {n} cartão(s) nesta sessão. | You reviewed {n} card(s) this session. | alta | aprovado (2026-10-05) |
 | review.session.deckEmptyTitle | Nenhum cartão neste Deck ainda | No cards in this Deck yet | alta | aprovado (2026-10-05) |
@@ -568,7 +574,7 @@ Observações: "Leaderboard" (ranking) e "Study materials" (material de apoio) t
 | fr.conj.sessionDone | Sessão concluída! | Session complete! | alta | aprovado (2026-10-05) |
 | fr.conj.wellDone | Muito bem! | Great job! | alta | aprovado (2026-10-05) |
 | fr.conj.keepPracticing | Continue praticando essas conjugações. | Keep practicing these conjugations. | alta | aprovado (2026-10-05) |
-| fr.conj.newSession | Nova sessão | New session | alta | aprovado (2026-10-05) |
+| fr.conj.newSession | Concluir sessão | Finish session | alta | texto novo da autora (2026-11-10; antes "Nova sessão" / "New session", aprovado 2026-10-05) |
 | fr.conj.verbCounter | Verbo {i} de {n} | Verb {i} of {n} | alta | aprovado (2026-10-05) |
 | fr.conj.currentVerb | Verbo atual | Current verb | alta | aprovado (2026-10-05) |
 | fr.conj.regular | Regular | Regular verb | alta | aprovado (2026-10-05) |

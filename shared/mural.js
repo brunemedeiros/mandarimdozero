@@ -347,7 +347,7 @@ function wireMuralComposer(form, ctx, teacherId, reload){
 
 async function renderMuralFeed(board, ctx){
   const feed = board.querySelector('.mural-feed');
-  feed.innerHTML = loadingHTML();
+  feed.innerHTML = loadingHTML(t('loading.mural'));
   const data = await muralRpc('mural_feed', { p_lang: APP_KEY, p_classroom_id: ctx.classroomId || null, p_student_id: ctx.role === 'teacher' ? (ctx.studentId || null) : null });
   if (data.error){ feed.innerHTML = `<p class="profile-empty-note">${escapeHTML(muralErrorText(data.error))}</p>`; return; }
   const posts = Array.isArray(data.posts) ? data.posts : [];
@@ -358,7 +358,7 @@ async function renderMuralFeed(board, ctx){
   const side = board.querySelector('.mc-side');
   if (side && !side.dataset.loaded){
     side.dataset.loaded = '1';
-    side.innerHTML = loadingHTML();
+    side.innerHTML = loadingHTML(t('loading.muralSide'));
     muralSideHTML(ctx, data).then(html => {
       side.innerHTML = html;
       side.querySelectorAll('[data-mural-open-lesson]').forEach(b => b.addEventListener('click', () => muralOpenLesson(ctx)));
@@ -914,7 +914,7 @@ async function renderMyMuralView(){
     wrap.innerHTML = `<p class="profile-empty-note">${t('supportMaterials.loginRequired')}</p>`;
     return;
   }
-  wrap.innerHTML = loadingHTML();
+  wrap.innerHTML = loadingHTML(t('loading.mural'));
   const list = await muralLoadList();
   muralApplyBadges();
   const s = list?.as_student;

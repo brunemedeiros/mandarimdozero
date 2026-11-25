@@ -4,3 +4,11 @@
 /* Letra errada (vermelho) e letra que faltou (traço): usados na Conjugação e em "Sua resposta" dos exercícios de digitar. */
 .conj-x{ color:var(--error-red); background:color-mix(in srgb, var(--error-red) 16%, transparent); border-radius:3px; font-weight:800; text-decoration:underline wavy; text-decoration-thickness:1.5px; text-underline-offset:3px; }
 .conj-gap{ display:inline-block; width:.55em; height:1em; border-bottom:3px solid var(--error-red); vertical-align:-.15em; margin:0 1px; }
+
+/* Nota de gramática dentro do painel de erro ("Por que não foi essa"): tabela (ex.: conjugação de um verbo), exemplo e
+   separador. Veio do fr/index.html (decisão da autora, 2026-11-15: manter e valer para todos os sites). Hoje nenhum
+   código monta essa tabela; fica pronta para notas de gramática com tabela. */
+.wrong-feedback-why .grammar-note-table{ width:100%; border-collapse:collapse; margin:8px 0; font-size:13px; }
+.wrong-feedback-why .grammar-note-table td{ padding:5px 8px; border-bottom:1px solid var(--paper-line); }
+.wrong-feedback-why .grammar-note-example{ font-size:13px; color: var(--ink-soft); margin-top:6px; }
+.wrong-feedback-why .grammar-note-sep{ border:none; border-top:1px solid var(--paper-line); margin:12px 0; }

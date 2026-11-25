@@ -27,3 +27,9 @@ notificação. **Só lê**: não corrige, não comenta, não envia nada às sess
 
 ## Grátis x Premium
 Não se aplica (ferramenta interna da autora, nada muda para alunos).
+
+## Ajustes depois da experiência
+- 2026-11-13: sem memória entre noites (o conector Claude_Code_Remote não chega à tarefa), então teste com falha é comparado com a `main` de 24 horas antes; Opus obrigatório nos PRs arriscados; histórico completo do repositório.
+- 2026-11-24 (rotina aprovada): perda de dado de aluno, mesmo indireta, é sempre Severo (em 16/11 o apagamento em cascata do histórico do Modo aula ao juntar fichas saiu como Médio); no máximo 3 Leves; nada de mensagens sobre o próprio funcionamento.
+- Entrega: o e-mail das tarefas agendadas não chega ao Gmail da autora; vale a notificação no celular (ligada em 2026-11-18).
+- 2026-11-24 (depois da revisão de 24/11, que custou ~US$ 5,50 a preço de tabela com 5 Opus): Opus só nos PRs CRÍTICOS (migration, dado de aluno, FSRS, produção); os outros arriscados vão para um ajudante Sonnet. A regra de só leitura vai copiada para cada ajudante e eles não usam o Supabase (um Opus tinha rodado `execute_sql` com SELECT). Severo leva a etiqueta "já no ar" ou "corrigir antes de ligar". PR sem link de sessão aparece pela branch.

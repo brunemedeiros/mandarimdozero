@@ -35,13 +35,47 @@ const ETAPA6 = (v) => etapa7(PROGRESSO_ORDEM(FAIXA_CONVIDADO(SELOS_PERFIL(v)))).
   .replace(/26a1\.svg(&quot;\);\\?">)⚡/g, '2b50.svg$1⭐')
   // Recomeçar o curso (2026-10-30, migration 123): caixa nova e vazia (hidden) em Configurações > Geral, montada por shared/recomecar-curso.js.
   .replace(/<!-- Recomeçar este curso.*?-->(\\n|\n)\s*<article id=\\?"settings-restart-box\\?"[^>]*><\/article>(\\n|\n)\s*/g, '')
+  // Privacidade e cookies (2026-11-16, Fase 3 do GA4, pedido da dona): caixa nova em Configurações > Geral com o botão das Preferências.
+  .replace(/<!-- Privacidade e cookies.*?-->(\\n|\n)\s*<article id=\\?"settings-cookies-box\\?"[\s\S]*?<\/article>(\\n|\n)\s*/g, '')
   // Lacuna dos cartões de completar sem os três tracinhos (2026-11-03, pedido da dona: a borda já é o sublinhado): a árvore nova
   // traz só um espaço dentro de <span class="cloze-blank">; a antiga trazia ___. Mesmo resto da cena.
   .replace(/(<span class=\\?"cloze-blank\\?" id=\\?"cloze-blank\\?">)&nbsp;(<\/span>)/g, '$1___$2')
   // Botão "‹ Voltar" dos cartões da professora (2026-11-04, PRs #436/#438; docs/historico/15-auditoria-banco-revisao.md):
   // syncReviewPrevRow cria a linha logo depois de #review-content em toda sessão da Revisão, VAZIA e escondida fora da sessão
   // da professora. Só a linha vazia e hidden sai; com o botão dentro a cena continua diferente.
-  .replace(/<div id=\\?"review-prev-row\\?" class=\\?"review-prev-row\\?" hidden=\\?"\\?"><\/div>/g, '');
+  .replace(/<div id=\\?"review-prev-row\\?" class=\\?"review-prev-row\\?" hidden=\\?"\\?"><\/div>/g, '')
+  // Teclado na Revisão (2026-11-05, decisão da autora; docs/historico/33-teclado-na-revisao.md): número (.kbd-hint) nos botões de nota e nas
+  // opções da múltipla escolha, dica "Espaço mostra a resposta" ao lado do "toque para ver a resposta" e etiqueta "Enter" no Continuar.
+  // Só esses acréscimos saem; o resto da cena continua igual. O nome da cena traz o texto do botão (com o número no fim).
+  .replace(/(<button class=\\?"grade-btn [^>]*>(?:(?!<\/button>).)*?)<span class=\\?"kbd-hint\\?">[1-4]<\/span>/g, '$1')
+  .replace(/(<button class=\\?"mc-option[^>]*>(?:(?!<\/button>).)*?)<span class=\\?"kbd-hint\\?">[1-4]<\/span>/g, '$1')
+  .replace(/(<button class=\\?"speed-option[^>]*>(?:(?!<\/button>).)*?)<span class=\\?"kbd-hint\\?">[1-4]<\/span>/g, '$1') // Revisão rápida (2026-11-13): número nas 4 opções
+  // Exercício de cenário (2026-11-24, decisão da autora): a bolinha própria (.scenario-option-num) saiu e o número vem do quadrado comum (.kbd-hint).
+  .replace(/(?:\\n|\n)\s*<span class=\\?"scenario-option-num\\?">\d+<\/span>/g, '')
+  .replace(/(<button class=\\?"scenario-option[^>]*>(?:(?!<\/button>)[\s\S])*?)<span class=\\?"kbd-hint\\?">[1-4]<\/span>/g, '$1')
+  .replace(/<span class=\\?"hint-touch\\?">([^<]*)<\/span><span class=\\?"hint-kbd\\?">[^<]*<\/span>/g, '$1')
+  .replace(/<span class=\\?"key-enter-hint\\?" aria-hidden=\\?"true\\?">Enter<\/span>/g, '')
+  .replace(/(\.(?:grade-btn\.grade-\w+|mc-option|speed-option(?:\.\w+)?)\[[^\]]*?)[1-4]\]/g, '$1]')
+  .replace(/(\.btn-primary\[Continu(?:ar|e))Enter\]/g, '$1]')
+  // Combinar com áudio (2026-11-14): a tela de tamanho ganhou a opção "Com áudio" (só sai a caixa da opção; o resto da cena continua comparado).
+  .replace(/(?:\\n|\n)\s*<button type=\\?"button\\?" class=\\?"match-audio-opt\\?"[\s\S]*?<\/button>/g, '')
+  // Aviso "esta lição ainda não está no idioma do site" saiu (2026-11-11, decisão da dona): unidade sem tradução nem aparece nem
+  // abre. O elemento sai da árvore antiga; o resto da cena continua comparado.
+  .replace(/(?:\\n|\n)\s*<p class=(\\*)"lesson-unit-goal\1" id=\1"ud-lang-notice\1"(?: hidden=\1"\1")? style=\1"font-style:\s*italic;\s*opacity:\s*\.8\1">[^<]*<\/p>/g, '')
+  // Etapa D, lote 3 (2026-11-08, aprovada pela dona; docs/telas-exercicio-etapa-d-proposta.md, commit 64605f1c): a sessão da Revisão
+  // trocou a moldura "← Voltar aos modos" + ⚑ pela barra do topo (progresso, ⚑, ⌨️, ✕). Só a moldura vira um marcador nos dois lados;
+  // o cartão e o resto da cena continuam comparados.
+  .replace(/ data-review-mode=(\\*)"[a-z]+\1"/g, '')
+  .replace(/<div class=(\\*)"activity-focus-bar\1"><button data-i18n=\1"review\.backToModes\1"[\s\S]*?<\/button><\/div>/g, 'MOLDURA_REVISAO')
+  .replace(/<div class=(\\*)"lesson-focus-bar activity-lesson-bar\1">[\s\S]*?id=\1"review-back-to-modes\1"[^>]*display:none;[^>]*>[^<]*<\/button>/g, 'MOLDURA_REVISAO')
+  .replace(/MOLDURA_REVISAO(?:\\n|\n)\s*/g, 'MOLDURA_REVISAO')
+  .replace(/(review-session-wrap(\\*)" style=\2"display:block;\2">)(?:\\n|\n)\s*MOLDURA/g, '$1MOLDURA')
+  // Animações (2026-11-25, pedido da dona; docs/historico/38-animacoes.md): o cartão da Revisão ganhou a classe de movimento
+  // mov-entrar (cartão novo) ou mov-revelar (resposta). Só a classe sai; o cartão continua comparado.
+  .replace(/ mov-(?:entrar|revelar|liberada)(?=\\*")/g, '')
+  .replace(/\.mov-(?:entrar|revelar|liberada)(?=[.\[#:\s])/g, '') // e no nome da cena (seletor do elemento clicado)
+  // Palavra dona do progresso no save (2026-11-11, defeito 1 da varredura; ver também quase-iguais-harness.js): só a árvore nova tem.
+  .replace(/,(\\*)"variantWord\1":\1"[^"\\]*\1"/g, '');
 // Passaporte e selos do Perfil (decisão da autora, 2026-11-24; shared/selos.js): a Visão geral foi redesenhada e a medalha do
 // cartão da trilha (Progresso) virou o selo pequeno. Nas duas árvores, o trecho redesenhado vira um marcador; o resto das telas
 // continua comparado. O desenho novo é conferido em tests/selos/test_selos_playwright.js.
