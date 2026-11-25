@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-9j2wnb8+O/sKppaRzMB2REH/3t8LRy9ujBtMHU+lkYg=' 'sha256-0p9aAkvwyIQxRKXpBugUe1rLIbKm1uOZkji6tbZFfQ8=' 'sha256-3q7tZ6FCGHYwXvukjx9+asDCz3let+3lnEqqYTPJBMc=' https://www.googletagmanager.com 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; media-src 'self' data: blob: https://eigjocalzwamisgqilhg.supabase.co; font-src 'self' data:; connect-src 'self' https://eigjocalzwamisgqilhg.supabase.co wss://eigjocalzwamisgqilhg.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com; worker-src 'self'; manifest-src 'self'; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'" data-csp="scripts/csp-atualizar.js">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-9j2wnb8+O/sKppaRzMB2REH/3t8LRy9ujBtMHU+lkYg=' 'sha256-0p9aAkvwyIQxRKXpBugUe1rLIbKm1uOZkji6tbZFfQ8=' 'sha256-443h1glGdeP1XG4EBMbETTivqgASuQCFCRbnCogAmAg=' https://www.googletagmanager.com 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; media-src 'self' data: blob: https://eigjocalzwamisgqilhg.supabase.co; font-src 'self' data:; connect-src 'self' https://eigjocalzwamisgqilhg.supabase.co wss://eigjocalzwamisgqilhg.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com; worker-src 'self'; manifest-src 'self'; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'" data-csp="scripts/csp-atualizar.js">
 <script src="shared/anti-moldura.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Idiomas com Prof. Brune</title>
@@ -909,7 +909,9 @@ let gateForgotEmail = '', gateForgotLeft = 0, gateForgotTimer = null, gateForgot
 function gateForgotWaitSeconds(error){
   const m = /after (\d+) seconds?/i.exec(String((error && error.message) || ''));
   if (m) return Math.max(1, Math.min(120, parseInt(m[1], 10)));
-  return (error && (error.status === 429 || error.code === 'over_email_send_rate_limit')) ? 60 : 0;
+  // 429 sem "after N seconds" (outro limite do Supabase, ex.: e-mails por hora do projeto): não dá para dizer que o
+  // link saiu, então mostra gate.forgot.failed (pedido da dona, PR #516).
+  return 0;
 }
 function paintForgotResend(){
   const btn = document.getElementById('gate-forgot-resend-btn');
