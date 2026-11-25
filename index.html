@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-9j2wnb8+O/sKppaRzMB2REH/3t8LRy9ujBtMHU+lkYg=' 'sha256-0p9aAkvwyIQxRKXpBugUe1rLIbKm1uOZkji6tbZFfQ8=' 'sha256-3q7tZ6FCGHYwXvukjx9+asDCz3let+3lnEqqYTPJBMc=' https://www.googletagmanager.com 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; media-src 'self' data: blob: https://eigjocalzwamisgqilhg.supabase.co; font-src 'self' data:; connect-src 'self' https://eigjocalzwamisgqilhg.supabase.co wss://eigjocalzwamisgqilhg.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com; worker-src 'self'; manifest-src 'self'; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'" data-csp="scripts/csp-atualizar.js">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-9j2wnb8+O/sKppaRzMB2REH/3t8LRy9ujBtMHU+lkYg=' 'sha256-0p9aAkvwyIQxRKXpBugUe1rLIbKm1uOZkji6tbZFfQ8=' 'sha256-1QayvwFvdAMKVfcP8OwCHZn7djkBqS/ncsBJ1HDFBiw=' https://www.googletagmanager.com 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; media-src 'self' data: blob: https://eigjocalzwamisgqilhg.supabase.co; font-src 'self' data:; connect-src 'self' https://eigjocalzwamisgqilhg.supabase.co wss://eigjocalzwamisgqilhg.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com; worker-src 'self'; manifest-src 'self'; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'" data-csp="scripts/csp-atualizar.js">
 <script src="shared/anti-moldura.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Idiomas com Prof. Brune</title>
@@ -412,7 +412,7 @@ button.jp-bloco:hover{ background:color-mix(in srgb, var(--tom, var(--accent)) 1
       </div>
       <div class="cad-campo">
         <label for="signup-password" data-i18n="gate.login.passwordLabel">Senha</label>
-        <div class="jp-campo"><span class="jp-campo-ico" aria-hidden="true">🔒</span><input type="password" id="signup-password" class="gate-input" autocomplete="new-password" minlength="6" placeholder="Crie uma senha (mínimo 6 caracteres)" data-i18n-attr="placeholder:gate.signup.passwordPh"></div>
+        <div class="jp-campo"><span class="jp-campo-ico" aria-hidden="true">🔒</span><input type="password" id="signup-password" class="gate-input" autocomplete="new-password" minlength="8" placeholder="Crie uma senha (mínimo 8 caracteres)" data-i18n-attr="placeholder:gate.signup.passwordPh"></div>
       </div>
       <button type="submit" class="btn btn-primary btn-block" id="signup-submit" data-i18n="gate.login.signupSubmit">Criar conta grátis</button>
     </form>
@@ -539,9 +539,9 @@ button.jp-bloco:hover{ background:color-mix(in srgb, var(--tom, var(--accent)) 1
     </div>
     <form id="gate-new-password-form">
       <label class="sr-only" for="gate-new-password-input" style="position:absolute;left:-9999px;" data-i18n="gate.newPass.label">Senha nova</label>
-      <div class="jp-campo"><span class="jp-campo-ico" aria-hidden="true">🔒</span><input type="password" id="gate-new-password-input" class="gate-input" placeholder="Senha nova (mínimo 6 caracteres)" data-i18n-attr="placeholder:gate.newPass.ph" autocomplete="new-password" required minlength="6"></div>
+      <div class="jp-campo"><span class="jp-campo-ico" aria-hidden="true">🔒</span><input type="password" id="gate-new-password-input" class="gate-input" placeholder="Senha nova (mínimo 8 caracteres)" data-i18n-attr="placeholder:gate.newPass.ph" autocomplete="new-password" required minlength="8"></div>
       <label class="sr-only" for="gate-new-password-confirm" style="position:absolute;left:-9999px;" data-i18n="gate.newPass.repeat">Repita a senha nova</label>
-      <div class="jp-campo"><span class="jp-campo-ico" aria-hidden="true">🔒</span><input type="password" id="gate-new-password-confirm" class="gate-input" placeholder="Repita a senha nova" data-i18n-attr="placeholder:gate.newPass.repeat" autocomplete="new-password" required minlength="6"></div>
+      <div class="jp-campo"><span class="jp-campo-ico" aria-hidden="true">🔒</span><input type="password" id="gate-new-password-confirm" class="gate-input" placeholder="Repita a senha nova" data-i18n-attr="placeholder:gate.newPass.repeat" autocomplete="new-password" required minlength="8"></div>
       <button type="submit" class="btn btn-primary btn-block" id="gate-new-password-btn" data-i18n="gate.newPass.submit">Salvar senha nova</button>
     </form>
     <p class="gate-note" id="gate-new-password-note" role="status"></p>
@@ -1028,11 +1028,12 @@ document.getElementById('gate-new-password-form').addEventListener('submit', asy
   const note = document.getElementById('gate-new-password-note');
   const btn = document.getElementById('gate-new-password-btn');
   if (pass !== again){ note.textContent = t('gate.newPass.mismatch'); note.className = 'gate-note err'; return; }
+  if (pass.length < 8){ note.textContent = t('gate.signup.shortPassword'); note.className = 'gate-note err'; return; }
   btn.disabled = true;
   const { data, error } = await supabaseClient.auth.updateUser({ password: pass });
   btn.disabled = false;
   if (error){
-    note.textContent = /same|different/i.test(error.message || '') ? t('gate.newPass.same') : t('gate.newPass.failed');
+    note.textContent = /same|different/i.test(error.message || '') ? t('gate.newPass.same') : /password.*(at least|characters|weak)/i.test(error.message || '') ? t('gate.signup.shortPassword') : t('gate.newPass.failed');
     note.className = 'gate-note err';
     return;
   }
@@ -1289,14 +1290,15 @@ document.getElementById('signup-form').addEventListener('submit', async (e) => {
     const email = emailEl.value.trim();
     if (!email || !emailEl.checkValidity()) return signupError(t('gate.signup.badEmail'), emailEl);
     const password = passEl.value;
-    if (password.length < 6) return signupError(t('gate.signup.shortPassword'), passEl);
+    // Mínimo 8 (decisão da autora, 2026-11-25: o tamanho protege mais que obrigar maiúscula/número; histórico 36).
+    if (password.length < 8) return signupError(t('gate.signup.shortPassword'), passEl);
     const username = signupUser.st.value;
     if (!signupAgeAck.checked){ showSignupMethod(); return; }
     saveSignupIntent({ lang: gateSignupLang, speak: gateSpeak || gateSiteLang(), username, name, ageAck: true });
     gatePendingPassword = password;
     const { data, error } = await supabaseClient.auth.signUp({ email, password, options: { data: { ui_language: gateUiLanguage(), full_name: name } } });
     if (error){
-      return signupError(error.message === 'User already registered' ? t('gate.login.alreadyRegistered') : t('gate.login.signupFailed'));
+      return signupError(error.message === 'User already registered' ? t('gate.login.alreadyRegistered') : /password.*(at least|characters|weak)/i.test(error.message || '') ? t('gate.signup.shortPassword') : t('gate.login.signupFailed'));
     }
     if (data.user && !data.session){ showVerify(email); return; }
     if (data.session){ await afterAuthResolved(data.user); }

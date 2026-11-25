@@ -194,13 +194,18 @@ const GATE_STUB = `window.supabase = { createClient: () => {
     await page.waitForSelector('#gate-new-password', { state: 'visible' });
     L('link de recuperação abre "Crie uma senha nova"', !(await page.isVisible('#gate-choose-language')));
     if (SHOTS) await page.screenshot({ path: `${SHOTS}/gate-senha-nova-${theme}-${width}.png` });
-    await page.fill('#gate-new-password-input', 'nova123'); await page.fill('#gate-new-password-confirm', 'nova124');
+    await page.fill('#gate-new-password-input', 'nova1234'); await page.fill('#gate-new-password-confirm', 'nova1235');
     await page.click('#gate-new-password-btn');
     L('senhas diferentes avisam', await page.evaluate(() => /não são iguais/.test(document.getElementById('gate-new-password-note').textContent) && !window.__calls.some(c => c[0] === 'updateUser')));
-    await page.fill('#gate-new-password-confirm', 'nova123');
+    // Mínimo 8 (2026-11-25): 7 caracteres avisa e não salva.
+    await page.fill('#gate-new-password-input', 'nova123'); await page.fill('#gate-new-password-confirm', 'nova123');
+    await page.evaluate(() => { for (const id of ['gate-new-password-input', 'gate-new-password-confirm']) document.getElementById(id).removeAttribute('minlength'); });
+    await page.click('#gate-new-password-btn');
+    L('senha nova com 7 caracteres avisa o mínimo de 8 e não salva', await page.evaluate(() => /pelo menos 8/.test(document.getElementById('gate-new-password-note').textContent) && !window.__calls.some(c => c[0] === 'updateUser')));
+    await page.fill('#gate-new-password-input', 'nova1234'); await page.fill('#gate-new-password-confirm', 'nova1234');
     await page.click('#gate-new-password-btn');
     await page.waitForSelector('#gate-choose-language', { state: 'visible' });
-    L('senha nova salva e segue o fluxo', await page.evaluate(() => window.__calls.some(c => c[0] === 'updateUser' && c[1].password === 'nova123')));
+    L('senha nova salva e segue o fluxo', await page.evaluate(() => window.__calls.some(c => c[0] === 'updateUser' && c[1].password === 'nova1234')));
     L('sem rolagem horizontal', await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1));
     L('sem erros de página', errors.length === 0, errors);
     await ctx.close();
