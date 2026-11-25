@@ -161,7 +161,7 @@ Os 38 reports da produção são todos de contas logadas (nenhum convidado), por
   21/21. `pwa-cache/test_aviso_versao_playwright.js` oscila por tempo (falhou 1 de 4 vezes aqui; 3/3 depois, aqui e na
   `main`). Pré-existentes iguais na `main`: checkpoint-zh, desafios-etapa-d, fase-j, xp-semana, recomecar-curso
   (timeouts), `i18n/test_playwright` e k2f (ambiente).
-- Falta conferir depois de publicar: o site no ar com o Google Analytics aceito (o sandbox não alcança o Google).
+- Conferido no ar depois do PR #520: aceitando os cookies, o gtag carrega e manda o `g/collect`, sem nenhuma recusa da CSP.
 
 ## Senha com mínimo de 8 (2026-11-25)
 
@@ -173,7 +173,8 @@ Os 38 reports da produção são todos de contas logadas (nenhum convidado), por
   Supabase só devolve `weak_password` junto, que o site ignora); cadastro com 7 é recusado (422 `weak_password`).
   Conta de teste `zz-teste-senha@example.invalid` criada no Staging para isso; a remoção pelo MCP pediu confirmação e ficou
   sem resposta: apagar pelo SQL Editor do Staging (`delete from auth.users where email like 'zz-teste-senha%@example.invalid';`).
-- Falta: a autora ligar o mínimo 8 na produção e o PR do site.
+- Produção: mínimo 8 ligado pela autora no painel (2026-11-25); site publicado pelo PR #526 (publicação conferida no ar).
+  Conta de teste do Staging apagada (0 usuários, 0 identidades, 0 perfis).
 - Pedido da sessão dos PRs 492/504: `admin.reports.detail.screenshotError` entrou em `NEW_KEYS` de
   `tests/i18n/test_i18n_unit.js` (precisa de `git fetch --unshallow`): 2331/2335 aqui; na `main` 2332/2337. As 4 que sobram
   são de outras sessões (`fr.conj.newSession`, `notif.cat.cartoes_professora`, `notif.pref.emailOnly`, `review.practiceMore`).

@@ -114,6 +114,7 @@ const nb = (x) => String(x).replace(/\u00a0/g, ' ');
     await page.fill('#gate-email', 'x@x.com'); await page.fill('#gate-password', 'errada1'); await page.click('#gate-submit-btn');
     await page.waitForFunction(() => document.getElementById('gate-login-note').textContent.length > 0);
     check(`${tag}: erro de senha em inglês`, await page.evaluate(() => document.getElementById('gate-login-note').textContent === 'Wrong email or password.'));
+    check(`${tag}: erro de senha marca os dois campos em vermelho e leva o cursor à senha`, await page.evaluate(() => ['gate-email', 'gate-password'].every(id => document.getElementById(id).getAttribute('aria-invalid') === 'true') && document.activeElement.id === 'gate-password'));
     if (SHOTS) await page.screenshot({ path: `${SHOTS}/entrada-en-${tag}.png` });
     await page.click(btn); await page.click('#site-lang-menu button[data-ui="pt-BR"]');
     await waitLang(page, 'pt-BR');
