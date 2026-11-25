@@ -72,7 +72,7 @@ function instalarBanco(seed){
   } };
 }
 
-// Abre o app como admin e já na aba pedida do Painel de Admin ('premium', 'notifications', 'badges', 'reports', 'analytics').
+// Abre o app como admin e já na aba pedida do Painel de Admin ('overview', 'premium', 'notifications', 'reports', 'analytics', 'privacy').
 async function abrirAdmin({ lang = 'fr', scheme = 'light', width = 1280, height = 1000, aba = 'premium', seed = {}, antes } = {}){
   const h = await abrir({ lang, scheme, width, height });
   const p = h.page;
