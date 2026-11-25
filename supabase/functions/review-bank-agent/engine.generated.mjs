@@ -5551,7 +5551,7 @@ function rbMoveTargets(students, item){
 // Mensagem (chave i18n sem o prefixo "rb.") para os erros das RPCs de gerenciamento.
 function rbManageErrKey(message){
   const m = String(message || '');
-  for (const k of ['has_card_other_recipient', 'duplicate_has_card', 'duplicate_in_target', 'language_mismatch', 'has_progress', 'has_card', 'same_student', 'not_authorized']){
+  for (const k of ['different_targets', 'has_card_other_recipient', 'duplicate_has_card', 'duplicate_in_target', 'language_mismatch', 'has_progress', 'has_card', 'same_student', 'not_authorized']){
     if (m.indexOf(k) >= 0) return 'err.' + k;
   }
   return null;

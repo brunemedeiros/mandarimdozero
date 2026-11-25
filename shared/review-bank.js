@@ -501,7 +501,10 @@ function rbDupHTML(){
       <button class="rb-link" data-rb="dup-swap">${rbH(rbt('dupSwap'))}</button>
       <div class="rb-dupprev"><b>${rbH(rbt('dupPreview'))}</b><br>${!pv ? '…' : pv.blocked
         ? rbH(rbt('dupBlocked', { why: rbt('err.' + pv.blocked) }))
-        : rbH(rbt('dupLine', { moved: pv.items_moved, dup: pv.items_duplicate, rm: pv.recaps_moved, rd: pv.recaps_duplicate })) + '<br><span class="rb-meta">' + rbH(rbt('dupNoLoss')) + '</span>'}</div>
+        : rbH(rbt('dupLine', { moved: pv.items_moved, dup: pv.items_duplicate, rm: pv.recaps_moved, rd: pv.recaps_duplicate }))
+          + ((pv.reviews_moved || 0) + (pv.requests_moved || 0) ? '<br>' + rbH(rbt('dupHistory', { rv: pv.reviews_moved || 0, rq: pv.requests_moved || 0 })) : '')
+          + (pv.link_moves ? '<br>' + rbH(rbt('dupLink')) : '')
+          + '<br><span class="rb-meta">' + rbH(rbt('dupNoLoss')) + '</span>'}</div>
       <div class="rb-edit-actions"><button class="rb-btn rb-btn-ok" data-rb="dup-confirm"${pv && !pv.blocked ? '' : ' disabled'}>${rbH(rbt('dupConfirm'))}</button><button class="rb-btn" data-rb="dup-cancel">${rbH(rbt('dupCancel'))}</button></div></div>`;
   }
   const pairs = rbDuplicatePairs(RB.students, rbDismissedPairs());
@@ -642,8 +645,12 @@ async function rbSaveStudent(box){
   const cols = { name, reference_language: f.reference_language, agent_managed: !!f.agent_managed, lesson_dates: cur.lesson_dates || [], updated_at: new Date().toISOString() };
   let r;
   if (cur.id){
-    cols.agenda_names = (cur.agenda_names || []).slice();
-    cols.last_entry_read = f.last_entry_read || null;
+    // Só grava o que a professora MUDOU na tela: a rotina da madrugada atualiza datas das aulas, nomes da agenda e a última leitura, e o
+    // formulário aberto guarda os valores de quando foi aberto (gravar tudo faria a "última leitura" voltar atrás).
+    delete cols.lesson_dates;
+    if (JSON.stringify((cur.lesson_dates || []).slice().sort()) !== cur.dates_orig) cols.lesson_dates = (cur.lesson_dates || []).slice();
+    if (JSON.stringify(cur.agenda_names || []) !== cur.agenda_orig) cols.agenda_names = (cur.agenda_names || []).slice();
+    if ((f.last_entry_read || null) !== (cur.last_orig || null)) cols.last_entry_read = f.last_entry_read || null;
     if ((cur.notebook_id || null) !== (cur.notebook_orig || null)) cols.notebook_id = cur.notebook_id || null; // caderno só muda se a professora trocou pela tela e confirmou
   }
   if (cur.id){ cols.status = f.status || 'ativo'; if (!box.querySelector('[data-f=language_app_key]').disabled) cols.language_app_key = f.language_app_key; r = await supabaseClient.from('review_bank_students').update(cols).eq('id', cur.id).select().maybeSingle(); }
@@ -815,7 +822,7 @@ function rbWire(wrap){
       else if (a === 'link-class'){ const pick = document.getElementById('rb-class-pick'); if (!pick) return; const { data, error } = await supabaseClient.rpc('link_review_bank_classroom', { p_bank_student_id: id, p_classroom_id: Number(pick.value) }); if (error) { rbToastErr(error); return; } const s = rbStudentById(id); s.classroom_id = Number(pick.value); s.linked_student_id = null; await rbReloadCur(); rbRender(); showToast(rbt('linkedClassDone', { n: data || 0 })); }
       else if (a === 'unlink'){ const { error } = await supabaseClient.rpc('unlink_review_bank_student', { p_bank_student_id: id }); if (error) { rbToastErr(error); return; } const s = rbStudentById(id); s.linked_student_id = null; s.classroom_id = null; rbRender(); showToast(rbt('unlinkedDone')); }
       else if (a === 'student-new'){ RB.studentForm = { id: null, name: '', language_app_key: 'portugues', reference_language: 'en', agent_managed: false, lesson_dates: [] }; rbRender(); }
-      else if (a === 'student-edit'){ const s = rbStudentById(id); RB.studentForm = { id: s.id, name: s.name, language_app_key: s.language_app_key, reference_language: s.reference_language, status: s.status, agent_managed: !!s.agent_managed, lesson_dates: (s.lesson_dates || []).slice(), notebook_id: s.notebook_id || null, notebook_orig: s.notebook_id || null, agenda_names: (s.agenda_names || []).slice(), last_entry_read: s.last_entry_read || '', nbEditing: false }; RB.deleting = null; rbRender(); }
+      else if (a === 'student-edit'){ const s = rbStudentById(id); RB.studentForm = { id: s.id, name: s.name, language_app_key: s.language_app_key, reference_language: s.reference_language, status: s.status, agent_managed: !!s.agent_managed, lesson_dates: (s.lesson_dates || []).slice(), notebook_id: s.notebook_id || null, notebook_orig: s.notebook_id || null, agenda_names: (s.agenda_names || []).slice(), last_entry_read: s.last_entry_read || '', last_orig: s.last_entry_read || null, agenda_orig: JSON.stringify(s.agenda_names || []), dates_orig: JSON.stringify((s.lesson_dates || []).slice().sort()), nbEditing: false }; RB.deleting = null; rbRender(); }
       else if (a === 'student-cancel'){ RB.studentForm = null; rbRender(); }
       else if (a === 'student-save'){ b.disabled = true; await rbSaveStudent(b.closest('[data-form=student]')); }
       else if (a === 'date-add'){ const inp = document.getElementById('rb-date-add'); if (inp && inp.value && !RB.studentForm.lesson_dates.includes(inp.value)){ RB.studentForm.lesson_dates.push(inp.value); document.getElementById('rb-datechips').innerHTML = rbDateChipsHTML(RB.studentForm.lesson_dates); inp.value = ''; } }
