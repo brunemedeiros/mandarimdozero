@@ -49,6 +49,13 @@ jobs:
         run: |
           sed -i "s/__BUILD_ID__/${GITHUB_SHA::7}/" fr/service-worker.js zh/service-worker.js shared/pwa.js
 
+      # Lista do que as páginas principais podem carregar (CSP por <meta>; auditoria de segurança de 2026-11,
+      # docs/historico/36-auditoria-seguranca-2026-11.md). Recalcula as impressões digitais do código solto de
+      # index.html, fr/index.html e zh/index.html: se alguém mudou esse código e esqueceu de rodar o script,
+      # o site publicado continua certo (o teste tests/csp/ avisa no repositório).
+      - name: Atualiza a lista de segurança das páginas (CSP)
+        run: node scripts/csp-atualizar.js
+
       - name: Empacota o site (sem build -- HTML/JS estático)
         uses: actions/upload-pages-artifact@v3
         with:

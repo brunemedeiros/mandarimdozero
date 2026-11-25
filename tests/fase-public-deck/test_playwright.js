@@ -18,7 +18,7 @@ const src = fs.readFileSync(path.join(ROOT, 'tests/fase-i/test_playwright.js'), 
 let STUB = src.slice(src.indexOf('const STUB = `') + 'const STUB = `'.length, src.indexOf('`;', src.indexOf('const STUB = `')));
 STUB = STUB.replace("rpc: async (name, args) => {", "rpc: async (name, args) => {\n      if (window.__rpcLog) window.__rpcLog.push([name, args]);\n      if (window.__rpcHandler){ const r = window.__rpcHandler(name, args); if (r !== undefined) return r; }");
 STUB = STUB.replace("storage: { from: () => ({ upload: async () => ({}), getPublicUrl: () => ({ data: { publicUrl: '' } }), remove: async () => ({}) }) },",
-  "storage: { from: () => ({ upload: async () => ({}), getPublicUrl: (p) => ({ data: { publicUrl: 'https://proj.supabase.co/storage/v1/object/public/flashcard-media/' + p } }),\n" +
+  "storage: { from: () => ({ upload: async () => ({}), getPublicUrl: (p) => ({ data: { publicUrl: 'https://eigjocalzwamisgqilhg.supabase.co/storage/v1/object/public/flashcard-media/' + p } }),\n" +
   "  upload: async (dest, blob) => { const S = (window.__STORAGE = window.__STORAGE || { log: [], copies: 0, failCopyAt: null }); S.log.push(['upload', dest, blob && blob.size]); return S.denyUpload ? { data: null, error: { message: 'upload negado' } } : { data: { path: dest }, error: null }; },\n" +
   "  copy: async (src, dest) => { const S = (window.__STORAGE = window.__STORAGE || { log: [], copies: 0, failCopyAt: null }); S.log.push(['copy', src, dest]); if (S.denyCopy) return { data: null, error: { message: 'Object not found' } }; if (S.failCopyAt != null && S.copies >= S.failCopyAt) return { data: null, error: { message: 'boom' } }; S.copies++; return { data: { path: dest }, error: null }; },\n" +
   "  remove: async (paths) => { const S = (window.__STORAGE = window.__STORAGE || { log: [], copies: 0, failCopyAt: null }); S.log.push(['remove', paths]); return { data: paths, error: null }; } }) },");
@@ -190,7 +190,7 @@ async function newPage(browser, port, lang, { guest, session, hash, handlerSrc }
     // ===== P7: cópia com mídia INDEPENDENTE (duplica objetos antes da RPC; compensa em falha) =====
     {
       const UID_A = '00000000-0000-0000-0000-00000000aaaa';
-      const U = (p) => 'https://proj.supabase.co/storage/v1/object/public/flashcard-media/' + UID_A + '/' + p;
+      const U = (p) => 'https://eigjocalzwamisgqilhg.supabase.co/storage/v1/object/public/flashcard-media/' + UID_A + '/' + p;
       const ITEMS = [{ url: U('audio-1.mp3'), path: UID_A + '/audio-1.mp3' }, { url: U('image-1.png'), path: UID_A + '/image-1.png' }, { url: U('tts-3.mp3'), path: UID_A + '/tts-3.mp3' }];
       const mediaHandler = `
         if (name === 'check_public_deck_duplicates') return { data: (window.__PLAN || { language: 'x', source_total: 1, incompatible: 0, counts: { none: 1 }, create_default: 1, instances_default: 1, root_final_name: 'Verbos', root_id: 8000, decks: [{ id: 8000, parent_id: null, name: 'Verbos' }], notes: [{ pos: 1, sig: 'sigA', cls: 'none', mode: 'normal', deck: 8000, instances: 1, selectable: true, selected_default: true, preview: 'bonjour' }] }), error: null };
@@ -232,7 +232,7 @@ async function newPage(browser, port, lang, { guest, session, hash, handlerSrc }
         // público e envia de novo para a pasta de quem importa.
         let baixados = 0;
         const { out, errors, ctx } = await runScenario({ items: ITEMS }, { denyCopy: true }, async (page) => {
-          await page.route(/proj\.supabase\.co\/storage\/v1\/object\/public\/flashcard-media\//, (rt) => { baixados++; rt.fulfill({ status: 200, contentType: 'audio/mpeg', body: Buffer.from('mp3-de-teste') }); });
+          await page.route(/eigjocalzwamisgqilhg\.supabase\.co\/storage\/v1\/object\/public\/flashcard-media\//, (rt) => { baixados++; rt.fulfill({ status: 200, contentType: 'audio/mpeg', body: Buffer.from('mp3-de-teste') }); });
         });
         const uploads = out.log.filter(x => x[0] === 'upload');
         L('139: cópia direta recusada -> baixa pelo link público e envia para a pasta de quem importa', baixados === 3 && uploads.length === 3 && uploads.every(u => u[1].startsWith('U/pubcopy-') && u[2] === 12), { baixados, uploads });
@@ -241,7 +241,7 @@ async function newPage(browser, port, lang, { guest, session, hash, handlerSrc }
       }
       {
         const { out, ctx } = await runScenario({ items: ITEMS }, { denyCopy: true, denyUpload: true }, async (page) => {
-          await page.route(/proj\.supabase\.co\/storage\/v1\/object\/public\/flashcard-media\//, (rt) => rt.fulfill({ status: 200, contentType: 'audio/mpeg', body: Buffer.from('x') }));
+          await page.route(/eigjocalzwamisgqilhg\.supabase\.co\/storage\/v1\/object\/public\/flashcard-media\//, (rt) => rt.fulfill({ status: 200, contentType: 'audio/mpeg', body: Buffer.from('x') }));
         });
         L('139: se o envio da cópia falhar, a RPC NÃO é chamada (nada criado no banco)', out.copyCalls === 0 && !out.imported, out.log);
         await ctx.close();
