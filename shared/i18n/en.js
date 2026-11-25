@@ -4204,7 +4204,7 @@ window.I18N_CATALOG['en'] = {
   'gate.newPass.title': 'Create a new password', // ALTA
   'gate.newPass.sub': 'Choose the password you\'ll use from now on.', // ALTA
   'gate.newPass.label': 'New password', // ALTA
-  'gate.newPass.ph': 'New password (at least 6 characters)', // ALTA
+  'gate.newPass.ph': 'New password (at least 8 characters)', // ALTA
   'gate.newPass.repeat': 'Repeat the new password', // ALTA
   'gate.newPass.submit': 'Save new password', // ALTA
   'gate.newPass.mismatch': 'The two passwords don\'t match.', // ALTA
@@ -4293,11 +4293,11 @@ window.I18N_CATALOG['en'] = {
   'gate.signup.userPickFree': 'Pick an available @.', // ALTA
   'gate.signup.needName': 'Enter your name.', // ALTA
   'gate.signup.badEmail': 'Check the email address.', // ALTA
-  'gate.signup.shortPassword': 'The password needs at least 6 characters.', // ALTA
+  'gate.signup.shortPassword': 'The password needs at least 8 characters.', // ALTA
   'gate.signup.retryTitle': 'Choose another @', // ALTA
   'gate.signup.retrySub': 'Someone took @{u} while you were creating your account. Pick another one to continue.', // ALTA
   'gate.signup.retrySave': 'Save and continue', // ALTA
-  'gate.signup.passwordPh': 'Create a password (at least 6 characters)', // ALTA
+  'gate.signup.passwordPh': 'Create a password (at least 8 characters)', // ALTA
   // Etapa 3, lote A (2026-10-19): trilha, cartão Continuar, Revisão do módulo e mapa da trilha. needs_review:
   // tradução nova, ainda não revisada pela dona; confiança no comentário de cada linha. Antes estes textos
   // apareciam em português também no site em inglês.
