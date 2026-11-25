@@ -288,3 +288,22 @@ e investigar por que ninguém ativa (convite, telas, iPhone exige o site instala
   conteúdo anterior está no git antes do commit 985c118d). `tests/push-cors/test_cors_push_send.js producao` 4/4
   (antes 2/3). A autora tentou ligar o push no celular: "Você não permitiu as notificações" (motivo `denied`: o Android/Chrome
   recusou sem mostrar a pergunta; o site não tinha como pedir de novo). Plano B e A aprovados, prévia antes de mexer.
+
+### Plano B e A implementados na branch (2026-11-25; decisões da autora: 2ª lição, a cada 7 dias, no máximo 3 vezes, sem "Não perguntar mais")
+
+- Peça comum `shared/push-convite.js` + `.css` (ligada em `fr/index.html` e `zh/index.html`; textos `push.*` em pt-BR e en):
+  - **B**: Configurações > Notificações mostra uma caixa FIXA com o passo a passo quando o navegador guardou "Bloquear"
+    (Android: Chrome > Configurações do site > Notificações + ícone do app > Informações do app; computador: cadeado) ou no
+    iPhone fora da Tela de Início; "Já liberei, tentar de novo". Caso da autora (2026-11-25): liberar o ícone no Android não
+    tirou o "Bloquear" do Chrome (`Notification.permission === 'denied'`, aviso "estão bloqueadas"); passo a passo enviado.
+  - **A**: convite na tela de Lição concluída (`renderLessonCompleteScreen`, contado em `licao-base.js`), não no checkpoint nem
+    na 1ª lição do curso; navegador bloqueado não recebe convite; "Ativar" recusado vira o passo a passo de liberar. O lugar do
+    convite só é criado quando ele aparece: a 1ª versão punha um `<div hidden>` em toda tela de conclusão e isso mudava quando
+    os avisos "+N XP" somem (`test_quase_iguais` 101 falhas, `test_atalhos` 18); com o lugar criado só na hora, os dois voltaram
+    ao normal (2764/2770 com as 6 de sempre; 92/92).
+- Testes: `tests/push-convite/test_playwright.js` 58/58 (fr e zh, Android/computador/iPhone, inglês sem português; fotos claro e
+  escuro conferidas); amigos-push 72/72, configuracoes 27/27, i18n 2334/2334, csp 12/12, css_compartilhado 5/5, boas-vindas 190/190,
+  xp trilha 19/19, e4 5b/5c/5e, m2 voz 16/16. `css-comum/test_cascata` acusa só as regras NOVAS do convite (é a prova de "mover
+  CSS sem mudar nada", compara com a main). Pré-existentes iguais sem a mudança: `xp-semana` (janela de idade por cima),
+  `e4/test_lote5d_pinyin` (trava ao carregar).
+- Falta: PR para publicar (a pedido da autora); depois, conferir no ar.

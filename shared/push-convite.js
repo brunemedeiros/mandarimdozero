@@ -121,25 +121,29 @@ function pushLessonInviteHTML(mode){
 }
 
 async function loadPushLessonInvite(){
-  const slot = document.getElementById('push-lesson-invite');
-  if (!slot) return;
+  const host = document.querySelector('#step-content .lesson-complete');
+  if (!host || document.getElementById('push-lesson-invite')) return;
   const now = Date.now();
   const state = pushInviteState();
   if (!pushLessonInviteDue(state, now)) return;
   const mode = await pushEnvMode();
   // 'blocked' não entra no convite: o clique não resolve; a ajuda fica em Configurações > Notificações.
   if (mode !== 'push' && mode !== 'ios') return;
-  if (!document.body.contains(slot)) return; // a pessoa já saiu da tela
+  if (!document.body.contains(host) || document.getElementById('push-lesson-invite')) return; // saiu da tela
   state.shown = (state.shown || 0) + 1;
   state.last = now;
   pushInviteSave(state);
+  // Criado só agora (sem convite, a tela de Lição concluída fica idêntica): antes do vocabulário da lição.
+  const slot = document.createElement('div');
+  slot.id = 'push-lesson-invite';
+  slot.className = 'push-invite-slot';
   slot.innerHTML = pushLessonInviteHTML(mode);
-  slot.hidden = false;
+  host.insertBefore(slot, host.querySelector('.lesson-recap'));
 }
 
 function pushLessonInviteClose(){
   const slot = document.getElementById('push-lesson-invite');
-  if (slot){ slot.hidden = true; slot.innerHTML = ''; }
+  if (slot) slot.remove();
 }
 
 // Liga o push neste aparelho (mesmo caminho do interruptor de Configurações). Devolve o resultado de subscribeToPush.

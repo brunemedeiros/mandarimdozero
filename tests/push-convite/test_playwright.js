@@ -109,7 +109,7 @@ async function renderDone(page){
 const inviteState = (page) => page.evaluate(() => {
   const s = document.getElementById('push-lesson-invite');
   let st = {}; try { st = JSON.parse(localStorage.getItem('pushLessonInvite:me') || '{}'); } catch (e) {}
-  return { exists: !!s, visible: !!s && !s.hidden, text: s ? s.innerText.replace(/\s+/g, ' ').trim() : '', st };
+  return { exists: !!s, visible: !!s && !s.hidden && s.getClientRects().length > 0, text: s ? s.innerText.replace(/\s+/g, ' ').trim() : '', st };
 });
 const setInvite = (page, st) => page.evaluate((st) => localStorage.setItem('pushLessonInvite:me', JSON.stringify(st)), st);
 
@@ -192,7 +192,7 @@ async function run(browser, port, lang){
   await page.evaluate(() => pushInviteNoteLessonDone());
   await renderDone(page);
   let iv = await inviteState(page);
-  check(`${L}: 1ª lição: sem convite (lugar existe)`, iv.exists && !iv.visible && iv.st.lessons === 1, iv);
+  check(`${L}: 1ª lição: sem convite e a tela fica idêntica (nem o lugar do convite entra)`, !iv.exists && iv.st.lessons === 1, iv);
   // 2ª lição: mostra
   await page.evaluate(() => pushInviteNoteLessonDone());
   await renderDone(page);
