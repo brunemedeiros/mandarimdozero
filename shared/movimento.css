@@ -101,6 +101,41 @@
   to{ box-shadow: 0 0 0 18px transparent; }
 }
 
+/* ---------- Janelas, menus e gavetas (itens 16 e 17) ----------
+   Entrada: só CSS, roda quando a janela passa a aparecer (display/hidden/.open). Cresce um pouco a partir do lado de onde veio.
+   Saída: cópia de desenho .mov-fantasma posta por shared/janelas-movimento.js no lugar da janela, que já fechou de verdade.
+   Usa as propriedades soltas `scale`/`translate` (não `transform`), para não brigar com o transform que algumas janelas já têm. */
+:root{ --mov-curva-sair: cubic-bezier(.4, 0, 1, 1); }
+@keyframes mov-fundo-in{ from{ opacity:0; } }
+@keyframes mov-janela-in{ from{ opacity:0; scale:.96; } }
+@keyframes mov-menu-in{ from{ opacity:0; scale:.95; translate:0 -4px; } }
+@keyframes mov-gaveta-in{ from{ translate:0 100%; } }
+@keyframes mov-fundo-out{ to{ opacity:0; } }
+@keyframes mov-janela-out{ to{ scale:.97; } }
+@keyframes mov-menu-out{ to{ opacity:0; scale:.96; } }
+@keyframes mov-gaveta-out{ to{ translate:0 100%; } }
+
+.app-modal-overlay, .manual-modal-overlay, .age-ack-overlay, .tm-backdrop, .mais-backdrop.open{ animation: mov-fundo-in var(--mov-janela) ease-out; }
+.app-modal, .manual-modal, .tpop.age-ack-pop, .tm-panel{ animation: mov-janela-in var(--mov-janela) var(--mov-curva-entrar); }
+.lang-switcher-dropdown.open, .user-dropdown.open, .deck-more-menu[open] > .deck-more-menu-list{ transform-origin: top right; animation: mov-menu-in 180ms var(--mov-curva-entrar); }
+.tpop:not(.age-ack-pop){ transform-origin: var(--caret-x, 50%) 0; animation: mov-menu-in 180ms var(--mov-curva-entrar); }
+.sidebar-mais.open .sidebar-mais-menu{ transform-origin: left top; animation: mov-menu-in 180ms var(--mov-curva-entrar); }
+/* Painel (Admin, Professora): janela nativa do navegador. Só a entrada; ao fechar ela some na hora, como antes. */
+dialog[open]{ animation: mov-fundo-in var(--mov-janela) ease-out; }
+dialog[open] > article{ animation: mov-janela-in var(--mov-janela) var(--mov-curva-entrar); }
+@media (max-width: 899px){
+  /* No celular estas viram gaveta que sobe de baixo. */
+  .user-dropdown.open:not(.notifications-dropdown), .tm-panel{ animation: mov-gaveta-in 280ms var(--mov-curva-entrar); }
+}
+
+.mov-fantasma{ pointer-events:none !important; animation: mov-fundo-out 170ms var(--mov-curva-sair) forwards !important; }
+.mov-fantasma *{ animation:none !important; transition:none !important; }
+.mov-fantasma > .app-modal, .mov-fantasma > .manual-modal, .mov-fantasma > .tpop{ animation: mov-janela-out 170ms var(--mov-curva-sair) forwards !important; }
+.mov-fantasma.tpop, .mov-fantasma.lang-switcher-dropdown, .mov-fantasma.user-dropdown, .mov-fantasma.tm-panel{ animation: mov-menu-out 150ms var(--mov-curva-sair) forwards !important; }
+@media (max-width: 899px){
+  .mov-fantasma.user-dropdown:not(.notifications-dropdown), .mov-fantasma.tm-panel{ animation: mov-gaveta-out 200ms var(--mov-curva-sair) forwards !important; }
+}
+
 /* ---------- Menos movimento (ajuste do celular/computador) ----------
    Uma regra para o site inteiro: tudo termina na hora, no mesmo estado final de quem vê a animação.
    Exceção de propósito: a rodinha de carregamento continua girando (devagar), senão parece site travado. */
