@@ -41,7 +41,7 @@ const ALUNOS = [
 ];
 
 
-async function abrir({ lang = 'fr', scheme = 'light', width = 1280, height = 1000, alunos = ALUNOS, admin = true, falhar = [] } = {}){
+async function abrir({ lang = 'fr', scheme = 'light', width = 1280, height = 1000, alunos = ALUNOS, admin = true, falhar = [], aoCriarPagina } = {}){
   const server = http.createServer((req, res) => {
     let p = decodeURIComponent(req.url.split('?')[0]); if (p.endsWith('/')) p += 'index.html';
     const f = path.join(ROOT, p);
@@ -52,6 +52,7 @@ async function abrir({ lang = 'fr', scheme = 'light', width = 1280, height = 100
   const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || undefined });
   const ctx = await browser.newContext({ serviceWorkers: 'block', viewport: { width, height }, colorScheme: scheme });
   const page = await ctx.newPage(); const errors = [];
+  if (aoCriarPagina) await aoCriarPagina(page); // opcional: ganchos antes de abrir o site (ex.: tests/csp/)
   page.on('pageerror', e => errors.push(e.message));
   await page.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, r => r.abort());
   await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase|\/shared\/vendor\/supabase-js/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));

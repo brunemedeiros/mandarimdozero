@@ -97,6 +97,11 @@ paths:
 - **Teclado na Revisão da aluna** (decisão da autora, 2026-11-05; `wireReviewKeyboard`, `shared/core/revisao-cartoes.js`; CSS `shared/revisao-teclado.css`): Espaço/Enter mostram a resposta do cartão Normal;
   1 a 4 pela POSIÇÃO do botão (4 notas: Errei, Difícil, Bom, Fácil; digitar com acerto em cheio: 1 Bom, 2 Fácil; múltipla escolha: opções); Enter aciona o "Continuar"; Espaço/Enter nunca avaliam; só números (sem setas nem `h`);
   tecla segurada e os 300 ms de cada cartão novo são ignorados; Preview e tela escondida nunca respondem. Cartão de Revisão novo chama `wireReviewKeyboard` no fim do renderer. Guarda: `tests/teclado-revisao/`.
+- **Lista do que a página pode carregar (CSP)** (auditoria de segurança, 2026-11-25): `index.html`, `fr/index.html` e `zh/index.html` têm um
+  `<meta http-equiv="Content-Security-Policy">` gerado por `scripts/csp-atualizar.js`. Mudou um `<script>` SEM `src` numa dessas páginas: rode
+  `node scripts/csp-atualizar.js` e faça commit (a publicação também roda, mas o teste `tests/csp/` falha até lá). Endereço externo novo (script,
+  fetch, áudio): entra no script, nunca à mão no `<meta>`. Teste que simula Supabase/mídia usa o endereço real do projeto, não um inventado. Nada de
+  `onclick=`/`onerror=` em HTML montado por JS (a lista bloqueia). Página nova: `shared/anti-moldura.js` no começo do `<head>`.
 - Enter dentro de campo de resposta pertence ao campo (não aciona o atalho global de "Continuar").
 - Ícones: emoji escrito no texto vira desenho do Fluent por `shared/emoji-icons.js`. Emoji novo precisa entrar no MAP de lá
   e ter o SVG em `shared/icons/fluent/` (senão aparece o emoji do aparelho). Ícone de menu = `<img class="tab-icon" ...>`.
