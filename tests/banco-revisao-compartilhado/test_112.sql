@@ -139,6 +139,66 @@ select pg_temp.as_user(pg_temp.g('C')); set local role authenticated;
 insert into r select pg_temp.try('select correct_my_bank_review(' || pg_temp.g('cC') || ', 9, false, null)') like '%grade_invalido%', '127: nota inválida é recusada';
 reset role;
 
+-- ===== 143: texto digitado só no erro de cartão de digitar; 180 dias; só a professora lê =====
+create temp table c143(id uuid, txt text, grade smallint) on commit drop; grant all on c143 to public;
+create or replace function pg_temp.last143() returns c143 language sql security definer as $$
+  select id, typed_text, grade from review_bank_reviews where student_id = '96000000-0000-0000-0000-0000000000b3' and via = 'casa' order by created_at desc, id desc limit 1 $$;
+grant execute on function pg_temp.last143() to public;
+-- Na mesma transação todas as linhas têm o mesmo created_at: limpar as do Caio antes de cada caso deixa só a linha do caso.
+create or replace function pg_temp.clr143() returns void language sql security definer as $$
+  delete from review_bank_reviews where student_id = '96000000-0000-0000-0000-0000000000b3' and via = 'casa' $$;
+grant execute on function pg_temp.clr143() to public;
+select pg_temp.as_user(pg_temp.g('C')); set local role authenticated;
+select pg_temp.clr143();
+insert into r select log_my_bank_review(pg_temp.g('cC')::bigint, 0, true, null, '  Je n’ai besoin de payer.  '), '143: Errei digitado com texto devolve true';
+insert into r select (pg_temp.last143()).txt = 'Je n’ai besoin de payer.', '143: erro digitado guarda o texto (sem espaços nas pontas)';
+select pg_temp.clr143();
+select log_my_bank_review(pg_temp.g('cC')::bigint, 0, false, null, 'texto de cartão de virar');
+insert into r select (pg_temp.last143()).txt is null, '143: cartão que não é de digitar não guarda texto';
+select pg_temp.clr143();
+select log_my_bank_review(pg_temp.g('cC')::bigint, 2, true, null, 'acertei');
+insert into r select (pg_temp.last143()).txt is null and (pg_temp.last143()).grade = 2, '143: acerto não guarda texto';
+select pg_temp.clr143();
+select log_my_bank_review(pg_temp.g('cC')::bigint, 1, true, null, 'quase');
+insert into r select (pg_temp.last143()).txt is null, '143: Difícil/quase não guarda texto';
+select pg_temp.clr143();
+select log_my_bank_review(pg_temp.g('cC')::bigint, 0, true, null, repeat('a', 400));
+insert into r select char_length((pg_temp.last143()).txt) = 300, '143: texto longo é cortado em 300';
+select pg_temp.clr143();
+select log_my_bank_review(pg_temp.g('cC')::bigint, 0, true, null, '   ');
+insert into r select (pg_temp.last143()).txt is null, '143: só espaços vira nulo';
+select pg_temp.clr143();
+insert into r select log_my_bank_review(pg_temp.g('cC')::bigint, 0, true, null), '143: a função de 4 parâmetros continua funcionando';
+insert into r select (pg_temp.last143()).txt is null and (pg_temp.last143()).grade = 0, '143: 4 parâmetros grava sem texto';
+-- correção: errou digitando, depois corrigiu para Bom: a linha é trocada e o texto some
+select pg_temp.clr143();
+select log_my_bank_review(pg_temp.g('cC')::bigint, 0, true, null, 'errado de propósito');
+insert into r select correct_my_bank_review(pg_temp.g('cC')::bigint, 2, true, null, 'errado de propósito'), '143: corrigir (5 parâmetros) devolve true';
+insert into r select (pg_temp.last143()).txt is null and (pg_temp.last143()).grade = 2, '143: corrigido para Bom não guarda texto';
+insert into r select correct_my_bank_review(pg_temp.g('cC')::bigint, 0, true, null, 'agora sim errei'), '143: corrigir para Errei';
+insert into r select (pg_temp.last143()).txt = 'agora sim errei', '143: corrigido para Errei guarda o texto novo';
+-- a aluna não lê as respostas (nem as próprias)
+insert into r select (select count(*) from review_bank_reviews) = 0, '143: aluna não lê review_bank_reviews';
+insert into r select pg_temp.try('select purge_old_bank_typed_text()') <> 'ok', '143: aluna não roda a limpeza';
+reset role;
+select pg_temp.as_user(pg_temp.g('T')); set local role authenticated;
+insert into r select (select count(*) from review_bank_reviews where typed_text = 'agora sim errei') = 1, '143: a professora lê o texto';
+reset role;
+set local role anon;
+insert into r select pg_temp.try('select log_my_bank_review(1, 0, true, null, ''x'')') <> 'ok'
+  and pg_temp.try('select correct_my_bank_review(1, 0, true, null, ''x'')') <> 'ok', '143: anon não executa as versões novas';
+reset role;
+-- 180 dias: a limpeza apaga só o texto antigo; a linha fica
+insert into c143 select (pg_temp.last143()).id, null, null;
+update review_bank_reviews set created_at = now() - interval '181 days' where id = (select id from c143);
+select pg_temp.as_user(pg_temp.g('C')); set local role authenticated;
+select log_my_bank_review(pg_temp.g('cC')::bigint, 0, true, null, 'recente');
+reset role;
+insert into r select purge_old_bank_typed_text() >= 1, '143: a limpeza apaga pelo menos o texto vencido';
+insert into r select (select typed_text is null and grade = 0 from review_bank_reviews where id = (select id from c143)), '143: texto com mais de 180 dias apagado, linha mantida';
+insert into r select (select count(*) = 1 from review_bank_reviews where typed_text = 'recente'), '143: texto recente fica';
+insert into r select pg_temp.try('insert into review_bank_reviews(item_id, teacher_id, bank_student_id, language_app_key, outcome, source, typed_text) select item_id, teacher_id, bank_student_id, language_app_key, outcome, source, repeat(''b'', 301) from review_bank_reviews limit 1') like '%typed_text_len%', '143: o banco recusa texto com mais de 300';
+
 -- ===== Vínculo inativo =====
 update teacher_students set status = 'removed' where teacher_id = pg_temp.g('T')::uuid and student_id = pg_temp.g('C')::uuid;
 select pg_temp.as_user(pg_temp.g('C')); set local role authenticated;
