@@ -3581,7 +3581,10 @@ window.I18N_CATALOG['en'] = {
   'rb.dupSwap': 'Swap which one stays', // ALTA
   'rb.dupPreview': 'What happens when merging', // ALTA
   'rb.dupLine': 'Items moving to the record that stays: {moved}. Already there (ignored): {dup}. Recaps moving: {rm}. Already there: {rd}.', // ALTA
-  'rb.dupNoLoss': 'Memory progress and cards already delivered do not change; nothing is deleted from any student.', // ALTA
+  'rb.dupNoLoss': 'Cards already delivered do not change and item memory is kept. Answers and requests of the repeated items move to the item that stays: nothing is lost.', // ALTA
+  'rb.dupLink': 'The linked account of the record that leaves moves to the record that stays.', // ALTA
+  'rb.dupHistory': 'Moving to the item that stays: {rv} class-mode answers and {rq} student requests.', // ALTA
+  'rb.err.different_targets': 'the two records have different accounts or classes. Unlink one of them before merging.', // ALTA
   'rb.dupConfirm': 'Merge now', // ALTA
   'rb.dupCancel': 'Cancel', // ALTA
   'rb.dupDone': 'Records merged.', // ALTA

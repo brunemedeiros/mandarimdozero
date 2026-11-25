@@ -205,10 +205,15 @@ const BANK_STUB = (who, appKey) => {
       D.review_bank_items.filter(i => i.bank_student_id === src.id).forEach(i => {
         if (i.import_key && D.review_bank_items.some(x => x.bank_student_id === dst.id && x.import_key === i.import_key)){ if (i.teacher_flashcard_id) blocked = blocked || 'duplicate_has_card'; dup++; } else moved++;
       });
-      const out = { dry_run: !!args.p_dry_run, blocked, keep: dst.name, remove: src.name, items_moved: moved, items_duplicate: dup, recaps_moved: 0, recaps_duplicate: 0 };
+      const dupIds = D.review_bank_items.filter(i => i.bank_student_id === src.id && i.import_key && D.review_bank_items.some(x => x.bank_student_id === dst.id && x.import_key === i.import_key)).map(i => i.id);
+      const linkMoves = !dst.linked_student_id && !dst.classroom_id && !!(src.linked_student_id || src.classroom_id);
+      if ((src.linked_student_id || src.classroom_id) && (dst.linked_student_id || dst.classroom_id) && src.linked_student_id !== dst.linked_student_id) blocked = blocked || 'different_targets';
+      const out = { dry_run: !!args.p_dry_run, blocked, keep: dst.name, remove: src.name, items_moved: moved, items_duplicate: dup, recaps_moved: 0, recaps_duplicate: 0, recaps_merged: 0,
+        reviews_moved: D.review_bank_reviews.filter(r => dupIds.includes(r.item_id)).length, requests_moved: 0, link_moves: linkMoves };
       if (args.p_dry_run || blocked) return { data: out, error: null };
       D.review_bank_items.filter(i => i.bank_student_id === src.id).forEach(i => {
-        if (i.import_key && D.review_bank_items.some(x => x.bank_student_id === dst.id && x.import_key === i.import_key)) D.review_bank_items.splice(D.review_bank_items.indexOf(i), 1);
+        const keptItem = i.import_key && D.review_bank_items.find(x => x.bank_student_id === dst.id && x.import_key === i.import_key);
+        if (keptItem){ D.review_bank_reviews.forEach(r => { if (r.item_id === i.id){ r.item_id = keptItem.id; r.bank_student_id = dst.id; } }); D.review_bank_items.splice(D.review_bank_items.indexOf(i), 1); }
         else { i.bank_student_id = dst.id; i.student_id = dst.linked_student_id || null; }
       });
       dst.agenda_names = [...new Set([...(dst.agenda_names || []), ...(src.agenda_names || []), src.name])];
@@ -626,9 +631,12 @@ const BANK_STUB = (who, appKey) => {
         D.review_bank_items.push(
           mk('lb1', 'rb-lb', { question: 'to run', answer: 'courir', import_key: 'k1' }), mk('lb2', 'rb-lb', { question: 'my ex', answer: 'mon ex', import_key: 'k3', sensitive: true }),
           mk('lu1', 'rb-lu', { question: 'to run', answer: 'courir', import_key: 'k1' }), mk('lu2', 'rb-lu', { question: 'cheese', answer: 'le fromage', import_key: 'k2' }),
+          mk('lu1b', 'rb-lu', { question: 'x', answer: 'y', import_key: 'kx' }), mk('lb1b', 'rb-lb', { question: 'x', answer: 'y', import_key: 'kx' }),
           mk('blk1', 'rb-blk', { question: 'x', answer: 'y', status: 'aprovado', teacher_flashcard_id: 999 }),
           mk('m1', 'rb-carol', { question: 'zz mover', answer: 'zz deplacer' }), mk('m2', 'rb-carol', { question: 'zz apagar', answer: 'zz supprimer' }),
           mk('sc1', 'rb-sem', { language_app_key: 'portugues', question: 'a mug', answer: 'uma caneca' }), mk('sc2', 'rb-sem', { language_app_key: 'portugues', question: 'a plug', answer: 'uma tomada' }));
+        D.review_bank_reviews.push({ id: 'rv-lu1', item_id: 'lu1', teacher_id: 'A', bank_student_id: 'rb-lu', language_app_key: 'frances', outcome: 'acertou', created_at: '2026-11-01', applied_at: '2026-11-01' },
+          { id: 'rv-lu2', item_id: 'lu1', teacher_id: 'A', bank_student_id: 'rb-lu', language_app_key: 'frances', outcome: 'errou', created_at: '2026-11-02', applied_at: '2026-11-02' });
       });
       await ev(async () => { await rbLoadBase(); rbRender(); });
       await page.waitForSelector('.rb-dup');
@@ -640,13 +648,14 @@ const BANK_STUB = (who, appKey) => {
       await page.waitForSelector('.rb-dupprev');
       await page.waitForFunction(() => /vêm para a ficha que fica/.test(document.querySelector('.rb-dupprev').textContent));
       const prev = await ev(() => document.querySelector('.rb-dupprev').textContent.replace(/\s+/g, ' '));
-      L('juntar: prévia diz 1 item vem, 1 já existe, e que nada se perde', prev.includes('vêm para a ficha que fica: 1') && prev.includes('Já existem (ignorados): 1') && prev.includes('nada é apagado'), prev);
+      L('juntar: prévia diz 1 item vem, 2 já existem, 2 respostas passam para o item que fica e que nada se perde', prev.includes('vêm para a ficha que fica: 1') && prev.includes('Já existem (ignorados): 2') && prev.includes('2 respostas do Modo aula') && prev.includes('nada se perde'), prev);
       L('juntar: prévia não mudou nada', await ev(() => window.__DB.review_bank_students.some(s => s.id === 'rb-lu')));
       await shot('gerenciar-juntar');
       await page.click('[data-rb="dup-confirm"]');
       await page.waitForFunction(() => !window.__DB.review_bank_students.some(s => s.id === 'rb-lu'));
+      L('juntar: as 2 respostas do Modo aula do item repetido NÃO somem (agora estão no item que ficou)', await ev(() => window.__DB.review_bank_reviews.filter(r => r.item_id === 'lb1').length === 2 && window.__DB.review_bank_reviews.filter(r => ['rv-lu1', 'rv-lu2'].includes(r.id)).length === 2));
       const merged = await ev(() => ({ items: window.__DB.review_bank_items.filter(i => i.bank_student_id === 'rb-lb').map(i => i.id).sort().join(), cur: RB.cur, agenda: window.__DB.review_bank_students.find(s => s.id === 'rb-lb').agenda_names.join() }));
-      L('juntar: itens no aluno que fica (sem repetir), aluno que fica selecionado e nome vira nome de agenda', merged.items === 'lb1,lb2,lu2' && merged.cur === 'rb-lb' && merged.agenda.includes('Luana') && merged.agenda.includes('Lu'), merged);
+      L('juntar: itens no aluno que fica (sem repetir), aluno que fica selecionado e nome vira nome de agenda', merged.items === 'lb1,lb1b,lb2,lu2' && merged.cur === 'rb-lb' && merged.agenda.includes('Luana') && merged.agenda.includes('Lu'), merged);
       L('juntar: aviso de duplicados some', await ev(() => !document.querySelector('.rb-dup')));
 
       // editar aluno: caderno, nomes na agenda, última leitura
@@ -672,6 +681,15 @@ const BANK_STUB = (who, appKey) => {
       await page.waitForFunction(() => !RB.studentForm);
       const saved = await ev(() => { const s = window.__DB.review_bank_students.find(x => x.id === 'rb-lb'); return { nb: s.notebook_id, ag: s.agenda_names.join(), lr: s.last_entry_read }; });
       L('salvar: caderno, nomes na agenda e última leitura gravados', saved.nb === NB && saved.ag.includes('Lu B') && saved.lr === '2026-11-10', saved);
+      // salvar o formulário NÃO desfaz o que a rotina da madrugada atualizou depois que ele foi aberto (última leitura, datas, nomes da agenda)
+      await page.click('[data-rb="student-edit"]');
+      await page.waitForSelector('#rb-agenda-add');
+      await ev(() => { const st = window.__DB.review_bank_students.find(x => x.id === 'rb-lb'); st.last_entry_read = '2026-11-20'; st.lesson_dates = ['2026-11-21']; st.agenda_names = [...st.agenda_names, 'Nome novo da rotina']; });
+      await page.fill('[data-form=student] [data-f=name]', 'Luana Baionne');
+      await page.click('[data-rb="student-save"]');
+      await page.waitForFunction(() => !RB.studentForm);
+      const keep = await ev(() => { const st = window.__DB.review_bank_students.find(x => x.id === 'rb-lb'); return { lr: st.last_entry_read, ld: st.lesson_dates.join(), ag: st.agenda_names.includes('Nome novo da rotina') }; });
+      L('salvar o formulário sem mexer nesses campos mantém a última leitura, as datas e os nomes que a rotina gravou depois', keep.lr === '2026-11-20' && keep.ld === '2026-11-21' && keep.ag, keep);
       await page.click('[data-rb="student-edit"]');
       await page.waitForSelector('[data-rb=nb-open]');
       L('ficha: com caderno aparece "Abrir caderno"', true);

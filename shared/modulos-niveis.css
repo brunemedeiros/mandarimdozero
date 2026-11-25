@@ -27,7 +27,7 @@
 .level-list-item{
   display:flex; align-items:center; gap:14px; flex:1; min-width:0; text-align:left;
   background: var(--paper); border:1px solid var(--paper-line); border-radius: var(--radius);
-  padding:14px 16px; cursor:pointer; font-family: var(--font-body); transition: all .15s ease;
+  padding:14px 16px; cursor:pointer; font-family: var(--font-body); transition: color .15s ease, background-color .15s ease, border-color .15s ease, box-shadow .15s ease, transform .15s ease, opacity .15s ease;
 }
 .level-list-item:hover{ border-color: var(--imperial-gold); }
 .level-list-item.active{ background: color-mix(in srgb, var(--seal-red) 8%, var(--paper)); border-color: var(--seal-red); }

@@ -503,7 +503,7 @@ function showAnswerPanel(contentEl, ex, opts = {}){
     STEP_STATE.exerciseIndex += 1;
     renderExerciseStep();
   });
-  panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  panel.scrollIntoView({ behavior: ((typeof prefersReducedMotion === 'function' && prefersReducedMotion()) ? 'auto' : 'smooth'), block: 'nearest' });
 }
 
 // Grupos da trilha na ordem de estudo (um por nível, vazios descartados).

@@ -70,6 +70,10 @@ const ETAPA6 = (v) => etapa7(PROGRESSO_ORDEM(FAIXA_CONVIDADO(v))).split('Ver o q
   .replace(/<div class=(\\*)"lesson-focus-bar activity-lesson-bar\1">[\s\S]*?id=\1"review-back-to-modes\1"[^>]*display:none;[^>]*>[^<]*<\/button>/g, 'MOLDURA_REVISAO')
   .replace(/MOLDURA_REVISAO(?:\\n|\n)\s*/g, 'MOLDURA_REVISAO')
   .replace(/(review-session-wrap(\\*)" style=\2"display:block;\2">)(?:\\n|\n)\s*MOLDURA/g, '$1MOLDURA')
+  // Animações (2026-11-25, pedido da dona; docs/historico/38-animacoes.md): o cartão da Revisão ganhou a classe de movimento
+  // mov-entrar (cartão novo) ou mov-revelar (resposta). Só a classe sai; o cartão continua comparado.
+  .replace(/ mov-(?:entrar|revelar|liberada)(?=\\*")/g, '')
+  .replace(/\.mov-(?:entrar|revelar|liberada)(?=[.\[#:\s])/g, '') // e no nome da cena (seletor do elemento clicado)
   // Palavra dona do progresso no save (2026-11-11, defeito 1 da varredura; ver também quase-iguais-harness.js): só a árvore nova tem.
   .replace(/,(\\*)"variantWord\1":\1"[^"\\]*\1"/g, '');
 // Faixa do modo convidado (conserto de 2026-11-10, pedido da dona): a frase ganhou um <span class="guest-warning-text"> em volta,
