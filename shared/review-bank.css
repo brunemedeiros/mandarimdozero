@@ -184,6 +184,20 @@
 @media (hover:hover) and (pointer:fine){ .rb-big:has(.rb-kbd){ padding-left:42px; padding-right:28px; } .rb-big .rb-kbd{ display:inline-flex; } }
 .rb-big small{ display:block; font-weight:600; font-size:11px; opacity:.85; }
 .rb-big.is-bad{ background:var(--grade-fill-again); border-color:var(--grade-fill-again); color:var(--on-grade-fill); }
+/* Base escura nos botões coloridos (decisão da autora, 2026-11-25; mesma receita do .btn-primary da Revisão): 3px na própria cor misturada com preto,
+   igual nos dois temas e idiomas; ao apertar o botão desce 2px. Botões neutros (bege) e chips de filtro ficam sem base. */
+.rb-btn-blue, .rb-big.is-blue{ --rb-c: var(--rb-box); }
+.rb-btn-ok{ --rb-c: var(--success-fill); }
+.rb-big.is-ok{ --rb-c: var(--grade-fill-easy); }
+.rb-big.is-help{ --rb-c: var(--grade-fill-hard); }
+.rb-big.is-good{ --rb-c: var(--grade-fill-good); }
+.rb-big.is-bad{ --rb-c: var(--grade-fill-again); }
+.rb-btn-blue, .rb-btn-ok, .rb-big.is-blue, .rb-big.is-ok, .rb-big.is-help, .rb-big.is-good, .rb-big.is-bad{
+  box-shadow:0 3px 0 color-mix(in srgb, var(--rb-c) 62%, #000); transition:transform .08s ease, box-shadow .08s ease; }
+.rb-btn-blue:active:not(:disabled), .rb-btn-ok:active:not(:disabled), .rb-big.is-blue:active:not(:disabled), .rb-big.is-ok:active:not(:disabled),
+.rb-big.is-help:active:not(:disabled), .rb-big.is-good:active:not(:disabled), .rb-big.is-bad:active:not(:disabled){
+  transform:translateY(2px); box-shadow:0 1px 0 color-mix(in srgb, var(--rb-c) 62%, #000); }
+@media (prefers-reduced-motion: reduce){ .rb-btn-blue, .rb-btn-ok, .rb-big.is-blue, .rb-big.is-ok, .rb-big.is-help, .rb-big.is-good, .rb-big.is-bad{ transition:none; } }
 .rb-keys{ font-size:12.5px; color:var(--ink-soft); }
 .rb-reasons{ display:flex; flex-direction:column; gap:10px; }
 .rb-reasons .chips{ display:flex; flex-wrap:wrap; gap:8px; }
