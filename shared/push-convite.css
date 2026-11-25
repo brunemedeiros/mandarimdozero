@@ -1,0 +1,24 @@
+/* Convite e ajuda para ativar os alertas no celular (plano B e A, 2026-11-25; shared/push-convite.js).
+   Peça comum de todos os sites: só tokens do próprio site (fr azul, zh vermelho; claro e escuro). */
+.push-help-slot{ padding: 0 1rem 1rem; }
+.push-help-slot[hidden], .push-invite-slot[hidden]{ display: none; }
+.push-help{ background: var(--paper); border: 1.5px solid var(--paper-line); border-radius: 14px; padding: .9rem 1rem; color: var(--ink); text-align: left; }
+.push-help h4{ margin: 0 0 .35rem; font-size: 1rem; line-height: 1.3; display: flex; gap: .45rem; align-items: flex-start; }
+.push-help p{ margin: 0 0 .7rem; color: var(--ink-soft); font-size: .92rem; line-height: 1.45; }
+.push-help-steps{ list-style: none; margin: 0 0 .8rem; padding: 0; counter-reset: pushpasso; }
+.push-help-steps li{ counter-increment: pushpasso; display: flex; gap: .6rem; align-items: flex-start; font-size: .93rem; line-height: 1.4; margin-bottom: .55rem; }
+.push-help-steps li::before{ content: counter(pushpasso); flex: none; width: 1.5rem; height: 1.5rem; border-radius: 50%;
+  background: var(--brand-fill); color: var(--on-brand-fill); font-weight: 800; font-size: .8rem; display: grid; place-items: center; }
+.push-help-extra{ font-size: .88rem !important; }
+.push-help-retry{ width: 100%; justify-content: center; }
+.push-invite-slot{ margin: 1rem 0 0; }
+.push-invite-card{ background: var(--paper-warm); border: 1.5px solid var(--paper-line); border-radius: 16px; padding: 1rem; text-align: left; }
+.push-invite-card > .push-help{ background: transparent; border: 0; padding: 0; }
+.push-invite-icon{ font-size: 1.8rem; line-height: 1; }
+.push-invite-card h3{ margin: .4rem 0 .35rem; font-size: 1.08rem; line-height: 1.3; color: var(--ink); }
+.push-invite-card > p{ margin: 0 0 .85rem; color: var(--ink-soft); font-size: .93rem; line-height: 1.45; }
+.push-invite-actions{ display: flex; flex-direction: column; gap: .4rem; }
+.push-invite-actions .btn{ width: 100%; justify-content: center; }
+@media (max-width: 600px){
+  .push-invite-actions .btn, .push-help-retry{ min-height: 44px; }
+}
