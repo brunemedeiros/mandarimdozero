@@ -202,6 +202,7 @@ const GATE_STUB = `window.supabase = { createClient: () => {
     await page.evaluate(() => { for (const id of ['gate-new-password-input', 'gate-new-password-confirm']) document.getElementById(id).removeAttribute('minlength'); });
     await page.click('#gate-new-password-btn');
     L('senha nova com 7 caracteres avisa o mínimo de 8 e não salva', await page.evaluate(() => /pelo menos 8/.test(document.getElementById('gate-new-password-note').textContent) && !window.__calls.some(c => c[0] === 'updateUser')));
+    if (SHOTS) await page.screenshot({ path: `${SHOTS}/gate-senha-nova-curta-${theme}-${width}.png` });
     await page.fill('#gate-new-password-input', 'nova1234'); await page.fill('#gate-new-password-confirm', 'nova1234');
     await page.click('#gate-new-password-btn');
     await page.waitForSelector('#gate-choose-language', { state: 'visible' });
