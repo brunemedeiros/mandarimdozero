@@ -54,6 +54,45 @@
 .streak-modal-overlay{ animation: mov-surgir var(--mov-janela) ease-out; }
 .streak-modal-body{ animation: mov-entrar var(--mov-janela) var(--mov-curva-entrar); }
 
+/* ---------- Janela da sequência, por dentro (pedido da dona, 2026-11-25) ----------
+   A chama fica viva enquanto a janela está no ar: além do brilho que já pulsava, um balanço leve (sobe um pouco, cresce 5%,
+   inclina 2 graus), com as propriedades soltas scale/rotate/translate para não brigar com a entrada dela (transform).
+   Os dias estudados da semana se preenchem um a um, da esquerda para a direita, depois que a chama chega; o de hoje
+   (o que acabou de ser conquistado) ganha um carimbo e um anel verde. Uma semana tem no máximo 7 dias: :nth-child basta. */
+.streak-flame{
+  display:inline-block;
+  animation: streakFlameIn .5s cubic-bezier(.34,1.56,.64,1), streakFlameGlow 1.8s ease-in-out .5s infinite, mov-chama-viva 1.5s ease-in-out .5s infinite;
+}
+@keyframes mov-chama-viva{
+  0%, 100%{ scale:1; rotate:0deg; translate:0 0; }
+  30%{ scale:1.05; rotate:-2deg; translate:0 -3px; }
+  65%{ scale:.98; rotate:2deg; translate:0 -1px; }
+}
+.streak-day-item.done .streak-day-circle{ animation: mov-dia-encher 300ms var(--mov-curva-entrar) both; }
+.streak-day-item:nth-child(1) .streak-day-circle{ animation-delay: 450ms; }
+.streak-day-item:nth-child(2) .streak-day-circle{ animation-delay: 540ms; }
+.streak-day-item:nth-child(3) .streak-day-circle{ animation-delay: 630ms; }
+.streak-day-item:nth-child(4) .streak-day-circle{ animation-delay: 720ms; }
+.streak-day-item:nth-child(5) .streak-day-circle{ animation-delay: 810ms; }
+.streak-day-item:nth-child(6) .streak-day-circle{ animation-delay: 900ms; }
+.streak-day-item:nth-child(7) .streak-day-circle{ animation-delay: 990ms; }
+.streak-day-item.done.today .streak-day-circle{
+  animation: mov-dia-carimbo 480ms var(--mov-curva-entrar) both, mov-dia-anel 800ms ease-out both;
+  animation-delay: 1100ms, 1450ms;
+}
+@keyframes mov-dia-encher{
+  from{ background: var(--paper); border-color: var(--paper-line); color: transparent; scale:.8; }
+}
+@keyframes mov-dia-carimbo{
+  0%{ background: var(--paper); border-color: var(--paper-line); color: transparent; scale:1; }
+  40%{ scale:1.3; }
+  100%{ scale:1; }
+}
+@keyframes mov-dia-anel{
+  from{ box-shadow: 0 0 0 0 color-mix(in srgb, var(--success-fill) 55%, transparent); }
+  to{ box-shadow: 0 0 0 12px transparent; }
+}
+
 /* ---------- Missão do dia concluída (chip da tela de fim de lição): o ✓ entra carimbado ---------- */
 .lesson-boundary-challenge-chip.done .lbc-chip-check{
   display:inline-block; animation: mov-carimbo 360ms var(--mov-curva-entrar) 250ms both;
@@ -149,4 +188,6 @@ dialog[open] > article{ animation: mov-janela-in var(--mov-janela) var(--mov-cur
   }
   .loading-spinner{ animation: loadingSpin 2.4s linear infinite !important; }
   .p-spinner{ animation: p-giro 2.4s linear infinite !important; }
+  /* Os dias da sequência já aparecem prontos (com espera, o dado só chegaria depois de 1 s). */
+  .streak-day-item .streak-day-circle{ animation:none !important; }
 }
