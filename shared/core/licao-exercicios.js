@@ -527,9 +527,15 @@ function renderReorderExercise(ex, contentEl, nextBtn, total){
       slot.addEventListener('click', () => {
         if (STEP_STATE.exerciseAnswered) return;
         const pos = parseInt(slot.dataset.seqPos);
+        // Volta animada: mede cada bloco que sai da frase ANTES do rebuild e, depois, faz o clone voar de volta
+        // até o lugar dele no banco (o mesmo voo da ida, ao contrário).
+        const leaving = [...slotsEl.querySelectorAll('.reorder-slot.filled')]
+          .filter(s => parseInt(s.dataset.seqPos) >= pos)
+          .map(s => ({ rect: s.getBoundingClientRect(), text: LANG_HOOKS.flySource(s), blockIdx: chosenSequence[parseInt(s.dataset.seqPos)] }));
         chosenSequence.splice(pos);
         renderSlots();
         renderBlocks();
+        leaving.forEach(b => flyBlockToSlot(b.rect, b.text, blocksEl.querySelector(`.reorder-block[data-block-idx="${b.blockIdx}"]`)));
       });
     });
   }

@@ -96,6 +96,9 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
   r = await run({});
   check('modo teste: envia 1 e-mail (só a ativa, que tem cartões novos); a parada fica sem e-mail', sent.length === 1 && sent[0].to === 'ana@x.test', sent.map(m => m.to));
   const mAtiva = sent.find(m => m.to === 'ana@x.test');
+  check('e-mail: o link "Parar de receber" (html e texto) aponta para a página do SITE; o cabeçalho de 1 clique continua na função', mAtiva.html.includes('https://app.profbrune.com.br/sair-cartoes/?u=ativa&amp;t=') || mAtiva.html.includes('https://app.profbrune.com.br/sair-cartoes/?u=ativa&t='), mAtiva.html.match(/href="[^"]*sair[^"]*"/));
+  check('e-mail: texto puro também leva o link do site', /app\.profbrune\.com\.br\/sair-cartoes\/\?u=ativa&t=[0-9a-f]{64}&l=pt/.test(mAtiva.text));
+  check('e-mail: botão "abrir o site" com UTM cartoes_novos (html e texto)', mAtiva.html.includes('href="https://app.profbrune.com.br/?utm_source=email&amp;utm_medium=email&amp;utm_campaign=cartoes_novos"') && mAtiva.text.includes('?utm_source=email&utm_medium=email&utm_campaign=cartoes_novos'));
   const tokAtiva = (/[?&]t=([0-9a-f]{64})/.exec(mAtiva.headers['List-Unsubscribe']) || [])[1];
   const corex = await import(coreSrc);
   check('link de sair do e-mail é assinado com a chave PRÓPRIA (não com a senha do agendamento)', !!tokAtiva && await corex.verifyUnsubscribe(SIGKEY, 'ativa', tokAtiva) === true && await corex.verifyUnsubscribe(SECRET, 'ativa', tokAtiva) === false);
@@ -127,13 +130,13 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
   const core = await import(coreSrc);
   const tk = await core.signUnsubscribe(SIGKEY, 'ativa'), tkOld = await core.signUnsubscribe(SECRET, 'ativa');
   const U = 'https://p.supabase.co/functions/v1/teacher-cards-digest';
-  const g = await handler(new Request(`${U}?u=ativa&t=${tk}&l=pt`));
-  const gTxt = await g.text();
-  check('sair: GET válido só PERGUNTA (botão que envia POST) e NÃO grava nada', g.status === 200 && gTxt.includes('Sim, parar de receber') && gTxt.includes('method="post"') && !(DB.notification_preferences || []).length, DB.notification_preferences);
-  const gEn = await (await handler(new Request(`${U}?u=ativa&t=${tk}&l=en`))).text();
-  check('sair: página de confirmação em inglês sem português', gEn.includes('Stop receiving these emails?') && !/você|Parar|Sim,/i.test(gEn));
+  const g = await handler(new Request(`${U}?u=ativa&t=${tk}&l=pt`), );
+  check('sair: GET redireciona (302) para a página do SITE com u, t e l, e NÃO grava nada (o Supabase mostraria HTML como texto cru)', g.status === 302 && g.headers.get('location') === `https://app.profbrune.com.br/sair-cartoes/?u=ativa&t=${tk}&l=pt` && !(DB.notification_preferences || []).length, g.headers.get('location'));
+  const gEn = await handler(new Request(`${U}?u=ativa&t=${tk}&l=en`));
+  check('sair: GET em inglês leva l=en', gEn.status === 302 && /&l=en$/.test(gEn.headers.get('location')));
   const ok = await handler(new Request(`${U}?u=ativa&t=${tk}&l=pt`, { method: 'POST' }));
-  check('sair: POST válido desliga só a categoria e mostra "Pronto!"', ok.status === 200 && (await ok.text()).includes('Pronto!') && JSON.stringify(DB.notification_preferences) === JSON.stringify([{ user_id: 'ativa', channels: { cartoes_professora: [] } }]), DB.notification_preferences);
+  const okJ = await ok.json();
+  check('sair: POST válido desliga só a categoria e responde JSON ok (a página do site mostra "Pronto!")', ok.status === 200 && okJ.ok === true && /json/.test(ok.headers.get('content-type')) && ok.headers.get('access-control-allow-origin') === '*' && JSON.stringify(DB.notification_preferences) === JSON.stringify([{ user_id: 'ativa', channels: { cartoes_professora: [] } }]), DB.notification_preferences);
   DB.notification_preferences[0].channels.estudo = ['email']; DB.notification_preferences[0].channels.cartoes_professora = ['email'];
   const ok2 = await handler(new Request(`${U}?u=ativa&t=${tk}&l=en`, { method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded' }, body: 'List-Unsubscribe=One-Click' }));
   check('sair por POST de 1 clique (Gmail) sem apagar as outras preferências', ok2.status === 200 && DB.notification_preferences[0].channels.estudo[0] === 'email' && Array.isArray(DB.notification_preferences[0].channels.cartoes_professora) && DB.notification_preferences[0].channels.cartoes_professora.length === 0);
@@ -142,8 +145,7 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
   check('link antigo (assinado com a senha do agendamento) ainda vale no POST', okOld.status === 200 && DB.notification_preferences[0].channels.cartoes_professora.length === 0);
   DB.notification_preferences[0].channels.cartoes_professora = ['email'];
   const bad = await handler(new Request(`${U}?u=outra&t=${tk}`, { method: 'POST' }));
-  const badGet = await handler(new Request(`${U}?u=outra&t=${tk}`));
-  check('sair: assinatura de outra conta é recusada (GET e POST) e nada muda', bad.status === 400 && badGet.status === 400 && DB.notification_preferences[0].channels.cartoes_professora[0] === 'email');
+    check('sair: assinatura de outra conta é recusada no POST (400, JSON) e nada muda', bad.status === 400 && (await bad.json()).error === 'invalid_link' && DB.notification_preferences[0].channels.cartoes_professora[0] === 'email');
 
   // e-mail de teste para a dona
   sent.length = 0;

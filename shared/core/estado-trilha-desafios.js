@@ -445,7 +445,8 @@ function showBadgeUnlockCelebration(badge, onDone){
   const layer = document.getElementById('badge-unlock-layer');
   if (!layer){ onDone?.(); return; }
   const el = document.createElement('div');
-  el.className = 'badge-unlock-toast';
+  // Último nível da trilha (tier 'max'): festa maior, só nele (decisão da dona, 2026-11-25): anel dourado e confete saindo do ícone.
+  el.className = 'badge-unlock-toast' + (badge.tier === 'max' ? ' is-topo' : '');
   el.setAttribute('role', 'status');
   el.setAttribute('aria-live', 'polite');
   // Nome e descrição vêm do catálogo de badges (admin/professora preenchem): escapados (revisão do código compartilhado, 2026-10-24).
@@ -475,6 +476,7 @@ function showBadgeUnlockCelebration(badge, onDone){
     switchTab('progress');
   });
   layer.appendChild(el);
+  if (badge.tier === 'max') setTimeout(() => { if (!done) confeteDoIcone(el.querySelector('.badge-unlock-icon')); }, 380);
   setTimeout(finish, 4000);
 }
 
@@ -803,6 +805,28 @@ function spawnConfetti(count, durationMs){
   setTimeout(() => { layer.innerHTML = ''; }, durationMs + 700);
 }
 
+// Confete pequeno que sai de um ponto (o ícone da conquista no último nível), em vez de cair do topo da tela como o
+// spawnConfetti. Peças soltas no #confetti-layer (fixo, sem clique), cada uma num arco para fora e para baixo.
+function confeteDoIcone(origemEl, count = 18){
+  if (prefersReducedMotion() || !origemEl || !origemEl.animate) return;
+  const layer = document.getElementById('confetti-layer');
+  if (!layer) return;
+  const r = origemEl.getBoundingClientRect();
+  const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+  for (let i = 0; i < count; i++){
+    const p = document.createElement('i');
+    p.className = 'confete-faisca';
+    p.style.left = `${cx}px`; p.style.top = `${cy}px`;
+    p.style.background = CONFETTI_COLORS[i % CONFETTI_COLORS.length];
+    layer.appendChild(p);
+    const ang = (-160 + Math.random() * 140) * Math.PI / 180, dist = 50 + Math.random() * 70;
+    p.animate([
+      { transform: 'translate(-50%, -50%) rotate(0deg)', opacity: 1 },
+      { transform: `translate(calc(-50% + ${Math.cos(ang) * dist}px), calc(-50% + ${Math.sin(ang) * dist + 50}px)) rotate(${Math.random() * 360}deg)`, opacity: 0 }
+    ], { duration: 900 + Math.random() * 300, easing: 'cubic-bezier(.2,.8,.2,1)', fill: 'forwards' }).onfinish = () => p.remove();
+  }
+}
+
 // Conta de 0 até `to` dentro de `el`, com easing de desaceleração.
 function animateCount(el, to, { duration = 650, suffix = '', prefix = '' } = {}){
   if (!el) return;
@@ -919,7 +943,7 @@ function showCorrectFeedbackPanel(contentEl, detail){
   `;
   wrap.appendChild(panel);
   wireAudioButtons(panel);
-  panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  panel.scrollIntoView({ behavior: ((typeof prefersReducedMotion === 'function' && prefersReducedMotion()) ? 'auto' : 'smooth'), block: 'nearest' });
 
   document.getElementById('correct-continue-btn').addEventListener('click', () => {
     STEP_STATE.exerciseIndex += 1;
@@ -1126,7 +1150,7 @@ function renderProgressView(){
   const badgeGridEl = document.getElementById('badge-grid');
   badgeGridEl.classList.add('has-tracks');
   badgeGridEl.innerHTML = trackViews.map(badgeTrackCardHTML).join('')
-    + (classics.length ? `<div class="track-classics"><div class="track-classics-title">${t('badge.ui.classicTitle')}</div><div class="track-showcase">${classics.map(badgeShowcaseItemHTML).join('')}</div></div>` : '');
+    + (classics.length ? `<div class="track-classics"><div class="track-classics-title">${t('badge.ui.classicTitle')}</div><div class="track-showcase selos-pagina">${classics.map(v => (typeof seloHTML === 'function' ? seloHTML(v) : badgeShowcaseItemHTML(v))).join('')}</div></div>` : '');
   wireTrackChips(badgeGridEl, trackViews.concat(classics));
 }
 

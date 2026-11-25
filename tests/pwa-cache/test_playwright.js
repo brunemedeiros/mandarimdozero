@@ -135,10 +135,11 @@ async function recarregarDepoisDePublicar(browser, site){
   const M = 'publicacao-' + Date.now();
   patches[`/${site}/content.js`] = (t) => t + `\n;window.__mContent = ${JSON.stringify(M)};\n`;
   patches['/shared/pwa.js'] = (t) => t + `\n;window.__mShared = ${JSON.stringify(M)};\n`;
-  patches[`/${site}/index.html`] = (t) => t.replace('</body>', `<script>window.__mHtml = ${JSON.stringify(M)};</script></body>`);
+  // Marca de versão num <meta> (um <script> solto injetado seria recusado pela lista de segurança da página, CSP).
+  patches[`/${site}/index.html`] = (t) => t.replace('</body>', `<meta name="m-html" content=${JSON.stringify(M)}></body>`);
   patches[`/${site}/service-worker.js`] = (t) => t.split('__BUILD_ID__').join('deploy2');
   await page.reload(); await pronto(); await page.waitForTimeout(500);
-  const r = await page.evaluate((M) => ({ html: window.__mHtml === M, content: window.__mContent === M, shared: window.__mShared === M }), M);
+  const r = await page.evaluate((M) => ({ html: (document.querySelector('meta[name="m-html"]') || {}).content === M, content: window.__mContent === M, shared: window.__mShared === M }), M);
   await ctx.close(); server.close();
   return r;
 }

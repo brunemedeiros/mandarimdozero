@@ -523,13 +523,13 @@ async function renderProfileView(){
     return;
   }
 
-  const profile = await ensureProfileLoaded();
-  renderProfileBody(wrap, { profile, langs, earnedBadges, specialBadges, isGuest: false });
+  const [profile, earnedAtMap] = await Promise.all([ensureProfileLoaded(), fetchOwnBadgeEarnedAt()]);
+  renderProfileBody(wrap, { profile, langs, earnedBadges, specialBadges, isGuest: false, earnedAtMap });
   renderSideRankingCard();
   if (typeof refreshFriendRequestCount === 'function') refreshFriendRequestCount();
 }
 
-function renderProfileBody(wrap, { profile, langs, earnedBadges, specialBadges, isGuest }){
+function renderProfileBody(wrap, { profile, langs, earnedBadges, specialBadges, isGuest, earnedAtMap }){
   const name = profileDisplayName(profile);
   const initials = avatarInitials(name);
   const color = avatarColor(profile?.user_id || CURRENT_USER?.email || 'convidado');
@@ -542,33 +542,25 @@ function renderProfileBody(wrap, { profile, langs, earnedBadges, specialBadges, 
     </div>
   ` : '';
 
-  const langsHTML = langs.map(l => `
-    <div class="profile-lang-card">
-      <div class="profile-lang-flag">${l.flagSvg}</div>
-      <div class="profile-lang-info">
-        <div class="profile-lang-name">${l.name}</div>
-        <div class="profile-lang-level">${l.levelLabel ? `${l.levelLabel} · ` : ''}${l.pct}%</div>
-        <div class="profile-lang-bar"><div style="width:${l.pct}%;"></div></div>
-      </div>
-    </div>
-  `).join('');
+  // Passaporte (decisão da autora, 2026-11-24; CSS em shared/selos.css): cada idioma estudado é um carimbo; a barra
+  // "Rumo ao próximo nível" é a do curso deste site (unidades do nível atual já completadas, computeProgressSummary).
+  const carimbosHTML = langs.map(l => {
+    const partes = (l.levelLabel || '').split('·').map(x => x.trim()).filter(Boolean);
+    const rotulo = t('profile.passport.stampAria', { lang: l.name, level: partes.join(', ') || `${l.pct}%` });
+    return `<div class="pp-carimbo" role="img" aria-label="${escapeAttr(rotulo)}">${l.flagSvg}<b>${escapeHTML(l.name)}</b>${partes.length ? `<span>${partes.map(escapeHTML).join('<br>')}</span>` : ''}</div>`;
+  }).join('');
+  const cursoAtual = langs.find(l => l.isCurrent) || langs[0];
 
-  // Vitrine de badges: mostra TODAS as conquistas já ganhas (não só as
-  // últimas 4) com ícone+nome, igual ao card do grid completo de
-  // Progresso (mesma classe .badge, ver renderProgressView) -- a Visão
-  // geral do Perfil é onde outras pessoas mais provavelmente olham
-  // primeiro, então é aqui que a "vitrine" precisa ser generosa. O grid
-  // completo em Progresso continua existindo à parte (com os badges ainda
-  // NÃO conquistados também, pra dar meta) -- "Ver todas →" leva pra lá.
+  // Vitrine de conquistas: TODAS as ganhas, cada uma como selo (shared/selos.js). Sem nenhuma ainda: as 4 primeiras
+  // aparecem como selos tracejados, bloqueados, como meta; tocar mostra como ganhar. "Ver todas" leva ao Progresso.
   const badgesHTML = earnedBadges.length ? `
-    <div class="track-showcase profile-track-showcase">
-      ${earnedBadges.map(badgeShowcaseItemHTML).join('')}
+    <div class="track-showcase profile-track-showcase selos-pagina">
+      ${earnedBadges.map(v => seloHTML(v, { earnedAt: seloEarnedAtFor(v, earnedAtMap) })).join('')}
     </div>
   ` : `<p class="profile-empty-note">${t('profile.noBadges')}</p>
-    <div class="track-showcase is-locked-preview">
-      ${badgeTrackViews(STATE).slice(0, 4).map(v => badgeShowcaseItemHTML(Object.assign({}, v, { name: v.nameNext, level: 0, tier: null }))).join('')}
-    </div>`;  // Sem nenhuma conquista ainda: as 4 primeiras aparecem bloqueadas (em cinza,
-  // com cadeado) como meta, no lugar de só uma frase. Tocar mostra como ganhar.
+    <div class="track-showcase is-locked-preview selos-pagina">
+      ${badgeTrackViews(STATE).slice(0, 4).map(v => seloHTML(Object.assign({}, v, { name: v.nameNext, level: 0, tier: null }), { bloqueada: true })).join('')}
+    </div>`;
 
   // Badges especiais (Fundadora, Beta Tester...) ficam junto da identidade,
   // não misturados com a grade de conquistas por gameplay -- são sobre
@@ -596,26 +588,30 @@ function renderProfileBody(wrap, { profile, langs, earnedBadges, specialBadges, 
       <button class="leaderboard-tab" data-tab="friends">${t('profile.tabFriends')}</button>
     </div>
     ${guestNote}
-    <div class="profile-identity profile-hero">
-      ${avatarHTML}
-      <div class="profile-name">${name}</div>
-      ${profile ? `<div class="profile-username">@${profile.username}</div>` : ''}
+    <section class="pp profile-hero" aria-label="${escapeAttr(name)}">
+      <div class="pp-topo">
+        ${avatarHTML}
+        <div class="profile-name">${escapeHTML(name)}</div>
+        ${profile ? `<div class="profile-username">@${escapeHTML(profile.username || '')}</div>` : ''}
+      </div>
       ${bio ? `<p class="profile-bio">${escapeHTML(bio)}</p>` : ''}
       ${specialBadgesHTML}
-      ${profile ? `<button class="profile-edit-btn" id="profile-edit-btn">${t('profile.editBtn')}</button>` : ''}
-    </div>
-
-    <div class="profile-section">
-      <div class="section-label">${t('profile.sectionLangs')}</div>
-      <div class="profile-langs-row">${langsHTML}</div>
-      <div class="profile-nums-row">
-        <div class="profile-num is-streak"><span class="profile-num-icon" aria-hidden="true">🔥</span><div class="v">${effectiveStreak()}</div><div class="l">${t('profile.streakLabel')}</div></div>
-        <div class="profile-num is-xp"><span class="profile-num-icon" aria-hidden="true">⭐</span><div class="v">${STATE.xp}</div><div class="l">${t('profile.xpLabel')}</div></div>
+      <div class="pp-picote" aria-hidden="true"></div>
+      <div class="pp-base">
+        <div class="pp-campos">
+          <div class="pp-campo is-streak"><span class="pp-campo-l">${t('profile.streakLabel')}</span><span class="pp-campo-v"><span aria-hidden="true">🔥</span>${effectiveStreak()}</span></div>
+          <div class="pp-campo is-xp"><span class="pp-campo-l">${t('profile.xpLabel')}</span><span class="pp-campo-v"><span aria-hidden="true">⭐</span>${STATE.xp}</span></div>
+        </div>
+        ${carimbosHTML ? `<div class="pp-carimbos${langs.length > 1 ? ' tem-varios' : ''}">${carimbosHTML}</div>` : ''}
       </div>
-      <button class="profile-stats-link" id="profile-stats-link">${t('profile.statsLink')}</button>
-    </div>
+      ${cursoAtual ? `<div class="pp-rumo"><div class="pp-rumo-l"><span>${t('profile.passport.nextLevel')}</span><span>${cursoAtual.pct}%</span></div><div class="profile-lang-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${cursoAtual.pct}" aria-label="${escapeAttr(t('profile.passport.nextLevel'))}"><div style="width:${cursoAtual.pct}%;"></div></div></div>` : ''}
+      <div class="pp-acoes">
+        ${profile ? `<button class="profile-edit-btn" id="profile-edit-btn">${t('profile.editBtn')}</button>` : '<span></span>'}
+        <button class="profile-stats-link" id="profile-stats-link">${t('profile.statsLink')}</button>
+      </div>
+    </section>
 
-    <div class="profile-section">
+    <div class="profile-section selos-caixa">
       <div class="section-label">${t('profile.sectionBadges')} <span class="conquests-count">${earnedBadges.filter(b => !b.classic).length}/${badgeTrackViews(STATE).length}</span></div>
       ${badgesHTML}
       <button class="profile-stats-link" id="profile-badges-link">${t('profile.badgesLink')}</button>

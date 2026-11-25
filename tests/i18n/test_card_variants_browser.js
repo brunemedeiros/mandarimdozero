@@ -15,6 +15,7 @@ window.supabase={createClient:()=>({auth:{getSession:async()=>({data:{session:nu
 let passed = 0, failed = 0;
 const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FALHOU:', n, x !== undefined ? JSON.stringify(x).slice(0, 300) : ''); } };
 
+// textOf = nome do campo do cartão (sem new Function: a lista de segurança das páginas, CSP, bloqueia texto virando código).
 async function run(browser, port, lang, cardId, textOf, ptWord, enWord, hanziId){
   const ctx = await browser.newContext({ serviceWorkers: 'block' });
   const page = await ctx.newPage(); const errors = [];
@@ -24,12 +25,12 @@ async function run(browser, port, lang, cardId, textOf, ptWord, enWord, hanziId)
   await page.addInitScript(() => { try { sessionStorage.setItem('guest_mode', '1'); } catch (e) {} });
   await page.goto(`http://127.0.0.1:${port}/${lang}/index.html`);
   await page.waitForFunction(() => typeof STATE !== 'undefined' && STATE.cards && STATE.cards.length > 0 && CURRENT_USER === false, null, { timeout: 20000 });
-  const word = (id, fnSrc) => page.evaluate(([id, fnSrc]) => { const c = STATE.cards.find(x => x.id === id); return c && new Function('c', fnSrc)(c); }, [id, fnSrc]);
+  const word = (id, fnSrc) => page.evaluate(([id, fnSrc]) => { const c = STATE.cards.find(x => x.id === id); return c && c[fnSrc]; }, [id, fnSrc]);
   check(`${lang}: palavra em português`, (await word(cardId, textOf)) === ptWord, await word(cardId, textOf));
   // estuda a palavra em português
   await page.evaluate((id) => { const c = STATE.cards.find(x => x.id === id); c.reps = 4; c.due = 12345; c.state = 'review'; c.stability = 7; c.fsrsMigrated = true; }, cardId);
   await page.evaluate(() => setUiLang('en'));
-  await page.waitForFunction(([id, fnSrc, en]) => { const c = STATE.cards.find(x => x.id === id); return c && new Function('c', fnSrc)(c) === en; }, [cardId, textOf, enWord], { timeout: 15000 });
+  await page.waitForFunction(([id, fnSrc, en]) => { const c = STATE.cards.find(x => x.id === id); return c && c[fnSrc] === en; }, [cardId, textOf, enWord], { timeout: 15000 });
   let c = await page.evaluate((id) => { const c = STATE.cards.find(x => x.id === id); return { reps: c.reps, due: c.due, state: c.state, id: c.id }; }, cardId);
   check(`${lang}: no inglês a palavra nova começa do zero`, c.reps === 0 && c.due === 0 && c.state === 'new' && c.id === cardId, c);
   await page.evaluate((id) => { const c = STATE.cards.find(x => x.id === id); c.reps = 2; c.due = 999; c.state = 'learning'; }, cardId);
@@ -37,7 +38,7 @@ async function run(browser, port, lang, cardId, textOf, ptWord, enWord, hanziId)
   const saved = await page.evaluate(() => JSON.parse(JSON.stringify(serializeState())));
   check(`${lang}: save carrega a gaveta com o histórico do português`, saved.cardVariants && saved.cardVariants[cardId] && saved.cardVariants[cardId][ptWord] && saved.cardVariants[cardId][ptWord].reps === 4, saved.cardVariants);
   await page.evaluate(() => setUiLang('pt-BR'));
-  await page.waitForFunction(([id, fnSrc, pt]) => { const c = STATE.cards.find(x => x.id === id); return c && new Function('c', fnSrc)(c) === pt; }, [cardId, textOf, ptWord], { timeout: 15000 });
+  await page.waitForFunction(([id, fnSrc, pt]) => { const c = STATE.cards.find(x => x.id === id); return c && c[fnSrc] === pt; }, [cardId, textOf, ptWord], { timeout: 15000 });
   c = await page.evaluate((id) => { const c = STATE.cards.find(x => x.id === id); return { reps: c.reps, due: c.due, state: c.state }; }, cardId);
   check(`${lang}: voltar ao português restaura o histórico em português`, c.reps === 4 && c.due === 12345 && c.state === 'review', c);
   // simula "recarregar" depois de salvar no inglês: save antigo com a palavra em inglês, site em português
@@ -48,11 +49,11 @@ async function run(browser, port, lang, cardId, textOf, ptWord, enWord, hanziId)
   // outro (antes: o histórico do português virava o do inglês e o do inglês voltava a zero).
   const prog = (id) => page.evaluate((id) => { const c = STATE.cards.find(x => x.id === id); return { reps: c.reps, state: c.state }; }, id);
   await page.evaluate(() => setUiLang('en'));
-  await page.waitForFunction(([id, fnSrc, en]) => { const c = STATE.cards.find(x => x.id === id); return c && new Function('c', fnSrc)(c) === en; }, [cardId, textOf, enWord], { timeout: 15000 });
+  await page.waitForFunction(([id, fnSrc, en]) => { const c = STATE.cards.find(x => x.id === id); return c && c[fnSrc] === en; }, [cardId, textOf, enWord], { timeout: 15000 });
   c = await prog(cardId);
   check(`${lang}: depois do carregamento, o inglês volta com o próprio histórico`, c.reps === 2 && c.state === 'learning', c);
   await page.evaluate(() => setUiLang('pt-BR'));
-  await page.waitForFunction(([id, fnSrc, pt]) => { const c = STATE.cards.find(x => x.id === id); return c && new Function('c', fnSrc)(c) === pt; }, [cardId, textOf, ptWord], { timeout: 15000 });
+  await page.waitForFunction(([id, fnSrc, pt]) => { const c = STATE.cards.find(x => x.id === id); return c && c[fnSrc] === pt; }, [cardId, textOf, ptWord], { timeout: 15000 });
   c = await prog(cardId);
   check(`${lang}: e o português continua com o dele`, c.reps === 4 && c.state === 'review', c);
   // O save só ganha a palavra nos cartões que trocam de palavra (os outros ficam iguais).
@@ -96,8 +97,8 @@ async function run(browser, port, lang, cardId, textOf, ptWord, enWord, hanziId)
   const sandbox = { window: {} }; require('vm').createContext(sandbox);
   require('vm').runInContext(fs.readFileSync(path.join(ROOT, 'zh/hanzi-data.js'), 'utf8') + ';this.H=HANZI_LESSONS;', sandbox);
   let hid = null; sandbox.H.forEach((l, i) => l.forEach((h, j) => { if (h.char === '巴') hid = `h${i}-c${j}`; }));
-  await run(browser, port, 'fr', 'uA1-2-v8', 'return c.front', 'brésilien / brésilienne', 'américain / américaine');
-  await run(browser, port, 'zh', 'u2-v6', 'return c.back_hanzi', '巴西', '美国', hid);
+  await run(browser, port, 'fr', 'uA1-2-v8', 'front', 'brésilien / brésilienne', 'américain / américaine');
+  await run(browser, port, 'zh', 'u2-v6', 'back_hanzi', '巴西', '美国', hid);
   await browser.close(); server.close();
   console.log(`${passed} ok, ${failed} falhas`);
   process.exit(failed ? 1 : 0);
