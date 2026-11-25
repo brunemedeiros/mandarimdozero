@@ -239,3 +239,20 @@ chama) e delete-my-account (id do `getUser(token)` + e-mail digitado igual ao da
 Testes ao vivo das funções com duas contas: não feitos. No Staging só existem 7 das 11 (faltam push-send, tts-generate,
 notification-cron e teacher-cards-digest), e testar exige contas reais com senha no Staging (sobram depois e precisam ser
 apagadas pela autora). Roteiro dos testes HTTP esperados: relatório do subagente resumido acima (A x B → 403/`not_authorized`).
+
+## Notificações no celular/navegador (push): conferência de 2026-11-25
+
+Pedido da dona: "confira se as notificações do navegador estão chegando". Resposta: **na prática, não chegam para ninguém além
+da própria autora**, por três motivos independentes:
+1. **Só 1 aparelho inscrito no site inteiro** (`push_subscriptions` na produção): o da autora (Chrome/Android, desde 2026-09-10).
+   Nenhuma inscrição nova desde então, embora 41 contas tenham "push" marcado nas preferências e a faixa de convite em Amigos
+   exista desde 2026-10-15. Sem aparelho inscrito, nenhum push sai (nem do site, nem do robô `notification-cron`, nem do
+   `push-dispatch` de Amigos).
+2. **`push-send` sem CORS** (`supabase/functions/push-send/index.ts:42-44`): a pergunta prévia do navegador recebe 405. No
+   registro da produção de hoje: Opera/Windows parou no 405 e não enviou; um iPhone (Safari) conseguiu 2 POST 200 (12:34 e 12:44
+   UTC), mas essa conta não tem aparelho inscrito, então nada foi entregue. Pushes do servidor não passam por aqui.
+3. **Inscrever de novo o mesmo aparelho falha** (teste no Staging, transação desfeita): a 1ª inscrição grava; a 2ª (mesmo
+   aparelho, `upsert` em `shared/push.js:78`) é recusada pela RLS ("USING expression") porque `push_subscriptions` não tem regra
+   de UPDATE (só SELECT, INSERT, DELETE da 013). Quem clica "Ativar" de novo vê "não foi possível salvar".
+Consertos propostos, aguardando a autora: CORS no `push-send` (deploy), regra de UPDATE da própria linha (migration sem DROP)
+e investigar por que ninguém ativa (convite, telas, iPhone exige o site instalado na tela inicial).
