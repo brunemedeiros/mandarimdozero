@@ -4,6 +4,8 @@
 
 export const CATEGORY = 'cartoes_professora';
 export const APP_URL = 'https://app.profbrune.com.br/';
+// Link do botão com UTM (padrão do site; o GA4 só guarda depois do "Aceitar").
+export const BUTTON_URL = APP_URL + '?utm_source=email&utm_medium=email&utm_campaign=cartoes_novos';
 
 const T = {
   pt: {
@@ -115,7 +117,7 @@ export function renderEmail({ lang, kind, nome, n, unsubscribeUrl, test }) {
   const subject = (test ? L.test : '') + K.subject(count, nome);
   const body = K.body(count, nome), box = K.box(count);
   const stop = unsubscribeUrl ? `<a href="${esc(unsubscribeUrl)}" style="color:#5d4f72">${esc(L.stop)}</a>` : '';
-  const html = brandEmailHtml({ langCode: L.lang, brand: L.brand, subject, pre: K.pre, label: K.label, titleA: K.titleA(count), titleB: K.titleB, body, box, button: K.button, buttonUrl: APP_URL, bye: K.bye, sig: L.sig, tag: L.tag, footerHtml: `${esc(L.footer)}${stop ? ' ' + stop : ''}` });
-  const text = [body, '', ...box.map(x => '- ' + x), '', `${K.button}: ${APP_URL}`, '', `${K.bye} ${L.sig}`, '', L.footer + (unsubscribeUrl ? ` ${L.stop}: ${unsubscribeUrl}` : '')].join('\n');
+  const html = brandEmailHtml({ langCode: L.lang, brand: L.brand, subject, pre: K.pre, label: K.label, titleA: K.titleA(count), titleB: K.titleB, body, box, button: K.button, buttonUrl: BUTTON_URL, bye: K.bye, sig: L.sig, tag: L.tag, footerHtml: `${esc(L.footer)}${stop ? ' ' + stop : ''}` });
+  const text = [body, '', ...box.map(x => '- ' + x), '', `${K.button}: ${BUTTON_URL}`, '', `${K.bye} ${L.sig}`, '', L.footer + (unsubscribeUrl ? ` ${L.stop}: ${unsubscribeUrl}` : '')].join('\n');
   return { subject, html, text };
 }

@@ -98,6 +98,7 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
   const mAtiva = sent.find(m => m.to === 'ana@x.test');
   check('e-mail: o link "Parar de receber" (html e texto) aponta para a página do SITE; o cabeçalho de 1 clique continua na função', mAtiva.html.includes('https://app.profbrune.com.br/sair-cartoes/?u=ativa&amp;t=') || mAtiva.html.includes('https://app.profbrune.com.br/sair-cartoes/?u=ativa&t='), mAtiva.html.match(/href="[^"]*sair[^"]*"/));
   check('e-mail: texto puro também leva o link do site', /app\.profbrune\.com\.br\/sair-cartoes\/\?u=ativa&t=[0-9a-f]{64}&l=pt/.test(mAtiva.text));
+  check('e-mail: botão "abrir o site" com UTM cartoes_novos (html e texto)', mAtiva.html.includes('href="https://app.profbrune.com.br/?utm_source=email&amp;utm_medium=email&amp;utm_campaign=cartoes_novos"') && mAtiva.text.includes('?utm_source=email&utm_medium=email&utm_campaign=cartoes_novos'));
   const tokAtiva = (/[?&]t=([0-9a-f]{64})/.exec(mAtiva.headers['List-Unsubscribe']) || [])[1];
   const corex = await import(coreSrc);
   check('link de sair do e-mail é assinado com a chave PRÓPRIA (não com a senha do agendamento)', !!tokAtiva && await corex.verifyUnsubscribe(SIGKEY, 'ativa', tokAtiva) === true && await corex.verifyUnsubscribe(SECRET, 'ativa', tokAtiva) === false);

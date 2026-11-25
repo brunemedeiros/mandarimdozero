@@ -33,8 +33,12 @@ export function splitTitle(title) {
   return [w.slice(0, k).join(' '), w.slice(k).join(' ')];
 }
 
+// Link do botão com UTM (padrão do site; o GA4 só guarda depois do "Aceitar"): campanha = reengajamento (saudade) ou aviso.
+export const buttonUrl = (kind) => `${APP_URL}?utm_source=email&utm_medium=email&utm_campaign=${kind === 'saudade' ? 'reengajamento' : 'aviso'}`;
+
 export function renderBrandedEmail({ lang, eventType, subject, body }) {
-  const l = L[lang === 'en' ? 'en' : 'pt'], k = l.kinds[kindForEvent(eventType)];
+  const kind = kindForEvent(eventType), link = buttonUrl(kind);
+  const l = L[lang === 'en' ? 'en' : 'pt'], k = l.kinds[kind];
   const [titleA, titleB] = splitTitle(subject);
   const html = `<!doctype html>
 <html lang="${l.code}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(subject)}</title>
@@ -52,13 +56,13 @@ export function renderBrandedEmail({ lang, eventType, subject, body }) {
 <tr><td class="px" style="padding:28px 28px 8px">
 <p style="margin:0 0 22px;font-size:16px;line-height:1.65">${esc(body)}</p>
 <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" style="margin:6px auto 24px"><tr><td align="center" style="border-radius:999px;background:#E36BCA;border:2px solid #22113f;box-shadow:4px 4px 0 #22113f">
-<a href="${APP_URL}" style="display:inline-block;padding:15px 32px;font-family:'Nunito','Helvetica Neue',Arial,sans-serif;font-size:16px;font-weight:900;color:#22113f;text-decoration:none">${esc(k.button)}</a></td></tr></table>
+<a href="${esc(link)}" style="display:inline-block;padding:15px 32px;font-family:'Nunito','Helvetica Neue',Arial,sans-serif;font-size:16px;font-weight:900;color:#22113f;text-decoration:none">${esc(k.button)}</a></td></tr></table>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-top:1px solid #ece4f2;margin-top:6px"><tr>
 <td width="72" valign="middle" style="padding:20px 14px 6px 0"><img src="https://app.profbrune.com.br/icons/brune-email.jpg" width="60" height="60" alt="Brune" style="display:block;border-radius:50%;border:2.5px solid #E36BCA"></td>
 <td valign="middle" style="padding:20px 0 6px;font-size:15px;line-height:1.5"><b>${esc(k.bye)}</b><br>${esc(l.sig)}<br><a href="https://www.instagram.com/prof.brune/" style="color:#1d6fa5">Instagram</a> &middot; <a href="https://app.profbrune.com.br" style="color:#1d6fa5">app.profbrune.com.br</a></td></tr></table>
 <div style="height:22px"></div></td></tr></table>
 <p style="max-width:560px;margin:16px auto 0;text-align:center;color:#5d4f72;font-family:'Nunito','Helvetica Neue',Arial,sans-serif;font-size:12px;line-height:1.6">${l.footer}<br>@prof.brune &middot; ${esc(l.tag)}</p>
 </td></tr></table></body></html>`;
-  const text = `${body}\n\n${k.button}: ${APP_URL}\n\n${k.bye} ${l.sig}\n\n${l.footer.replace(/&gt;/g, '>')}`;
+  const text = `${body}\n\n${k.button}: ${link}\n\n${k.bye} ${l.sig}\n\n${l.footer.replace(/&gt;/g, '>')}`;
   return { html, text };
 }
