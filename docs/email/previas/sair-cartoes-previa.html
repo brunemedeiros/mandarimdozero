@@ -2,8 +2,8 @@
 <html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Prévia: página "Parar de receber" (cartões novos)</title>
 <style>
-:root{--bg:#FAF5EA;--card:#fff;--ink:#22113f;--soft:#5d4f72;--band:#3D167B;--pink:#E36BCA;--box:#FAF5EA;--line:#ece4f2;--link:#1d6fa5;--chip:#fff;--chipb:#cfc3e3}
-:root[data-theme=dark]{--bg:#17141F;--card:#201C2B;--ink:#EEE9F5;--soft:#ADA5BE;--band:#3D167B;--box:#2a2538;--line:#362F44;--link:#6CB8E6;--chip:#2a2538;--chipb:#4a4060}
+:root{--bg:#FAF5EA;--card:#fff;--ink:#22113f;--soft:#5d4f72;--band:#3D167B;--pink:#E36BCA;--pinkd:color-mix(in srgb,#E36BCA 66%,#000);--box:#FAF5EA;--line:#ece4f2;--link:#1d6fa5;--chip:#fff;--chipb:#cfc3e3}
+:root[data-theme=dark]{--bg:#17141F;--card:#201C2B;--ink:#EEE9F5;--soft:#ADA5BE;--box:#2a2538;--line:#362F44;--link:#6CB8E6;--chip:#2a2538;--chipb:#4a4060}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:'Nunito','Helvetica Neue',Arial,sans-serif}
 .bar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;justify-content:center;padding:10px;background:#22113f;color:#FAF5EA;font-size:13px;position:sticky;top:0;z-index:5}
@@ -19,26 +19,30 @@ h1 em{font-style:normal;color:var(--pink)}
 p{margin:0 0 16px;line-height:1.65;font-size:16px}
 .ok{background:var(--box);border-radius:16px;padding:14px 16px;margin:0 0 18px;display:flex;gap:10px;line-height:1.5}
 .ok i{font-style:normal;color:#3498D6;font-weight:900}
-.btn{display:block;width:100%;font:inherit;font-weight:900;font-size:16px;color:#22113f;background:var(--pink);border:2px solid #22113f;box-shadow:4px 4px 0 #22113f;border-radius:999px;padding:14px 22px;cursor:pointer;margin:0 0 14px}
+.btn{display:block;width:100%;font:inherit;font-weight:900;font-size:16px;color:#22113f;background:var(--pink);border:0;box-shadow:0 4px 0 var(--pinkd);border-radius:999px;padding:14px 22px;cursor:pointer;margin:0 0 16px}
+.btn:active{transform:translateY(2px);box-shadow:0 2px 0 var(--pinkd)}
 .btn2{display:block;width:100%;font:inherit;font-weight:800;font-size:15px;color:var(--ink);background:transparent;border:2px solid var(--chipb);border-radius:999px;padding:12px 22px;cursor:pointer;margin:0 0 14px}
 .link{background:none;border:0;font:inherit;color:var(--link);text-decoration:underline;cursor:pointer;padding:0}
 .undo{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;border-top:1px solid var(--line);padding:14px 0;margin:0 0 6px;font-size:15px}
-.undo .btn3{font:inherit;font-weight:900;font-size:14px;color:#22113f;background:var(--pink);border:2px solid #22113f;border-radius:999px;padding:8px 16px;cursor:pointer}
-.why{border-top:1px solid var(--line);padding-top:16px}.why h2{font-size:17px;margin:0 0 4px}.why small{display:block;color:var(--soft);margin:0 0 12px;line-height:1.5}
-.chips{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 12px}
-.chip{font:inherit;font-weight:700;font-size:14px;color:var(--ink);background:var(--chip);border:2px solid var(--chipb);border-radius:999px;padding:8px 14px;cursor:pointer}
-.chip[aria-pressed=true]{background:var(--band);color:#FAF5EA;border-color:var(--band)}
-textarea{width:100%;font:inherit;border:2px solid var(--chipb);border-radius:14px;padding:10px 12px;background:var(--chip);color:var(--ink);min-height:70px;margin:0 0 12px}
-.row{display:flex;gap:10px;align-items:center;margin:0 0 16px}.row .btn{width:auto;margin:0;flex:1}
+.undo .btn3{font:inherit;font-weight:900;font-size:14px;color:#22113f;background:var(--pink);border:0;box-shadow:0 3px 0 var(--pinkd);border-radius:999px;padding:9px 18px;cursor:pointer}
+.why h2{font-size:17px;margin:0 0 4px}.why small{display:block;color:var(--soft);margin:0 0 12px;line-height:1.5}
+.opts{display:flex;flex-direction:column;gap:8px;margin:0 0 14px}
+.opt{display:flex;align-items:center;gap:12px;width:100%;text-align:left;font:inherit;font-weight:700;font-size:15px;color:var(--ink);background:var(--chip);border:2px solid var(--chipb);border-radius:14px;padding:12px 14px;cursor:pointer}
+.opt .dot{flex:none;width:20px;height:20px;border-radius:50%;border:2px solid var(--chipb);background:var(--card)}
+.opt[aria-pressed=true]{border-color:var(--band);background:var(--box)}
+.opt[aria-pressed=true] .dot{border-color:var(--band);background:radial-gradient(circle,var(--band) 0 5px,var(--card) 6px)}
+textarea{width:100%;font:inherit;border:2px solid var(--chipb);border-radius:14px;padding:10px 12px;background:var(--chip);color:var(--ink);min-height:70px;margin:-2px 0 14px}
+.when{display:flex;flex-direction:column;gap:10px;margin:0 0 16px}
+.when label{display:flex;flex-direction:column;gap:5px;font-weight:800;font-size:14px}
+select{font:inherit;font-weight:700;font-size:16px;color:var(--ink);background:var(--chip);border:2px solid var(--chipb);border-radius:14px;padding:11px 12px}
 .sig{display:flex;align-items:center;gap:12px;border-top:1px solid var(--line);margin:8px 28px 0;padding:16px 0 22px;font-size:14px;line-height:1.4;color:var(--soft)}
 .sig img{width:52px;height:52px;border-radius:50%;border:2px solid var(--pink)}.sig b{color:var(--ink);display:block}
 .foot{text-align:center;font-size:12px;color:var(--soft);margin:14px 0 0}
 .note{max-width:520px;margin:16px auto 40px;padding:0 16px;font-size:13px;line-height:1.55;color:var(--soft)}
 .note div{background:var(--box);border-radius:14px;padding:12px 14px}.note b{color:var(--ink)}
-[hidden]{display:none!important}
 </style></head><body>
 <div class="bar"><b>Prévia: estado da tela</b>
-<button data-s="ask">1 Pergunta</button><button data-s="done">2 Pronto (desfazer + motivo)</button><button data-s="thanks">3 Motivo enviado</button><button data-s="back">4 Voltou a receber</button><button data-s="weekly">5 Resumo semanal</button>
+<button data-s="ask">1 Pergunta (com motivo)</button><button data-s="done">2 Pronto</button><button data-s="wk">3 Resumo: dia e hora</button><button data-s="wkok">4 Resumo combinado</button><button data-s="back">5 Voltou a receber</button>
 <span style="width:10px"></span><button id="lang">EN</button><button id="th">Escuro</button></div>
 <div class="wrap"><div class="card">
 <div class="band"><span class="pill" id="pill"></span><h1 id="h"></h1></div>
@@ -47,35 +51,38 @@ textarea{width:100%;font:inherit;border:2px solid var(--chipb);border-radius:14p
 </div><div class="foot" id="ft"></div></div>
 <div class="note"><div id="nt"></div></div>
 <script>
-var S='ask',EN=false,reason='',other='';
+var S='ask',EN=false,reason=-1,day=0,per=0;
 var T={pt:{pill:'Cartões novos da professora',sg:'sua professora de idiomas',ft:'app.profbrune.com.br',
- ask:{h:'Quer mesmo <em>sair</em> da lista?',p:'Eu te aviso por e-mail quando coloco cartões novos para você revisar. Se está chegando coisa demais, tem um jeito mais leve de continuar.',go:'Sim, parar de receber',alt:'Prefiro 1 resumo por semana',keep:'Continuar recebendo'},
- done:{h:'Pronto, você <em>saiu</em> da lista',ok:'Você não vai mais receber o e-mail de cartões novos da sua professora. Seus cartões continuam no site.',un:'Foi sem querer?',unb:'Voltar a receber',wh:'Posso saber o motivo?',ws:'É opcional e leva 5 segundos. Eu leio e uso para melhorar o aviso. A resposta não fica no seu perfil de estudo.',send:'Enviar',skip:'Pular',oth:'Conte em poucas palavras (opcional)',
-  r:['Recebo e-mails demais','Não é mais do meu interesse','Os cartões não servem para mim','Estou sem tempo agora','Prefiro ver tudo no site','Outro motivo']},
- thanks:{h:'Obrigada, <em>anotei</em>!',p:'Sua resposta me ajuda a deixar o aviso melhor. Se mudar de ideia, é só ligar de novo em Configurações > Notificações, dentro do site.',un:'Foi sem querer?',unb:'Voltar a receber'},
+ days:['domingo','segunda-feira','terça-feira','quarta-feira','quinta-feira','sexta-feira','sábado'],pers:['de manhã (8h)','à tarde (14h)','à noite (20h)'],
+ r:['Recebo e-mails demais','Estou sem tempo agora','Os cartões não servem para mim','Não é mais do meu interesse','Prefiro ver tudo no site','Outro motivo'],
+ ask:{h:'Quer mesmo <em>sair</em> da lista?',p:'Eu te aviso por e-mail quando coloco cartões novos para você revisar. Se está chegando coisa demais, tem um jeito mais leve de continuar.',wh:'Qual é o motivo?',ws:'Escolha um: eu leio todas as respostas e uso para melhorar o aviso. Ela não fica no seu perfil de estudo.',oth:'Conte em poucas palavras (opcional)',go:'Parar de receber',alt:'Prefiro 1 resumo por semana',keep:'Continuar recebendo'},
+ done:{h:'Pronto, você <em>saiu</em> da lista',ok:'Você não vai mais receber o e-mail de cartões novos da sua professora. Seus cartões continuam no site.',thx:'Obrigada, anotei o seu motivo.',un:'Foi sem querer?',unb:'Voltar a receber'},
+ wk:{h:'Qual dia e <em>que hora</em>?',p:'Eu junto os cartões novos da semana num único e-mail. Escolha quando ele chega:',d:'Dia',t:'Horário',go:'Combinar',back:'Voltar',tz:'Horário de Brasília.'},
+ wkok:{h:'Combinado: <em>1 resumo</em> por semana',pre:'Toda ',un:'Mudou de ideia?',unb:'Voltar ao aviso do dia',ch:'Mudar dia ou hora',ok2:'Você deixa de receber o aviso do dia.'},
  back:{h:'Que bom que <em>voltou</em>!',p:'Os e-mails de cartões novos voltaram para a sua caixa. Quando quiser ajustar, é em Configurações > Notificações, dentro do site.',go:'Abrir o site'},
- weekly:{h:'Combinado: <em>1 resumo</em> por semana',ok:'Vou juntar os cartões novos num só e-mail, todo domingo de manhã. Você deixa de receber o aviso do dia.',un:'Mudou de ideia?',unb:'Voltar ao aviso do dia'},
- note:'<b>Nota da prévia (não aparece na página):</b> 1) botão de desfazer e a tela de motivo ficam só com a assinatura do link, sem login. 2) Motivos: lista montada a partir da pesquisa de 12 marcas (recebo demais, não me interessa mais, conteúdo irrelevante, mais Outro); "nunca me cadastrei" ficou de fora porque não se aplica a alunas. 3) O resumo semanal ainda não existe como e-mail: precisa ser construído (e a escolha guardada em uma migration). 4) Tudo em pt-BR e en; no en não há português. 5) A foto e o tom são os da assinatura dos seus e-mails.'},
+ note:'<b>Nota da prévia (não aparece na página):</b> 1) O motivo fica na primeira tela, em lista vertical (sem depender da largura da tela). Ele é pedido, mas não trava o botão: quem sai pelo "cancelar inscrição" do Gmail nunca vê esta tela, e nenhuma das 12 marcas pesquisadas exige motivo. 2) Desfazer e motivo funcionam só com a assinatura do link, sem login. 3) O resumo semanal ainda não existe como e-mail e precisa de uma migration para guardar dia e horário. 4) Tudo em pt-BR e en. 5) Sombra do botão: rosa mais escuro, como nos botões do site.'},
 en:{pill:'New cards from your teacher',sg:'your language teacher',ft:'app.profbrune.com.br',
- ask:{h:'Really <em>leave</em> the list?',p:'I email you when I add new cards for you to review. If it feels like too much, there is a lighter way to keep going.',go:'Yes, stop receiving',alt:'I prefer 1 summary a week',keep:'Keep receiving'},
- done:{h:'Done, you <em>left</em> the list',ok:'You will no longer get the email about new cards from your teacher. Your cards are still on the site.',un:'Was that a mistake?',unb:'Turn it back on',wh:'Mind telling me why?',ws:'Optional, takes 5 seconds. I read it and use it to improve the email. Your answer is not saved in your study profile.',send:'Send',skip:'Skip',oth:'Tell me in a few words (optional)',
-  r:['I get too many emails','I am no longer interested','The cards are not useful to me','I have no time right now','I prefer to see everything on the site','Another reason']},
- thanks:{h:'Thank you, <em>noted</em>!',p:'Your answer helps me improve this email. If you change your mind, turn it back on in Settings > Notifications, inside the site.',un:'Was that a mistake?',unb:'Turn it back on'},
+ days:['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'],pers:['morning (8am)','afternoon (2pm)','evening (8pm)'],
+ r:['I get too many emails','I have no time right now','The cards are not useful to me','I am no longer interested','I prefer to see everything on the site','Another reason'],
+ ask:{h:'Really <em>leave</em> the list?',p:'I email you when I add new cards for you to review. If it feels like too much, there is a lighter way to keep going.',wh:'What is the reason?',ws:'Pick one: I read every answer and use it to improve the email. It is not saved in your study profile.',oth:'Tell me in a few words (optional)',go:'Stop receiving',alt:'I prefer 1 summary a week',keep:'Keep receiving'},
+ done:{h:'Done, you <em>left</em> the list',ok:'You will no longer get the email about new cards from your teacher. Your cards are still on the site.',thx:'Thank you, I noted your reason.',un:'Was that a mistake?',unb:'Turn it back on'},
+ wk:{h:'Which day and <em>what time</em>?',p:'I bundle the week\'s new cards into one email. Pick when it arrives:',d:'Day',t:'Time',go:'Confirm',back:'Back',tz:'Brasília time.'},
+ wkok:{h:'Deal: <em>1 summary</em> a week',pre:'Every ',un:'Changed your mind?',unb:'Back to the daily email',ch:'Change day or time',ok2:'You stop getting the daily email.'},
  back:{h:'Glad you are <em>back</em>!',p:'New-card emails are back in your inbox. You can adjust this anytime in Settings > Notifications, inside the site.',go:'Open the site'},
- weekly:{h:'Deal: <em>1 summary</em> a week',ok:'I will bundle the new cards into one email, every Sunday morning. You stop getting the daily one.',un:'Changed your mind?',unb:'Back to the daily email'},
- note:'<b>Preview note (not on the page):</b> undo and reason work with the link signature only, no login. Reasons follow a 12-brand market study. The weekly summary email does not exist yet. All text is pt-BR and en, no Portuguese in en.'}};
+ note:'<b>Preview note (not on the page):</b> reason is on the first screen, as a vertical list, asked but not blocking. Undo and reason work with the link signature only. The weekly summary email does not exist yet. All text is pt-BR and en, no Portuguese in en.'}};
 function render(){var t=T[EN?'en':'pt'],s=t[S],h='';
  document.getElementById('pill').textContent=t.pill;document.getElementById('sg').textContent=t.sg;document.getElementById('ft').textContent=t.ft;document.getElementById('nt').innerHTML=t.note;
  document.getElementById('h').innerHTML=s.h;
- if(S==='ask')h='<p>'+s.p+'</p><button class="btn" data-a="done">'+s.go+'</button><button class="btn2" data-a="weekly">'+s.alt+'</button><p style="text-align:center;margin:0 0 10px"><button class="link" data-a="back">'+s.keep+'</button></p>';
- if(S==='done'){h='<div class="ok"><i>✓</i><span>'+s.ok+'</span></div><div class="undo"><span>'+s.un+'</span><button class="btn3" data-a="back">'+s.unb+'</button></div><div class="why"><h2>'+s.wh+'</h2><small>'+s.ws+'</small><div class="chips">'+s.r.map(function(x,i){return '<button class="chip" aria-pressed="'+(reason===i)+'" data-r="'+i+'">'+x+'</button>'}).join('')+'</div>'+(reason===5?'<textarea maxlength="200" placeholder="'+s.oth+'"></textarea>':'')+'<div class="row"><button class="btn" data-a="thanks">'+s.send+'</button><button class="link" data-a="thanks">'+s.skip+'</button></div></div>';}
- if(S==='thanks')h='<p>'+s.p+'</p><div class="undo"><span>'+s.un+'</span><button class="btn3" data-a="back">'+s.unb+'</button></div>';
+ if(S==='ask')h='<p>'+s.p+'</p><div class="why"><h2>'+s.wh+'</h2><small>'+s.ws+'</small><div class="opts">'+t.r.map(function(x,i){return '<button class="opt" aria-pressed="'+(reason===i)+'" data-r="'+i+'"><span class="dot"></span>'+x+'</button>'}).join('')+'</div>'+(reason===5?'<textarea maxlength="200" placeholder="'+s.oth+'"></textarea>':'')+'</div><button class="btn" data-a="done">'+s.go+'</button><button class="btn2" data-a="wk">'+s.alt+'</button><p style="text-align:center;margin:0 0 10px"><button class="link" data-a="back">'+s.keep+'</button></p>';
+ if(S==='done')h='<div class="ok"><i>✓</i><span>'+s.ok+(reason>=0?'<br><b>'+s.thx+'</b>':'')+'</span></div><div class="undo"><span>'+s.un+'</span><button class="btn3" data-a="back">'+s.unb+'</button></div>';
+ if(S==='wk')h='<p>'+s.p+' <span style="color:var(--soft);font-size:14px">'+s.tz+'</span></p><div class="when"><label>'+s.d+'<select id="d">'+t.days.map(function(x,i){return '<option value="'+i+'"'+(i===day?' selected':'')+'>'+x+'</option>'}).join('')+'</select></label><label>'+s.t+'<select id="p">'+t.pers.map(function(x,i){return '<option value="'+i+'"'+(i===per?' selected':'')+'>'+x+'</option>'}).join('')+'</select></label></div><button class="btn" data-a="wkok">'+s.go+'</button><p style="text-align:center;margin:0 0 10px"><button class="link" data-a="ask">'+s.back+'</button></p>';
+ if(S==='wkok')h='<div class="ok"><i>✓</i><span>'+(!EN&&(day===0||day===6)?'Todo ':s.pre)+t.days[day]+' '+t.pers[per]+'. '+s.ok2+'</span></div><div class="undo"><span>'+s.un+'</span><button class="btn3" data-a="back">'+s.unb+'</button></div><p style="margin:6px 0 10px"><button class="link" data-a="wk">'+s.ch+'</button></p>';
  if(S==='back')h='<p>'+s.p+'</p><button class="btn" data-a="ask">'+s.go+'</button>';
- if(S==='weekly')h='<div class="ok"><i>✓</i><span>'+s.ok+'</span></div><div class="undo"><span>'+s.un+'</span><button class="btn3" data-a="back">'+s.unb+'</button></div>';
  document.getElementById('b').innerHTML=h;
  [].forEach.call(document.querySelectorAll('.bar [data-s]'),function(b){b.classList.toggle('on',b.dataset.s===S)});}
 document.addEventListener('click',function(e){var a=e.target.closest('[data-a],[data-s],[data-r]');if(!a)return;
- if(a.dataset.r!==undefined){reason=reason==+a.dataset.r?'':+a.dataset.r;render();return}
+ if(a.dataset.r!==undefined){reason=reason==+a.dataset.r?-1:+a.dataset.r;render();return}
+ var dd=document.getElementById('d');if(dd){day=+dd.value;per=+document.getElementById('p').value}
  S=a.dataset.a||a.dataset.s;render();});
 document.getElementById('lang').onclick=function(){EN=!EN;this.textContent=EN?'PT':'EN';document.documentElement.lang=EN?'en':'pt-BR';render()};
 document.getElementById('th').onclick=function(){var d=document.documentElement.dataset.theme==='dark';document.documentElement.dataset.theme=d?'light':'dark';this.textContent=d?'Escuro':'Claro'};
