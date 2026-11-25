@@ -209,9 +209,33 @@ teste IDOR com dois alunos fictícios no Staging). Nada mudou em produção.
   `user_id` e `reporter_email` nulo; ninguém preenche status (fica `novo`), prioridade, nota nem resposta. O site
   (`shared/reports.js`) já manda exatamente isso. **Staging: aplicada em 2026-11-25** (gravada como `147_reports_insert_own`);
   conferida em transação desfeita: 2 envios legítimos aceitos (logado e visitante com e-mail), 8 falsificações recusadas.
-  Produção: **pendente** de autorização. Voltar atrás: comentário no fim da migration.
+  **Produção: aplicada em 2026-11-25 com autorização da autora** (versão `20261125220157`); leitura de conferência da
+  regra em `pg_policies` ainda a fazer. Voltar atrás: comentário no fim da migration.
 - Teste de regressão: `tests/seguranca-idor/` (`idor_staging.sql` diz sozinho `IDOR_OK`/`IDOR_FALHOU`; README com a tabela).
   A 1ª rodada desse arquivo final ficou esperando uma confirmação do MCP (o script tem `delete`) e não rodou; as rodadas
   anteriores, com os mesmos casos, deram o resultado acima.
 - Não verificado nesta rodada: IDOR nas Edge Functions. Propostas pendentes: limite da `support-materials` (P2) e
   `is_admin()` no lugar do e-mail (P3).
+
+## Edge Functions: revisão de IDOR (2026-11-25)
+
+Subagente, só leitura do código (seguindo os shims até o código que roda) + GET/OPTIONS sem token na produção.
+**Nenhum IDOR grave ou médio:** nas 11 funções a identidade vem do JWT, de uma senha (`x-cron-token`, `x-agent-token`,
+em tempo constante) ou de link assinado (HMAC), nunca de um `user_id` mandado no corpo. Sem token: 401 em delete-my-account,
+notification-cron, push-dispatch, push-send, report-reply-send, review-bank-agent e tts-generate; as públicas de propósito
+(class-calendar-feed, google-calendar, notion-sync, teacher-cards-digest) respondem 404/405 sem parâmetro.
+Confirmado de forma independente: push-send (sem `user_id`; a RLS de `push_subscriptions` limita aos aparelhos de quem
+chama) e delete-my-account (id do `getUser(token)` + e-mail digitado igual ao da conta) conferem o DONO, não só o login.
+
+| # | Gravidade | Achado | Situação |
+|---|---|---|---|
+| A1 | Leve (defeito, não brecha) | `push-send` não responde OPTIONS nem manda CORS (`index.ts:42-44`, OPTIONS ao vivo = 405): o navegador barra a chamada de `shared/notifications.js:89`, então os pushes do próprio navegador (XP, conquista, Desafio) provavelmente nunca chegam | Pendente (pede deploy) |
+| A2 | Leve | `report-reply-send` responde para o `reporter_email` gravado no report | Resolvido pela 147 (só visitante grava e-mail; logada vai pelo e-mail da conta) |
+| A3 | Informativo | `tts-generate` aceita cartão que a pessoa consegue VER (aluna gera áudio de cartão da professora); gasta só a cota dela, arquivo na pasta dela | Aceitável |
+| A4 | Informativo | Token do `class-calendar-feed` sem validade (~79 bits), pode ser trocado | Decisão de projeto |
+| A5 | Leve | OAuth do Google Agenda e do Notion sem vínculo com o navegador: professora que mandasse o link de consentimento a outra pessoa ligaria a agenda dela à própria conta | Exige papel de professora + enganar alguém |
+| A6 | Informativo | CORS `*` sem cookies/credenciais | Sem risco |
+
+Testes ao vivo das funções com duas contas: não feitos. No Staging só existem 7 das 11 (faltam push-send, tts-generate,
+notification-cron e teacher-cards-digest), e testar exige contas reais com senha no Staging (sobram depois e precisam ser
+apagadas pela autora). Roteiro dos testes HTTP esperados: relatório do subagente resumido acima (A x B → 403/`not_authorized`).
