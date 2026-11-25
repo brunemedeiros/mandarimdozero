@@ -113,3 +113,29 @@ function showToast(msg, opts){
   start(toastDurationMs(msg));
   if (isXp) watchCompletionForXpToasts();
 }
+
+// "+N" pequeno ao lado da barra da lição (animações, item 5; decisão da dona, 2026-11-25). Dentro da lição da trilha o aviso
+// "+N XP" no topo virava uma fila de avisos (um por acerto, 4 s cada); ali ele dá lugar a este número que sobe e some em menos
+// de 1 s, no ponto para onde o aluno já está olhando. Fora da lição (Revisão, Desafios...), e com "menos movimento" no aparelho
+// (o número sumiria sem ser visto), continua o aviso de sempre. Devolve true quando mostrou; false = quem chamou usa o aviso.
+function xpPertoDaBarra(amount){
+  const app = document.getElementById('app');
+  const barra = document.getElementById('step-progress-wrap');
+  if (!app || !app.classList.contains('lesson-focus') || !barra) return false;
+  if (typeof prefersReducedMotion === 'function' && prefersReducedMotion()) return false;
+  if (typeof COMPLETION_SCREEN_SELECTOR !== 'undefined' && document.querySelector(COMPLETION_SCREEN_SELECTOR)) return false;
+  const r = barra.getBoundingClientRect();
+  if (!r.width || r.bottom < 0 || r.top > window.innerHeight) return false;
+  document.querySelectorAll('.xp-perto-barra').forEach(e => e.remove());
+  const el = document.createElement('span');
+  el.className = 'xp-perto-barra';
+  el.setAttribute('role', 'status');
+  el.setAttribute('aria-label', t('toast.xpGain', { amount }));
+  el.textContent = `+${amount}`;
+  // Preso à página (não à tela): se a tela rolar até o painel de acerto, o número acompanha a barra em vez de flutuar sobre o texto.
+  el.style.left = `${Math.round(r.right + window.scrollX)}px`;
+  el.style.top = `${Math.round(r.top + r.height / 2 + window.scrollY)}px`;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 1000);
+  return true;
+}

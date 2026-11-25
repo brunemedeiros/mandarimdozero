@@ -8,7 +8,7 @@
   display:inline-flex; align-items:center; justify-content:center; flex-shrink:0;
   transition: transform .12s ease, background .15s ease; padding:0; line-height:1;
 }
-.audio-btn:hover, .custom-audio-btn:hover{ background: var(--paper-line); transform: scale(1.08); }
+@media (hover:hover) and (pointer:fine){ .audio-btn:hover, .custom-audio-btn:hover{ background: var(--paper-line); transform: scale(1.08); } }
 .audio-btn:active, .custom-audio-btn:active{ transform: scale(.94); }
 .audio-btn.speaking{ background: var(--seal-red); color: var(--gold-bright); animation: pulseAudio .6s ease infinite; }
 @keyframes pulseAudio{ 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.12); } }

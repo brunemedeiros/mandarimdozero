@@ -91,6 +91,19 @@ function renderBlockIntroCard(u, contentEl, nextBtn){
   nextBtn.textContent = posInBlock < block.length - 1 ? t('zh.path.nextWordArrow') : t('common.continueArrow');
 }
 
+// Unidade recém-liberada (animações, item 14; decisão da dona, 2026-11-25): marcada no instante em que a anterior é concluída
+// e mostrada com um carimbo na primeira vez que a trilha (lista ou mapa) aparece na tela. Fica só na memória da página: não vai
+// para o progresso salvo; recarregar o site antes de ver a trilha perde o carimbo, e nada mais muda.
+let UNIDADE_RECEM_LIBERADA = null;
+function marcarUnidadeLiberada(el){
+  el.classList.add('mov-liberada');
+  requestAnimationFrame(() => {
+    if (!el.isConnected || !el.getClientRects().length) return; // trilha ainda escondida (tela de conclusão): fica para a próxima vez
+    UNIDADE_RECEM_LIBERADA = null;
+    el.scrollIntoView({ block: 'center', behavior: (typeof prefersReducedMotion === 'function' && prefersReducedMotion()) ? 'auto' : 'smooth' });
+  });
+}
+
 function buildUnitBlock(u){
   const state = unitBlockState(u);
   const unlocked = state !== 'locked';
@@ -129,6 +142,7 @@ function buildUnitBlock(u){
     + (state === 'available' ? ' available' : '')
     + (expanded ? ' expanded' : '');
   if (state === 'current') block.setAttribute('aria-current', 'step');
+  if (UNIDADE_RECEM_LIBERADA !== null && String(u.id) === String(UNIDADE_RECEM_LIBERADA) && unlocked) marcarUnidadeLiberada(block);
 
   const badgeHTML = state === 'done' ? `<span class="ub-badge">✓</span>`
     : state === 'skipped' ? `<span class="ub-badge ub-badge-skipped" title="${t('trail.unit.skippedTitle')}">${t('trail.unit.skippedBadge')}</span>` : '';
@@ -455,7 +469,9 @@ function markUnitCompleted(unitId, scorePct, { skipToast = false } = {}){
   const levelUnits = unitsOfLevel(u.level);
   const idx = levelUnits.findIndex(x => x.id === unitId);
   if (idx >= 0 && idx+1 < levelUnits.length){
-    STATE.unitProgress[levelUnits[idx+1].id].unlocked = true;
+    const proxima = STATE.unitProgress[levelUnits[idx+1].id];
+    if (!proxima.unlocked) UNIDADE_RECEM_LIBERADA = levelUnits[idx+1].id;
+    proxima.unlocked = true;
   }
   addXP(25);
   registerStudyToday();

@@ -4,12 +4,13 @@
 // - icon: emoji (✅ exercício, 🎉 revisão/sessão, 💪 quase lá, 🏆 recorde); sub: linha de apoio; stats: cartões de resultado (XP ganho, acertos, pontos);
 // - body: corpo livre (listas de erros, recapitulação), alinhado à esquerda; actions: 1 ou 2 botões (secondary = botão claro);
 // - cls: classe-marcador da tela (ex.: 'conj-session-result'), sem estilo próprio, para testes e para o toast.
+// - pop: o ícone "estoura" ao aparecer (tier-pop). Ligado por padrão desde 2026-11-25 (antes nenhuma tela pedia); pop:false desliga.
 function conclusaoHTML(o){
   o = o || {};
   const stats = (o.stats || []).filter(Boolean);
   const acts = (o.actions || []).filter(Boolean);
   return `<div class="lesson-complete conclusao${o.cls ? ' ' + o.cls : ''}" data-completion-screen>
-    <div class="lesson-complete-icon${o.pop ? ' tier-pop' : ''}">${o.icon || '✅'}</div>
+    <div class="lesson-complete-icon${o.pop !== false ? ' tier-pop' : ''}">${o.icon || '✅'}</div>
     <h2>${o.title || ''}</h2>
     ${o.sub ? `<p class="lesson-boundary-title">${o.sub}</p>` : ''}
     ${stats.length ? `<div class="lesson-complete-stats">${stats.map(s => `<div class="lc-stat"><div class="lc-stat-label">${s.label}</div><div class="lc-stat-value">${s.value}</div></div>`).join('')}</div>` : ''}

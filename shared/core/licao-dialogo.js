@@ -225,7 +225,7 @@ function renderDialogueCheck(u, dlg, who, checks, nextBtn, rows){
       document.getElementById('dlg-q-next').addEventListener('click', () => {
         if (last) finish(); else { st.qi += 1; showQuestion(); }
       });
-      document.getElementById('dlg-q-next').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      document.getElementById('dlg-q-next').scrollIntoView({ behavior: ((typeof prefersReducedMotion === 'function' && prefersReducedMotion()) ? 'auto' : 'smooth'), block: 'nearest' });
     }));
   }
 
@@ -238,7 +238,7 @@ function renderDialogueCheck(u, dlg, who, checks, nextBtn, rows){
     document.getElementById('dlg-redo').addEventListener('click', () => { st.qi = 0; st.correct = 0; showQuestion(); nextBtn.style.display = 'none'; });
     nextBtn.textContent = t('common.continueArrow');
     nextBtn.style.display = 'flex';
-    nextBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    nextBtn.scrollIntoView({ behavior: ((typeof prefersReducedMotion === 'function' && prefersReducedMotion()) ? 'auto' : 'smooth'), block: 'nearest' });
   }
 
   showQuestion();

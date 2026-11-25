@@ -19,7 +19,7 @@ const PECAS = [
       const r = await p.evaluate((html) => {
         document.querySelectorAll('#t-box').forEach(e => e.remove());
         const box = document.createElement('div'); box.id = 't-box'; box.style.cssText = 'position:fixed;top:10px;left:10px;z-index:99999;background:var(--paper);padding:20px'; box.innerHTML = html; document.body.appendChild(box);
-        const e = document.getElementById('t-ok'); if (!e) return null; const cs = getComputedStyle(e);
+        const e = document.getElementById('t-ok'); if (!e) return null; e.getAnimations().forEach(a => { try { a.finish(); } catch (x) {} }); /* o dia da sequência se preenche com animação (2026-11-25): mede a cor final */ const cs = getComputedStyle(e);
         const P = s => s.match(/[\d.]+/g).map(Number); const l = c => { const f = x => { x /= 255; return x <= .03928 ? x / 12.92 : Math.pow((x + .055) / 1.055, 2.4); }; return .2126 * f(c[0]) + .7152 * f(c[1]) + .0722 * f(c[2]); };
         const bg = cs.backgroundColor, fg = cs.color; const a = l(P(bg)), c = l(P(fg)); box.remove();
         return { bg, fg, c: +((Math.max(a, c) + .05) / (Math.min(a, c) + .05)).toFixed(2) };
