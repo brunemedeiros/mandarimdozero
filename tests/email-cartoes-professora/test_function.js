@@ -91,28 +91,30 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
   // teste: só as 2 alunas da lista; novos para a ativa, lembrete para a parada; "outra" e "semmail" ficam de fora
   DB.teacher_cards_digest_settings[0].mode = 'teste';
   r = await run({ dry_run: true });
-  check('dry_run: planeja sem enviar e sem gravar', sent.length === 0 && !(DB.teacher_cards_digest_log || []).length && by(r, 'ativa').kind === 'novos' && by(r, 'ativa').n === 2 && by(r, 'parada').kind === 'lembrete' && by(r, 'parada').n === 2, r);
+  check('dry_run: planeja sem enviar e sem gravar (parada há dias mas sem cartões novos: nada, o lembrete saiu)', sent.length === 0 && !(DB.teacher_cards_digest_log || []).length && by(r, 'ativa').kind === 'novos' && by(r, 'ativa').n === 2 && by(r, 'parada').skipped === 'nada_a_avisar', r);
   check('modo teste: só entra quem está na lista de teste', !by(r, 'outra').student && !by(r, 'semmail').student && !by(r, 'saiu').student, r);
   r = await run({});
-  check('modo teste: envia 2 e-mails (ativa e parada)', sent.length === 2 && sent.map(m => m.to).sort().join() === 'ana@x.test,carol@x.test', sent.map(m => m.to));
-  const mAtiva = sent.find(m => m.to === 'ana@x.test'), mParada = sent.find(m => m.to === 'carol@x.test');
+  check('modo teste: envia 1 e-mail (só a ativa, que tem cartões novos); a parada fica sem e-mail', sent.length === 1 && sent[0].to === 'ana@x.test', sent.map(m => m.to));
+  const mAtiva = sent.find(m => m.to === 'ana@x.test');
+  check('e-mail: o link "Parar de receber" (html e texto) aponta para a página do SITE; o cabeçalho de 1 clique continua na função', mAtiva.html.includes('https://app.profbrune.com.br/sair-cartoes/?u=ativa&amp;t=') || mAtiva.html.includes('https://app.profbrune.com.br/sair-cartoes/?u=ativa&t='), mAtiva.html.match(/href="[^"]*sair[^"]*"/));
+  check('e-mail: texto puro também leva o link do site', /app\.profbrune\.com\.br\/sair-cartoes\/\?u=ativa&t=[0-9a-f]{64}&l=pt/.test(mAtiva.text));
+  check('e-mail: botão "abrir o site" com UTM cartoes_novos (html e texto)', mAtiva.html.includes('href="https://app.profbrune.com.br/?utm_source=email&amp;utm_medium=email&amp;utm_campaign=cartoes_novos"') && mAtiva.text.includes('?utm_source=email&utm_medium=email&utm_campaign=cartoes_novos'));
   const tokAtiva = (/[?&]t=([0-9a-f]{64})/.exec(mAtiva.headers['List-Unsubscribe']) || [])[1];
   const corex = await import(coreSrc);
   check('link de sair do e-mail é assinado com a chave PRÓPRIA (não com a senha do agendamento)', !!tokAtiva && await corex.verifyUnsubscribe(SIGKEY, 'ativa', tokAtiva) === true && await corex.verifyUnsubscribe(SECRET, 'ativa', tokAtiva) === false);
   check('e-mail da ativa: "novos" com 2 cartões, nome, de remetente certo, texto puro e cabeçalhos de sair em 1 clique', mAtiva.subject === 'Você tem 2 cartões novos da sua professora' && mAtiva.html.includes('Oi, Ana!') && mAtiva.text.length > 20 && mAtiva.from.startsWith('Prof Brune') && mAtiva.headers['List-Unsubscribe-Post'] === 'List-Unsubscribe=One-Click' && /teacher-cards-digest\?u=ativa&t=[0-9a-f]{64}&l=pt/.test(mAtiva.headers['List-Unsubscribe']), mAtiva.headers);
-  check('e-mail da parada: lembrete', mParada.subject === 'Seus cartões estão te esperando, Carol');
   const log = DB.teacher_cards_digest_log;
-  check('registro: 1 linha por aluna, enviadas', log.length === 2 && log.every(l => l.status === 'sent' && l.sent_on === today), log);
+  check('registro: 1 linha (a ativa), enviada', log.length === 1 && log.every(l => l.status === 'sent' && l.sent_on === today), log);
   r = await run({});
-  check('mesmo dia de novo: não envia de novo (1 por dia)', sent.length === 2 && by(r, 'ativa').skipped === 'ja_enviado_hoje' && by(r, 'parada').skipped === 'ja_enviado_hoje', r);
+  check('mesmo dia de novo: não envia de novo (1 por dia)', sent.length === 1 && by(r, 'ativa').skipped === 'ja_enviado_hoje', r);
 
   // dia seguinte: lembrete só depois de 7 dias; "novos" só com cartão entregue depois do último "novos"
   DB.teacher_cards_digest_log.forEach(l => { l.sent_on = '2000-01-01'; l.created_at = new Date(Date.now() + 1000).toISOString(); });
   r = await run({});
-  check('dia seguinte: nada novo e lembrete de ontem (menos de 7 dias): não envia', sent.length === 2 && by(r, 'ativa').skipped === 'nada_a_avisar' && by(r, 'parada').skipped === 'nada_a_avisar', r);
+  check('dia seguinte: nada novo: não envia', sent.length === 1 && by(r, 'ativa').skipped === 'nada_a_avisar' && by(r, 'parada').skipped === 'nada_a_avisar', r);
   DB.teacher_flashcards.push({ student_id: 'ativa', teacher_id: T, status: 'active', bank_item_id: 'b', created_at: new Date(Date.now() + 5000).toISOString() });
   r = await run({});
-  check('cartão entregue depois do último e-mail: novo "novos" com 1 cartão', sent.length === 3 && sent[2].subject === 'Você tem 1 cartão novo da sua professora', sent.map(m => m.subject));
+  check('cartão entregue depois do último e-mail: novo "novos" com 1 cartão', sent.length === 2 && sent[1].subject === 'Você tem 1 cartão novo da sua professora', sent.map(m => m.subject));
 
   // todos: inclui inglês, sem e-mail e vínculo removido; respeita "parar de receber"
   seed(); DB.teacher_cards_digest_settings[0].mode = 'todos';
@@ -121,20 +123,20 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
   check('modo todos: quem desligou não recebe; sem e-mail e vínculo removido ficam de fora', by(r, 'ativa').skipped === 'desligou' && by(r, 'semmail').skipped === 'sem_email' && !by(r, 'saiu').student, r);
   const bia = sent.find(m => m.to === 'bia@x.test');
   check('site em inglês: e-mail em inglês, sem português', bia && bia.subject === 'You have 1 new card from your teacher' && !/você|cartão|Revisão/i.test(bia.html.replace(/<style[\s\S]*?<\/style>/, '')) && /&l=en/.test(bia.headers['List-Unsubscribe']), bia && bia.subject);
-  check('modo todos: quem tem preferência salva com e-mail ou sem nada recebe', sent.some(m => m.to === 'carol@x.test') && !sent.some(m => m.to === 'ana@x.test'));
+  check('modo todos: só recebe quem tem cartão novo e não desligou (a desligou e a parada sem cartões novos ficam de fora)', sent.length === 1 && sent[0].to === 'bia@x.test');
 
   // sair: GET só confirma, POST grava; chave própria; link antigo (senha do agendamento) continua valendo
   seed();
   const core = await import(coreSrc);
   const tk = await core.signUnsubscribe(SIGKEY, 'ativa'), tkOld = await core.signUnsubscribe(SECRET, 'ativa');
   const U = 'https://p.supabase.co/functions/v1/teacher-cards-digest';
-  const g = await handler(new Request(`${U}?u=ativa&t=${tk}&l=pt`));
-  const gTxt = await g.text();
-  check('sair: GET válido só PERGUNTA (botão que envia POST) e NÃO grava nada', g.status === 200 && gTxt.includes('Sim, parar de receber') && gTxt.includes('method="post"') && !(DB.notification_preferences || []).length, DB.notification_preferences);
-  const gEn = await (await handler(new Request(`${U}?u=ativa&t=${tk}&l=en`))).text();
-  check('sair: página de confirmação em inglês sem português', gEn.includes('Stop receiving these emails?') && !/você|Parar|Sim,/i.test(gEn));
+  const g = await handler(new Request(`${U}?u=ativa&t=${tk}&l=pt`), );
+  check('sair: GET redireciona (302) para a página do SITE com u, t e l, e NÃO grava nada (o Supabase mostraria HTML como texto cru)', g.status === 302 && g.headers.get('location') === `https://app.profbrune.com.br/sair-cartoes/?u=ativa&t=${tk}&l=pt` && !(DB.notification_preferences || []).length, g.headers.get('location'));
+  const gEn = await handler(new Request(`${U}?u=ativa&t=${tk}&l=en`));
+  check('sair: GET em inglês leva l=en', gEn.status === 302 && /&l=en$/.test(gEn.headers.get('location')));
   const ok = await handler(new Request(`${U}?u=ativa&t=${tk}&l=pt`, { method: 'POST' }));
-  check('sair: POST válido desliga só a categoria e mostra "Pronto!"', ok.status === 200 && (await ok.text()).includes('Pronto!') && JSON.stringify(DB.notification_preferences) === JSON.stringify([{ user_id: 'ativa', channels: { cartoes_professora: [] } }]), DB.notification_preferences);
+  const okJ = await ok.json();
+  check('sair: POST válido desliga só a categoria e responde JSON ok (a página do site mostra "Pronto!")', ok.status === 200 && okJ.ok === true && /json/.test(ok.headers.get('content-type')) && ok.headers.get('access-control-allow-origin') === '*' && JSON.stringify(DB.notification_preferences) === JSON.stringify([{ user_id: 'ativa', channels: { cartoes_professora: [] } }]), DB.notification_preferences);
   DB.notification_preferences[0].channels.estudo = ['email']; DB.notification_preferences[0].channels.cartoes_professora = ['email'];
   const ok2 = await handler(new Request(`${U}?u=ativa&t=${tk}&l=en`, { method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded' }, body: 'List-Unsubscribe=One-Click' }));
   check('sair por POST de 1 clique (Gmail) sem apagar as outras preferências', ok2.status === 200 && DB.notification_preferences[0].channels.estudo[0] === 'email' && Array.isArray(DB.notification_preferences[0].channels.cartoes_professora) && DB.notification_preferences[0].channels.cartoes_professora.length === 0);
@@ -143,12 +145,11 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
   check('link antigo (assinado com a senha do agendamento) ainda vale no POST', okOld.status === 200 && DB.notification_preferences[0].channels.cartoes_professora.length === 0);
   DB.notification_preferences[0].channels.cartoes_professora = ['email'];
   const bad = await handler(new Request(`${U}?u=outra&t=${tk}`, { method: 'POST' }));
-  const badGet = await handler(new Request(`${U}?u=outra&t=${tk}`));
-  check('sair: assinatura de outra conta é recusada (GET e POST) e nada muda', bad.status === 400 && badGet.status === 400 && DB.notification_preferences[0].channels.cartoes_professora[0] === 'email');
+    check('sair: assinatura de outra conta é recusada no POST (400, JSON) e nada muda', bad.status === 400 && (await bad.json()).error === 'invalid_link' && DB.notification_preferences[0].channels.cartoes_professora[0] === 'email');
 
   // e-mail de teste para a dona
   sent.length = 0;
-  const tr = await post({ test_to: 'dona@x.test', test_kind: 'lembrete', test_lang: 'en', test_name: 'Marina', test_n: 5 });
+  const tr = await post({ test_to: 'dona@x.test', test_lang: 'en', test_name: 'Marina', test_n: 5 });
   check('e-mail de teste: vai só para o endereço pedido, com TEST no assunto', tr.status === 200 && sent.length === 1 && sent[0].to === 'dona@x.test' && sent[0].subject.startsWith('TEST: ') && !(DB.teacher_cards_digest_log || []).length, sent);
 
   console.log(`Função teacher-cards-digest: ${passed}/${passed + failed} verificações${failed ? ' — ' + failed + ' FALHAS' : ' — OK'}`);

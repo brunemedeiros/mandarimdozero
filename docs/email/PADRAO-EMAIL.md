@@ -46,6 +46,6 @@ Mesmo modelo, trocando etiqueta, título e texto. Variáveis do Supabase: `{{ .T
 | Modelo do Supabase | Etiqueta | Título | Botão |
 |---|---|---|---|
 | Confirm signup | Confirme seu e-mail | Falta pouco *para começar!* | Ativar minha conta |
-| Magic Link | Seu acesso | Entre *com um clique.* | Entrar no app |
+| Magic Link | Seu acesso | Entre *com um clique.* | Entrar no site |
 | Reset Password | Nova senha | Vamos criar *uma senha nova.* | Criar nova senha |
 | Change Email | Novo e-mail | Confirme *o novo endereço.* | Confirmar e-mail |

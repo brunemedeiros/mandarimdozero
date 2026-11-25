@@ -70,6 +70,7 @@
 
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import webpush from 'npm:web-push@3';
+import { renderBrandedEmail } from './email-brand.mjs';
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -398,21 +399,19 @@ async function getUserEmail(supabase: any, cache: Map<string, string | null>, us
 // precisa pra assinatura VAPID). Sem RESEND_API_KEY/RESEND_FROM_EMAIL
 // configurados (secrets manuais, ver PR), só loga e sai -- nunca derruba o
 // resto da varredura por falta de um secret opcional.
-async function sendEmailToUser(supabase: any, cache: Map<string, string | null>, userId: string, subject: string, body: string): Promise<void> {
+async function sendEmailToUser(supabase: any, cache: Map<string, string | null>, userId: string, subject: string, body: string, eventType: string): Promise<void> {
   if (!resendApiKey || !resendFromEmail) return;
   const to = await getUserEmail(supabase, cache, userId);
   if (!to) return;
 
-  const html = `<div style="font-family:-apple-system,sans-serif;max-width:480px;margin:0 auto;padding:24px;">
-    <p style="font-size:15px;line-height:1.6;color:#241A15;">${body}</p>
-    <p style="font-size:12px;color:#93856F;margin-top:32px;">${uiLangFor(userId) === 'en' ? 'You can adjust which emails you receive in Settings &gt; Notifications, inside the app.' : 'Você pode ajustar quais e-mails recebe em Configurações &gt; Notificações, dentro do app.'}</p>
-  </div>`;
+  // Visual Prof Brune (email-brand.mjs); texto e assunto continuam vindo de notification_templates.
+  const mail = renderBrandedEmail({ lang: uiLangFor(userId) === 'en' ? 'en' : 'pt', eventType, subject, body });
 
   try {
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${resendApiKey}` },
-      body: JSON.stringify({ from: resendFromEmail, to, subject, html, text: body }),
+      body: JSON.stringify({ from: resendFromEmail, to, subject, html: mail.html, text: mail.text }),
     });
     if (!res.ok) console.error('notification-cron: falha ao enviar e-mail', userId, res.status, await res.text());
   } catch (e: any) {
@@ -557,7 +556,7 @@ async function maybeNotify(
     if (emailTemplate) {
       const emailSubject = fillPlaceholders(emailTemplate.title, payload) || title || (uiLangFor(userId) === 'en' ? 'Notification' : 'Notificação');
       const emailBody = fillPlaceholders(emailTemplate.body, payload);
-      if (emailBody) await sendEmailToUser(supabase, emailCache, userId, emailSubject, emailBody);
+      if (emailBody) await sendEmailToUser(supabase, emailCache, userId, emailSubject, emailBody, eventType);
     }
   }
 

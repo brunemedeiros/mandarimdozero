@@ -168,10 +168,11 @@ function badgeTrackCardHTML(v){
     ? `<div class="track-max">${t('badge.ui.maxLevel')}</div>`
     : `<div class="track-progress"><div class="track-bar"><span style="width:${pct}%"></span></div><span class="track-count">${Math.min(v.barValue, v.barTo)}/${v.barTo}</span></div>
        <div class="track-next">${escapeHTML(v.goalText)}</div>`;
+  // Selo da trilha no lugar da medalha (shared/selos.js, 2026-11-24): formato, cor do nível e borda com o progresso.
   return `<div class="track-card${v.maxed ? ' is-max' : ''}${v.level ? '' : ' is-locked'}" data-track="${v.id}">
-    ${badgeMedalHTML(v)}
+    ${typeof seloMiniHTML === 'function' ? seloMiniHTML(v) : badgeMedalHTML(v)}
     <div class="track-body">
-      <div class="track-top"><span class="track-title">${escapeHTML(v.title)}</span><span class="track-level tier-${v.level ? v.tier : 'locked'}">${levelLine}</span></div>
+      <div class="track-top"><span class="track-title">${escapeHTML(v.title)}</span><span class="track-level tier-${v.level ? v.tier : 'locked'}"${v.level && typeof seloMetal === 'function' ? ` style="background:var(--selo-${seloMetal(v)}-2);color:var(--on-selo-${seloMetal(v)})"` : ''}>${levelLine}</span></div>
       <div class="track-name">${escapeHTML(name)}</div>
       ${footer}
     </div>

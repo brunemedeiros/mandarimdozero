@@ -290,8 +290,12 @@ async function onUserLoggedIn(user){
   if (typeof maybeShowAgeAckBanner === 'function') maybeShowAgeAckBanner().catch(() => {});
   // GA4 (shared/consent.js): só mede depois de saber quem está logado; professora/admin não são medidas.
   if (window.ProfBruneConsent && typeof ensureProfileLoaded === 'function'){
-    ensureProfileLoaded().catch(() => null).then(() => {
-      const staff = (typeof isTeacherOrAdmin === 'function' && isTeacherOrAdmin()) || (typeof isAdminUser === 'function' && isAdminUser());
+    // Só com o perfil de fato carregado (revisão diária, 2026-11-24): sem perfil não dá para saber se é professora, então
+    // nada é medido. A admin é reconhecida pelo e-mail mesmo sem perfil e marca o aparelho para não contar.
+    ensureProfileLoaded().catch(() => null).then((profile) => {
+      const admin = typeof isAdminUser === 'function' && isAdminUser();
+      if (!profile){ if (admin) window.ProfBruneConsent.setContext({ staff: true }); return; }
+      const staff = admin || (typeof isTeacherOrAdmin === 'function' && isTeacherOrAdmin());
       window.ProfBruneConsent.setContext({ staff: !!staff });
     });
   }

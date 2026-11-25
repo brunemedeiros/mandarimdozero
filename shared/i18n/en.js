@@ -1209,6 +1209,8 @@ window.I18N_CATALOG['en'] = {
   'profile.streakLabel': 'day streak', // ALTA
   'profile.xpLabel': 'Total XP', // ALTA
   'profile.statsLink': 'View full statistics →', // ALTA
+  'profile.passport.nextLevel': 'On the way to the next level', // ALTA
+  'profile.passport.stampAria': '{lang}: {level}', // ALTA
   'profile.sectionBadges': 'Achievements', // ALTA
   'profile.badgesLink': 'View all →', // ALTA
   'profile.featuredNone': 'None', // ALTA
@@ -2503,6 +2505,8 @@ window.I18N_CATALOG['en'] = {
   'badge.track.comeback.1': 'Back in the Game', // ALTA
   'badge.track.comeback.goal.1': 'Come back to studying a few days after stopping', // ALTA
   'badge.ui.levelOf': 'Level {n} of {total}', // ALTA
+  'badge.stamp.max': 'Max level', // ALTA
+  'badge.stamp.toNext': '{pct}% of the way to level {n}', // ALTA
   'badge.ui.locked': 'Locked', // ALTA
   'badge.ui.maxLevel': 'Max level', // ALTA
   'badge.ui.classic': 'Classic', // ALTA
@@ -2714,9 +2718,73 @@ window.I18N_CATALOG['en'] = {
   'friends.joint.aria': { one: 'You both studied {n} day in a row', other: 'You both studied {n} days in a row' }, // ALTA
   'friends.suggest.reason.mutual': { one: '{n} mutual friend', other: '{n} mutual friends' }, // ALTA
   'profile.tabFriends': 'Friends', // ALTA
-  'panel.admin.sub': 'Badges, metrics, notifications, reports and plans.', // ALTA
+  'panel.admin.sub': 'Overview, metrics, notifications, reports and plans.', // ALTA
   'panel.tab.badges': 'Badges', // ALTA
   'panel.tab.analytics': 'Analytics', // ALTA
+  'panel.tab.overview': 'Overview', // ALTA
+  'admin.overview.title': 'Overview', // ALTA
+  'admin.overview.sub': 'How accounts and your students are doing, all in one place.', // ALTA
+  'admin.overview.filter.period': 'Period', // ALTA
+  'admin.overview.period.7': '7 days', // ALTA
+  'admin.overview.period.30': '30 days', // ALTA
+  'admin.overview.period.90': '90 days', // ALTA
+  'admin.overview.filter.scope': 'Who', // ALTA
+  'admin.overview.scope.mine': 'My students', // ALTA
+  'admin.overview.scope.others': 'Other accounts', // ALTA
+  'admin.overview.scope.all': 'All accounts', // ALTA
+  'admin.overview.filter.language': 'Language', // ALTA
+  'admin.overview.lang.all': 'All', // ALTA
+  'admin.overview.kpi.students': 'Students', // ALTA
+  'admin.overview.kpi.accounts': 'Accounts', // ALTA
+  'admin.overview.kpi.active': 'Studied in the period', // ALTA
+  'admin.overview.kpi.activeDetail': 'At least 1 day with study', // ALTA
+  'admin.overview.kpi.engagement': 'Average engagement', // ALTA
+  'admin.overview.kpi.engagementDetail': 'Days with study in the last 7 days', // ALTA
+  'admin.overview.kpi.new': 'New sign-ups', // ALTA
+  'admin.overview.kpi.premium': 'Premium', // ALTA
+  'admin.overview.chart.activity.title': 'Visits and study per day', // ALTA
+  'admin.overview.chart.sessions': 'Visits', // ALTA
+  'admin.overview.chart.active': 'Studied', // ALTA
+  'admin.overview.chart.signups.title': 'Sign-ups per day', // ALTA
+  'admin.overview.chart.signups': 'Sign-ups', // ALTA
+  'admin.overview.chart.aria': '{title}: from {from} to {to}, at most {max} in one day.', // ALTA
+  'admin.overview.chart.tableCaption': '{title}: values per day', // ALTA
+  'admin.overview.chart.col.day': 'Day', // ALTA
+  'admin.overview.chart.empty': 'Nothing in this period.', // ALTA
+  'admin.overview.eng.title': 'Engagement in the last 7 days', // ALTA
+  'admin.overview.eng.note': 'Counts days with real study (lesson, review, challenge, dictation, conjugation) today and in the 6 days before, whatever period is chosen. Just opening the site doesn\'t count. Click a band to see who is in it.', // ALTA
+  'admin.overview.band.nenhum': 'None', // ALTA
+  'admin.overview.band.baixo': 'Low', // ALTA
+  'admin.overview.band.medio': 'Medium', // ALTA
+  'admin.overview.band.alto': 'High', // ALTA
+  'admin.overview.band.altissimo': 'Very high', // ALTA
+  'admin.overview.bandRange.nenhum': '0 days', // ALTA
+  'admin.overview.bandRange.baixo': '1 day', // ALTA
+  'admin.overview.bandRange.medio': '2 to 3 days', // ALTA
+  'admin.overview.bandRange.alto': '4 to 5 days', // ALTA
+  'admin.overview.bandRange.altissimo': '6 to 7 days', // ALTA
+  'admin.overview.list.people': { one: '{n} person', other: '{n} people' }, // ALTA
+  'admin.overview.list.days': { one: '{n} day with study', other: '{n} days with study' }, // ALTA
+  'admin.overview.list.newAccount': 'new account (less than 7 days)', // ALTA
+  'admin.overview.list.openFicha': 'Open details', // ALTA
+  'admin.overview.list.empty': 'No one here.', // ALTA
+  'admin.overview.sit.title': 'Students\' status', // ALTA
+  'admin.overview.sit.note': 'Challenges and Dictations don\'t count here yet (only in engagement), so someone can be "High" in engagement and "Stopped" in status.', // ALTA
+  'admin.overview.sit.failed': { one: 'Couldn\'t read {n} student right now; they are left out of the count.', other: 'Couldn\'t read {n} students right now; they are left out of the count.' }, // ALTA
+  'admin.overview.rev.title': 'Reviews done in the period', // ALTA
+  'admin.overview.rev.home': 'At home', // ALTA
+  'admin.overview.rev.class': 'In class', // ALTA
+  'admin.overview.rev.col.student': 'Student', // ALTA
+  'admin.overview.rev.note': 'At home = cards the student answered on the site. In class = cards from Class mode. A review is never counted in both.', // ALTA
+  'admin.overview.rev.error': 'Couldn\'t load the reviews.', // ALTA
+  'admin.overview.plans.title': 'Plan', // ALTA
+  'admin.overview.plans.free': 'Free', // ALTA
+  'admin.overview.plans.premium': 'Premium', // ALTA
+  'admin.overview.plans.note': 'You (admin and teacher) are left out of the counts. Cancelled, expired and pending payment will show up here once there are sales on the site.', // ALTA
+  'admin.overview.foot.tz': 'Days are counted in Brasília time. Analytics still counts in London time (UTC), so the daily numbers there may differ a little.', // ALTA
+  'admin.overview.empty.scope': 'No accounts for this choice.', // ALTA
+  'admin.overview.error': 'Couldn\'t load the Overview.', // ALTA
+  'admin.overview.retry': 'Try again', // ALTA
   'panel.tab.notifications': 'Notifications', // ALTA
   'panel.tab.reports': 'Reports', // ALTA
   'panel.tab.plans': 'Plans', // ALTA
@@ -3515,7 +3583,10 @@ window.I18N_CATALOG['en'] = {
   'rb.dupSwap': 'Swap which one stays', // ALTA
   'rb.dupPreview': 'What happens when merging', // ALTA
   'rb.dupLine': 'Items moving to the record that stays: {moved}. Already there (ignored): {dup}. Recaps moving: {rm}. Already there: {rd}.', // ALTA
-  'rb.dupNoLoss': 'Memory progress and cards already delivered do not change; nothing is deleted from any student.', // ALTA
+  'rb.dupNoLoss': 'Cards already delivered do not change and item memory is kept. Answers and requests of the repeated items move to the item that stays: nothing is lost.', // ALTA
+  'rb.dupLink': 'The linked account of the record that leaves moves to the record that stays.', // ALTA
+  'rb.dupHistory': 'Moving to the item that stays: {rv} class-mode answers and {rq} student requests.', // ALTA
+  'rb.err.different_targets': 'the two records have different accounts or classes. Unlink one of them before merging.', // ALTA
   'rb.dupConfirm': 'Merge now', // ALTA
   'rb.dupCancel': 'Cancel', // ALTA
   'rb.dupDone': 'Records merged.', // ALTA
@@ -4095,6 +4166,24 @@ window.I18N_CATALOG['en'] = {
   'gate.forgot.needEmail': 'Type your email in the field above first.', // ALTA
   'gate.forgot.failed': 'Couldn\'t send the email right now.', // ALTA
   'gate.forgot.sent': 'We sent you a link to reset your password.', // ALTA
+  'gate.forgot.sending': 'Sending...', // ALTA (needs_review)
+  'gate.forgotAsk.title': 'Forgot your password?', // ALTA (needs_review)
+  'gate.forgotAsk.sub': 'No problem. Type your account\'s email and I\'ll send you a link to create a new password.', // ALTA (needs_review)
+  'gate.forgotAsk.submit': 'Send link', // ALTA (needs_review)
+  'gate.forgotAsk.needEmail': 'Type a valid email.', // ALTA (needs_review)
+  'gate.forgotSent.title': 'Link on its way!', // ALTA (needs_review)
+  'gate.forgotSent.from': 'From', // ALTA (needs_review)
+  'gate.forgotSent.sender': 'Prof. Brune', // ALTA (needs_review)
+  'gate.forgotSent.to': 'To', // ALTA (needs_review)
+  'gate.forgotSent.stamp': 'Sent now', // ALTA (needs_review)
+  'gate.forgotSent.bodyBefore': 'Open the email and tap ', // ALTA (needs_review)
+  'gate.forgotSent.bodyButton': 'Create new password', // ALTA (needs_review)
+  'gate.forgotSent.bodyAfter': '. The link is valid for 1 hour.', // ALTA (needs_review)
+  'gate.forgotSent.note': 'Didn\'t get it in a few minutes? Check your spam folder or ask for another link.', // ALTA (needs_review)
+  'gate.forgotSent.resend': 'Resend link', // ALTA (needs_review)
+  'gate.forgotSent.resendIn': 'Resend link in {s} s', // ALTA (needs_review)
+  'gate.forgotSent.back': 'Back to sign in', // ALTA (needs_review)
+  'gate.forgotSent.resent': 'We sent a new link. Use the most recent email.', // ALTA (needs_review)
   'gate.verify.title': 'Confirm your email', // ALTA
   'gate.verify.subBefore': 'We sent a code to ', // ALTA
   'gate.verify.subAfter': '. Enter it here to activate your account.', // ALTA
@@ -4113,7 +4202,7 @@ window.I18N_CATALOG['en'] = {
   'gate.newPass.title': 'Create a new password', // ALTA
   'gate.newPass.sub': 'Choose the password you\'ll use from now on.', // ALTA
   'gate.newPass.label': 'New password', // ALTA
-  'gate.newPass.ph': 'New password (at least 6 characters)', // ALTA
+  'gate.newPass.ph': 'New password (at least 8 characters)', // ALTA
   'gate.newPass.repeat': 'Repeat the new password', // ALTA
   'gate.newPass.submit': 'Save new password', // ALTA
   'gate.newPass.mismatch': 'The two passwords don\'t match.', // ALTA
@@ -4202,11 +4291,11 @@ window.I18N_CATALOG['en'] = {
   'gate.signup.userPickFree': 'Pick an available @.', // ALTA
   'gate.signup.needName': 'Enter your name.', // ALTA
   'gate.signup.badEmail': 'Check the email address.', // ALTA
-  'gate.signup.shortPassword': 'The password needs at least 6 characters.', // ALTA
+  'gate.signup.shortPassword': 'The password needs at least 8 characters.', // ALTA
   'gate.signup.retryTitle': 'Choose another @', // ALTA
   'gate.signup.retrySub': 'Someone took @{u} while you were creating your account. Pick another one to continue.', // ALTA
   'gate.signup.retrySave': 'Save and continue', // ALTA
-  'gate.signup.passwordPh': 'Create a password (at least 6 characters)', // ALTA
+  'gate.signup.passwordPh': 'Create a password (at least 8 characters)', // ALTA
   // Etapa 3, lote A (2026-10-19): trilha, cartão Continuar, Revisão do módulo e mapa da trilha. needs_review:
   // tradução nova, ainda não revisada pela dona; confiança no comentário de cada linha. Antes estes textos
   // apareciam em português também no site em inglês.

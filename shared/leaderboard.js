@@ -336,13 +336,16 @@ async function fetchUserBadgeGrants(userId){
 async function fetchUserEarnedBadges(userId){
   const { data, error } = await supabaseClient
     .from('earned_badges')
-    .select('badge_id, language_app_key')
+    .select('badge_id, language_app_key, earned_at')
     .eq('user_id', userId);
   if (error){ console.error('Erro ao carregar conquistas do perfil:', error); return []; }
   // C4: conquista de curso só do idioma atual; conquista da conta, de qualquer idioma.
-  const ids = new Set((data || []).filter(r => r.language_app_key === APP_KEY || AccountProgress.isAccountBadge(r.badge_id)).map(r => r.badge_id));
+  const linhas = (data || []).filter(r => r.language_app_key === APP_KEY || AccountProgress.isAccountBadge(r.badge_id));
+  const ids = new Set(linhas.map(r => r.badge_id));
+  const datas = {}; linhas.forEach(r => { datas[r.badge_id] = r.earned_at; });
   // Conquistas com níveis: uma por trilha (maior nível, inclusive das conquistas antigas) + clássicas.
-  return summarizeBadgeIds([...ids]);
+  // earnedAt = data do nível mostrado (selo com data só nas conquistas novas, shared/selos.js).
+  return summarizeBadgeIds([...ids]).map(d => Object.assign(d, { earnedAt: datas[d.id] || '' }));
 }
 
 async function renderLeaderboardView(){

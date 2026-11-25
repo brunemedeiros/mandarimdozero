@@ -42,7 +42,7 @@ const ANTES = () => {
     // ---- quadro ----
     L('tela cheia: sem Ranking ao lado', await p.evaluate(() => getComputedStyle(document.querySelector('.right-cards')).display === 'none'));
     L('título, subtítulo e as 2 seções', (await p.innerText('[data-tpl="pagina"] header')).includes('Planos') && (await p.$$eval('[data-tpl="pagina"] > article', l => l.length)) === 2);
-    L('as 6 abas do Admin (a de Privacidade é temporária) continuam e Planos está ativa', JSON.stringify(await p.$$eval('#view-admin-badges [data-admin-section]', l => l.map(b => b.dataset.adminSection))) === '["badges","analytics","notifications","reports","premium","privacy"]' && await p.$eval('[data-admin-section="premium"]', b => b.classList.contains('is-active')));
+    L('as 6 abas do Admin (a de Privacidade é temporária) continuam e Planos está ativa', JSON.stringify(await p.$$eval('#view-admin-badges [data-admin-section]', l => l.map(b => b.dataset.adminSection))) === '["overview","analytics","notifications","reports","premium","privacy"]' && await p.$eval('[data-admin-section="premium"]', b => b.classList.contains('is-active')));
     L('matriz: 12 permissões × 5 tipos', (await p.$$eval('[data-plano-matriz] tbody tr', l => l.length)) === 12 && (await p.$$eval('[data-plano-matriz] thead th', l => l.length)) === 6);
     L('matriz: limites só nas 2 permissões de número × 5 tipos', (await p.$$eval('[data-plano-limite]', l => l.length)) === 10);
     L('matriz: Grátis tem 20 cartões', (await p.inputValue(`${celula('user', 'own_cards_limit')} [data-plano-limite]`)) === '20');
@@ -138,7 +138,7 @@ const ANTES = () => {
 
   // ---- sem ser admin ----
   for (const lang of ['fr', 'zh']){
-    const h = await abrirAdmin({ lang, aba: 'badges', seed: SEED, antes: ANTES });
+    const h = await abrirAdmin({ lang, aba: 'overview', seed: SEED, antes: ANTES });
     await h.page.evaluate(() => { isAdminUser = () => false; renderAdminPremiumView(); });
     check(`[${lang}] sem ser admin: só o aviso, sem busca nem matriz`, (await h.page.textContent('#admin-premium-content')).includes('Só a administração') && !(await h.page.$('#plans-search-input')));
     await h.close();

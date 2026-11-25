@@ -48,6 +48,16 @@ function refreshStudyCardTexts(){
 // renderClozeText(), não o resolver (comportamento intocado, o resolver
 // já só devolve a marca que pertence a ESTA CardInstance -- markId --
 // nunca todas de uma Note com múltiplas lacunas).
+// Movimento do cartão (2026-11-25): o mesmo objeto `card` volta aqui ao revelar/verificar; um objeto novo é um
+// cartão novo. Cartão novo entra suave (mov-entrar); no mesmo cartão, só o que acabou de aparecer surge (mov-revelar).
+// O CSS fica em shared/movimento.css.
+function movimentoCartaoRevisao(mountEl, card){
+  const novo = mountEl.__movCartao !== card;
+  mountEl.__movCartao = card;
+  const el = mountEl.querySelector('#flashcard');
+  if (el) el.classList.add(novo ? 'mov-entrar' : 'mov-revelar');
+}
+
 function renderClozeCard(mountEl, card, localState, callbacks){
   const view = resolveCardContentView(card);
   const answered = localState.answered;
@@ -87,6 +97,8 @@ function renderClozeCard(mountEl, card, localState, callbacks){
       </div>
     ` : `${localState.ptBr ? typedPtBrNoteHTML(localState.ptBr) : LANG_HOOKS.reviewTyped.hintHTML(localState)}${reviewObservationHTML(card)}${typedResultActionsHTML(card, localState)}`}
   `;
+  movimentoCartaoRevisao(mountEl, card);
+
 
   wireCustomAudioButtons(mountEl);
 
@@ -212,6 +224,8 @@ function renderTypeAnswerCard(mountEl, card, localState, callbacks){
       </div>
     ` : `${localState.ptBr ? typedPtBrNoteHTML(localState.ptBr) : LANG_HOOKS.reviewTyped.hintHTML(localState)}${reviewObservationHTML(card)}${typedResultActionsHTML(card, localState)}`}
   `;
+  movimentoCartaoRevisao(mountEl, card);
+
 
   wireAudioButtons(mountEl, card.__isPreviewCard);
   wireCustomAudioButtons(mountEl);
@@ -363,6 +377,8 @@ function renderNormalCard(mountEl, card, localState, callbacks){
       ${gradeButtonsHTML(card)}
     ` : ''}
   `;
+  movimentoCartaoRevisao(mountEl, card);
+
 
   mountEl.querySelector('#flashcard').addEventListener('click', () => {
     if (!localState.revealed){

@@ -1,0 +1,146 @@
+/* Selos das conquistas e passaporte do Perfil (decisão da autora, 2026-11-24).
+   Peça comum: shared/selos.js monta o SVG de cada selo; este arquivo tem as cores (escala B: bronze, prata,
+   esmeralda, safira, ametista, rubi; ouro = sempre o nível máximo) e o layout. Vale para todos os sites.
+   - formato = qual trilha é (cada trilha tem o seu);
+   - cor da borda = nível (escala B, por número de níveis da trilha);
+   - borda preenchida = quanto falta para o próximo nível; nível máximo = selo inteiro em ouro;
+   - data só nas conquistas ganhas depois do registro em lote (BADGE_BACKFILL_EARNED_AT). */
+:root{
+  --selo-bronze-1:#F2C892; --selo-bronze-2:#C2803E; --selo-bronze-3:#7A4A1B; --on-selo-bronze:#2A1E05;
+  --selo-prata-1:#FFFFFF; --selo-prata-2:#B7C0CB; --selo-prata-3:#6C7785; --on-selo-prata:#2A1E05;
+  --selo-esmeralda-1:#9DF2C6; --selo-esmeralda-2:#1E9E63; --selo-esmeralda-3:#0B5434; --on-selo-esmeralda:#2A1E05;
+  --selo-safira-1:#A9CBFF; --selo-safira-2:#2F68D0; --selo-safira-3:#14357A; --on-selo-safira:#FFFFFF;
+  --selo-ametista-1:#DDBDFF; --selo-ametista-2:#8547CC; --selo-ametista-3:#45207A; --on-selo-ametista:#FFFFFF;
+  --selo-rubi-1:#FFA5B1; --selo-rubi-2:#CF2741; --selo-rubi-3:#741020; --on-selo-rubi:#FFFFFF;
+  --selo-ouro-1:#FFF1A8; --selo-ouro-2:#F2B33D; --selo-ouro-3:#A9690A; --on-selo-ouro:#2A1E05;
+  --selo-ouro-cheio-1:#FFF6C2; --selo-ouro-cheio-2:#FFD46A; --selo-ouro-cheio-3:#E9A21F;
+  --selo-ouro-borda:#A9690A; --selo-max-faixa:#7A4A06; --on-selo-max-faixa:#FFFFFF; --selo-max-tinta:#3B2604; --selo-max-data:#5C3B07;
+  --selo-trilho:.24; --selo-carimbo-idioma: var(--brand-fill);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+  --selo-bronze-1:#F7DBB8; --selo-bronze-2:#D4A678; --selo-bronze-3:#C58648; --on-selo-bronze:#2A1E05;
+    --selo-prata-1:#FFFFFF; --selo-prata-2:#CDD3DB; --selo-prata-3:#BBC3CE; --on-selo-prata:#2A1E05;
+    --selo-esmeralda-1:#BFF7DA; --selo-esmeralda-2:#62BB92; --selo-esmeralda-3:#29A36B; --on-selo-esmeralda:#2A1E05;
+    --selo-safira-1:#C7DDFF; --selo-safira-2:#6D95DE; --selo-safira-3:#3970D2; --on-selo-safira:#2A1E05;
+    --selo-ametista-1:#E9D4FF; --selo-ametista-2:#AA7EDB; --selo-ametista-3:#8B50CF; --on-selo-ametista:#2A1E05;
+    --selo-rubi-1:#FFC4CC; --selo-rubi-2:#DD687A; --selo-rubi-3:#D1324A; --on-selo-rubi:#2A1E05;
+    --selo-ouro-1:#FFF6C6; --selo-ouro-2:#F6CA77; --selo-ouro-3:#F3B747; --on-selo-ouro:#2A1E05;
+    --selo-trilho:.38; --selo-carimbo-idioma: color-mix(in srgb, var(--brand-fill) 62%, white);
+  }
+}
+:root[data-theme="dark"]{
+  --selo-bronze-1:#F7DBB8; --selo-bronze-2:#D4A678; --selo-bronze-3:#C58648; --on-selo-bronze:#2A1E05;
+  --selo-prata-1:#FFFFFF; --selo-prata-2:#CDD3DB; --selo-prata-3:#BBC3CE; --on-selo-prata:#2A1E05;
+  --selo-esmeralda-1:#BFF7DA; --selo-esmeralda-2:#62BB92; --selo-esmeralda-3:#29A36B; --on-selo-esmeralda:#2A1E05;
+  --selo-safira-1:#C7DDFF; --selo-safira-2:#6D95DE; --selo-safira-3:#3970D2; --on-selo-safira:#2A1E05;
+  --selo-ametista-1:#E9D4FF; --selo-ametista-2:#AA7EDB; --selo-ametista-3:#8B50CF; --on-selo-ametista:#2A1E05;
+  --selo-rubi-1:#FFC4CC; --selo-rubi-2:#DD687A; --selo-rubi-3:#D1324A; --on-selo-rubi:#2A1E05;
+  --selo-ouro-1:#FFF6C6; --selo-ouro-2:#F6CA77; --selo-ouro-3:#F3B747; --on-selo-ouro:#2A1E05;
+  --selo-trilho:.38; --selo-carimbo-idioma: color-mix(in srgb, var(--brand-fill) 62%, white);
+}
+
+/* ---------- O selo (Visão geral, perfil público e clássicas do Progresso) ---------- */
+.track-chip.selo{ position:relative; width:108px; height:108px; padding:0; margin:0; border:0; border-radius:0; background:none; box-shadow:none;
+  cursor:pointer; font:inherit; color:inherit; display:block; flex:none; opacity:1; }
+.track-chip.selo:hover{ background:none; }
+.selo-borda{ position:absolute; inset:0; width:100%; height:100%; overflow:visible; pointer-events:none; }
+.selo-borda .selo-trilho{ opacity:var(--selo-trilho); }
+.selo-miolo{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px;
+  transform:translateY(var(--selo-desloc, 0px)) scale(var(--selo-esc, 1)); }
+.selo .selo-ico{ width:22px; height:22px; display:block; filter:none; opacity:1; }
+.selo .selo-ico.is-emoji{ font-size:20px; line-height:22px; text-align:center; }
+.selo .track-chip-name{ color:var(--ink); font-size:10.5px; font-weight:900; line-height:1.08; text-align:center; text-wrap:balance; max-width:74px; overflow-wrap:anywhere; }
+.selo .selo-nivel{ font-size:9px; font-weight:900; line-height:1; padding:2px 5px; border-radius:3px; margin-top:1px; white-space:nowrap; box-shadow:inset 0 1px 0 rgba(255,255,255,.35); }
+.selo .selo-data{ font-size:8.5px; font-weight:800; color:var(--ink-soft); line-height:1; }
+.selo.is-max .track-chip-name{ color:var(--selo-max-tinta); }
+.selo.is-max .selo-data{ color:var(--selo-max-data); }
+.selo.is-max .selo-nivel{ background:var(--selo-max-faixa); color:var(--on-selo-max-faixa); }
+.selo.is-max .selo-borda{ filter:drop-shadow(0 2px 0 rgba(122,74,6,.45)); }
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .selo.is-max .selo-borda{ filter:drop-shadow(0 0 6px rgba(255,212,106,.35)); } }
+:root[data-theme="dark"] .selo.is-max .selo-borda{ filter:drop-shadow(0 0 6px rgba(255,212,106,.35)); }
+.selo.is-classic .selo-nivel{ background:var(--brand-fill); color:var(--on-brand-fill); }
+.selo.is-locked .selo-ico{ filter:grayscale(1); opacity:.45; }
+.selo.is-locked .track-chip-name{ color:var(--ink-soft); }
+.selo.is-locked .selo-nivel{ background:var(--paper-warm); color:var(--ink-soft); box-shadow:none; }
+.track-chip.selo:focus-visible{ outline:3px solid var(--brand-fill); outline-offset:3px; border-radius:12px; }
+/* Inclinação de carimbo (sem animação). */
+.selos-pagina .track-chip.selo:nth-child(5n+1){ transform:rotate(-6deg); }
+.selos-pagina .track-chip.selo:nth-child(5n+2){ transform:rotate(4deg) translateY(4px); }
+.selos-pagina .track-chip.selo:nth-child(5n+3){ transform:rotate(-2deg) translateY(-2px); }
+.selos-pagina .track-chip.selo:nth-child(5n+4){ transform:rotate(7deg) translateY(3px); }
+.selos-pagina .track-chip.selo:nth-child(5n){ transform:rotate(-4deg) translateY(3px); }
+
+/* Página de vistos: grade dos selos sobre o fundo de linhas onduladas. */
+.selos-pagina{ display:grid; grid-template-columns:repeat(auto-fill, minmax(100px, 1fr)); gap:12px 2px; padding:10px 0 6px; justify-items:center; }
+.selos-caixa{ background-color:var(--paper);
+  background-image:
+    repeating-radial-gradient(circle at 15% 120%, transparent 0 9px, color-mix(in srgb, var(--brand-fill) 6%, transparent) 9px 10px),
+    repeating-radial-gradient(circle at 90% -20%, transparent 0 11px, color-mix(in srgb, var(--brand-fill) 5%, transparent) 11px 12px);
+  border:1px solid var(--paper-line); border-radius:22px; box-shadow:0 3px 0 var(--paper-line); padding:16px 14px 14px; }
+.selos-caixa > .section-label, #view-profile .selos-caixa > .section-label{ margin-top:0; }
+#view-profile .selos-caixa{ margin-top:18px; }
+@media (min-width: 900px){
+  .selos-pagina{ grid-template-columns:repeat(auto-fill, minmax(132px, 1fr)); gap:14px 8px; }
+  .track-chip.selo{ width:136px; height:136px; }
+  .selo .selo-ico{ width:32px; height:32px; }
+  .selo .track-chip-name{ font-size:12.5px; max-width:90px; }
+  .selo .selo-nivel{ font-size:10.5px; }
+  .selo .selo-data{ font-size:10px; }
+}
+
+/* ---------- Selo pequeno no cartão da trilha (Perfil > Progresso): só o ícone vira selo ---------- */
+.selo-mini{ position:relative; width:64px; height:64px; flex:none; display:grid; place-items:center; }
+.selo-mini .selo-borda{ position:absolute; inset:0; }
+.selo-mini .badge-ico{ position:relative; width:28px; height:28px; }
+.selo-mini .badge-ico.is-emoji{ font-size:24px; line-height:28px; text-align:center; }
+.selo-mini.is-locked .badge-ico{ filter:grayscale(1); opacity:.4; }
+.selo-mini .track-medal-lock{ position:absolute; right:6px; bottom:6px; }
+.selo-mini.is-max .selo-borda{ filter:drop-shadow(0 2px 0 rgba(122,74,6,.4)); }
+
+/* ---------- Passaporte (Perfil > Visão geral) ---------- */
+.pp{ position:relative; margin-top:14px; padding:20px 18px 18px; border-radius:22px; background:var(--paper);
+  border:1px solid var(--paper-line); box-shadow:0 3px 0 var(--paper-line); overflow:hidden; }
+.pp-topo{ display:grid; grid-template-columns:auto 1fr; gap:4px 16px; align-items:center; }
+.pp .profile-avatar{ grid-row:1 / span 2; width:84px; height:96px; border-radius:14px; font-size:30px; box-shadow:none; object-fit:cover;
+  outline:1px solid var(--paper-line); outline-offset:4px; }
+.pp .profile-name{ font-size:24px; font-weight:900; line-height:1.15; text-align:left; margin:0; align-self:end; overflow-wrap:anywhere; }
+.pp .profile-username{ text-align:left; align-self:start; margin:0; font-size:14px; }
+.pp .profile-bio{ margin:14px 0 0; max-width:60ch; text-align:left; font-size:14.5px; line-height:1.5; color:var(--ink); }
+.pp .profile-special-badges{ margin-top:12px; justify-content:flex-start; }
+.pp-picote{ height:0; border-top:2px dashed var(--paper-line); margin:18px -18px 16px; }
+.pp-base{ display:grid; grid-template-columns:1fr auto; gap:12px; align-items:center; }
+.pp-campos{ display:grid; gap:12px; }
+.pp-campo{ display:grid; gap:1px; }
+.pp-campo-l{ font-size:12.5px; font-weight:700; color:var(--ink-soft); }
+.pp-campo-l::first-letter{ text-transform:uppercase; }
+.pp-campo-v{ font-size:20px; font-weight:900; color:var(--ink); font-variant-numeric:tabular-nums; display:flex; align-items:center; gap:6px; }
+.pp-carimbos{ display:flex; gap:4px; align-items:center; }
+.pp-carimbo{ width:124px; height:124px; border-radius:50%; display:grid; place-content:center; justify-items:center; gap:2px; flex:none;
+  color:var(--selo-carimbo-idioma); border:3px double currentColor; box-shadow:inset 0 0 0 5px var(--paper), inset 0 0 0 6.5px currentColor;
+  transform:rotate(-9deg); text-align:center; opacity:.92; }
+.pp-carimbo + .pp-carimbo{ transform:rotate(7deg); margin-left:-18px; }
+.pp-carimbos.tem-varios .pp-carimbo{ width:96px; height:96px; }
+.pp-carimbo svg{ width:26px; height:auto; border-radius:3px; }
+.pp-carimbo b{ font-size:15px; font-weight:900; line-height:1.1; }
+.pp-carimbo span{ font-size:11.5px; font-weight:800; line-height:1.2; max-width:88px; }
+.pp-carimbos.tem-varios .pp-carimbo b{ font-size:12.5px; }
+.pp-carimbos.tem-varios .pp-carimbo span{ font-size:10px; }
+.pp-rumo{ margin-top:16px; }
+.pp-rumo-l{ display:flex; justify-content:space-between; font-size:13px; font-weight:700; color:var(--ink-soft); }
+.pp-rumo .profile-lang-bar{ height:8px; margin-top:6px; }
+.pp-rumo .profile-lang-bar > div{ background:var(--brand-fill); }
+.pp-acoes{ display:flex; justify-content:space-between; align-items:center; margin-top:16px; gap:12px; flex-wrap:wrap; }
+.pp .profile-edit-btn{ position:static; margin:0; font-size:13.5px; padding:8px 16px; }
+.pp .profile-stats-link{ margin:0; width:auto; }
+@media (min-width: 900px){
+  .pp{ padding:26px 28px 22px; }
+  .pp-picote{ margin-left:-28px; margin-right:-28px; }
+  .pp-base{ grid-template-columns:1fr; }
+  .pp-campos{ grid-template-columns:repeat(2, minmax(0, 220px)); }
+  .pp-carimbos{ position:absolute; top:22px; right:30px; }
+  .pp-carimbo{ width:146px; height:146px; }
+  .pp-carimbos.tem-varios .pp-carimbo{ width:116px; height:116px; }
+  .pp .profile-bio{ max-width:calc(100% - 200px); }
+  .pp .profile-name, .pp .profile-username{ padding-right:170px; }
+}

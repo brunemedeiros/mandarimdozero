@@ -914,7 +914,7 @@ function exprAnswer(c, origIdx){
       <button class="btn btn-primary btn-block wrong-feedback-continue" id="expr-continue-btn">${t('common.continueArrow')}</button>
     </div>`;
   stage.parentElement.appendChild(panel);
-  panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  panel.scrollIntoView({ behavior: ((typeof prefersReducedMotion === 'function' && prefersReducedMotion()) ? 'auto' : 'smooth'), block: 'nearest' });
   document.getElementById('expr-continue-btn').addEventListener('click', () => exprShowExamples(c));
 }
 
@@ -1035,7 +1035,7 @@ function exprShowOrder(c){
     slotsEl.parentElement.appendChild(panel);
     exprWireAudio('expr-order-done-play', file);
     exprWireAudio('expr-order-done-slow', file, SLOW_AUDIO_RATE);
-    panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    panel.scrollIntoView({ behavior: ((typeof prefersReducedMotion === 'function' && prefersReducedMotion()) ? 'auto' : 'smooth'), block: 'nearest' });
     document.getElementById('expr-continue-btn').addEventListener('click', () => exprShowYourTurn(c));
   }
 
@@ -1126,7 +1126,7 @@ function exprCheckTurn(c, revealed){
       <button class="btn btn-primary btn-block wrong-feedback-continue" id="expr-continue-btn">${t('common.continueArrow')}</button>
     </div>`;
   document.getElementById('expr-turn-stage').parentElement.appendChild(panel);
-  panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  panel.scrollIntoView({ behavior: ((typeof prefersReducedMotion === 'function' && prefersReducedMotion()) ? 'auto' : 'smooth'), block: 'nearest' });
   document.getElementById('expr-continue-btn').addEventListener('click', () => exprShowFinal(c));
 }
 
