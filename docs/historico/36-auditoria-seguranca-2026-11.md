@@ -179,3 +179,39 @@ Os 38 reports da produção são todos de contas logadas (nenhum convidado), por
   `tests/i18n/test_i18n_unit.js` (precisa de `git fetch --unshallow`): 2331/2335 aqui; na `main` 2332/2337. As 4 que sobram
   são de outras sessões (`fr.conj.newSession`, `notif.cat.cartoes_professora`, `notif.pref.emailOnly`, `review.practiceMore`).
 
+
+## Segunda rodada: chaves, RLS e teste IDOR (2026-11-25)
+
+Pedido da dona: auditoria só de leitura em 3 frentes (chaves no código e no histórico; tabelas, RLS, Storage e funções;
+teste IDOR com dois alunos fictícios no Staging). Nada mudou em produção.
+
+- **Chaves (subagente, 2481 commits de todas as branches + site no ar):** nenhum segredo. Só a chave pública `anon`
+  (produção e Staging) e a `sb_publishable_` dos testes, públicas por design. Sem `service_role`, `sb_secret_`, Resend,
+  Google, GitHub, Notion, chave privada nem `.env` (nem no histórico). Não usa Vite (sem `VITE_`). Workflows leem
+  `${{ secrets.* }}`. Sugestão preventiva: `.env*`, `*.pem`, `*.key` no `.gitignore`. Não verificável daqui: os valores do
+  Vault e dos secrets.
+- **Banco (produção, só leitura):** 72 tabelas, todas com RLS. 9 regras `using true`, todas de propósito (catálogos,
+  modelos de aviso, Desafios publicados, XP/conquistas para o Ranking), menos o envio de report. Storage: `avatars` e
+  `flashcard-media` públicas com limite; `support-materials` pública **sem limite de tamanho e tipo** (0 arquivos);
+  `mural` e `report-screenshots` privadas. Funções `security definer` abertas a visitante: as mesmas 7 da 1ª rodada.
+  Abertas a conta logada: 128; as 24 que recebem id de outra pessoa conferem admin/dona (código lido).
+  Hoje só a conta da autora tem os papéis admin, teacher e premium_basic.
+- **Regras do Staging = produção** (hash `5d74535018c7e732a011b00523e008d4`, 86 regras), então o teste no Staging vale para a produção.
+- **Teste IDOR** (Staging, transações desfeitas, zero resíduo conferido): A não lê, edita nem apaga nada do B em 15 tabelas
+  (o controle mostra que o B vê os seus); as funções do aluno dão `not_authorized` para A e respondem para a professora do B;
+  A não vira admin nem cria vínculo. **Achado (Médio):** `reports_public_insert` era `WITH CHECK (true)`: A e um visitante
+  gravaram report com o `user_id` do B, status `resolvido`, prioridade, nota interna, resposta e `reporter_email` forjados
+  (a resposta da admin iria para esse e-mail). **Achado (Leve):** a conta se dá XP (`weekly_xp`) e conquistas
+  (`earned_badges`) à vontade (o XP é calculado no navegador; consertar pede mudar o desenho, decisão da autora).
+  Leve também: regras de admin por e-mail do token em vez de `is_admin()` (funciona, só não é uniforme).
+- **Conserto do report, migration 147** (`shared/supabase_migrations/147_reports_insert_own.sql`), aprovada pela autora:
+  `ALTER POLICY` no lugar (sem DROP, por isso foi pelo MCP). Visitante só com `user_id` nulo; logado só com o próprio
+  `user_id` e `reporter_email` nulo; ninguém preenche status (fica `novo`), prioridade, nota nem resposta. O site
+  (`shared/reports.js`) já manda exatamente isso. **Staging: aplicada em 2026-11-25** (gravada como `147_reports_insert_own`);
+  conferida em transação desfeita: 2 envios legítimos aceitos (logado e visitante com e-mail), 8 falsificações recusadas.
+  Produção: **pendente** de autorização. Voltar atrás: comentário no fim da migration.
+- Teste de regressão: `tests/seguranca-idor/` (`idor_staging.sql` diz sozinho `IDOR_OK`/`IDOR_FALHOU`; README com a tabela).
+  A 1ª rodada desse arquivo final ficou esperando uma confirmação do MCP (o script tem `delete`) e não rodou; as rodadas
+  anteriores, com os mesmos casos, deram o resultado acima.
+- Não verificado nesta rodada: IDOR nas Edge Functions. Propostas pendentes: limite da `support-materials` (P2) e
+  `is_admin()` no lugar do e-mail (P3).
