@@ -41,7 +41,7 @@ function wireDontKnowButton(contentEl, ex, onRevealAnswer){
       </div>
     `;
     const block = row.querySelector('#inline-hint-block');
-    block.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    block.scrollIntoView({ behavior: ((typeof prefersReducedMotion === 'function' && prefersReducedMotion()) ? 'auto' : 'smooth'), block: 'nearest' });
     block.querySelector('#inline-hint-retry-btn').addEventListener('click', () => {
       block.remove();
     });

@@ -31,6 +31,6 @@ Números = itens da lista entregue à dona.
 - Só prévia, esperam decisão da dona: 5 ("+XP" pequeno perto da barra na lição), 13 (festa maior só no último nível da conquista,
   escolha dela), 14 (unidade liberada no mapa), 16/17 (janelas, menus e gavetas; Painel).
 - De propósito sem animação: sidebar, pulso no nó atual do mapa, acordeões, troca de tema.
-- Pendente pequeno: `scrollIntoView({behavior:'smooth'})` dos painéis de acerto/erro ainda rola suave com "menos movimento".
+- Rolagem até o painel de acerto/erro (lição, diálogo, Desafios, Ditado): sem rolagem suave com "menos movimento".
 
 Prévia (privada): https://claude.ai/artifact/VWz2PXPd3Z1VVaGu2muVYw

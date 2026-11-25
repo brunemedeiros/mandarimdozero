@@ -919,7 +919,7 @@ function showCorrectFeedbackPanel(contentEl, detail){
   `;
   wrap.appendChild(panel);
   wireAudioButtons(panel);
-  panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  panel.scrollIntoView({ behavior: ((typeof prefersReducedMotion === 'function' && prefersReducedMotion()) ? 'auto' : 'smooth'), block: 'nearest' });
 
   document.getElementById('correct-continue-btn').addEventListener('click', () => {
     STEP_STATE.exerciseIndex += 1;

@@ -891,7 +891,7 @@ function renderDictationResult(d, userText){
   document.getElementById('dictation-retry-btn').style.display = 'inline-flex';
   if (typeof activityBarProgress === 'function') activityBarProgress('dictation-player-wrap', 100);
   const box = wrap.firstElementChild;
-  if (box){ box.scrollIntoView({ behavior: 'smooth', block: 'start' }); try { box.focus({ preventScroll: true }); } catch(e){} }
+  if (box){ box.scrollIntoView({ behavior: ((typeof prefersReducedMotion === 'function' && prefersReducedMotion()) ? 'auto' : 'smooth'), block: 'start' }); try { box.focus({ preventScroll: true }); } catch(e){} }
 }
 
 // ---------- Marcação da seção e ligação dos botões ----------
