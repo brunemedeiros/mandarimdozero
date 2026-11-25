@@ -1,7 +1,7 @@
 /* Movimento comum dos sites (pedido da autora, 2026-11-25; vale para fr, zh, pt e os próximos).
    Carregado por ÚLTIMO em cada index.html, para valer por cima das regras antigas.
    Regra da casa: o que o aluno faz muitas vezes por sessão é curto e discreto; festa só nos momentos raros.
-   Peça nova usa os tempos e curvas daqui, em vez de número solto. Registro: docs/historico/37-animacoes.md. */
+   Peça nova usa os tempos e curvas daqui, em vez de número solto. Registro: docs/historico/38-animacoes.md. */
 
 :root{
   --mov-toque: 120ms;    /* aperto de botão, troca de cor */
