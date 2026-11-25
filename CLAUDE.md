@@ -53,7 +53,10 @@ Se uma regra deste arquivo ficar específica de uma pasta, mova-a para `.claude/
 - **Caixas da marca com texto** (botão, aba/chip selecionado, contador; decisão da autora, 2026-10-19, PR 370): fundo
   `var(--brand-fill)` (azul no fr, vermelho no zh) e texto `var(--on-brand-fill)` (branco), igual nos dois temas. Nunca
   `--seal-red` com texto, nem `#fff`/azul fixo. Verde de sucesso (✓, "Continuar" do acerto, selo ok; PR 383, 2026-10-22):
-  `var(--success-fill)` com `var(--on-success-fill)` (branco); nunca `--jade` com texto. Guarda: `tests/cores-marca/`.
+  `var(--success-fill)` com `var(--on-success-fill)` (branco); nunca `--jade` com texto. Botões de nota (Errei, Difícil, Bom, Fácil;
+  PR 412, 2026-10-29): cores FIXAS `--grade-fill-*` com `--on-grade-fill` (branco), iguais nos dois temas e idiomas (Difícil é o amarelo
+  `#C9973A`, 2,6:1 de contraste, escolha da autora). Botões coloridos do Banco de Revisão têm base escura de 3px (PR 519, 2026-11-25).
+  Guarda: `tests/cores-marca/`.
 - **Conteúdo nasce traduzido** (decisão da autora, 2026-10-19): todo conteúdo novo ou alterado (trilha, notas, diálogos,
   Desafios, ditados) já sai com a versão para CADA idioma de site do curso (hoje pt-BR e en), no mesmo lote e na mesma
   revisão; lote sem todas as traduções não é importado nem publicado. Como fazer: `.claude/rules/conteudo-trilha.md`.
