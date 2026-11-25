@@ -13,8 +13,8 @@ funções), código do repositório e cabeçalhos do site no ar.
 | 2 | Médio | `avatars`, `flashcard-media` e `support-materials`: qualquer um LISTAVA a pasta inteira (via os ids das contas); `avatars` sem limite de tipo/tamanho | Conserto: migration 139 (cada conta só lista a própria pasta; o link direto continua público) |
 | 3 | Médio | Bibliotecas externas sem versão fixa (`supabase-js@2`) e sem lacre SRI (nenhuma das 4) | Conserto: 3 guardadas no site, Hanzi Writer com SRI (abaixo) |
 | 4 | Médio | `notification-cron` aceita a chave pública (`verify_jwt` aceita o token anon): qualquer um dispara os avisos fora de hora. Limites por dia e intervalo mínimo seguram o estrago | Conserto: senha `x-cron-token` + migration 140 (abaixo) |
-| 5 | Leve | Proteção contra senhas vazadas (HaveIBeenPwned) desligada no Auth | Pendente (talvez só no plano pago) |
-| 6 | Leve | Sem CSP / proteção contra moldura (GitHub Pages não deixa configurar cabeçalhos) | Pendente; dá para pôr parte por `<meta>` |
+| 5 | Leve | Proteção contra senhas vazadas (HaveIBeenPwned) desligada no Auth | Só no plano Pro (conferido 2026-11-25); alternativa grátis abaixo |
+| 6 | Leve | Sem CSP / proteção contra moldura (GitHub Pages não deixa configurar cabeçalhos) | Conserto: CSP por `<meta>` + anti-moldura (abaixo) |
 | 7 | Leve | 20 funções sem `search_path` fixo (nenhuma `security definer`) | Pendente |
 
 Conferido e OK: nenhum segredo no código nem no histórico do git; das funções `security definer` executáveis
@@ -135,4 +135,31 @@ Os 38 reports da produção são todos de contas logadas (nenhum convidado), por
 
 - 200 ok:true, 44 combinações conta/idioma, **0 erros** (na véspera, 10 da missão `xp50`), 29 avisos criados.
 - Lembretes "faltam N missões": 2 (na véspera 9, no dia 22 eram 10): agora só saem para quem mexeu nas missões hoje.
+
+## Senhas vazadas e cabeçalhos de proteção (2026-11-25)
+
+- **Senhas vazadas:** a proteção do Supabase (HaveIBeenPwned) só existe no plano Pro; o projeto está no grátis
+  (`get_organization`: plan free). Das 63 contas, 54 entram pelo Google e 9 por e-mail e senha; o site aceita senha
+  de 6 caracteres (`index.html`, cadastro). Proposta à autora: mínimo de 8 sem obrigar maiúscula/número (o tamanho
+  protege mais que regras de composição, que viram "Senha1"), testando antes no Staging o aviso de "senha fraca" que
+  o Supabase pode mostrar a quem já tem senha curta. Aguarda a autora.
+- **Anti-moldura (clickjacking), aprovado em 2026-11-25:** `shared/anti-moldura.js` no começo do `<head>` de 12 páginas
+  (`index.html`, `fr`, `zh`, Sobre, 4 de privacidade, Ajuda, contrato, 2 testes de nivelamento; não na tela sem internet).
+  `frame-ancestors`/`X-Frame-Options` não funcionam por `<meta>` e o GitHub Pages não deixa cabeçalho. Em moldura de outro
+  endereço a página some (o Chrome só deixa trocar a janela inteira com clique da pessoa); moldura do próprio site segue
+  permitida. Teste `tests/anti-moldura/test_playwright.js` 5/5.
+- **Lista do que a página pode carregar (CSP), aprovado em 2026-11-25:** `<meta http-equiv="Content-Security-Policy">` em
+  `index.html`, `fr/index.html`, `zh/index.html`, gerado por `scripts/csp-atualizar.js` (impressões sha256 do código solto,
+  sem `unsafe-inline` nem `unsafe-eval` para script; `wasm-unsafe-eval` para o sql.js; estilos com `unsafe-inline`; imagens de
+  qualquer `https:`; conexões só com o site, o Supabase de produção, Google Analytics e jsdelivr no zh). A publicação
+  (`deploy-pages.yml`) roda o script antes de ir ao ar; `tests/csp/test_csp_playwright.js` 12/12 confere a lista em dia,
+  13 abas no fr e 11 no zh sem nenhuma recusa, a entrada sem login, e um ataque simulado (script de fora recusado, `onerror`
+  numa imagem não roda). Regra para as outras sessões em `.claude/rules/frontend-fr-zh.md`.
+- Regressão (subagente, 115 arquivos de navegador): nenhuma falha nova do site. Ajustes de teste: `fase-public-deck` usava
+  um endereço inventado do Supabase (agora o real, interceptado) 158/158; `i18n/test_card_variants_browser.js` usava
+  `new Function` na página (agora lê o campo) 24/24; `pwa-cache/test_playwright.js` injetava `<script>` solto (agora `<meta>`)
+  21/21. `pwa-cache/test_aviso_versao_playwright.js` oscila por tempo (falhou 1 de 4 vezes aqui; 3/3 depois, aqui e na
+  `main`). Pré-existentes iguais na `main`: checkpoint-zh, desafios-etapa-d, fase-j, xp-semana, recomecar-curso
+  (timeouts), `i18n/test_playwright` e k2f (ambiente).
+- Falta conferir depois de publicar: o site no ar com o Google Analytics aceito (o sandbox não alcança o Google).
 
