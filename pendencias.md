@@ -43,10 +43,10 @@ Atualizado em: 26/11
 - [P-024] [desde 26/11] [Médio] sem PR · migrations 147 (`reports_insert_own`) e 148 (`push_subscriptions_owner_update`) e `push-send` v13 já estão na produção (e 147/148 no Staging), mas o código só existe nessa branch, fora da `main`; o "Estado atual" não registra · branch `claude/relaxed-sagan-7lyu9c` · resolvido quando a branch for mesclada (arquivos 147/148 na `main`)
 
 ## Perguntas para a autora (não são de nenhuma conversa)
-- [P-008] [desde 25/11] Alguma ficha foi juntada no Banco entre 16/11 e 25/11 (antes da migration 145)? Se sim, as respostas dos itens repetidos podem ter sido apagadas.
 - [P-020] [desde 26/11] [Médio] `tests/paridade-sites/test_quase_iguais.js` passou de 2770/2770 para 2764/2770: 6 cenas (config, config_geral, config_notifications, fr en e zh en) mostram o seletor de exportar em inglês ("Unit", "All units") onde a árvore de referência mostra "Unidade"/"Todas as unidades". Causa não identificada entre os PRs de 25/11 (as chaves de `en.js` não mudaram); falha reproduzida na segunda rodada. Algum PR precisa ajustar o teste ou o texto.
 
 ## Resolvidas (ficam 7 dias e saem)
+- [P-008] resolvida em 26/11 · a autora confirmou que não usou o "Juntar" entre 16/11 e 25/11: nenhuma resposta foi perdida antes da migration 145
 - [P-000] resolvida em 25/11 · #517 · migration da Central de Controle renumerada de 145 para 146 (as duas estão na produção sem conflito)
 - [P-001] resolvida em 26/11 · #523 · "Parar de receber" agora abre a página `sair-cartoes/` do site (200 no ar), função `teacher-cards-digest` v5 na produção sem JWT
 - [P-005] resolvida em 26/11 · #509/#527 · `tests/i18n/test_i18n_unit.js` voltou a passar 2333/2333
