@@ -49,6 +49,7 @@ const server = http.createServer((req, res) => {
   check('pt: "Parar de receber" funciona sem motivo (sair nunca depende de resposta)', await r.page.isEnabled('[data-a=sair]') && await r.page.isEnabled('[data-a=semanal]'));
   const sh = await r.page.$eval('.btn', e => getComputedStyle(e).boxShadow);
   check('pt: botão rosa com sombra rosa escura (sem roxo e sem borda)', (/color\(srgb 0\.5\d* 0\.2\d* 0\.5\d*\)/.test(sh) || /rgb\(\s*1[0-9]{2},\s*[0-9]{2},\s*1[0-9]{2}\)/.test(sh)) && !/34, 17, 63/.test(sh) && await r.page.$eval('.btn', e => getComputedStyle(e).borderTopWidth) === '0px', sh);
+  check('pt: texto dos botões rosa em branco (cor de fundo do cartão)', await r.page.$eval('.btn', e => getComputedStyle(e).color) === 'rgb(255, 255, 255)');
   check('pt: Anton e Nunito carregadas do próprio site, nada de Google Fonts nem outro domínio', await r.page.evaluate(async () => { await document.fonts.ready; return document.fonts.check('34px Anton', 'QUER'); }) && r.outside.length === 0, r.outside);
   await r.shot('pergunta');
   // motivo + sair
@@ -58,6 +59,7 @@ const server = http.createServer((req, res) => {
   await r.page.click('.opt:nth-child(2)'); await r.page.click('[data-a=sair]'); await r.page.waitForSelector('#h:has-text("saiu")');
   check('pt: sair com motivo = 1 POST urlencoded simples (sem pré-voo) com a=sair e r=sem_tempo', r.posts.length === 1 && r.posts[0].m === 'POST' && /u=abc&t=def&l=pt$/.test(r.posts[0].url) && r.posts[0].body.a === 'sair' && r.posts[0].body.r === 'sem_tempo' && !r.posts[0].body.o && /x-www-form-urlencoded/.test(r.posts[0].ct), r.posts);
   check('pt: mostra "Pronto", agradece o motivo e oferece desfazer', /Obrigada, anotei/.test(await r.page.textContent('.ok')) && await r.page.isVisible('[data-a=voltar]'));
+  check('pt: botão "Voltar a receber" também com texto branco', await r.page.$eval('.btn3', e => getComputedStyle(e).color) === 'rgb(255, 255, 255)');
   await r.shot('pronto');
   await r.page.click('[data-a=voltar]'); await r.page.waitForSelector('#h:has-text("voltou")');
   check('pt: desfazer = POST a=voltar sem motivo e mostra "Que bom que voltou"', r.posts.length === 2 && r.posts[1].body.a === 'voltar' && !r.posts[1].body.r);
