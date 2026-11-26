@@ -179,3 +179,140 @@ Os 38 reports da produção são todos de contas logadas (nenhum convidado), por
   `tests/i18n/test_i18n_unit.js` (precisa de `git fetch --unshallow`): 2331/2335 aqui; na `main` 2332/2337. As 4 que sobram
   são de outras sessões (`fr.conj.newSession`, `notif.cat.cartoes_professora`, `notif.pref.emailOnly`, `review.practiceMore`).
 
+
+## Segunda rodada: chaves, RLS e teste IDOR (2026-11-25)
+
+Pedido da dona: auditoria só de leitura em 3 frentes (chaves no código e no histórico; tabelas, RLS, Storage e funções;
+teste IDOR com dois alunos fictícios no Staging). Nada mudou em produção.
+
+- **Chaves (subagente, 2481 commits de todas as branches + site no ar):** nenhum segredo. Só a chave pública `anon`
+  (produção e Staging) e a `sb_publishable_` dos testes, públicas por design. Sem `service_role`, `sb_secret_`, Resend,
+  Google, GitHub, Notion, chave privada nem `.env` (nem no histórico). Não usa Vite (sem `VITE_`). Workflows leem
+  `${{ secrets.* }}`. Sugestão preventiva: `.env*`, `*.pem`, `*.key` no `.gitignore`. Não verificável daqui: os valores do
+  Vault e dos secrets.
+- **Banco (produção, só leitura):** 72 tabelas, todas com RLS. 9 regras `using true`, todas de propósito (catálogos,
+  modelos de aviso, Desafios publicados, XP/conquistas para o Ranking), menos o envio de report. Storage: `avatars` e
+  `flashcard-media` públicas com limite; `support-materials` pública **sem limite de tamanho e tipo** (0 arquivos);
+  `mural` e `report-screenshots` privadas. Funções `security definer` abertas a visitante: as mesmas 7 da 1ª rodada.
+  Abertas a conta logada: 128; as 24 que recebem id de outra pessoa conferem admin/dona (código lido).
+  Hoje só a conta da autora tem os papéis admin, teacher e premium_basic.
+- **Regras do Staging = produção** (hash `5d74535018c7e732a011b00523e008d4`, 86 regras), então o teste no Staging vale para a produção.
+- **Teste IDOR** (Staging, transações desfeitas, zero resíduo conferido): A não lê, edita nem apaga nada do B em 15 tabelas
+  (o controle mostra que o B vê os seus); as funções do aluno dão `not_authorized` para A e respondem para a professora do B;
+  A não vira admin nem cria vínculo. **Achado (Médio):** `reports_public_insert` era `WITH CHECK (true)`: A e um visitante
+  gravaram report com o `user_id` do B, status `resolvido`, prioridade, nota interna, resposta e `reporter_email` forjados
+  (a resposta da admin iria para esse e-mail). **Achado (Leve):** a conta se dá XP (`weekly_xp`) e conquistas
+  (`earned_badges`) à vontade (o XP é calculado no navegador; consertar pede mudar o desenho, decisão da autora).
+  Leve também: regras de admin por e-mail do token em vez de `is_admin()` (funciona, só não é uniforme).
+- **Conserto do report, migration 147** (`shared/supabase_migrations/147_reports_insert_own.sql`), aprovada pela autora:
+  `ALTER POLICY` no lugar (sem DROP, por isso foi pelo MCP). Visitante só com `user_id` nulo; logado só com o próprio
+  `user_id` e `reporter_email` nulo; ninguém preenche status (fica `novo`), prioridade, nota nem resposta. O site
+  (`shared/reports.js`) já manda exatamente isso. **Staging: aplicada em 2026-11-25** (gravada como `147_reports_insert_own`);
+  conferida em transação desfeita: 2 envios legítimos aceitos (logado e visitante com e-mail), 8 falsificações recusadas.
+  **Produção: aplicada em 2026-11-25 com autorização da autora** (versão `20261125220157`); conferida em `pg_policies`: texto
+  certo, hash das 86 regras igual nos dois projetos (`102e79f81def52aa19d5222cafbaa08b`), os 38 reports intactos. Voltar atrás: comentário no fim da migration.
+- Teste de regressão: `tests/seguranca-idor/` (`idor_staging.sql` diz sozinho `IDOR_OK`/`IDOR_FALHOU`; README com a tabela).
+  Rodado no Staging em 2026-11-25 depois da 147: **`IDOR_OK passou=90`** (a autora aprovou a confirmação do MCP, que
+  aparece porque o script tem `delete`); zero resíduo conferido (0 contas, 0 perfis, 0 reports de teste).
+- Não verificado nesta rodada: IDOR nas Edge Functions. Propostas pendentes: limite da `support-materials` (P2) e
+  `is_admin()` no lugar do e-mail (P3).
+
+## Edge Functions: revisão de IDOR (2026-11-25)
+
+Subagente, só leitura do código (seguindo os shims até o código que roda) + GET/OPTIONS sem token na produção.
+**Nenhum IDOR grave ou médio:** nas 11 funções a identidade vem do JWT, de uma senha (`x-cron-token`, `x-agent-token`,
+em tempo constante) ou de link assinado (HMAC), nunca de um `user_id` mandado no corpo. Sem token: 401 em delete-my-account,
+notification-cron, push-dispatch, push-send, report-reply-send, review-bank-agent e tts-generate; as públicas de propósito
+(class-calendar-feed, google-calendar, notion-sync, teacher-cards-digest) respondem 404/405 sem parâmetro.
+Confirmado de forma independente: push-send (sem `user_id`; a RLS de `push_subscriptions` limita aos aparelhos de quem
+chama) e delete-my-account (id do `getUser(token)` + e-mail digitado igual ao da conta) conferem o DONO, não só o login.
+
+| # | Gravidade | Achado | Situação |
+|---|---|---|---|
+| A1 | Leve (defeito, não brecha) | `push-send` não responde OPTIONS nem manda CORS (`index.ts:42-44`, OPTIONS ao vivo = 405): o navegador barra a chamada de `shared/notifications.js:89`, então os pushes do próprio navegador (XP, conquista, Desafio) provavelmente nunca chegam | Pendente (pede deploy) |
+| A2 | Leve | `report-reply-send` responde para o `reporter_email` gravado no report | Resolvido pela 147 (só visitante grava e-mail; logada vai pelo e-mail da conta) |
+| A3 | Informativo | `tts-generate` aceita cartão que a pessoa consegue VER (aluna gera áudio de cartão da professora); gasta só a cota dela, arquivo na pasta dela | Aceitável |
+| A4 | Informativo | Token do `class-calendar-feed` sem validade (~79 bits), pode ser trocado | Decisão de projeto |
+| A5 | Leve | OAuth do Google Agenda e do Notion sem vínculo com o navegador: professora que mandasse o link de consentimento a outra pessoa ligaria a agenda dela à própria conta | Exige papel de professora + enganar alguém |
+| A6 | Informativo | CORS `*` sem cookies/credenciais | Sem risco |
+
+Testes ao vivo das funções com duas contas: não feitos. No Staging só existem 7 das 11 (faltam push-send, tts-generate,
+notification-cron e teacher-cards-digest), e testar exige contas reais com senha no Staging (sobram depois e precisam ser
+apagadas pela autora). Roteiro dos testes HTTP esperados: relatório do subagente resumido acima (A x B → 403/`not_authorized`).
+
+## Notificações no celular/navegador (push): conferência de 2026-11-25
+
+Pedido da dona: "confira se as notificações do navegador estão chegando". Resposta: **na prática, não chegam para ninguém além
+da própria autora**, por três motivos independentes:
+1. **Só 1 aparelho inscrito no site inteiro** (`push_subscriptions` na produção): o da autora (Chrome/Android, desde 2026-09-10).
+   Nenhuma inscrição nova desde então, embora 41 contas tenham "push" marcado nas preferências e a faixa de convite em Amigos
+   exista desde 2026-10-15. Sem aparelho inscrito, nenhum push sai (nem do site, nem do robô `notification-cron`, nem do
+   `push-dispatch` de Amigos).
+2. **`push-send` sem CORS** (`supabase/functions/push-send/index.ts:42-44`): a pergunta prévia do navegador recebe 405. No
+   registro da produção de hoje: Opera/Windows parou no 405 e não enviou; um iPhone (Safari) conseguiu 2 POST 200 (12:34 e 12:44
+   UTC), mas essa conta não tem aparelho inscrito, então nada foi entregue. Pushes do servidor não passam por aqui.
+3. **Inscrever de novo o mesmo aparelho falha** (teste no Staging, transação desfeita): a 1ª inscrição grava; a 2ª (mesmo
+   aparelho, `upsert` em `shared/push.js:78`) é recusada pela RLS ("USING expression") porque `push_subscriptions` não tem regra
+   de UPDATE (só SELECT, INSERT, DELETE da 013). Quem clica "Ativar" de novo vê "não foi possível salvar".
+Consertos propostos, aguardando a autora: CORS no `push-send` (deploy), regra de UPDATE da própria linha (migration sem DROP)
+e investigar por que ninguém ativa (convite, telas, iPhone exige o site instalado na tela inicial).
+
+### Consertos 1 e 2 no Staging e investigação da adesão (2026-11-25, aprovados pela autora)
+
+- **148 `push_subscriptions_owner_update`** (`shared/supabase_migrations/148_push_subscriptions_owner_update.sql`, sem DROP):
+  Staging aplicada. Teste (transação desfeita): ativar aparelho novo ok, ativar de novo o mesmo aparelho ok (antes: recusado),
+  A editar o aparelho de B = 0 linhas, A passar o próprio aparelho para B = recusado, A sobrescrever a inscrição de B pelo
+  upsert = recusado, chave de B intacta. Produção: pendente do "ok" da autora.
+- **`push-send` com CORS** (`supabase/functions/push-send/index.ts`, molde do push-dispatch; sem VAPID = 503 em vez de não subir).
+  Código da produção (v12) conferido igual ao repositório antes da mudança. Staging: publicada (v1, não existia lá).
+  `tests/push-cors/test_cors_push_send.js` (Chromium de verdade na origem do site, só chave pública): Staging 3/3
+  (chamada chega; 503 `vapid_missing` porque o Staging não tem as chaves de push); produção 2/3 (navegador bloqueia: o defeito).
+  Produção: pendente do "ok" da autora; depois rodar o teste com `producao` (esperado 4/4 com `sent:0`).
+- **Investigação da adesão (subagente, só leitura):**
+  - O servidor envia e o Google aceita: `notification-cron` (22h UTC de 24 e 25/11) e `push-dispatch` (fila de Amigos, 10 itens,
+    todos para a conta da autora) sem nenhum erro; inscrição não foi apagada (seria se o Google desse 404/410), chave VAPID bate
+    (senão 403). Logo a inscrição de 10/09 provavelmente é de OUTRO navegador/aparelho da autora, ou o Chrome/site está com
+    notificação bloqueada no Android. Teste para ela: Configurações > Notificações no celular atual.
+  - Convite de Amigos chega a no máximo 4 contas (só quem tem amizade aceita; janela só no 1º amigo). Fora disso, só o
+    interruptor escondido em Configurações > Notificações.
+  - iPhone (11 das 27 contas ativas em 60 dias; maior grupo de celular): fora da Tela de Início o interruptor só diz "Seu navegador
+    não suporta notificações push"; o passo a passo do iPhone existe só na faixa de Amigos. A página de entrada (`index.html`, raiz)
+    não tem manifest nem a meta da Apple: adicionar à Tela de Início a partir dela pode virar atalho comum (suspeito).
+  - Parte técnica certa (service workers com `push`/`notificationclick`, escopo /fr e /zh, CSP). Nada medido: 0 eventos de ativação.
+  - Plano proposto (aguarda a autora): convite visível para todas (depois de lição/Revisão, com "Agora não"); passo a passo do
+    iPhone em Configurações + manifest na raiz; medir tentativas/resultados; botão "mandar aviso de teste para este aparelho".
+    Tudo grátis.
+
+- **Produção (2026-11-25, "ok" da autora):** `148_push_subscriptions_owner_update` gravada como `20261125224057` (regra
+  conferida em `pg_policies`); `push-send` **v13** (mesmo conteúdo do Staging, sha `336083...e1`; voltar atrás = v12, o
+  conteúdo anterior está no git antes do commit 985c118d). `tests/push-cors/test_cors_push_send.js producao` 4/4
+  (antes 2/3). A autora tentou ligar o push no celular: "Você não permitiu as notificações" (motivo `denied`: o Android/Chrome
+  recusou sem mostrar a pergunta; o site não tinha como pedir de novo). Plano B e A aprovados, prévia antes de mexer.
+
+### Plano B e A implementados na branch (2026-11-25; decisões da autora: 2ª lição, a cada 7 dias, no máximo 3 vezes, sem "Não perguntar mais")
+
+- Peça comum `shared/push-convite.js` + `.css` (ligada em `fr/index.html` e `zh/index.html`; textos `push.*` em pt-BR e en):
+  - **B**: Configurações > Notificações mostra uma caixa FIXA com o passo a passo quando o navegador guardou "Bloquear"
+    (Android: Chrome > Configurações do site > Notificações + ícone do app > Informações do app; computador: cadeado) ou no
+    iPhone fora da Tela de Início; "Já liberei, tentar de novo". Caso da autora (2026-11-25): liberar o ícone no Android não
+    tirou o "Bloquear" do Chrome (`Notification.permission === 'denied'`, aviso "estão bloqueadas"); passo a passo enviado.
+  - **A**: convite na tela de Lição concluída (`renderLessonCompleteScreen`, contado em `licao-base.js`), não no checkpoint nem
+    na 1ª lição do curso; navegador bloqueado não recebe convite; "Ativar" recusado vira o passo a passo de liberar. O lugar do
+    convite só é criado quando ele aparece: a 1ª versão punha um `<div hidden>` em toda tela de conclusão e isso mudava quando
+    os avisos "+N XP" somem (`test_quase_iguais` 101 falhas, `test_atalhos` 18); com o lugar criado só na hora, os dois voltaram
+    ao normal (2764/2770 com as 6 de sempre; 92/92).
+- Testes: `tests/push-convite/test_playwright.js` 58/58 (fr e zh, Android/computador/iPhone, inglês sem português; fotos claro e
+  escuro conferidas); amigos-push 72/72, configuracoes 27/27, i18n 2334/2334, csp 12/12, css_compartilhado 5/5, boas-vindas 190/190,
+  xp trilha 19/19, e4 5b/5c/5e, m2 voz 16/16. `css-comum/test_cascata` acusa só as regras NOVAS do convite (é a prova de "mover
+  CSS sem mudar nada", compara com a main). Pré-existentes iguais sem a mudança: `xp-semana` (janela de idade por cima),
+  `e4/test_lote5d_pinyin` (trava ao carregar).
+- Falta: PR para publicar (a pedido da autora); depois, conferir no ar.
+- 2026-11-26: o aparelho da autora tem o site instalado pelo **Opera** (símbolo "O" no canto do ícone), não pelo Chrome; por isso
+  não havia nada em Chrome > Configurações do site. O passo a passo do Android (B) passou a valer para qualquer navegador
+  (cadeado do endereço → Permissões/Configurações do site → Notificações) e explica o símbolo do ícone. `tests/push-convite` 58/58.
+- 2026-11-26: a autora liberou as notificações no Opera (escudo verde → Permissões → Notificações) e ligou o push no site:
+  nova inscrição na produção (18:30 UTC, `fcm.googleapis.com`, `push_subscriptions.id` 5; a de 10/09 continua). Aviso de teste
+  pedido por ela: 1 linha em `push_outbox` (id 11, "Teste da Prof. Brune 🔔") + `push-dispatch` chamado com a chave pública:
+  `{"claimed":1,"sent":2,"failed":0,"pruned":0}` (aceito pelo Google nos 2 aparelhos).
+  **Chegou no celular dela às 15:31 de Brasília** (print: notificação do Opera "Teste da Prof. Brune", com o ícone do site).
+  Caminho inteiro confirmado: fila → push-dispatch → Google → Opera no Android.

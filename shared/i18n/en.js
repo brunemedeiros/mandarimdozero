@@ -286,6 +286,28 @@ window.I18N_CATALOG['en'] = {
   'notif.pref.push.blocked': 'Notifications are blocked in your browser settings. Allow them there and try again.', // ALTA
   'notif.pref.push.denied': 'You did not allow notifications. You can try again whenever you like.', // ALTA
   'notif.pref.push.error': 'Could not turn on right now. Please try again.', // ALTA
+  // Ajuda e convite para ativar os alertas no celular (plano B e A, 2026-11-25, shared/push-convite.js)
+  'push.help.ios.title': 'On iPhone, one more step', // ALTA
+  'push.help.ios.intro': 'Apple only sends alerts from sites on your Home Screen. It takes 10 seconds:', // ALTA
+  'push.help.ios.step1': 'Tap ⬆️ <strong>Share</strong> in the Safari toolbar', // ALTA
+  'push.help.ios.step2': 'Scroll and tap <strong>Add to Home Screen</strong> → <strong>Add</strong>', // ALTA
+  'push.help.ios.step3': 'Open the site from the <strong>new icon</strong> and turn on alerts in Settings → Notifications', // ALTA
+  'push.help.blocked.title': 'Your phone blocked alerts from this site', // ALTA
+  'push.help.blocked.titleDesktop': 'Your browser blocked alerts from this site', // ALTA
+  'push.help.blocked.intro': 'The site can\'t ask again. Just allow it there, once:', // ALTA
+  'push.help.android.step1': 'Open the <strong>browser</strong> you installed the site with (Chrome, Opera, Samsung Internet...) and go to <strong>app.profbrune.com.br</strong>', // ALTA
+  'push.help.android.step2': 'Tap the <strong>lock</strong> next to the address (in Opera, the <strong>green shield</strong>) → <strong>Permissions</strong> (or <strong>Site settings</strong>) → <strong>Notifications</strong>', // ALTA
+  'push.help.android.step3': 'Choose <strong>Allow</strong>, then close the site and open it again', // ALTA
+  'push.help.android.appIcon': 'Tip: the small symbol on the corner of the site icon shows which browser installed it (the red "O" is Opera). If you can\'t find the lock or the shield, look in that browser\'s <strong>Settings</strong> → <strong>Site settings</strong> → <strong>Notifications</strong>.', // ALTA
+  'push.help.desktop.step1': 'Click the <strong>lock</strong> next to the site address', // ALTA
+  'push.help.desktop.step2': 'Under <strong>Notifications</strong>, choose <strong>Allow</strong> and reload the page', // ALTA
+  'push.help.retry': 'I allowed it, try again', // ALTA
+  'push.help.stillBlocked': 'Still blocked. Check the steps above, close the site and open it again.', // ALTA
+  'push.invite.title': 'Want a reminder so you don\'t lose your streak?', // ALTA
+  'push.invite.text': 'We\'ll let you know when today\'s review is ready or when your streak is at risk. You choose which alerts you want and can turn them off anytime.', // ALTA
+  'push.invite.enable': 'Turn on reminders', // ALTA
+  'push.invite.later': 'Not now', // ALTA
+  'push.invite.ok': 'Got it', // ALTA
   'notif.pref.titleMatrixInApp': 'In the app', // ALTA
   'notif.pref.titleMatrixPush': 'Push', // ALTA
   'notif.pref.titleMatrixEmail': 'Email', // ALTA
