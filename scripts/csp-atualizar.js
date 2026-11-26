@@ -60,15 +60,34 @@ function policyFor(page, html){
 
 const META_RE = /<meta http-equiv="Content-Security-Policy" content="[^"]*" data-csp="scripts\/csp-atualizar\.js">\n/;
 
+// Lista "busque já" (dona, 2026-11-26): com a política num <meta>, o Chrome e o Firefox deixam de buscar os scripts da página
+// em paralelo enquanto ela é lida (o "preload scanner" se desliga) e os ~180 <script src> passaram a vir um de cada vez: no
+// celular a abertura foi de ~6 s para ~30 s. Um <link rel="preload"> por script, logo depois do <meta>, devolve a busca em
+// paralelo sem tirar a proteção (a ordem de execução continua a dos <script>). Só arquivos do próprio site, sem lacre (SRI).
+const PRELOAD_RE = /<!-- preload:scripts\/csp-atualizar\.js -->\n[\s\S]*?<!-- \/preload -->\n/;
+function preloadBlock(html){
+  const srcs = [];
+  const re = /<script\s[^>]*\bsrc="([^"]+)"[^>]*>/gi;
+  let m;
+  while ((m = re.exec(html))){
+    const tag = m[0], src = m[1];
+    if (/^(https?:)?\/\//i.test(src) || /\sintegrity=/i.test(tag) || srcs.includes(src)) continue;
+    srcs.push(src);
+  }
+  if (!srcs.length) return '';
+  return '<!-- preload:scripts/csp-atualizar.js -->\n' + srcs.map(u => `<link rel="preload" as="script" href="${u}">\n`).join('') + '<!-- /preload -->\n';
+}
+
 function render(page){
   const file = path.join(ROOT, page);
   const html = fs.readFileSync(file, 'utf8');
-  const semMeta = html.replace(META_RE, '');
+  const semMeta = html.replace(META_RE, '').replace(PRELOAD_RE, '');
   const meta = `<meta http-equiv="Content-Security-Policy" content="${policyFor(page, semMeta)}" data-csp="scripts/csp-atualizar.js">\n`;
   // Logo depois do <meta charset>: a política só vale para o que vem depois dela no documento.
   const m = /<meta charset="[^"]*">\s*\n/i.exec(semMeta);
   if (!m) throw new Error(page + ': sem <meta charset>');
-  return { file, before: html, after: semMeta.slice(0, m.index + m[0].length) + meta + semMeta.slice(m.index + m[0].length) };
+  const at = m.index + m[0].length;
+  return { file, before: html, after: semMeta.slice(0, at) + meta + preloadBlock(semMeta) + semMeta.slice(at) };
 }
 
 if (require.main === module){
@@ -85,4 +104,4 @@ if (require.main === module){
     console.log('CSP em dia nas ' + Object.keys(PAGES).length + ' páginas');
   }
 }
-module.exports = { PAGES, policyFor, inlineHashes, render };
+module.exports = { PAGES, policyFor, inlineHashes, preloadBlock, render };
