@@ -40,3 +40,19 @@ Depois: migration (2 tabelas + preferência), função, agendamento, testes, e-m
 - Link de sair: GET só mostra a confirmação (botão que envia POST); só o POST grava. Evita antivírus e pré-visualizadores desligarem o aviso sozinhos.
 - Assinatura do link com chave PRÓPRIA: Vault `cards_digest_signing_key` (gerada no banco pela migration 142, lida por `cards_digest_signing_key()`, só service role). Links já enviados (assinados com a senha do agendamento) continuam valendo; retirar essa conferência uns 30 dias depois.
 - Testes: `test_core.js` 33 e `test_function.js` 23.
+
+
+## Página "Parar de receber" v2 e resumo semanal (2026-11-26)
+
+Decisões da dona (conversa de 25 e 26/11, prévia `docs/email/previas/sair-cartoes-previa.html`, pesquisa de 12 marcas no Gmail dela):
+- A página do site `sair-cartoes/` (não mais HTML da função, que o Supabase entrega como `text/plain`) tem na 1ª tela: motivo (lista vertical:
+  recebo e-mails demais, estou sem tempo agora, os cartões não servem para mim, não é mais do meu interesse, prefiro ver tudo no site, outro motivo),
+  "Parar de receber", "Prefiro 1 resumo por semana" e "Continuar recebendo". O motivo é pedido com destaque, mas **não trava** o botão
+  (o "cancelar inscrição" do Gmail nunca mostra a tela; nenhuma das 12 marcas pesquisadas exige motivo; sair não pode depender de resposta).
+- "Pronto" e "Combinado: 1 resumo por semana" trazem "Foi sem querer? Voltar a receber" (POST `a=voltar`, sem login: vale a assinatura do link).
+- Resumo semanal: sem escolha de dia ou hora (decisão: menos atrito). Sempre **domingo de manhã**, no mesmo agendamento das 11h UTC (8h de
+  Brasília); só para quem escolheu; conta só cartões criados desde o último e-mail (ou 7 dias); não manda e-mail vazio. UTM `cartoes_semanal`.
+- Motivos ficam **anônimos** (sem user_id nem e-mail), para a promessa "não fica no seu perfil de estudo" ser verdadeira. Leitura:
+  função `cards_digest_exit_summary()` (só `is_teacher()`); ainda sem tela no Painel.
+- Quem religa o aviso do dia em Configurações > Notificações volta ao diário (o diário vence o semanal).
+- Migration `149_cards_digest_weekly_reasons` (Staging 2026-11-26; produção pendente). Voltar atrás: shim da função no commit da v5 (`33be805`).

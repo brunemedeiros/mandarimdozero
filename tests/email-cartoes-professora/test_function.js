@@ -147,7 +147,67 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
   const bad = await handler(new Request(`${U}?u=outra&t=${tk}`, { method: 'POST' }));
     check('sair: assinatura de outra conta é recusada no POST (400, JSON) e nada muda', bad.status === 400 && (await bad.json()).error === 'invalid_link' && DB.notification_preferences[0].channels.cartoes_professora[0] === 'email');
 
+  // ações da página nova: semanal, motivo, voltar
+  const form = (extra, l = 'pt') => handler(new Request(`${U}?u=ativa&t=${tk}&l=${l}`, { method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams(extra).toString() }));
+  seed();
+  const rs = await form({ a: 'semanal', r: 'sem_tempo' });
+  const rsJ = await rs.json();
+  check('semanal: desliga o aviso do dia, guarda frequência semanal e 1 motivo ANÔNIMO (sem conta nem e-mail)', rs.status === 200 && rsJ.ok && rsJ.action === 'semanal' && DB.notification_preferences[0].channels.cartoes_professora.length === 0 && DB.teacher_cards_digest_prefs[0].frequency === 'semanal' && DB.cards_digest_exit_reasons.length === 1 && DB.cards_digest_exit_reasons[0].reason === 'sem_tempo' && DB.cards_digest_exit_reasons[0].action === 'semanal' && DB.cards_digest_exit_reasons[0].lang === 'pt' && !Object.keys(DB.cards_digest_exit_reasons[0]).some(k => /user|email|student/.test(k)), DB.cards_digest_exit_reasons);
+  await form({ a: 'sair', r: 'outro', o: '  não   faz   sentido   ' }, 'en');
+  check('sair com "outro": guarda o texto livre limpo e o idioma; frequência volta a diário', DB.cards_digest_exit_reasons[1].reason === 'outro' && DB.cards_digest_exit_reasons[1].other_text === 'não faz sentido' && DB.cards_digest_exit_reasons[1].lang === 'en' && DB.teacher_cards_digest_prefs[0].frequency === 'diario', DB.cards_digest_exit_reasons);
+  await form({ a: 'sair', r: 'inventado', o: 'x' });
+  await form({ a: 'sair', r: 'prefiro_site', o: 'texto que só vale no outro' });
+  check('motivo fora da lista é ignorado; texto livre só vale no "outro"', DB.cards_digest_exit_reasons.length === 3 && DB.cards_digest_exit_reasons[2].reason === 'prefiro_site' && DB.cards_digest_exit_reasons[2].other_text === null, DB.cards_digest_exit_reasons);
+  await form({ a: 'sair', r: 'outro', o: 'y'.repeat(500) });
+  check('texto livre limitado a 200 caracteres', DB.cards_digest_exit_reasons[3].other_text.length === 200);
+  const nR = DB.cards_digest_exit_reasons.length;
+  const rv = await form({ a: 'voltar', r: 'muitos_emails' });
+  check('voltar: religa o aviso do dia, frequência diária, e NÃO grava motivo', rv.status === 200 && (await rv.json()).action === 'voltar' && DB.notification_preferences[0].channels.cartoes_professora[0] === 'email' && DB.teacher_cards_digest_prefs[0].frequency === 'diario' && DB.cards_digest_exit_reasons.length === nR);
+  const rb = await handler(new Request(`${U}?u=ativa&t=errado&l=pt`, { method: 'POST', body: new URLSearchParams({ a: 'voltar' }).toString() }));
+  check('voltar com assinatura errada: recusa e nada muda', rb.status === 400);
+  DB.notification_preferences[0].channels.cartoes_professora = ['email'];
+  await handler(new Request(`${U}?u=ativa&t=${tk}&l=pt`, { method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded' }, body: 'List-Unsubscribe=One-Click' }));
+  check('POST de 1 clique do Gmail: sai, sem motivo e sem resumo semanal', DB.notification_preferences[0].channels.cartoes_professora.length === 0 && DB.teacher_cards_digest_prefs[0].frequency === 'diario' && DB.cards_digest_exit_reasons.length === nR);
+
+  // resumo semanal: só quem escolheu, só aos domingos
+  const RealDate = Date, setNow = (iso) => { globalThis.Date = class extends RealDate { constructor(...a) { if (a.length) super(...a); else super(iso); } static now() { return new RealDate(iso).getTime(); } }; };
+  try {
+    setNow('2026-11-29T14:00:00Z'); // domingo, 11h em Brasília
+    seed();
+    DB.teacher_cards_digest_settings[0].mode = 'teste'; DB.teacher_cards_digest_settings[0].test_student_ids = ['ativa', 'parada', 'outra'];
+    DB.notification_preferences = [{ user_id: 'ativa', channels: { cartoes_professora: [] } }, { user_id: 'parada', channels: { cartoes_professora: [] } }];
+    DB.teacher_cards_digest_prefs = [{ user_id: 'ativa', frequency: 'semanal' }];
+    sent.length = 0;
+    r = await run({});
+    const wk = sent.find(m => m.to === 'ana@x.test');
+    check('domingo: quem escolheu o resumo semanal recebe 1 e-mail "Seu resumo da semana", com UTM semanal e o link de sair do site', wk && wk.subject === 'Seu resumo da semana: 2 cartões novos' && wk.html.includes('utm_campaign=cartoes_semanal') && /sair-cartoes\/\?u=ativa/.test(wk.html) && by(r, 'ativa').frequency === 'semanal', sent.map(m => m.subject));
+    check('domingo: quem desligou sem escolher o semanal continua sem nada; o diário de quem não desligou segue normal', by(r, 'parada').skipped === 'desligou' && !sent.some(m => m.to === 'carol@x.test') && sent.some(m => m.to === 'bia@x.test'), r);
+    check('o log do resumo semanal fica marcado como semanal (1 por dia)', DB.teacher_cards_digest_log.find(x => x.student_id === 'ativa').frequency === 'semanal' && DB.teacher_cards_digest_log.find(x => x.student_id === 'outra').frequency === 'diario');
+    reset(); seed();
+    DB.teacher_cards_digest_settings[0].mode = 'teste'; DB.teacher_cards_digest_settings[0].test_student_ids = ['ativa'];
+    DB.notification_preferences = [{ user_id: 'ativa', channels: { cartoes_professora: [] } }];
+    DB.teacher_cards_digest_prefs = [{ user_id: 'ativa', frequency: 'semanal' }];
+    setNow('2026-11-25T14:00:00Z'); // quarta
+    r = await run({});
+    check('fora do domingo: quem escolheu o semanal NÃO recebe nada', sent.length === 0 && by(r, 'ativa').skipped === 'semanal_so_domingo', r);
+    setNow('2026-11-29T14:00:00Z'); // domingo, mas sem cartão novo na semana
+    reset(); seed();
+    DB.teacher_cards_digest_settings[0].mode = 'teste'; DB.teacher_cards_digest_settings[0].test_student_ids = ['parada'];
+    DB.notification_preferences = [{ user_id: 'parada', channels: { cartoes_professora: [] } }];
+    DB.teacher_cards_digest_prefs = [{ user_id: 'parada', frequency: 'semanal' }];
+    r = await run({});
+    check('domingo sem cartão novo na semana: não manda e-mail vazio', sent.length === 0 && by(r, 'parada').skipped === 'nada_a_avisar', r);
+    reset(); seed();
+    DB.teacher_cards_digest_settings[0].mode = 'teste'; DB.teacher_cards_digest_settings[0].test_student_ids = ['outra'];
+    DB.notification_preferences = [{ user_id: 'outra', channels: { cartoes_professora: [] } }];
+    DB.teacher_cards_digest_prefs = [{ user_id: 'outra', frequency: 'semanal' }];
+    r = await run({});
+    const wkEn = sent.find(m => m.to === 'bia@x.test');
+    check('resumo semanal em inglês: assunto e texto em inglês, sem português', wkEn && wkEn.subject === 'Your weekly summary: 1 new card' && !/você|cartão|Revisão|semana/i.test(wkEn.html.replace(/<style[\s\S]*?<\/style>/, '').replace(/utm_campaign=\w+/g, '')), wkEn && wkEn.subject);
+  } finally { globalThis.Date = RealDate; }
+
   // e-mail de teste para a dona
+  seed();
   sent.length = 0;
   const tr = await post({ test_to: 'dona@x.test', test_lang: 'en', test_name: 'Marina', test_n: 5 });
   check('e-mail de teste: vai só para o endereço pedido, com TEST no assunto', tr.status === 200 && sent.length === 1 && sent[0].to === 'dona@x.test' && sent[0].subject.startsWith('TEST: ') && !(DB.teacher_cards_digest_log || []).length, sent);

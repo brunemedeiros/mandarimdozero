@@ -63,9 +63,9 @@ const site = (req, res) => {
   await p.close();
 
   // 5) todas as páginas do site carregam o anti-moldura logo no começo do <head>
-  const paginas = ['index.html', 'fr/index.html', 'zh/index.html', 'sobre.html', 'privacidade-cookies.html', 'privacidade-google-agenda.html', 'privacidade-login.html', 'privacidade-notion.html', 'ajuda/index.html', 'contrato/index.html', 'teste-de-nivelamento-fr/index.html', 'teste-de-nivelamento-pt/index.html'];
+  const paginas = ['index.html', 'fr/index.html', 'zh/index.html', 'sobre.html', 'privacidade-cookies.html', 'privacidade-google-agenda.html', 'privacidade-login.html', 'privacidade-notion.html', 'ajuda/index.html', 'contrato/index.html', 'teste-de-nivelamento-fr/index.html', 'teste-de-nivelamento-pt/index.html', 'sair-cartoes/index.html'];
   const sem = paginas.filter(f => { const s = fs.readFileSync(path.join(ROOT, f), 'utf8'); const i = s.indexOf('anti-moldura.js'); return i < 0 || i > s.indexOf('<script', s.indexOf('<head')) && s.indexOf('<script', s.indexOf('<head')) !== s.lastIndexOf('<script', i); });
-  check('as 12 páginas carregam o anti-moldura antes de qualquer outro script', sem.length === 0, sem);
+  check('as 13 páginas carregam o anti-moldura antes de qualquer outro script', sem.length === 0, sem);
 
   await b.close(); s1.close(); s2.close();
   console.log(`anti-moldura: ${ok}/${ok + ruim} checks`); process.exit(ruim ? 1 : 0);

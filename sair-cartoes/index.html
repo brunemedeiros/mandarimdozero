@@ -2,72 +2,152 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
+<script src="../shared/anti-moldura.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
 <meta name="referrer" content="no-referrer">
 <title>Parar de receber e-mails</title>
 <link rel="icon" href="../icons/favicon-32.png" sizes="32x32">
 <link rel="stylesheet" href="../shared/fonts/nunito.css">
-<!-- Página do link "Parar de receber" do e-mail "cartões novos da sua professora" (Edge Function teacher-cards-digest).
-     Existe porque o Supabase entrega HTML de função como texto cru (text/plain). Esta página só PERGUNTA; quem desliga é o clique
-     no botão (POST na função). Sem Google Analytics e sem consent.js de propósito: o endereço leva a assinatura do link. -->
+<link rel="stylesheet" href="../shared/fonts/anton.css">
+<!-- Página do link "Parar de receber" do e-mail "cartões novos da sua professora" (Edge Function teacher-cards-digest, migration 149).
+     Existe porque o Supabase entrega HTML de função como texto cru (text/plain). A página só PERGUNTA; quem muda a preferência é o clique
+     num botão (POST na função, que confere a assinatura do link: sem login, sem robô). Estados: pergunta (com motivo), pronto, resumo
+     semanal (sempre domingo de manhã), nada muda, voltou. Sem Google Analytics e sem consent.js de propósito: o endereço leva a assinatura.
+     Prévia aprovada: docs/email/previas/sair-cartoes-previa.html. Textos em pt-BR e en (`l=en`, sem português no inglês). -->
 <style>
-:root { --ink: #22113f; --ink-soft: #5d4f72; --bg: #FAF5EA; --card: #fff; --btn: #E36BCA; --on-btn: #22113f; --link: #1d6fa5; }
-@media (prefers-color-scheme: dark) { :root { --ink: #EEE9F5; --ink-soft: #ADA5BE; --bg: #17141F; --card: #201C2B; --btn: #E36BCA; --on-btn: #22113f; --link: #6CB8E6; } }
+:root { --bg: #FAF5EA; --card: #fff; --ink: #22113f; --soft: #5d4f72; --band: #3D167B; --pink: #E36BCA; --pink-dark: color-mix(in srgb, #E36BCA 66%, #000); --box: #FAF5EA; --line: #ece4f2; --link: #1d6fa5; --chip: #fff; --chip-line: #cfc3e3; }
+@media (prefers-color-scheme: dark) { :root { --bg: #17141F; --card: #201C2B; --ink: #EEE9F5; --soft: #ADA5BE; --box: #2a2538; --line: #362F44; --link: #6CB8E6; --chip: #2a2538; --chip-line: #4a4060; } }
+* { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); color: var(--ink); font-family: 'Nunito', 'Helvetica Neue', Arial, sans-serif; }
-.wrap { max-width: 480px; margin: 48px auto; padding: 0 20px; }
-.card { background: var(--card); border-radius: 22px; padding: 28px; }
-h1 { margin: 0 0 12px; font-size: 26px; }
-p { margin: 0 0 20px; line-height: 1.6; }
-button { font: inherit; font-weight: 900; color: var(--on-btn); background: var(--btn); border: 2px solid #22113f; box-shadow: 4px 4px 0 #22113f; border-radius: 999px; padding: 13px 26px; cursor: pointer; margin: 0 0 14px; }
-button[disabled] { opacity: .6; cursor: wait; }
-a { color: var(--link); }
-.act { display: block; }
+.wrap { max-width: 520px; margin: 32px auto 24px; padding: 0 16px; }
+.card { background: var(--card); border-radius: 22px; overflow: hidden; box-shadow: 0 8px 30px rgba(34, 17, 63, .12); }
+.band { background: var(--band); color: #FAF5EA; padding: 26px 28px 24px; }
+.pill { display: inline-block; border: 1.5px solid var(--pink); color: #f6c4ec; border-radius: 999px; font-size: 11px; font-weight: 800; letter-spacing: .12em; padding: 4px 12px; text-transform: uppercase; }
+h1 { font-family: 'Anton', 'Impact', 'Arial Narrow', sans-serif; font-weight: 400; font-size: 34px; line-height: 1.1; margin: 14px 0 0; text-transform: uppercase; letter-spacing: .01em; }
+h1 em { font-style: normal; color: var(--pink); }
+.body { padding: 24px 28px 8px; }
+p { margin: 0 0 16px; line-height: 1.65; font-size: 16px; }
+.ok { background: var(--box); border-radius: 16px; padding: 14px 16px; margin: 0 0 18px; display: flex; gap: 10px; line-height: 1.5; }
+.ok i { font-style: normal; color: #3498D6; font-weight: 900; }
+.btn { display: block; width: 100%; font: inherit; font-weight: 900; font-size: 16px; color: #22113f; background: var(--pink); border: 0; box-shadow: 0 4px 0 var(--pink-dark); border-radius: 999px; padding: 14px 22px; cursor: pointer; margin: 0 0 16px; }
+.btn:active { transform: translateY(2px); box-shadow: 0 2px 0 var(--pink-dark); }
+.btn2 { display: block; width: 100%; font: inherit; font-weight: 800; font-size: 15px; color: var(--ink); background: transparent; border: 2px solid var(--chip-line); border-radius: 999px; padding: 12px 22px; cursor: pointer; margin: 0 0 14px; }
+.btn[disabled], .btn2[disabled], .btn3[disabled] { opacity: .6; cursor: wait; }
+.link { background: none; border: 0; font: inherit; color: var(--link); text-decoration: underline; cursor: pointer; padding: 0; }
+a.btn { text-align: center; text-decoration: none; }
+.undo { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; border-top: 1px solid var(--line); padding: 14px 0; margin: 0 0 6px; font-size: 15px; }
+.btn3 { font: inherit; font-weight: 900; font-size: 14px; color: #22113f; background: var(--pink); border: 0; box-shadow: 0 3px 0 var(--pink-dark); border-radius: 999px; padding: 9px 18px; cursor: pointer; }
+.why h2 { font-size: 17px; margin: 0 0 4px; }
+.why small { display: block; color: var(--soft); margin: 0 0 12px; line-height: 1.5; }
+.opts { display: flex; flex-direction: column; gap: 8px; margin: 0 0 14px; }
+.opt { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; font: inherit; font-weight: 700; font-size: 15px; color: var(--ink); background: var(--chip); border: 2px solid var(--chip-line); border-radius: 14px; padding: 12px 14px; cursor: pointer; }
+.opt .dot { flex: none; width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--chip-line); background: var(--card); }
+.opt[aria-checked="true"] { border-color: var(--band); background: var(--box); }
+.opt[aria-checked="true"] .dot { border-color: var(--band); background: radial-gradient(circle, var(--band) 0 5px, var(--card) 6px); }
+textarea { width: 100%; font: inherit; border: 2px solid var(--chip-line); border-radius: 14px; padding: 10px 12px; background: var(--chip); color: var(--ink); min-height: 70px; margin: -2px 0 14px; }
+.btn:focus-visible, .btn2:focus-visible, .btn3:focus-visible, .opt:focus-visible, .link:focus-visible, textarea:focus-visible { outline: 3px solid var(--link); outline-offset: 2px; }
+.sig { display: flex; align-items: center; gap: 12px; border-top: 1px solid var(--line); margin: 8px 28px 0; padding: 16px 0 22px; font-size: 14px; line-height: 1.4; color: var(--soft); }
+.sig img { width: 52px; height: 52px; border-radius: 50%; border: 2px solid var(--pink); }
+.sig b { color: var(--ink); display: block; }
+.foot { text-align: center; font-size: 12px; color: var(--soft); margin: 14px 0 0; }
+.center { text-align: center; margin: 0 0 10px; }
 [hidden] { display: none !important; }
 </style>
 </head>
 <body>
-<div class="wrap"><div class="card">
-  <h1 id="t"></h1>
-  <p id="m"></p>
-  <button id="go" type="button" class="act"></button>
-  <a id="keep" href="https://app.profbrune.com.br/"></a>
-</div></div>
+<div class="wrap">
+  <main class="card">
+    <div class="band"><span class="pill" id="pill"></span><h1 id="h"></h1></div>
+    <div class="body" id="b" aria-live="polite"></div>
+    <div class="sig"><img alt="" src="../icons/brune-email.jpg" width="52" height="52"><div><b>Brune</b><span id="sg"></span></div></div>
+  </main>
+  <div class="foot">app.profbrune.com.br</div>
+</div>
 <script>
 (function () {
   var q = new URLSearchParams(location.search);
-  var u = q.get('u') || '', t = q.get('t') || '', en = q.get('l') === 'en';
+  var u = q.get('u') || '', t = q.get('t') || '', EN = q.get('l') === 'en';
   var FN = 'https://eigjocalzwamisgqilhg.supabase.co/functions/v1/teacher-cards-digest';
-  var T = en ? {
-    title: 'Stop receiving these emails?', msg: 'You will no longer get the email about new cards from your teacher.',
-    go: 'Yes, stop receiving', keep: 'Keep receiving', doneT: 'Done!',
-    doneM: 'You will no longer get the email about new cards from your teacher. To turn it back on, go to Settings > Notifications in the app.',
-    badT: 'This link is not valid', badM: 'Open the app and turn this email off in Settings > Notifications.',
-    errT: 'Something went wrong', errM: 'Please try again in a minute, or turn this email off in Settings > Notifications in the app.', site: 'app.profbrune.com.br'
-  } : {
-    title: 'Parar de receber estes e-mails?', msg: 'Você não vai mais receber o e-mail de cartões novos da sua professora.',
-    go: 'Sim, parar de receber', keep: 'Continuar recebendo', doneT: 'Pronto!',
-    doneM: 'Você não vai mais receber o e-mail de cartões novos da sua professora. Para voltar a receber, ligue em Configurações > Notificações, dentro do site.',
-    badT: 'Este link não é válido', badM: 'Abra o site e desligue este e-mail em Configurações > Notificações.',
-    errT: 'Algo deu errado', errM: 'Tente de novo daqui a pouco, ou desligue este e-mail em Configurações > Notificações, dentro do site.', site: 'app.profbrune.com.br'
+  var SITE = 'https://app.profbrune.com.br/';
+  var CODES = ['muitos_emails', 'sem_tempo', 'cartoes_nao_servem', 'sem_interesse', 'prefiro_site', 'outro'];
+  var T = {
+    pt: {
+      pill: 'Cartões novos da professora', sg: 'sua professora de idiomas',
+      r: ['Recebo e-mails demais', 'Estou sem tempo agora', 'Os cartões não servem para mim', 'Não é mais do meu interesse', 'Prefiro ver tudo no site', 'Outro motivo'],
+      ask: { h: 'Quer mesmo <em>sair</em> da lista?', p: 'Eu te aviso por e-mail quando coloco cartões novos para você revisar. Se está chegando coisa demais, tem um jeito mais leve de continuar.', wh: 'Qual é o motivo?', ws: 'Escolha um: eu leio todas as respostas e uso para melhorar o aviso. Ela não fica no seu perfil de estudo.', oth: 'Conte em poucas palavras (opcional)', go: 'Parar de receber', alt: 'Prefiro 1 resumo por semana', keep: 'Continuar recebendo' },
+      done: { h: 'Pronto, você <em>saiu</em> da lista', ok: 'Você não vai mais receber o e-mail de cartões novos da sua professora. Seus cartões continuam no site.', thx: 'Obrigada, anotei o seu motivo.', un: 'Foi sem querer?', unb: 'Voltar a receber' },
+      wk: { h: 'Combinado: <em>1 resumo</em> por semana', ok: 'Vou juntar os cartões novos num só e-mail, que chega todo domingo de manhã. Você deixa de receber o aviso do dia.', thx: 'Obrigada, anotei o seu motivo.', un: 'Mudou de ideia?', unb: 'Voltar ao aviso do dia' },
+      keep: { h: 'Combinado: <em>nada muda</em>', p: 'Você continua recebendo o aviso quando eu coloco cartões novos para você revisar.', go: 'Abrir o site' },
+      back: { h: 'Que bom que <em>voltou</em>!', p: 'Os e-mails de cartões novos voltaram para a sua caixa. Quando quiser ajustar, é em Configurações > Notificações, dentro do site.', go: 'Abrir o site' },
+      bad: { h: 'Este link <em>não é válido</em>', p: 'Abra o site e ajuste este e-mail em Configurações > Notificações.', go: 'Abrir o site' },
+      err: { h: 'Algo <em>deu errado</em>', p: 'Tente de novo daqui a pouco, ou ajuste este e-mail em Configurações > Notificações, dentro do site.', go: 'Tentar de novo' }
+    },
+    en: {
+      pill: 'New cards from your teacher', sg: 'your language teacher',
+      r: ['I get too many emails', 'I have no time right now', 'The cards are not useful to me', 'I am no longer interested', 'I prefer to see everything on the site', 'Another reason'],
+      ask: { h: 'Really <em>leave</em> the list?', p: 'I email you when I add new cards for you to review. If it feels like too much, there is a lighter way to keep going.', wh: 'What is the reason?', ws: 'Pick one: I read every answer and use it to improve the email. It is not saved in your study profile.', oth: 'Tell me in a few words (optional)', go: 'Stop receiving', alt: 'I prefer 1 summary a week', keep: 'Keep receiving' },
+      done: { h: 'Done, you <em>left</em> the list', ok: 'You will no longer get the email about new cards from your teacher. Your cards are still on the site.', thx: 'Thank you, I noted your reason.', un: 'Was that a mistake?', unb: 'Turn it back on' },
+      wk: { h: 'Deal: <em>1 summary</em> a week', ok: 'I will bundle the new cards into one email that arrives every Sunday morning. You stop getting the daily email.', thx: 'Thank you, I noted your reason.', un: 'Changed your mind?', unb: 'Back to the daily email' },
+      keep: { h: 'Deal: <em>nothing changes</em>', p: 'You keep getting the email when I add new cards for you to review.', go: 'Open the site' },
+      back: { h: 'Glad you are <em>back</em>!', p: 'New-card emails are back in your inbox. You can adjust this anytime in Settings > Notifications, inside the site.', go: 'Open the site' },
+      bad: { h: 'This link is <em>not valid</em>', p: 'Open the site and adjust this email in Settings > Notifications.', go: 'Open the site' },
+      err: { h: 'Something <em>went wrong</em>', p: 'Please try again in a minute, or adjust this email in Settings > Notifications, inside the site.', go: 'Try again' }
+    }
   };
-  document.documentElement.lang = en ? 'en' : 'pt-BR';
+  var L = T[EN ? 'en' : 'pt'];
+  var S = (!u || !t) ? 'bad' : 'ask', reason = -1, other = '', busy = false, lastAction = null, picked = false;
   var $ = function (id) { return document.getElementById(id); };
-  function show(title, msg, hideBtn) { $('t').textContent = title; $('m').textContent = msg; $('go').hidden = !!hideBtn; $('keep').textContent = hideBtn ? T.site : T.keep; document.title = title; }
-  if (!u || !t) { show(T.badT, T.badM, true); return; }
-  show(T.title, T.msg, false); $('go').textContent = T.go;
-  $('go').addEventListener('click', function () {
-    var b = $('go'); b.disabled = true;
-    // POST simples (sem corpo nem cabeçalho extra): o navegador não faz pré-voo.
-    fetch(FN + '?u=' + encodeURIComponent(u) + '&t=' + encodeURIComponent(t) + '&l=' + (en ? 'en' : 'pt'), { method: 'POST' })
+  document.documentElement.lang = EN ? 'en' : 'pt-BR';
+  $('pill').textContent = L.pill; $('sg').textContent = L.sg;
+
+  function render() {
+    var s = L[S], h = '';
+    $('h').innerHTML = s.h; document.title = $('h').textContent;
+    if (S === 'ask') {
+      h = '<p>' + s.p + '</p><div class="why"><h2 id="whq">' + s.wh + '</h2><small>' + s.ws + '</small><div class="opts" role="radiogroup" aria-labelledby="whq">' +
+        L.r.map(function (x, i) { return '<button type="button" class="opt" role="radio" aria-checked="' + (reason === i) + '" data-r="' + i + '"><span class="dot"></span>' + x + '</button>'; }).join('') + '</div>' +
+        (reason === 5 ? '<textarea id="oth" maxlength="200" placeholder="' + s.oth + '"></textarea>' : '') + '</div>' +
+        '<button type="button" class="btn" data-a="sair"' + (busy ? ' disabled' : '') + '>' + s.go + '</button>' +
+        '<button type="button" class="btn2" data-a="semanal"' + (busy ? ' disabled' : '') + '>' + s.alt + '</button>' +
+        '<p class="center"><button type="button" class="link" data-a="keep">' + s.keep + '</button></p>';
+    } else if (S === 'done' || S === 'wk') {
+      h = '<div class="ok"><i>✓</i><span>' + s.ok + (picked ? '<br><b>' + s.thx + '</b>' : '') + '</span></div>' +
+        '<div class="undo"><span>' + s.un + '</span><button type="button" class="btn3" data-a="voltar"' + (busy ? ' disabled' : '') + '>' + s.unb + '</button></div>';
+    } else if (S === 'err') {
+      h = '<p>' + s.p + '</p><button type="button" class="btn" data-a="retry">' + s.go + '</button><a class="link" href="' + SITE + '">app.profbrune.com.br</a>';
+    } else {
+      h = '<p>' + s.p + '</p><a class="btn" href="' + SITE + '">' + s.go + '</a>';
+    }
+    $('b').innerHTML = h;
+    if (S === 'ask' && reason === 5 && $('oth')) { $('oth').value = other; $('oth').addEventListener('input', function () { other = this.value; }); }
+  }
+
+  // POST simples (corpo urlencoded, sem cabeçalho extra): o navegador não faz pré-voo. A função confere a assinatura do link.
+  function send(action) {
+    busy = true; lastAction = action; render();
+    var body = new URLSearchParams({ a: action });
+    if (action !== 'voltar' && reason >= 0) { body.set('r', CODES[reason]); if (reason === 5 && other.trim()) body.set('o', other.trim().slice(0, 200)); }
+    fetch(FN + '?u=' + encodeURIComponent(u) + '&t=' + encodeURIComponent(t) + '&l=' + (EN ? 'en' : 'pt'), { method: 'POST', body: body })
       .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { return { s: r.status, j: j }; }); })
       .then(function (x) {
-        if (x.s === 200 && x.j && x.j.ok) show(T.doneT, T.doneM, true);
-        else if (x.s === 400) show(T.badT, T.badM, true);
-        else { show(T.errT, T.errM, false); b.disabled = false; }
+        busy = false;
+        if (x.s === 200 && x.j && x.j.ok) { picked = action !== 'voltar' && reason >= 0; S = action === 'voltar' ? 'back' : action === 'semanal' ? 'wk' : 'done'; }
+        else if (x.s === 400) S = 'bad'; else S = 'err';
+        render(); $('b').scrollIntoView({ block: 'nearest' });
       })
-      .catch(function () { show(T.errT, T.errM, false); b.disabled = false; });
+      .catch(function () { busy = false; S = 'err'; render(); });
+  }
+
+  document.addEventListener('click', function (e) {
+    var el = e.target.closest('[data-a],[data-r]'); if (!el || busy) return;
+    if (el.dataset.r !== undefined) { reason = reason === +el.dataset.r ? -1 : +el.dataset.r; render(); return; }
+    var a = el.dataset.a;
+    if (a === 'keep') { S = 'keep'; render(); return; }
+    if (a === 'retry') { send(lastAction || 'sair'); return; }
+    send(a);
   });
+  render();
 })();
 </script>
 </body>

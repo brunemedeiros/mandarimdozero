@@ -7,7 +7,7 @@
 // continuam funcionando); POST (da página ou do "cancelar inscrição" do Gmail, List-Unsubscribe de 1 clique) confere e grava, e responde JSON.
 // Regras e textos: core.mjs (testado em tests/email-cartoes-professora/). Deploy com verify_jwt:false (cada rota confere quem chama).
 import { createClient } from 'npm:@supabase/supabase-js@2';
-import { APP_URL, CATEGORY, allowsDigest, decideKind, firstName, renderEmail, signUnsubscribe, verifyUnsubscribe } from './core.mjs';
+import { APP_URL, CATEGORY, allowsDigest, decideKind, firstName, isSunday, parseExitForm, renderEmail, signUnsubscribe, verifyUnsubscribe } from './core.mjs';
 
 const CORS = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'authorization, apikey, content-type, x-cron-token, x-client-info', 'Access-Control-Allow-Methods': 'GET, POST, OPTIONS' };
 const json = (status: number, body: unknown) => new Response(JSON.stringify(body), { status, headers: { ...CORS, 'Content-Type': 'application/json' } });
@@ -70,11 +70,22 @@ Deno.serve(async (req: Request) => {
     if (req.method === 'GET') return new Response(null, { status: 302, headers: { ...CORS, Location: `${APP_URL}sair-cartoes/?u=${encodeURIComponent(u || '')}&t=${encodeURIComponent(t || '')}&l=${l}`, 'Cache-Control': 'no-store' } });
     if (req.method !== 'POST') return json(405, { ok: false, error: 'method_not_allowed' });
     if (!(await verifyAny(sb, u || '', t || ''))) return json(400, { ok: false, error: 'invalid_link' });
+    // O POST da página do site manda a=sair|semanal|voltar (+ r, o); o do "cancelar inscrição" do Gmail não manda nada = sair.
+    let form: URLSearchParams | null = null;
+    try { form = new URLSearchParams(await req.text()); } catch (_) { form = null; }
+    const { action, reason, other } = parseExitForm(form, url.searchParams);
     const { data: row } = await sb.from('notification_preferences').select('channels').eq('user_id', u).maybeSingle();
-    const channels = { ...((row && row.channels) || {}), [CATEGORY]: [] };
+    const channels = { ...((row && row.channels) || {}), [CATEGORY]: action === 'voltar' ? ['email'] : [] };
     const { error } = await sb.from('notification_preferences').upsert({ user_id: u, channels }, { onConflict: 'user_id' });
     if (error) { console.error('teacher-cards-digest: falha ao salvar saída', error.message); return json(500, { ok: false, error: 'save_failed' }); }
-    return json(200, { ok: true });
+    const { error: fErr } = await sb.from('teacher_cards_digest_prefs').upsert({ user_id: u, frequency: action === 'semanal' ? 'semanal' : 'diario', updated_at: new Date().toISOString() }, { onConflict: 'user_id' });
+    if (fErr) console.error('teacher-cards-digest: falha ao salvar frequência', fErr.message);
+    if (reason) {
+      // Motivo anônimo (sem conta nem e-mail), só para melhorar o aviso. Falha aqui não desfaz a saída.
+      const { error: rErr } = await sb.from('cards_digest_exit_reasons').insert({ reason, other_text: other, action, lang: l });
+      if (rErr) console.error('teacher-cards-digest: falha ao guardar motivo', rErr.message);
+    }
+    return json(200, { ok: true, action });
   }
 
   if (req.method !== 'POST') return json(405, { ok: false, error: 'method_not_allowed' });
@@ -105,25 +116,32 @@ Deno.serve(async (req: Request) => {
         const { data: done } = await sb.from('teacher_cards_digest_log').select('id').eq('student_id', uid).eq('sent_on', today).limit(1);
         if (done && done.length) { item.skipped = 'ja_enviado_hoje'; summary.push(item); continue; }
         const { data: pref } = await sb.from('notification_preferences').select('channels').eq('user_id', uid).maybeSingle();
-        if (!allowsDigest(pref && pref.channels)) { item.skipped = 'desligou'; summary.push(item); continue; }
+        // Quem saiu do aviso diário e escolheu o resumo semanal recebe 1 e-mail por semana, aos domingos de manhã.
+        let freq = 'diario';
+        if (!allowsDigest(pref && pref.channels)) {
+          const { data: fp } = await sb.from('teacher_cards_digest_prefs').select('frequency').eq('user_id', uid).maybeSingle();
+          if (!(fp && fp.frequency === 'semanal')) { item.skipped = 'desligou'; summary.push(item); continue; }
+          if (!isSunday(today)) { item.skipped = 'semanal_so_domingo'; summary.push(item); continue; }
+          freq = 'semanal';
+        }
         const { data: prof } = await sb.from('profiles').select('display_name').eq('user_id', uid).maybeSingle();
         const { data: prog } = await sb.from('progress').select('data').eq('user_id', uid).maybeSingle();
         const lang = prog?.data?._meta?.uiLanguage === 'en' ? 'en' : 'pt';
         const { data: lastNovos } = await sb.from('teacher_cards_digest_log').select('created_at').eq('student_id', uid).eq('kind', 'novos').eq('status', 'sent').order('created_at', { ascending: false }).limit(1);
-        const since = lastNovos && lastNovos.length ? lastNovos[0].created_at : new Date(Date.now() - 3 * 86400000).toISOString();
+        const since = lastNovos && lastNovos.length ? lastNovos[0].created_at : new Date(Date.now() - (freq === 'semanal' ? 7 : 3) * 86400000).toISOString();
         const { data: cards } = await sb.from('teacher_flashcards').select('created_at').eq('student_id', uid).eq('teacher_id', st.teacher_id).eq('status', 'active').not('bank_item_id', 'is', null);
         const newCount = (cards || []).filter((c: any) => c.created_at > since).length;
         const kind = decideKind({ newCount }); // só "cartões novos" (decisão da dona, 2026-11-25: quem some continua com o aviso antigo do notification-cron)
         if (!kind) { item.skipped = 'nada_a_avisar'; summary.push(item); continue; }
         const n = newCount;
-        item.kind = kind; item.n = n; item.lang = lang;
+        item.kind = kind; item.n = n; item.lang = lang; if (freq === 'semanal') item.frequency = 'semanal';
         if (dryRun) { item.dry_run = true; summary.push(item); continue; }
         const { data: au } = await sb.auth.admin.getUserById(uid);
         const to = au?.user?.email;
         if (!to) { item.skipped = 'sem_email'; summary.push(item); continue; }
-        const { error: claimErr } = await sb.from('teacher_cards_digest_log').insert({ teacher_id: st.teacher_id, student_id: uid, kind, cards_count: n, sent_on: today, status: 'pending' });
+        const { error: claimErr } = await sb.from('teacher_cards_digest_log').insert({ teacher_id: st.teacher_id, student_id: uid, kind, cards_count: n, sent_on: today, status: 'pending', frequency: freq });
         if (claimErr) { item.skipped = 'trava_do_dia'; summary.push(item); continue; }
-        const mail = renderEmail({ lang, kind, nome: firstName(prof?.display_name), n, unsubscribeUrl: await unsubSiteUrl(sb, uid, lang) });
+        const mail = renderEmail({ lang, kind: freq === 'semanal' ? 'semanal' : kind, nome: firstName(prof?.display_name), n, unsubscribeUrl: await unsubSiteUrl(sb, uid, lang) });
         const err = await sendResend(to, mail, await unsubPostUrl(sb, uid, lang));
         await sb.from('teacher_cards_digest_log').update({ status: err ? 'error' : 'sent', error: err }).eq('student_id', uid).eq('sent_on', today);
         item.status = err ? 'error' : 'sent'; if (err) item.error = err;
