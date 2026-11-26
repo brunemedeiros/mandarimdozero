@@ -37,13 +37,13 @@ Atualizado em: 26/11
 - [P-022] [desde 26/11] [Leve] #521 · rolagem automática para a unidade recém-liberada, sem o aluno pedir (confirmar com a dona) · `shared/core/trilha-licao.js:~95-105` · resolvido quando a dona confirmar ou o comportamento mudar
 
 ## Conversa "Passaporte e selos" · https://claude.ai/code/session_01W7mkF561UhmK9d3RKazEz5
-- [P-023] [desde 26/11] [Médio] #522 · o perfil de conta PRIVADA agora mostra a data de cada conquista (`earned_at`), o que revela quando a pessoa estudou; a leitura de `earned_badges` é aberta a qualquer logado (080_private_profile.sql:104); RLS atual não conferida · `shared/leaderboard.js:339-348`, `shared/public-profile.js:259-266` · resolvido quando a data só aparecer com `isPublic` ou a autora decidir que pode
+- [P-023] [desde 26/11] [Severo já no ar] #522 · o perfil de conta PRIVADA agora mostra a data de cada conquista (`earned_at`), o que revela quando a pessoa estudou; a leitura de `earned_badges` é aberta a qualquer logado (080_private_profile.sql:104); RLS atual não conferida · `shared/leaderboard.js:339-348`, `shared/public-profile.js:259-266` · resolvido quando a data só aparecer com `isPublic` ou a autora decidir que pode (Severo pela regra da autora: dado de conta privada exposto)
 
 ## Conversa branch `claude/relaxed-sagan-7lyu9c` · https://claude.ai/code/session_01W7mkF4iqmJot9jd8prH5xV
 - [P-024] [desde 26/11] [Médio] sem PR · migrations 147 (`reports_insert_own`) e 148 (`push_subscriptions_owner_update`) e `push-send` v13 já estão na produção (e 147/148 no Staging), mas o código só existe nessa branch, fora da `main`; o "Estado atual" não registra · branch `claude/relaxed-sagan-7lyu9c` · resolvido quando a branch for mesclada (arquivos 147/148 na `main`)
 
 ## Perguntas para a autora (não são de nenhuma conversa)
-- [P-020] [desde 26/11] [Médio] `tests/paridade-sites/test_quase_iguais.js` passou de 2770/2770 para 2764/2770: 6 cenas (config, config_geral, config_notifications, fr en e zh en) mostram o seletor de exportar em inglês ("Unit", "All units") onde a árvore de referência mostra "Unidade"/"Todas as unidades". Causa não identificada entre os PRs de 25/11 (as chaves de `en.js` não mudaram); falha reproduzida na segunda rodada. Algum PR precisa ajustar o teste ou o texto.
+- [P-020] [desde 26/11] [Leve] `tests/paridade-sites/test_quase_iguais.js` passou de 2770/2770 para 2764/2770: 6 cenas de Configurações no site em inglês (fr e zh) mostram o seletor de exportar em inglês ("Unit", "All units") e a referência do teste tem "Unidade"/"Todas as unidades". O inglês ESTÁ CERTO (a chave `settings.export.allUnits` = "All units" existe em `shared/i18n/en.js:199`); muito provavelmente antes vazava português ali e alguém consertou. NÃO mexer no texto do site: só atualizar a referência do teste (conferido pelo Claude em 26/11) · `tests/paridade-sites/test_quase_iguais.js` · resolvido quando o teste voltar a 2770/2770 sem português no site em inglês
 
 ## Resolvidas (ficam 7 dias e saem)
 - [P-008] resolvida em 26/11 · a autora confirmou que não usou o "Juntar" entre 16/11 e 25/11: nenhuma resposta foi perdida antes da migration 145
