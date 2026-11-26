@@ -307,3 +307,6 @@ e investigar por que ninguém ativa (convite, telas, iPhone exige o site instala
   CSS sem mudar nada", compara com a main). Pré-existentes iguais sem a mudança: `xp-semana` (janela de idade por cima),
   `e4/test_lote5d_pinyin` (trava ao carregar).
 - Falta: PR para publicar (a pedido da autora); depois, conferir no ar.
+- 2026-11-26: o aparelho da autora tem o site instalado pelo **Opera** (símbolo "O" no canto do ícone), não pelo Chrome; por isso
+  não havia nada em Chrome > Configurações do site. O passo a passo do Android (B) passou a valer para qualquer navegador
+  (cadeado do endereço → Permissões/Configurações do site → Notificações) e explica o símbolo do ícone. `tests/push-convite` 58/58.

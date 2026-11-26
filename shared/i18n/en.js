@@ -295,10 +295,10 @@ window.I18N_CATALOG['en'] = {
   'push.help.blocked.title': 'Your phone blocked alerts from this site', // ALTA
   'push.help.blocked.titleDesktop': 'Your browser blocked alerts from this site', // ALTA
   'push.help.blocked.intro': 'The site can\'t ask again. Just allow it there, once:', // ALTA
-  'push.help.android.step1': 'Open <strong>Chrome</strong> and tap <strong>⋮</strong> → <strong>Settings</strong>', // ALTA
-  'push.help.android.step2': 'Tap <strong>Site settings</strong> → <strong>Notifications</strong>', // ALTA
-  'push.help.android.step3': 'Under <strong>Blocked</strong>, tap <strong>app.profbrune.com.br</strong> and choose <strong>Allow</strong>', // ALTA
-  'push.help.android.appIcon': 'If you use the site from the icon on your phone, also check: press and hold the icon → <strong>App info</strong> → <strong>Notifications</strong> → turn on <strong>Allow notifications</strong>. Then close the site and open it again.', // ALTA
+  'push.help.android.step1': 'Open the <strong>browser</strong> you installed the site with (Chrome, Opera, Samsung Internet...) and go to <strong>app.profbrune.com.br</strong>', // ALTA
+  'push.help.android.step2': 'Tap the <strong>lock</strong> next to the address → <strong>Permissions</strong> (or <strong>Site settings</strong>) → <strong>Notifications</strong>', // ALTA
+  'push.help.android.step3': 'Choose <strong>Allow</strong>, then close the site and open it again', // ALTA
+  'push.help.android.appIcon': 'Tip: the small symbol on the corner of the site icon shows which browser installed it (the red "O" is Opera). If you can\'t find the lock, look in that browser\'s <strong>Settings</strong> → <strong>Site settings</strong> → <strong>Notifications</strong>.', // ALTA
   'push.help.desktop.step1': 'Click the <strong>lock</strong> next to the site address', // ALTA
   'push.help.desktop.step2': 'Under <strong>Notifications</strong>, choose <strong>Allow</strong> and reload the page', // ALTA
   'push.help.retry': 'I allowed it, try again', // ALTA

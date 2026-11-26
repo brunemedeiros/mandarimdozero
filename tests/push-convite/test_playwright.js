@@ -124,7 +124,7 @@ async function run(browser, port, lang){
   await openNotifSettings(page);
   let h = await helpState(page);
   check(`${L}: Android bloqueado: caixa aparece ao abrir`, h.visible && h.kind === 'blocked' && h.retry, h);
-  check(`${L}: Android bloqueado: passos do Chrome e do ícone`, /Configurações do site/.test(h.text) && /Bloqueados/.test(h.text) && /Informações do app/.test(h.text) && /Seu celular bloqueou/.test(h.text), h.text);
+  check(`${L}: Android bloqueado: passos para qualquer navegador (Chrome, Opera...) e a dica do símbolo do ícone`, /Chrome, Opera, Samsung Internet/.test(h.text) && /cadeado/.test(h.text) && /Configurações do site/.test(h.text) && /Opera/.test(h.text) && /Seu celular bloqueou/.test(h.text), h.text);
   await page.evaluate(() => document.getElementById('notif-pref-push-help').scrollIntoView({ block: 'center' }));
   await shot(page, `${L}-b-android-bloqueado`);
   // "Já liberei, tentar de novo": deu certo agora
@@ -141,7 +141,7 @@ async function run(browser, port, lang){
   await setup(page, 'off', 'denied');
   await openNotifSettings(page);
   h = await helpState(page);
-  check(`${L}: computador bloqueado: passos do cadeado`, h.visible && /navegador bloqueou/.test(h.text) && /cadeado/.test(h.text) && !/Informações do app/.test(h.text), h.text);
+  check(`${L}: computador bloqueado: passos do cadeado`, h.visible && /navegador bloqueou/.test(h.text) && /cadeado/.test(h.text) && !/Samsung Internet/.test(h.text), h.text);
   await page.evaluate(() => { window.__subResult = { ok: false, reason: 'blocked' }; });
   await page.click('#notif-pref-push-help [data-push-help-retry]');
   await page.waitForTimeout(400);
