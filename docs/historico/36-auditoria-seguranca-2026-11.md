@@ -310,3 +310,7 @@ e investigar por que ninguém ativa (convite, telas, iPhone exige o site instala
 - 2026-11-26: o aparelho da autora tem o site instalado pelo **Opera** (símbolo "O" no canto do ícone), não pelo Chrome; por isso
   não havia nada em Chrome > Configurações do site. O passo a passo do Android (B) passou a valer para qualquer navegador
   (cadeado do endereço → Permissões/Configurações do site → Notificações) e explica o símbolo do ícone. `tests/push-convite` 58/58.
+- 2026-11-26: a autora liberou as notificações no Opera (escudo verde → Permissões → Notificações) e ligou o push no site:
+  nova inscrição na produção (18:30 UTC, `fcm.googleapis.com`, `push_subscriptions.id` 5; a de 10/09 continua). Aviso de teste
+  pedido por ela: 1 linha em `push_outbox` (id 11, "Teste da Prof. Brune 🔔") + `push-dispatch` chamado com a chave pública:
+  `{"claimed":1,"sent":2,"failed":0,"pruned":0}` (aceito pelo Google nos 2 aparelhos).
