@@ -314,3 +314,5 @@ e investigar por que ninguém ativa (convite, telas, iPhone exige o site instala
   nova inscrição na produção (18:30 UTC, `fcm.googleapis.com`, `push_subscriptions.id` 5; a de 10/09 continua). Aviso de teste
   pedido por ela: 1 linha em `push_outbox` (id 11, "Teste da Prof. Brune 🔔") + `push-dispatch` chamado com a chave pública:
   `{"claimed":1,"sent":2,"failed":0,"pruned":0}` (aceito pelo Google nos 2 aparelhos).
+  **Chegou no celular dela às 15:31 de Brasília** (print: notificação do Opera "Teste da Prof. Brune", com o ícone do site).
+  Caminho inteiro confirmado: fila → push-dispatch → Google → Opera no Android.
