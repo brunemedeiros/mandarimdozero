@@ -47,6 +47,15 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
   check('Configurações: desligada salva como [] aparece desligada', JSON.stringify(R('notifPrefEffectiveChannels({channels:{cartoes_professora:[]}}, __c)', { c: cat })) === '[]');
   check('Configurações: no sino e no celular não existe (canal ausente), e-mail existe', !!R('notifPrefChannelMissing(__c, "in_app")', { c: cat }) && !!R('notifPrefChannelMissing(__c, "push")', { c: cat }) && !R('notifPrefChannelMissing(__c, "email")', { c: cat }));
   check('Configurações: salvo com sino/push por engano só vale o e-mail', JSON.stringify(R('notifPrefEffectiveChannels({channels:{cartoes_professora:["in_app","push","email"]}}, __c)', { c: cat })) === '["email"]');
+  check('domingo: isSunday só para domingo', core.isSunday('2026-11-29') && !core.isSunday('2026-11-30') && !core.isSunday('2026-11-25'));
+  const fd = (o) => new URLSearchParams(o);
+  const pf = core.parseExitForm;
+  check('parseExitForm: sem nada = sair sem motivo (1 clique do Gmail)', JSON.stringify(pf(fd('List-Unsubscribe=One-Click'))) === JSON.stringify({ action: 'sair', reason: null, other: null }));
+  check('parseExitForm: semanal com motivo; motivo inválido some; voltar nunca leva motivo; texto só no "outro" e até 200', pf(fd({ a: 'semanal', r: 'sem_tempo' })).reason === 'sem_tempo' && pf(fd({ r: 'xx' })).reason === null && pf(fd({ a: 'voltar', r: 'sem_tempo' })).reason === null && pf(fd({ r: 'outro', o: 'a  b' })).other === 'a b' && pf(fd({ r: 'sem_tempo', o: 'a' })).other === null && pf(fd({ r: 'outro', o: 'z'.repeat(300) })).other.length === 200 && pf(fd({ a: 'apagar' })).action === 'sair');
+  const wp = core.renderEmail({ lang: 'pt', kind: 'semanal', nome: 'Ana', n: 3, unsubscribeUrl: 'https://app.profbrune.com.br/sair-cartoes/?u=1' });
+  const we = core.renderEmail({ lang: 'en', kind: 'semanal', nome: '', n: 1 });
+  check('e-mail semanal pt: assunto, UTM semanal, domingo no texto', wp.subject === 'Seu resumo da semana: 3 cartões novos' && wp.html.includes('utm_campaign=cartoes_semanal') && wp.text.includes('utm_campaign=cartoes_semanal') && /domingo/.test(wp.html));
+  check('e-mail semanal en: sem português', we.subject === 'Your weekly summary: 1 new card' && !/você|cartão|Revisão|semana|domingo/i.test(we.html.replace(/<style[\s\S]*?<\/style>/, '').replace(/utm_campaign=\w+/g, '')) && /Sunday/.test(we.html));
   console.log(`E-mail de cartões da professora: ${passed}/${passed + failed} verificações${failed ? ' — ' + failed + ' FALHAS' : ' — OK'}`);
   process.exit(failed ? 1 : 0);
 })();

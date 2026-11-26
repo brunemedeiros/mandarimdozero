@@ -6,6 +6,22 @@ export const CATEGORY = 'cartoes_professora';
 export const APP_URL = 'https://app.profbrune.com.br/';
 // Link do botão com UTM (padrão do site; o GA4 só guarda depois do "Aceitar").
 export const BUTTON_URL = APP_URL + '?utm_source=email&utm_medium=email&utm_campaign=cartoes_novos';
+export const BUTTON_URL_WEEKLY = APP_URL + '?utm_source=email&utm_medium=email&utm_campaign=cartoes_semanal';
+
+// Resumo semanal (escolha de quem sai do aviso diário): sempre aos domingos, no mesmo agendamento das 11h UTC (8h de Brasília).
+export const isSunday = ymd => new Date(String(ymd) + 'T12:00:00Z').getUTCDay() === 0;
+
+// Motivos de saída aceitos (a mesma lista da tela e do check da migration 149).
+export const EXIT_REASONS = ['muitos_emails', 'sem_tempo', 'cartoes_nao_servem', 'sem_interesse', 'prefiro_site', 'outro'];
+// Lê o que a página do site (ou o "cancelar inscrição" do Gmail) manda no POST: a = sair | semanal | voltar; r = motivo; o = texto do "outro".
+// Sem nada (POST de 1 clique do Gmail: `List-Unsubscribe=One-Click`) = sair, sem motivo.
+export function parseExitForm(...sources) {
+  const g = k => { for (const sp of sources) { const v = sp && sp.get && sp.get(k); if (v != null && v !== '') return v; } return ''; };
+  const a = g('a'), action = a === 'semanal' || a === 'voltar' ? a : 'sair';
+  const r = g('r'), reason = action !== 'voltar' && EXIT_REASONS.includes(r) ? r : null;
+  const other = reason === 'outro' ? g('o').replace(/\s+/g, ' ').trim().slice(0, 200) : '';
+  return { action, reason, other: other || null };
+}
 
 const T = {
   pt: {
@@ -18,6 +34,15 @@ const T = {
       body: (n, nome) => `${nome ? `Oi, ${nome}!` : 'Oi!'} Separei ${n === 1 ? '1 cartão novo' : `${n} cartões novos`} para você revisar, com o que a gente viu nas últimas aulas.`,
       box: n => [n === 1 ? '1 cartão novo na sua Revisão' : `${n} cartões novos na sua Revisão`, 'Leva poucos minutos por dia', 'Quanto mais você revisa, mais fácil fica lembrar na hora de falar'],
       button: 'Revisar meus cartões', bye: 'Até já!',
+    },
+    semanal: {
+      subject: n => (n === 1 ? 'Seu resumo da semana: 1 cartão novo' : `Seu resumo da semana: ${n} cartões novos`),
+      pre: 'Os cartões novos da semana, num só e-mail.',
+      label: 'Resumo da semana',
+      titleA: n => (n === 1 ? '1 cartão novo' : `${n} cartões novos`), titleB: 'nesta semana!',
+      body: (n, nome) => `${nome ? `Oi, ${nome}!` : 'Oi!'} Este é o seu resumo de domingo: ${n === 1 ? '1 cartão novo' : `${n} cartões novos`} para você revisar, com o que a gente viu nas aulas da semana.`,
+      box: n => [n === 1 ? '1 cartão novo na sua Revisão' : `${n} cartões novos na sua Revisão`, 'Leva poucos minutos por dia', 'Um e-mail por semana, sempre aos domingos'],
+      button: 'Revisar meus cartões', bye: 'Boa semana!',
     },
     footer: 'Você recebe este aviso porque é aluno(a) da professora Brune.', stop: 'Parar de receber estes e-mails', sig: 'Brune, sua professora de idiomas', tag: 'aulas de idiomas online',
     test: 'TESTE: ',
@@ -32,6 +57,15 @@ const T = {
       body: (n, nome) => `${nome ? `Hi, ${nome}!` : 'Hi!'} I added ${n === 1 ? '1 new card' : `${n} new cards`} to your Review, based on what we covered in our latest classes.`,
       box: n => [n === 1 ? '1 new card in your Review' : `${n} new cards in your Review`, 'Only a few minutes a day', 'The more you review, the easier it is to remember when you speak'],
       button: 'Review my cards', bye: 'See you soon!',
+    },
+    semanal: {
+      subject: n => (n === 1 ? 'Your weekly summary: 1 new card' : `Your weekly summary: ${n} new cards`),
+      pre: 'This week\'s new cards, in a single email.',
+      label: 'Weekly summary',
+      titleA: n => (n === 1 ? '1 new card' : `${n} new cards`), titleB: 'this week!',
+      body: (n, nome) => `${nome ? `Hi, ${nome}!` : 'Hi!'} This is your Sunday summary: ${n === 1 ? '1 new card' : `${n} new cards`} to review, based on what we covered in this week's classes.`,
+      box: n => [n === 1 ? '1 new card in your Review' : `${n} new cards in your Review`, 'Only a few minutes a day', 'One email a week, always on Sundays'],
+      button: 'Review my cards', bye: 'Have a great week!',
     },
     footer: 'You get this notice because you are a student of Prof Brune.', stop: 'Stop receiving these emails', sig: 'Brune, your language teacher', tag: 'online language classes',
     test: 'TEST: ',
@@ -117,7 +151,7 @@ export function renderEmail({ lang, kind, nome, n, unsubscribeUrl, test }) {
   const subject = (test ? L.test : '') + K.subject(count, nome);
   const body = K.body(count, nome), box = K.box(count);
   const stop = unsubscribeUrl ? `<a href="${esc(unsubscribeUrl)}" style="color:#5d4f72">${esc(L.stop)}</a>` : '';
-  const html = brandEmailHtml({ langCode: L.lang, brand: L.brand, subject, pre: K.pre, label: K.label, titleA: K.titleA(count), titleB: K.titleB, body, box, button: K.button, buttonUrl: BUTTON_URL, bye: K.bye, sig: L.sig, tag: L.tag, footerHtml: `${esc(L.footer)}${stop ? ' ' + stop : ''}` });
-  const text = [body, '', ...box.map(x => '- ' + x), '', `${K.button}: ${BUTTON_URL}`, '', `${K.bye} ${L.sig}`, '', L.footer + (unsubscribeUrl ? ` ${L.stop}: ${unsubscribeUrl}` : '')].join('\n');
+  const html = brandEmailHtml({ langCode: L.lang, brand: L.brand, subject, pre: K.pre, label: K.label, titleA: K.titleA(count), titleB: K.titleB, body, box, button: K.button, buttonUrl: kind === 'semanal' ? BUTTON_URL_WEEKLY : BUTTON_URL, bye: K.bye, sig: L.sig, tag: L.tag, footerHtml: `${esc(L.footer)}${stop ? ' ' + stop : ''}` });
+  const text = [body, '', ...box.map(x => '- ' + x), '', `${K.button}: ${kind === 'semanal' ? BUTTON_URL_WEEKLY : BUTTON_URL}`, '', `${K.bye} ${L.sig}`, '', L.footer + (unsubscribeUrl ? ` ${L.stop}: ${unsubscribeUrl}` : '')].join('\n');
   return { subject, html, text };
 }
