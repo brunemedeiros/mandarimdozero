@@ -316,3 +316,16 @@ e investigar por que ninguém ativa (convite, telas, iPhone exige o site instala
   `{"claimed":1,"sent":2,"failed":0,"pruned":0}` (aceito pelo Google nos 2 aparelhos).
   **Chegou no celular dela às 15:31 de Brasília** (print: notificação do Opera "Teste da Prof. Brune", com o ícone do site).
   Caminho inteiro confirmado: fila → push-dispatch → Google → Opera no Android.
+
+## P2 e P3 no Staging (2026-11-26)
+
+- **150 `admin_policies_is_admin`** (P3): as 16 regras que reconheciam a admin pelo e-mail do token passam a usar `is_admin()`
+  (papel `admin` em `account_roles` OU o e-mail da autora; hoje só a conta dela tem o papel). `ALTER POLICY` no lugar, sem DROP.
+  Lista conferida igual nos dois projetos. Staging aplicada em 2026-11-26.
+- **151 `support_materials_size_limit`** (P2): a pasta pública `support-materials` passa a recusar arquivo acima de 50 MB, o mesmo
+  limite da tela (`TMT_MAX_FILE_BYTES`). Tipos de arquivo continuam livres (a tela aceita qualquer tipo); restringir só com a lista
+  da autora. Staging aplicada em 2026-11-26.
+- Teste (Staging, transação desfeita): admin pelo papel e conta com o e-mail da admin editam report alheio (1), veem os 122
+  Desafios (com os 2 rascunhos) e passam pela regra das conquistas; aluna comum: editar report 0, Desafios 120 (só publicados),
+  criar conquista recusado; limite da pasta = 52428800. Produção: aguardando o "ok" da autora.
+- Base para o teto de XP (produção, 2026-11-26): 89 semanas com XP, maior 2019, 95% abaixo de 1336, média 423.
