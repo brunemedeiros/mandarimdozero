@@ -28,3 +28,13 @@ Decisões da dona (2026-11-23/24). Valem para fr e zh (e o futuro pt). Nada no b
 ## Testes
 CSS entre sites 5/5; i18n no navegador 209/209; paridade quase iguais 2770/2770; i18n unit com as 14 chaves novas na lista de
 textos aprovados (as falhas que sobram já existiam na `main`). Prévia no celular: fr e zh, claro e escuro, e com menos movimento.
+
+## O B abre pronto (2026-11-25)
+
+A dona viu no celular só "@prof.brune" na abertura: a animação começava com o B vazio e, num aparelho rápido, o site abria
+antes de o B se formar. Decisão dela (opção recomendada): a abertura começa com o B COMPLETO (relógio da animação parado em
+2,9 s) e, depois de 0,4 s, a animação segue sozinha: o B some no fim do ciclo (~1 s depois de abrir) e volta a se desenhar,
+repetindo. Com "menos movimento" no aparelho, continua pronto e parado. Mudou só o `<script>` solto logo depois do desenho, em
+`fr/index.html` e `zh/index.html`; por causa da lista de segurança (CSP, `scripts/csp-atualizar.js`) as impressões digitais foram
+recalculadas. A tela que o Android mostra ao abrir o app instalado (ícone + "Francês com Prof. Brune") é do sistema e não aceita
+animação. Testes: simulação de celular fr e zh, com e sem "menos movimento" (14/14), e `tests/csp/` 12/12.

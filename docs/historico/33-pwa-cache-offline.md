@@ -146,3 +146,14 @@ Teste `tests/pwa-cache/test_aviso_sem_internet_playwright.js`: 48/48 (itens novo
 verdadeiro, percebida pelo áudio, por um pedido e pelo batimento; some sozinho sem o evento `online`; sem alarme falso com rede). Na
 versão de antes: 42/48, os 6 "o aviso aparece" falham (o que a autora viu).
 
+
+## Ícone sem cantos brancos (2026-11-25)
+
+Na tela que o Android mostra ao abrir o app instalado (ícone + "Francês com Prof. Brune", desenhada pelo sistema a partir do
+`manifest.json`, sem animação possível), o ícone aparecia com pedacinhos brancos nos cantos: o ícone-mestre é um quadrado bege
+de cantos arredondados sobre branco, e o fundo dessa tela é bege. Decisão da dona (prévia aprovada): os cantos e o quadrado
+passam a ter a cor de fundo de cada app (fr `#FAF5EA`, zh `#FBF4E8`), então o B aparece sozinho no fundo. Cor sólida, não
+transparente (no iPhone o transparente vira preto). Feito no gerador (`paint_icon_background` em
+`scripts/generate_pwa_assets.py`, roda de novo sem mudar nada); vale também para a versão "maskable" (que tinha os mesmos cantos
+brancos dentro), os favicons, o ícone do iPhone e a imagem de compartilhamento. Quem já instalou pode levar alguns dias para ver o
+ícone novo (o Android atualiza sozinho).

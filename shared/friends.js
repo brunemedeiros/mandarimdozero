@@ -568,7 +568,7 @@ async function loadFriendsMiniRank(){
   const scopes = [{ key: 'all', label: t('friends.scopeAll') }, ...langs.map(l => ({ key: l.appKey, label: languageDisplayName(l) }))];
   const chips = `<div class="leaderboard-tabs friends-rank-scopes" role="tablist" aria-label="${t('friends.scopeAria')}">${scopes.map(sc =>
     `<button type="button" class="leaderboard-tab ${sc.key === scope ? 'active' : ''}" role="tab" aria-selected="${sc.key === scope}" data-friends-rank-scope="${escapeAttr(sc.key)}">${escapeHTML(sc.label)}</button>`).join('')}</div>`;
-  box.innerHTML = `${chips}<div id="friends-mini-rank-rows">${loadingHTML(t('friends.loadingShort'))}</div>`;
+  box.innerHTML = `${chips}<div id="friends-mini-rank-rows">${loadingHTML(t('loading.friendsWeek'))}</div>`;
   const rows = await fetchFriendsLeaderboard(scope, leaderboardCurrentWeekStart());
   if (seq !== FRIENDS_STATE.rankSeq) return;
   const rowsBox = document.getElementById('friends-mini-rank-rows');
@@ -1061,7 +1061,7 @@ function friendsCheerHTML(item){
 async function loadFriendsActivity(){
   const box = document.getElementById('friends-activity');
   if (!box) return;
-  if (!box.children.length) box.innerHTML = loadingHTML(t('friends.loadingShort'));
+  if (!box.children.length) box.innerHTML = loadingHTML(t('loading.friendsNews'));
   const appKey = (typeof APP_KEY !== 'undefined') ? APP_KEY : LanguageRegistry.defaultAppKey();
   // Conquistas: friends_badge_feed (091, com Parabéns); sem ela, a lista antiga (friends_activity, sem botão).
   let [badgesRes, streakRes] = await Promise.all([
@@ -1181,7 +1181,7 @@ const FRIENDS_PREF_FIELDS = [
 async function loadFriendsPrefs(){
   const body = document.getElementById('friends-prefs-body');
   if (!body || typeof CURRENT_USER === 'undefined' || !CURRENT_USER) return;
-  body.innerHTML = loadingHTML(t('friends.loadingShort'));
+  body.innerHTML = loadingHTML(t('loading.friendsPrefs'));
   const { data, error } = await supabaseClient.from('friend_settings').select('*').eq('user_id', CURRENT_USER.id).maybeSingle();
   const box = document.getElementById('friends-prefs-body');
   if (!box) return;
