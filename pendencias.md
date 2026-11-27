@@ -6,13 +6,16 @@ quais foram resolvidas, move essas para "Resolvidas" e acrescenta as novas.
 
 Formato de cada linha: `- [P-NNN] [desde DD/MM] [Severo já no ar | Severo corrigir antes de ligar | Médio | Leve] #PR · o problema · onde (arquivo:linha) · como conferir que foi resolvido`
 
-Atualizado em: 26/11
+Atualizado em: 27/11
 
 ## Conversa "Banco de Revisão" · https://claude.ai/code/session_01MbTyCoU1yEuwCeRkWS9maB
 - [P-002] [desde 25/11] [Leve] #518 · o "Estado atual" do `CLAUDE.md` cita a migration 145 (feito no #524), mas ainda não registra a `review-bank-agent` v17 na produção (nenhuma "v17" no arquivo) · `CLAUDE.md` · resolvido quando a linha do Banco citar a versão atual da função
 - [P-003] [desde 25/11] [Leve] #518 · ao juntar fichas, o pedido repetido recusado ganha uma marca dentro do texto que a aluna escreveu · `shared/supabase_migrations/145_review_bank_merge_keep_history.sql:70` · resolvido quando o texto da aluna ficar intacto (a marca em outro campo)
-- [P-015] [desde 26/11] [Leve] #523 · a página nova `sair-cartoes/` não carrega `shared/anti-moldura.js` e não entra na lista de `tests/anti-moldura/test_playwright.js` (regra em `.claude/rules/frontend-fr-zh.md:104`) · `sair-cartoes/index.html` · resolvido quando a página carregar o script e o teste a listar
-- [P-016] [desde 26/11] [Leve] #523 · `sair-cartoes/` nasce com `lang="pt-BR"` e `<title>` em português até o JS rodar; no site em inglês pisca português e, sem JS, fica em branco · `sair-cartoes/index.html:2` e `:27` · resolvido quando o título inicial for neutro e houver `<noscript>` nas duas línguas
+- [P-016] [desde 26/11] [Leve] #523 · `sair-cartoes/` nasce com `lang="pt-BR"` e `<title>` em português até o JS rodar; no site em inglês pisca português e, sem JS, fica em branco · `sair-cartoes/index.html:2` e `:27` · resolvido quando o título inicial for neutro e houver `<noscript>` nas duas línguas (ainda aberto em 27/11: `<html lang="pt-BR">` e título em português)
+- [P-025] [desde 27/11] [Médio] #532 · quem escolhe "1 resumo por semana" grava `cartoes_professora` vazio em `notification_preferences` e o semanal só em `teacher_cards_digest_prefs`; Configurações > Notificações mostra o aviso desligado mas o e-mail continua chegando todo domingo, e religar/desligar de novo faz o semanal voltar sem pedido; as telas "voltou" e "link inválido" mandam ajustar em Configurações, o que não funciona para o semanal · `supabase/functions/teacher-cards-digest/index.ts` (~linha 125 e 403), `shared/notification-preferences.js:44` · resolvido quando Configurações enxergar/zerar o semanal (ou a função só enviar se o canal estiver marcado)
+- [P-026] [desde 27/11] [Médio] #532 · o motivo de saída não é anônimo de fato: `updated_at` da conta e `created_at` do motivo são gravados no mesmo instante, e `cards_digest_exit_summary()` devolve a hora exata do texto livre, dá para cruzar conta x motivo · `supabase/functions/teacher-cards-digest/index.ts:407-411` · resolvido quando o motivo guardar só o dia/semana e a hora exata não for devolvida
+- [P-027] [desde 27/11] [Leve] #532 · botões rosa da página com texto branco `#fff` sobre `#E36BCA` (contraste ~2,9:1) e fora do `docs/email/PADRAO-EMAIL.md:15` (texto escuro); o título do PR sugere que foi pedido da autora, confirmar · `sair-cartoes/index.html:87` e `:94` · resolvido quando a autora confirmar a cor ou o contraste chegar a 4,5:1
+- [P-028] [desde 27/11] [Leve] #532 · documentação desatualizada: `docs/email-cartoes-professora-proposta.md:61` ainda diz "produção pendente" para a 149 (já aplicada) e a prévia `docs/email/previas/sair-cartoes-previa.html` citada no CLAUDE.md não está na `main` · `docs/email-cartoes-professora-proposta.md`, `CLAUDE.md` · resolvido quando as duas frases forem corrigidas
 
 ## Conversa "Central de Controle plano" · https://claude.ai/code/session_01W7mkF6UAWsrJCnTY3YddXY
 - [P-004] [desde 25/11] [Leve] #517 · a contagem "Na aula" de turma ignora a data em que a aluna entrou na turma · `shared/supabase_migrations/146_admin_overview.sql` · resolvido quando a contagem só considerar aulas a partir da entrada da aluna
@@ -39,13 +42,17 @@ Atualizado em: 26/11
 ## Conversa "Passaporte e selos" · https://claude.ai/code/session_01W7mkF561UhmK9d3RKazEz5
 - [P-023] [desde 26/11] [Severo já no ar] #522 · o perfil de conta PRIVADA agora mostra a data de cada conquista (`earned_at`), o que revela quando a pessoa estudou; a leitura de `earned_badges` é aberta a qualquer logado (080_private_profile.sql:104); RLS atual não conferida · `shared/leaderboard.js:339-348`, `shared/public-profile.js:259-266` · resolvido quando a data só aparecer com `isPublic` ou a autora decidir que pode (Severo pela regra da autora: dado de conta privada exposto)
 
-## Conversa branch `claude/relaxed-sagan-7lyu9c` · https://claude.ai/code/session_01W7mkF4iqmJot9jd8prH5xV
-- [P-024] [desde 26/11] [Médio] sem PR · migrations 147 (`reports_insert_own`) e 148 (`push_subscriptions_owner_update`) e `push-send` v13 já estão na produção (e 147/148 no Staging), mas o código só existe nessa branch, fora da `main`; o "Estado atual" não registra · branch `claude/relaxed-sagan-7lyu9c` · resolvido quando a branch for mesclada (arquivos 147/148 na `main`)
+## Conversa "Notificações no celular" · https://claude.ai/code/session_01W7mkF4iqmJot9jd8prH5xV
+- [P-030] [desde 27/11] [Leve] #530 · iPhone com o site na Tela de Início e alertas negados cai no texto "desktop" ("Clique no cadeado ao lado do endereço"), mas o app aberto pelo ícone não tem barra de endereço; o caminho certo é Ajustes do iPhone > Notificações · `shared/push-convite.js:298-305` · resolvido quando o texto do iPhone cobrir esse caso
+- [P-031] [desde 27/11] [Leve] #530 · o "Estado atual" do `CLAUDE.md` ainda diz que o PR #530 está "aguardando a autora mesclar", mas já foi mesclado (26/11) · `CLAUDE.md:161` · resolvido quando a linha disser mesclado, e depois conferir a publicação e contar aparelhos inscritos em ~2 semanas
 
 ## Perguntas para a autora (não são de nenhuma conversa)
 - [P-020] [desde 26/11] [Leve] `tests/paridade-sites/test_quase_iguais.js` passou de 2770/2770 para 2764/2770: 6 cenas de Configurações no site em inglês (fr e zh) mostram o seletor de exportar em inglês ("Unit", "All units") e a referência do teste tem "Unidade"/"Todas as unidades". O inglês ESTÁ CERTO (a chave `settings.export.allUnits` = "All units" existe em `shared/i18n/en.js:199`); muito provavelmente antes vazava português ali e alguém consertou. NÃO mexer no texto do site: só atualizar a referência do teste (conferido pelo Claude em 26/11) · `tests/paridade-sites/test_quase_iguais.js` · resolvido quando o teste voltar a 2770/2770 sem português no site em inglês
+- [P-029] [desde 27/11] [Leve] #532 · a leitura dos motivos de saída (migration 149, `149_cards_digest_weekly_reasons.sql:299`) é liberada a qualquer conta com papel `teacher`: existe outra professora cadastrada além da Brune? Não deu para conferir (sem SQL na revisão) · resolvido quando a autora confirmar que só ela tem o papel
 
 ## Resolvidas (ficam 7 dias e saem)
+- [P-015] resolvida em 27/11 · #532 · `sair-cartoes/` agora carrega `anti-moldura.js` e está na lista do teste
+- [P-024] resolvida em 27/11 · #530 · migrations 147 e 148 e `push-send` v13 agora estão na `main` (PR mesclado)
 - [P-008] resolvida em 26/11 · a autora confirmou que não usou o "Juntar" entre 16/11 e 25/11: nenhuma resposta foi perdida antes da migration 145
 - [P-000] resolvida em 25/11 · #517 · migration da Central de Controle renumerada de 145 para 146 (as duas estão na produção sem conflito)
 - [P-001] resolvida em 26/11 · #523 · "Parar de receber" agora abre a página `sair-cartoes/` do site (200 no ar), função `teacher-cards-digest` v5 na produção sem JWT
