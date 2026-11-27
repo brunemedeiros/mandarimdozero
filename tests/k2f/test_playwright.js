@@ -4,7 +4,10 @@
 // boot (o stub de rpc/select respeita o mesmo contrato da migration 051/052).
 // Rodar: node tests/fase-e/test_playwright.js   (usa o playwright global)
 const { chromium } = require(require.resolve('playwright', { paths: [process.env.NODE_PATH || '/opt/node22/lib/node_modules'] }));
-const NM = process.env.K2F_NM || '/tmp/claude-0/k2f/node_modules';
+// Bibliotecas do próprio site (shared/vendor/, fixadas na auditoria de 2026-11): antes vinham de uma pasta temporária de
+// uma sessão antiga (/tmp/claude-0/k2f/node_modules) e o teste quebrava em qualquer ambiente novo (2026-11-27).
+const VENDOR = require('path').join(__dirname, '..', '..', 'shared', 'vendor');
+const SQLJS_JS = VENDOR + '/sqljs-1.8.0/sql-wasm.js', SQLJS_WASM = VENDOR + '/sqljs-1.8.0/sql-wasm.wasm', JSZIP_JS = VENDOR + '/jszip-3.10.1/jszip.min.js';
 const http = require('http'), fs = require('fs'), path = require('path');
 const ROOT = path.resolve(__dirname, '..', '..');
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.png': 'image/png', '.mp3': 'audio/mpeg', '.svg': 'image/svg+xml' };
@@ -87,7 +90,7 @@ async function bootPage(browser, lang, port){
 
 
 
-const SQLJS = require(NM + '/sql.js'), JSZip = require(NM + '/jszip');
+const SQLJS = require(SQLJS_JS), JSZip = require(JSZIP_JS);
 async function readApkg(buf){
   const zip = await JSZip.loadAsync(buf);
   const SQL = await SQLJS();
@@ -110,9 +113,9 @@ async function readApkg(buf){
     const errors = []; page.on('pageerror', e => errors.push(e.message));
     await page.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, r => r.abort());
     await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase|\/shared\/vendor\/supabase-js/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
-    await page.route(/jszip\.min\.js/, r => r.fulfill({ contentType: 'text/javascript', body: fs.readFileSync(NM + '/jszip/dist/jszip.min.js', 'utf8') }));
-    await page.route(/sql-wasm\.js/, r => r.fulfill({ contentType: 'text/javascript', body: fs.readFileSync(NM + '/sql.js/dist/sql-wasm.js', 'utf8') }));
-    await page.route(/sql-wasm\.wasm/, r => r.fulfill({ contentType: 'application/wasm', body: fs.readFileSync(NM + '/sql.js/dist/sql-wasm.wasm') }));
+    await page.route(/jszip\.min\.js/, r => r.fulfill({ contentType: 'text/javascript', body: fs.readFileSync(JSZIP_JS, 'utf8') }));
+    await page.route(/sql-wasm\.js/, r => r.fulfill({ contentType: 'text/javascript', body: fs.readFileSync(SQLJS_JS, 'utf8') }));
+    await page.route(/sql-wasm\.wasm/, r => r.fulfill({ contentType: 'application/wasm', body: fs.readFileSync(SQLJS_WASM) }));
     await page.addInitScript(() => { try { sessionStorage.setItem('guest_mode', '1'); } catch (e) {} });
     await page.goto(`http://127.0.0.1:${port}/${lang}/index.html`);
     await page.waitForFunction(() => typeof STATE !== 'undefined' && STATE.cards && STATE.cards.length > 0 && CURRENT_USER === false, null, { timeout: 15000 });
@@ -137,7 +140,7 @@ async function readApkg(buf){
     const vocabByStudy = await ev(() => { const m = {}; UNITS.forEach(u => (u.vocab || []).forEach(v => { m[APP_KEY === 'mandarim' ? v.c : v.f] = v.t; })); return m; });
     const transSet = new Set(Object.values(vocabByStudy));
     for (let i = 0; i < 10; i++){
-      const cur = await page.evaluate(() => ({ p: document.querySelector('.speed-prompt .french, .speed-prompt .hanzi')?.innerText, o: [...document.querySelectorAll('.speed-option')].map(e => e.innerText) }));
+      const cur = await page.evaluate(() => ({ p: document.querySelector('.speed-prompt .french, .speed-prompt .hanzi')?.innerText, o: [...document.querySelectorAll('.speed-option')].map(e => { const c = e.cloneNode(true); c.querySelectorAll('.kbd-hint').forEach(k => k.remove()); return c.innerText.trim(); }) })); // sem o número do atalho (1 a 4), que as opções ganharam em 2026-11-13
       if (!cur.p) break;
       prompts.push(cur.p); optionSets.push(cur.o);
       const right = vocabByStudy[cur.p];

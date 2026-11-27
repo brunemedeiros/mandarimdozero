@@ -701,7 +701,8 @@ function deckBrowserTopModalIs(id){
   if (!me) return false;
   const z = el => Number(getComputedStyle(el).zIndex) || 0;
   const others = Array.from(document.querySelectorAll('.app-modal-overlay'))
-    .filter(o => o !== me && getComputedStyle(o).display !== 'none');
+    // .mov-fantasma = desenho da animação de saída (shared/janelas-movimento.js, 0,15 s), não é janela aberta (2026-11-27).
+    .filter(o => o !== me && !o.classList.contains('mov-fantasma') && getComputedStyle(o).display !== 'none');
   return others.every(o => z(o) < z(me));
 }
 function addCardModalOnKey(e){
