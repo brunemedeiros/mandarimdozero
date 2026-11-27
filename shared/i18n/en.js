@@ -2812,6 +2812,20 @@ window.I18N_CATALOG['en'] = {
   'admin.overview.xp.note': 'Accounts with {limit} XP or more in a week, over the last 2 weeks (the real record is about 2,000). The site caps XP at {cap} per week for each language. It may just be a lot of studying; worth a look.', // ALTA
   'admin.overview.xp.amount': '{n} XP in the week of {week}', // ALTA
   'admin.overview.xp.capped': 'hit the cap', // ALTA
+  'admin.overview.exit.title': 'New-cards email: why people leave', // ALTA
+  'admin.overview.exit.kpi.total': 'Answers', // ALTA
+  'admin.overview.exit.kpi.weekly': 'On the weekly summary now', // ALTA
+  'admin.overview.exit.reason.muitos_emails': 'I get too many emails', // ALTA
+  'admin.overview.exit.reason.sem_tempo': 'I have no time right now', // ALTA
+  'admin.overview.exit.reason.cartoes_nao_servem': 'The cards are not useful to me', // ALTA
+  'admin.overview.exit.reason.sem_interesse': 'I am no longer interested', // ALTA
+  'admin.overview.exit.reason.prefiro_site': 'I prefer to see everything on the site', // ALTA
+  'admin.overview.exit.reason.outro': 'Another reason', // ALTA
+  'admin.overview.exit.weeklyOf': '({n} chose the weekly summary)', // ALTA
+  'admin.overview.exit.others': 'What they wrote under "Another reason"', // ALTA
+  'admin.overview.exit.more': 'Show {n} more', // ALTA
+  'admin.overview.exit.empty': 'No answers yet. When someone leaves through the email link and picks a reason, it shows up here.', // ALTA
+  'admin.overview.exit.note': 'Anonymous answers from the "Stop receiving" page (since 11/26/2026): they do not show who answered. People who leave with the Gmail unsubscribe button, or without picking a reason, do not appear.', // ALTA
   'admin.overview.empty.scope': 'No accounts for this choice.', // ALTA
   'admin.overview.error': 'Couldn\'t load the Overview.', // ALTA
   'admin.overview.retry': 'Try again', // ALTA
