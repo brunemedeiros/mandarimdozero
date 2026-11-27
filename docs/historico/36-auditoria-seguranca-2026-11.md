@@ -420,7 +420,8 @@ pwa-cache 21/21, 48/48 e 14/14, login-obrigatorio 127/127, 166/166 e 63/63, cons
   404; sem login = 401; código mal formado = 400; `callback` com `state` falso = 400; ligação de A não trocada pela tentativa de B.
 - **Testes:** `tests/oauth-confirmar/run.sh` (Node 65/65 + Postgres local 30/30); `tests/aulas-presenca/run.sh` sem falha
   (117 45/45, 128 19/19 etc.); `tests/aulas-presenca/test_google_map.mjs` 9/9 (ajustado para a importação nova);
-  `tests/notion/test_map.mjs` 13/13.
+  `tests/notion/test_map.mjs` 13/13; `tests/painel-professora/test_playwright.js` 895/895; `tests/i18n/test_sem_portugues_en.js` 6/6;
+  `tests/i18n/test_i18n_unit.js` 2333/2333.
 - **Limpeza:** a remoção das contas `zz-oauth-*` pela ferramenta ficou esperando confirmação: `docs/rollout-sql/limpeza-staging-zz-oauth.sql`
   (SQL Editor do Staging; a ligação de teste e as pendências saem em cascata).
 - **Produção (aguardando o ok da autora):** 1) migration 156; 2) deploy de `google-calendar` e `notion-sync` (mesmos arquivos da
