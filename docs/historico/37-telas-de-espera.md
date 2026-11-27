@@ -38,3 +38,15 @@ repetindo. Com "menos movimento" no aparelho, continua pronto e parado. Mudou s�
 `fr/index.html` e `zh/index.html`; por causa da lista de segurança (CSP, `scripts/csp-atualizar.js`) as impressões digitais foram
 recalculadas. A tela que o Android mostra ao abrir o app instalado (ícone + "Francês com Prof. Brune") é do sistema e não aceita
 animação. Testes: simulação de celular fr e zh, com e sem "menos movimento" (14/14), e `tests/csp/` 12/12.
+
+## B completo em qualquer navegador e abertura rápida de novo (2026-11-26/27)
+
+A dona abriu no Opera (Android) e viu só "@prof.brune" por mais de 30 s. Duas causas:
+1. No motor do Chrome (Opera, Chrome) e no do Firefox a animação SMIL só começa quando a página TERMINA de carregar; até lá o
+   desenho fica no ponto inicial, que era o B vazio. Conserto: o estado parado do desenho virou o B completo
+   (`stroke-dashoffset="0"` nas máscaras) e as animações entram no meio do ciclo (`begin="-2.7s"`, o B completo); o `<script>`
+   solto agora só pausa a animação com menos movimento. Sem `setCurrentTime`/`setTimeout`.
+2. A página levava ~30 s para carregar no celular desde a CSP por `<meta>` (PR #520): ver o histórico 36.
+Testes: B visível ao abrir em fr e zh, normal, com menos movimento e com a animação parada (simulando o navegador que só
+começa no fim do carregamento) 20/20; rede de celular simulada (150 ms por arquivo): hoje B vazio em 1, 3, 6 e 10 s; com o
+conserto, B completo e depois animado.
