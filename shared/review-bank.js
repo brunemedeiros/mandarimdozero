@@ -233,7 +233,7 @@ function rbStudentPanelHTML(s){
     ${ready.length && rbHasTarget(s) ? `<div class="rb-ready"><span>${rbH(rbt('readyBanner', { n: ready.length }))}</span><button class="rb-btn rb-btn-blue" data-rb="generate-ready" data-id="${rbH(s.id)}">${rbH(rbt('generateReady'))}</button></div>` : ''}
     <div class="rb-counts" aria-live="polite">${counts.map(([v, k]) => `<div class="rb-count"><b>${v}</b><span>${rbH(rbt(k))}</span></div>`).join('')}</div>
     <div class="rb-tabs" role="tablist" aria-label="${rbH(rbt('tabsAria'))}">${['desempenho', 'aulas', 'itens'].map(k => `<button class="rb-fchip" role="tab" data-rb="tab" data-t="${k}" aria-selected="${RB.tab === k}" aria-pressed="${RB.tab === k}">${rbH(rbt('tab.' + k))}</button>`).join('')}</div>
-    ${RB.tab === 'desempenho' ? rbStatsHTML(s) : ''}
+    ${RB.tab === 'desempenho' ? rbStruggleHTML(s) + rbStatsHTML(s) : ''}
     ${RB.tab === 'aulas' ? rbRecapHTML(s) + rbLessonsHTML(s) : ''}
     ${RB.tab !== 'itens' ? '' : `<section style="display:flex;flex-direction:column;gap:12px;">
       <div class="rb-toolbar" role="group" aria-label="${rbH(rbt('filterAria'))}">
@@ -291,7 +291,8 @@ function rbItemHTML(i, s){
         ${i.class_date ? `<span class="rb-meta">${rbH(rbt('classOf', { d: rbDateFmt(i.class_date) }))}</span>` : ''}
         ${i.status === 'pendente' ? `<span class="rb-tag is-pend">${rbH(rbt('st.pendente'))}</span>` : i.status === 'cortado' ? `<span class="rb-tag">${rbH(rbt('st.cortado'))}</span>` : ''}
         ${i.sensitive ? `<span class="rb-tag is-pend" title="${rbH(rbt('sensitiveHint'))}">${rbH(rbt('sensitiveTag'))}</span>` : ''}
-        ${i.teacher_flashcard_id ? `<span class="rb-tag is-card" title="${rbH(rbt('cardDelivered'))}">${rbH(rbt('cardTag'))}</span>` : ''}</div>
+        ${i.teacher_flashcard_id ? `<span class="rb-tag is-card" title="${rbH(rbt('cardDelivered'))}">${rbH(rbt('cardTag'))}</span>` : ''}
+        ${rbStreakTagHTML(i)}</div>
       <div class="rb-q">${rbH(i.question)}</div>
       ${i.wrong_form ? `<div class="rb-wrong">${rbH(i.wrong_form)}</div>` : ''}
       <div class="rb-a">${rbH(i.answer)}</div>
@@ -299,6 +300,7 @@ function rbItemHTML(i, s){
       ${i.check_note ? `<div class="rb-doubt"><strong>${rbH(rbt('toCheckColon'))}</strong> ${rbH(i.check_note)}</div>` : ''}
       ${prop ? rbProposalHTML(i, prop) : ''}
       ${rbRequestsHTML(i)}
+      ${rbTypedHTML(i)}
     </div>
     <div class="rb-actions">
       ${i.status !== 'aprovado' ? `<button class="rb-btn rb-btn-ok" data-rb="approve" data-id="${rbH(i.id)}">${rbH(rbt('approve'))}</button>` : `<button class="rb-btn" data-rb="unapprove" data-id="${rbH(i.id)}">${rbH(rbt('backToPending'))}</button>`}
@@ -311,6 +313,50 @@ function rbItemHTML(i, s){
           ${i.teacher_flashcard_id ? `<span class="rb-meta">${rbH(rbt('itemHasCardHint'))}</span>` : `<button class="rb-btn rb-btn-cut" data-rb="item-delete" data-id="${rbH(i.id)}">${rbH(rbt('itemDelete'))}</button>`}
         </div></details>
     </div>${rbMovePanelHTML(i)}</article>`;
+}
+
+// ---------- Etapa 3 (143): o que foi digitado ao errar e itens com erros seguidos ----------
+// Compara pela forma do idioma do ALUNO (o painel do fr mostra alunos de português; o do zh, de francês).
+function rbTypedAttemptHTML(typed, expected, lang){
+  if (typeof typedAttemptHTML !== 'function') return `<div class="typed-attempt">${rbH(typed)}</div>`;
+  const form = lang === 'mandarim' && typeof pinyinAttemptDisplayForm === 'function' ? pinyinAttemptDisplayForm : (x => x);
+  return typedAttemptHTML(typed, expected, form) || `<div class="typed-attempt">${rbH(typed)}</div>`;
+}
+function rbStreakTagHTML(i){
+  const n = rbMissStreak(RB.reviewsBy[i.bank_student_id] || [], i.id);
+  return n >= RB_MISS_STREAK_ALERT ? `<span class="rb-tag is-bad" title="${rbH(rbt('struggle.hint'))}">${rbH(rbt('streakTag', { n }))}</span>` : '';
+}
+function rbTypedListHTML(i, limit){
+  const s = rbStudentById(i.bank_student_id), group = !!(s && s.classroom_id);
+  const exp = rbTypedExpected(i);
+  return `<ul class="rb-typed-list">${rbTypedAttempts(RB.reviewsBy[i.bank_student_id] || [], i.id, limit).map(r => `<li>
+    <span class="rb-meta">${rbH(rbDateFmt(r.review_date || String(r.created_at || '').slice(0, 10)))}${group ? ' · ' + rbH(rbPersonLabel(r.student_id, i.language_app_key)) : ''}</span>
+    ${rbTypedAttemptHTML(r.typed_text, exp, i.language_app_key)}</li>`).join('')}</ul>`;
+}
+function rbTypedHTML(i){
+  const revs = RB.reviewsBy[i.bank_student_id] || [];
+  const n = rbItemReviews(revs, i.id).filter(r => r.typed_text).length;
+  if (!n) return '';
+  const open = rbMissStreak(revs, i.id) >= RB_MISS_STREAK_ALERT;
+  return `<details class="rb-typed"${open ? ' open' : ''}><summary>${rbH(rbt('typed.title', { n }))}</summary>
+    ${rbTypedListHTML(i, 5)}
+    <p class="rb-meta rb-typed-exp">${rbH(rbt('typed.expected'))} <strong class="rb-a">${rbH(rbTypedExpected(i))}</strong></p>
+    <p class="rb-meta rb-typed-note">${rbH(rbt('typed.note'))}</p></details>`;
+}
+// Aba Desempenho: itens errados nas últimas 3 vezes ou mais (some quando não há nenhum).
+function rbStruggleHTML(s){
+  const list = rbStrugglingItems(RB.itemsBy[s.id] || [], RB.reviewsBy[s.id] || []);
+  if (!list.length) return '';
+  return `<section class="rb-struggle" aria-labelledby="rb-struggle-h">
+    <h4 id="rb-struggle-h">${rbH(rbt('struggle.title', { n: list.length }))}</h4>
+    <p class="rb-meta">${rbH(rbt('struggle.hint'))}</p>
+    <div class="rb-list">${list.slice(0, 8).map(({ item: it, streak }) => `<div class="rb-struggle-item">
+      <div class="rb-struggle-top"><span class="rb-tag is-bad">${rbH(rbt('streakTag', { n: streak }))}</span><span class="rb-tag">${rbH(rbt('type.' + it.item_type))}</span></div>
+      ${it.wrong_form ? `<div class="rb-wrong">${rbH(it.wrong_form)}</div>` : `<div class="rb-q">${rbH(it.question)}</div>`}
+      <div class="rb-a">${rbH(it.answer)}</div>
+      ${rbTypedAttempts(RB.reviewsBy[s.id] || [], it.id, 1).length ? `<div class="rb-struggle-typed"><span class="rb-meta">${rbH(rbt('struggle.lastTyped'))}</span>${rbTypedListHTML(it, 2)}</div>` : ''}
+      <div><button class="rb-btn" data-rb="goto-item" data-id="${rbH(it.id)}">${rbH(rbt('struggle.see'))}</button></div></div>`).join('')}</div>
+  </section>`;
 }
 
 // Pedidos das alunas (114): cada um com as ações certas para o tipo. Cortar vale para todos; recusar devolve o cartão dela.
@@ -804,6 +850,8 @@ function rbWire(wrap){
       else if (a === 'filter'){ RB.sel = {}; RB.filter = b.dataset.f; RB.limit = 60; rbRender(); }
       else if (a === 'more'){ RB.limit += 60; document.getElementById('rb-list').innerHTML = rbListHTML(rbStudentById(RB.cur)); }
       else if (a === 'item-new'){ RB.adding = true; RB.editingId = null; rbRender(); }
+      else if (a === 'goto-item'){ const it = rbFindItem(id); if (!it) return; RB.tab = 'itens'; rbLs.set('student-tab', RB.tab); RB.filter = 'todos'; RB.type = ''; RB.q = it.question || it.answer || ''; RB.editingId = null; RB.adding = false; rbRender();
+        const el = document.querySelector('.rb-item[data-item="' + id + '"]'); if (el){ el.classList.add('is-focus'); el.scrollIntoView({ block: 'center' }); } }
       else if (a === 'item-edit'){ RB.editingId = id; RB.adding = false; rbRender(); }
       else if (a === 'item-cancel'){ RB.editingId = null; RB.adding = false; rbRender(); }
       else if (a === 'item-save'){ b.disabled = true; await rbSaveItem(b.closest('[data-form=item]'), !!b.dataset.approve); }
