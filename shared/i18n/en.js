@@ -1129,6 +1129,7 @@ window.I18N_CATALOG['en'] = {
   'supportMaterials.loginRequired': 'Sign in to your account to see your support material.', // ALTA
   'supportMaterials.openLink': '🔗 Open link', // ALTA
   'supportMaterials.downloadFile': 'Download file', // ALTA
+  'supportMaterials.fileError': 'Could not open the file right now. Please try again.', // ALTA
   'supportMaterials.sentOn': 'sent on {date}', // ALTA
   'supportMaterials.empty': "Your teacher hasn't sent any support material yet. When she sends something (a summary, a link, a file), it will show up here.", // ALTA
   'wizard.day.mon': 'Mon', // ALTA

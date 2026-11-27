@@ -69,7 +69,8 @@ check('tamanho: KB e MB', run('tmtSize(2048)') === '2 KB' && run('tmtSize(3 * 10
   // ---- cartão ----
   const card = run('tmtCardHTML(g)', { g: v });
   check('cartão: título, três avatares, nomes', card.includes('Vocab') && (card.match(/class="p-avatar"/g) || []).length === 3 && card.includes('Ana Paula'));
-  check('cartão: arquivo como link seguro', /<a class="p-selo p-selo--info" href="https:\/\/c\/v\.pdf" target="_blank" rel="noopener noreferrer">Arquivo · v\.pdf</.test(card), card.slice(0, 700));
+  // Pasta fechada (153, 2026-11-27): o arquivo abre por link temporário criado no clique (data-sm-file), nunca pelo endereço aberto.
+  check('cartão: arquivo abre por link temporário (data-sm-file), sem o endereço aberto no href', /<a class="p-selo p-selo--info" href="#" data-sm-file="https:\/\/c\/v\.pdf">Arquivo · v\.pdf</.test(card) && !/href="https:\/\/c\/v\.pdf"/.test(card), card.slice(0, 700));
   check('cartão: menu com editar e apagar do envio', card.includes(`data-editar-material="${v.gid}"`) && card.includes(`data-apagar-material="${v.gid}"`));
   const perigoso = run('tmtCardHTML(g)', { g: { gid: 9, title: '<img src=x onerror=1>', description: '<script>1</script>', link_url: 'javascript:alert(1)', file_url: 'data:x', file_name: 'a"b', created_at: '2026-10-02T15:00:00Z', links: [links[0]], rows: [{}] } });
   check('cartão: texto do banco escapado', !perigoso.includes('<img') && !perigoso.includes('<script') && perigoso.includes('&lt;img'));

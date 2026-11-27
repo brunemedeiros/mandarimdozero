@@ -1148,6 +1148,7 @@ window.I18N_CATALOG['pt-BR'] = {
   'supportMaterials.loginRequired': 'Entre na sua conta para ver seu material de apoio.',
   'supportMaterials.openLink': '🔗 Abrir link',
   'supportMaterials.downloadFile': 'Baixar arquivo',
+  'supportMaterials.fileError': 'Não foi possível abrir o arquivo agora. Tente de novo.',
   'supportMaterials.sentOn': 'enviado em {date}',
   'supportMaterials.empty': 'Sua professora ainda não enviou nenhum material de apoio. Quando ela enviar algo (um resumo, um link, um arquivo), ele aparece aqui.',
   'wizard.day.mon': 'seg',
