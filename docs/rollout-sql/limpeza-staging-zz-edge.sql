@@ -5,7 +5,7 @@ begin;
 delete from public.push_subscriptions where user_id = '4ed09878-034f-4cfe-959a-c98d76e0dc3f';
 delete from public.own_flashcards where owner_id = '4ed09878-034f-4cfe-959a-c98d76e0dc3f';
 delete from public.reports where id = 31 and description like 'ZZ teste IDOR edge%';
-delete from public.profiles where user_id = '4ed09878-034f-4cfe-959a-c98d76e0dc3f';
+-- (o perfil sai sozinho junto com a conta: o banco proíbe apagar perfil de conta que ainda existe, profiles_protect_delete)
 delete from auth.users where email like 'zz-edge-%@example.invalid';
 commit;
 -- Conferência (deve dar 0): select count(*) from auth.users where email like 'zz-edge-%@example.invalid';
