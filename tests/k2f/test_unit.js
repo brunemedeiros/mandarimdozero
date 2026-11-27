@@ -8,7 +8,8 @@ for (const lang of ['fr', 'zh']){
   const ctx = loadLang(lang), isZh = lang === 'zh';
   const run = c => vm.runInContext(c, ctx);
   const src = require('../e4/app-source').withCore(read(lang + '/app.js'));
-  ['hasPlainFrontBack', 'cardPromptText', 'cardAnswerText', 'buildSpeedQueue', 'buildSpeedOptions', 'startMatchGame'].forEach(f => run(extractFunction(src, f)));
+  ['hasPlainFrontBack', 'cardPromptText', 'cardAnswerText', 'buildSpeedQueue', 'buildSpeedOptions', 'matchSoundKey', 'matchSameSound', 'matchAudioPreference', 'matchHasPregenAudio', 'matchPickAudioIndexes' /* usadas pelo Combinar desde o Combinar com áudio (2026-11-14) */, 'startMatchGame'].forEach(f => run(extractFunction(src, f)));
+  run('this.MATCH_AUDIO_STORAGE_KEY = "match-with-audio";'); // constante do Combinar com áudio (2026-11-14)
   run('this.shuffle = a => a.slice(); this.renderMatchGame = function(){}; this.trackEvent = function(){}; this.MATCH_STATE = { pairSize: 50, pairs: [], tiles: [] };');
   run('this.eligibleReviewPool = function(){ return STATE.cards; };');
   run('this.cardPromptPinyinText = function(){ return ""; };');

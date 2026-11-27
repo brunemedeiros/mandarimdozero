@@ -49,3 +49,18 @@ Prévia vista pela autora; decisões:
   novo para a descrição x motivo dos três modos, com data e motivo), push-convite 58/58, configuracoes 27/27, csp 12/12,
   recomecar-curso 220/220. `tests/k2f/` (falta o `sql.js` no ambiente) e `tests/deck-browser/` (tempo esgotado) já falhavam
   antes, igual na `main`.
+
+## Testes de Decks e k2f consertados (2026-11-27, pedido da autora)
+Os dois falhavam também na `main`, por mudanças posteriores a eles (nada de defeito para a aluna, salvo o item 4):
+1. **k2f, bibliotecas**: os 3 testes de navegador buscavam sql.js e JSZip numa pasta temporária de uma sessão antiga
+   (`/tmp/claude-0/k2f/node_modules`). Agora usam as cópias do próprio site em `shared/vendor/` (fixadas na auditoria).
+2. **k2f, Revisão rápida**: desde 2026-11-13 as opções têm o número do atalho (1 a 4); o teste lia "olá 1" e errava a resposta.
+   Lê o texto sem o `.kbd-hint`. O teste de unidade passou a carregar as funções do Combinar com áudio (2026-11-14).
+3. **k2f, importação do Anki**: injetava a JSZip como código solto e buscava o `.wasm` em outro endereço; a lista de segurança
+   da página (CSP, 2026-11-25) barra as duas coisas. Usa o que o site já carrega.
+4. **Decks, Esc no Painel** (conserto no SITE, `shared/deck-browser.js`): a regra "Esc só fecha a janela de cima" contava a
+   cópia de animação de saída (`.mov-fantasma`, 0,15 s, histórico 38) como janela aberta; quem reabrisse o Painel nesse
+   instante não conseguia fechar com Esc. Agora o fantasma é ignorado.
+5. **Decks, celular**: a largura da janela era medida durante a animação de entrada (cresce de 96% a 100%); mede `offsetWidth`.
+Resultados: k2f 34/34, 52/52, 32/32, 58/58, 60/60; deck-browser 208/208; revisao-ajustes 48/48, janelas-revisao 40/40,
+revisao-proposta-a 60/60, animações 40/40, quase iguais 2770/2770.
