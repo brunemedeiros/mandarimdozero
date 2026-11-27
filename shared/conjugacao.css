@@ -272,7 +272,7 @@
 #view-conjugaison .cg-feedback{ margin-top:20px; padding-top:18px; border-top:1px solid var(--paper-line); }
 #view-conjugaison .cg-verdict{ margin:0 0 14px; font-size:17px; font-weight:900; }
 #view-conjugaison .cg-verdict.ok{ color:var(--jade); }
-#view-conjugaison .cg-verdict.no{ color:var(--error-red); }
+#view-conjugaison .cg-verdict.no{ color:var(--error-red-text); }
 #view-conjugaison .cg-verdict span{ color:var(--ink); font-weight:700; }
 #view-conjugaison .cg-why{ display:grid; grid-template-columns:150px minmax(0, 1fr); gap:16px; align-items:start; padding:14px 16px; border-radius:14px; background:var(--paper-warm); }
 #view-conjugaison .cg-why h3{ margin:0 0 4px; font-size:15px; font-weight:800; color:var(--ink); }

@@ -32,30 +32,41 @@ const anonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
 // Edge Functions > Secrets). VAPID_SUBJECT é um contato (mailto: ou
 // https:) exigido pelo protocolo Web Push pra identificar quem está
 // mandando, caso o provedor do navegador precise falar com alguém.
-const vapidPublicKey = Deno.env.get('VAPID_PUBLIC_KEY')!;
-const vapidPrivateKey = Deno.env.get('VAPID_PRIVATE_KEY')!;
+const vapidPublicKey = Deno.env.get('VAPID_PUBLIC_KEY');
+const vapidPrivateKey = Deno.env.get('VAPID_PRIVATE_KEY');
 const vapidSubject = Deno.env.get('VAPID_SUBJECT') || 'mailto:brunemed1310@gmail.com';
+const vapidReady = !!(vapidPublicKey && vapidPrivateKey);
+if (vapidReady) webpush.setVapidDetails(vapidSubject, vapidPublicKey!, vapidPrivateKey!);
 
-webpush.setVapidDetails(vapidSubject, vapidPublicKey, vapidPrivateKey);
+// CORS (2026-11-25): o navegador chama esta função de app.profbrune.com.br com o
+// cabeçalho Authorization, então antes manda uma "pergunta prévia" (OPTIONS).
+// Sem resposta a ela (antes: 405, sem Access-Control-*), o Chrome/Edge/Opera nem
+// enviavam o POST e nenhum push do site chegava. Mesmo molde do push-dispatch.
+const CORS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+};
+const json = (body: unknown, status = 200) =>
+  new Response(JSON.stringify(body), { status, headers: { ...CORS, 'Content-Type': 'application/json' } });
 
 Deno.serve(async (req: Request) => {
-  if (req.method !== 'POST') {
-    return new Response(JSON.stringify({ ok: false, error: 'method_not_allowed' }), { status: 405, headers: { 'Content-Type': 'application/json' } });
-  }
+  if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS });
+  if (req.method !== 'POST') return json({ ok: false, error: 'method_not_allowed' }, 405);
+  // Sem as chaves VAPID não dá para assinar o push (antes a função nem subia).
+  if (!vapidReady) return json({ ok: false, error: 'vapid_missing' }, 503);
 
   const authHeader = req.headers.get('Authorization');
-  if (!authHeader) {
-    return new Response(JSON.stringify({ ok: false, error: 'missing_authorization' }), { status: 401, headers: { 'Content-Type': 'application/json' } });
-  }
+  if (!authHeader) return json({ ok: false, error: 'missing_authorization' }, 401);
 
   let payload: { title?: string; body?: string; actionTab?: string };
   try {
     payload = await req.json();
   } catch {
-    return new Response(JSON.stringify({ ok: false, error: 'invalid_json' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+    return json({ ok: false, error: 'invalid_json' }, 400);
   }
   if (!payload.body) {
-    return new Response(JSON.stringify({ ok: false, error: 'missing_body' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+    return json({ ok: false, error: 'missing_body' }, 400);
   }
 
   // Cliente "como o usuário" -- repassa o JWT de quem chamou, em vez de
@@ -68,7 +79,7 @@ Deno.serve(async (req: Request) => {
   const { data: subscriptions, error } = await supabase.from('push_subscriptions').select('*');
   if (error) {
     console.error('push-send: falha ao ler push_subscriptions', error);
-    return new Response(JSON.stringify({ ok: false, error: error.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+    return json({ ok: false, error: error.message }, 500);
   }
 
   const messagePayload = JSON.stringify({
@@ -103,5 +114,5 @@ Deno.serve(async (req: Request) => {
   }
 
   const summary = { ok: true, sent, removed, errorCount: errors.length, errors: errors.slice(0, 5) };
-  return new Response(JSON.stringify(summary), { status: 200, headers: { 'Content-Type': 'application/json' } });
+  return json(summary);
 });

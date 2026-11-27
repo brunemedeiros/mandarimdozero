@@ -740,7 +740,7 @@ async function openAddCardModal(opts){
         <h3 id="add-card-modal-title">${escapeHTML(t('review.deck.addCard'))}</h3>
         <button type="button" class="app-modal-close" data-add-card-close aria-label="${escapeHTML(t('common.close'))}">✕</button>
       </div>
-      <div class="app-modal-body p-editor" id="add-card-modal-body"><p class="profile-edit-hint">${escapeHTML(t('review.deck.loading'))}</p></div>
+      <div class="app-modal-body p-editor" id="add-card-modal-body"><p class="profile-edit-hint">${escapeHTML(t('loading.cardEditor'))}</p></div>
     </div>`;
   document.body.appendChild(overlay);
   overlay.querySelector('[data-add-card-close]').addEventListener('click', closeAddCardModal);
@@ -1255,7 +1255,7 @@ function renderDeckPanelEditor(opts){
   const ctx = p.ctx;
   const row = ctx && ctx.cards.find(r => r.id === note.rowId);
   if (!row){
-    pane.innerHTML = `${backBtn}<p class="deck-panel-meta">${meta}</p><p class="profile-edit-hint">${escapeHTML(t(ctx ? 'review.panel.loadCardError' : 'review.deck.loading'))}</p>`;
+    pane.innerHTML = `${backBtn}<p class="deck-panel-meta">${meta}</p><p class="profile-edit-hint">${escapeHTML(t(ctx ? 'review.panel.loadCardError' : 'loading.card'))}</p>`;
     pane.querySelector('[data-panel-back]').addEventListener('click', deckPanelBackToList);
     return;
   }

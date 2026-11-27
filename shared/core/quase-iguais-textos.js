@@ -264,6 +264,10 @@ function renderLessonCompleteScreen(u, lesson, { challengesBefore, xpEarned, sco
     </div>
   `;
   wireAudioButtons(contentEl);
+  // Convite para ativar os lembretes (plano A, 2026-11-25, shared/push-convite.js): só em lição de verdade (não no
+  // checkpoint nem na 1ª lição do curso); a regra (2ª lição, a cada 7 dias, no máximo 3 vezes) fica lá. O lugar do
+  // convite só entra na tela quando ele aparece (a tela fica idêntica quando não há convite).
+  if (trackHistory && !welcomeB && typeof loadPushLessonInvite === 'function') loadPushLessonInvite();
   // Etapa 6: na 1ª lição do curso o bloco "Recado da Prof. Brune" já explica o XP; os avisos "+N XP" dos últimos
   // exercícios saem da tela para não ficarem por cima do título.
   if (welcomeB){ const layer = document.getElementById('toast-layer'); if (layer) layer.querySelectorAll('.toast').forEach(el => el.remove()); }

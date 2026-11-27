@@ -64,7 +64,10 @@ const STUB = `window.supabase = { createClient: () => {
     // e-mail vazio: aviso, sem envio
     await page.fill('#gate-forgot-email', ''); await page.click('#gate-forgot-send-btn');
     L('sem e-mail: avisa e não envia', await page.evaluate(() => window.__calls.length === 0 && document.getElementById('gate-forgot-note').classList.contains('err')));
+    L('sem e-mail: o campo fica vermelho e o vermelho some ao digitar', await page.evaluate(() => document.getElementById('gate-forgot-email').getAttribute('aria-invalid') === 'true'));
+    if (OUT) await page.screenshot({ path: path.join(OUT, `esqueci-sem-email-${lang}-${theme}-${width}.png`) });
     await page.fill('#gate-forgot-email', 'aluna@x.com');
+    L('ao digitar o e-mail, o vermelho some', await page.evaluate(() => !document.getElementById('gate-forgot-email').hasAttribute('aria-invalid')));
     await page.click('#gate-forgot-send-btn');
     L('enquanto envia: botão travado com "' + T.sending + '"', await page.evaluate(s => { const b = document.getElementById('gate-forgot-send-btn'); return b.disabled && b.textContent === s; }, T.sending));
     await page.evaluate(() => document.getElementById('gate-forgot-send-btn').click()); // clique repetido no meio do envio

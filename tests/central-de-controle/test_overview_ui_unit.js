@@ -98,5 +98,13 @@ check('erro ao carregar: aviso com "Tentar de novo"', run('aovBodyHTML(S, () => 
 check('carregando: rodinha', run('aovBodyHTML(S, () => true)', { S: ST({ stats: null }) }).includes('p-spinner'));
 check('rodapé: dia no horário de Brasília', bodyMine.includes('horário de Brasília'));
 
+// ---- XP fora do normal (opção D, migration 152, 2026-11-27) ----
+check('XP: sem ninguém acima do limite, nada aparece', run('aovXpAlertsHTML(null)') === '' && run('aovXpAlertsHTML({threshold:3000,cap:8000,rows:[]})') === '');
+const xpA = run('aovXpAlertsHTML({threshold:3000,cap:8000,rows:[{user_id:"a",display_name:"<b>Ana</b>",username:"ana",language_app_key:"frances",week_start:"2026-11-23",amount:8000,capped:true},{user_id:"b",display_name:"Bia",language_app_key:"mandarim",week_start:"2026-11-16",amount:3200,capped:false}]})');
+check('XP: lista com nome escapado, idioma, XP, semana e "chegou ao teto" só em quem chegou', xpA.includes('data-aov="xp-alerta"') && xpA.includes('XP fora do normal') && xpA.includes('&lt;b&gt;Ana') && xpA.includes('8.000 XP na semana de 23/11') && xpA.includes('chegou ao teto') && xpA.split('chegou ao teto').length === 2 && xpA.includes('3.200 XP'), xpA);
+check('XP: a nota explica o limite e o teto', xpA.includes('3.000 XP ou mais') && xpA.includes('8.000 XP por semana'));
+const bodyXp = run('aovBodyHTML(S, () => true)', { S: ST({ xpAlerts: { threshold: 3000, cap: 8000, rows: [{ user_id: 'a', display_name: 'Ana', language_app_key: 'frances', week_start: '2026-11-23', amount: 5000, capped: false }] } }) });
+check('XP: o aviso vem antes dos números, em qualquer escolha', bodyXp.indexOf('data-aov="xp-alerta"') > -1 && bodyXp.indexOf('data-aov="xp-alerta"') < bodyXp.indexOf('data-aov="numeros"'));
+
 console.log(`central-de-controle (peças da Visão Geral): ${pass}/${pass + fail}`);
 process.exit(fail ? 1 : 0);

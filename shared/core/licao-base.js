@@ -110,6 +110,7 @@ function finishCurrentLesson(u){
     // conclusão logo acima -- STATE.xp só muda dentro de addXP() (ver
     // Fase 1), então esse delta é exatamente o que esta lição concedeu.
     const xpEarned = STATE.xp - STEP_STATE.acq.xpAtLessonStart;
+    if (typeof pushInviteNoteLessonDone === 'function') pushInviteNoteLessonDone(); // conta lições para o convite dos lembretes
     renderLessonCompleteScreen(u, finished, { challengesBefore, xpEarned, scorePct: lessonScorePct, welcomeB });
     return;
   }

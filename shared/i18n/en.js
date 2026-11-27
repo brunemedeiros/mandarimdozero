@@ -152,6 +152,7 @@ window.I18N_CATALOG['en'] = {
   'restart.modal.check': 'I understand: my {course} progress goes back to zero.', // ALTA
   'restart.modal.cancel': 'Cancel', // ALTA
   'restart.modal.yes': 'Restart from zero', // ALTA
+  'restart.modal.hint': 'Tick the box above to unlock the button.', // ALTA
   'restart.modal.working': 'Just a moment...', // ALTA
   'restart.err.generic': 'Could not restart right now. Nothing changed in your progress. Please try again in a moment.', // ALTA
   'restart.done': 'Done! The course restarted from zero. Enjoy the journey!', // ALTA
@@ -181,6 +182,7 @@ window.I18N_CATALOG['en'] = {
   'accountDelete.modal.label': 'Type your email to confirm', // ALTA
   'accountDelete.modal.cancel': 'Cancel', // ALTA
   'accountDelete.modal.yes': 'Delete forever', // ALTA
+  'accountDelete.modal.hint': 'Type your email above to unlock the button.', // ALTA
   'accountDelete.err.mismatch': 'The email does not match.', // ALTA
   'accountDelete.err.teacher': 'Teacher and administrator accounts cannot be deleted here. Please contact the administrator.', // ALTA
   'accountDelete.err.generic': 'We could not delete it right now. Please try again in a moment.', // ALTA
@@ -286,6 +288,28 @@ window.I18N_CATALOG['en'] = {
   'notif.pref.push.blocked': 'Notifications are blocked in your browser settings. Allow them there and try again.', // ALTA
   'notif.pref.push.denied': 'You did not allow notifications. You can try again whenever you like.', // ALTA
   'notif.pref.push.error': 'Could not turn on right now. Please try again.', // ALTA
+  // Ajuda e convite para ativar os alertas no celular (plano B e A, 2026-11-25, shared/push-convite.js)
+  'push.help.ios.title': 'On iPhone, one more step', // ALTA
+  'push.help.ios.intro': 'Apple only sends alerts from sites on your Home Screen. It takes 10 seconds:', // ALTA
+  'push.help.ios.step1': 'Tap ⬆️ <strong>Share</strong> in the Safari toolbar', // ALTA
+  'push.help.ios.step2': 'Scroll and tap <strong>Add to Home Screen</strong> → <strong>Add</strong>', // ALTA
+  'push.help.ios.step3': 'Open the site from the <strong>new icon</strong> and turn on alerts in Settings → Notifications', // ALTA
+  'push.help.blocked.title': 'Your phone blocked alerts from this site', // ALTA
+  'push.help.blocked.titleDesktop': 'Your browser blocked alerts from this site', // ALTA
+  'push.help.blocked.intro': 'The site can\'t ask again. Just allow it there, once:', // ALTA
+  'push.help.android.step1': 'Open the <strong>browser</strong> you installed the site with (Chrome, Opera, Samsung Internet...) and go to <strong>app.profbrune.com.br</strong>', // ALTA
+  'push.help.android.step2': 'Tap the <strong>lock</strong> next to the address (in Opera, the <strong>green shield</strong>) → <strong>Permissions</strong> (or <strong>Site settings</strong>) → <strong>Notifications</strong>', // ALTA
+  'push.help.android.step3': 'Choose <strong>Allow</strong>, then close the site and open it again', // ALTA
+  'push.help.android.appIcon': 'Tip: the small symbol on the corner of the site icon shows which browser installed it (the red "O" is Opera). If you can\'t find the lock or the shield, look in that browser\'s <strong>Settings</strong> → <strong>Site settings</strong> → <strong>Notifications</strong>.', // ALTA
+  'push.help.desktop.step1': 'Click the <strong>lock</strong> next to the site address', // ALTA
+  'push.help.desktop.step2': 'Under <strong>Notifications</strong>, choose <strong>Allow</strong> and reload the page', // ALTA
+  'push.help.retry': 'I allowed it, try again', // ALTA
+  'push.help.stillBlocked': 'Still blocked. Check the steps above, close the site and open it again.', // ALTA
+  'push.invite.title': 'Want a reminder so you don\'t lose your streak?', // ALTA
+  'push.invite.text': 'We\'ll let you know when today\'s review is ready or when your streak is at risk. You choose which alerts you want and can turn them off anytime.', // ALTA
+  'push.invite.enable': 'Turn on reminders', // ALTA
+  'push.invite.later': 'Not now', // ALTA
+  'push.invite.ok': 'Got it', // ALTA
   'notif.pref.titleMatrixInApp': 'In the app', // ALTA
   'notif.pref.titleMatrixPush': 'Push', // ALTA
   'notif.pref.titleMatrixEmail': 'Email', // ALTA
@@ -334,7 +358,7 @@ window.I18N_CATALOG['en'] = {
   'streakPop.friends.manyActiveNoName': '{k} active. Longest: {days}', // ALTA
   'streakPop.friends.none': 'Study on the same day and your streak together begins.', // ALTA
   'streakPop.friends.noFriends': 'Studying with someone helps you keep the rhythm.', // ALTA
-  'streakPop.friends.loading': 'Loading...', // ALTA
+  'streakPop.friends.loading': "Loading your friends' streaks...", // ALTA
   'streakPop.friends.error': 'Couldn\'t load your friends right now.', // ALTA
   'streakPop.friends.see': 'See friends', // ALTA
   'streakPop.friends.invite': 'Invite friends', // ALTA
@@ -905,7 +929,7 @@ window.I18N_CATALOG['en'] = {
   'review.deck.moreOptions': 'More options: import and export', // ALTA -- Revisão nova
   'review.deck.importFile': 'Import file (.apkg or .json)', // ALTA -- Revisão nova
   'review.deck.export': 'Export', // ALTA -- Revisão nova
-  'review.deck.loadingDecks': 'Loading your Decks…', // ALTA -- Revisão nova
+  'review.deck.loadingDecks': 'Loading your Decks...', // ALTA -- Revisão nova
   'review.deck.expand': 'Expand', // ALTA -- Revisão nova
   'review.deck.collapse': 'Collapse', // ALTA -- Revisão nova
   'review.deck.createLink': '+ Create Deck', // ALTA -- Revisão nova
@@ -948,7 +972,6 @@ window.I18N_CATALOG['en'] = {
   'review.deck.isPublic': '🌐 Public', // ALTA -- Revisão nova
   'review.deck.publish': '🔒 Private', // ALTA -- Revisão nova
   'review.deck.delete': 'Delete', // ALTA -- Revisão nova
-  'review.deck.loading': 'Loading…', // ALTA -- Revisão nova
   'review.deck.loadError': 'Couldn\'t load. Try again.', // ALTA -- Revisão nova
   'review.deck.createdCount.one': '✓ {n} created', // ALTA -- Revisão nova
   'review.deck.createdCount.other': '✓ {n} created', // ALTA -- Revisão nova
@@ -2564,7 +2587,6 @@ window.I18N_CATALOG['en'] = {
   'friends.section.friends': 'Your friends', // ALTA
   'friends.btn.remove': 'Unfriend', // ALTA
   'friends.section.outgoing': 'Sent requests', // ALTA
-  'friends.loadingShort': 'Loading...', // ALTA
   'friends.scopeAll': 'All', // ALTA
   'friends.scopeAria': 'Friends\' ranking language', // ALTA
   'friends.rank.miniError': 'Couldn\'t load the ranking right now.', // ALTA
@@ -2784,6 +2806,10 @@ window.I18N_CATALOG['en'] = {
   'admin.overview.plans.premium': 'Premium', // ALTA
   'admin.overview.plans.note': 'You (admin and teacher) are left out of the counts. Cancelled, expired and pending payment will show up here once there are sales on the site.', // ALTA
   'admin.overview.foot.tz': 'Days are counted in Brasília time. Analytics still counts in London time (UTC), so the daily numbers there may differ a little.', // ALTA
+  'admin.overview.xp.title': 'Unusual XP', // ALTA
+  'admin.overview.xp.note': 'Accounts with {limit} XP or more in a week, over the last 2 weeks (the real record is about 2,000). The site caps XP at {cap} per week for each language. It may just be a lot of studying; worth a look.', // ALTA
+  'admin.overview.xp.amount': '{n} XP in the week of {week}', // ALTA
+  'admin.overview.xp.capped': 'hit the cap', // ALTA
   'admin.overview.empty.scope': 'No accounts for this choice.', // ALTA
   'admin.overview.error': 'Couldn\'t load the Overview.', // ALTA
   'admin.overview.retry': 'Try again', // ALTA
@@ -2832,7 +2858,7 @@ window.I18N_CATALOG['en'] = {
   'myClassLogs.empty': 'Your teacher hasn\'t logged any classes yet.', // ALTA
   'plans.title': 'Plans', // ALTA
   'plans.sub': 'Who has which plan and what each plan unlocks. Changes apply right away for Free, Student and Premium.', // ALTA
-  'plans.loading': 'Loading…', // ALTA
+  'plans.loading': 'Loading plans...', // ALTA
   'plans.confirm.cancel': 'Cancel', // ALTA
   'plans.confirm.revoke.title': 'Remove {role} from @{username}?', // ALTA
   'plans.confirm.revoke.text': 'The account loses what this plan unlocks right away. You can give the plan back anytime.', // ALTA
@@ -2842,7 +2868,7 @@ window.I18N_CATALOG['en'] = {
   'plans.confirm.perm.confirm': 'Turn off', // ALTA
   'notifications.title': 'Notifications', // ALTA
   'notifications.sub': 'The texts people get for each event. Each time, the site picks one active variant; the more variants, the less repetitive it feels.', // ALTA -- Etapa 7 lote 1b (needs_review)
-  'notifications.loading': 'Loading notifications…', // ALTA
+  'notifications.loading': 'Loading notifications...', // ALTA
   'notifications.menu': 'Actions', // ALTA
   'notifications.delete': 'Delete', // ALTA
   'notifications.lang.fr': 'French', // ALTA
@@ -2865,7 +2891,7 @@ window.I18N_CATALOG['en'] = {
   'notifications.delete.confirm': 'Delete variant', // ALTA
   'badges.title': 'Badges', // ALTA
   'badges.sub': 'Create special badges and choose who gets them. They show up on the winner\'s profile.', // ALTA
-  'badges.loading': 'Loading badges…', // ALTA
+  'badges.loading': 'Loading badges...', // ALTA
   'badges.menu': 'Actions', // ALTA
   'badges.edit': 'Edit', // ALTA
   'badges.delete': 'Delete', // ALTA
@@ -2896,7 +2922,7 @@ window.I18N_CATALOG['en'] = {
   'badges.delete.confirm': 'Delete badge', // ALTA
   'badges.toast.revoked': '✓ Badge revoked.', // ALTA
   'reports.title': 'Reports', // ALTA
-  'reports.loading': 'Loading reports…', // ALTA
+  'reports.loading': 'Loading reports...', // ALTA
   'reports.menu': 'Actions', // ALTA
   'reports.row.replied': 'replied', // ALTA
   'reports.row.repliedTitle': 'You already replied by email', // ALTA
@@ -2920,7 +2946,7 @@ window.I18N_CATALOG['en'] = {
   'reports.reply.confirm.cancel': 'Back', // ALTA
   'analytics.title': 'Analytics', // ALTA
   'analytics.sub': 'How people use the site: who studies, what they do and where they get stuck. Only student accounts are counted; yours is left out.', // ALTA -- Etapa 7 lote 1b (needs_review)
-  'analytics.loading': 'Loading numbers…', // ALTA
+  'analytics.loading': 'Loading numbers...', // ALTA
   'analytics.custom.from': 'From', // ALTA
   'analytics.custom.to': 'To', // ALTA
   'analytics.delta.flatAria': 'No change from the previous period', // ALTA
@@ -3007,7 +3033,7 @@ window.I18N_CATALOG['en'] = {
   'students.empty.title': 'No students linked yet', // ALTA
   'students.empty.text': 'Once you link someone, their progress shows up here.', // ALTA
   'students.empty.filtered': 'No students match these filters.', // ALTA
-  'students.loading': 'Loading students…', // ALTA
+  'students.loading': 'Loading students...', // ALTA
   'students.loading.count': '{done} of {total}', // ALTA
   'students.error.partial': { one: 'Could not load the data of {n} student. They appear without a status.', other: 'Could not load the data of {n} students. They appear without a status.' }, // ALTA
   'students.dialog.hint': 'A link applies to one course. The same person can be linked to another course later.', // ALTA
@@ -3137,7 +3163,7 @@ window.I18N_CATALOG['en'] = {
   'classlogs.empty.filtered': 'No classes match these filters.', // ALTA
   'classlogs.noStudents.title': 'No students linked yet', // ALTA
   'classlogs.noStudents.text': 'Link a student in the Students tab to log classes for them.', // ALTA
-  'classlogs.loading': 'Loading classes…', // ALTA
+  'classlogs.loading': 'Loading classes...', // ALTA
   'classlogs.fail': 'Could not load the classes right now.', // ALTA
   'classlogs.form.title': 'Log a class', // ALTA
   'classlogs.form.who': 'Who had the class', // ALTA
@@ -3185,7 +3211,7 @@ window.I18N_CATALOG['en'] = {
   'materials.empty.filtered': 'No material matches these filters.', // ALTA
   'materials.noStudents.title': 'No students linked yet', // ALTA
   'materials.noStudents.text': 'Link a student in the Students tab to send them material.', // ALTA
-  'materials.loading': 'Loading materials…', // ALTA
+  'materials.loading': 'Loading materials...', // ALTA
   'materials.fail': 'Could not load the materials right now.', // ALTA
   'materials.form.title': 'Send material', // ALTA
   'materials.form.who': 'Who will get it', // ALTA
@@ -3268,7 +3294,7 @@ window.I18N_CATALOG['en'] = {
   'cards.page.prev': 'Previous', // ALTA
   'cards.page.next': 'Next', // ALTA
   'cards.page.range': '{from} to {to} of {total}', // ALTA
-  'cards.loading': 'Loading cards…', // ALTA
+  'cards.loading': 'Loading cards...', // ALTA
   'cards.fail': 'Could not load the cards right now.', // ALTA
   'cards.edit.title': 'Edit card', // ALTA
   'cards.edit.for': 'Card for {name}', // ALTA
@@ -3452,7 +3478,7 @@ window.I18N_CATALOG['en'] = {
   'rb.linkedAccount': 'Linked account', // ALTA
   'rb.linkedDone': 'Student linked.', // ALTA
   'rb.loadError': 'Could not load the Review Bank. Reload the page.', // ALTA
-  'rb.loading': 'Loading…', // ALTA
+  'rb.loading': 'Loading...', // ALTA
   'rb.manualEdit': 'Edit manual', // ALTA
   'rb.manualEmpty': 'There is no manual yet. Click "Edit manual" to write your note-taking rules.', // ALTA
   'rb.manualHint': 'Write in simple markdown: headings with #, lists with -, **bold** and tables with |.', // ALTA
@@ -3758,7 +3784,7 @@ window.I18N_CATALOG['en'] = {
   'panel.notion.recent': { one: '{n} lesson updated from Notion in the last 7 days', other: '{n} lessons updated from Notion in the last 7 days' }, // ALTA
   'panel.notion.counts': '{linked} linked lessons · {approval} to approve · {review} to review · {waiting} waiting for an account', // ALTA
   'panel.notion.syncNow': 'Read now', // ALTA
-  'panel.notion.reading': 'Reading Notion…', // ALTA
+  'panel.notion.reading': 'Reading Notion...', // ALTA
   'panel.notion.synced': 'Notion read.', // ALTA
   'panel.notion.editColumns': 'Columns', // ALTA
   'panel.notion.otherDatabase': 'Change database', // ALTA
@@ -3879,7 +3905,7 @@ window.I18N_CATALOG['en'] = {
   'panel.gcal.sortLabel': 'Order', // ALTA
   'panel.gcal.tabSkipped': 'Skipped ({n})', // ALTA
   'panel.gcal.tabOpen': 'To review ({n})', // ALTA
-  'panel.gcal.reading': 'Reading your calendar…', // ALTA
+  'panel.gcal.reading': 'Reading your calendar...', // ALTA
   'panel.gcal.synced': 'Calendar read.', // ALTA
   'panel.gcal.loadError': 'Couldn\'t load the Google connection right now.', // ALTA
   'panel.gcal.errReconnect': 'Google asked you to connect again. Click "Connect again" (nothing is lost).', // ALTA
@@ -4204,7 +4230,7 @@ window.I18N_CATALOG['en'] = {
   'gate.newPass.title': 'Create a new password', // ALTA
   'gate.newPass.sub': 'Choose the password you\'ll use from now on.', // ALTA
   'gate.newPass.label': 'New password', // ALTA
-  'gate.newPass.ph': 'New password (at least 6 characters)', // ALTA
+  'gate.newPass.ph': 'New password (at least 8 characters)', // ALTA
   'gate.newPass.repeat': 'Repeat the new password', // ALTA
   'gate.newPass.submit': 'Save new password', // ALTA
   'gate.newPass.mismatch': 'The two passwords don\'t match.', // ALTA
@@ -4249,6 +4275,7 @@ window.I18N_CATALOG['en'] = {
   'gate.signup.methodTitle': 'Create your account and start learning {lang}', // ALTA
   'gate.signup.methodSub': 'It\'s free. Choose how you\'d like to sign up.', // ALTA
   'gate.signup.ageAck': 'I\'m 18 or older, or I have my parent or guardian\'s permission to use the site.', // ALTA
+  'gate.signup.ageAckRequired': 'Tick the box to continue.', // ALTA
   'consent.title': 'Cookies', // ALTA
   'consent.text': 'This site uses cookies to improve your experience and measure visits.', // ALTA
   'consent.policy': 'Cookie policy', // ALTA
@@ -4275,6 +4302,7 @@ window.I18N_CATALOG['en'] = {
   'ageAck.label': 'I\'m 18 or older, or I have my parent or guardian\'s permission to use the site.', // ALTA
   'ageAck.thanks': 'Thanks, all set!', // ALTA
   'ageAck.error': 'We couldn\'t save it right now. Please try again in a moment.', // ALTA
+  'ageAck.required': 'Tick the box to continue.', // ALTA
   'gate.signup.withEmail': 'Continue with email', // ALTA
   'gate.signup.dataTitle': 'Your details', // ALTA
   'gate.signup.dataSub': 'Your name and your @ appear on your profile.', // ALTA
@@ -4293,11 +4321,11 @@ window.I18N_CATALOG['en'] = {
   'gate.signup.userPickFree': 'Pick an available @.', // ALTA
   'gate.signup.needName': 'Enter your name.', // ALTA
   'gate.signup.badEmail': 'Check the email address.', // ALTA
-  'gate.signup.shortPassword': 'The password needs at least 6 characters.', // ALTA
+  'gate.signup.shortPassword': 'The password needs at least 8 characters.', // ALTA
   'gate.signup.retryTitle': 'Choose another @', // ALTA
   'gate.signup.retrySub': 'Someone took @{u} while you were creating your account. Pick another one to continue.', // ALTA
   'gate.signup.retrySave': 'Save and continue', // ALTA
-  'gate.signup.passwordPh': 'Create a password (at least 6 characters)', // ALTA
+  'gate.signup.passwordPh': 'Create a password (at least 8 characters)', // ALTA
   // Etapa 3, lote A (2026-10-19): trilha, cartão Continuar, Revisão do módulo e mapa da trilha. needs_review:
   // tradução nova, ainda não revisada pela dona; confiança no comentário de cada linha. Antes estes textos
   // apareciam em português também no site em inglês.
@@ -4431,6 +4459,11 @@ window.I18N_CATALOG['en'] = {
   'loading.publishOptions': 'Loading sharing options...', // ALTA
   'loading.reviewBank': 'Loading the Review Bank...', // ALTA
   'loading.notifPrefs': 'Loading preferences...', // ALTA
+  'loading.friendsWeek': "Loading this week's challenge...", // ALTA
+  'loading.friendsNews': "Loading your friends' news...", // ALTA
+  'loading.friendsPrefs': 'Loading Friends preferences...', // ALTA
+  'loading.cardEditor': 'Opening the card editor...', // ALTA
+  'loading.card': 'Loading the card...', // ALTA
   'zh.hanzi.radicals': '🧬 Radicals', // ALTA (achado extra: botão e título da tela de Radicais)
   // Etapa 3, lote C (2026-10-19): gerenciador de Tags, excluir Deck, importação cortada, Meus cartões, validação de
   // tags, novo editor, importação .apkg e Decks públicos. Texto pt idêntico ao que estava escrito direto no JS/HTML.
@@ -4459,7 +4492,7 @@ window.I18N_CATALOG['en'] = {
   'tagManager.rename': 'Rename', // ALTA
   'tagManager.delete.title': 'Delete tag', // ALTA
   'tagManager.delete.aria': 'Delete tag {tag}', // ALTA
-  'tagManager.loading': 'Loading tags…', // ALTA
+  'tagManager.loading': 'Loading tags...', // ALTA
   'tagManager.hint.teacher': 'Tags on your student cards (all students and languages). Renaming or deleting applies to all of them.', // ALTA
   'tagManager.hint.own': 'Tags on your own cards. Tags on your teacher\'s cards don\'t show up here and you can\'t change them.', // ALTA
   'tagManager.retry': 'Try again', // ALTA

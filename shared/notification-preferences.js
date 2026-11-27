@@ -87,6 +87,13 @@ async function renderNotificationPreferencesView(){
   // migration 010).
   const localPushSubscription = typeof getLocalPushSubscription === 'function' ? await getLocalPushSubscription() : null;
   const pushSubscribedHere = !!localPushSubscription;
+  // Plano B (2026-11-25, shared/push-convite.js): caixa fixa com o passo a passo quando o interruptor não tem como
+  // funcionar aqui: iPhone/iPad sem o site na Tela de Início, ou o navegador guardou "Bloquear" para o site.
+  let pushHelpKind = '';
+  if (typeof pushHelpHTML === 'function' && !pushSubscribedHere){
+    if (typeof pushSupported === 'function' && !pushSupported()) pushHelpKind = (pushPlatform() === 'ios' && !pushIsStandalone()) ? 'ios' : '';
+    else if (typeof Notification !== 'undefined' && Notification.permission === 'denied') pushHelpKind = 'blocked';
+  }
 
   const anyInAppOn = NOTIFICATION_PREF_CATEGORIES.some(c => notifPrefEffectiveChannels(prefs, c).includes('in_app'));
   const anyEmailOn = NOTIFICATION_PREF_CATEGORIES.filter(c => !c.inAppOnly && !c.noEmail).some(c => notifPrefEffectiveChannels(prefs, c).includes('email') || (prefs.channels?.[c.id] || []).includes('email'));
@@ -123,6 +130,7 @@ async function renderNotificationPreferencesView(){
       <header><h3>${t('notif.pref.sectionTitle')}</h3></header>
       ${switchRow('notif-pref-inapp-switch', 'notif.pref.inApp.title', 'notif.pref.inApp.sub', anyInAppOn)}
       ${switchRow('notif-pref-push-switch', 'notif.pref.push.title', 'notif.pref.push.sub', pushSubscribedHere)}
+      <div id="notif-pref-push-help" class="push-help-slot"${pushHelpKind ? '' : ' hidden'}>${pushHelpKind ? pushHelpHTML(pushHelpKind) : ''}</div>
       ${switchRow('notif-pref-email-switch', 'notif.pref.email.title', 'notif.pref.email.sub', anyEmailOn)}
     </article>
 
@@ -174,7 +182,16 @@ async function renderNotificationPreferencesView(){
     if (turningOn){
       const result = await subscribeToPush();
       if (!result.ok){
-        showToast(notificationPushErrorMessage(result.reason));
+        // Plano B: bloqueado/recusado (ou iPhone fora da Tela de Início) mostra a caixa com o passo a passo, que fica.
+        const helpSlot = document.getElementById('notif-pref-push-help');
+        const kind = (result.reason === 'blocked' || result.reason === 'denied') ? 'blocked'
+          : (result.reason === 'unsupported' && typeof pushPlatform === 'function' && pushPlatform() === 'ios' && !pushIsStandalone()) ? 'ios' : '';
+        if (kind && helpSlot && typeof pushHelpHTML === 'function'){
+          helpSlot.innerHTML = pushHelpHTML(kind);
+          helpSlot.hidden = false;
+        } else {
+          showToast(notificationPushErrorMessage(result.reason));
+        }
         input.checked = false;
         input.disabled = false;
         return;
