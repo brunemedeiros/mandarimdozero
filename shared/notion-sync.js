@@ -25,6 +25,33 @@ async function notionCall(action, extra){
   }
 }
 
+// 156 (achado A5 da auditoria): a volta do consentimento traz ?notion=ok|erro|cancelado ou ?notion=confirmar&c=<código>.
+// Lido e tirado do endereço logo ao carregar a página, para o código de confirmação não ficar exposto (histórico, print).
+// A ligação só é ativada quando esta sessão logada confirma (ação 'confirm' da Edge Function; o servidor confere se é a
+// mesma conta que começou).
+function notionParseReturn(href){
+  const u = new URL(href);
+  const st = u.searchParams.get('notion');
+  if (!/^(ok|erro|cancelado|confirmar)$/.test(st || '')) return null;
+  const code = st === 'confirmar' ? (u.searchParams.get('c') || '') : '';
+  u.searchParams.delete('notion');
+  if (st === 'confirmar') u.searchParams.delete('c');
+  return { status: st, code, clean: u.toString() };
+}
+const NOTION_RETURN = (function(){
+  try {
+    const r = notionParseReturn(location.href);
+    if (r) history.replaceState(history.state, '', r.clean);
+    return r;
+  } catch (e) { return null; }
+})();
+
+async function notionConfirmReturn(code){
+  const res = await notionCall('confirm', { code });
+  if (res && res.ok) await notionAfter(Promise.resolve({}), t('panel.notion.connectedToast'));
+  else { showToast(t('panel.notion.confirmFailed')); console.error('Notion: confirmação recusada:', (res && res.error) || '?'); }
+}
+
 async function notionLoad(){
   const [{ data: status, error }, { data: items }] = await Promise.all([
     supabaseClient.rpc('notion_status'),
@@ -380,11 +407,13 @@ function wireNotionBox(root){
       await notionAfter(supabaseClient.rpc('notion_link_name', { p_name: name, p_action: 'ignore' }), t('panel.notion.linked'), li);
     }
   });
-  // Volta do consentimento do Notion (?notion=ok|erro|cancelado): já abre a escolha do banco.
-  const m = /[?&]notion=(ok|erro|cancelado)/.exec(location.search + location.hash);
-  if (m){
-    showToast(m[1] === 'ok' ? t('panel.notion.connectedToast') : m[1] === 'erro' ? t('panel.notion.errGeneric') : t('panel.notion.cancelledToast'));
-    try { const u = new URL(location.href); u.searchParams.delete('notion'); history.replaceState(null, '', u.toString()); } catch {}
+  // Volta do consentimento do Notion (?notion=ok|erro|cancelado|confirmar): já abre a caixa.
+  // (lida ao carregar: NOTION_RETURN; 'confirmar' = pedir à Edge Function para ativar a ligação pendente).
+  if (NOTION_RETURN && !NOTION_RETURN.handled){
+    NOTION_RETURN.handled = true;
+    const st = NOTION_RETURN.status;
+    if (st === 'confirmar') notionConfirmReturn(NOTION_RETURN.code);
+    else showToast(st === 'ok' ? t('panel.notion.connectedToast') : st === 'erro' ? t('panel.notion.errGeneric') : t('panel.notion.cancelledToast'));
     NOTION_STATE.open = true; host.open = true;
   }
 }

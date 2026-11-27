@@ -5,7 +5,9 @@
 //
 // Rotas (verify_jwt = false: a volta do login do Google não traz JWT; cada rota confere quem chama):
 //   POST {action:'start', return_url}   professora logada (Authorization: Bearer <jwt>) -> {url} do consentimento do Google
-//   GET  .../google-calendar/callback?code&state   volta do Google: troca o code, guarda o refresh token, volta ao site
+//   GET  .../google-calendar/callback?code&state   volta do Google: troca o code e guarda o resultado como PENDENTE (156),
+//                                        volta ao site com ?gcal=confirmar&c=<código>
+//   POST {action:'confirm', code}        quem está logado no site: ativa a ligação só se for o MESMO dono da pendência (156)
 //   POST {action:'sync'}                 x-sync-token = senha do Vault (pg_cron, todas as contas) OU professora (só a dela)
 //   POST {action:'calendars'}            professora: atualiza a lista de agendas da conta Google
 // Leitura (janela de 14 dias atrás a 90 dias à frente): a primeira de cada agenda vem desde 2025-05-01 (dá horário às aulas
@@ -15,6 +17,7 @@
 // A senha do cron fica só no Vault (gcal_sync_token) e é conferida por gcal_check_sync_token.
 
 import { createClient } from 'npm:@supabase/supabase-js@2';
+import { newConfirmCode, isConfirmCode, hashConfirmCode, confirmReturnUrl, CONFIRM_STATUS } from './oauth-confirm.mjs';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -40,6 +43,15 @@ const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { ...CORS, 'Content-Type': 'application/json' } });
 
 const admin = () => createClient(SUPABASE_URL, SERVICE_KEY, { auth: { persistSession: false } });
+
+// Qualquer conta logada (para a confirmação: o banco confere se é a dona da pendência).
+async function userFromRequest(req: Request): Promise<string | null> {
+  const auth = req.headers.get('Authorization') || '';
+  if (!auth.startsWith('Bearer ')) return null;
+  const userClient = createClient(SUPABASE_URL, ANON_KEY, { global: { headers: { Authorization: auth } }, auth: { persistSession: false } });
+  const { data } = await userClient.auth.getUser();
+  return data?.user?.id || null;
+}
 
 // Professora logada a partir do cabeçalho Authorization.
 async function teacherFromRequest(req: Request): Promise<string | null> {
@@ -183,12 +195,15 @@ Deno.serve(async (req: Request) => {
     }
     let calendars: any[] = [];
     try { calendars = await listCalendars(tok.body.access_token); } catch { /* lista vem depois pelo botão */ }
-    await sb.rpc('gcal_save_connection', {
-      p_user: row.user_id, p_email: emailFromIdToken(tok.body.id_token), p_refresh: tok.body.refresh_token,
-      p_scopes: tok.body.scope || SCOPES, p_calendars: calendars,
+    // 156: não ativa aqui. Guarda como pendente; só a sessão logada da mesma professora confirma (ação 'confirm').
+    const confirmCode = newConfirmCode();
+    const { error: pendErr } = await sb.rpc('oauth_pending_save', {
+      p_provider: 'google', p_user: row.user_id, p_code_hash: await hashConfirmCode(confirmCode),
+      p_payload: { email: emailFromIdToken(tok.body.id_token), refresh_token: tok.body.refresh_token,
+                   scopes: tok.body.scope || SCOPES, calendars },
     });
-    back.searchParams.set('gcal', 'ok');
-    return Response.redirect(back.toString(), 302);
+    if (pendErr) { back.searchParams.set('gcal', 'erro'); return Response.redirect(back.toString(), 302); }
+    return Response.redirect(confirmReturnUrl(back.toString(), 'gcal', confirmCode), 302);
   }
 
   if (req.method !== 'POST') return json({ ok: false, error: 'method_not_allowed' }, 405);
@@ -208,6 +223,17 @@ Deno.serve(async (req: Request) => {
       access_type: 'offline', prompt: 'consent', include_granted_scopes: 'true', state: String(state),
     }).toString();
     return json({ ok: true, url: auth.toString() });
+  }
+
+  if (action === 'confirm') {
+    const caller = await userFromRequest(req);
+    if (!caller) return json({ ok: false, error: 'not_authorized' }, CONFIRM_STATUS.not_authorized);
+    const code = String(body.code || '');
+    if (!isConfirmCode(code)) return json({ ok: false, error: 'invalid_code' }, CONFIRM_STATUS.invalid_code);
+    const { data, error } = await sb.rpc('oauth_pending_confirm', { p_provider: 'google', p_code_hash: await hashConfirmCode(code), p_caller: caller });
+    if (error || !data) return json({ ok: false, error: 'confirm' }, 500);
+    const res = data as { ok: boolean; error?: string };
+    return json(res, res.ok ? 200 : ((CONFIRM_STATUS as Record<string, number>)[res.error || ''] || 400));
   }
 
   if (action === 'sync') {

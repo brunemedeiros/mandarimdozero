@@ -398,3 +398,32 @@ pwa-cache 21/21, 48/48 e 14/14, login-obrigatorio 127/127, 166/166 e 63/63, cons
   o perfil sair junto com a conta; como tudo estava entre `begin`/`commit`, nada foi apagado). Arquivo corrigido: apaga os dados e a
   conta; o perfil sai em cascata.
 - **Google Agenda/Notion (A5)**: a autora pediu o conserto agora (2026-11-27).
+
+## Conserto A5: ligação do Google Agenda / Notion confirmada pela sessão logada (2026-11-27, Staging)
+
+- **Como era:** a volta do login do Google/Notion (`callback`) já gravava a ligação para a dona do `state`. Link de consentimento
+  repassado a outra pessoa ligaria a agenda/Notion dela à conta de quem começou.
+- **Como ficou:** a volta só guarda uma **pendência** (`oauth_pending_links`, migration `156_oauth_confirm_same_session`; tokens
+  no `payload`, código de confirmação de 256 bits do qual só o hash SHA-256 fica no banco, 15 min, uso único) e volta ao site com
+  `?gcal=confirmar&c=<código>` / `?notion=confirmar&c=<código>`. O site tira o código do endereço ao carregar e chama a ação nova
+  `confirm` com a sessão de quem está logado; `oauth_pending_confirm` só ativa se for a MESMA conta, senão descarta a pendência
+  (tokens apagados). Respostas: 200 ok, 403 `not_same_user`, 410 `expired`, 409 `already_used`, 404 `not_found`, 400 `invalid_code`,
+  401 sem login. Ligação ativa antiga não muda enquanto não houver confirmação. Sincronização e uso dos tokens não mudaram.
+  Aviso novo no site (pt-BR e en): `panel.gcal.confirmFailed` / `panel.notion.confirmFailed`.
+- **Sobra conhecida:** se a outra pessoa não estiver logada no site e repassar o endereço final (com o código) a quem começou, em
+  até 15 min, a ligação acontece; exige que ela entregue um link secreto, não só que clique.
+- **Produção antes do conserto (conferido, só leitura):** `google-calendar` v5 e `notion-sync` v3, código igual ao do repositório.
+- **Staging:** 156 aplicada (versão `20261127224710`); `google-calendar` **v9** e `notion-sync` **v7** (`verify_jwt:false`
+  nas duas, como antes). Teste do banco (transação desfeita): 30/30. Ponta a ponta por HTTP com 2 contas de senha
+  (`zz-oauth-a/b@example.invalid`) e pendências gravadas pelo banco (tokens falsos): A confirma a própria = 200 e ligação ativa;
+  B confirma a de A = 403 e a pendência some (A tentando depois = 409); vencido = 410; reusado = 409; código do Google no Notion =
+  404; sem login = 401; código mal formado = 400; `callback` com `state` falso = 400; ligação de A não trocada pela tentativa de B.
+- **Testes:** `tests/oauth-confirmar/run.sh` (Node 65/65 + Postgres local 30/30); `tests/aulas-presenca/run.sh` sem falha
+  (117 45/45, 128 19/19 etc.); `tests/aulas-presenca/test_google_map.mjs` 9/9 (ajustado para a importação nova);
+  `tests/notion/test_map.mjs` 13/13.
+- **Limpeza:** a remoção das contas `zz-oauth-*` pela ferramenta ficou esperando confirmação: `docs/rollout-sql/limpeza-staging-zz-oauth.sql`
+  (SQL Editor do Staging; a ligação de teste e as pendências saem em cascata).
+- **Produção (aguardando o ok da autora):** 1) migration 156; 2) deploy de `google-calendar` e `notion-sync` (mesmos arquivos da
+  pasta, `verify_jwt:false`); 3) PR do site (`shared/google-calendar.js`, `shared/notion-sync.js`, textos). Fazer 2 e 3 juntos: com a
+  função nova e o site antigo, a volta mostra o Painel sem ligar nada (o site antigo não conhece `confirmar`). O repasse
+  `agenda.profbrune.com.br/google|notion/callback` (Netlify) não muda. Voltar atrás: republicar v5/v3.
