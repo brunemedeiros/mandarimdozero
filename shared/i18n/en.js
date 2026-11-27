@@ -459,6 +459,7 @@ window.I18N_CATALOG['en'] = {
   'trail.levelReview.title': '{level} Review', // ALTA
   'trail.levelReview.goal': 'Dictations that bring together everything you learned across the level. Optional.', // ALTA
   'trail.dailyMissions.caption': '🎯 Daily missions', // ALTA
+  'trail.dailyMissions.doneNow': '✓ Done!', // ALTA
   'trail.levelPreparing': 'The content for level {level} is still being prepared.', // ALTA
   'trail.module.label': 'Module {n} · {title}', // ALTA
   'trail.levelTest.eyebrow': 'Level test', // ALTA
