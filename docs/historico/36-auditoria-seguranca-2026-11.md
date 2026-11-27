@@ -329,3 +329,13 @@ e investigar por que ninguém ativa (convite, telas, iPhone exige o site instala
   Desafios (com os 2 rascunhos) e passam pela regra das conquistas; aluna comum: editar report 0, Desafios 120 (só publicados),
   criar conquista recusado; limite da pasta = 52428800. Produção: aguardando o "ok" da autora.
 - Base para o teto de XP (produção, 2026-11-26): 89 semanas com XP, maior 2019, 95% abaixo de 1336, média 423.
+## CSP por `<meta>` deixava a abertura em ~30 s no celular (2026-11-26/27)
+
+Com a política num `<meta>`, o Chrome (e Opera) e o Firefox desligam o "preload scanner": os ~180 `<script src>` do fim do
+`<body>` passaram a ser buscados um de cada vez. Rede de celular simulada (150 ms por arquivo): antes do PR #520 6,1 s; depois
+30,6 s; sem a CSP 8,0 s; com a CSP no fim do `<head>` 30,7 s (o lugar não importa). Conserto aprovado pela dona (a proteção
+fica): `scripts/csp-atualizar.js` também escreve, logo depois do `<meta>`, um bloco `<!-- preload:... -->` com um
+`<link rel="preload" as="script">` por script do próprio site (sem os de fora nem os com lacre SRI); roda na publicação como a
+CSP, então a lista nunca fica velha. Resultado: fr 32 s -> 6 s, zh 29 s -> 6 s. Testes: `tests/csp/` 12/12, anti-moldura 5/5,
+pwa-cache 21/21, 48/48 e 14/14, login-obrigatorio 127/127, 166/166 e 63/63, consentimento 77/77, animações 40/40, paridade
+2770/2770 e 92/92, i18n 2333/2333 (sem falha nova).
