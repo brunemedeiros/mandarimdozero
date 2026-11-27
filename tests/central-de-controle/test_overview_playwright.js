@@ -34,6 +34,10 @@ const ANTES = () => {
   window.__RPC.admin_xp_alerts = () => ({ threshold: 3000, cap: 8000, rows: [
     { user_id: 's1', display_name: 'Marina Alves', username: 'marina.alves', language_app_key: 'frances', week_start: day(3), amount: 8000, capped: true },
     { user_id: 's9', display_name: '<script>x</script>', username: 'zz', language_app_key: 'mandarim', week_start: day(10), amount: 3400, capped: false } ] });
+  // Motivos de saída do e-mail de cartões (migration 149, 2026-11-27)
+  window.__RPC.cards_digest_exit_summary = () => ({ semanal_ativos: 2,
+    por_motivo: [{ reason: 'sem_tempo', action: 'sair', total: 3 }, { reason: 'sem_tempo', action: 'semanal', total: 2 }, { reason: 'muitos_emails', action: 'sair', total: 2 }, { reason: 'cartoes_nao_servem', action: 'sair', total: 1 }, { reason: 'outro', action: 'sair', total: 1 }],
+    outros: [{ texto: 'não consigo abrir o e-mail no celular', quando: day(1) + 'T14:20:00+00:00' }, { texto: '<img src=x onerror=alert(1)>', quando: day(2) + 'T09:00:00+00:00' }] });
 };
 
 (async () => {
@@ -58,6 +62,15 @@ const ANTES = () => {
     L('XP fora do normal: nome vindo do banco escapado', !(await p.$('[data-aov="xp-alerta"] script')) && xp.includes('<script>x</script>'));
     L('XP fora do normal: vem antes dos números', await p.evaluate(() => { const a = document.querySelector('[data-aov="xp-alerta"]'), b = document.querySelector('[data-aov="numeros"]'); return !!(a && b && (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING)); }));
     await shot('xp-alerta');
+
+    // ---- Motivos de saída do e-mail de cartões (2026-11-27) ----
+    const ex = await p.innerText('[data-aov="saida-motivos"]').catch(() => '');
+    L('motivos de saída: bloco com título, respostas (9), resumo semanal (2) e a nota de anonimato', ex.includes('E-mail de cartões novos: por que saem') && /Respostas\s*\n?\s*9/.test(ex) && /No resumo semanal agora\s*\n?\s*2/.test(ex) && ex.includes('anônimas'), ex.slice(0, 300));
+    L('motivos de saída: ordem do mais citado (sem tempo 5) e porcentagem', ex.indexOf('Estou sem tempo agora') < ex.indexOf('Recebo e-mails demais') && ex.includes('5 (56%)') && ex.includes('(2 escolheram o resumo semanal)'));
+    L('motivos de saída: texto livre escapado (sem HTML injetado) e a função foi chamada', !(await p.$('[data-aov="saida-motivos"] img')) && ex.includes('<img src=x onerror=alert(1)>') && (await rpcs('cards_digest_exit_summary')).length >= 1, [await p.$('[data-aov="saida-motivos"] img') ? 'img' : 'sem img', ex.includes('<img src=x onerror=alert(1)>'), (await rpcs('cards_digest_exit_summary')).length]);
+    L('motivos de saída: barras com largura proporcional (a maior em 100%)', await p.$$eval('[data-aov="saida-motivos"] .p-barra i', els => els.length === 6 && els.some(e => e.getAttribute('style').includes('--v:100%'))));
+    await p.$eval('[data-aov="saida-motivos"]', e => e.scrollIntoView());
+    await shot('motivos-saida');
 
     // ---- números e gráficos ----
     const numeros = await p.innerText('[data-aov="numeros"]');
