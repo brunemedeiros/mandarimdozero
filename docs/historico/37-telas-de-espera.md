@@ -50,3 +50,12 @@ A dona abriu no Opera (Android) e viu só "@prof.brune" por mais de 30 s. Duas c
 Testes: B visível ao abrir em fr e zh, normal, com menos movimento e com a animação parada (simulando o navegador que só
 começa no fim do carregamento) 20/20; rede de celular simulada (150 ms por arquivo): hoje B vazio em 1, 3, 6 e 10 s; com o
 conserto, B completo e depois animado.
+
+## Animação do B em CSS (2026-11-27)
+
+Com a abertura rápida de novo, a dona viu no Opera o B completo, mas parado: a animação SMIL (embutida no desenho) só começa
+quando a página termina de carregar, e o site abre nesse mesmo instante. A animação passou para CSS (`@keyframes la-azul`,
+`la-rosa`, `la-some` no `<style>` logo antes do desenho, mesmo ciclo de 3,85 s, `animation-delay: -2.7s` = começa no B
+completo), que roda durante o carregamento; "menos movimento" desliga pelo próprio CSS (`prefers-reduced-motion`), sem
+`<script>`. Medido em rede lenta simulada: SMIL parado o tempo todo; CSS some e redesenha a partir de ~0,8 s com a página ainda
+carregando. Testes: B visível e animado em fr e zh, parado com menos movimento; `tests/csp/` 12/12; `tests/animacoes/` 40/40.
