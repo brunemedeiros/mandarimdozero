@@ -294,7 +294,7 @@
 .cloze-grammar-group .challenge-choice-btn{ min-width:96px; justify-content:center; border-radius:999px; padding:10px 22px; min-height:48px; }
 .cloze-grammar-group .challenge-choice-btn::after{ margin-left:2px; }
 .cloze-grammar-group-label{ text-transform:none; letter-spacing:0; font-size:13px; font-weight:700; }
-.cloze-grammar-msg{ color: var(--error-red); font-weight:700; }
+.cloze-grammar-msg{ color: var(--error-red-text); font-weight:700; }
 .cloze-grammar .btn-block{ min-height:50px; font-size:16px; }
 /* Devolutiva: barra de cor à esquerda, texto alinhado, rótulos sem caixa alta */
 .challenge-feedback, .listen-translate-feedback, .accent-feedback{ text-align:left; border-left-width:5px; padding:18px 18px 18px 18px; margin-top:16px; }

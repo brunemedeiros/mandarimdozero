@@ -679,3 +679,13 @@
 .painel .p-convites li:first-child{ border-top: 0; }
 .painel .p-convites .p-acoes{ margin-left: auto; }
 .painel .p-convites .is-expired small{ color: var(--p-erro); }
+
+/* Botão desativado no painel: cinza sólido + texto cinza legível, em vez da transparência do Pico (decisão da autora, 2026-11-27).
+   Botões "sem caixa" (⋯, faixas da Visão Geral) ficam como estavam. */
+.painel :is(button, [type=submit], [type=button], [role=button])[disabled]:not(.att-more):not(.aov-faixa):not(.aov-sit){
+  --pico-background-color: var(--disabled-fill); --pico-border-color: var(--disabled-fill); --pico-color: var(--on-disabled-fill);
+  background:var(--disabled-fill); color:var(--on-disabled-fill); border-color:var(--disabled-fill); box-shadow:none; opacity:1; transform:none; cursor:not-allowed;
+}
+/* Linha que diz por que o botão está cinza (Recomeçar o curso, Excluir conta; decisão da autora, 2026-11-27). */
+.painel .btn-motivo{ margin: .5rem 0 0; font-size: .85rem; color: var(--p-tinta-suave); text-align: center; }
+.painel .btn-motivo[hidden]{ display: none; }
