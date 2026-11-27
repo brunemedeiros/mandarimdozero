@@ -361,29 +361,83 @@ function openDailyMissionTarget(id){
   }
 }
 
+// Quanto cada Missão do dia já tem agora ({ id: número }), para comparar no fim da lição.
+function missionsProgressSnapshot(){
+  try {
+    const out = {};
+    todaysChallenges().forEach(c => { out[c.id] = Math.min(Number(c.get(STATE.daily)) || 0, c.target); });
+    return out;
+  } catch (e) { return null; }
+}
+
+// Animação da tela das Missões do dia (dona, 2026-11-27, prévia aprovada: velocidade média, selo sem número): só as missões
+// que mudaram nesta lição enchem a barra, uma depois da outra (0,7 s cada); a que foi completada agora ganha borda verde,
+// o selo "✓ Concluída!" no lugar do "1/1" e um pulinho no ícone. Com menos movimento, tudo já no lugar final.
+const DC_FILL_MS = 700, DC_STAGGER_MS = 455, DC_FIRST_MS = 400;
+function animateDailyChallenges(contentEl, list){
+  const reduce = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+  let delay = DC_FIRST_MS;
+  list.forEach(({ c, before, after }, i) => {
+    if (after === before) return;
+    const card = contentEl.querySelector(`.daily-challenge-card[data-dc="${i}"]`);
+    if (!card) return;
+    const fill = card.querySelector('.daily-challenge-progress-fill');
+    const frac = card.querySelector('.daily-challenge-fraction');
+    const pct = v => Math.round((v / c.target) * 100) + '%';
+    const finish = () => {
+      if (!card.isConnected) return;
+      frac.textContent = `${after}/${c.target}`;
+      if (after >= c.target && before < c.target) card.classList.add('dc-done-now');
+    };
+    if (reduce){ fill.style.width = pct(after); finish(); return; }
+    setTimeout(() => {
+      if (!card.isConnected) return;
+      fill.classList.add('dc-anim');
+      fill.style.width = pct(after);
+      const t0 = performance.now();
+      const step = now => {
+        if (!card.isConnected) return;
+        const k = Math.min(1, (now - t0) / DC_FILL_MS);
+        frac.textContent = `${Math.round(before + (after - before) * k)}/${c.target}`;
+        if (k < 1) requestAnimationFrame(step); else finish();
+      };
+      requestAnimationFrame(step);
+    }, delay);
+    delay += DC_STAGGER_MS;
+  });
+}
+
 function renderDailyChallengesScreen(){
   const contentEl = document.getElementById('step-content');
   const nextBtn = document.getElementById('step-next-btn');
   document.getElementById('step-back-btn').style.display = 'none';
   document.getElementById('step-progress-fill').style.width = '100%';
 
+  // Antes x agora de cada missão; a foto do começo da lição é usada uma vez só (voltar a esta tela mostra o estado final).
+  const atStart = STEP_STATE.missionsAtStart || null;
+  STEP_STATE.missionsAtStart = null;
+  const dcList = todaysChallenges().map(c => {
+    // Number(...)||0: um campo ausente nunca mais vira NaN silencioso
+    // (ver auditoria "O problema dos 100%") -- current fica sempre um
+    // número válido entre 0 e c.target.
+    const after = Math.min(Number(c.get(STATE.daily)) || 0, c.target);
+    const b = atStart && typeof atStart[c.id] === 'number' ? atStart[c.id] : after;
+    return { c, before: Math.min(b, after), after };
+  });
   contentEl.innerHTML = `
     <div class="challenges-screen">
       <h2>${t('trail.dailyMissions.caption')}</h2>
-      ${todaysChallenges().map((c, i) => {
-        // Number(...)||0: um campo ausente nunca mais vira NaN silencioso
-        // (ver auditoria "O problema dos 100%") -- current fica sempre um
-        // número válido entre 0 e c.target.
-        const current = Math.min(Number(c.get(STATE.daily)) || 0, c.target);
+      ${dcList.map(({ c, before: current }, i) => {
         const pct = Math.round((current / c.target) * 100);
         return `
-          <div class="daily-challenge-card">
+          <div class="daily-challenge-card" data-dc="${i}">
             <div class="daily-challenge-icon-sq slot-${i}">${c.icon}</div>
             <div class="daily-challenge-body">
               <div class="daily-challenge-label">${c.label}</div>
               <div class="daily-challenge-progress-row">
                 <div class="daily-challenge-progress-track"><div class="daily-challenge-progress-fill" style="width:${pct}%"></div></div>
                 <div class="daily-challenge-fraction">${current}/${c.target}</div>
+                <span class="dc-done-pill">${t('trail.dailyMissions.doneNow')}</span>
               </div>
             </div>
           </div>
@@ -393,6 +447,7 @@ function renderDailyChallengesScreen(){
   `;
   nextBtn.textContent = t('common.continueArrow');
   nextBtn.style.display = 'flex';
+  animateDailyChallenges(contentEl, dcList);
 
   // BUG real corrigido aqui (relatado pela autora, 2026-09-15): esta tela é
   // SEMPRE a próxima depois de "Unidade concluída!" (renderUnitCompleteScreen,

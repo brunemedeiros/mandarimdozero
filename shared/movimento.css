@@ -191,3 +191,21 @@ dialog[open] > article{ animation: mov-janela-in var(--mov-janela) var(--mov-cur
   /* Os dias da sequência já aparecem prontos (com espera, o dado só chegaria depois de 1 s). */
   .streak-day-item .streak-day-circle{ animation:none !important; }
 }
+
+/* Missões do dia animadas (dona, 2026-11-27): a barra enche do valor do começo da lição até o novo; a missão completada agora
+   ganha borda verde, o selo "✓ Concluída!" no lugar do número e um pulinho no ícone (shared/core/estado-trilha-desafios.js). */
+.daily-challenge-progress-fill.dc-anim{ transition: width .7s cubic-bezier(.22,.8,.3,1); }
+.daily-challenge-card{ transition: border-color .3s ease, box-shadow .3s ease; }
+.daily-challenge-card.dc-done-now{ border-color: var(--success-fill);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--success-fill) 35%, transparent), var(--shadow-card); }
+.dc-done-pill{ display:none; flex-shrink:0; font-size:12px; font-weight:800; line-height:1; padding:6px 9px; border-radius:999px;
+  background: var(--success-fill); color: var(--on-success-fill); white-space:nowrap; }
+.daily-challenge-card.dc-done-now .dc-done-pill{ display:inline-block; animation: dc-pop .38s cubic-bezier(.3,1.6,.5,1) both; }
+.daily-challenge-card.dc-done-now .daily-challenge-fraction{ display:none; }
+.daily-challenge-card.dc-done-now .daily-challenge-icon-sq{ animation: dc-bounce .5s ease both; }
+@keyframes dc-pop{ from{ transform:scale(.4); opacity:0; } to{ transform:scale(1); opacity:1; } }
+@keyframes dc-bounce{ 0%{ transform:scale(1); } 40%{ transform:scale(1.15) rotate(-6deg); } 100%{ transform:scale(1); } }
+@media (prefers-reduced-motion: reduce){
+  .daily-challenge-progress-fill.dc-anim{ transition:none; }
+  .daily-challenge-card.dc-done-now .dc-done-pill, .daily-challenge-card.dc-done-now .daily-challenge-icon-sq{ animation:none; }
+}
