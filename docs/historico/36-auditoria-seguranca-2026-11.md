@@ -383,3 +383,12 @@ pwa-cache 21/21, 48/48 e 14/14, login-obrigatorio 127/127, 166/166 e 63/63, cons
   e de conferência (`own_flashcards`/`teacher_flashcards` validam o deck, `decks_validate_hierarchy` aceita "Meus Decks" como
   pai e recusa pai errado, igual a antes da mudança); 0 funções sem endereço fixo. Produção: aguardando o "ok" da autora.
 - **Testes ao vivo das Edge Functions com contas de verdade**: autorizados pela autora (Staging, contas `zz-edge-*`); resultado abaixo.
+- **Resultado (subagente, Staging, contas de verdade com senha):** nenhuma das 8 funções deixou a conta A mexer na conta B.
+  push-send (CORS 200; leitura só das inscrições de quem chama; envio real não testável no Staging, sem chaves de push),
+  delete-my-account (e-mail de B = 400 `confirm_mismatch`; e-mail de A + `user_id` de B = só A apagada, B intacta),
+  report-reply-send (403 antes de qualquer envio), push-dispatch (só a fila, 0 linhas), review-bank-agent (401 nos 3 casos),
+  google-calendar e notion-sync (401 para aluna; callback com `state` falso = 400), class-calendar-feed (senha aleatória = calendário vazio).
+  Nenhum e-mail ou push saiu. Sobrou no Staging a conta `zz-edge-b` e 4 linhas dela (a limpeza pela ferramenta ficou esperando
+  confirmação): `docs/rollout-sql/limpeza-staging-zz-edge.sql` para a autora colar no SQL Editor do Staging.
+- **Google Agenda/Notion (A5)**: explicado à autora; conserto possível = conferir no retorno do Google/Notion que é o MESMO navegador
+  que começou a ligação (marca guardada no navegador no `start` e conferida no `callback`). Aguarda decisão.
