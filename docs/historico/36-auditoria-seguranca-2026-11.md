@@ -392,3 +392,9 @@ pwa-cache 21/21, 48/48 e 14/14, login-obrigatorio 127/127, 166/166 e 63/63, cons
   confirmação): `docs/rollout-sql/limpeza-staging-zz-edge.sql` para a autora colar no SQL Editor do Staging.
 - **Google Agenda/Notion (A5)**: explicado à autora; conserto possível = conferir no retorno do Google/Notion que é o MESMO navegador
   que começou a ligação (marca guardada no navegador no `start` e conferida no `callback`). Aguarda decisão.
+- **154 na produção** (2026-11-27, "ok" da autora; versão `20261127224036`): lista das 20 funções conferida igual à do Staging
+  pelo hash dos nomes (`c48305caa22cae60001d19a53e300208`); depois, 0 funções sem `search_path` e as funções respondem igual.
+- **Limpeza do Staging**: a 1ª versão do arquivo falhou com `profile_delete_forbidden` (o gatilho `profiles_protect_delete` só deixa
+  o perfil sair junto com a conta; como tudo estava entre `begin`/`commit`, nada foi apagado). Arquivo corrigido: apaga os dados e a
+  conta; o perfil sai em cascata.
+- **Google Agenda/Notion (A5)**: a autora pediu o conserto agora (2026-11-27).
