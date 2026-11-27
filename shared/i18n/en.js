@@ -259,6 +259,7 @@ window.I18N_CATALOG['en'] = {
   'notif.cat.sistema': '⚙️ System', // ALTA
   'notif.cat.amigos': '👥 Friends', // ALTA
   'notif.cat.cartoes_professora': '📚 New cards from your teacher', // ALTA
+  'notif.cat.cartoes_professora_semanal': '📚 Weekly cards summary (Sunday morning)', // ALTA
   'notif.pref.inAppOnly': 'Friends only has in-app notifications', // ALTA
   'notif.pref.noEmail': 'Friends has no email notifications', // ALTA
   'notif.pref.emailOnly': 'This notice only exists by email', // ALTA
@@ -391,6 +392,9 @@ window.I18N_CATALOG['en'] = {
   'review.mode.hard.desc': 'The ones you miss most', // ALTA
   'review.mode.match.name': 'Match', // MÉDIA -- nome do jogo; alternativa: "Matching"
   'review.mode.match.desc': 'Pairs game', // ALTA
+  'review.mode.speed.empty': 'No cards for today', // ALTA
+  'review.mode.hard.empty': 'No hard words yet', // ALTA
+  'review.mode.match.needWords': 'Needs {n} words', // ALTA
   'review.insufficientTitle': 'Not enough vocabulary yet', // ALTA
   'review.match.insufficientMin': 'The Match game needs at least {n} words already seen in completed lessons.', // ALTA
   'review.match.insufficientSome': 'The Match game needs at least a few words you have already studied successfully in Study.', // ALTA
@@ -2824,8 +2828,9 @@ window.I18N_CATALOG['en'] = {
   'admin.overview.exit.weeklyOf': '({n} chose the weekly summary)', // ALTA
   'admin.overview.exit.others': 'What they wrote under "Another reason"', // ALTA
   'admin.overview.exit.more': 'Show {n} more', // ALTA
+  'admin.overview.exit.weekOf': 'week of {day}', // ALTA
   'admin.overview.exit.empty': 'No answers yet. When someone leaves through the email link and picks a reason, it shows up here.', // ALTA
-  'admin.overview.exit.note': 'Anonymous answers from the "Stop receiving" page (since 11/26/2026): they do not show who answered. People who leave with the Gmail unsubscribe button, or without picking a reason, do not appear.', // ALTA
+  'admin.overview.exit.note': 'Anonymous answers from the "Stop receiving" page: only the week and the reason are saved, never the account or the time, so there is no way to tell who answered. People who leave with the Gmail unsubscribe button, or without picking a reason, do not appear.', // ALTA
   'admin.overview.empty.scope': 'No accounts for this choice.', // ALTA
   'admin.overview.error': 'Couldn\'t load the Overview.', // ALTA
   'admin.overview.retry': 'Try again', // ALTA

@@ -59,3 +59,15 @@ Decisões da dona (conversa de 25 e 26/11, prévia `docs/email/previas/sair-cart
 - Motivos na Visão Geral do Painel de Admin (pedido da dona, 2026-11-27): bloco "E-mail de cartões novos: por que saem" (respostas, quantos estão no resumo
   semanal agora, barras por motivo com o "(N escolheram o resumo semanal)", e o texto do "Outro motivo"; nota de anonimato). Lê a função
   `cards_digest_exit_summary()` (já na produção desde a 149); sem a função ou sem resposta, o bloco some. Só a admin vê. Sem migration.
+
+## Correções P-025 e P-026 (revisão diária, 2026-11-27; migration `155_cards_digest_anonymous_answers`)
+
+- **P-025 (resumo semanal):** a escolha do semanal passou da tabela `teacher_cards_digest_prefs` (que as Configurações não enxergavam) para a MESMA
+  matriz de preferências do e-mail: `notification_preferences.channels.cartoes_professora_semanal` (['email'] = ligado), ao lado de `cartoes_professora`
+  (aviso do dia). Configurações ganhou a linha "Resumo semanal dos cartões (domingo de manhã)"; ligar um desliga o outro (nunca os dois), "sair" desliga
+  os dois, "voltar" liga só o do dia e "desligar e-mails" em geral desliga o semanal também. Servidor: o do dia vence se os dois estiverem ligados.
+  `teacher_cards_digest_prefs` ficou sem uso (vazia de resumos na produção).
+- **P-026 (anonimato):** `cards_digest_exit_reasons` (149) guardava hora e id sequencial, que se cruzavam com a hora do clique em
+  `notification_preferences.updated_at`. Agora `cards_digest_exit_answers` guarda só `week_of` (segunda-feira, horário de Brasília), um id aleatório
+  (uuid) e as respostas; sem conta, e-mail nem hora. Limite que continua: o texto livre do "Outro motivo" é o que a pessoa escrever, e os registros
+  da plataforma do Supabase guardam o endereço do POST (que leva a conta) por tempo limitado; as tabelas antigas ficam vazias e sem uso (apagar depois pelo SQL Editor).

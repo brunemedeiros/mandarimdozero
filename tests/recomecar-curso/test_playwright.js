@@ -92,6 +92,7 @@ async function openApp(browser, base, app, o){
   if (!o.ctx){
     // Tema desde o começo (app_theme, shared/theme.js): trocar depois deixa a captura no meio da transição de cor.
     await ctx.addInitScript(({ lang, seed, theme }) => {
+      try { sessionStorage.setItem('age-ack-later', '1'); /* a janela de confirmação de idade (shared/age-ack.js) abria por cima e cobria o botão (2026-11-27) */ } catch (e) {}
       try { localStorage.setItem('ui-language', lang); localStorage.setItem('ui-language-gate', lang); localStorage.setItem('app_theme', theme); if (!localStorage.getItem('__db')) localStorage.setItem('__db', seed); } catch (e) {}
     }, { lang: o.lang, theme: o.theme || 'light', seed: JSON.stringify({ row: rowFor(app, o.lang, o), backups: [], rpcs: [], upserts: 0, linked: !!o.linked }) });
   }
@@ -167,6 +168,7 @@ async function flow(browser, base, app, o){
   await page.click('#restart-course-open');
   await page.waitForTimeout(300);
   await page.click('#restart-course-check');
+  await page.waitForTimeout(450); // o botão do painel troca de cor com transição (Pico, ~0,2 s): do cinza de desativado ao vermelho (2026-11-27)
   const on = await page.evaluate(() => { const y = document.getElementById('restart-course-yes'); const cs = getComputedStyle(y);
     const probe = document.createElement('span'); probe.style.cssText = 'color:var(--on-vivid);background:var(--error-red)'; document.body.appendChild(probe);
     const pc = getComputedStyle(probe); const exp = { color: pc.color, bg: pc.backgroundColor }; probe.remove();

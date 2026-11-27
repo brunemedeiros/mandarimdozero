@@ -1801,7 +1801,10 @@ button.wrong-feedback-continue:active:not(:disabled){ box-shadow: 0 2px 0 color-
   transition: transform .15s ease, box-shadow .15s ease; display:flex; flex-direction:column; align-items:center; gap:8px;
 }
 .review-mode-card:hover{ transform: translateY(-2px); box-shadow: var(--shadow-lift); }
-.review-mode-card:disabled{ opacity:.5; cursor:not-allowed; }
+/* Desativado: o cartão continua apagado (escolha da autora, 2026-11-27: sem cinza), mas o motivo escrito no lugar da descrição fica legível. */
+.review-mode-card:disabled{ cursor:not-allowed; }
+.review-mode-card:disabled > :not(.desc){ opacity:.5; }
+.review-mode-card:disabled .desc{ color:var(--ink-soft); font-weight:700; }
 .review-mode-card:disabled:hover{ transform:none; box-shadow:var(--shadow-card); }
 .review-mode-card .icon{ font-size:32px; }
 .review-mode-card .count{ font-size:26px; font-weight:800; color: var(--seal-red-dark); }

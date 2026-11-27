@@ -15,3 +15,5 @@ Procedimento de teste no navegador: skill `teste-navegador`. Para rodar regress�
 - O sandbox bloqueia o CDN do Supabase: `ERR_TUNNEL_CONNECTION_FAILED` no console é esperado; qualquer outro erro é real.
 - Relatar números reais (`N/N`) e separar falhas pré-existentes (confirmadas com `git stash`) de falhas novas.
 - Ao mudar comportamento de propósito, atualizar o teste antigo e dizer qual e por quê.
+- Biblioteca de terceiros no teste (sql.js, JSZip...) vem de `shared/vendor/`, nunca de pasta temporária (`/tmp`). Medir tamanho de janela com
+  `offsetWidth` (o `getBoundingClientRect` pega a animação de entrada) e lembrar do fantasma `.mov-fantasma` (0,15 s) ao reabrir janela (2026-11-27).
