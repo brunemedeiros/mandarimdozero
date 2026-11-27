@@ -3860,6 +3860,7 @@ window.I18N_CATALOG['en'] = {
   'panel.notion.r.noName': 'Row without a student.', // ALTA
   'panel.notion.connectedToast': 'Notion connected.', // ALTA
   'panel.notion.cancelledToast': 'Notion connection cancelled.', // ALTA
+  'panel.notion.confirmFailed': "We couldn't confirm the Notion connection. Start again in the same browser where you're signed in to the site.", // ALTA
   'panel.gcal.more': 'More Google Calendar options', // ALTA
   'panel.gcal.on': 'Connected', // ALTA
   'panel.gcal.toReview': '{n} to review', // ALTA
@@ -3933,6 +3934,7 @@ window.I18N_CATALOG['en'] = {
   'panel.gcal.errGeneric': 'Something went wrong with Google Calendar. Please try again in a moment.', // ALTA
   'panel.gcal.connectedToast': 'Google Calendar connected. Now choose the calendars with your lessons.', // ALTA
   'panel.gcal.cancelledToast': 'Google connection canceled.', // ALTA
+  'panel.gcal.confirmFailed': "We couldn't confirm the Google Calendar connection. Start again in the same browser where you're signed in to the site.", // ALTA
   'panel.gcal.timeFromGoogle': 'Time comes from Google Calendar: to change it, change it there.', // ALTA
   'myClassLogs.feed.title': 'See your lessons in your calendar (Google, Apple, Outlook)', // ALTA
   'myClassLogs.feed.intro': 'Subscribe to this link once and your lessons show up in your calendar on their own, in your time zone. When a lesson changes here, your calendar follows.', // ALTA

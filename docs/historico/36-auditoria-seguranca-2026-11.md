@@ -15,7 +15,7 @@ funções), código do repositório e cabeçalhos do site no ar.
 | 4 | Médio | `notification-cron` aceita a chave pública (`verify_jwt` aceita o token anon): qualquer um dispara os avisos fora de hora. Limites por dia e intervalo mínimo seguram o estrago | Conserto: senha `x-cron-token` + migration 140 (abaixo) |
 | 5 | Leve | Proteção contra senhas vazadas (HaveIBeenPwned) desligada no Auth | Só no plano Pro (conferido 2026-11-25); alternativa grátis abaixo |
 | 6 | Leve | Sem CSP / proteção contra moldura (GitHub Pages não deixa configurar cabeçalhos) | Conserto: CSP por `<meta>` + anti-moldura (abaixo) |
-| 7 | Leve | 20 funções sem `search_path` fixo (nenhuma `security definer`) | Pendente |
+| 7 | Leve | 20 funções sem `search_path` fixo (nenhuma `security definer`) | Conserto: migration 154 (Staging e produção, 2026-11-27) |
 
 Conferido e OK: nenhum segredo no código nem no histórico do git; das funções `security definer` executáveis
 por conta logada, só sobram consultas públicas de propósito (`check_username_signup`, `classroom_code_info`,
@@ -371,3 +371,91 @@ pwa-cache 21/21, 48/48 e 14/14, login-obrigatorio 127/127, 166/166 e 63/63, cons
 - Testes: `painel-materiais` 42/42 e 214/214 (novo: o clique pede o link de 10 min com o caminho certo; o teste antigo do link
   perigoso na vista da aluna conferia um elemento vazio e foi corrigido), painel-professora 895/895, mural 325/325, csp 12/12,
   i18n 2333/2333. Produção e PR: aguardando o "ok" da autora.
+
+## Rodada de 2026-11-27 (tarde): pasta fechada na produção, 20 funções, decisões
+
+- **153 na produção** (versão `20261127154756`): pasta `support-materials` fechada e regra `support_materials_student_read`;
+  site publicado pelo PR #541 e conferido no ar (~40 s depois da mesclagem).
+- **Tipos de arquivo do Material de apoio: ficam LIVRES** (decisão da autora, 2026-11-27). Só o limite de 50 MB (151).
+- **154 `functions_fixed_search_path`** (achado 7 de 2026-11-19): as 20 funções sem `search_path` fixo passam a ter
+  `search_path = public` (nenhuma é security definer nem usa extensão). Staging aplicada em 2026-11-27. Teste (transação
+  desfeita): as 10 funções simples devolvem o esperado; gatilhos de data (`profiles`, `reports`, `notification_*`, `challenges`)
+  e de conferência (`own_flashcards`/`teacher_flashcards` validam o deck, `decks_validate_hierarchy` aceita "Meus Decks" como
+  pai e recusa pai errado, igual a antes da mudança); 0 funções sem endereço fixo. Produção: aguardando o "ok" da autora.
+- **Testes ao vivo das Edge Functions com contas de verdade**: autorizados pela autora (Staging, contas `zz-edge-*`); resultado abaixo.
+- **Resultado (subagente, Staging, contas de verdade com senha):** nenhuma das 8 funções deixou a conta A mexer na conta B.
+  push-send (CORS 200; leitura só das inscrições de quem chama; envio real não testável no Staging, sem chaves de push),
+  delete-my-account (e-mail de B = 400 `confirm_mismatch`; e-mail de A + `user_id` de B = só A apagada, B intacta),
+  report-reply-send (403 antes de qualquer envio), push-dispatch (só a fila, 0 linhas), review-bank-agent (401 nos 3 casos),
+  google-calendar e notion-sync (401 para aluna; callback com `state` falso = 400), class-calendar-feed (senha aleatória = calendário vazio).
+  Nenhum e-mail ou push saiu. Sobrou no Staging a conta `zz-edge-b` e 4 linhas dela (a limpeza pela ferramenta ficou esperando
+  confirmação): `docs/rollout-sql/limpeza-staging-zz-edge.sql` para a autora colar no SQL Editor do Staging.
+- **Google Agenda/Notion (A5)**: explicado à autora; conserto possível = conferir no retorno do Google/Notion que é o MESMO navegador
+  que começou a ligação (marca guardada no navegador no `start` e conferida no `callback`). Aguarda decisão.
+- **154 na produção** (2026-11-27, "ok" da autora; versão `20261127224036`): lista das 20 funções conferida igual à do Staging
+  pelo hash dos nomes (`c48305caa22cae60001d19a53e300208`); depois, 0 funções sem `search_path` e as funções respondem igual.
+- **Limpeza do Staging**: a 1ª versão do arquivo falhou com `profile_delete_forbidden` (o gatilho `profiles_protect_delete` só deixa
+  o perfil sair junto com a conta; como tudo estava entre `begin`/`commit`, nada foi apagado). Arquivo corrigido: apaga os dados e a
+  conta; o perfil sai em cascata.
+- **Google Agenda/Notion (A5)**: a autora pediu o conserto agora (2026-11-27).
+
+## Conserto A5: ligação do Google Agenda / Notion confirmada pela sessão logada (2026-11-27, Staging e produção)
+
+- **Como era:** a volta do login do Google/Notion (`callback`) já gravava a ligação para a dona do `state`. Link de consentimento
+  repassado a outra pessoa ligaria a agenda/Notion dela à conta de quem começou.
+- **Como ficou:** a volta só guarda uma **pendência** (`oauth_pending_links`, migration `156_oauth_confirm_same_session`; tokens
+  no `payload`, código de confirmação de 256 bits do qual só o hash SHA-256 fica no banco, 15 min, uso único) e volta ao site com
+  `?gcal=confirmar&c=<código>` / `?notion=confirmar&c=<código>`. O site tira o código do endereço ao carregar e chama a ação nova
+  `confirm` com a sessão de quem está logado; `oauth_pending_confirm` só ativa se for a MESMA conta, senão descarta a pendência
+  (tokens apagados). Respostas: 200 ok, 403 `not_same_user`, 410 `expired`, 409 `already_used`, 404 `not_found`, 400 `invalid_code`,
+  401 sem login. Ligação ativa antiga não muda enquanto não houver confirmação. Sincronização e uso dos tokens não mudaram.
+  Aviso novo no site (pt-BR e en): `panel.gcal.confirmFailed` / `panel.notion.confirmFailed`.
+- **Sobra conhecida:** se a outra pessoa não estiver logada no site e repassar o endereço final (com o código) a quem começou, em
+  até 15 min, a ligação acontece; exige que ela entregue um link secreto, não só que clique.
+- **Produção antes do conserto (conferido, só leitura):** `google-calendar` v5 e `notion-sync` v3, código igual ao do repositório.
+- **Staging:** 156 aplicada (versão `20261127224710`); `google-calendar` **v9** e `notion-sync` **v7** (`verify_jwt:false`
+  nas duas, como antes). Teste do banco (transação desfeita): 30/30. Ponta a ponta por HTTP com 2 contas de senha
+  (`zz-oauth-a/b@example.invalid`) e pendências gravadas pelo banco (tokens falsos): A confirma a própria = 200 e ligação ativa;
+  B confirma a de A = 403 e a pendência some (A tentando depois = 409); vencido = 410; reusado = 409; código do Google no Notion =
+  404; sem login = 401; código mal formado = 400; `callback` com `state` falso = 400; ligação de A não trocada pela tentativa de B.
+- **Testes:** `tests/oauth-confirmar/run.sh` (Node 65/65 + Postgres local 30/30); `tests/aulas-presenca/run.sh` sem falha
+  (117 45/45, 128 19/19 etc.); `tests/aulas-presenca/test_google_map.mjs` 9/9 (ajustado para a importação nova);
+  `tests/notion/test_map.mjs` 13/13; `tests/painel-professora/test_playwright.js` 895/895; `tests/i18n/test_sem_portugues_en.js` 6/6;
+  `tests/i18n/test_i18n_unit.js` 2333/2333.
+- **Limpeza:** feita pela autora no SQL Editor do Staging (2026-11-27): `limpeza-staging-zz-oauth.sql` e `limpeza-staging-zz-edge.sql`
+  deram 0 (contas `zz-*` 0, pendências 0, report 31 0).
+- **Produção (2026-11-27, autorizada):** migration 156 aplicada (versão `20261127231139`; RLS ligada, `oauth_pending_save`/`confirm` só
+  para `service_role`, `anon`/`authenticated` sem acesso); `google-calendar` **v6** e `notion-sync` **v4** (`verify_jwt:false`, mesmos
+  arquivos da pasta). Teste ao vivo sem login: OPTIONS 200, `confirm` 401, `sync` sem senha 401, `callback` com `state` falso 400 (nas duas).
+  Site publicado pelo PR logo em seguida. O repasse `agenda.profbrune.com.br/google|notion/callback` (Netlify) não mudou.
+  Voltar atrás: republicar `google-calendar` v5 e `notion-sync` v3 (código do commit anterior ao conserto) e reverter o PR do site;
+  a tabela e as 2 funções podem ficar. Próxima vez que a autora religar o Google/Notion, a tela pede a confirmação sozinha (sem passo extra).
+
+## Resumo final da auditoria (2026-11-27)
+
+Duas rodadas (2026-11-19 a 25 e 2026-11-25 a 27). Nenhum segredo vazou no código nem no histórico do Git (2481 commits).
+
+| Achado | Gravidade | Situação |
+|---|---|---|
+| Prints dos reports abertos a qualquer visitante | Grave | Fechado (139) |
+| Pastas `avatars`, `flashcard-media`, `support-materials` listáveis | Médio | Fechado (139) |
+| Report forjável em nome de outra conta | Médio | Fechado (147) |
+| Robô de avisos disparável por qualquer um | Médio | Fechado (140 + senha) |
+| Bibliotecas externas sem versão fixa | Médio | Fechado (`shared/vendor/` + SRI) |
+| Material de apoio sem limite e com pasta pública | Médio | Fechado (151 + 153) |
+| XP do Ranking sem teto | Leve | Fechado (152: teto 8.000 + aviso na Visão Geral) |
+| Regras de admin pelo e-mail do token | Leve | Fechado (150, `is_admin()`) |
+| Sem CSP / proteção contra moldura | Leve | Fechado (PR #520) |
+| Senha mínima curta | Leve | Fechado (8, site e Supabase) |
+| 20 funções sem `search_path` | Leve | Fechado (154) |
+| Push sem CORS e sem reinscrição | Leve (defeito) | Fechado (`push-send` v13 + 148) |
+| Google Agenda/Notion ligável por link repassado (A5) | Leve | Fechado (156 + `google-calendar` v6 + `notion-sync` v4) |
+| Senhas vazadas (HaveIBeenPwned) | Leve | Só no plano Pro (não contratado) |
+| Conquistas sem trava | Leve | Aceito (decisão da autora) |
+| Token do feed da agenda sem validade (A4); `tts-generate` (A3); CORS `*` (A6) | Informativo | Aceitos |
+
+Testes de regressão que ficam: `tests/seguranca-idor/` (90/90), `tests/push-cors/`, `tests/push-convite/`, `tests/oauth-confirmar/`,
+`tests/csp/`, `tests/painel-materiais/`, `tests/central-de-controle/`. Não verificável daqui: os valores do Vault e dos secrets.
+Acompanhar: aparelhos inscritos no push por volta de 2026-12-10 (tarefa agendada); tirar a conferência dos links antigos do e-mail
+de cartões por volta de 2026-12-25; apagar pelo SQL Editor as tabelas vazias `cards_digest_exit_reasons` e `teacher_cards_digest_prefs`
+(de outra conversa).
