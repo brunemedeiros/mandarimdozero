@@ -355,3 +355,19 @@ pwa-cache 21/21, 48/48 e 14/14, login-obrigatorio 127/127, 166/166 e 63/63, cons
   `152_weekly_xp_cap_and_alerts` = `20261127152530`. Conferido: 0 regras com o e-mail, 18 com `is_admin()` (16 novas + 2 que já
   usavam), limite 52428800, gatilho `weekly_xp_cap` presente, `admin_xp_alerts` fechada para visitante, XP intacto (133 linhas,
   maior 2.019), hash das regras igual ao do Staging (`644c1d6487092f1f2f03807160de6717`). Tela "XP fora do normal" no PR seguinte.
+
+## Material de apoio: pasta fechada (2026-11-27, pedido da autora)
+
+- **153 `support_materials_private`**: `support-materials` deixa de ser pública e ganha a regra `support_materials_student_read`
+  (a aluna lê o arquivo de um material que ela consegue ver em `teacher_support_materials`: enviado para ela e com vínculo ativo;
+  a subconsulta respeita a RLS dessa tabela). A professora continua lendo a própria pasta. Diferente da 139, o `CREATE POLICY` em
+  `storage.objects` passou pela ferramenta MCP (Staging, 2026-11-27).
+- Teste no Staging (transação desfeita): professora vê 2 arquivos; aluna certa vê só o dela (1) e nenhum outro da professora;
+  outra aluna 0; visitante 0; a mesma aluna sem vínculo 0; pasta `public = false`. Na produção havia 0 arquivos (2 materiais, nenhum
+  com arquivo): nada quebra.
+- Site: o arquivo abre por link temporário de 10 min criado no clique (`openSupportMaterialFile` em
+  `shared/teacher-support-materials.js`, molde dos prints dos reports), na tela da aluna e no painel da professora (`data-sm-file`);
+  `file_url` continua no formato antigo. Aviso novo `supportMaterials.fileError` (pt-BR e en).
+- Testes: `painel-materiais` 42/42 e 214/214 (novo: o clique pede o link de 10 min com o caminho certo; o teste antigo do link
+  perigoso na vista da aluna conferia um elemento vazio e foi corrigido), painel-professora 895/895, mural 325/325, csp 12/12,
+  i18n 2333/2333. Produção e PR: aguardando o "ok" da autora.
