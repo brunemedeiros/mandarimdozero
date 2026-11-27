@@ -10,7 +10,7 @@
 
 const ADMIN_OVERVIEW = {
   days: 30, scope: 'mine', language: 'all',
-  stats: null, statsError: false, reviews: null, reviewsError: false, situation: null,
+  stats: null, statsError: false, reviews: null, reviewsError: false, situation: null, xpAlerts: null,
   openBand: null, openSit: null,
   token: 0, bound: false,
 };
@@ -42,6 +42,15 @@ async function adminOverviewFetchReviews(){
   return data;
 }
 
+// XP fora do normal (migration 152): falha aqui nunca derruba a Visão Geral (sem lista = sem aviso).
+async function adminOverviewFetchXpAlerts(){
+  try {
+    const { data, error } = await supabaseClient.rpc('admin_xp_alerts');
+    if (error || !data || typeof data !== 'object') return null;
+    return data;
+  } catch (e) { return null; }
+}
+
 // Situação dos alunos pela mesma rotina da aba Alunos (cache da sessão compartilhado com ela).
 async function adminOverviewLoadSituation(token){
   const st = ADMIN_OVERVIEW;
@@ -64,13 +73,13 @@ async function adminOverviewLoadSituation(token){
 async function adminOverviewLoad(){
   const st = ADMIN_OVERVIEW;
   const token = ++st.token;
-  st.stats = null; st.statsError = false; st.reviews = null; st.reviewsError = false; st.situation = null;
+  st.stats = null; st.statsError = false; st.reviews = null; st.reviewsError = false; st.situation = null; st.xpAlerts = null;
   st.openBand = null; st.openSit = null;
   adminOverviewRenderBody();
   const mine = st.scope === 'mine';
-  const [stats, reviews] = await Promise.all([adminOverviewFetchStats(), mine ? adminOverviewFetchReviews() : Promise.resolve(null)]);
+  const [stats, reviews, xpAlerts] = await Promise.all([adminOverviewFetchStats(), mine ? adminOverviewFetchReviews() : Promise.resolve(null), adminOverviewFetchXpAlerts()]);
   if (token !== st.token) return;
-  st.stats = stats; st.statsError = !stats;
+  st.stats = stats; st.statsError = !stats; st.xpAlerts = xpAlerts;
   if (mine){ st.reviews = reviews; st.reviewsError = !reviews; }
   if (mine && stats) st.situation = { loading: true, done: 0, total: 0 };
   adminOverviewRenderBody();

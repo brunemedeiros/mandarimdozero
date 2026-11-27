@@ -37,3 +37,6 @@ site novo parte do molde da família (ver `docs/i18n/e4-plano-de-extracao.md`) e
   `shared/toast.js`). Teste: `tests/xp-semana/`.
 - O toast "+N XP" aparece para todo ganho maior que 0. A notificação do sino usa `notification_rules.min_xp_amount` (categoria `gamificacao`, 15 na produção).
 - Demais fontes e valores atuais, e o que está em revisão: `docs/historico/21-auditoria-xp.md`. Ao mexer em qualquer XP, atualizar esse arquivo e o teste `tests/xp/`.
+- **Teto do XP da semana** (decisão da autora, 2026-11-27, migration `152_weekly_xp_cap_and_alerts`): o banco segura `weekly_xp.amount` em 8.000 por semana e idioma
+  (gatilho `weekly_xp_cap`, não recusa a gravação). O XP é somado no navegador, então o teto só barra trapaça grosseira. A Visão Geral do Admin avisa
+  contas com 3.000 ou mais nas últimas 2 semanas (`admin_xp_alerts`). Mudar o teto = migration nova + texto `admin.overview.xp.note`.

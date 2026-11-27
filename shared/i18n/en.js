@@ -2806,6 +2806,10 @@ window.I18N_CATALOG['en'] = {
   'admin.overview.plans.premium': 'Premium', // ALTA
   'admin.overview.plans.note': 'You (admin and teacher) are left out of the counts. Cancelled, expired and pending payment will show up here once there are sales on the site.', // ALTA
   'admin.overview.foot.tz': 'Days are counted in Brasília time. Analytics still counts in London time (UTC), so the daily numbers there may differ a little.', // ALTA
+  'admin.overview.xp.title': 'Unusual XP', // ALTA
+  'admin.overview.xp.note': 'Accounts with {limit} XP or more in a week, over the last 2 weeks (the real record is about 2,000). The site caps XP at {cap} per week for each language. It may just be a lot of studying; worth a look.', // ALTA
+  'admin.overview.xp.amount': '{n} XP in the week of {week}', // ALTA
+  'admin.overview.xp.capped': 'hit the cap', // ALTA
   'admin.overview.empty.scope': 'No accounts for this choice.', // ALTA
   'admin.overview.error': 'Couldn\'t load the Overview.', // ALTA
   'admin.overview.retry': 'Try again', // ALTA

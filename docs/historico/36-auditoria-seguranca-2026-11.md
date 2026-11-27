@@ -317,6 +317,18 @@ e investigar por que ninguém ativa (convite, telas, iPhone exige o site instala
   **Chegou no celular dela às 15:31 de Brasília** (print: notificação do Opera "Teste da Prof. Brune", com o ícone do site).
   Caminho inteiro confirmado: fila → push-dispatch → Google → Opera no Android.
 
+## P2 e P3 no Staging (2026-11-26)
+
+- **150 `admin_policies_is_admin`** (P3): as 16 regras que reconheciam a admin pelo e-mail do token passam a usar `is_admin()`
+  (papel `admin` em `account_roles` OU o e-mail da autora; hoje só a conta dela tem o papel). `ALTER POLICY` no lugar, sem DROP.
+  Lista conferida igual nos dois projetos. Staging aplicada em 2026-11-26.
+- **151 `support_materials_size_limit`** (P2): a pasta pública `support-materials` passa a recusar arquivo acima de 50 MB, o mesmo
+  limite da tela (`TMT_MAX_FILE_BYTES`). Tipos de arquivo continuam livres (a tela aceita qualquer tipo); restringir só com a lista
+  da autora. Staging aplicada em 2026-11-26.
+- Teste (Staging, transação desfeita): admin pelo papel e conta com o e-mail da admin editam report alheio (1), veem os 122
+  Desafios (com os 2 rascunhos) e passam pela regra das conquistas; aluna comum: editar report 0, Desafios 120 (só publicados),
+  criar conquista recusado; limite da pasta = 52428800. Produção: aguardando o "ok" da autora.
+- Base para o teto de XP (produção, 2026-11-26): 89 semanas com XP, maior 2019, 95% abaixo de 1336, média 423.
 ## CSP por `<meta>` deixava a abertura em ~30 s no celular (2026-11-26/27)
 
 Com a política num `<meta>`, o Chrome (e Opera) e o Firefox desligam o "preload scanner": os ~180 `<script src>` do fim do
@@ -327,3 +339,19 @@ fica): `scripts/csp-atualizar.js` também escreve, logo depois do `<meta>`, um b
 CSP, então a lista nunca fica velha. Resultado: fr 32 s -> 6 s, zh 29 s -> 6 s. Testes: `tests/csp/` 12/12, anti-moldura 5/5,
 pwa-cache 21/21, 48/48 e 14/14, login-obrigatorio 127/127, 166/166 e 63/63, consentimento 77/77, animações 40/40, paridade
 2770/2770 e 92/92, i18n 2333/2333 (sem falha nova).
+
+## XP do Ranking: opções A e D (2026-11-27, decisão da autora: teto 8.000)
+
+- **152 `weekly_xp_cap_and_alerts`**: gatilho `weekly_xp_cap` (segura em 8.000; sem DROP, criado só se não existir) e RPC
+  `admin_xp_alerts()` (só admin; contas com >= 3.000 nas últimas 2 semanas). Staging aplicada em 2026-11-27. Teste (transação
+  desfeita): 1.200 e 7.999 ficam, 99.999 vira 8.000, linha nova de 50.000 vira 8.000, aluna chamando a lista = not_authorized,
+  admin vê a conta com 8.000 "no teto". Produção: aguardando o "ok" da autora.
+- Tela: bloco "XP fora do normal" no topo da Visão Geral (`aovXpAlertsHTML`, `shared/admin-overview-ui.js`), só quando há alguém;
+  falha da RPC nunca derruba a Visão Geral. Testes: `tests/central-de-controle/` 45/45 e 170/170 (fr/zh, claro/escuro, celular).
+
+## P2, P3 e teto do XP na produção (2026-11-27, "ok" da autora)
+
+- Versões: `150_admin_policies_is_admin` = `20261127152524`, `151_support_materials_size_limit` = `20261127152526`,
+  `152_weekly_xp_cap_and_alerts` = `20261127152530`. Conferido: 0 regras com o e-mail, 18 com `is_admin()` (16 novas + 2 que já
+  usavam), limite 52428800, gatilho `weekly_xp_cap` presente, `admin_xp_alerts` fechada para visitante, XP intacto (133 linhas,
+  maior 2.019), hash das regras igual ao do Staging (`644c1d6487092f1f2f03807160de6717`). Tela "XP fora do normal" no PR seguinte.

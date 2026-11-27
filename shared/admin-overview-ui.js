@@ -214,11 +214,27 @@ function aovErrorHTML(){
     <button type="button" class="secondary" data-aov-tentar>${aovEsc(t('admin.overview.retry'))}</button></div>`;
 }
 // Corpo (tudo menos cabeçalho e filtros). st = { days, scope, language, stats, statsError, reviews, reviewsError, situation, openBand, openSit }
+// ---- XP fora do normal (opção D da auditoria, 2026-11-27; RPC admin_xp_alerts da migration 152) ----
+// alerts = { threshold, cap, rows: [{ user_id, username, display_name, language_app_key, week_start, amount, capped }] } ou null.
+// Só aparece quando há alguém acima do limite; independe dos filtros (é um aviso de segurança do Ranking).
+function aovXpAlertsHTML(alerts){
+  const rows = (alerts && alerts.rows) || [];
+  if (!rows.length) return '';
+  const items = rows.map(r => aovPersonHTML(r, { extra: [
+    aovLangLabel(r.language_app_key),
+    t('admin.overview.xp.amount', { n: aovNum(r.amount), week: aovDayLabel(r.week_start) }),
+    r.capped ? t('admin.overview.xp.capped') : '',
+  ].filter(Boolean).join(' · ') })).join('');
+  return `<article data-aov="xp-alerta" class="aov-xp-alerta"><header><h3>⚠️ ${aovEsc(t('admin.overview.xp.title'))}</h3></header>
+    <p class="p-subtitulo p-nota">${aovEsc(t('admin.overview.xp.note', { limit: aovNum(alerts.threshold || 3000), cap: aovNum(alerts.cap || 8000) }))}</p>
+    <ul class="aov-pessoas">${items}</ul></article>`;
+}
+
 function aovBodyHTML(st, openable){
   if (st.statsError) return aovErrorHTML();
   if (!st.stats) return aovLoadingHTML();
   const mine = st.scope === 'mine';
-  return `${aovKpisHTML(st.stats, st.scope)}
+  return `${aovXpAlertsHTML(st.xpAlerts)}${aovKpisHTML(st.stats, st.scope)}
     ${aovChartsHTML(st.stats)}
     <div class="p-grade-2 aov-blocos">
       ${aovEngagementHTML(st.stats, st.openBand, openable)}
