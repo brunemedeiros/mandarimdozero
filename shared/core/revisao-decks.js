@@ -606,19 +606,19 @@ function renderReviewModeSelect(){
         <span class="${speedSplit.learning ? 'is-learning' : 'is-zero'}">${speedSplit.learning}</span>
         <span class="${speedSplit.review ? 'is-review' : 'is-zero'}">${speedSplit.review}</span>
       </div>
-      <div class="desc">${rec.speedBestScore ? t('review.records.yourRecord', { record: speedRecordText(rec) }) : t('review.records.againstClock')}</div>
+      <div class="desc">${trueCount === 0 ? t('review.mode.speed.empty') : (rec.speedBestScore ? t('review.records.yourRecord', { record: speedRecordText(rec) }) : t('review.records.againstClock'))}</div>
     </button>
     <button class="review-mode-card" id="mode-card-hard" ${hardCount === 0 ? 'disabled' : ''}>
       <div class="icon">🔥</div>
       <div class="name">${t('review.mode.hard.name')}</div>
       <div class="count">${hardCount}</div>
-      <div class="desc">${hardLeft ? t('review.records.leftList', { n: hardLeft }) : t('review.mode.hard.desc')}</div>
+      <div class="desc">${hardLeft ? t('review.records.leftList', { n: hardLeft }) : (hardCount === 0 ? t('review.mode.hard.empty') : t('review.mode.hard.desc'))}</div>
     </button>
     <button class="review-mode-card" id="mode-card-match" ${matchWordCount < 10 ? 'disabled' : ''}>
       <div class="icon">🧩</div>
       <div class="name">${t('review.mode.match.name')}</div>
       <div class="count">${matchWordCount}</div>
-      <div class="desc">${rec.matchBestMs ? t('review.records.yourRecord', { record: formatRecordSeconds(rec.matchBestMs) }) : t('review.mode.match.desc')}</div>
+      <div class="desc">${matchWordCount < 10 ? t('review.mode.match.needWords', { n: 10 }) : (rec.matchBestMs ? t('review.records.yourRecord', { record: formatRecordSeconds(rec.matchBestMs) }) : t('review.mode.match.desc'))}</div>
     </button>
   `;
   const weekEl = document.getElementById('review-week');

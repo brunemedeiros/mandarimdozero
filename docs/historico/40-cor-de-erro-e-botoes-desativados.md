@@ -34,7 +34,18 @@ cores-marca (todas verdes).
 de teste nunca confirmou a idade. O teste agora dispensa essa janela na visita (`sessionStorage['age-ack-later']`) e espera
 a transição de cor do botão (~0,2 s do Pico, do cinza ao vermelho) antes de medir. Resultado: 220/220.
 
-## Em prévia, aguardando a autora
-Cartões da Revisão (Praticar) desativados em cinza com o motivo escrito ("Nenhum cartão para hoje", "Ainda não tem cartões
-difíceis", "Precisa de 10 palavras") e caixinhas/chavinhas desativadas das Notificações em cinza (a marcada continua com o
-✓ visível, em cinza escuro). Nada aplicado no código.
+## Cartões da Revisão e caixinhas do painel (2026-11-27, 2ª rodada)
+Prévia vista pela autora; decisões:
+- **Cartões da Revisão (Praticar)**: NADA de cinza ("não gostei de tudo cinza"); o cartão continua apagado como antes, mas o
+  motivo vai no lugar da descrição e fica legível (só o ícone, o nome e o número ficam apagados): "Nenhum cartão para hoje"
+  (`review.mode.speed.empty`), "Ainda não tem cartões difíceis" (`review.mode.hard.empty`; se alguma palavra já saiu da lista,
+  continua "Já saíram da lista: N"), "Precisa de 10 palavras" (`review.mode.match.needWords`). Inglês: "No cards for today",
+  "No hard words yet", "Needs {n} words".
+- **Caixinhas e chavinhas do painel**: cinza só no que NÃO dá para clicar (pergunta da autora: "se é só liga/desliga, não precisa
+  ser cinza"). Na tabela de Notificações: "Celular" num aviso que não vai ao celular, "E-mail" num aviso só por e-mail etc.; a
+  marcada continua com o ✓, em cinza escuro. Chavinha fica cinza só no instante em que está salvando. As que ligam e desligam
+  não mudaram. CSS em `shared/painel/painel-componentes.css`.
+- Testes: i18n 2333/2333, painel-ds (88/88, 131/131, 194/194), revisao-proposta-a 60/60, quase iguais 2770/2770 (marcador
+  novo para a descrição x motivo dos três modos, com data e motivo), push-convite 58/58, configuracoes 27/27, csp 12/12,
+  recomecar-curso 220/220. `tests/k2f/` (falta o `sql.js` no ambiente) e `tests/deck-browser/` (tempo esgotado) já falhavam
+  antes, igual na `main`.

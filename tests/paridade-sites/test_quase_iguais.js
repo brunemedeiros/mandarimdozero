@@ -75,7 +75,12 @@ const ETAPA6 = (v) => etapa7(PROGRESSO_ORDEM(FAIXA_CONVIDADO(SELOS_PERFIL(v)))).
   .replace(/ mov-(?:entrar|revelar|liberada)(?=\\*")/g, '')
   .replace(/\.mov-(?:entrar|revelar|liberada)(?=[.\[#:\s])/g, '') // e no nome da cena (seletor do elemento clicado)
   // Palavra dona do progresso no save (2026-11-11, defeito 1 da varredura; ver também quase-iguais-harness.js): só a árvore nova tem.
-  .replace(/,(\\*)"variantWord\1":\1"[^"\\]*\1"/g, '');
+  .replace(/,(\\*)"variantWord\1":\1"[^"\\]*\1"/g, '')
+  // Cartão desativado da Revisão escreve o motivo no lugar da descrição (decisão da autora, 2026-11-27): nas duas árvores, a descrição
+  // e o motivo de cada modo viram o mesmo marcador.
+  .replace(/(class=(\\*)"desc\2">)(?:As que você mais erra|Ainda não tem cartões difíceis|The ones you miss most|No hard words yet)</g, '$1DESC_DIFICEIS<')
+  .replace(/(class=(\\*)"desc\2">)(?:Contra o relógio|Nenhum cartão para hoje|Against the clock|No cards for today)</g, '$1DESC_RAPIDA<')
+  .replace(/(class=(\\*)"desc\2">)(?:Jogo de pares|Precisa de 10 palavras|Pairs game|Needs 10 words)</g, '$1DESC_COMBINAR<');
 // Passaporte e selos do Perfil (decisão da autora, 2026-11-24; shared/selos.js): a Visão geral foi redesenhada e a medalha do
 // cartão da trilha (Progresso) virou o selo pequeno. Nas duas árvores, o trecho redesenhado vira um marcador; o resto das telas
 // continua comparado. O desenho novo é conferido em tests/selos/test_selos_playwright.js.

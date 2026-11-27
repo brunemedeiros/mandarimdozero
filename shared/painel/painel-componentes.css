@@ -689,3 +689,9 @@
 /* Linha que diz por que o botão está cinza (Recomeçar o curso, Excluir conta; decisão da autora, 2026-11-27). */
 .painel .btn-motivo{ margin: .5rem 0 0; font-size: .85rem; color: var(--p-tinta-suave); text-align: center; }
 .painel .btn-motivo[hidden]{ display: none; }
+/* Caixinha e chavinha que NÃO dá para clicar (ex.: "Celular" num aviso que não vai ao celular; chavinha salvando): cinza, em vez da
+   transparência do Pico; a marcada continua com o ✓ visível, em cinza escuro. As que ligam e desligam não mudam (decisão da autora, 2026-11-27). */
+.painel input[type=checkbox][disabled]{ opacity:1; --pico-background-color:var(--disabled-fill); background-color:var(--disabled-fill); border-color:color-mix(in srgb, var(--on-disabled-fill) 55%, transparent); cursor:not-allowed; }
+.painel input[type=checkbox]:not([role=switch]):checked[disabled]{ --pico-background-color:var(--on-disabled-fill); background-color:var(--on-disabled-fill); border-color:var(--on-disabled-fill); }
+.painel input[type=checkbox][role=switch][disabled]{ --pico-background-color:var(--disabled-fill); background-color:var(--disabled-fill); border-color:var(--disabled-fill); }
+.painel input[type=checkbox][role=switch][disabled]::before{ background:var(--on-disabled-fill); opacity:.6; }
