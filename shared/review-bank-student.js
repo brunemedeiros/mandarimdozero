@@ -30,6 +30,7 @@ function bankHomeFsrsSnapshot(card){
   return o;
 }
 // Chamada por gradeCurrentCard() DEPOIS de applyMemoryGrade. Só cartões da professora (origin 'teacher') com linha própria.
+// opts.typedText: o que foi digitado (só vai para a fila no erro de cartão de digitar).
 // opts.correction (botão Voltar da Revisão): é a nota CORRIGIDA de um cartão já respondido. Se a resposta anterior ainda está na fila (não
 // foi enviada), ela é trocada ali mesmo; se já foi, o envio usa correct_my_bank_review (127), que troca a de hoje em vez de somar outra.
 function logBankHomeStudy(card, grade, typed, opts){
@@ -37,6 +38,9 @@ function logBankHomeStudy(card, grade, typed, opts){
     if (!card || card.origin !== 'teacher' || card.rowId == null || typeof CURRENT_USER === 'undefined' || !CURRENT_USER) return;
     const list = bankHomeLogRead();
     const entry = { card: Number(card.rowId), grade, typed: !!typed, fsrs: bankHomeFsrsSnapshot(card), at: Date.now() };
+    // O que a aluna digitou, só quando ERRA um cartão de digitar (143, decisão da autora 2026-11-24); a professora lê no Banco.
+    const text = grade === 0 && typed && opts && opts.typedText != null ? String(opts.typedText).trim().slice(0, 300) : '';
+    if (text) entry.text = text;
     if (opts && opts.correction){
       let at = -1;
       for (let i = list.length - 1; i >= 0; i--){ if (list[i].card === entry.card){ at = i; break; } }
@@ -56,9 +60,14 @@ async function flushBankHomeLog(){
     while (list.length){
       const e = list[0];
       const args = { p_card_id: e.card, p_grade: e.grade, p_typed: !!e.typed, p_fsrs: e.fsrs || null };
-      let { error } = await supabaseClient.rpc(e.fix ? 'correct_my_bank_review' : 'log_my_bank_review', args);
+      if (e.text) args.p_typed_text = e.text;
+      const fn = e.fix ? 'correct_my_bank_review' : 'log_my_bank_review';
+      const missing = (err) => !!err && (err.code === 'PGRST202' || err.code === '42883');
+      let { error } = await supabaseClient.rpc(fn, args);
+      // Banco ainda sem a 143: envia sem o texto (a nota não se perde).
+      if (missing(error) && 'p_typed_text' in args){ delete args.p_typed_text; ({ error } = await supabaseClient.rpc(fn, args)); }
       // Banco ainda sem a 127: a correção entra como resposta comum (não trava a fila).
-      if (error && e.fix && (error.code === 'PGRST202' || error.code === '42883')) ({ error } = await supabaseClient.rpc('log_my_bank_review', args));
+      if (missing(error) && e.fix) ({ error } = await supabaseClient.rpc('log_my_bank_review', args));
       if (error) break; // sem rede ou banco sem a 112: tenta de novo no próximo envio
       list = bankHomeLogRead().slice(1);
       bankHomeLogWrite(list);

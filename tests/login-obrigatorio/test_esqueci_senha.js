@@ -27,6 +27,7 @@ const STUB = `window.supabase = { createClient: () => {
         window.__calls.push(email);
         await new Promise(r => setTimeout(r, 600));
         if (window.__fail) return { error: { message: 'Network error', status: 500 } };
+        if (window.__fail429) return { error: { message: 'Email rate limit exceeded', status: 429, code: 'over_email_send_rate_limit' } };
         const last = window.__sentAt[email];
         if (last && Date.now() - last < 60000) return { error: { message: 'For security purposes, you can only request this after 51 seconds.', status: 429, code: 'over_email_send_rate_limit' } };
         window.__sentAt[email] = Date.now(); return { error: null };
@@ -96,6 +97,13 @@ const STUB = `window.supabase = { createClient: () => {
     await page.fill('#gate-forgot-email', 'outra@x.com'); await page.click('#gate-forgot-send-btn');
     await page.waitForFunction(() => !document.getElementById('gate-forgot-send-btn').disabled);
     L('erro de verdade: fica na tela do e-mail com o aviso e o botão volta', (await page.isVisible('#gate-forgot')) && await page.evaluate(() => document.getElementById('gate-forgot-note').classList.contains('err')));
+    // 429 SEM "after N seconds" (outro limite do Supabase): não dá para dizer que o link saiu, mostra gate.forgot.failed
+    await page.evaluate(() => { window.__fail = false; window.__fail429 = true; });
+    await page.fill('#gate-forgot-email', 'terceira@x.com'); await page.click('#gate-forgot-send-btn');
+    await page.waitForFunction(() => !document.getElementById('gate-forgot-send-btn').disabled);
+    L('429 sem "after N seconds": fica na tela do e-mail, sem "Link a caminho"', (await page.isVisible('#gate-forgot')) && !(await page.isVisible('#gate-forgot-sent')));
+    L('429 sem "after N seconds": mostra gate.forgot.failed', await page.evaluate(() => { const n = document.getElementById('gate-forgot-note'); return n.classList.contains('err') && n.textContent === t('gate.forgot.failed'); }), await page.textContent('#gate-forgot-note'));
+    await page.evaluate(() => { window.__fail429 = false; });
     await page.click('#gate-forgot-cancel'); await page.waitForSelector('#gate-login', { state: 'visible' });
     L('"Voltar" da tela do e-mail leva ao login', await page.isVisible('#gate-login'));
     L('zero pageerror', errors.length === 0, errors);

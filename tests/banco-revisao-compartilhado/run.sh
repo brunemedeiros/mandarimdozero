@@ -16,5 +16,7 @@ $P $DB -f "$MIG/112_review_bank_shared_schedule.sql" >/dev/null
 $P $DB -f "$MIG/112_review_bank_shared_schedule.sql" >/dev/null
 $P $DB -f "$MIG/127_bank_home_correction.sql" >/dev/null
 $P $DB -f "$MIG/127_bank_home_correction.sql" >/dev/null
-echo "migrations aplicadas (até 096 + 112 + 127, duas vezes cada)"
+$P $DB -f "$MIG/143_review_bank_typed_text.sql" >/dev/null
+$P $DB -f "$MIG/143_review_bank_typed_text.sql" >/dev/null
+echo "migrations aplicadas (até 096 + 112 + 127 + 143, duas vezes cada)"
 psql -h /tmp/pg -p 54329 -U pguser $DB -q -At -f "$HERE/test_112.sql" 2>&1 | grep -v '^\s*$'
