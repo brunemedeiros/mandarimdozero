@@ -259,6 +259,7 @@ window.I18N_CATALOG['en'] = {
   'notif.cat.sistema': '⚙️ System', // ALTA
   'notif.cat.amigos': '👥 Friends', // ALTA
   'notif.cat.cartoes_professora': '📚 New cards from your teacher', // ALTA
+  'notif.cat.cartoes_professora_semanal': '📚 Weekly cards summary (Sunday morning)', // ALTA
   'notif.pref.inAppOnly': 'Friends only has in-app notifications', // ALTA
   'notif.pref.noEmail': 'Friends has no email notifications', // ALTA
   'notif.pref.emailOnly': 'This notice only exists by email', // ALTA
@@ -2827,8 +2828,9 @@ window.I18N_CATALOG['en'] = {
   'admin.overview.exit.weeklyOf': '({n} chose the weekly summary)', // ALTA
   'admin.overview.exit.others': 'What they wrote under "Another reason"', // ALTA
   'admin.overview.exit.more': 'Show {n} more', // ALTA
+  'admin.overview.exit.weekOf': 'week of {day}', // ALTA
   'admin.overview.exit.empty': 'No answers yet. When someone leaves through the email link and picks a reason, it shows up here.', // ALTA
-  'admin.overview.exit.note': 'Anonymous answers from the "Stop receiving" page (since 11/26/2026): they do not show who answered. People who leave with the Gmail unsubscribe button, or without picking a reason, do not appear.', // ALTA
+  'admin.overview.exit.note': 'Anonymous answers from the "Stop receiving" page: only the week and the reason are saved, never the account or the time, so there is no way to tell who answered. People who leave with the Gmail unsubscribe button, or without picking a reason, do not appear.', // ALTA
   'admin.overview.empty.scope': 'No accounts for this choice.', // ALTA
   'admin.overview.error': 'Couldn\'t load the Overview.', // ALTA
   'admin.overview.retry': 'Try again', // ALTA

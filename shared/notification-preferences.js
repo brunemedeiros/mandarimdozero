@@ -42,7 +42,23 @@ const NOTIFICATION_PREF_CATEGORIES = [
   // Cartões novos da professora (e-mail diário da Edge Function teacher-cards-digest, migration 141): só e-mail, ligado
   // por padrão para quem tem professora (decisão da dona, 2026-11-23). Sem preferência salva o servidor envia.
   { id: 'cartoes_professora', labelKey: 'notif.cat.cartoes_professora', emailOnly: true, defaultChannels: ['email'] },
+  // Resumo semanal dos cartões (domingo de manhã): quem sai do aviso do dia pela página "Parar de receber" pode escolher 1 e-mail por semana
+  // (P-025, 2026-11-27). Fica na mesma matriz para as Configurações mostrarem a escolha certa e o "desligar e-mails" desligar os dois.
+  // Desligado por padrão; ligado só por escolha. O do dia e o semanal nunca ficam ligados juntos (ver notifPrefExclusiveDigest).
+  { id: 'cartoes_professora_semanal', labelKey: 'notif.cat.cartoes_professora_semanal', emailOnly: true, defaultChannels: [] },
 ];
+
+// Aviso do dia e resumo semanal dos cartões são escolhas que se excluem: `prefer` diz qual ficou por último ('cartoes_professora' ou
+// 'cartoes_professora_semanal'); sem `prefer`, o do dia vence (mesma regra do servidor, teacher-cards-digest).
+function notifPrefExclusiveDigest(channels, prefer){
+  const daily = Array.isArray(channels.cartoes_professora) ? channels.cartoes_professora.includes('email') : true;
+  const weekly = Array.isArray(channels.cartoes_professora_semanal) && channels.cartoes_professora_semanal.includes('email');
+  if (daily && weekly){
+    if (prefer === 'cartoes_professora_semanal') channels.cartoes_professora = [];
+    else channels.cartoes_professora_semanal = [];
+  }
+  return channels;
+}
 
 // Canais efetivos de uma categoria: o que está salvo; para categoria só-in_app
 // sem nada salvo, o padrão do servidor (ligado) -- evita mostrar desmarcado
@@ -247,7 +263,15 @@ async function setCategoryChannel(category, channel, enabled){
   const current = new Set(cat ? notifPrefEffectiveChannels(prefs, cat) : (channels[category] || []));
   if (enabled) current.add(channel); else current.delete(channel);
   channels[category] = [...current];
+  notifPrefExclusiveDigest(channels, category);
   await saveNotificationPreferenceChannels(channels);
+  if (category === 'cartoes_professora' || category === 'cartoes_professora_semanal'){
+    // O do dia e o semanal se excluem: a caixinha do outro acompanha (sem redesenhar a tela, para o foco não pular).
+    ['cartoes_professora', 'cartoes_professora_semanal'].forEach(id => {
+      const box = document.querySelector(`input[data-pref-category="${id}"][data-pref-channel="email"]`), c = NOTIFICATION_PREF_CATEGORIES.find(x => x.id === id);
+      if (box && c) box.checked = notifPrefEffectiveChannels({ channels }, c).includes('email');
+    });
+  }
 }
 
 async function setAllCategoriesChannel(channel, enabled){
@@ -260,6 +284,7 @@ async function setAllCategoriesChannel(channel, enabled){
     if (enabled) current.add(channel); else current.delete(channel);
     channels[c.id] = [...current];
   });
+  notifPrefExclusiveDigest(channels);
   await saveNotificationPreferenceChannels(channels);
 }
 

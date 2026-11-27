@@ -260,7 +260,7 @@ function aovExitReasonsHTML(sum){
       <span class="p-barra" aria-hidden="true"><i style="--v:${pct}%"></i></span></div>`;
   }).join('');
   const others = Array.isArray(sum.outros) ? sum.outros.filter(o => o && o.texto) : [];
-  const li = (o) => `<li class="aov-pessoa"><span class="aov-exit-texto">${aovEsc(o.texto)}</span><small>${aovEsc(aovDayLabel(String(o.quando || '').slice(0, 10)))}</small></li>`;
+  const li = (o) => `<li class="aov-pessoa"><span class="aov-exit-texto">${aovEsc(o.texto)}</span><small>${aovEsc(t('admin.overview.exit.weekOf', { day: aovDayLabel(String(o.quando || '').slice(0, 10)) }))}</small></li>`;
   const shown = others.slice(0, AOV_EXIT_OTHERS_SHOWN), rest = others.slice(AOV_EXIT_OTHERS_SHOWN);
   const othersHTML = others.length ? `<h4 class="aov-exit-sub">${aovEsc(t('admin.overview.exit.others'))}</h4><ul class="aov-pessoas" data-aov="saida-outros">${shown.map(li).join('')}</ul>
     ${rest.length ? `<details><summary>${aovEsc(t('admin.overview.exit.more', { n: rest.length }))}</summary><ul class="aov-pessoas">${rest.map(li).join('')}</ul></details>` : ''}` : '';
