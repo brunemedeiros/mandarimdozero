@@ -348,3 +348,10 @@ pwa-cache 21/21, 48/48 e 14/14, login-obrigatorio 127/127, 166/166 e 63/63, cons
   admin vê a conta com 8.000 "no teto". Produção: aguardando o "ok" da autora.
 - Tela: bloco "XP fora do normal" no topo da Visão Geral (`aovXpAlertsHTML`, `shared/admin-overview-ui.js`), só quando há alguém;
   falha da RPC nunca derruba a Visão Geral. Testes: `tests/central-de-controle/` 45/45 e 170/170 (fr/zh, claro/escuro, celular).
+
+## P2, P3 e teto do XP na produção (2026-11-27, "ok" da autora)
+
+- Versões: `150_admin_policies_is_admin` = `20261127152524`, `151_support_materials_size_limit` = `20261127152526`,
+  `152_weekly_xp_cap_and_alerts` = `20261127152530`. Conferido: 0 regras com o e-mail, 18 com `is_admin()` (16 novas + 2 que já
+  usavam), limite 52428800, gatilho `weekly_xp_cap` presente, `admin_xp_alerts` fechada para visitante, XP intacto (133 linhas,
+  maior 2.019), hash das regras igual ao do Staging (`644c1d6487092f1f2f03807160de6717`). Tela "XP fora do normal" no PR seguinte.
