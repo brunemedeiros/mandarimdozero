@@ -120,7 +120,7 @@
 }
 .dictation-sentence.has-error{ border-left-color: var(--error-red); }
 .dictation-sentence-text{ flex:1; min-width:0; font-size:15px; line-height:1.5; color: var(--ink); overflow-wrap:anywhere; }
-.dictation-sentence-flag{ font-weight:800; font-size:13px; color: var(--error-red); }
+.dictation-sentence-flag{ font-weight:800; font-size:13px; color: var(--error-red-text); }
 .dictation-sentence-play{
   flex-shrink:0; min-height:40px; min-width:40px; padding:6px 12px;
   background: var(--paper-warm); border:1px solid var(--paper-line); border-radius:999px;

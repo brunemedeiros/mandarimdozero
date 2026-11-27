@@ -294,6 +294,7 @@ try{
      fundo escuro, então precisam de texto escuro em cima). */
   --on-vivid: #FFFFFF;
   --error-red-text: #B81F13; /* texto de erro sobre --paper-warm: 5.32:1 (o --error-red puro dá 4.15:1) */
+  --disabled-fill: #E4DED3; --on-disabled-fill: #5E566B; /* botão desativado: cinza sólido + texto 5,2:1 (decisão da autora, 2026-11-27) */
   /* grade-hard/grade-good (botões Difícil/Bom da revisão) -- cor PRÓPRIA
      (não reaproveita --seal-red, a cor de MARCA, nem um hex solto) que seguem
      o MESMO padrão claro-escuro/on-vivid de --error-red/--jade acima, em vez
@@ -364,6 +365,7 @@ try{
     --ink-soft: #C5B8D9;
     --on-vivid: #201335;
     --error-red-text: #FF6B5C;
+    --disabled-fill: #2E2739; --on-disabled-fill: #A79DB8; /* botão desativado: cinza sólido + texto 5,6:1 (decisão da autora, 2026-11-27) */
     /* Par escuro de grade-hard/grade-good (ver :root claro) -- mesmo padrão
        "mais claro/pastel no escuro" de --error-red/--jade, pra continuar
        passando com --on-vivid (que também vira texto escuro no escuro).
@@ -400,6 +402,7 @@ try{
   --ink-soft: #C5B8D9;
   --on-vivid: #201335;
   --error-red-text: #FF6B5C;
+  --disabled-fill: #2E2739; --on-disabled-fill: #A79DB8; /* botão desativado: cinza sólido + texto 5,6:1 (decisão da autora, 2026-11-27) */
   --grade-hard-bg: #C9973A;
   --grade-good-bg: #5FA8D3;
   --medal-gold: #F5C25B; --medal-silver: #C9D2DD; --medal-bronze: #E3A06C; --on-medal: #2A1E05;
@@ -1264,7 +1267,7 @@ body.lesson-focus #pwa-update-banner{ display:none !important; }
   font-weight:800; font-size:13.5px; margin-right:7px; animation: comboBadgeIn .35s cubic-bezier(.34,1.56,.64,1);
 }
 @keyframes comboBadgeIn{ 0%{ transform:scale(0) rotate(-8deg); opacity:0; } 60%{ transform:scale(1.18) rotate(3deg); opacity:1; } 100%{ transform:scale(1) rotate(0); } }
-.wrong-feedback-header{ color: var(--error-red); }
+.wrong-feedback-header{ color: var(--error-red-text); }
 
 /* Explicação ("por que não foi essa" / a resposta) -- SEMPRE visível,
    automática, sem depender de o aluno clicar em nada. Inclui tanto o erro
@@ -1761,7 +1764,8 @@ button.wrong-feedback-continue:active:not(:disabled){ box-shadow: 0 2px 0 color-
   box-shadow: 0 var(--btn-depth) 0 rgba(0,0,0,0.18);
   box-shadow: 0 var(--btn-depth) 0 color-mix(in srgb, var(--imperial-gold) 65%, #000); }
 .btn-gold:active:not(:disabled){ box-shadow: 0 2px 0 color-mix(in srgb, var(--imperial-gold) 65%, #000); }
-.btn:disabled{ opacity:.45; cursor:not-allowed; }
+/* Desativado = cinza sólido + texto cinza legível, nos dois temas (decisão da autora, 2026-11-27; antes era 45% de transparência). */
+.btn:disabled, .btn:disabled:hover{ background:var(--disabled-fill); color:var(--on-disabled-fill); border-color:var(--disabled-fill); box-shadow:none; opacity:1; transform:none; cursor:not-allowed; }
 .btn-block{ width:100%; }
 .btn-sm{ padding:8px 14px; font-size:13px; border-radius:11px; text-decoration:none; --btn-depth:3px; --btn-depth-sm:2px; }
 
@@ -1942,7 +1946,7 @@ button.wrong-feedback-continue:active:not(:disabled){ box-shadow: 0 2px 0 color-
   min-width:84px; padding:12px 10px; border-radius:12px; border:2px solid var(--paper-line);
   background: var(--paper-warm); cursor:pointer; font-family:inherit;
 }
-.match-size-btn:disabled{ opacity:.4; cursor:not-allowed; }
+.match-size-btn:disabled{ background:var(--disabled-fill); color:var(--on-disabled-fill); border-color:var(--disabled-fill); box-shadow:none; opacity:1; transform:none; cursor:not-allowed; }
 .match-size-btn.selected{ border-color: var(--seal-red); background: color-mix(in srgb, var(--seal-red) 10%, var(--paper-warm)); }
 .match-size-num{ font-size:22px; font-weight:800; color:var(--ink); }
 .match-size-label{ font-size:11.5px; color:var(--ink-soft); line-height:1.3; }
@@ -2005,7 +2009,7 @@ button.wrong-feedback-continue:active:not(:disabled){ box-shadow: 0 2px 0 color-
 .review-observation{ display:flex; flex-direction:column; gap:2px; margin:12px 0; padding:10px 14px; background:var(--paper-warm); border:1px solid var(--paper-line); border-radius:var(--radius); color:var(--ink); font-size:14px; line-height:1.45; text-align:left; white-space:pre-line; }
 .review-observation strong{ font-size:12px; font-weight:800; color:var(--ink-soft); }
 #delete-account-yes{ background:var(--error-red, var(--grade-again-bg)); border-color:var(--error-red, var(--grade-again-bg)); color:var(--on-vivid); }
-#delete-account-yes:disabled{ opacity:.45; cursor:not-allowed; }
+#delete-account-yes:disabled{ background:var(--disabled-fill); color:var(--on-disabled-fill); border-color:var(--disabled-fill); box-shadow:none; opacity:1; transform:none; cursor:not-allowed; }
 .privacy-draft{ max-width:760px; margin:0 auto; padding:4px 0 24px; line-height:1.55; }
 .privacy-draft-h{ margin:22px 0 6px; font-size:17px; }
 .privacy-draft-p{ margin:0 0 10px; }
@@ -3304,7 +3308,7 @@ body.lesson-focus .acq-phase-banner{ margin-bottom:10px; padding:4px 12px; }
 .reorder-attempt{ font-size:18px; line-height:1.8; }
 /* .typed-attempt, .conj-x e .conj-gap ("Sua resposta" com letras erradas): shared/licao-feedback.css, comum aos sites. */
 .reorder-attempt-w.ok{ color:var(--jade); }
-.reorder-attempt-w.bad{ color:var(--error-red); font-weight:700; text-decoration:line-through; text-decoration-thickness:2px; }
+.reorder-attempt-w.bad{ color:var(--error-red-text); font-weight:700; text-decoration:line-through; text-decoration-thickness:2px; }
 .reorder-attempt-w.near{ text-decoration:underline; text-decoration-color:#E0A526; text-decoration-thickness:3px; text-underline-offset:4px; }
 /* ===== Revisão: total de hoje, recordes, semana e força da memória (shared/review-extras.js) ===== */
 #review-today-widget{ text-align:left; margin:14px 0 16px; }
@@ -3413,7 +3417,7 @@ body.lesson-focus .acq-phase-banner{ margin-bottom:10px; padding:4px 12px; }
 .deck-overview-total{ margin:16px 0 0; font-size:13px; color:var(--ink-soft); }
 .deck-overview-hint{ margin-top:6px; }
 .deck-overview-footer{ margin-top:22px; padding-top:14px; border-top:1px solid var(--paper-line); max-width:520px; margin-left:auto; margin-right:auto; }
-.deck-overview-danger{ color:var(--error-red); }
+.deck-overview-danger{ color:var(--error-red-text); }
 .deck-overview-extra{ max-width:520px; margin:0 auto; text-align:left; }
 .deck-delete-dialog{ margin-top:10px; padding:12px; border:1px solid var(--error-red); border-radius:var(--radius); background:var(--paper-warm); }
 .add-card-modal{ max-width:680px; }
@@ -4205,7 +4209,7 @@ button.att-swatch[aria-pressed="false"]{ background:transparent; font-weight:600
 .uchoice-user{ padding-left:30px; }
 .uchoice-status{ min-height:18px; margin:6px 0 0; font-size:13px; color:var(--ink-soft); }
 .uchoice-status.is-ok{ color:var(--jade); font-weight:700; }
-.uchoice-status.is-bad{ color:var(--error-red); font-weight:700; }
+.uchoice-status.is-bad{ color:var(--error-red-text); font-weight:700; }
 .uchoice-rules{ margin:4px 0 0; font-size:12.5px; color:var(--ink-soft); }
 .uchoice-warn{ margin:14px 0 12px; padding:10px 12px; border-radius:12px; background:var(--paper-warm); color:var(--ink); font-size:13.5px; line-height:1.45; }
 .uchoice-error:empty{ display:none; }
@@ -5580,6 +5584,7 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
         <button class="btn btn-secondary" id="restart-course-cancel" style="flex:1;" data-i18n="restart.modal.cancel">Cancelar</button>
         <button class="btn btn-primary p-perigo" id="restart-course-yes" style="flex:1;" disabled data-i18n="restart.modal.yes">Recomeçar do zero</button>
       </div>
+      <p class="btn-motivo" id="restart-course-hint" data-i18n="restart.modal.hint">Marque a caixinha acima para liberar o botão.</p>
     </div>
   </div>
 </div>
@@ -5628,6 +5633,7 @@ button.dcs-card:focus-visible{ outline: 3px solid var(--seal-red); outline-offse
         <button class="btn btn-secondary" id="delete-account-cancel" style="flex:1;" data-i18n="accountDelete.modal.cancel">Cancelar</button>
         <button class="btn btn-primary p-perigo" id="delete-account-yes" style="flex:1;" disabled data-i18n="accountDelete.modal.yes">Excluir para sempre</button>
       </div>
+      <p class="btn-motivo" id="delete-account-hint" data-i18n="accountDelete.modal.hint">Digite o seu e-mail acima para liberar o botão.</p>
     </div>
   </div>
 </div>

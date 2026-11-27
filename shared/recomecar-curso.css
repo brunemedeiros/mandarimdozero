@@ -19,7 +19,7 @@
 /* Botão vermelho de erro (texto --on-vivid), também desabilitado com o mesmo par de cores. */
 .janela-painel.painel button.btn.p-perigo{ background: var(--p-erro); border: 0; color: var(--p-sobre-vivo); }
 .janela-painel.painel button.btn.p-perigo:hover{ background: color-mix(in srgb, var(--p-erro) 86%, black); }
-.janela-painel.painel button.btn:disabled{ opacity: .45; cursor: not-allowed; }
+.janela-painel.painel button.btn:disabled, .janela-painel.painel button.btn:disabled:hover{ background:var(--disabled-fill, #E4DED3); color:var(--on-disabled-fill, #5E566B); border-color:var(--disabled-fill, #E4DED3); box-shadow:none; opacity:1; transform:none; cursor:not-allowed; }
 
 /* Retomada guiada: lista de caminhos, a primeira (Continuar) em destaque com a cor da marca. */
 .comeback-opcoes{ display: grid; gap: .6rem; margin-top: .4rem; }

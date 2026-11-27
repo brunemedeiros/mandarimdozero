@@ -36,7 +36,7 @@ const IGUAIS = [
   ['.gram-block-body strong', 'color', 'var(--seal-red-dark)'],
   ['.reorder-blocks ~ .exercise-dontknow', 'border', '1px solid var(--paper-line)'],
   ['.exercise-option.incorrect', 'border-color', 'var(--error-red)'],
-  ['.wrong-feedback-header', 'color', 'var(--error-red)'],
+  ['.wrong-feedback-header', 'color', 'var(--error-red-text)'] /* 2026-11-27: texto de erro com o vermelho legível (decisão da autora) */,
   ['.dlg-name', 'max-width', '64px'],
 ];
 for (const site of SITES){
