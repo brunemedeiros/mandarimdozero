@@ -477,6 +477,7 @@ window.I18N_CATALOG['pt-BR'] = {
   'trail.levelReview.title': 'Revisão do {level}',
   'trail.levelReview.goal': 'Ditados que juntam o que você aprendeu em todo o nível. Opcional.',
   'trail.dailyMissions.caption': '🎯 Missões do dia',
+  'trail.dailyMissions.doneNow': '✓ Concluída!',
   'trail.levelPreparing': 'O conteúdo do nível {level} ainda está sendo preparado.',
   'trail.module.label': 'Módulo {n} · {title}',
   'trail.levelTest.eyebrow': 'Teste de nível',

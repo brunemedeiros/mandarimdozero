@@ -235,6 +235,8 @@ function openUnitDetail(unitId){
   // unidade numa lição diferente da última vez reaproveitaria os blocos da
   // lição errada.
   STEP_STATE.acq = { unitId: null, blocks: [], blockIdx: 0, phase: 'intro', introIdx: 0, wordMisses: {}, introduced: {}, lessonScore: { correct: 0, total: 0 }, xpAtLessonStart: STATE.xp };
+  // Como cada Missão do dia estava quando a lição abriu: a tela das Missões no fim enche a barra daqui até o valor novo.
+  STEP_STATE.missionsAtStart = (typeof missionsProgressSnapshot === 'function') ? missionsProgressSnapshot() : null;
   STEP_STATE.exerciseUnitId = null;
   STEP_STATE.checkpointUnitId = null;
   STEP_STATE.checkpointXpAtStart = null;
