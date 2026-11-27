@@ -1,4 +1,4 @@
-# Guardar o que a aluna digitou nos cartões da professora: plano (Etapa 1 publicada; Etapa 2 no Staging, aguarda a autora para a produção; Etapa 3 depois)
+# Guardar o que a aluna digitou nos cartões da professora: plano (Etapa 1 publicada; Etapa 2 na produção e publicada em 2026-11-27; Etapa 3 depois)
 
 Pedido da autora em 2026-11-24, depois do report 37 (Francielly, cartão "Corrija: Je n'ai besoin de payer").
 Situação: o banco só guarda "errou/acertou" (`review_bank_reviews.outcome`, `grade`, `typed` = se foi digitado). Ela errou
@@ -24,7 +24,7 @@ digitou) e `review_answer_result` (o site considerou certo, quase ou errado). El
 há dado novo guardado sem ela saber. Mudança pequena em `shared/reports.js` (`reportTypedAnswerInfo`) + teste em
 `tests/reports-contexto/`. Vale para fr, zh e pt, e também para os cartões próprios e da trilha.
 
-**Etapa 2: guardar a resposta no Banco (migration + site). FEITA na branch, migration 143 no Staging (2026-11-24).**
+**Etapa 2: guardar a resposta no Banco (migration + site). FEITA: migration 143 no Staging (2026-11-24) e na produção (2026-11-27, autorizada pela autora), site publicado.**
 Ficou assim: `shared/supabase_migrations/143_review_bank_typed_text.sql` (o número 142 já tinha sido usado no Staging por outra
 conversa, `142_admin_overview`); o site manda `opts.typedText` em `logBankHomeStudy` (nota e Voltar) e a fila só guarda o texto
 no Errei de cartão de digitar; sem a 143 no banco, reenvia sem o texto. Aviso na Política (`shared/privacy-draft.js` e
@@ -48,7 +48,7 @@ Plano original:
 
 | Migration | Staging | Produção |
 |---|---|---|
-| 143_review_bank_typed_text | 20261124025513 (2026-11-24) | pendente (aguarda a autora) |
+| 143_review_bank_typed_text | 20261124025513 (2026-11-24) | 20261127153200 (2026-11-27; as 5 funções com hash igual ao Staging; cron `purge-bank-typed-text` 07:23 UTC) |
 
 ## Grátis x Premium
 
