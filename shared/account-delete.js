@@ -17,8 +17,14 @@ function openDeleteAccountModal(){
   document.getElementById('delete-account-input').value = '';
   document.getElementById('delete-account-error').textContent = '';
   document.getElementById('delete-account-yes').disabled = true;
+  syncDeleteAccountHint();
   modal.style.display = 'flex';
   document.getElementById('delete-account-input').focus();
+}
+// Linha embaixo do botão dizendo o que falta para ele ligar (decisão da autora, 2026-11-27): só aparece com o botão cinza.
+function syncDeleteAccountHint(){
+  const yes = document.getElementById('delete-account-yes'), hint = document.getElementById('delete-account-hint');
+  if (yes && hint) hint.hidden = !yes.disabled;
 }
 function closeDeleteAccountModal(){
   const modal = document.getElementById('delete-account-modal');
@@ -52,6 +58,7 @@ async function confirmDeleteAccount(){
   document.getElementById('delete-account-cancel').addEventListener('click', closeDeleteAccountModal);
   document.getElementById('delete-account-input').addEventListener('input', (e) => {
     document.getElementById('delete-account-yes').disabled = e.target.value.trim().toLowerCase() !== String((CURRENT_USER && CURRENT_USER.email) || '').toLowerCase() || !e.target.value.trim();
+    syncDeleteAccountHint();
   });
   document.getElementById('delete-account-yes').addEventListener('click', confirmDeleteAccount);
 })();

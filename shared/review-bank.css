@@ -19,7 +19,7 @@
 /* botões */
 .rb-btn{ font:inherit; font-weight:800; font-size:13px; border-radius:999px; padding:7px 14px; cursor:pointer; border:1px solid var(--paper-line); background:var(--paper); color:var(--ink); white-space:nowrap; }
 .rb-btn:hover{ background:var(--paper-warm); }
-.rb-btn:disabled{ opacity:.5; cursor:default; }
+.rb-btn:disabled, .rb-btn:disabled:hover{ background:var(--disabled-fill, #E4DED3); color:var(--on-disabled-fill, #5E566B); border-color:var(--disabled-fill, #E4DED3); box-shadow:none; opacity:1; transform:none; cursor:not-allowed; }
 .rb-btn-blue{ background:var(--rb-box); border-color:var(--rb-box); color:var(--rb-on-box); font-weight:800; }
 .rb-btn-blue:hover{ background:var(--rb-box); filter:brightness(1.12); }
 .rb-btn-ok{ background:var(--success-fill); border-color:var(--success-fill); color:var(--on-success-fill); }
@@ -279,7 +279,7 @@
 .review-peek-note{ margin:14px 0 0; font-size:13px; font-weight:700; color:var(--ink-soft); text-align:center; }
 .review-peek-locked{ margin-top:8px; font-size:13px; color:var(--ink-soft); text-align:center; }
 .review-peek-grades .grade-btn.is-current{ outline:3px solid var(--ink); outline-offset:2px; }
-.review-peek-grades .grade-btn:disabled{ opacity:.5; cursor:not-allowed; }
+.review-peek-grades .grade-btn:disabled{ background:var(--disabled-fill, #E4DED3); color:var(--on-disabled-fill, #5E566B); border-color:var(--disabled-fill, #E4DED3); box-shadow:none; opacity:1; transform:none; cursor:not-allowed; }
 .review-peek .btn-block{ margin-top:16px; }
 
 /* Faixa "cartões da sua professora para hoje" (Revisão e Estudo) */

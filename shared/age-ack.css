@@ -9,11 +9,13 @@
 .age-ack-actions{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
 .age-ack-later{ background:none; border:0; padding:6px 2px; font:inherit; font-size:13.5px; font-weight:800; color:var(--ink-soft); text-decoration:underline; cursor:pointer; }
 .age-ack-confirm{ font-size:14px; padding:8px 16px; }
-.age-ack-confirm:disabled{ opacity:.45; cursor:not-allowed; }
+.age-ack-confirm:disabled{ background:var(--disabled-fill, #E4DED3); color:var(--on-disabled-fill, #5E566B); border-color:var(--disabled-fill, #E4DED3); box-shadow:none; opacity:1; transform:none; cursor:not-allowed; }
 .age-ack-note{ margin:0; font-size:13px; color:var(--ink-soft); }
 .age-ack-note:empty{ display:none; }
-.age-ack-note.err{ color:var(--error-red); }
+.age-ack-note.err{ color:var(--error-red-text); }
 .age-ack-thanks{ margin:0; font-weight:800; font-size:15px; color:var(--ink); text-align:center; padding:8px 0; }
 @media (max-width: 600px){
   .age-ack-later, .age-ack-confirm{ min-height:44px; }
 }
+.age-ack-label.is-invalid{ outline:2px solid var(--error-red); outline-offset:4px; border-radius:8px; }
+.age-ack-label.is-invalid input{ outline:2px solid var(--error-red); outline-offset:1px; }

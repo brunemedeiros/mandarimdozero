@@ -28,7 +28,7 @@ function ageAckModalHTML(){
     + '<span id="age-ack-label-text">' + escapeHTML(t('ageAck.label')) + '</span></label></div>'
     + '<p class="age-ack-note" id="age-ack-note" role="status"></p>'
     + '<div class="age-ack-actions"><button type="button" class="age-ack-later" id="age-ack-later">' + escapeHTML(t('ageAck.later')) + '</button>'
-    + '<button type="button" class="tpop-link age-ack-confirm" id="age-ack-confirm" disabled>' + escapeHTML(t('ageAck.confirm')) + '</button></div>'
+    + '<button type="button" class="tpop-link age-ack-confirm" id="age-ack-confirm">' + escapeHTML(t('ageAck.confirm')) + '</button></div>'
     + '</div></div></div></div>';
 }
 
@@ -58,7 +58,13 @@ function openAgeAckModal(){
   const modal = document.getElementById('age-ack-modal');
   const box = document.getElementById('age-ack-check');
   const confirm = document.getElementById('age-ack-confirm');
-  box.addEventListener('change', () => { confirm.disabled = !box.checked; });
+  // Botão sempre ligado (decisão da autora, 2026-11-27): sem a caixinha, o toque diz o que falta e marca a caixinha em vermelho.
+  box.addEventListener('change', () => {
+    if (!box.checked) return;
+    box.closest('.age-ack-label').classList.remove('is-invalid'); box.removeAttribute('aria-invalid');
+    const note = document.getElementById('age-ack-note');
+    if (note && note.textContent === t('ageAck.required')){ note.textContent = ''; note.className = 'age-ack-note'; }
+  });
   confirm.addEventListener('click', onAgeAckConfirm);
   document.getElementById('age-ack-later').addEventListener('click', ageAckLater);
   modal.addEventListener('keydown', (e) => { if (e.key === 'Escape') ageAckLater(); });
@@ -79,7 +85,13 @@ async function onAgeAckConfirm(){
   const box = document.getElementById('age-ack-check');
   const confirm = document.getElementById('age-ack-confirm');
   const note = document.getElementById('age-ack-note');
-  if (!box || !box.checked) return;
+  if (!box) return;
+  if (!box.checked){
+    note.textContent = t('ageAck.required'); note.className = 'age-ack-note err';
+    box.closest('.age-ack-label').classList.add('is-invalid'); box.setAttribute('aria-invalid', 'true');
+    try { box.focus({ preventScroll: true }); } catch (e) {}
+    return;
+  }
   box.disabled = true; confirm.disabled = true;
   note.textContent = ''; note.className = 'age-ack-note';
   let ok = false;
@@ -88,7 +100,7 @@ async function onAgeAckConfirm(){
     ok = !error && !!data;
   } catch (err) { ok = false; }
   if (!ok){
-    box.disabled = false; confirm.disabled = !box.checked;
+    box.disabled = false; confirm.disabled = false;
     note.textContent = t('ageAck.error'); note.className = 'age-ack-note err';
     return;
   }

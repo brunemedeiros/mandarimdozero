@@ -194,6 +194,7 @@
     document.getElementById('restart-course-check-label').textContent = t('restart.modal.check', { course: course });
     var yes = document.getElementById('restart-course-yes');
     yes.disabled = true; yes.textContent = t('restart.modal.yes');
+    var hint = document.getElementById('restart-course-hint'); if (hint) hint.hidden = false;
     document.getElementById('restart-course-error').textContent = '';
     modal.style.display = 'flex';
     loadTeacherLinked().then(function(){
@@ -358,7 +359,7 @@
     on('restart-undo-close', closeUndo); on('restart-undo-cancel', closeUndo); on('restart-undo-yes', confirmUndo);
     on('comeback-close', closeComeback);
     var check = document.getElementById('restart-course-check');
-    if (check) check.addEventListener('change', function(){ var y = document.getElementById('restart-course-yes'); if (y && !S.busy) y.disabled = !check.checked; });
+    if (check) check.addEventListener('change', function(){ var y = document.getElementById('restart-course-yes'); if (y && !S.busy) y.disabled = !check.checked; var h = document.getElementById('restart-course-hint'); if (h) h.hidden = check.checked; });
     ['restart-course-modal', 'restart-undo-modal', 'comeback-modal'].forEach(function(id){
       var m = document.getElementById(id);
       if (m) m.addEventListener('click', function(e){ if (e.target === m){ if (id === 'comeback-modal') closeComeback(); else if (id === 'restart-undo-modal') closeUndo(); else closeConfirm(); } });

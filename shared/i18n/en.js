@@ -152,6 +152,7 @@ window.I18N_CATALOG['en'] = {
   'restart.modal.check': 'I understand: my {course} progress goes back to zero.', // ALTA
   'restart.modal.cancel': 'Cancel', // ALTA
   'restart.modal.yes': 'Restart from zero', // ALTA
+  'restart.modal.hint': 'Tick the box above to unlock the button.', // ALTA
   'restart.modal.working': 'Just a moment...', // ALTA
   'restart.err.generic': 'Could not restart right now. Nothing changed in your progress. Please try again in a moment.', // ALTA
   'restart.done': 'Done! The course restarted from zero. Enjoy the journey!', // ALTA
@@ -181,6 +182,7 @@ window.I18N_CATALOG['en'] = {
   'accountDelete.modal.label': 'Type your email to confirm', // ALTA
   'accountDelete.modal.cancel': 'Cancel', // ALTA
   'accountDelete.modal.yes': 'Delete forever', // ALTA
+  'accountDelete.modal.hint': 'Type your email above to unlock the button.', // ALTA
   'accountDelete.err.mismatch': 'The email does not match.', // ALTA
   'accountDelete.err.teacher': 'Teacher and administrator accounts cannot be deleted here. Please contact the administrator.', // ALTA
   'accountDelete.err.generic': 'We could not delete it right now. Please try again in a moment.', // ALTA
@@ -4273,6 +4275,7 @@ window.I18N_CATALOG['en'] = {
   'gate.signup.methodTitle': 'Create your account and start learning {lang}', // ALTA
   'gate.signup.methodSub': 'It\'s free. Choose how you\'d like to sign up.', // ALTA
   'gate.signup.ageAck': 'I\'m 18 or older, or I have my parent or guardian\'s permission to use the site.', // ALTA
+  'gate.signup.ageAckRequired': 'Tick the box to continue.', // ALTA
   'consent.title': 'Cookies', // ALTA
   'consent.text': 'This site uses cookies to improve your experience and measure visits.', // ALTA
   'consent.policy': 'Cookie policy', // ALTA
@@ -4299,6 +4302,7 @@ window.I18N_CATALOG['en'] = {
   'ageAck.label': 'I\'m 18 or older, or I have my parent or guardian\'s permission to use the site.', // ALTA
   'ageAck.thanks': 'Thanks, all set!', // ALTA
   'ageAck.error': 'We couldn\'t save it right now. Please try again in a moment.', // ALTA
+  'ageAck.required': 'Tick the box to continue.', // ALTA
   'gate.signup.withEmail': 'Continue with email', // ALTA
   'gate.signup.dataTitle': 'Your details', // ALTA
   'gate.signup.dataSub': 'Your name and your @ appear on your profile.', // ALTA

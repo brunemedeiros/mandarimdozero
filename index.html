@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-9j2wnb8+O/sKppaRzMB2REH/3t8LRy9ujBtMHU+lkYg=' 'sha256-0p9aAkvwyIQxRKXpBugUe1rLIbKm1uOZkji6tbZFfQ8=' 'sha256-Qpg1Qnd3KQehumNsJ7N91FLavQxJRTuxhkPbhg+/aQ4=' https://www.googletagmanager.com 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; media-src 'self' data: blob: https://eigjocalzwamisgqilhg.supabase.co; font-src 'self' data:; connect-src 'self' https://eigjocalzwamisgqilhg.supabase.co wss://eigjocalzwamisgqilhg.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com; worker-src 'self'; manifest-src 'self'; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'" data-csp="scripts/csp-atualizar.js">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-9j2wnb8+O/sKppaRzMB2REH/3t8LRy9ujBtMHU+lkYg=' 'sha256-0p9aAkvwyIQxRKXpBugUe1rLIbKm1uOZkji6tbZFfQ8=' 'sha256-fu/SqbIaI6WPlJLskC/yILkus6vEqVg7W8zdC5BwQm0=' https://www.googletagmanager.com 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; media-src 'self' data: blob: https://eigjocalzwamisgqilhg.supabase.co; font-src 'self' data:; connect-src 'self' https://eigjocalzwamisgqilhg.supabase.co wss://eigjocalzwamisgqilhg.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com; worker-src 'self'; manifest-src 'self'; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'" data-csp="scripts/csp-atualizar.js">
 <!-- preload:scripts/csp-atualizar.js -->
 <link rel="preload" as="script" href="shared/anti-moldura.js">
 <link rel="preload" as="script" href="shared/consent.js">
@@ -79,6 +79,7 @@ try{
   --borda-campo: color-mix(in srgb, var(--paper-line), var(--ink-soft) 60%);
   --ouro: #D99A1E;
   --marca-texto: var(--accent-dark);
+  --disabled-fill: #E4DED3; --on-disabled-fill: #5E566B; /* botão desativado: cinza sólido + texto 5,2:1 (decisão da autora, 2026-11-27) */
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
@@ -86,6 +87,7 @@ try{
     --paper-line: #362F44; --shadow-card: 0 2px 10px rgba(0,0,0,0.35); --shadow-lift: 0 14px 34px rgba(0,0,0,0.45);
     --success: #6FD495; --danger: #FF8A80;
     --elevado: color-mix(in srgb, var(--paper-warm), white 8%); --marca-texto: var(--accent);
+    --disabled-fill: #2B2636; --on-disabled-fill: #A69FB6; /* botão desativado: cinza sólido + texto 5,8:1 (decisão da autora, 2026-11-27) */
   }
 }
 :root[data-theme="dark"]{
@@ -93,6 +95,7 @@ try{
   --paper-line: #362F44; --shadow-card: 0 2px 10px rgba(0,0,0,0.35); --shadow-lift: 0 14px 34px rgba(0,0,0,0.45);
   --success: #6FD495; --danger: #FF8A80;
   --elevado: color-mix(in srgb, var(--paper-warm), white 8%); --marca-texto: var(--accent);
+  --disabled-fill: #2B2636; --on-disabled-fill: #A69FB6; /* botão desativado: cinza sólido + texto 5,8:1 (decisão da autora, 2026-11-27) */
 }
 *{ box-sizing:border-box; }
 html,body{ margin:0; padding:0; }
@@ -145,7 +148,8 @@ h1{
   font-size:16px; cursor:pointer; transition:transform .1s ease, filter .15s ease, background .15s ease;
 }
 .btn:active{ transform:scale(.98); }
-.btn:disabled{ opacity:.6; cursor:default; }
+/* Desativado = cinza sólido + texto cinza legível (decisão da autora, 2026-11-27). */
+.btn:disabled, .btn:disabled:hover{ background:var(--disabled-fill); color:var(--on-disabled-fill); border-color:var(--disabled-fill); box-shadow:none; opacity:1; transform:none; cursor:not-allowed; }
 .btn-block{ width:100%; }
 .btn-primary{ background:var(--brand-fill); color:var(--on-brand-fill); }
 .btn-primary:hover{ filter:brightness(1.06); }
@@ -295,7 +299,8 @@ button.jp-bloco:hover{ background:color-mix(in srgb, var(--tom, var(--accent)) 1
 /* Confirmação de idade no passo 2 (Fase P, 136): sem marcar, os dois botões ficam apagados. */
 .cad-idade{ display:flex; align-items:flex-start; gap:10px; margin:4px 0 14px; padding:12px 14px; border:1px solid var(--paper-line); border-radius:12px; background:var(--paper); font-size:14.5px; line-height:1.4; color:var(--ink); text-align:left; cursor:pointer; }
 .cad-idade input{ width:20px; height:20px; margin:1px 0 0; flex:0 0 auto; accent-color:var(--accent); cursor:pointer; }
-#gate-signup-method .gate-oauth-btn:disabled, #gate-signup-method .cad-email-btn:disabled{ opacity:.45; cursor:not-allowed; }
+.cad-idade.is-invalid{ border-color:var(--danger); box-shadow:0 0 0 1px var(--danger); }
+.cad-idade.is-invalid input{ outline:2px solid var(--danger); outline-offset:1px; }
 .cad-arroba{ position:relative; }
 .cad-arroba .pre{ position:absolute; left:14px; top:50%; transform:translateY(-50%); font-weight:800; font-size:15px; color:var(--ink-soft); pointer-events:none; }
 .cad-arroba .gate-input{ padding-left:2rem; padding-right:2.6rem; }
@@ -395,11 +400,11 @@ button.jp-bloco:hover{ background:color-mix(in srgb, var(--tom, var(--accent)) 1
       <p class="sub" data-i18n="gate.signup.methodSub">É grátis. Escolha como prefere entrar.</p>
     </div>
     <label class="cad-idade" for="signup-age-ack"><input type="checkbox" id="signup-age-ack"><span data-i18n="gate.signup.ageAck">Tenho 18 anos ou mais, ou tenho autorização do meu responsável para usar o site.</span></label>
-    <button class="gate-oauth-btn" id="signup-google-btn" disabled>
+    <button class="gate-oauth-btn" id="signup-google-btn">
       <svg width="18" height="18" viewBox="0 0 18 18" style="flex-shrink:0;"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84c-.21 1.13-.84 2.09-1.8 2.73v2.27h2.91c1.7-1.57 2.69-3.88 2.69-6.64z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.91-2.27c-.81.54-1.84.86-3.05.86-2.35 0-4.34-1.58-5.05-3.71H.96v2.34C2.44 15.98 5.48 18 9 18z"/><path fill="#FBBC05" d="M3.95 10.7c-.18-.54-.28-1.11-.28-1.7s.1-1.16.28-1.7V4.96H.96C.35 6.17 0 7.55 0 9s.35 2.83.96 4.04l2.99-2.34z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.51.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0 5.48 0 2.44 2.02.96 4.96l2.99 2.34C4.66 5.16 6.65 3.58 9 3.58z"/></svg>
       <span data-i18n="gate.login.google">Continuar com Google</span>
     </button>
-    <button type="button" class="btn btn-primary btn-block cad-email-btn" id="signup-email-btn" disabled><span class="cad-email-ico" aria-hidden="true">📧</span><span data-i18n="gate.signup.withEmail">Continuar com e-mail</span></button>
+    <button type="button" class="btn btn-primary btn-block cad-email-btn" id="signup-email-btn"><span class="cad-email-ico" aria-hidden="true">📧</span><span data-i18n="gate.signup.withEmail">Continuar com e-mail</span></button>
     <p class="gate-note" id="signup-method-note" role="status"></p>
     <p class="cad-alt"><span data-i18n="gate.signup.haveAccount">Já tem conta?</span> <button type="button" class="gate-link-btn cad-alt-link" data-goto-login data-i18n="gate.signup.loginLink">Entrar</button></p>
   </div>
@@ -1173,18 +1178,29 @@ document.querySelectorAll('.cad-voltar').forEach(b => b.addEventListener('click'
 }));
 // Caixinha de idade (Fase P, migration 136; decisão da dona em 2026-11-15): sem marcar, não dá para seguir por
 // nenhum dos dois caminhos. A marcação viaja no signup-intent e afterAuthResolved grava a data (ack_my_age).
+// Os botões ficam sempre ligados (decisão da autora, 2026-11-27): tocar sem a caixinha marcada diz o que falta e
+// marca a caixinha em vermelho, em vez de um botão apagado que não explica nada.
 const signupAgeAck = document.getElementById('signup-age-ack');
-function syncSignupAgeAck(){
-  const on = !!signupAgeAck.checked;
-  document.getElementById('signup-google-btn').disabled = !on;
-  document.getElementById('signup-email-btn').disabled = !on;
+function signupAgeAckMissing(){
+  if (signupAgeAck.checked) return false;
+  const note = document.getElementById('signup-method-note');
+  note.textContent = t('gate.signup.ageAckRequired'); note.className = 'gate-note err';
+  signupAgeAck.closest('.cad-idade').classList.add('is-invalid');
+  signupAgeAck.setAttribute('aria-invalid', 'true');
+  try { signupAgeAck.focus({ preventScroll: false }); } catch (e) {}
+  return true;
 }
-signupAgeAck.addEventListener('change', syncSignupAgeAck);
-syncSignupAgeAck();
-document.getElementById('signup-email-btn').addEventListener('click', () => { if (signupAgeAck.checked) showSignupData(); });
+signupAgeAck.addEventListener('change', () => {
+  if (!signupAgeAck.checked) return;
+  signupAgeAck.closest('.cad-idade').classList.remove('is-invalid');
+  signupAgeAck.removeAttribute('aria-invalid');
+  const note = document.getElementById('signup-method-note');
+  if (note.textContent === t('gate.signup.ageAckRequired')){ note.textContent = ''; note.className = 'gate-note'; }
+});
+document.getElementById('signup-email-btn').addEventListener('click', () => { if (!signupAgeAckMissing()) showSignupData(); });
 document.getElementById('signup-google-btn').addEventListener('click', async () => {
   const note = document.getElementById('signup-method-note');
-  if (!signupAgeAck.checked) return;
+  if (signupAgeAckMissing()) return;
   saveSignupIntent({ lang: gateSignupLang, speak: gateSpeak || gateSiteLang(), ageAck: true });
   note.textContent = t('gate.login.googleRedirect'); note.className = 'gate-note';
   const { error } = await supabaseClient.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: cleanRedirectURL() } });
