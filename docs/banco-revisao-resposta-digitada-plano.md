@@ -1,4 +1,4 @@
-# Guardar o que a aluna digitou nos cartões da professora: plano (Etapa 1 feita; 2 e 3 aguardam)
+# Guardar o que a aluna digitou nos cartões da professora: plano (Etapa 1 publicada; Etapa 2 na produção e publicada em 2026-11-27; Etapa 3 depois)
 
 Pedido da autora em 2026-11-24, depois do report 37 (Francielly, cartão "Corrija: Je n'ai besoin de payer").
 Situação: o banco só guarda "errou/acertou" (`review_bank_reviews.outcome`, `grade`, `typed` = se foi digitado). Ela errou
@@ -24,7 +24,14 @@ digitou) e `review_answer_result` (o site considerou certo, quase ou errado). El
 há dado novo guardado sem ela saber. Mudança pequena em `shared/reports.js` (`reportTypedAnswerInfo`) + teste em
 `tests/reports-contexto/`. Vale para fr, zh e pt, e também para os cartões próprios e da trilha.
 
-**Etapa 2: guardar a resposta no Banco (migration + site).**
+**Etapa 2: guardar a resposta no Banco (migration + site). FEITA: migration 143 no Staging (2026-11-24) e na produção (2026-11-27, autorizada pela autora), site publicado.**
+Ficou assim: `shared/supabase_migrations/143_review_bank_typed_text.sql` (o número 142 já tinha sido usado no Staging por outra
+conversa, `142_admin_overview`); o site manda `opts.typedText` em `logBankHomeStudy` (nota e Voltar) e a fila só guarda o texto
+no Errei de cartão de digitar; sem a 143 no banco, reenvia sem o texto. Aviso na Política (`shared/privacy-draft.js` e
+`ajuda/textos/politica.html`, seções 3 e 7 e o mapa) e nas respostas da Ajuda (`ajuda/conteudo.js`). Testes:
+`tests/banco-revisao-compartilhado/run.sh` 54/54 (23 novos da 143), `tests/banco-revisao-resposta-digitada/` (fila 11/11,
+navegador 7/7). Teste ao vivo no Staging, desfeito no fim: Errei digitado guarda o texto; acerto não; 4 parâmetros segue ok.
+Plano original:
 - Migration nova (número livre na hora): coluna `typed_text text` em `review_bank_reviews`, com limite de 300 caracteres.
 - Nova versão da RPC com um 5º parâmetro (`p_typed_text`), mantendo a de 4 parâmetros funcionando (aparelho com o site
   antigo em cache continua enviando sem quebrar). Mesma coisa para `correct_my_bank_review`. Sem `DROP`: só acrescenta.
@@ -36,6 +43,12 @@ há dado novo guardado sem ela saber. Mudança pequena em `shared/reports.js` (`
   vermelho pela mesma peça da Revisão (`typedAttemptHTML`).
 - Na faixa de estatísticas, um aviso "itens que a aluna erra muito" (ex.: 3 erros seguidos), para achar cartão mal feito
   antes de virar report. Prévia visual antes de publicar (o Banco mantém o visual antigo).
+
+## Registro das migrations
+
+| Migration | Staging | Produção |
+|---|---|---|
+| 143_review_bank_typed_text | 20261124025513 (2026-11-24) | 20261127153200 (2026-11-27; as 5 funções com hash igual ao Staging; cron `purge-bank-typed-text` 07:23 UTC) |
 
 ## Grátis x Premium
 

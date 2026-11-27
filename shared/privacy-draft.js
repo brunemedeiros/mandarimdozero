@@ -127,7 +127,7 @@ const PRIVACY_DRAFT = {
  ],
  [
   "p",
-  "Quando você tem um vínculo ativo com uma professora, ela vê o seu progresso de estudo no site, os cartões que ela preparou para você e as suas respostas a esses cartões: quais você acertou ou errou, quando estudou e se estudou em aula ou em casa. Ela não vê a sua senha nem os seus outros dados privados. Notas privadas que a professora escreve sobre as aulas não aparecem para você."
+  "Quando você tem um vínculo ativo com uma professora, ela vê o seu progresso de estudo no site, os cartões que ela preparou para você e as suas respostas a esses cartões: quais você acertou ou errou, quando estudou e se estudou em aula ou em casa. Quando você erra um cartão de digitar dela estudando em casa, ela também vê o que você digitou, para entender o erro e consertar o cartão se ele estiver confuso. Esse texto é apagado depois de 180 dias. Ela não vê a sua senha nem os seus outros dados privados. Notas privadas que a professora escreve sobre as aulas não aparecem para você."
  ],
  [
   "p",
@@ -179,7 +179,7 @@ const PRIVACY_DRAFT = {
  ],
  [
   "p",
-  "Os dados ficam enquanto a conta existir. Quem é aluna ou usuária pode excluir a própria conta em Configurações, na aba Geral (função em teste): isso apaga o progresso, os cartões, os registros que a professora tem sobre ela (aulas, cartões e itens do Banco de Revisão), as fotos e os arquivos. Pedidos de ajuda enviados antes ficam sem o e-mail e sem a captura de tela. Contas de professora e de administradora ainda não podem ser excluídas por conta própria. Fora isso, o site não apaga dados automaticamente. [CONFIRMAR: prazos por tipo de dado, exclusão de contas de professora e o que a lei exige guardar]"
+  "Os dados ficam enquanto a conta existir. Quem é aluna ou usuária pode excluir a própria conta em Configurações, na aba Geral (função em teste): isso apaga o progresso, os cartões, os registros que a professora tem sobre ela (aulas, cartões e itens do Banco de Revisão), as fotos e os arquivos. Pedidos de ajuda enviados antes ficam sem o e-mail e sem a captura de tela. Contas de professora e de administradora ainda não podem ser excluídas por conta própria. Fora isso, o site só apaga uma coisa sozinho: o que você digitou ao errar um cartão da professora some depois de 180 dias (a marcação de certo ou errado continua). [CONFIRMAR: prazos por tipo de dado, exclusão de contas de professora e o que a lei exige guardar]"
  ],
  [
   "h",
@@ -278,7 +278,7 @@ const PRIVACY_DRAFT = {
      "A professora (digitação, importação, rotina da madrugada) e você (estudo)",
      "Tabelas do Banco e dos cartões",
      "Professora; a aluna vê os cartões dela",
-     "Sem prazo; inclui pessoas sem conta"
+     "Sem prazo; inclui pessoas sem conta. O que a aluna digitou ao errar: 180 dias"
     ],
     [
      "Cadernos das aulas (Google Docs)",
