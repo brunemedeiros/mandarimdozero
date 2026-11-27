@@ -371,3 +371,15 @@ pwa-cache 21/21, 48/48 e 14/14, login-obrigatorio 127/127, 166/166 e 63/63, cons
 - Testes: `painel-materiais` 42/42 e 214/214 (novo: o clique pede o link de 10 min com o caminho certo; o teste antigo do link
   perigoso na vista da aluna conferia um elemento vazio e foi corrigido), painel-professora 895/895, mural 325/325, csp 12/12,
   i18n 2333/2333. Produção e PR: aguardando o "ok" da autora.
+
+## Rodada de 2026-11-27 (tarde): pasta fechada na produção, 20 funções, decisões
+
+- **153 na produção** (versão `20261127154756`): pasta `support-materials` fechada e regra `support_materials_student_read`;
+  site publicado pelo PR #541 e conferido no ar (~40 s depois da mesclagem).
+- **Tipos de arquivo do Material de apoio: ficam LIVRES** (decisão da autora, 2026-11-27). Só o limite de 50 MB (151).
+- **154 `functions_fixed_search_path`** (achado 7 de 2026-11-19): as 20 funções sem `search_path` fixo passam a ter
+  `search_path = public` (nenhuma é security definer nem usa extensão). Staging aplicada em 2026-11-27. Teste (transação
+  desfeita): as 10 funções simples devolvem o esperado; gatilhos de data (`profiles`, `reports`, `notification_*`, `challenges`)
+  e de conferência (`own_flashcards`/`teacher_flashcards` validam o deck, `decks_validate_hierarchy` aceita "Meus Decks" como
+  pai e recusa pai errado, igual a antes da mudança); 0 funções sem endereço fixo. Produção: aguardando o "ok" da autora.
+- **Testes ao vivo das Edge Functions com contas de verdade**: autorizados pela autora (Staging, contas `zz-edge-*`); resultado abaixo.
