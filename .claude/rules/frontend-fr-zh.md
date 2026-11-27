@@ -102,6 +102,9 @@ paths:
   `node scripts/csp-atualizar.js` e faça commit (a publicação também roda, mas o teste `tests/csp/` falha até lá). Endereço externo novo (script,
   fetch, áudio): entra no script, nunca à mão no `<meta>`. Teste que simula Supabase/mídia usa o endereço real do projeto, não um inventado. Nada de
   `onclick=`/`onerror=` em HTML montado por JS (a lista bloqueia). Página nova: `shared/anti-moldura.js` no começo do `<head>`.
+- **Botão desativado** (decisão da autora, 2026-11-27): cinza sólido `var(--disabled-fill)` + texto `var(--on-disabled-fill)`, nunca
+  transparência. Botão que só depende de marcar uma caixinha fica LIGADO e, ao tocar, explica o que falta e marca a caixinha em vermelho;
+  ação sem volta (Excluir conta, Recomeçar) fica desativada com uma linha `.btn-motivo` embaixo. Texto de erro: `--error-red-text`. `docs/historico/40-*`.
 - Enter dentro de campo de resposta pertence ao campo (não aciona o atalho global de "Continuar").
 - Ícones: emoji escrito no texto vira desenho do Fluent por `shared/emoji-icons.js`. Emoji novo precisa entrar no MAP de lá
   e ter o SVG em `shared/icons/fluent/` (senão aparece o emoji do aparelho). Ícone de menu = `<img class="tab-icon" ...>`.

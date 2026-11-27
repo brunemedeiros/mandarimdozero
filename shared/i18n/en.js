@@ -391,6 +391,9 @@ window.I18N_CATALOG['en'] = {
   'review.mode.hard.desc': 'The ones you miss most', // ALTA
   'review.mode.match.name': 'Match', // MÉDIA -- nome do jogo; alternativa: "Matching"
   'review.mode.match.desc': 'Pairs game', // ALTA
+  'review.mode.speed.empty': 'No cards for today', // ALTA
+  'review.mode.hard.empty': 'No hard words yet', // ALTA
+  'review.mode.match.needWords': 'Needs {n} words', // ALTA
   'review.insufficientTitle': 'Not enough vocabulary yet', // ALTA
   'review.match.insufficientMin': 'The Match game needs at least {n} words already seen in completed lessons.', // ALTA
   'review.match.insufficientSome': 'The Match game needs at least a few words you have already studied successfully in Study.', // ALTA
