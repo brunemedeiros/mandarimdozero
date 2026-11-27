@@ -30,6 +30,10 @@ const ANTES = () => {
     students: [{ user_id: 's1', display_name: 'Marina Alves', username: 'marina.alves', home: 100, class: 20 }, { user_id: 's2', display_name: 'Rafael Costa', username: 'rafa.costa', home: 30, class: 4 }] });
   window.__RPC.get_teacher_student_overview = (a) => window.__OV(a.p_student_id);
   window.__RPC.get_teacher_student_restarts = () => ({ restarts: [] });
+  // XP fora do normal (migration 152, 2026-11-27)
+  window.__RPC.admin_xp_alerts = () => ({ threshold: 3000, cap: 8000, rows: [
+    { user_id: 's1', display_name: 'Marina Alves', username: 'marina.alves', language_app_key: 'frances', week_start: day(3), amount: 8000, capped: true },
+    { user_id: 's9', display_name: '<script>x</script>', username: 'zz', language_app_key: 'mandarim', week_start: day(10), amount: 3400, capped: false } ] });
 };
 
 (async () => {
@@ -47,6 +51,13 @@ const ANTES = () => {
     L('subtítulo do painel não fala mais de Badges', !(await p.textContent('#view-admin-badges .path-header p')).includes('Badges'));
     L('só a Visão Geral aparece (o antigo contêiner de Badges fica escondido)', await p.$eval('#admin-overview-content', e => e.style.display !== 'none') && await p.$eval('#admin-badges-content', e => e.style.display === 'none'));
     L('abre em Meus alunos, 30 dias, todos os idiomas', JSON.stringify((await rpcs('admin_overview_stats'))[0]) === JSON.stringify({ p_days: 30, p_scope: 'mine', p_language: 'all' }), await rpcs('admin_overview_stats'));
+
+    // ---- XP fora do normal (opção D, 2026-11-27) ----
+    const xp = await p.innerText('[data-aov="xp-alerta"]').catch(() => '');
+    L('XP fora do normal: aviso no topo com a conta no teto e a outra', xp.includes('XP fora do normal') && xp.includes('Marina Alves') && xp.includes('8.000 XP') && xp.includes('chegou ao teto') && xp.includes('3.400 XP'), xp);
+    L('XP fora do normal: nome vindo do banco escapado', !(await p.$('[data-aov="xp-alerta"] script')) && xp.includes('<script>x</script>'));
+    L('XP fora do normal: vem antes dos números', await p.evaluate(() => { const a = document.querySelector('[data-aov="xp-alerta"]'), b = document.querySelector('[data-aov="numeros"]'); return !!(a && b && (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING)); }));
+    await shot('xp-alerta');
 
     // ---- números e gráficos ----
     const numeros = await p.innerText('[data-aov="numeros"]');

@@ -339,3 +339,12 @@ fica): `scripts/csp-atualizar.js` também escreve, logo depois do `<meta>`, um b
 CSP, então a lista nunca fica velha. Resultado: fr 32 s -> 6 s, zh 29 s -> 6 s. Testes: `tests/csp/` 12/12, anti-moldura 5/5,
 pwa-cache 21/21, 48/48 e 14/14, login-obrigatorio 127/127, 166/166 e 63/63, consentimento 77/77, animações 40/40, paridade
 2770/2770 e 92/92, i18n 2333/2333 (sem falha nova).
+
+## XP do Ranking: opções A e D (2026-11-27, decisão da autora: teto 8.000)
+
+- **152 `weekly_xp_cap_and_alerts`**: gatilho `weekly_xp_cap` (segura em 8.000; sem DROP, criado só se não existir) e RPC
+  `admin_xp_alerts()` (só admin; contas com >= 3.000 nas últimas 2 semanas). Staging aplicada em 2026-11-27. Teste (transação
+  desfeita): 1.200 e 7.999 ficam, 99.999 vira 8.000, linha nova de 50.000 vira 8.000, aluna chamando a lista = not_authorized,
+  admin vê a conta com 8.000 "no teto". Produção: aguardando o "ok" da autora.
+- Tela: bloco "XP fora do normal" no topo da Visão Geral (`aovXpAlertsHTML`, `shared/admin-overview-ui.js`), só quando há alguém;
+  falha da RPC nunca derruba a Visão Geral. Testes: `tests/central-de-controle/` 45/45 e 170/170 (fr/zh, claro/escuro, celular).
