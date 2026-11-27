@@ -11,3 +11,16 @@ fr/scripts/lab_output_pt/
 tests/perfil-progresso/capturas/
 tests/perfil-editar/capturas/
 tests/selos/capturas/
+
+# Registro interno de arquivos editados por sessão do Claude Code (não é código)
+.claude/tsc-cache/
+
+# Segredos nunca entram no repositório (auditoria de segurança, 2026-11-25; preventivo, nenhum arquivo assim existe hoje)
+.env
+.env.*
+*.pem
+*.key
+*.p12
+*.pfx
+credentials*.json
+service-account*.json

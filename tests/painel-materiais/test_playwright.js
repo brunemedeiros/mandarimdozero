@@ -137,7 +137,26 @@ async function abrirMateriais(opts){
     L('link javascript: e arquivo data: não viram href', (await p.$$eval('[data-material="900"] a', l => l.length)) === 0);
     L('vista da aluna também não abre link perigoso', await p.evaluate(async () => {
       fetchSupportMaterialsForCurrentStudent = async () => [{ id: 1, title: 'x', description: null, link_url: 'javascript:alert(1)', file_url: null, created_at: new Date().toISOString() }];
-      const d = document.createElement('div'); d.id = 'support-materials-content'; document.body.appendChild(d); await renderSupportMaterialsView(); const ok = !d.querySelector('a[href^="javascript"]'); d.remove(); return ok; }));
+      // A página já tem #support-materials-content: confere nele (antes criava outro com o mesmo id e conferia o vazio).
+      let d = document.getElementById('support-materials-content'), novo = !d; if (novo){ d = document.createElement('div'); d.id = 'support-materials-content'; document.body.appendChild(d); }
+      await renderSupportMaterialsView(); const ok = d.textContent.includes('x') && !d.querySelector('a[href^="javascript"]'); if (novo) d.remove(); return ok; }));
+    // ---- pasta fechada (153, 2026-11-27): o arquivo abre por link temporário pedido no clique ----
+    const sm = await p.evaluate(async () => {
+      const pedidos = [], abertas = [];
+      supabaseClient.storage.from = (bucket) => ({ createSignedUrl: async (pth, s) => { pedidos.push([bucket, pth, s]); return { data: { signedUrl: 'https://assinado.example/' + pth }, error: null }; } });
+      const realOpen = window.open; window.open = () => { const w = { location: { href: '' }, close(){} }; abertas.push(w); return w; };
+      fetchSupportMaterialsForCurrentStudent = async () => [{ id: 7, title: 'Apostila', description: null, link_url: null,
+        file_url: 'https://eigjocalzwamisgqilhg.supabase.co/storage/v1/object/public/support-materials/T/123-abc%20x.pdf', file_name: 'apostila.pdf', created_at: new Date().toISOString() }];
+      let d = document.getElementById('support-materials-content'), novo = !d; if (novo){ d = document.createElement('div'); d.id = 'support-materials-content'; document.body.appendChild(d); }
+      await renderSupportMaterialsView();
+      const a = d.querySelector('[data-sm-file]'); const hrefAberto = a ? a.getAttribute('href') : null;
+      if (!a){ const html = d.innerHTML; if (novo) d.remove(); window.open = realOpen; return { erro: html.slice(0, 400) }; }
+      a.click(); await new Promise(r => setTimeout(r, 50));
+      window.open = realOpen; if (novo) d.remove();
+      return { hrefAberto, pedidos, destino: abertas[0] && abertas[0].location.href };
+    });
+    L('vista da aluna: arquivo sem endereço aberto no link; o clique pede link de 10 min com o caminho certo e abre',
+      sm.hrefAberto === '#' && JSON.stringify(sm.pedidos) === JSON.stringify([['support-materials', 'T/123-abc x.pdf', 600]]) && sm.destino === 'https://assinado.example/T/123-abc x.pdf', sm);
     if (OUT) await p.screenshot({ path: path.join(OUT, `materiais-${lang}-${scheme}.png`), fullPage: true });
 
     // ---- celular ----

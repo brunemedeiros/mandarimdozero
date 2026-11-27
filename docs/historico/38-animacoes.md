@@ -51,3 +51,16 @@ Números = itens da lista entregue à dona.
 - De propósito sem animação: sidebar, pulso no nó atual do mapa, acordeões, troca de tema.
 
 Prévia (privada): https://claude.ai/artifact/VWz2PXPd3Z1VVaGu2muVYw
+
+## Missões do dia animadas (2026-11-27)
+
+Pedido da dona: na tela das Missões do dia (depois de "Unidade concluída!") as barras apareciam já cheias, sem dizer o que a lição
+mudou. Prévia aprovada (velocidade média, selo sem número). Ao abrir a lição, `missionsProgressSnapshot()` guarda quanto cada missão
+tinha (`STEP_STATE.missionsAtStart`, `shared/core/trilha-licao.js`); a tela (`renderDailyChallengesScreen`,
+`shared/core/estado-trilha-desafios.js`) desenha a barra nesse valor e `animateDailyChallenges` enche só as que mudaram, uma depois da
+outra (0,4 s de espera, 0,7 s por barra, 0,455 s entre elas), contando o número junto; a completada agora ganha borda verde, o selo
+"✓ Concluída!" (`trail.dailyMissions.doneNow`, en "✓ Done!") no lugar do "1/1" e um pulinho no ícone. A foto é usada uma vez só
+(voltar à tela mostra o final). Menos movimento: tudo já no final. CSS em `shared/movimento.css`. Tudo grátis; fr, zh e pt.
+Testes: `tests/missoes-animadas/test_playwright.js` 29/29 (fr e zh; capturas claro/escuro conferidas); paridade "quase iguais"
+2770/2770 (harness neutraliza a tela das Missões: barra no valor final e sem o selo nos dois lados); i18n 2333/2333; xp 10/10, 19/19,
+10/10, 9/9; xp-semana cálculo 15/15 (o de navegador dá timeout também na `main`); animações 40/40.

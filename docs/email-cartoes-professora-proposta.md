@@ -56,3 +56,6 @@ Decisões da dona (conversa de 25 e 26/11, prévia `docs/email/previas/sair-cart
   função `cards_digest_exit_summary()` (só `is_teacher()`); ainda sem tela no Painel.
 - Quem religa o aviso do dia em Configurações > Notificações volta ao diário (o diário vence o semanal).
 - Migration `149_cards_digest_weekly_reasons` (Staging 2026-11-26; produção pendente). Voltar atrás: shim da função no commit da v5 (`33be805`).
+- Motivos na Visão Geral do Painel de Admin (pedido da dona, 2026-11-27): bloco "E-mail de cartões novos: por que saem" (respostas, quantos estão no resumo
+  semanal agora, barras por motivo com o "(N escolheram o resumo semanal)", e o texto do "Outro motivo"; nota de anonimato). Lê a função
+  `cards_digest_exit_summary()` (já na produção desde a 149); sem a função ou sem resposta, o bloco some. Só a admin vê. Sem migration.

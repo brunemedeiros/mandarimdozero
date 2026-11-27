@@ -893,7 +893,7 @@ function regradeReviewEntry(idx, newGrade){
   }
   if (typeof logBankHomeStudy === 'function'){
     const kind = e.local && e.local.kind;
-    logBankHomeStudy(card, newGrade, kind === 'type_answer' || kind === 'cloze', { correction: true });
+    logBankHomeStudy(card, newGrade, kind === 'type_answer' || kind === 'cloze', { correction: true, typedText: e.local && e.local.typedAnswer });
   }
   e.grade = newGrade;
   e.xp = newXp;
@@ -971,7 +971,7 @@ function gradeCurrentCard(grade){
   // Cartão da professora (Banco): o estudo em casa entra nas estatísticas e no agendamento do Banco (112).
   if (typeof logBankHomeStudy === 'function'){
     const kind = STATE.reviewCardState && STATE.reviewCardState.kind;
-    logBankHomeStudy(card, grade, kind === 'type_answer' || kind === 'cloze');
+    logBankHomeStudy(card, grade, kind === 'type_answer' || kind === 'cloze', { typedText: STATE.reviewCardState && STATE.reviewCardState.typedAnswer });
   }
   STATE.totalReviews += 1;
   // Streak só conta quando a SESSÃO inteira termina (ver renderReviewView),

@@ -88,3 +88,10 @@ Tudo o que for decidido sobre XP vale para todos os sites (fr, zh, pt e futuros)
 ## Ditados passam a dar XP (2026-11-23)
 - Decisão da autora ("Ditados também dão XP", em PR separado; vale para todos os sites). Valores propostos pelo Claude (a autora não definiu): primeira tentativa de cada ditado, nota >= 90 = 4 (`LESSON_CLOSE_XP`), 60 a 89 = 2 (`EXERCISE_XP_PRODUCE`), < 60 = 0; refazer = 0. `dictationXP` em `shared/ditados.js`; o resultado mostra "XP ganho". Teste: `tests/ditado/` 64/64.
 - Valores do Ditado confirmados pela autora em 2026-11-24 ("Os valores de XP dos Ditados estão bons").
+
+## Teto do XP da semana e aviso na Visão Geral (2026-11-27)
+
+Decisão da autora (opções A e D da auditoria de segurança, `docs/historico/36-auditoria-seguranca-2026-11.md`): `weekly_xp.amount`
+fica no máximo em 8.000 por semana e idioma (gatilho `weekly_xp_cap` da migration 152; o número é segurado, a gravação não falha).
+Base: maior semana real 2.019, 95% abaixo de 1.336, média 423 (produção, 2026-11-26). A Visão Geral do Painel de Admin mostra
+"XP fora do normal" (3.000 ou mais nas últimas 2 semanas, RPC `admin_xp_alerts`). Conquistas (`earned_badges`) ficaram sem trava (só enfeite).
