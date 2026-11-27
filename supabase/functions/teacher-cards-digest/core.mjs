@@ -3,6 +3,9 @@
 // Testes: node tests/email-cartoes-professora/test_core.js. A Edge Function (index.ts) só liga isto ao banco e ao Resend.
 
 export const CATEGORY = 'cartoes_professora';
+// Resumo semanal (P-025): fica na MESMA matriz de preferências (notification_preferences.channels), ao lado do aviso do dia, para as
+// Configurações mostrarem a escolha certa e qualquer "desligar e-mails" desligar os dois. ['email'] = ligado.
+export const WEEKLY_CATEGORY = 'cartoes_professora_semanal';
 export const APP_URL = 'https://app.profbrune.com.br/';
 // Link do botão com UTM (padrão do site; o GA4 só guarda depois do "Aceitar").
 export const BUTTON_URL = APP_URL + '?utm_source=email&utm_medium=email&utm_campaign=cartoes_novos';
@@ -94,6 +97,12 @@ export function allowsDigest(channels) {
   const c = channels && channels[CATEGORY];
   if (!Array.isArray(c)) return true;
   return c.includes('email');
+}
+
+// Quem escolheu o resumo semanal (e não está no aviso do dia: o diário vence se os dois estiverem ligados).
+export function allowsWeekly(channels) {
+  const c = channels && channels[WEEKLY_CATEGORY];
+  return Array.isArray(c) && c.includes('email');
 }
 
 async function hmacHex(secret, message) {

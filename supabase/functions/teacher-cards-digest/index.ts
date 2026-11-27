@@ -7,7 +7,7 @@
 // continuam funcionando); POST (da página ou do "cancelar inscrição" do Gmail, List-Unsubscribe de 1 clique) confere e grava, e responde JSON.
 // Regras e textos: core.mjs (testado em tests/email-cartoes-professora/). Deploy com verify_jwt:false (cada rota confere quem chama).
 import { createClient } from 'npm:@supabase/supabase-js@2';
-import { APP_URL, CATEGORY, allowsDigest, decideKind, firstName, isSunday, parseExitForm, renderEmail, signUnsubscribe, verifyUnsubscribe } from './core.mjs';
+import { APP_URL, CATEGORY, WEEKLY_CATEGORY, allowsDigest, allowsWeekly, decideKind, firstName, isSunday, parseExitForm, renderEmail, signUnsubscribe, verifyUnsubscribe } from './core.mjs';
 
 const CORS = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'authorization, apikey, content-type, x-cron-token, x-client-info', 'Access-Control-Allow-Methods': 'GET, POST, OPTIONS' };
 const json = (status: number, body: unknown) => new Response(JSON.stringify(body), { status, headers: { ...CORS, 'Content-Type': 'application/json' } });
@@ -75,14 +75,13 @@ Deno.serve(async (req: Request) => {
     try { form = new URLSearchParams(await req.text()); } catch (_) { form = null; }
     const { action, reason, other } = parseExitForm(form, url.searchParams);
     const { data: row } = await sb.from('notification_preferences').select('channels').eq('user_id', u).maybeSingle();
-    const channels = { ...((row && row.channels) || {}), [CATEGORY]: action === 'voltar' ? ['email'] : [] };
+    // Aviso do dia e resumo semanal moram na mesma matriz e nunca ficam os dois ligados (P-025): voltar = só o do dia; semanal = só o semanal; sair = nenhum.
+    const channels = { ...((row && row.channels) || {}), [CATEGORY]: action === 'voltar' ? ['email'] : [], [WEEKLY_CATEGORY]: action === 'semanal' ? ['email'] : [] };
     const { error } = await sb.from('notification_preferences').upsert({ user_id: u, channels }, { onConflict: 'user_id' });
     if (error) { console.error('teacher-cards-digest: falha ao salvar saída', error.message); return json(500, { ok: false, error: 'save_failed' }); }
-    const { error: fErr } = await sb.from('teacher_cards_digest_prefs').upsert({ user_id: u, frequency: action === 'semanal' ? 'semanal' : 'diario', updated_at: new Date().toISOString() }, { onConflict: 'user_id' });
-    if (fErr) console.error('teacher-cards-digest: falha ao salvar frequência', fErr.message);
     if (reason) {
-      // Motivo anônimo (sem conta nem e-mail), só para melhorar o aviso. Falha aqui não desfaz a saída.
-      const { error: rErr } = await sb.from('cards_digest_exit_reasons').insert({ reason, other_text: other, action, lang: l });
+      // Motivo ANÔNIMO de verdade (P-026): sem conta, sem e-mail, sem hora (só a semana, preenchida pelo banco) e com id aleatório.
+      const { error: rErr } = await sb.from('cards_digest_exit_answers').insert({ reason, other_text: other, action, lang: l });
       if (rErr) console.error('teacher-cards-digest: falha ao guardar motivo', rErr.message);
     }
     return json(200, { ok: true, action });
@@ -119,8 +118,7 @@ Deno.serve(async (req: Request) => {
         // Quem saiu do aviso diário e escolheu o resumo semanal recebe 1 e-mail por semana, aos domingos de manhã.
         let freq = 'diario';
         if (!allowsDigest(pref && pref.channels)) {
-          const { data: fp } = await sb.from('teacher_cards_digest_prefs').select('frequency').eq('user_id', uid).maybeSingle();
-          if (!(fp && fp.frequency === 'semanal')) { item.skipped = 'desligou'; summary.push(item); continue; }
+          if (!allowsWeekly(pref && pref.channels)) { item.skipped = 'desligou'; summary.push(item); continue; }
           if (!isSunday(today)) { item.skipped = 'semanal_so_domingo'; summary.push(item); continue; }
           freq = 'semanal';
         }
