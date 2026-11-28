@@ -459,3 +459,15 @@ Testes de regressão que ficam: `tests/seguranca-idor/` (90/90), `tests/push-cor
 Acompanhar: aparelhos inscritos no push por volta de 2026-12-10 (tarefa agendada); tirar a conferência dos links antigos do e-mail
 de cartões por volta de 2026-12-25; apagar pelo SQL Editor as tabelas vazias `cards_digest_exit_reasons` e `teacher_cards_digest_prefs`
 (de outra conversa).
+
+## Levantamento dos acessos aos prints dos reports (2026-11-28, para o advogado)
+
+- Pasta `report-screenshots` pública de 2026-09-10 (migration 021) até 2026-11-23 (139). 16 prints: 15 da conta da autora
+  (testes, 10 a 14/09) e 1 de uma aluna (report 37, categoria tradução, 24/10, sem e-mail).
+- `edge_logs` guardados desde 2026-09-10; os 75 dias conferidos (subagente, só leitura), incluindo downloads servidos do cache
+  (`cf_cache_status` HIT aparece nos registros). Acessos: a autora (envio e Painel, mesma rede e navegador), a aluna (só o envio),
+  a auditoria (listagem em 19 e 23/11). Nenhum outro acesso, listagem ou envio. O print da aluna não foi aberto entre 24/10 e 23/11.
+  `storage.objects.last_accessed_at` não serve como prova (fica igual à hora do envio mesmo depois de aberto pelo Painel).
+- Registrado na aba "Auditoria de segurança" do documento do advogado (https://claude.ai/artifact/GCZFie5fbCT2rKW4nKUfuq),
+  com 4 perguntas de LGPD (comunicação à ANPD e à aluna, registro interno, prazo de guarda dos prints). Falta a autora
+  descrever o que aparece no print da aluna.
