@@ -85,14 +85,18 @@ async function run(browser, port, lang){
     check(`${lang}: sem a data, a janela aparece`, await has(page));
     const t1 = await page.$eval('#age-ack-modal', e => e.innerText);
     check(`${lang}: textos em pt-BR`, /Uma confirmação rápida/.test(t1) && /Leva um segundo/.test(t1) && /Tenho 18 anos ou mais, ou tenho autorização do meu responsável/.test(t1) && /Agora não/.test(t1) && /Confirmar/.test(t1), t1);
-    check(`${lang}: nada marcado de antemão e Confirmar travado`, await page.evaluate(() => !document.getElementById('age-ack-check').checked && document.getElementById('age-ack-confirm').disabled));
+    // Confirmar sempre ligado (decisão da autora, 2026-11-27): sem a caixinha, avisa, marca em vermelho e não grava nada.
+    check(`${lang}: nada marcado de antemão e Confirmar ligado`, await page.evaluate(() => !document.getElementById('age-ack-check').checked && !document.getElementById('age-ack-confirm').disabled));
+    await page.click('#age-ack-confirm');
+    const semMarcar = await page.evaluate(() => ({ note: document.getElementById('age-ack-note').textContent, red: document.querySelector('.age-ack-label').classList.contains('is-invalid'), rpc: window.__rpc.some(r => r.name === 'ack_my_age'), open: !!document.getElementById('age-ack-modal') }));
+    check(`${lang}: Confirmar sem marcar: avisa, caixinha vermelha, não grava e a janela fica`, /Marque a caixinha para continuar/.test(semMarcar.note) && semMarcar.red && !semMarcar.rpc && semMarcar.open, semMarcar);
     await page.evaluate(() => maybeShowAgeAckBanner());
     check(`${lang}: chamar de novo não duplica`, await page.evaluate(() => document.querySelectorAll('#age-ack-modal').length === 1));
     if (SHOTS) await page.screenshot({ path: `${SHOTS}/${lang}-ptBR-claro-celular.png` });
     await page.check('#age-ack-check');
-    check(`${lang}: marcar libera o Confirmar`, await page.evaluate(() => !document.getElementById('age-ack-confirm').disabled));
+    check(`${lang}: marcar tira o aviso e o vermelho`, await page.evaluate(() => !document.querySelector('.age-ack-label').classList.contains('is-invalid') && document.getElementById('age-ack-note').textContent === ''));
     await page.uncheck('#age-ack-check');
-    check(`${lang}: desmarcar trava de novo`, await page.evaluate(() => document.getElementById('age-ack-confirm').disabled));
+    check(`${lang}: desmarcar deixa o Confirmar ligado (avisa ao tocar)`, await page.evaluate(() => !document.getElementById('age-ack-confirm').disabled));
     await page.check('#age-ack-check');
     await page.click('#age-ack-confirm');
     await page.waitForFunction(() => window.__rpc.some(r => r.name === 'ack_my_age'));

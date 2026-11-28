@@ -64,3 +64,18 @@ Os dois falhavam também na `main`, por mudanças posteriores a eles (nada de de
 5. **Decks, celular**: a largura da janela era medida durante a animação de entrada (cresce de 96% a 100%); mede `offsetWidth`.
 Resultados: k2f 34/34, 52/52, 32/32, 58/58, 60/60; deck-browser 208/208; revisao-ajustes 48/48, janelas-revisao 40/40,
 revisao-proposta-a 60/60, animações 40/40, quase iguais 2770/2770.
+
+## Bateria completa de testes (2026-11-28) e defeito achado
+Rodada com o subagente `regressao`: 331 arquivos, 315 passaram, 15 falharam, 1 pulado (precisa de Storage real).
+- **Defeito real consertado** (`shared/core/quase-iguais-textos.js`, `answerSpeedQuestion`): desde o número do atalho nas opções
+  (2026-11-13), a Revisão rápida comparava o texto do botão COM o número com a resposta; a opção certa nunca ficava verde e o acerto
+  aparecia em VERMELHO. A nota (FSRS) sempre esteve certa (vem de `isCorrect`). Agora compara sem o `.kbd-hint`; `tests/revisao-seguranca`
+  confere que o acerto fica verde e nunca vermelho (A1 14/14).
+- Testes que as decisões de 2026-11-27 deixaram para trás, atualizados: cadastro e janela de idade (botão sempre ligado, aviso e caixinha
+  vermelha; 168/168 e 44/44) e cascata de CSS dos Desafios (cor `--error-red-text` marcada como de propósito; 25/25).
+- `tests/k2g`: comparava o HTML do cartão com as classes de animação (`mov-entrar`/`mov-revelar`, histórico 38); agora ignora (58/58).
+- Ficaram para as conversas donas (lista para a autora): `tests/registro` (palavras de idioma fixas em `shared/admin-overview-ui.js`),
+  `tests/i18n` (chave `notif.cat.cartoes_professora_semanal` fora da lista), `tests/pt-servidor` (cópia do e-mail no painel diferente de
+  `shared/email-brand.mjs`), `tests/xp-semana` e `tests/desafios-etapa-d` (janela de idade/sequência cobre o botão), `tests/conjugacao`
+  (`.cg-verdict` some depois do erro), `tests/checkpoint-zh` (pinyin em cima do hanzi), `test_ditados_motor` (ordem do CSS),
+  `e4/test_lote5d_pinyin` (falta `wireReviewKeyboard` no teste) e `test_legacy_parity` (T8, conhecido).

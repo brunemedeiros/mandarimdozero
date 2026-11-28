@@ -175,12 +175,21 @@ const nb = (x) => String(x).replace(/\u00a0/g, ' ');
     // Fase P (136): sem a caixinha de idade, os dois caminhos ficam travados; marcar libera; desmarcar trava de novo
     const ageTxt = await page.evaluate(() => document.querySelector('label.cad-idade').innerText.replace(/\u00a0/g, ' '));
     check(`${tag}: caixinha de idade no idioma do site`, E ? /I'm 18 or older, or I have my parent or guardian's permission/.test(ageTxt) : /Tenho 18 anos ou mais, ou tenho autorização do meu responsável/.test(ageTxt), ageTxt);
-    const dis = () => page.evaluate(() => [document.getElementById('signup-google-btn').disabled, document.getElementById('signup-email-btn').disabled].join(','));
-    check(`${tag}: sem marcar a idade, Google e e-mail travados`, (await dis()) === 'true,true', await dis());
+    // Botões sempre ligados (decisão da autora, 2026-11-27): sem a caixinha, o toque avisa, marca a caixinha em vermelho e NÃO avança.
+    const idade = () => page.evaluate(() => ({ dis: [document.getElementById('signup-google-btn').disabled, document.getElementById('signup-email-btn').disabled].join(','),
+      note: document.getElementById('signup-method-note').textContent, red: document.querySelector('label.cad-idade').classList.contains('is-invalid'),
+      inv: document.getElementById('signup-age-ack').getAttribute('aria-invalid'), step2: getComputedStyle(document.getElementById('gate-signup-method')).display !== 'none' }));
+    check(`${tag}: sem marcar a idade, Google e e-mail ligados`, (await idade()).dis === 'false,false', await idade());
+    await page.click('#signup-email-btn');
+    let s1 = await idade();
+    check(`${tag}: e-mail sem a idade: avisa, caixinha vermelha e fica no passo 2`, (E ? /Tick the box to continue/ : /Marque a caixinha para continuar/).test(s1.note) && s1.red && s1.inv === 'true' && s1.step2, s1);
+    await page.click('#signup-google-btn');
+    s1 = await idade();
+    check(`${tag}: Google sem a idade: avisa e não sai da página`, s1.red && s1.step2 && !(await page.evaluate(() => (window.__calls || []).some(c => c[0] === 'oauth'))), s1);
     await page.check('#signup-age-ack');
-    check(`${tag}: marcando a idade, os dois liberam`, (await dis()) === 'false,false', await dis());
+    s1 = await idade();
+    check(`${tag}: marcando a idade, o aviso e o vermelho somem`, !s1.red && s1.inv === null && s1.note === '', s1);
     await page.uncheck('#signup-age-ack');
-    check(`${tag}: desmarcando, travam de novo`, (await dis()) === 'true,true', await dis());
     await page.click('#gate-signup-method .cad-voltar'); await visible(page, 'gate-signup-course');
     await page.click('#signup-grid .lang-card[data-lang="fr"]'); await visible(page, 'gate-signup-method');
     await page.check('#signup-age-ack'); await page.click('#signup-email-btn');
