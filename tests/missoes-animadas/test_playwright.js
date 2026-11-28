@@ -78,6 +78,45 @@ const estado = p => p.evaluate(() => [...document.querySelectorAll('.daily-chall
       await o.ctx.close();
     }
   }
+  // Card "Missões do dia" da Trilha (2026-11-28): anima quando a missão andou desde a última vez que o card apareceu.
+  const card = p => p.evaluate(() => [...document.querySelectorAll('#daily-challenges-strip .dcs-card[data-dc]')].map(c => ({
+    w: c.querySelector('.dcs-fill').style.width, frac: c.querySelector('.dcs-fraction').textContent,
+    fracVisivel: getComputedStyle(c.querySelector('.dcs-fraction')).display !== 'none', feita: c.classList.contains('dc-done-now'), done: c.classList.contains('done') })));
+  for (const site of ['fr', 'zh']) {
+    const { p, ctx, errs } = await abrir(b, site, 'light', 'no-preference');
+    await p.evaluate(() => { localStorage.setItem(CHALLENGES_STRIP_COLLAPSE_KEY, '0'); sessionStorage.removeItem('dcs-seen'); document.getElementById('path-list-wrap').style.display = 'block'; document.getElementById('unit-detail-wrap').style.display = 'none'; const s = document.getElementById('daily-challenges-strip'); s.style.display = 'block';
+      window.__agora = { streak: 0, conj: 0, perfect: 0 }; renderDailyChallengesStrip(); });
+    let k = await card(p);
+    ok(k.length === 3 && k.every(c => c.w === '0%' && !c.feita), `${site} card: 1ª vez na sessão não anima`, k);
+    await p.evaluate(() => { window.__agora = { streak: 1, conj: 1, perfect: 0 }; renderDailyChallengesStrip(); });
+    k = await card(p); ok(k[0].w === '0%' && k[1].w === '0%', `${site} card: missão que andou começa no valor de antes`, k);
+    await p.waitForTimeout(2000); k = await card(p);
+    ok(k[0].w === '100%' && k[0].feita && k[0].done && !k[0].fracVisivel, `${site} card: completada agora enche, fica verde e mostra o selo`, k[0]);
+    ok(k[1].w === '50%' && !k[1].feita && k[1].frac === '1/2', `${site} card: avançou sem completar enche até a metade`, k[1]);
+    ok(k[2].w === '0%' && !k[2].feita, `${site} card: a que não mudou fica parada`, k[2]);
+    await p.evaluate(() => renderDailyChallengesStrip()); k = await card(p);
+    ok(k[0].w === '100%' && !k[0].feita && k[0].done && k[0].fracVisivel, `${site} card: na volta seguinte, verde com o número (sem selo)`, k[0]);
+    // depois da tela do fim da lição, o card não repete
+    await p.evaluate(() => { STEP_STATE.missionsAtStart = { streak: 1, conj: 1, perfect: 0 }; window.__agora = { streak: 1, conj: 2, perfect: 1 }; renderDailyChallengesScreen(); renderDailyChallengesStrip(); });
+    k = await card(p); ok(k[1].w === '100%' && k[2].w === '100%' && !k[2].feita, `${site} card: não repete o que a tela do fim da lição mostrou`, k);
+    // recolhido não anima; ao abrir mostra o final
+    await p.evaluate(() => { localStorage.setItem(CHALLENGES_STRIP_COLLAPSE_KEY, '1'); renderDailyChallengesStrip(); window.__agora = { streak: 1, conj: 2, perfect: 1 }; });
+    await p.evaluate(() => { localStorage.setItem(CHALLENGES_STRIP_COLLAPSE_KEY, '0'); renderDailyChallengesStrip(); }); k = await card(p);
+    ok(k.every(c => c.w === '100%' && !c.feita), `${site} card: recolhido não anima`, k);
+    ok(errs.length === 0, `${site} card: sem erro de página`, errs);
+    await p.evaluate(() => { localStorage.setItem(CHALLENGES_STRIP_COLLAPSE_KEY, '0'); sessionStorage.removeItem('dcs-seen'); window.__agora = { streak: 0, conj: 0, perfect: 0 }; renderDailyChallengesStrip(); window.__agora = { streak: 1, conj: 1, perfect: 0 }; renderDailyChallengesStrip(); });
+    await p.waitForTimeout(900);
+    await p.locator('#daily-challenges-strip').screenshot({ path: path.join(OUT, `${site}-card-meio.png`) });
+    await p.waitForTimeout(1300);
+    await p.locator('#daily-challenges-strip').screenshot({ path: path.join(OUT, `${site}-card-fim.png`) });
+    await ctx.close();
+    const o = await abrir(b, site, 'light', 'reduce');
+    await o.p.evaluate(() => { localStorage.setItem(CHALLENGES_STRIP_COLLAPSE_KEY, '0'); sessionStorage.removeItem('dcs-seen'); const s = document.getElementById('daily-challenges-strip'); s.style.display = 'block';
+      window.__agora = { streak: 0, conj: 0, perfect: 0 }; renderDailyChallengesStrip(); window.__agora = { streak: 1, conj: 0, perfect: 0 }; renderDailyChallengesStrip(); });
+    await o.p.waitForTimeout(50); k = await card(o.p);
+    ok(k[0].w === '100%' && k[0].feita, `${site} card: com menos movimento já no final`, k[0]);
+    await o.ctx.close();
+  }
   // inglês: texto do selo
   {
     const { p, ctx } = await abrir(b, 'fr', 'light', 'reduce');

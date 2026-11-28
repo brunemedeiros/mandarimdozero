@@ -64,3 +64,13 @@ outra (0,4 s de espera, 0,7 s por barra, 0,455 s entre elas), contando o número
 Testes: `tests/missoes-animadas/test_playwright.js` 29/29 (fr e zh; capturas claro/escuro conferidas); paridade "quase iguais"
 2770/2770 (harness neutraliza a tela das Missões: barra no valor final e sem o selo nos dois lados); i18n 2333/2333; xp 10/10, 19/19,
 10/10, 9/9; xp-semana cálculo 15/15 (o de navegador dá timeout também na `main`); animações 40/40.
+
+### Card "Missões do dia" da Trilha (2026-11-28)
+
+Pedido da dona: animar o card das Missões da Trilha do mesmo jeito. Como o card é redesenhado toda vez que a aluna volta à Trilha,
+ele anima quando a missão ANDOU desde a última vez que o card apareceu (valores guardados na aba, `sessionStorage` `dcs-seen`, com a
+data do dia); a 1ª vez na sessão não anima; a tela do fim da lição grava o que mostrou, então o card não repete; recolhido ou com
+menos movimento, já no final. Completada agora: borda verde, "✓ Concluída!" no lugar do número e pulinho no ícone; na volta seguinte,
+verde com o número. Mesma função `animateDailyChallenges` (agora recebe os seletores), CSS em `shared/movimento.css`. Testes:
+`tests/missoes-animadas/` 49/49 (20 novos do card); paridade 2770/2770 (harness neutraliza também o card); amigos 210/210, amigos em
+dupla 255/255; atalhos 92/92; animações 40/40; xp 10/10; i18n 2333/2334 (a 1 falha é de outra sessão, igual sem esta mudança).

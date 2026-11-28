@@ -374,20 +374,21 @@ function missionsProgressSnapshot(){
 // que mudaram nesta lição enchem a barra, uma depois da outra (0,7 s cada); a que foi completada agora ganha borda verde,
 // o selo "✓ Concluída!" no lugar do "1/1" e um pulinho no ícone. Com menos movimento, tudo já no lugar final.
 const DC_FILL_MS = 700, DC_STAGGER_MS = 455, DC_FIRST_MS = 400;
-function animateDailyChallenges(contentEl, list){
+function animateDailyChallenges(contentEl, list, sel){
+  const S = sel || { card: '.daily-challenge-card', fill: '.daily-challenge-progress-fill', frac: '.daily-challenge-fraction', doneClass: null };
   const reduce = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
   let delay = DC_FIRST_MS;
   list.forEach(({ c, before, after }, i) => {
     if (after === before) return;
-    const card = contentEl.querySelector(`.daily-challenge-card[data-dc="${i}"]`);
+    const card = contentEl.querySelector(`${S.card}[data-dc="${i}"]`);
     if (!card) return;
-    const fill = card.querySelector('.daily-challenge-progress-fill');
-    const frac = card.querySelector('.daily-challenge-fraction');
+    const fill = card.querySelector(S.fill);
+    const frac = card.querySelector(S.frac);
     const pct = v => Math.round((v / c.target) * 100) + '%';
     const finish = () => {
       if (!card.isConnected) return;
       frac.textContent = `${after}/${c.target}`;
-      if (after >= c.target && before < c.target) card.classList.add('dc-done-now');
+      if (after >= c.target && before < c.target){ card.classList.add('dc-done-now'); if (S.doneClass) card.classList.add(S.doneClass); }
     };
     if (reduce){ fill.style.width = pct(after); finish(); return; }
     setTimeout(() => {
@@ -448,6 +449,7 @@ function renderDailyChallengesScreen(){
   nextBtn.textContent = t('common.continueArrow');
   nextBtn.style.display = 'flex';
   animateDailyChallenges(contentEl, dcList);
+  { const v = {}; dcList.forEach(({ c, after }) => { v[c.id] = after; }); dcsSeenWrite(v); }
 
   // BUG real corrigido aqui (relatado pela autora, 2026-09-15): esta tela é
   // SEMPRE a próxima depois de "Unidade concluída!" (renderUnitCompleteScreen,
@@ -605,6 +607,17 @@ function isDailyChallengesStripCollapsed(){
 // botão de recolher/expandir. Renderiza no MESMO markup em dois lugares
 // (Trilha no mobile + card da sidebar no desktop, Fase 3): CSS decide qual
 // dos dois fica visível conforme a largura da tela, nunca os dois juntos.
+// Quanto o card "Missões do dia" da Trilha mostrou da última vez (dona, 2026-11-28: animar o card como a tela do fim da lição).
+// Guardado na aba (sessionStorage) com a data: a 1ª vez na sessão não anima; a tela do fim da lição grava o valor final, então
+// o card não repete o que ela acabou de mostrar.
+const DCS_SEEN_KEY = 'dcs-seen';
+function dcsSeenRead(){
+  try { const o = JSON.parse(sessionStorage.getItem(DCS_SEEN_KEY) || 'null'); return o && o.date === (STATE.daily && STATE.daily.date) ? (o.values || {}) : null; } catch (e) { return null; }
+}
+function dcsSeenWrite(values){
+  try { sessionStorage.setItem(DCS_SEEN_KEY, JSON.stringify({ date: STATE.daily && STATE.daily.date, values })); } catch (e) {}
+}
+
 function renderDailyChallengesStrip(){
   const targets = ['daily-challenges-strip', 'side-missions-body']
     .map(id => document.getElementById(id))
@@ -612,21 +625,29 @@ function renderDailyChallengesStrip(){
   if (!targets.length) return;
   ensureDailyBucket();
   const collapsed = isDailyChallengesStripCollapsed();
-  const cardsHTML = todaysChallenges().map((c, i) => {
+  const seen = dcsSeenRead();
+  const dcsList = todaysChallenges().map(c => {
     // Number(...)||0: um campo ausente nunca mais vira NaN silencioso (ver
     // auditoria "O problema dos 100%") -- current fica sempre um número
     // válido entre 0 e c.target.
-    const current = Math.min(Number(c.get(STATE.daily)) || 0, c.target);
+    const after = Math.min(Number(c.get(STATE.daily)) || 0, c.target);
+    const b = seen && typeof seen[c.id] === 'number' && !collapsed ? Math.min(seen[c.id], after) : after;
+    return { c, before: b, after };
+  });
+  const nowSeen = {}; dcsList.forEach(({ c, after }) => { nowSeen[c.id] = after; });
+  dcsSeenWrite(nowSeen);
+  const cardsHTML = dcsList.map(({ c, before: current }, i) => {
     const pct = Math.round((current / c.target) * 100);
     const done = current >= c.target;
     return `
-      <button type="button" class="dcs-card ${done ? 'done' : ''}" data-mission-go="${escapeAttr(String(c.id || ''))}">
+      <button type="button" class="dcs-card ${done ? 'done' : ''}" data-mission-go="${escapeAttr(String(c.id || ''))}" data-dc="${i}">
         <div class="dcs-icon-sq slot-${i}">${c.icon}</div>
         <div class="dcs-body">
           <div class="dcs-card-label">${c.label}</div>
           <div class="dcs-progress-row">
             <div class="dcs-track"><div class="dcs-fill" style="width:${pct}%"></div></div>
             <div class="dcs-fraction">${current}/${c.target}</div>
+            <span class="dc-done-pill">${t('trail.dailyMissions.doneNow')}</span>
           </div>
         </div>
       </button>
@@ -646,6 +667,7 @@ function renderDailyChallengesStrip(){
       renderDailyChallengesStrip();
     });
     strip.querySelectorAll('[data-mission-go]').forEach(card => card.addEventListener('click', () => openDailyMissionTarget(card.dataset.missionGo)));
+    if (!collapsed) animateDailyChallenges(strip, dcsList, { card: '.dcs-card', fill: '.dcs-fill', frac: '.dcs-fraction', doneClass: 'done' });
   });
 }
 

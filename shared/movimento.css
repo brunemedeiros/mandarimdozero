@@ -209,3 +209,14 @@ dialog[open] > article{ animation: mov-janela-in var(--mov-janela) var(--mov-cur
   .daily-challenge-progress-fill.dc-anim{ transition:none; }
   .daily-challenge-card.dc-done-now .dc-done-pill, .daily-challenge-card.dc-done-now .daily-challenge-icon-sq{ animation:none; }
 }
+/* Card "Missões do dia" da Trilha (dona, 2026-11-28): mesma animação, no tamanho do card (a lógica é a mesma da tela acima). */
+.dcs-fill.dc-anim{ transition: width .7s cubic-bezier(.22,.8,.3,1); }
+.dcs-card{ transition: border-color .3s ease, background-color .3s ease; }
+.dcs-card .dc-done-pill{ font-size:10.5px; padding:4px 7px; }
+.dcs-card.dc-done-now .dc-done-pill{ display:inline-block; animation: dc-pop .38s cubic-bezier(.3,1.6,.5,1) both; }
+.dcs-card.dc-done-now .dcs-fraction{ display:none; }
+.dcs-card.dc-done-now .dcs-icon-sq{ animation: dc-bounce .5s ease both; }
+@media (prefers-reduced-motion: reduce){
+  .dcs-fill.dc-anim{ transition:none; }
+  .dcs-card.dc-done-now .dc-done-pill, .dcs-card.dc-done-now .dcs-icon-sq{ animation:none; }
+}
