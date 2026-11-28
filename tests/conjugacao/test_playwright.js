@@ -342,6 +342,7 @@ async function fill(page, wrongIdx){
         noSpoil: !document.querySelector('.cg-listen') && document.querySelector('.cg-panel .cg-tr').hidden }));
       check('partida com 10 frases, em modo foco, lacuna e 2 opções; sem 🔊 nem tradução antes de responder', q.n === 10 && q.focus === 'conjugaison' && q.blank && q.choices === 2 && q.noSpoil, q);
       const right = await page.evaluate(() => CONJ_GAMES_UI.state.order[0].ans);
+      await page.waitForTimeout(350); // os atalhos ignoram de propósito os 0,3 s iniciais de cada pergunta (tecla segurada); 2026-11-28
       await page.keyboard.press(right === 'a' ? '2' : '1'); // tecla escolhe (errada, de propósito)
       await page.waitForTimeout(60);
       const f = await page.evaluate(() => ({ verdict: document.querySelector('.cg-verdict').className, fill: document.querySelector('.cg-sentence .cg-fill').textContent,

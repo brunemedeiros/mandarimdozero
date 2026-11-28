@@ -79,6 +79,7 @@ async function openApp(browser, base, app, o){
   const mobile = o.width < 600;
   const ctx = await browser.newContext({ viewport: { width: o.width, height: mobile ? 844 : 900 }, deviceScaleFactor: mobile ? 2 : 1, serviceWorkers: 'block',
     colorScheme: o.theme, locale: o.lang, hasTouch: mobile, isMobile: mobile });
+  await ctx.addInitScript(() => { try { sessionStorage.setItem('age-ack-later', '1'); } catch (e) {} }); // a janela de idade (Fase P) cobria o botão do XP (2026-11-28)
   await ctx.addInitScript(({ lang }) => { try { localStorage.setItem('ui-language', lang); localStorage.setItem('ui-language-gate', lang); } catch (e) {} }, { lang: o.lang });
   const page = await ctx.newPage();
   const errs = []; page.on('pageerror', e => errs.push(String(e)));

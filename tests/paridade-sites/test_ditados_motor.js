@@ -53,7 +53,7 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
     && /^wireDictationScreen\(\);$/m.test(app) && !/^    'dict\.(?!count\.)/m.test(app));
   const html = read('fr/index.html');
   const iCss = html.indexOf('href="../shared/ditados.css"'), iStyleEnd = html.indexOf('</style>'), iConjCss = html.indexOf('href="../shared/conjugacao.css"');
-  const iDados = html.indexOf('<script src="dictations.js">'), iMotor = html.indexOf('../shared/ditados.js'), iCfg = html.indexOf('"ditados-config.js"'), iApp = html.indexOf('<script src="app.js">');
+  const iDados = html.indexOf('<script src="dictations.js">'), iMotor = html.indexOf('<script src="../shared/ditados.js"'), iCfg = html.indexOf('<script src="ditados-config.js"') /* a etiqueta <script>, não a lista <link rel="preload"> do topo (2026-11-26) */, iApp = html.indexOf('<script src="app.js">');
   check('fr carrega o CSS depois do <style> (e da Conjugação) e dados -> motor -> config -> app.js', iCss > iStyleEnd && iCss > iConjCss && iDados > 0 && iDados < iMotor && iMotor < iCfg && iCfg < iApp);
   const style = html.slice(html.indexOf('<style>'), iStyleEnd);
   const sobrou = style.split('\n').filter(l => /dictation/.test(l) && !/dictation-play-btn/.test(l) && !/^\s*\/\*/.test(l));

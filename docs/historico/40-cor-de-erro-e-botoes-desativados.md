@@ -79,3 +79,21 @@ Rodada com o subagente `regressao`: 331 arquivos, 315 passaram, 15 falharam, 1 p
   `shared/email-brand.mjs`), `tests/xp-semana` e `tests/desafios-etapa-d` (janela de idade/sequência cobre o botão), `tests/conjugacao`
   (`.cg-verdict` some depois do erro), `tests/checkpoint-zh` (pinyin em cima do hanzi), `test_ditados_motor` (ordem do CSS),
   `e4/test_lote5d_pinyin` (falta `wireReviewKeyboard` no teste) e `test_legacy_parity` (T8, conhecido).
+
+## Investigações e testes restantes (2026-11-28, pedido da autora)
+- **Conjugação**: não era defeito. Os atalhos 1/2 ignoram de propósito os 0,3 s iniciais de cada pergunta (tecla segurada); o teste
+  apertava a tecla antes disso. Espera 350 ms (81/81).
+- **Ponto de verificação do chinês**: o pinyin continua em cima do hanzi; desde o número do atalho os dois ficam centralizados, e o
+  teste esperava alinhamento à esquerda (agora confere o centro). **Defeito achado junto, consertado**: no "Complete a frase"
+  (`shared/core/licao-exercicios.js`, fr e zh) as opções erradas eram sorteadas sem conferir texto repetido; a mesma palavra
+  ("有", "je") podia sair duas vezes, ou uma opção "errada" igual à certa só mudando a maiúscula. Agora não repete texto (sem
+  diferença de maiúscula); o embaralhamento é o mesmo de antes (paridade 2770/2770) e só muda quando havia repetição.
+  `tests/checkpoint-zh` confere que não há opção repetida (26/26).
+- Testes consertados: `xp-semana` (janela de idade cobria o botão; 242/242), `desafios-etapa-d` (janela da sequência aparece
+  conforme a hora; o teste a fecha; 596/596), `i18n` (texto do resumo semanal, PR #546), `registro` (Visão Geral e sino da
+  professora pegam os idiomas do registro, sem mudar texto; central-de-controle 54/54 e 190/190, sino 280/280), `pt-servidor`
+  (o robô de avisos roda com o `email-brand.mjs`; a cópia "para colar no painel" saiu do teste e ganhou aviso de OBSOLETA,
+  porque desde a v39 a produção usa um atalho para o repositório; 53/53), `test_ditados_motor` (a lista "busque já" do topo
+  confundia a ordem; 41/41), `e4/test_lote5d_pinyin` (12/12).
+- Continuam falhando só os dois já conhecidos do site de português: `tests/registro` pela linha do Mural (T9) e
+  `test_legacy_parity` (T8).

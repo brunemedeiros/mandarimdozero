@@ -171,12 +171,18 @@ function buildExerciseSet(unit){
       : Math.floor(Math.random() * blocks.length);
     const correctBlock = blocks[blankIdx];
 
+    // Opções sem repetir texto (2026-11-28): a mesma palavra aparece em várias frases ("有", "je"), e antes podia sair duas vezes
+    // entre as opções, ou uma opção "errada" igual à certa só mudando a maiúscula. Compara sem maiúscula e sem espaço nas pontas.
+    const optKey = (b) => String(LANG_HOOKS.textOf(b) || '').trim().toLowerCase();
+    const taken = new Set([optKey(correctBlock)]);
+    // Mesma lista e mesmo embaralhamento de antes (o sorteio não muda quando não há repetição); a repetição só é tirada depois.
+    const pickUnique = (shuffled, n) => { const out = []; for (const b of shuffled){ if (out.length >= n) break; const k = optKey(b); if (!k || taken.has(k)) continue; taken.add(k); out.push(b); } return out; };
     const unitBlockPool = (unit.phrases || []).flatMap(ph => ph.blocks || []).filter(b => LANG_HOOKS.textOf(b) !== LANG_HOOKS.textOf(correctBlock));
-    let distractors = shuffle(unitBlockPool).slice(0, 3);
+    let distractors = pickUnique(shuffle(unitBlockPool), 3);
     if (distractors.length < 3){
       const globalPool = UNITS.flatMap(u2 => (u2.phrases || []).flatMap(ph => ph.blocks || []))
         .filter(b => LANG_HOOKS.textOf(b) !== LANG_HOOKS.textOf(correctBlock) && !distractors.includes(b));
-      distractors = distractors.concat(shuffle(globalPool).slice(0, 3 - distractors.length));
+      distractors = distractors.concat(pickUnique(shuffle(globalPool), 3 - distractors.length));
     }
 
     return { format: 'cloze', phrase: p, blankIdx, correctBlock, options: shuffle([correctBlock, ...distractors]) };
