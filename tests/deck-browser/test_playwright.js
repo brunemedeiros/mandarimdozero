@@ -650,7 +650,8 @@ const listRows = page => page.evaluate(() => Array.from(document.querySelectorAl
     await shot(page, `deck-detail-${lang}-mobile`);
     await page.evaluate(() => openDeckPanel(9001));
     await page.waitForSelector('#deck-panel-modal [data-panel-open-note]');
-    const m1 = await page.evaluate(() => { const r = document.querySelector('#deck-panel-modal .app-modal').getBoundingClientRect(); return { w: r.width, side: document.querySelector('#deck-panel-modal [data-panel-side]').open, editor: getComputedStyle(document.querySelector('#deck-panel-modal [data-panel-editor]')).display }; });
+    // offsetWidth = largura de verdade; o getBoundingClientRect pega a animação de entrada (a janela cresce de 96% a 100%, histórico 38) (2026-11-27)
+    const m1 = await page.evaluate(() => { const r = { width: document.querySelector('#deck-panel-modal .app-modal').offsetWidth }; return { w: r.width, side: document.querySelector('#deck-panel-modal [data-panel-side]').open, editor: getComputedStyle(document.querySelector('#deck-panel-modal [data-panel-editor]')).display }; });
     check(lang + ' celular: Painel em tela cheia, filtros fechados, editor escondido', m1.w >= 389 && m1.side === false && m1.editor === 'none', m1);
     await shot(page, `deck-panel-${lang}-mobile-list`);
     await page.click('#deck-panel-modal [data-panel-open-note="self:501"]');

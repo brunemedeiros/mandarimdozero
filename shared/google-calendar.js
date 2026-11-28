@@ -22,6 +22,33 @@ async function gcalCall(action, extra){
   }
 }
 
+// 156 (achado A5 da auditoria): a volta do consentimento traz ?gcal=ok|erro|cancelado ou ?gcal=confirmar&c=<código>.
+// Lido e tirado do endereço logo ao carregar a página, para o código de confirmação não ficar exposto (histórico, print).
+// A ligação só é ativada quando esta sessão logada confirma (ação 'confirm' da Edge Function; o servidor confere se é a
+// mesma conta que começou).
+function gcalParseReturn(href){
+  const u = new URL(href);
+  const st = u.searchParams.get('gcal');
+  if (!/^(ok|erro|cancelado|confirmar)$/.test(st || '')) return null;
+  const code = st === 'confirmar' ? (u.searchParams.get('c') || '') : '';
+  u.searchParams.delete('gcal');
+  if (st === 'confirmar') u.searchParams.delete('c');
+  return { status: st, code, clean: u.toString() };
+}
+const GCAL_RETURN = (function(){
+  try {
+    const r = gcalParseReturn(location.href);
+    if (r) history.replaceState(history.state, '', r.clean);
+    return r;
+  } catch (e) { return null; }
+})();
+
+async function gcalConfirmReturn(code){
+  const res = await gcalCall('confirm', { code });
+  if (res && res.ok) await gcalAfter(Promise.resolve({}), t('panel.gcal.connectedToast'));
+  else { showToast(t('panel.gcal.confirmFailed')); console.error('Google Agenda: confirmação recusada:', (res && res.error) || '?'); }
+}
+
 async function gcalLoad(){
   const [{ data: status, error }, items] = await Promise.all([
     supabaseClient.rpc('google_calendar_status'),
@@ -340,11 +367,13 @@ function wireGoogleCalendarBox(root){
       }
     }
   });
-  // Volta do consentimento do Google (?gcal=ok|erro|cancelado).
-  const m = /[?&]gcal=(ok|erro|cancelado)/.exec(location.search + location.hash);
-  if (m){
-    showToast(m[1] === 'ok' ? t('panel.gcal.connectedToast') : m[1] === 'erro' ? t('panel.gcal.errGeneric') : t('panel.gcal.cancelledToast'));
-    try { const u = new URL(location.href); u.searchParams.delete('gcal'); history.replaceState(null, '', u.toString()); } catch {}
+  // Volta do consentimento do Google (?gcal=ok|erro|cancelado|confirmar).
+  // (lida ao carregar: GCAL_RETURN; 'confirmar' = pedir à Edge Function para ativar a ligação pendente).
+  if (GCAL_RETURN && !GCAL_RETURN.handled){
+    GCAL_RETURN.handled = true;
+    const st = GCAL_RETURN.status;
+    if (st === 'confirmar') gcalConfirmReturn(GCAL_RETURN.code);
+    else showToast(st === 'ok' ? t('panel.gcal.connectedToast') : st === 'erro' ? t('panel.gcal.errGeneric') : t('panel.gcal.cancelledToast'));
     GCAL_STATE.open = true; host.open = true;
   }
 }

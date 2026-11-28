@@ -230,6 +230,43 @@ function aovXpAlertsHTML(alerts){
     <ul class="aov-pessoas">${items}</ul></article>`;
 }
 
+// ---- Motivos de saída do e-mail "cartões novos" (pedido da dona, 2026-11-27; RPC cards_digest_exit_summary da migration 149) ----
+// sum = { por_motivo: [{ reason, action: 'sair'|'semanal', total }], outros: [{ texto, quando }], semanal_ativos } ou null (sem bloco).
+// Respostas ANÔNIMAS da página "Parar de receber": não há conta nem e-mail aqui. Quem sai pelo Gmail ou sem escolher motivo não aparece.
+// Independe do período e do filtro (é o total desde 26/11/2026).
+const AOV_EXIT_REASONS = ['muitos_emails', 'sem_tempo', 'cartoes_nao_servem', 'sem_interesse', 'prefiro_site', 'outro'];
+const AOV_EXIT_OTHERS_SHOWN = 10;
+function aovExitReasonsHTML(sum){
+  if (!sum || typeof sum !== 'object') return '';
+  const rows = Array.isArray(sum.por_motivo) ? sum.por_motivo : [];
+  const total = {}, weekly = {};
+  rows.forEach(r => {
+    if (!AOV_EXIT_REASONS.includes(r.reason)) return;
+    const n = Number(r.total) || 0;
+    total[r.reason] = (total[r.reason] || 0) + n;
+    if (r.action === 'semanal') weekly[r.reason] = (weekly[r.reason] || 0) + n;
+  });
+  const sumAll = AOV_EXIT_REASONS.reduce((a, k) => a + (total[k] || 0), 0);
+  const head = `<header><h3>${aovEsc(t('admin.overview.exit.title'))}</h3></header>`;
+  const kpis = `<div class="p-indicadores" data-aov="saida-numeros">${aovKpi(aovNum(sumAll), t('admin.overview.exit.kpi.total'))}${aovKpi(aovNum(sum.semanal_ativos), t('admin.overview.exit.kpi.weekly'))}</div>`;
+  const note = `<small class="p-subtitulo p-nota">${aovEsc(t('admin.overview.exit.note'))}</small>`;
+  if (!sumAll) return `<article data-aov="saida-motivos">${head}${kpis}<p class="p-subtitulo p-nota">${aovEsc(t('admin.overview.exit.empty'))}</p>${note}</article>`;
+  const order = AOV_EXIT_REASONS.slice().sort((a, b) => (total[b] || 0) - (total[a] || 0) || AOV_EXIT_REASONS.indexOf(a) - AOV_EXIT_REASONS.indexOf(b));
+  const max = Math.max(...order.map(k => total[k] || 0));
+  const bars = order.map(k => {
+    const n = total[k] || 0, pct = max ? Math.round(n / max * 100) : 0, share = Math.round(n / sumAll * 100);
+    const w = weekly[k] ? ` <small>${aovEsc(t('admin.overview.exit.weeklyOf', { n: weekly[k] }))}</small>` : '';
+    return `<div class="p-barra-linha"><span class="p-barra-topo"><span>${aovEsc(t(`admin.overview.exit.reason.${k}`))}${w}</span><span>${aovEsc(aovNum(n))} (${share}%)</span></span>
+      <span class="p-barra" aria-hidden="true"><i style="--v:${pct}%"></i></span></div>`;
+  }).join('');
+  const others = Array.isArray(sum.outros) ? sum.outros.filter(o => o && o.texto) : [];
+  const li = (o) => `<li class="aov-pessoa"><span class="aov-exit-texto">${aovEsc(o.texto)}</span><small>${aovEsc(t('admin.overview.exit.weekOf', { day: aovDayLabel(String(o.quando || '').slice(0, 10)) }))}</small></li>`;
+  const shown = others.slice(0, AOV_EXIT_OTHERS_SHOWN), rest = others.slice(AOV_EXIT_OTHERS_SHOWN);
+  const othersHTML = others.length ? `<h4 class="aov-exit-sub">${aovEsc(t('admin.overview.exit.others'))}</h4><ul class="aov-pessoas" data-aov="saida-outros">${shown.map(li).join('')}</ul>
+    ${rest.length ? `<details><summary>${aovEsc(t('admin.overview.exit.more', { n: rest.length }))}</summary><ul class="aov-pessoas">${rest.map(li).join('')}</ul></details>` : ''}` : '';
+  return `<article data-aov="saida-motivos">${head}${kpis}<div class="p-barras">${bars}</div>${othersHTML}${note}</article>`;
+}
+
 function aovBodyHTML(st, openable){
   if (st.statsError) return aovErrorHTML();
   if (!st.stats) return aovLoadingHTML();
@@ -241,6 +278,7 @@ function aovBodyHTML(st, openable){
       ${mine ? aovSituationHTML(st.situation, st.openSit) : aovPlansHTML(st.stats)}
     </div>
     ${mine ? `<div class="p-grade-2 aov-blocos">${aovReviewsHTML(st.reviews, st.reviewsError)}${aovPlansHTML(st.stats)}</div>` : ''}
+    ${aovExitReasonsHTML(st.exitSummary)}
     <small class="p-subtitulo p-nota" data-aov="fuso">${aovEsc(t('admin.overview.foot.tz'))}</small>`;
 }
 function aovPageHTML(st, openable){

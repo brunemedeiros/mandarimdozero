@@ -10,7 +10,10 @@
 //     nenhum cartão "não reconhecido".
 // Rodar: node tests/k2f/test_playwright_anki_idioma.js
 const { chromium } = require(require.resolve('playwright', { paths: [process.env.NODE_PATH || '/opt/node22/lib/node_modules'] }));
-const NM = process.env.K2F_NM || '/tmp/claude-0/k2f/node_modules';
+// Bibliotecas do próprio site (shared/vendor/, fixadas na auditoria de 2026-11): antes vinham de uma pasta temporária de
+// uma sessão antiga (/tmp/claude-0/k2f/node_modules) e o teste quebrava em qualquer ambiente novo (2026-11-27).
+const VENDOR = require('path').join(__dirname, '..', '..', 'shared', 'vendor');
+const SQLJS_JS = VENDOR + '/sqljs-1.8.0/sql-wasm.js', SQLJS_WASM = VENDOR + '/sqljs-1.8.0/sql-wasm.wasm', JSZIP_JS = VENDOR + '/jszip-3.10.1/jszip.min.js';
 const http = require('http'), fs = require('fs'), path = require('path');
 const ROOT = path.resolve(__dirname, '..', '..');
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.png': 'image/png', '.mp3': 'audio/mpeg', '.svg': 'image/svg+xml' };
@@ -30,7 +33,7 @@ const STUB = `(function(){
 let passed = 0, failed = 0;
 const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FALHOU:', n, x !== undefined ? JSON.stringify(x).slice(0, 500) : ''); } };
 
-const SQLJS = require(NM + '/sql.js'), JSZip = require(NM + '/jszip');
+const SQLJS = require(SQLJS_JS), JSZip = require(JSZIP_JS);
 async function readApkg(buf){
   const zip = await JSZip.loadAsync(buf);
   const SQL = await SQLJS();
@@ -46,9 +49,9 @@ async function exportIn(browser, port, app, lang){
   const page = await ctx.newPage(); const errors = []; page.on('pageerror', e => errors.push(e.message));
   await page.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, r => r.abort());
   await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase|\/shared\/vendor\/supabase-js/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
-  await page.route(/jszip\.min\.js/, r => r.fulfill({ contentType: 'text/javascript', body: fs.readFileSync(NM + '/jszip/dist/jszip.min.js', 'utf8') }));
-  await page.route(/sql-wasm\.js/, r => r.fulfill({ contentType: 'text/javascript', body: fs.readFileSync(NM + '/sql.js/dist/sql-wasm.js', 'utf8') }));
-  await page.route(/sql-wasm\.wasm/, r => r.fulfill({ contentType: 'application/wasm', body: fs.readFileSync(NM + '/sql.js/dist/sql-wasm.wasm') }));
+  await page.route(/jszip\.min\.js/, r => r.fulfill({ contentType: 'text/javascript', body: fs.readFileSync(JSZIP_JS, 'utf8') }));
+  await page.route(/sql-wasm\.js/, r => r.fulfill({ contentType: 'text/javascript', body: fs.readFileSync(SQLJS_JS, 'utf8') }));
+  await page.route(/sql-wasm\.wasm/, r => r.fulfill({ contentType: 'application/wasm', body: fs.readFileSync(SQLJS_WASM) }));
   await ctx.addInitScript((lang) => { try { sessionStorage.setItem('guest_mode', '1'); localStorage.setItem('ui-language', lang); } catch (e) {} }, lang);
   await page.goto(`http://127.0.0.1:${port}/${app}/index.html`);
   await page.waitForFunction(() => typeof STATE !== 'undefined' && STATE.cards && STATE.cards.length > 0 && CURRENT_USER === false, null, { timeout: 30000 });
@@ -77,10 +80,11 @@ async function exportIn(browser, port, app, lang){
 
 // Importa o .apkg pelo caminho REAL do site (parseApkgFile + buildAnkiImportPlan).
 async function importPlan(page, buf){
-  await page.addScriptTag({ content: fs.readFileSync(NM + '/jszip/dist/jszip.min.js', 'utf8') });
+  // O próprio site já carrega JSZip e sql.js de shared/vendor/. Injetar o código solto agora é barrado pela lista de segurança da
+  // página (CSP, 2026-11-25), e buscar o .wasm de outro endereço também: tudo vem do próprio site (2026-11-27).
   return page.evaluate(async (b64) => {
     const bin = atob(b64); const bytes = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-    const SQL = await initSqlJs({ locateFile: f => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${f}` });
+    const SQL = await initSqlJs({ locateFile: f => `../shared/vendor/sqljs-1.8.0/${f}` });
     const parsed = await parseApkgFile(bytes.buffer, { SQL, JSZipCtor: JSZip });
     if (!parsed.ok) return { ok: false, error: parsed.error };
     const kinds = Object.values(parsed.models).map(m => ({ name: m.name, kind: classifyAnkiNoteType(m).kind }));

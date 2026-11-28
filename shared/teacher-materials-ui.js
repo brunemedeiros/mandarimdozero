@@ -81,7 +81,7 @@ function tmtCardHTML(g){
   const link = tmtSafeUrl(g.link_url);
   const anexos = [
     link ? `<a class="p-selo p-selo--info" href="${tmtEsc(link)}" target="_blank" rel="noopener noreferrer">${tmtEsc(t('materials.card.link', { host: tmtHost(link) }))}</a>` : '',
-    g.file_url && tmtSafeUrl(g.file_url) ? `<a class="p-selo p-selo--info" href="${tmtEsc(tmtSafeUrl(g.file_url))}" target="_blank" rel="noopener noreferrer">${tmtEsc(t('materials.card.file', { name: g.file_name || t('materials.card.fileNoName') }))}</a>` : '',
+    g.file_url && tmtSafeUrl(g.file_url) ? `<a class="p-selo p-selo--info" href="#" data-sm-file="${tmtEsc(tmtSafeUrl(g.file_url))}">${tmtEsc(t('materials.card.file', { name: g.file_name || t('materials.card.fileNoName') }))}</a>` : '',
   ].filter(Boolean).join('');
   return `<article class="p-aula" data-material="${tmtEsc(g.gid)}">
     <div class="p-aula-dia" title="${tmtEsc(t('materials.card.sentOn', { date: fmtDate(d) }))}"><b>${tmtEsc(day)}</b><span>${tmtEsc(mon)}</span></div>

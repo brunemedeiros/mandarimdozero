@@ -3,7 +3,9 @@ import fs from 'node:fs'; import os from 'node:os'; import path from 'node:path'
 const src = fs.readFileSync(new URL('../../supabase/functions/google-calendar/index.ts', import.meta.url), 'utf8')
   .replace(/^import \{ createClient \} from 'npm:[^']+';$/m, 'const createClient = null as any;')
   .replace(/Deno\.env\.get\(([^)]*)\)!?/g, "''")
-  .replace(/^Deno\.serve\(/m, '((..._a: any[]) => null)(');
+  .replace(/^Deno\.serve\(/m, '((..._a: any[]) => null)(')
+  // 156: a função importa as peças da confirmação da própria pasta; no arquivo temporário, pelo caminho completo.
+  .replace("from './oauth-confirm.mjs'", `from '${new URL('../../supabase/functions/google-calendar/oauth-confirm.mjs', import.meta.url).href}'`);
 const tmp = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'gcal-')), 'f.mts');
 fs.writeFileSync(tmp, src);
 const { mapEvent, readPlan } = await import(pathToFileURL(tmp).href);

@@ -56,6 +56,7 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
   const we = core.renderEmail({ lang: 'en', kind: 'semanal', nome: '', n: 1 });
   check('e-mail semanal pt: assunto, UTM semanal, domingo no texto', wp.subject === 'Seu resumo da semana: 3 cartões novos' && wp.html.includes('utm_campaign=cartoes_semanal') && wp.text.includes('utm_campaign=cartoes_semanal') && /domingo/.test(wp.html));
   check('e-mail semanal en: sem português', we.subject === 'Your weekly summary: 1 new card' && !/você|cartão|Revisão|semana|domingo/i.test(we.html.replace(/<style[\s\S]*?<\/style>/, '').replace(/utm_campaign=\w+/g, '')) && /Sunday/.test(we.html));
+  check('allowsWeekly: só com cartoes_professora_semanal ligado no e-mail', core.allowsWeekly({ cartoes_professora_semanal: ['email'] }) && !core.allowsWeekly({ cartoes_professora_semanal: [] }) && !core.allowsWeekly({}) && !core.allowsWeekly(null) && !core.allowsWeekly({ cartoes_professora_semanal: ['in_app'] }));
   console.log(`E-mail de cartões da professora: ${passed}/${passed + failed} verificações${failed ? ' — ' + failed + ' FALHAS' : ' — OK'}`);
   process.exit(failed ? 1 : 0);
 })();

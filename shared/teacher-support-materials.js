@@ -61,7 +61,7 @@ async function fetchSupportMaterialsForCurrentStudent(languageAppKey){
   return data || [];
 }
 
-// Upload pro bucket `support-materials` (migration 033, leitura pública,
+// Upload pro bucket `support-materials` (migration 033; leitura FECHADA desde a 153, ver openSupportMaterialFile;
 // escrita restrita à pasta do próprio auth.uid() -- sempre a PROFESSORA
 // aqui). Sem restrição de tipo (PDF/imagem/doc) -- diferente de
 // uploadFlashcardMedia (que separa image/audio), aqui é só "um arquivo
@@ -77,6 +77,40 @@ async function uploadSupportMaterialFile(file){
   if (error){ console.error('Erro ao subir material de apoio:', error); return { ok: false, error: t('ownFlashcards.err.uploadFailed') }; }
   const { data: pub } = supabaseClient.storage.from('support-materials').getPublicUrl(path);
   return { ok: true, url: pub.publicUrl, fileName: file.name };
+}
+
+// Pasta fechada desde a migration 153 (2026-11-27): o arquivo abre por um link temporário (10 min) criado no
+// clique, como os prints dos reports (shared/admin-reports.js, reportsOpenScreenshot). O Storage só assina para
+// quem pode ler: a professora (pasta dela) ou a aluna que recebeu o material (com vínculo ativo). file_url continua
+// gravado no formato antigo; o caminho do arquivo sai dele.
+function supportMaterialPath(url){
+  const m = String(url || '').match(/\/support-materials\/([^?#]+)/);
+  if (!m) return '';
+  try { return decodeURIComponent(m[1]); } catch (e) { return m[1]; }
+}
+async function openSupportMaterialFile(fileUrl){
+  const path = supportMaterialPath(fileUrl);
+  const w = window.open('', '_blank');
+  if (w) { try { w.opener = null; } catch (e) {} }
+  let url = null;
+  if (path){
+    try {
+      const { data, error } = await supabaseClient.storage.from('support-materials').createSignedUrl(path, 600);
+      if (!error && data && data.signedUrl) url = data.signedUrl;
+    } catch (e) {}
+  }
+  if (url && w) { w.location.href = url; return; }
+  if (url) { window.location.href = url; return; }
+  if (w) w.close();
+  if (typeof showToast === 'function') showToast(t('supportMaterials.fileError')); else alert(t('supportMaterials.fileError'));
+}
+if (typeof document !== 'undefined'){
+  document.addEventListener('click', (e) => {
+    const a = e.target.closest && e.target.closest('[data-sm-file]');
+    if (!a) return;
+    e.preventDefault();
+    openSupportMaterialFile(a.dataset.smFile);
+  });
 }
 
 // title obrigatório (nome curto pro material); description/linkUrl/

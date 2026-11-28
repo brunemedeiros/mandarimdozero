@@ -5,7 +5,9 @@
 //
 // Rotas (verify_jwt = false: a volta do login do Notion não traz JWT; cada rota confere quem chama):
 //   POST {action:'start', return_url}     professora logada -> {url} do consentimento do Notion
-//   GET  .../notion-sync/callback?code&state   volta do Notion: troca o code, guarda o token, volta ao site
+//   GET  .../notion-sync/callback?code&state   volta do Notion: troca o code e guarda o resultado como PENDENTE (156),
+//                                        volta ao site com ?notion=confirmar&c=<código>
+//   POST {action:'confirm', code}         quem está logado no site: ativa a ligação só se for o MESMO dono da pendência (156)
 //   POST {action:'databases'}             professora: bancos que ela autorizou -> [{id, title}]
 //   POST {action:'columns', database_id}  professora: colunas do banco + sugestão do mapa -> {properties, suggested}
 //   POST {action:'sync'}                  x-sync-token = senha do Vault do cron (todas as contas) OU professora (só a dela)
@@ -15,6 +17,7 @@
 
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { mapRow, suggestColumns, FIELDS, FIELD_TYPES } from './map.mjs';
+import { newConfirmCode, isConfirmCode, hashConfirmCode, confirmReturnUrl, CONFIRM_STATUS } from './oauth-confirm.mjs';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -38,6 +41,15 @@ const CORS = {
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { ...CORS, 'Content-Type': 'application/json' } });
 const admin = () => createClient(SUPABASE_URL, SERVICE_KEY, { auth: { persistSession: false } });
+
+// Qualquer conta logada (para a confirmação: o banco confere se é a dona da pendência).
+async function userFromRequest(req: Request): Promise<string | null> {
+  const auth = req.headers.get('Authorization') || '';
+  if (!auth.startsWith('Bearer ')) return null;
+  const userClient = createClient(SUPABASE_URL, ANON_KEY, { global: { headers: { Authorization: auth } }, auth: { persistSession: false } });
+  const { data } = await userClient.auth.getUser();
+  return data?.user?.id || null;
+}
 
 async function teacherFromRequest(req: Request): Promise<string | null> {
   const auth = req.headers.get('Authorization') || '';
@@ -136,12 +148,15 @@ Deno.serve(async (req: Request) => {
     });
     const tok = await r.json().catch(() => ({}));
     if (!r.ok || !tok.access_token) { back.searchParams.set('notion', 'erro'); return Response.redirect(back.toString(), 302); }
-    await sb.rpc('notion_save_connection', {
-      p_user: row.user_id, p_token: tok.access_token, p_workspace_id: tok.workspace_id || null,
-      p_workspace_name: tok.workspace_name || null, p_bot_id: tok.bot_id || null,
+    // 156: não ativa aqui. Guarda como pendente; só a sessão logada da mesma professora confirma (ação 'confirm').
+    const confirmCode = newConfirmCode();
+    const { error: pendErr } = await sb.rpc('oauth_pending_save', {
+      p_provider: 'notion', p_user: row.user_id, p_code_hash: await hashConfirmCode(confirmCode),
+      p_payload: { access_token: tok.access_token, workspace_id: tok.workspace_id || null,
+                   workspace_name: tok.workspace_name || null, bot_id: tok.bot_id || null },
     });
-    back.searchParams.set('notion', 'ok');
-    return Response.redirect(back.toString(), 302);
+    if (pendErr) { back.searchParams.set('notion', 'erro'); return Response.redirect(back.toString(), 302); }
+    return Response.redirect(confirmReturnUrl(back.toString(), 'notion', confirmCode), 302);
   }
 
   if (req.method !== 'POST') return json({ ok: false, error: 'method_not_allowed' }, 405);
@@ -177,6 +192,17 @@ Deno.serve(async (req: Request) => {
     if (status !== 200) return json({ ok: false, error: `database ${status}` }, 502);
     const properties = Object.entries(db.properties || {}).map(([name, p]: [string, any]) => ({ id: p.id, name, type: p.type }));
     return json({ ok: true, title: titleOf(db), properties, suggested: suggestColumns(db.properties), fields: FIELDS, field_types: FIELD_TYPES });
+  }
+
+  if (action === 'confirm') {
+    const caller = await userFromRequest(req);
+    if (!caller) return json({ ok: false, error: 'not_authorized' }, CONFIRM_STATUS.not_authorized);
+    const code = String(body.code || '');
+    if (!isConfirmCode(code)) return json({ ok: false, error: 'invalid_code' }, CONFIRM_STATUS.invalid_code);
+    const { data, error } = await sb.rpc('oauth_pending_confirm', { p_provider: 'notion', p_code_hash: await hashConfirmCode(code), p_caller: caller });
+    if (error || !data) return json({ ok: false, error: 'confirm' }, 500);
+    const res = data as { ok: boolean; error?: string };
+    return json(res, res.ok ? 200 : ((CONFIRM_STATUS as Record<string, number>)[res.error || ''] || 400));
   }
 
   if (action === 'sync') {

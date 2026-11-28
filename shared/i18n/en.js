@@ -259,6 +259,7 @@ window.I18N_CATALOG['en'] = {
   'notif.cat.sistema': '⚙️ System', // ALTA
   'notif.cat.amigos': '👥 Friends', // ALTA
   'notif.cat.cartoes_professora': '📚 New cards from your teacher', // ALTA
+  'notif.cat.cartoes_professora_semanal': '📚 Weekly cards summary (Sunday morning)', // ALTA
   'notif.pref.inAppOnly': 'Friends only has in-app notifications', // ALTA
   'notif.pref.noEmail': 'Friends has no email notifications', // ALTA
   'notif.pref.emailOnly': 'This notice only exists by email', // ALTA
@@ -391,6 +392,9 @@ window.I18N_CATALOG['en'] = {
   'review.mode.hard.desc': 'The ones you miss most', // ALTA
   'review.mode.match.name': 'Match', // MÉDIA -- nome do jogo; alternativa: "Matching"
   'review.mode.match.desc': 'Pairs game', // ALTA
+  'review.mode.speed.empty': 'No cards for today', // ALTA
+  'review.mode.hard.empty': 'No hard words yet', // ALTA
+  'review.mode.match.needWords': 'Needs {n} words', // ALTA
   'review.insufficientTitle': 'Not enough vocabulary yet', // ALTA
   'review.match.insufficientMin': 'The Match game needs at least {n} words already seen in completed lessons.', // ALTA
   'review.match.insufficientSome': 'The Match game needs at least a few words you have already studied successfully in Study.', // ALTA
@@ -459,6 +463,7 @@ window.I18N_CATALOG['en'] = {
   'trail.levelReview.title': '{level} Review', // ALTA
   'trail.levelReview.goal': 'Dictations that bring together everything you learned across the level. Optional.', // ALTA
   'trail.dailyMissions.caption': '🎯 Daily missions', // ALTA
+  'trail.dailyMissions.doneNow': '✓ Done!', // ALTA
   'trail.levelPreparing': 'The content for level {level} is still being prepared.', // ALTA
   'trail.module.label': 'Module {n} · {title}', // ALTA
   'trail.levelTest.eyebrow': 'Level test', // ALTA
@@ -1128,6 +1133,7 @@ window.I18N_CATALOG['en'] = {
   'supportMaterials.loginRequired': 'Sign in to your account to see your support material.', // ALTA
   'supportMaterials.openLink': '🔗 Open link', // ALTA
   'supportMaterials.downloadFile': 'Download file', // ALTA
+  'supportMaterials.fileError': 'Could not open the file right now. Please try again.', // ALTA
   'supportMaterials.sentOn': 'sent on {date}', // ALTA
   'supportMaterials.empty': "Your teacher hasn't sent any support material yet. When she sends something (a summary, a link, a file), it will show up here.", // ALTA
   'wizard.day.mon': 'Mon', // ALTA
@@ -2810,6 +2816,21 @@ window.I18N_CATALOG['en'] = {
   'admin.overview.xp.note': 'Accounts with {limit} XP or more in a week, over the last 2 weeks (the real record is about 2,000). The site caps XP at {cap} per week for each language. It may just be a lot of studying; worth a look.', // ALTA
   'admin.overview.xp.amount': '{n} XP in the week of {week}', // ALTA
   'admin.overview.xp.capped': 'hit the cap', // ALTA
+  'admin.overview.exit.title': 'New-cards email: why people leave', // ALTA
+  'admin.overview.exit.kpi.total': 'Answers', // ALTA
+  'admin.overview.exit.kpi.weekly': 'On the weekly summary now', // ALTA
+  'admin.overview.exit.reason.muitos_emails': 'I get too many emails', // ALTA
+  'admin.overview.exit.reason.sem_tempo': 'I have no time right now', // ALTA
+  'admin.overview.exit.reason.cartoes_nao_servem': 'The cards are not useful to me', // ALTA
+  'admin.overview.exit.reason.sem_interesse': 'I am no longer interested', // ALTA
+  'admin.overview.exit.reason.prefiro_site': 'I prefer to see everything on the site', // ALTA
+  'admin.overview.exit.reason.outro': 'Another reason', // ALTA
+  'admin.overview.exit.weeklyOf': '({n} chose the weekly summary)', // ALTA
+  'admin.overview.exit.others': 'What they wrote under "Another reason"', // ALTA
+  'admin.overview.exit.more': 'Show {n} more', // ALTA
+  'admin.overview.exit.weekOf': 'week of {day}', // ALTA
+  'admin.overview.exit.empty': 'No answers yet. When someone leaves through the email link and picks a reason, it shows up here.', // ALTA
+  'admin.overview.exit.note': 'Anonymous answers from the "Stop receiving" page: only the week and the reason are saved, never the account or the time, so there is no way to tell who answered. People who leave with the Gmail unsubscribe button, or without picking a reason, do not appear.', // ALTA
   'admin.overview.empty.scope': 'No accounts for this choice.', // ALTA
   'admin.overview.error': 'Couldn\'t load the Overview.', // ALTA
   'admin.overview.retry': 'Try again', // ALTA
@@ -3847,6 +3868,7 @@ window.I18N_CATALOG['en'] = {
   'panel.notion.r.noName': 'Row without a student.', // ALTA
   'panel.notion.connectedToast': 'Notion connected.', // ALTA
   'panel.notion.cancelledToast': 'Notion connection cancelled.', // ALTA
+  'panel.notion.confirmFailed': "We couldn't confirm the Notion connection. Start again in the same browser where you're signed in to the site.", // ALTA
   'panel.gcal.more': 'More Google Calendar options', // ALTA
   'panel.gcal.on': 'Connected', // ALTA
   'panel.gcal.toReview': '{n} to review', // ALTA
@@ -3920,6 +3942,7 @@ window.I18N_CATALOG['en'] = {
   'panel.gcal.errGeneric': 'Something went wrong with Google Calendar. Please try again in a moment.', // ALTA
   'panel.gcal.connectedToast': 'Google Calendar connected. Now choose the calendars with your lessons.', // ALTA
   'panel.gcal.cancelledToast': 'Google connection canceled.', // ALTA
+  'panel.gcal.confirmFailed': "We couldn't confirm the Google Calendar connection. Start again in the same browser where you're signed in to the site.", // ALTA
   'panel.gcal.timeFromGoogle': 'Time comes from Google Calendar: to change it, change it there.', // ALTA
   'myClassLogs.feed.title': 'See your lessons in your calendar (Google, Apple, Outlook)', // ALTA
   'myClassLogs.feed.intro': 'Subscribe to this link once and your lessons show up in your calendar on their own, in your time zone. When a lesson changes here, your calendar follows.', // ALTA

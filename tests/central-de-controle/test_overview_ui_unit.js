@@ -106,5 +106,21 @@ check('XP: a nota explica o limite e o teto', xpA.includes('3.000 XP ou mais') &
 const bodyXp = run('aovBodyHTML(S, () => true)', { S: ST({ xpAlerts: { threshold: 3000, cap: 8000, rows: [{ user_id: 'a', display_name: 'Ana', language_app_key: 'frances', week_start: '2026-11-23', amount: 5000, capped: false }] } }) });
 check('XP: o aviso vem antes dos números, em qualquer escolha', bodyXp.indexOf('data-aov="xp-alerta"') > -1 && bodyXp.indexOf('data-aov="xp-alerta"') < bodyXp.indexOf('data-aov="numeros"'));
 
+
+// ---- Motivos de saída do e-mail de cartões (2026-11-27, migration 149) ----
+const EXIT = { por_motivo: [{ reason: 'sem_tempo', action: 'sair', total: 3 }, { reason: 'sem_tempo', action: 'semanal', total: 2 }, { reason: 'muitos_emails', action: 'sair', total: 1 }, { reason: 'outro', action: 'sair', total: 1 }, { reason: 'inventado', action: 'sair', total: 9 }],
+  outros: Array.from({ length: 12 }, (_, i) => ({ texto: i === 0 ? '<b>não abre</b>' : `motivo ${i}`, quando: '2026-11-26T18:46:47+00:00' })), semanal_ativos: 2 };
+const ex = run('aovExitReasonsHTML(E)', { E: EXIT });
+check('motivos: sem dado (função falhou) = nenhum bloco', run('aovExitReasonsHTML(null)') === '' && run('aovExitReasonsHTML("x")') === '');
+check('motivos: vazio mostra a mensagem e os números zerados, sem barras', run('aovExitReasonsHTML({por_motivo:[],outros:[],semanal_ativos:0})').includes('Ninguém respondeu ainda') && !run('aovExitReasonsHTML({por_motivo:[],outros:[],semanal_ativos:0})').includes('p-barra-linha'));
+check('motivos: soma sair + semanal por motivo (sem_tempo = 5), ignora motivo desconhecido, total de respostas = 7', ex.includes('5 (71%)') && ex.includes('1 (14%)') && !ex.includes('inventado') && /Respostas<\/span><span class="p-indicador-valor">7</.test(ex), ex.slice(0, 600));
+check('motivos: ordem do mais citado para o menos (sem_tempo, depois empate pela ordem da lista)', ex.indexOf('Estou sem tempo') < ex.indexOf('Recebo e-mails demais') && ex.indexOf('Recebo e-mails demais') < ex.indexOf('Outro motivo') && ex.indexOf('Outro motivo') < ex.indexOf('Não é mais do meu interesse'));
+check('motivos: mostra quantos escolheram o resumo semanal e quantos estão nele agora', ex.includes('(2 escolheram o resumo semanal)') && /No resumo semanal agora<\/span><span class="p-indicador-valor">2</.test(ex));
+check('motivos: texto livre escapado, 10 à vista e o resto em "Ver mais 2"', ex.includes('&lt;b&gt;não abre') && !ex.includes('<b>não abre') && (ex.match(/class="aov-pessoa"/g) || []).length === 12 && ex.includes('Ver mais 2') && ex.includes('26/11'));
+check('motivos: nota explica que é anônimo e que Gmail/sem motivo não aparece', ex.includes('anônimas') && ex.includes('Gmail'));
+const bodyEx = run('aovBodyHTML(S, () => true)', { S: ST({ exitSummary: EXIT }) });
+check('motivos: o bloco entra na página, depois dos outros blocos e antes da nota de fuso', bodyEx.indexOf('data-aov="saida-motivos"') > bodyEx.indexOf('data-aov="engajamento"') && bodyEx.indexOf('data-aov="saida-motivos"') < bodyEx.indexOf('data-aov="fuso"'));
+check('motivos: sem resposta da função, a página não ganha o bloco', !run('aovBodyHTML(S, () => true)', { S: ST({ exitSummary: null }) }).includes('saida-motivos'));
+
 console.log(`central-de-controle (peças da Visão Geral): ${pass}/${pass + fail}`);
 process.exit(fail ? 1 : 0);

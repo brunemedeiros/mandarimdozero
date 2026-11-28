@@ -148,6 +148,24 @@ let ok = 0, bad = 0; const chk = (n, c) => { if (c) ok++; else { bad++; console.
     await page.click('[data-settings-section="notifications"]'); await page.waitForTimeout(700);
     chk(lang + ': 3 interruptores principais', await page.evaluate(() => ['notif-pref-inapp-switch','notif-pref-push-switch','notif-pref-email-switch'].every(id => document.getElementById(id)?.matches('input[role=switch]'))));
     chk(lang + ': matriz com 1 linha por categoria', await page.evaluate(() => document.querySelectorAll('.cfg-matriz tbody tr').length === NOTIFICATION_PREF_CATEGORIES.length));
+    // Resumo semanal dos cartões (P-025, 2026-11-27): o do dia e o semanal se excluem e "desligar e-mails" desliga os dois
+    await page.evaluate(() => {
+      window.__P = { channels: { estudo: ['email'], cartoes_professora: [], cartoes_professora_semanal: ['email'] }, quiet_hours_start: null, quiet_hours_end: null };
+      window.__SAVED = [];
+      window.ensureNotificationPreferencesLoaded = async () => window.__P;
+      window.saveNotificationPreferenceChannels = async (ch) => { window.__SAVED.push(JSON.parse(JSON.stringify(ch))); window.__P.channels = ch; return true; };
+    });
+    await page.evaluate(() => renderNotificationPreferencesView()); await page.waitForTimeout(300);
+    const dg = () => page.evaluate(() => ({ dia: document.querySelector('input[data-pref-category="cartoes_professora"][data-pref-channel="email"]').checked, sem: document.querySelector('input[data-pref-category="cartoes_professora_semanal"][data-pref-channel="email"]').checked }));
+    chk(lang + ': quem escolheu o semanal vê o semanal ligado e o do dia desligado', JSON.stringify(await dg()) === JSON.stringify({ dia: false, sem: true }));
+    chk(lang + ': a linha do semanal só tem a caixinha de e-mail', await page.evaluate(() => { const r = document.querySelector('input[data-pref-category="cartoes_professora_semanal"][data-pref-channel="email"]').closest('tr'); return r.querySelectorAll('input:not([disabled])').length === 1 && r.querySelector('th').textContent.includes('Resumo semanal'); }));
+    await page.$eval('input[data-pref-category="cartoes_professora"][data-pref-channel="email"]', e => e.click()); await page.waitForTimeout(150);
+    chk(lang + ': ligar o aviso do dia desliga o semanal (nunca os dois), na tela e no que é salvo', JSON.stringify(await dg()) === JSON.stringify({ dia: true, sem: false }) && await page.evaluate(() => { const c = window.__SAVED.at(-1); return c.cartoes_professora[0] === 'email' && c.cartoes_professora_semanal.length === 0; }));
+    await page.$eval('input[data-pref-category="cartoes_professora_semanal"][data-pref-channel="email"]', e => e.click()); await page.waitForTimeout(150);
+    chk(lang + ': ligar o semanal desliga o do dia', JSON.stringify(await dg()) === JSON.stringify({ dia: false, sem: true }) && await page.evaluate(() => { const c = window.__SAVED.at(-1); return c.cartoes_professora.length === 0 && c.cartoes_professora_semanal[0] === 'email'; }));
+    await page.evaluate(() => renderNotificationPreferencesView()); await page.waitForTimeout(300);
+    await page.$eval('#notif-pref-email-switch', e => e.click()); await page.waitForTimeout(250);
+    chk(lang + ': desligar os e-mails em geral desliga o semanal também (não sobra e-mail escondido)', await page.evaluate(() => { const c = window.__SAVED.at(-1); return c.cartoes_professora.length === 0 && c.cartoes_professora_semanal.length === 0; }));
     chk(lang + ': caixinhas da matriz com nome acessível', await page.evaluate(() => [...document.querySelectorAll('.cfg-matriz input')].every(i => (i.getAttribute('aria-label') || '').includes(':'))));
     await ctx.close();
   }
