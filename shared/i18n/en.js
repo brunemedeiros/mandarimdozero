@@ -3558,6 +3558,14 @@ window.I18N_CATALOG['en'] = {
   'rb.sTip': '{d}: {a} correct, {h} with help, {e} mistakes', // ALTA
   'rb.sNote': 'In class: answers given in Class mode. At home: answers from when the student reviews the cards on the site (recorded since 10/19/2026; anything earlier is not shown here).', // ALTA
   'rb.sTitle': 'Performance (class and home)', // ALTA
+  'rb.typed.title': 'What was typed when wrong ({n})', // ALTA
+  'rb.typed.expected': 'Card answer:', // ALTA
+  'rb.typed.note': 'Only home study keeps the text, and only when the answer is wrong. It is deleted after 180 days.', // ALTA
+  'rb.streakTag': 'Missed the last {n}', // ALTA
+  'rb.struggle.title': 'Items missed in a row ({n})', // ALTA
+  'rb.struggle.hint': 'Missed the last 3 times or more. It may just be hard, or the card may be asking for something else: check what was typed.', // ALTA
+  'rb.struggle.lastTyped': 'Last typed answers:', // ALTA
+  'rb.struggle.see': 'See item', // ALTA
   'rb.sTop': 'Most missed', // ALTA
   'rb.sTotal': 'answers', // ALTA
   'rb.sWrong': 'missed', // ALTA

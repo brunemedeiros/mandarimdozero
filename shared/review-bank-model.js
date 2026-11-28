@@ -344,3 +344,36 @@ function rbManageErrKey(message){
   }
   return null;
 }
+
+// ---------- Etapa 3: o que a aluna digitou ao errar (143) e itens que ela erra muito ----------
+// Respostas de um item, da mais recente para a mais antiga (aula e casa juntas; mesma ordem do carregamento do Banco).
+function rbItemReviews(reviews, itemId){
+  return (reviews || []).filter(r => r.item_id === itemId).slice().sort((a, b) => String(b.created_at || '').localeCompare(String(a.created_at || '')));
+}
+// O que foi digitado ao errar (só o estudo em casa guarda; até `limit`), do mais recente para o mais antigo.
+function rbTypedAttempts(reviews, itemId, limit){
+  return rbItemReviews(reviews, itemId).filter(r => r.typed_text).slice(0, limit || 5);
+}
+// Resposta com que o texto digitado é comparado: a lacuna no cartão de lacuna; a resposta nos outros.
+function rbTypedExpected(item){
+  const i = rbNormalizeItem(item);
+  return rbCardMode(i) === 'cloze' && i.gap_word ? i.gap_word : i.answer;
+}
+// Erros seguidos mais recentes de um item. Turma: conta por pessoa e vale a pessoa com mais erros seguidos (o erro de uma
+// não some porque a outra acertou depois). Ficha individual: todas as respostas são da mesma pessoa.
+function rbMissStreak(reviews, itemId){
+  const by = {};
+  rbItemReviews(reviews, itemId).forEach(r => { const k = r.student_id || '-'; (by[k] = by[k] || []).push(r); });
+  let best = 0;
+  Object.values(by).forEach(list => { let n = 0; for (const r of list){ if (r.outcome !== 'errou') break; n++; } if (n > best) best = n; });
+  return best;
+}
+const RB_MISS_STREAK_ALERT = 3;
+// Itens não cortados que a aluna errou as últimas 3 vezes ou mais (pode ser o cartão que está mal feito), mais erros primeiro.
+function rbStrugglingItems(items, reviews, min){
+  const lim = min || RB_MISS_STREAK_ALERT;
+  return (items || []).filter(i => i.status !== 'cortado')
+    .map(i => ({ item: i, streak: rbMissStreak(reviews, i.id) }))
+    .filter(x => x.streak >= lim)
+    .sort((a, b) => b.streak - a.streak);
+}
