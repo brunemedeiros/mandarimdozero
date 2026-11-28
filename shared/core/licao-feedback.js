@@ -58,8 +58,10 @@ function typedPtBrNoteHTML(adj){
   return PortuguesVariantes.ptBrFeedbackHTML(adj.pairs, { t, esc: escapeHTML, lead: t('answer.ptpt.almost') });
 }
 
-function typedAttemptHTML(typed, expected){
-  const form = (typeof LANG_HOOKS !== 'undefined' && LANG_HOOKS.typedAttemptForm) || (s => s);
+// `formOverride` (opcional): forma de comparar de OUTRO idioma (o Banco mostra respostas de alunos de qualquer idioma no
+// painel do fr ou do zh; aluno de francês no painel do zh não pode passar pelo pinyin).
+function typedAttemptHTML(typed, expected, formOverride){
+  const form = formOverride || (typeof LANG_HOOKS !== 'undefined' && LANG_HOOKS.typedAttemptForm) || (s => s);
   const given = form(String(typed == null ? '' : typed).replace(/\s*\/\s*/g, ' / ').trim());
   if (!given) return '';
   const forms = acceptedForms(expected).map(form);

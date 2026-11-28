@@ -319,3 +319,23 @@
 .rb-more > summary::-webkit-details-marker{ display:none; }
 .rb-more-menu{ display:flex; flex-direction:column; gap:6px; margin-top:6px; padding:8px; background:var(--paper); border:1px solid var(--paper-line); border-radius:12px; }
 .rb-line input[type=date]{ flex:0 0 auto; width:190px; }
+
+/* Etapa 3 (143): o que foi digitado ao errar e itens com erros seguidos. Vermelho = --rb-wrong/--rb-bad (iguais no fr e no zh). */
+.rb-tag.is-bad{ color:var(--rb-wrong); border-color:var(--rb-bad); }
+.rb-typed{ margin-top:4px; border-top:1px dashed var(--paper-line); padding-top:8px; }
+.rb-typed > summary{ cursor:pointer; font-size:13px; font-weight:800; color:var(--ink-soft); min-height:32px; display:flex; align-items:center; }
+.rb-typed-list{ list-style:none; margin:6px 0 0; padding:0; display:flex; flex-direction:column; gap:8px; }
+.rb-typed-list li{ display:flex; flex-wrap:wrap; align-items:baseline; gap:2px 12px; }
+.rb-typed-list li > .rb-meta{ min-width:52px; }
+.rb-typed-list .typed-attempt{ font-size:15px; line-height:1.6; color:var(--ink); }
+.rb-typed-exp{ margin:8px 0 0; }
+.rb-typed-note{ margin:4px 0 0; font-size:12px; }
+.rb-struggle{ border:1px solid var(--rb-bad); border-radius:var(--radius); padding:14px 16px; background:var(--paper); display:flex; flex-direction:column; gap:10px; }
+.rb-struggle h4{ margin:0; font-size:15px; font-weight:800; color:var(--ink); }
+.rb-struggle > p{ margin:0; }
+.rb-struggle-item{ background:var(--paper-warm); border:1px solid var(--paper-line); border-radius:10px; padding:10px 12px; display:flex; flex-direction:column; gap:6px; }
+.rb-struggle-top{ display:flex; flex-wrap:wrap; gap:6px; }
+.rb-struggle-typed{ display:flex; flex-direction:column; gap:2px; }
+.rb-struggle-typed .rb-typed-list{ margin:0; }
+.rb-item.is-focus{ outline:2px solid var(--rb-bad); outline-offset:2px; }
+@media (max-width: 600px){ .rb-struggle .rb-btn{ min-height:44px; } }
