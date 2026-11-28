@@ -45,6 +45,7 @@ const EXCECOES = {
   // rótulos por chave de i18n (a CHAVE do objeto é o appKey; texto vem do catálogo)
   'admin-notifications.js': 'opções <option> com chave i18n por idioma',
   'admin-reports.js': 'REPORT_LANGUAGE_LABELS (getters i18n)',
+  'admin-overview-ui.js': 'AOV_LANG_LABELS (getters i18n); a lista de idiomas vem do registro (2026-11-28)',
   'admin-students.js': 'STUDENT_LANGUAGE_LABELS (getters i18n) e FLASHCARD_DIRECTION_LANGUAGE_LABELS (decisão da autora)',
   'deck-browser.js': 'DECK_BROWSER_LANG_LABELS (getters i18n)',
   'my-flashcards.js': 'myFlashcardLangName: nome em português como lógica (docs/i18n/inventario)',

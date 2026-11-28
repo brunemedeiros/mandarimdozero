@@ -8,7 +8,14 @@
 
 const AOV_PERIODS = [7, 30, 90];
 const AOV_SCOPES = ['mine', 'others', 'all'];
-const AOV_LANGUAGES = ['all', 'frances', 'mandarim', 'portugues'];
+// Rótulos por chave de i18n (a chave do objeto é o appKey; o texto vem do catálogo), no padrão de STUDENT_LANGUAGE_LABELS.
+const AOV_LANG_LABELS = {
+  frances: () => t('fieldEditor.lang.fr'),
+  mandarim: () => t('admin.students.lang.mandarim'),
+  portugues: () => t('admin.students.lang.portugues'),
+};
+// A lista de idiomas vem do registro (languages/registry.js); idioma novo entra sozinho (2026-11-28, tests/registro).
+const AOV_LANGUAGES = ['all'].concat(typeof LanguageRegistry !== 'undefined' && LanguageRegistry.appKeys ? LanguageRegistry.appKeys() : Object.keys(AOV_LANG_LABELS));
 const AOV_BANDS = ['nenhum', 'baixo', 'medio', 'alto', 'altissimo'];
 const AOV_SITUATIONS = ['ok', 'warn', 'stopped', 'none'];
 const AOV_SITUATION_CLASS = { ok: 'p-selo--ok', warn: 'p-selo--aviso', stopped: 'p-selo--erro', none: '' };
@@ -30,10 +37,8 @@ function aovDayLabel(s){
 
 function aovLangLabel(key){
   if (key === 'all') return t('admin.overview.lang.all');
-  if (key === 'frances') return t('fieldEditor.lang.fr');
-  if (key === 'mandarim') return t('admin.students.lang.mandarim');
-  if (key === 'portugues') return t('admin.students.lang.portugues');
-  return String(key || '');
+  if (AOV_LANG_LABELS[key]) return AOV_LANG_LABELS[key]();
+  return typeof languageDisplayName === 'function' ? languageDisplayName(key) : String(key || '');
 }
 
 function aovBand(days){

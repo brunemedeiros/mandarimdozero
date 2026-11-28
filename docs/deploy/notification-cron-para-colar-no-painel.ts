@@ -1,3 +1,6 @@
+// OBSOLETA desde a v39 (2026-11-25): NÃO colar no painel. A produção roda um atalho (shim) que importa
+// supabase/functions/notification-cron/index.ts do repositório, fixado num commit (ver o Estado atual do CLAUDE.md).
+// Este arquivo ficou parado na v38 e só é guardado como histórico (2026-11-28).
 // Notification Cron (versão publicada: mesma lógica de supabase/functions/notification-cron/index.ts do repositório, com os comentários longos encurtados).
 // E3/C3 (2026-10-12): + sequência da conta (_account) para streak_at_risk, meta do dia e reengajamento, uma vez por pessoa.
 // Roda fora do navegador com service role; fuso: usa UTC (agendar entre 21h-23h UTC).

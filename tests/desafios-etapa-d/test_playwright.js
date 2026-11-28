@@ -200,6 +200,9 @@ const frame = async (page, label, cmd) => {
     check(L + ' revisão: jogo de pares sem trilha de progresso', await page.evaluate(() => getComputedStyle(document.querySelector('#review-session-wrap .lesson-progress-track')).visibility === 'hidden'));
     await page.evaluate(() => openReviewSession('flashcard')); await page.waitForTimeout(150);
     check(L + ' revisão: de volta ao Flashcard a trilha volta', await page.evaluate(() => getComputedStyle(document.querySelector('#review-session-wrap .lesson-progress-track')).visibility === 'visible'));
+    // A janela da sequência (🔥) aparece quando a revisão conta como o 1º estudo do dia, o que depende da hora em que o teste roda;
+    // ela não é o que este teste confere, então é fechada se estiver aberta (2026-11-28).
+    await page.evaluate(() => { const m = document.getElementById('streak-modal-overlay'); if (m && getComputedStyle(m).display !== 'none') m.style.display = 'none'; });
     await page.click('#review-session-wrap .activity-exit-btn'); await page.waitForTimeout(200);
     check(L + ' revisão: ✕ volta aos modos e desliga o foco', !(await vis(page, '#review-session-wrap')) && await page.evaluate(() => !document.getElementById('app').classList.contains('lesson-focus')));
     check(L + ' Ditados e Desafios: ✕ com nome "Sair"', await page.evaluate(x => [...document.querySelectorAll('#dictation-player-wrap .activity-exit-btn, #challenge-player-wrap .activity-exit-btn')].every(b => b.getAttribute('aria-label') === x), lang === 'en' ? 'Exit' : 'Sair'));

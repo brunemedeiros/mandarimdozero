@@ -65,8 +65,10 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
   // 4. Complete a frase: pinyin em cima do hanzi.
   if (await show('cloze') >= 0){
     await page.waitForTimeout(200);
-    const lay = await page.evaluate(() => { const o = document.querySelector('.cloze-option'); if (!o) return null; const p = o.querySelector('.cloze-option-pinyin').getBoundingClientRect(), h = o.querySelector('.cloze-option-hanzi').getBoundingClientRect(); return { above: p.bottom <= h.top + 1, sameLeft: Math.abs(p.left - h.left) < 2 }; });
+    const lay = await page.evaluate(() => { const o = document.querySelector('.cloze-option'); if (!o) return null; const p = o.querySelector('.cloze-option-pinyin').getBoundingClientRect(), h = o.querySelector('.cloze-option-hanzi').getBoundingClientRect(); return { above: p.bottom <= h.top + 1, sameLeft: Math.abs((p.left + p.width / 2) - (h.left + h.width / 2)) < 2 }; /* centralizados um sobre o outro (layout atual, com o número do atalho) */ });
     check('Complete a frase: pinyin em cima do hanzi', !lay || (lay.above && lay.sameLeft), lay);
+    const dup = await page.evaluate(() => { const t = [...document.querySelectorAll('.cloze-option .cloze-option-hanzi')].map(e => e.textContent.trim().toLowerCase()); return { t, ok: new Set(t).size === t.length }; });
+    check('Complete a frase: nenhuma opção repetida (2026-11-28)', dup.ok, dup);
   }
   // 5. Selecione a frase correta: sem áudio nas opções, pontuação final só no fim.
   for (let k = 0; k < 6; k++){

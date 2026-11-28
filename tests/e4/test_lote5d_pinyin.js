@@ -12,7 +12,7 @@ function load(lang) {
   const ctx = { console, spoken, document: { getElementById: (id) => nodes[id] || (nodes[id] = el()) }, STEP_STATE: { conceptQueue: [{ kind: 'x', blocks: [{ title: 'T', body: 'B', examples: [{ f: 'bonjour', c: '你好', p: 'nǐ hǎo', t: 'olá' }] }] }], conceptIdx: 0, conceptBlockIdx: 0, exerciseIndex: 0 },
     REALITY_NOTE_BANNER_TEXT: {}, CULTURE_NOTE_BANNER_TEXT: {}, setAcqPhaseBanner() {}, t: (k) => `[${k}]`, audioBtnHTML: (x) => `<btn ${x}>`, wireAudioButtons() {}, wireDontKnowButton() {},
     escapeHTML: (x) => x, reviewProgressBarHTML: () => '', reviewCardTagLabel: () => 'tag', customAudioBtnHTML: () => '', flashcardImageHTML: () => '', reviewObservationHTML: () => '', isStudyLanguageField: () => true, APP_KEY: 'k',
-    resolveCardContentView: () => ({ prompt: { text: 'PROMPT', pinyinText: 'PY' }, correctText: 'c', distractorTexts: ['d'] }), shuffle: (a) => a, wireCustomAudioButtons() {},
+    resolveCardContentView: () => ({ prompt: { text: 'PROMPT', pinyinText: 'PY' }, correctText: 'c', distractorTexts: ['d'] }), shuffle: (a) => a, wireCustomAudioButtons() {}, wireReviewKeyboard() {} /* teclado da Revisão (2026-11-05): fora do que este teste confere */,
     canSpeakFrench: () => true, canSpeakChinese: () => true, speakFrench: (x) => spoken.push('fr:' + x), speakChinese: (x) => spoken.push('zh:' + x) };
   vm.createContext(ctx);
   vm.runInContext(read(lang + '/lang-hooks.js').replace('const LANG_HOOKS', 'var LANG_HOOKS') + '\n' + core.replace(/\bfunction (\w+)/g, 'var $1 = function $1'), ctx);

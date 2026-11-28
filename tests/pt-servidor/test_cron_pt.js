@@ -7,7 +7,8 @@ const fs = require('fs'), vm = require('vm'), path = require('path'), mod = requ
 const ROOT = path.join(__dirname, '../..');
 const SOURCES = [
   ['repo', path.join(ROOT, 'supabase/functions/notification-cron/index.ts')],
-  ['painel', path.join(ROOT, 'docs/deploy/notification-cron-para-colar-no-painel.ts')],
+  // A cópia "para colar no painel" (docs/deploy/notification-cron-para-colar-no-painel.ts) não é mais publicada: desde a v39
+  // (2026-11-25) a produção roda um atalho para este arquivo do repositório, fixado num commit. Saiu do teste em 2026-11-28.
 ];
 let pass = 0, fail = 0;
 const t = (n, ok, x) => { if (ok) pass++; else { fail++; console.log('FALHOU', n, x !== undefined ? JSON.stringify(x) : ''); } };
@@ -48,6 +49,9 @@ function fakeDb(tables, users) {
 const CRON_TOKEN = 'teste-token-do-agendamento-1234567890';
 function loadCron(file, envOver) {
   let src = fs.readFileSync(file, 'utf8').replace(/^import .*$/mg, '');
+  // A peça do e-mail no visual Prof Brune (email-brand.mjs, importada pelo index.ts desde a v39) entra junto, sem os "export".
+  const brand = path.join(path.dirname(file), 'email-brand.mjs');
+  if (fs.existsSync(brand) && /from '\.\/email-brand\.mjs'/.test(fs.readFileSync(file, 'utf8'))) src = fs.readFileSync(brand, 'utf8').replace(/^import .*$/mg, '').replace(/^export /mg, '') + '\n' + src;
   const js = mod.stripTypeScriptTypes(src);
   const ctx = { console: { log() {}, error() {} }, TextEncoder, Date, Object, Number, Array, Promise, Map, Set, JSON, String, Math, Response: class { constructor(b, init) { this.body = b; this.status = (init && init.status) || 200; } },
     fetch: async () => ({ ok: true }), webpush: { setVapidDetails() {}, sendNotification: async () => {} },
@@ -208,13 +212,7 @@ const events = (tables, user) => (tables.notification_events || []).filter((n) =
     t(`regra do bloco (${c.site ? 'course-storage.js' : 'cron'}): ${c.name}`, JSON.stringify(got ?? null) === JSON.stringify(c.expect), got);
   }
 
-  // ---------- código igual nos dois arquivos (o do painel só tem comentários encurtados) ----------
-  const norm = (f) => fs.readFileSync(f, 'utf8').split('\n')
-    .map((l) => l.replace(/\s+\/\/ [^'"`]*$/, '').trimEnd())
-    .filter((l) => l.trim() && !/^\s*\/\//.test(l)).join('\n');
-  const a = norm(SOURCES[0][1]).split('\n'), b = norm(SOURCES[1][1]).split('\n');
-  const firstDiff = a.findIndex((l, i) => l !== b[i]);
-  t('cópia do painel tem o MESMO código do repo (sem contar comentários)', a.length === b.length && firstDiff === -1, firstDiff >= 0 ? { repo: a[firstDiff], painel: b[firstDiff] } : { a: a.length, b: b.length });
+  // (A comparação com a cópia do painel saiu em 2026-11-28: a cópia não é mais publicada, ver SOURCES.)
 
   // ---------- cliente: shared/notifications.js pickNotificationTemplate ----------
   const nsrc = fs.readFileSync(path.join(ROOT, 'shared/notifications.js'), 'utf8');

@@ -126,7 +126,7 @@ async function loadTeacherBellItems(){
 }
 
 function teacherBellLangName(key){
-  return ['frances', 'mandarim', 'portugues'].includes(key) ? t(`panel.tbell.lang.${key}`) : String(key || '');
+  return (typeof LanguageRegistry !== 'undefined' && LanguageRegistry.isKnownAppKey(key)) ? t(`panel.tbell.lang.${key}`) : String(key || ''); // idiomas do registro (2026-11-28)
 }
 
 // Frase no idioma do site de quem lê. Nome, turma e trecho vêm do banco (escapados por quem chama).
