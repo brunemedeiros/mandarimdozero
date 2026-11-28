@@ -115,7 +115,8 @@ async function scenes(page, visit){
       // movidas continuam as mesmas; recurso novo de outra tela não é "regra que mudou de lugar".
       // Animações (2026-11-25, pedido da dona; docs/historico/38-animacoes.md): `transition: all` virou a lista do que muda
       // (.challenge-level-tab, .challenge-choice-btn) e shared/movimento.css, carregado por último, vale por cima de propósito.
-      const DELIB = /\.challenge-level-tab\||\.cloze-grammar \.challenge-choice-btn|expr-|challenge-queue-interstitial|\.lesson-complete|\.lc-stat|\.lesson-boundary-title|conclusao|\.accent-feedback(?: \.accent-feedback-header)?\|\|\{"text-align|\.accent-feedback-correct-box|\.audio-btn-md\|\||activity-lesson-bar|cg-progress-bar|conj-progress-bar|cg-dontknow|\.cg-choice\|\|\{"position|\.cg-choice\.is-wrong|#conj-practice-wrap \.conj-progress|^:root\|\||\.rb-big\.is-(ok|help|good|bad)\||^\.grade-(again|hard|good|easy)\||^\.xp-suffix\|/;
+      // .cloze-grammar-msg: cor do texto de erro trocada de propósito para --error-red-text (decisão da autora, 2026-11-27).
+      const DELIB = /\.cloze-grammar-msg\||\.challenge-level-tab\||\.cloze-grammar \.challenge-choice-btn|expr-|challenge-queue-interstitial|\.lesson-complete|\.lc-stat|\.lesson-boundary-title|conclusao|\.accent-feedback(?: \.accent-feedback-header)?\|\|\{"text-align|\.accent-feedback-correct-box|\.audio-btn-md\|\||activity-lesson-bar|cg-progress-bar|conj-progress-bar|cg-dontknow|\.cg-choice\|\|\{"position|\.cg-choice\.is-wrong|#conj-practice-wrap \.conj-progress|^:root\|\||\.rb-big\.is-(ok|help|good|bad)\||^\.grade-(again|hard|good|easy)\||^\.xp-suffix\|/;
       const sumiu = [...ca].filter(([k, n]) => (cb.get(k) || 0) < n).map(([k]) => k).filter(k => !DELIB.test(k));
       const keysMoved = new Set(rb.filter(r => /desafios\.css$/.test(r.sheet)).map(key));
       // Regra de OUTRA tela que outra sessão mexeu depois do refactor (ex.: #view-progress .stat-card) não é o que este teste guarda: só
@@ -138,6 +139,7 @@ async function scenes(page, visit){
         for (let j = 0; j < rb.length; j++){
           if (j === i) continue;
           const S = rb[j]; if (S.spec !== R.spec) continue;
+          if (S.sel === '.cloze-grammar-msg' && R.sel === '.cloze-grammar-msg') continue; // mesma regra com a cor nova (2026-11-27), não é empate entre regras diferentes
           if (/movimento\.css$/.test(S.sheet) && ia.get(pb[j]) === undefined) continue; // regra nova de movimento (2026-11-25): vale por cima de propósito
           const oS = ia.get(pb[j]);
           if (!process.env.CONTROLE && (oS > oR) === (j > i)) continue; // CONTROLE=1: todos os pares (prova que a busca acha empates)

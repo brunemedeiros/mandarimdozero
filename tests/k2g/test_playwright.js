@@ -116,9 +116,11 @@ async function bootPage(browser, lang, port){
       ['lastDirection', 'reviewDirection', 'nextCardDirection'].forEach(k => { if (poison) c[k] = poison; else delete c[k]; });
       STATE.reviewQueue = [c]; STATE.reviewIndex = 0; STATE.reviewCardState = null; window.__speak.length = 0;
       switchTab('review'); renderReviewView();
-      const before = { html: document.getElementById('review-content').innerHTML, speak: window.__speak.slice() };
+      // Classes de animação (mov-entrar/revelar/liberada, histórico 38, 2026-11-25) dependem de ser a 1ª vez na tela, não da direção (2026-11-28).
+      const semMov = (h) => h.replace(/ mov-(?:entrar|revelar|liberada)(?=")/g, '');
+      const before = { html: semMov(document.getElementById('review-content').innerHTML), speak: window.__speak.slice() };
       let after = null;
-      if (reveal){ document.getElementById('flashcard').click(); after = { html: document.getElementById('review-content').innerHTML, speak: window.__speak.slice() }; }
+      if (reveal){ document.getElementById('flashcard').click(); after = { html: semMov(document.getElementById('review-content').innerHTML), speak: window.__speak.slice() }; }
       return { before, after, text: document.getElementById('flashcard').innerText };
     }, [id, poison, reveal]);
     for (const [label, id] of Object.entries(ids)){

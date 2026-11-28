@@ -52,9 +52,10 @@ const { withPage, realErrors, close, check, summary } = require('./harness');
         res.speedOptionsNoTags = [...document.querySelectorAll('.speed-option')].every(b => b.querySelector('img,b,i') === null);
         // Acertar continua marcando a opção certa (answerSpeedQuestion compara textContent com o texto do cartão).
         const card = SPEED_STATE.queue[SPEED_STATE.index];
-        const right = [...document.querySelectorAll('.speed-option')].find(b => b.textContent === cardAnswerText(card));
+        const semNum = (b) => { const k = b.querySelector('.kbd-hint'); return k ? b.textContent.replace(k.textContent, '') : b.textContent; }; // sem o número do atalho (2026-11-13)
+        const right = [...document.querySelectorAll('.speed-option')].find(b => semNum(b) === cardAnswerText(card));
         res.rightFound = !!right;
-        if (right){ right.click(); await new Promise(r => setTimeout(r, 50)); res.rightMarked = right.classList.contains('correct'); }
+        if (right){ right.click(); await new Promise(r => setTimeout(r, 50)); res.rightMarked = right.classList.contains('correct') && !right.classList.contains('incorrect'); } // acerto: verde, nunca vermelho (2026-11-28)
         backToReviewModeSelect();
         res.err = err;
         return res;

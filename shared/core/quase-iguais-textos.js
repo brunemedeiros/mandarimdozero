@@ -58,7 +58,11 @@ function answerSpeedQuestion(isCorrect, el, chosenIdx){
 
   options.forEach((btn, i) => {
     btn.classList.add('disabled');
-    if (btn.textContent === correctText) btn.classList.add('correct');
+    // Texto da opção SEM o número do atalho (.kbd-hint, 2026-11-13): com o número, a comparação nunca batia e a opção
+    // certa não ficava verde (e o acerto aparecia em vermelho). Conserto de 2026-11-28; a nota (FSRS) já vinha certa (isCorrect).
+    const hint = btn.querySelector('.kbd-hint');
+    const optText = hint ? btn.textContent.replace(hint.textContent, '') : btn.textContent;
+    if (optText === correctText) btn.classList.add('correct');
     else if (i === chosenIdx) btn.classList.add('incorrect');
   });
 
