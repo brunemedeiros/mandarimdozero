@@ -1,4 +1,4 @@
-# Guardar o que a aluna digitou nos cartões da professora: plano (Etapa 1 publicada; Etapa 2 na produção e publicada em 2026-11-27; Etapa 3 depois)
+# Guardar o que a aluna digitou nos cartões da professora: plano (Etapa 1 publicada; Etapa 2 na produção e publicada em 2026-11-27; Etapa 3 publicada em 2026-11-28)
 
 Pedido da autora em 2026-11-24, depois do report 37 (Francielly, cartão "Corrija: Je n'ai besoin de payer").
 Situação: o banco só guarda "errou/acertou" (`review_bank_reviews.outcome`, `grade`, `typed` = se foi digitado). Ela errou
@@ -38,7 +38,7 @@ Plano original:
 - `logBankHomeStudy()` passa a mandar `STATE.reviewCardState.typedAnswer` na fila.
 - Staging antes da produção, teste SQL local (`tests/banco-revisao-compartilhado/`) e teste no navegador.
 
-**Etapa 3: mostrar para a professora. PRÉVIA pronta na branch (2026-11-27), aguarda aprovação da autora; nada publicado.**
+**Etapa 3: mostrar para a professora. prévia aprovada pela autora (2026-11-28: 3 erros seguidos, 5 respostas no item e 2 no Desempenho) e publicada.**
 Ficou assim: em cada item (Aulas e Todos os itens), "O que foi digitado ao errar (N)" com as 5 últimas respostas (data; na turma,
 o nome de quem digitou), o erro marcado em vermelho por `typedAttemptHTML` (agora aceita a forma de comparar do idioma do ALUNO),
 a resposta do cartão (na lacuna, a palavra da lacuna) e a nota dos 180 dias; fechado, e já aberto quando o item tem erros seguidos.
